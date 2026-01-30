@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import FerramentasIA from "./pages/FerramentasIA";
 import CriarRoteiro from "./pages/CriarRoteiro";
+import CriarConteudo from "./pages/CriarConteudo";
 import RoteiroPublico from "./pages/RoteiroPublico";
 import MapaTurismo from "./pages/MapaTurismo";
 import SupplierDetail from "./pages/SupplierDetail";
@@ -21,6 +22,7 @@ import Materiais from "./pages/Materiais";
 import BloqueiosAereos from "./pages/BloqueiosAereos";
 import Agenda from "./pages/Agenda";
 import NotFound from "./pages/NotFound";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -77,6 +79,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CriarRoteiro />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ferramentas-ia/criar-conteudo"
+              element={
+                <ProtectedRoute>
+                  <CriarConteudo />
                 </ProtectedRoute>
               }
             />

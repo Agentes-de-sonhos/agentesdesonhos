@@ -101,6 +101,48 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_content: {
+        Row: {
+          content_type: string
+          created_at: string
+          detected_benefits: string[] | null
+          detected_destination: string | null
+          detected_info: Json | null
+          generated_text: string
+          id: string
+          original_file_name: string | null
+          original_file_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          detected_benefits?: string[] | null
+          detected_destination?: string | null
+          detected_info?: Json | null
+          generated_text: string
+          id?: string
+          original_file_name?: string | null
+          original_file_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          detected_benefits?: string[] | null
+          detected_destination?: string | null
+          detected_info?: Json | null
+          generated_text?: string
+          id?: string
+          original_file_name?: string | null
+          original_file_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       itineraries: {
         Row: {
           budget_level: string
