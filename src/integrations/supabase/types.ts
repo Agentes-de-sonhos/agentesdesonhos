@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      flight_blocks: {
+        Row: {
+          airline: string
+          created_at: string
+          destination: string
+          end_date: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          operator: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          airline: string
+          created_at?: string
+          destination: string
+          end_date: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          operator: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          airline?: string
+          created_at?: string
+          destination?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          operator?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      materials: {
+        Row: {
+          category: string
+          created_at: string
+          file_url: string | null
+          id: string
+          is_active: boolean
+          material_type: string
+          published_at: string
+          supplier_id: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          material_type: string
+          published_at?: string
+          supplier_id?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          material_type?: string
+          published_at?: string
+          supplier_id?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "trade_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       news: {
         Row: {
           category: string

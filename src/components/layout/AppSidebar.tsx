@@ -10,6 +10,8 @@ import {
   Cloud,
   LogOut,
   Shield,
+  FileText,
+  Plane,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,16 @@ const baseMenuItems = [
     title: "Mapa do Turismo",
     url: "/mapa-turismo",
     icon: Map,
+  },
+  {
+    title: "Materiais de Divulgação",
+    url: "/materiais",
+    icon: FileText,
+  },
+  {
+    title: "Bloqueios Aéreos",
+    url: "/bloqueios-aereos",
+    icon: Plane,
   },
   {
     title: "Notícias",

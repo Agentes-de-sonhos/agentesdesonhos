@@ -12,16 +12,18 @@ interface NewsItem {
 }
 
 interface NewsFeedCardProps {
-  title: string;
+  title?: string;
   news: NewsItem[];
 }
 
 export function NewsFeedCard({ title, news }: NewsFeedCardProps) {
   return (
     <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300">
-      <CardHeader className="pb-3">
-        <CardTitle className="font-display text-lg">{title}</CardTitle>
-      </CardHeader>
+      {title && (
+        <CardHeader className="pb-3">
+          <CardTitle className="font-display text-lg">{title}</CardTitle>
+        </CardHeader>
+      )}
       <CardContent className="space-y-3">
         {news.map((item) => (
           <a
