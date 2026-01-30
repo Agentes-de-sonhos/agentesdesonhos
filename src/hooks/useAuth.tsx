@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isNewUser: boolean;
   // Passwordless OTP
   sendOtp: (email: string) => Promise<{ error: Error | null }>;
   verifyOtp: (email: string, token: string) => Promise<{ error: Error | null }>;
@@ -13,6 +14,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  setIsNewUser: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   // Ensure a profile exists after the user is authenticated.
   useEffect(() => {
@@ -32,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const ensureProfile = async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id")
+        .select("id, cpf, phone, agency_name")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -42,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!data) {
+        // Create new profile
         const { error: insertError } = await supabase.from("profiles").insert({
           user_id: user.id,
           name: profileName,
@@ -50,6 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (insertError) {
           console.error("Error creating profile:", insertError);
         }
+        // New user, should complete onboarding
+        setIsNewUser(true);
+      } else {
+        // Check if profile is incomplete (missing key fields)
+        const isIncomplete = !(data as any).cpf && !(data as any).phone && !(data as any).agency_name;
+        setIsNewUser(isIncomplete);
       }
     };
 
@@ -133,11 +143,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user, 
       session, 
       loading, 
+      isNewUser,
       sendOtp, 
       verifyOtp, 
       signIn, 
       signUp, 
-      signOut 
+      signOut,
+      setIsNewUser,
     }}>
       {children}
     </AuthContext.Provider>

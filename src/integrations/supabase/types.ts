@@ -49,25 +49,61 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address_number: string | null
+          agency_name: string | null
+          avatar_url: string | null
+          city: string | null
+          cnpj: string | null
+          cpf: string | null
           created_at: string
+          has_password: boolean | null
           id: string
           name: string
+          neighborhood: string | null
+          phone: string | null
+          state: string | null
+          street: string | null
           updated_at: string
           user_id: string
+          zip_code: string | null
         }
         Insert: {
+          address_number?: string | null
+          agency_name?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          cnpj?: string | null
+          cpf?: string | null
           created_at?: string
+          has_password?: boolean | null
           id?: string
           name: string
+          neighborhood?: string | null
+          phone?: string | null
+          state?: string | null
+          street?: string | null
           updated_at?: string
           user_id: string
+          zip_code?: string | null
         }
         Update: {
+          address_number?: string | null
+          agency_name?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          cnpj?: string | null
+          cpf?: string | null
           created_at?: string
+          has_password?: boolean | null
           id?: string
           name?: string
+          neighborhood?: string | null
+          phone?: string | null
+          state?: string | null
+          street?: string | null
           updated_at?: string
           user_id?: string
+          zip_code?: string | null
         }
         Relationships: []
       }
