@@ -6,8 +6,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
+  sendOtp: (email: string) => Promise<{ error: Error | null }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -19,8 +19,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   // Ensure a profile exists after the user is authenticated.
-  // IMPORTANT: Profile creation cannot happen at signUp time when email confirmation is required,
-  // because the user may not be authenticated yet and RLS will reject the insert.
   useEffect(() => {
     if (!user) return;
 
@@ -51,7 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Defer to avoid any chance of running near auth state change callbacks.
     const t = window.setTimeout(() => {
       void ensureProfile();
     }, 0);
@@ -79,33 +76,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+  const sendOtp = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
+      options: {
+        shouldCreateUser: true,
+      },
     });
     return { error: error as Error | null };
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-
-    const { error } = await supabase.auth.signUp({
+  const verifyOtp = async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({
       email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          name: name.trim(),
-        },
-      },
+      token,
+      type: "email",
     });
-
-    if (error) {
-      return { error: error as Error };
-    }
-
-    return { error: null };
+    return { error: error as Error | null };
   };
 
   const signOut = async () => {
@@ -113,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, sendOtp, verifyOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
