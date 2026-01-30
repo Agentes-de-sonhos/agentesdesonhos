@@ -97,7 +97,7 @@ const tradeUpdates = [
   },
 ];
 
-const Index = () => {
+export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in">
@@ -156,6 +156,4 @@ const Index = () => {
       </div>
     </DashboardLayout>
   );
-};
-
-export default Index;
+}
