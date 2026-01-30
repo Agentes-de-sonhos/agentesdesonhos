@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   Route,
   FileText,
@@ -7,97 +8,110 @@ import {
   Building2,
   CreditCard,
   Globe,
+  Hotel,
+  Ship,
+  Car,
+  Loader2,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { NewsFeedCard } from "@/components/dashboard/NewsFeedCard";
 import { ExternalLinksCard } from "@/components/dashboard/ExternalLinksCard";
 import { TradeUpdatesCard } from "@/components/dashboard/TradeUpdatesCard";
+import { supabase } from "@/integrations/supabase/client";
+import { LucideIcon } from "lucide-react";
 
-// Mock data
-const newsItems = [
-  {
-    id: "1",
-    title: "Temporada de cruzeiros 2025: Brasil deve receber 2 milhões de turistas",
-    source: "Panrotas",
-    url: "https://panrotas.com.br",
-    date: "Há 2 horas",
-    category: "Cruzeiros",
-  },
-  {
-    id: "2",
-    title: "Novos voos diretos para Europa a partir de São Paulo",
-    source: "Mercado & Eventos",
-    url: "https://mercadoeeventos.com.br",
-    date: "Há 5 horas",
-    category: "Aéreo",
-  },
-  {
-    id: "3",
-    title: "Embratur lança campanha internacional para atrair turistas",
-    source: "Ministério do Turismo",
-    url: "https://gov.br/turismo",
-    date: "Ontem",
-    category: "Institucional",
-  },
-];
-
-const externalLinks = [
-  {
-    id: "1",
-    title: "Amadeus",
-    url: "https://amadeus.com",
-    icon: Plane,
-    description: "Sistema de reservas",
-  },
-  {
-    id: "2",
-    title: "Hotelbeds",
-    url: "https://hotelbeds.com",
-    icon: Building2,
-    description: "Plataforma hoteleira",
-  },
-  {
-    id: "3",
-    title: "Omnibees",
-    url: "https://omnibees.com",
-    icon: CreditCard,
-    description: "Motor de reservas",
-  },
-  {
-    id: "4",
-    title: "Panrotas",
-    url: "https://panrotas.com.br",
-    icon: Globe,
-    description: "Portal de notícias",
-  },
-];
-
-const tradeUpdates = [
-  {
-    id: "1",
-    title: "Programa de fidelidade renovado",
-    description: "Principais operadoras anunciam benefícios exclusivos para agentes de viagens cadastrados.",
-    type: "novo" as const,
-    date: "30 Jan 2025",
-  },
-  {
-    id: "2",
-    title: "Capacitação em destinos europeus",
-    description: "Nova plataforma de treinamento online disponível com certificações gratuitas.",
-    type: "destaque" as const,
-    date: "29 Jan 2025",
-  },
-  {
-    id: "3",
-    title: "Atualização de comissões",
-    description: "Confira as novas tabelas de comissionamento das principais operadoras.",
-    type: "atualização" as const,
-    date: "28 Jan 2025",
-  },
-];
+// Icon mapping for suppliers
+const iconMap: Record<string, LucideIcon> = {
+  plane: Plane,
+  building: Building2,
+  "credit-card": CreditCard,
+  globe: Globe,
+  "map-pin": MapPin,
+  hotel: Hotel,
+  ship: Ship,
+  car: Car,
+};
 
 export default function Dashboard() {
+  // Fetch news from database
+  const { data: news, isLoading: newsLoading } = useQuery({
+    queryKey: ["news"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data.map((item) => ({
+        id: item.id,
+        title: item.title,
+        source: item.source,
+        url: item.url,
+        date: formatDate(item.created_at),
+        category: item.category,
+      }));
+    },
+  });
+
+  // Fetch trade updates from database
+  const { data: tradeUpdates, isLoading: tradeLoading } = useQuery({
+    queryKey: ["trade-updates"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trade_updates")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data.map((item) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        type: item.type as "novo" | "atualização" | "destaque",
+        date: formatDate(item.created_at),
+      }));
+    },
+  });
+
+  // Fetch suppliers from database
+  const { data: suppliers, isLoading: suppliersLoading } = useQuery({
+    queryKey: ["suppliers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("suppliers")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data.map((item) => ({
+        id: item.id,
+        title: item.title,
+        url: item.url,
+        icon: iconMap[item.icon] || Globe,
+        description: item.description,
+      }));
+    },
+  });
+
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffHours < 1) return "Agora";
+    if (diffHours < 24) return `Há ${diffHours} hora${diffHours > 1 ? "s" : ""}`;
+    if (diffDays === 1) return "Ontem";
+    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  const isLoading = newsLoading || tradeLoading || suppliersLoading;
+
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in">
@@ -143,16 +157,38 @@ export default function Dashboard() {
         </section>
 
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* News Feed */}
-          <NewsFeedCard title="Feed de Notícias" news={newsItems} />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* News Feed */}
+              {news && news.length > 0 ? (
+                <NewsFeedCard title="Feed de Notícias" news={news} />
+              ) : (
+                <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+                  <p>Nenhuma notícia disponível</p>
+                </div>
+              )}
 
-          {/* Trade Updates */}
-          <TradeUpdatesCard updates={tradeUpdates} />
-        </div>
+              {/* Trade Updates */}
+              {tradeUpdates && tradeUpdates.length > 0 ? (
+                <TradeUpdatesCard updates={tradeUpdates} />
+              ) : (
+                <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+                  <p>Nenhuma novidade do trade disponível</p>
+                </div>
+              )}
+            </div>
 
-        {/* External Links */}
-        <ExternalLinksCard title="Atalhos Rápidos" links={externalLinks} />
+            {/* External Links */}
+            {suppliers && suppliers.length > 0 && (
+              <ExternalLinksCard title="Atalhos Rápidos" links={suppliers} />
+            )}
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

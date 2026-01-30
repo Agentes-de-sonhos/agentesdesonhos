@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, 
   Settings, 
@@ -10,10 +11,16 @@ import {
   Shield,
   UserCheck,
   UserX,
-  Loader2
+  Loader2,
+  Newspaper,
+  TrendingUp,
+  Building2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
+import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
+import { AdminSuppliersManager } from "@/components/admin/AdminSuppliersManager";
 
 interface UserWithRole {
   id: string;
@@ -46,12 +53,11 @@ export default function Admin() {
 
       if (rolesError) throw rolesError;
 
-      // Combine profiles with roles
       const combinedUsers: UserWithRole[] = (profiles || []).map((profile) => {
         const userRole = roles?.find((r) => r.user_id === profile.user_id);
         return {
           id: profile.user_id,
-          email: "", // We don't have access to email from auth.users
+          email: "",
           name: profile.name,
           role: (userRole?.role as "admin" | "agente") || "agente",
           created_at: profile.created_at,
@@ -130,7 +136,7 @@ export default function Admin() {
             Painel Administrativo
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie usuários e configurações da plataforma
+            Gerencie usuários, notícias e conteúdo da plataforma
           </p>
         </div>
 
@@ -153,114 +159,112 @@ export default function Admin() {
           ))}
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Configurações
-              </CardTitle>
-              <CardDescription>
-                Gerencie as configurações gerais da plataforma
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Acessar Configurações
-              </Button>
-            </CardContent>
-          </Card>
+        {/* Tabs for Content Management */}
+        <Tabs defaultValue="news" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="news" className="flex items-center gap-2">
+              <Newspaper className="h-4 w-4" />
+              Notícias
+            </TabsTrigger>
+            <TabsTrigger value="trade" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Trade
+            </TabsTrigger>
+            <TabsTrigger value="suppliers" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Fornecedores
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Usuários
+            </TabsTrigger>
+          </TabsList>
 
-          <Card className="border-0 shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Relatórios
-              </CardTitle>
-              <CardDescription>
-                Visualize métricas e análises da plataforma
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Ver Relatórios
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="news">
+            <AdminNewsManager />
+          </TabsContent>
 
-        {/* Users Table */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Gerenciar Usuários
-            </CardTitle>
-            <CardDescription>
-              Visualize e gerencie os usuários da plataforma
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : users.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <UserX className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhum usuário encontrado</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                        Nome
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                        Role
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                        Data de Cadastro
-                      </th>
-                      <th className="text-right py-3 px-4 font-medium text-muted-foreground">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map((user) => (
-                      <tr key={user.id} className="border-b last:border-0">
-                        <td className="py-3 px-4 font-medium">{user.name}</td>
-                        <td className="py-3 px-4">
-                          <Badge
-                            variant={user.role === "admin" ? "default" : "secondary"}
-                          >
-                            {user.role === "admin" ? "Administrador" : "Agente"}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-muted-foreground">
-                          {new Date(user.created_at).toLocaleDateString("pt-BR")}
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleUserRole(user.id, user.role)}
-                          >
-                            {user.role === "admin" ? "Tornar Agente" : "Tornar Admin"}
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <TabsContent value="trade">
+            <AdminTradeUpdatesManager />
+          </TabsContent>
+
+          <TabsContent value="suppliers">
+            <AdminSuppliersManager />
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card className="border-0 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Gerenciar Usuários
+                </CardTitle>
+                <CardDescription>
+                  Visualize e gerencie os usuários da plataforma
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : users.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserX className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Nenhum usuário encontrado</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-3 px-4 font-medium text-muted-foreground">
+                            Nome
+                          </th>
+                          <th className="text-left py-3 px-4 font-medium text-muted-foreground">
+                            Role
+                          </th>
+                          <th className="text-left py-3 px-4 font-medium text-muted-foreground">
+                            Data de Cadastro
+                          </th>
+                          <th className="text-right py-3 px-4 font-medium text-muted-foreground">
+                            Ações
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users.map((user) => (
+                          <tr key={user.id} className="border-b last:border-0">
+                            <td className="py-3 px-4 font-medium">{user.name}</td>
+                            <td className="py-3 px-4">
+                              <Badge
+                                variant={user.role === "admin" ? "default" : "secondary"}
+                              >
+                                {user.role === "admin" ? "Administrador" : "Agente"}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4 text-muted-foreground">
+                              {new Date(user.created_at).toLocaleDateString("pt-BR")}
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleUserRole(user.id, user.role)}
+                              >
+                                {user.role === "admin" ? "Tornar Agente" : "Tornar Admin"}
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
