@@ -138,22 +138,32 @@ export default function Dashboard() {
             {/* 1. News Feed & Trade Updates - TOP */}
             <div className="grid gap-6 lg:grid-cols-2">
               {/* News Feed */}
-              {news && news.length > 0 ? (
-                <NewsFeedCard title="Feed de Notícias" news={news} />
-              ) : (
-                <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
-                  <p>Nenhuma notícia disponível</p>
-                </div>
-              )}
+              <div>
+                <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+                  Principais Notícias do Dia
+                </h2>
+                {news && news.length > 0 ? (
+                  <NewsFeedCard news={news} />
+                ) : (
+                  <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+                    <p>Nenhuma notícia disponível</p>
+                  </div>
+                )}
+              </div>
 
               {/* Trade Updates */}
-              {tradeUpdates && tradeUpdates.length > 0 ? (
-                <TradeUpdatesCard updates={tradeUpdates} />
-              ) : (
-                <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
-                  <p>Nenhuma novidade do trade disponível</p>
-                </div>
-              )}
+              <div>
+                <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+                  Principais Novidades do Trade
+                </h2>
+                {tradeUpdates && tradeUpdates.length > 0 ? (
+                  <TradeUpdatesCard updates={tradeUpdates} />
+                ) : (
+                  <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+                    <p>Nenhuma novidade do trade disponível</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* 2. Mapa do Turismo - Categories */}

@@ -15,6 +15,8 @@ import Noticias from "./pages/Noticias";
 import Perfil from "./pages/Perfil";
 import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
+import Materiais from "./pages/Materiais";
+import BloqueiosAereos from "./pages/BloqueiosAereos";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
@@ -80,6 +82,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Noticias />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/materiais"
+              element={
+                <ProtectedRoute>
+                  <Materiais />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bloqueios-aereos"
+              element={
+                <ProtectedRoute>
+                  <BloqueiosAereos />
                 </ProtectedRoute>
               }
             />

@@ -6,15 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, 
-  Settings, 
-  BarChart3, 
   Shield,
   UserCheck,
   UserX,
   Loader2,
   Newspaper,
   TrendingUp,
-  Building2
+  Building2,
+  FileText,
+  Plane
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,8 @@ import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
 import { AdminSuppliersManager } from "@/components/admin/AdminSuppliersManager";
 import { AdminTradeSuppliersManager } from "@/components/admin/AdminTradeSuppliersManager";
+import { AdminMaterialsManager } from "@/components/admin/AdminMaterialsManager";
+import { AdminFlightBlocksManager } from "@/components/admin/AdminFlightBlocksManager";
 
 interface UserWithRole {
   id: string;
@@ -162,10 +164,18 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="trade-suppliers" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="trade-suppliers" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Diretório</span>
+            </TabsTrigger>
+            <TabsTrigger value="materials" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Materiais</span>
+            </TabsTrigger>
+            <TabsTrigger value="flight-blocks" className="flex items-center gap-2">
+              <Plane className="h-4 w-4" />
+              <span className="hidden sm:inline">Bloqueios</span>
             </TabsTrigger>
             <TabsTrigger value="news" className="flex items-center gap-2">
               <Newspaper className="h-4 w-4" />
@@ -187,6 +197,14 @@ export default function Admin() {
 
           <TabsContent value="trade-suppliers">
             <AdminTradeSuppliersManager />
+          </TabsContent>
+
+          <TabsContent value="materials">
+            <AdminMaterialsManager />
+          </TabsContent>
+
+          <TabsContent value="flight-blocks">
+            <AdminFlightBlocksManager />
           </TabsContent>
 
           <TabsContent value="news">
