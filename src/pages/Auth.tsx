@@ -238,83 +238,78 @@ export default function Auth() {
               </form>
             </Form>
           ) : (
-            <Form {...signupForm}>
-              <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
-                <FormField
-                  control={signupForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome completo</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Seu nome"
-                          autoComplete="name"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="signup-name" className="text-sm font-medium leading-none">
+                  Nome completo
+                </label>
+                <Input
+                  id="signup-name"
+                  type="text"
+                  placeholder="Seu nome"
+                  autoComplete="name"
+                  {...signupForm.register("name")}
                 />
-                <FormField
-                  control={signupForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="seu@email.com"
-                          autoComplete="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                {signupForm.formState.errors.name && (
+                  <p className="text-sm font-medium text-destructive">
+                    {signupForm.formState.errors.name.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="signup-email" className="text-sm font-medium leading-none">
+                  Email
+                </label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  autoComplete="email"
+                  {...signupForm.register("email")}
                 />
-                <FormField
-                  control={signupForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            autoComplete="new-password"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <Eye className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Criar conta
-                </Button>
-              </form>
-            </Form>
+                {signupForm.formState.errors.email && (
+                  <p className="text-sm font-medium text-destructive">
+                    {signupForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="signup-password" className="text-sm font-medium leading-none">
+                  Senha
+                </label>
+                <div className="relative">
+                  <Input
+                    id="signup-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    {...signupForm.register("password")}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+                {signupForm.formState.errors.password && (
+                  <p className="text-sm font-medium text-destructive">
+                    {signupForm.formState.errors.password.message}
+                  </p>
+                )}
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Criar conta
+              </Button>
+            </form>
           )}
 
           <div className="text-center pt-2">
