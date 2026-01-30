@@ -59,16 +59,21 @@ export default function Auth() {
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const navigate = useNavigate();
-  const { sendOtp, verifyOtp, signIn, signUp, user } = useAuth();
+  const { sendOtp, verifyOtp, signIn, signUp, user, isNewUser, setIsNewUser } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
 
   useEffect(() => {
     if (user && !roleLoading && role) {
-      const destination = role === "admin" ? "/admin" : "/dashboard";
-      navigate(destination, { replace: true });
+      // Check if user should complete onboarding
+      if (isNewUser) {
+        navigate("/onboarding", { replace: true });
+      } else {
+        const destination = role === "admin" ? "/admin" : "/dashboard";
+        navigate(destination, { replace: true });
+      }
     }
-  }, [user, role, roleLoading, navigate]);
+  }, [user, role, roleLoading, isNewUser, navigate]);
 
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),

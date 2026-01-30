@@ -12,9 +12,9 @@ import FerramentasIA from "./pages/FerramentasIA";
 import MapaTurismo from "./pages/MapaTurismo";
 import Noticias from "./pages/Noticias";
 import Perfil from "./pages/Perfil";
+import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -79,6 +79,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Perfil />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
                 </ProtectedRoute>
               }
             />
