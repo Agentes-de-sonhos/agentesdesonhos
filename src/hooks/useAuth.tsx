@@ -18,6 +18,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Ensure a profile exists after the user is authenticated.
+  // IMPORTANT: Profile creation cannot happen at signUp time when email confirmation is required,
+  // because the user may not be authenticated yet and RLS will reject the insert.
+  useEffect(() => {
+    if (!user) return;
+
+    const nameFromMetadata = String((user.user_metadata as any)?.name ?? "").trim();
+    const profileName = nameFromMetadata.length >= 2 ? nameFromMetadata : "Usuário";
+
+    const ensureProfile = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking profile:", error);
+        return;
+      }
+
+      if (!data) {
+        const { error: insertError } = await supabase.from("profiles").insert({
+          user_id: user.id,
+          name: profileName,
+        });
+
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+        }
+      }
+    };
+
+    // Defer to avoid any chance of running near auth state change callbacks.
+    const t = window.setTimeout(() => {
+      void ensureProfile();
+    }, 0);
+
+    return () => window.clearTimeout(t);
+  }, [user]);
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -49,29 +90,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, name: string) => {
     const redirectUrl = `${window.location.origin}/`;
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
+        data: {
+          name: name.trim(),
+        },
       },
     });
 
     if (error) {
       return { error: error as Error };
-    }
-
-    // Create profile after successful signup
-    if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        user_id: data.user.id,
-        name,
-      });
-
-      if (profileError) {
-        console.error("Error creating profile:", profileError);
-        return { error: profileError as unknown as Error };
-      }
     }
 
     return { error: null };
