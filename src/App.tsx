@@ -17,6 +17,7 @@ import Onboarding from "./pages/Onboarding";
 import Auth from "./pages/Auth";
 import Materiais from "./pages/Materiais";
 import BloqueiosAereos from "./pages/BloqueiosAereos";
+import Agenda from "./pages/Agenda";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
@@ -98,6 +99,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <BloqueiosAereos />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agenda"
+              element={
+                <ProtectedRoute>
+                  <Agenda />
                 </ProtectedRoute>
               }
             />

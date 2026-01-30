@@ -14,7 +14,8 @@ import {
   TrendingUp,
   Building2,
   FileText,
-  Plane
+  Plane,
+  Calendar
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +25,7 @@ import { AdminSuppliersManager } from "@/components/admin/AdminSuppliersManager"
 import { AdminTradeSuppliersManager } from "@/components/admin/AdminTradeSuppliersManager";
 import { AdminMaterialsManager } from "@/components/admin/AdminMaterialsManager";
 import { AdminFlightBlocksManager } from "@/components/admin/AdminFlightBlocksManager";
+import { AdminEventsManager } from "@/components/admin/AdminEventsManager";
 
 interface UserWithRole {
   id: string;
@@ -164,7 +166,7 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="trade-suppliers" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="trade-suppliers" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Diretório</span>
@@ -176,6 +178,10 @@ export default function Admin() {
             <TabsTrigger value="flight-blocks" className="flex items-center gap-2">
               <Plane className="h-4 w-4" />
               <span className="hidden sm:inline">Bloqueios</span>
+            </TabsTrigger>
+            <TabsTrigger value="events" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Agenda</span>
             </TabsTrigger>
             <TabsTrigger value="news" className="flex items-center gap-2">
               <Newspaper className="h-4 w-4" />
@@ -205,6 +211,10 @@ export default function Admin() {
 
           <TabsContent value="flight-blocks">
             <AdminFlightBlocksManager />
+          </TabsContent>
+
+          <TabsContent value="events">
+            <AdminEventsManager />
           </TabsContent>
 
           <TabsContent value="news">
