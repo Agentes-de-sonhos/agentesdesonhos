@@ -9,6 +9,8 @@ import { AdminRoute } from "@/components/auth/AdminRoute";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import FerramentasIA from "./pages/FerramentasIA";
+import CriarRoteiro from "./pages/CriarRoteiro";
+import RoteiroPublico from "./pages/RoteiroPublico";
 import MapaTurismo from "./pages/MapaTurismo";
 import SupplierDetail from "./pages/SupplierDetail";
 import Noticias from "./pages/Noticias";
@@ -62,6 +64,23 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/ferramentas-ia/criar-roteiro"
+              element={
+                <ProtectedRoute>
+                  <CriarRoteiro />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ferramentas-ia/criar-roteiro/:id"
+              element={
+                <ProtectedRoute>
+                  <CriarRoteiro />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/roteiro/:token" element={<RoteiroPublico />} />
             <Route
               path="/mapa-turismo"
               element={
