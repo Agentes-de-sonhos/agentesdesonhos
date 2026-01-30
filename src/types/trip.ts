@@ -1,0 +1,128 @@
+export interface Trip {
+  id: string;
+  user_id: string;
+  client_name: string;
+  destination: string;
+  start_date: string;
+  end_date: string;
+  status: 'active' | 'archived';
+  share_token: string | null;
+  created_at: string;
+  updated_at: string;
+  services?: TripService[];
+}
+
+export interface TripService {
+  id: string;
+  trip_id: string;
+  service_type: TripServiceType;
+  service_data: TripServiceData;
+  voucher_url: string | null;
+  voucher_name: string | null;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type TripServiceType = 
+  | 'flight'
+  | 'hotel'
+  | 'car_rental'
+  | 'transfer'
+  | 'attraction'
+  | 'insurance'
+  | 'cruise'
+  | 'other';
+
+export interface TripFlightData {
+  origin_city: string;
+  destination_city: string;
+  airline: string;
+  departure_date: string;
+  return_date: string;
+  notes: string;
+}
+
+export interface TripHotelData {
+  hotel_name: string;
+  city: string;
+  check_in: string;
+  check_out: string;
+  notes: string;
+}
+
+export interface TripCarRentalData {
+  pickup_location: string;
+  dropoff_location: string;
+  car_type: string;
+  notes: string;
+}
+
+export interface TripTransferData {
+  transfer_type: 'arrival' | 'departure';
+  location: string;
+  date: string;
+}
+
+export interface TripAttractionData {
+  name: string;
+  date: string;
+  quantity: number;
+}
+
+export interface TripInsuranceData {
+  provider: string;
+  start_date: string;
+  end_date: string;
+  coverage: string;
+}
+
+export interface TripCruiseData {
+  ship_name: string;
+  route: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface TripOtherData {
+  description: string;
+}
+
+export type TripServiceData = 
+  | TripFlightData 
+  | TripHotelData 
+  | TripCarRentalData 
+  | TripTransferData 
+  | TripAttractionData 
+  | TripInsuranceData 
+  | TripCruiseData 
+  | TripOtherData;
+
+export interface TripFormData {
+  client_name: string;
+  destination: string;
+  start_date: string;
+  end_date: string;
+}
+
+export const TRIP_SERVICE_LABELS: Record<TripServiceType, string> = {
+  flight: 'Passagem Aérea',
+  hotel: 'Hospedagem',
+  car_rental: 'Locação de Veículo',
+  transfer: 'Transfer',
+  attraction: 'Ingressos/Atrações',
+  insurance: 'Seguro Viagem',
+  cruise: 'Cruzeiro',
+  other: 'Outros',
+};
+
+export const TRIP_SERVICE_ICONS: Record<TripServiceType, string> = {
+  flight: 'Plane',
+  hotel: 'Hotel',
+  car_rental: 'Car',
+  transfer: 'Bus',
+  attraction: 'Ticket',
+  insurance: 'Shield',
+  cruise: 'Ship',
+  other: 'FileText',
+};
