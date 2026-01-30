@@ -13,6 +13,8 @@ import GerarOrcamento from "./pages/GerarOrcamento";
 import CriarRoteiro from "./pages/CriarRoteiro";
 import CriarConteudo from "./pages/CriarConteudo";
 import RoteiroPublico from "./pages/RoteiroPublico";
+import TripWallet from "./pages/TripWallet";
+import ViagemPublica from "./pages/ViagemPublica";
 import MapaTurismo from "./pages/MapaTurismo";
 import SupplierDetail from "./pages/SupplierDetail";
 import Noticias from "./pages/Noticias";
@@ -108,6 +110,23 @@ const App = () => (
               }
             />
             <Route path="/roteiro/:token" element={<RoteiroPublico />} />
+            <Route
+              path="/ferramentas-ia/trip-wallet"
+              element={
+                <ProtectedRoute>
+                  <TripWallet />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ferramentas-ia/trip-wallet/:id"
+              element={
+                <ProtectedRoute>
+                  <TripWallet />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/viagem/:token" element={<ViagemPublica />} />
             <Route
               path="/mapa-turismo"
               element={

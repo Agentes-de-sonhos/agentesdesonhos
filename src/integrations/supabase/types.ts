@@ -660,6 +660,89 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_services: {
+        Row: {
+          created_at: string
+          id: string
+          order_index: number
+          service_data: Json
+          service_type: string
+          trip_id: string
+          updated_at: string
+          voucher_name: string | null
+          voucher_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          service_data?: Json
+          service_type: string
+          trip_id: string
+          updated_at?: string
+          voucher_name?: string | null
+          voucher_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          service_data?: Json
+          service_type?: string
+          trip_id?: string
+          updated_at?: string
+          voucher_name?: string | null
+          voucher_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_services_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          client_name: string
+          created_at: string
+          destination: string
+          end_date: string
+          id: string
+          share_token: string | null
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          destination: string
+          end_date: string
+          id?: string
+          share_token?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          destination?: string
+          end_date?: string
+          id?: string
+          share_token?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

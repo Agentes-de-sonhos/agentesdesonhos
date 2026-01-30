@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Sparkles, Wand2, Image, FileText, ArrowRight } from "lucide-react";
+import { Sparkles, Wand2, Image, FileText, ArrowRight, Wallet } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,14 @@ const tools = [
     href: "/ferramentas-ia/gerar-orcamento",
     available: true,
     badge: "Disponível",
+  },
+  {
+    title: "Trip Wallet",
+    description: "Organize vouchers e documentos da viagem do cliente",
+    icon: Wallet,
+    href: "/ferramentas-ia/trip-wallet",
+    available: true,
+    badge: "Novo",
   },
 ];
 
