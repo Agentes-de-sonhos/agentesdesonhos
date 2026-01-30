@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_datetime: string
+          event_type: string
+          id: string
+          is_active: boolean
+          is_online: boolean
+          location: string | null
+          organizer: string
+          registration_url: string | null
+          start_datetime: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_datetime: string
+          event_type: string
+          id?: string
+          is_active?: boolean
+          is_online?: boolean
+          location?: string | null
+          organizer: string
+          registration_url?: string | null
+          start_datetime: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_datetime?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          is_online?: boolean
+          location?: string | null
+          organizer?: string
+          registration_url?: string | null
+          start_datetime?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       flight_blocks: {
         Row: {
           airline: string

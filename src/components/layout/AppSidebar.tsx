@@ -12,6 +12,7 @@ import {
   Shield,
   FileText,
   Plane,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,11 @@ const baseMenuItems = [
     title: "Bloqueios Aéreos",
     url: "/bloqueios-aereos",
     icon: Plane,
+  },
+  {
+    title: "Agenda",
+    url: "/agenda",
+    icon: Calendar,
   },
   {
     title: "Notícias",
