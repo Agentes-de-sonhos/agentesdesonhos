@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Sparkles, Wand2, MessageSquare, Image, FileText, ArrowRight } from "lucide-react";
+import { Sparkles, Wand2, Image, FileText, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,20 +23,12 @@ const tools = [
     badge: "Disponível",
   },
   {
-    title: "Assistente de Vendas",
-    description: "Tire dúvidas e receba sugestões em tempo real",
-    icon: MessageSquare,
-    href: "#",
-    available: false,
-    badge: "Em breve",
-  },
-  {
-    title: "Editor de Propostas",
-    description: "Transforme orçamentos em propostas profissionais",
+    title: "Gerar Orçamento",
+    description: "Monte orçamentos profissionais com todos os serviços",
     icon: FileText,
-    href: "#",
-    available: false,
-    badge: "Em breve",
+    href: "/ferramentas-ia/gerar-orcamento",
+    available: true,
+    badge: "Disponível",
   },
 ];
 
