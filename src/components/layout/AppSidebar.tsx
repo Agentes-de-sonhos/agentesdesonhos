@@ -8,9 +8,11 @@ import {
   User,
   ChevronLeft,
   Cloud,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
   {
@@ -43,6 +45,7 @@ const menuItems = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { signOut } = useAuth();
 
   return (
     <aside
@@ -108,6 +111,21 @@ export function AppSidebar() {
           );
         })}
       </nav>
+
+      {/* Logout Button */}
+      <div className="absolute bottom-20 left-3 right-3">
+        <Button
+          variant="ghost"
+          className={cn(
+            "w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10",
+            collapsed && "justify-center px-0"
+          )}
+          onClick={signOut}
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {!collapsed && <span>Sair</span>}
+        </Button>
+      </div>
 
       {/* Footer */}
       {!collapsed && (
