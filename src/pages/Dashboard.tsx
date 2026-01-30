@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import {
   Route,
   FileText,
@@ -18,6 +19,7 @@ import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { NewsFeedCard } from "@/components/dashboard/NewsFeedCard";
 import { ExternalLinksCard } from "@/components/dashboard/ExternalLinksCard";
 import { TradeUpdatesCard } from "@/components/dashboard/TradeUpdatesCard";
+import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
 
@@ -34,6 +36,8 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   // Fetch news from database
   const { data: news, isLoading: newsLoading } = useQuery({
     queryKey: ["news"],
@@ -125,44 +129,13 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Quick Actions */}
-        <section>
-          <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
-            Ações Rápidas
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <QuickActionCard
-              title="Criar Roteiro"
-              description="Gere roteiros personalizados com IA"
-              icon={Route}
-              variant="primary"
-            />
-            <QuickActionCard
-              title="Criar Conteúdo"
-              description="Posts e descrições automatizados"
-              icon={FileText}
-              variant="accent"
-            />
-            <QuickActionCard
-              title="Especialista em Destinos"
-              description="Consulte informações detalhadas"
-              icon={MapPin}
-            />
-            <QuickActionCard
-              title="Converter Orçamento"
-              description="Transforme pedidos em propostas"
-              icon={Calculator}
-            />
-          </div>
-        </section>
-
-        {/* Main Content Grid */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
           <>
+            {/* 1. News Feed & Trade Updates - TOP */}
             <div className="grid gap-6 lg:grid-cols-2">
               {/* News Feed */}
               {news && news.length > 0 ? (
@@ -182,6 +155,49 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
+
+            {/* 2. Mapa do Turismo - Categories */}
+            <section>
+              <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+                Mapa do Turismo
+              </h2>
+              <SupplierCategoriesCard />
+            </section>
+
+            {/* 3. Ferramentas IA (renamed from Ações Rápidas) */}
+            <section>
+              <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+                Ferramentas IA
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <QuickActionCard
+                  title="Criar Roteiro"
+                  description="Gere roteiros personalizados com IA"
+                  icon={Route}
+                  variant="primary"
+                  onClick={() => navigate("/ferramentas-ia")}
+                />
+                <QuickActionCard
+                  title="Criar Conteúdo"
+                  description="Posts e descrições automatizados"
+                  icon={FileText}
+                  variant="accent"
+                  onClick={() => navigate("/ferramentas-ia")}
+                />
+                <QuickActionCard
+                  title="Especialista em Destinos"
+                  description="Consulte informações detalhadas"
+                  icon={MapPin}
+                  onClick={() => navigate("/ferramentas-ia")}
+                />
+                <QuickActionCard
+                  title="Converter Orçamento"
+                  description="Transforme pedidos em propostas"
+                  icon={Calculator}
+                  onClick={() => navigate("/ferramentas-ia")}
+                />
+              </div>
+            </section>
 
             {/* External Links */}
             {suppliers && suppliers.length > 0 && (

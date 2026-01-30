@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,8 +19,6 @@ import {
   Search,
   Globe,
   Instagram,
-  Phone,
-  Mail,
   ChevronRight,
   Loader2,
   Filter,
@@ -54,9 +52,28 @@ interface TradeSupplier {
 }
 
 export default function MapaTurismo() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const navigate = useNavigate();
+
+  // Read category from URL on mount
+  useEffect(() => {
+    const categoria = searchParams.get("categoria");
+    if (categoria && CATEGORIES.includes(categoria)) {
+      setCategoryFilter(categoria);
+    }
+  }, [searchParams]);
+
+  // Update URL when category changes
+  const handleCategoryChange = (value: string) => {
+    setCategoryFilter(value);
+    if (value === "all") {
+      setSearchParams({});
+    } else {
+      setSearchParams({ categoria: value });
+    }
+  };
 
   const { data: suppliers, isLoading } = useQuery({
     queryKey: ["trade-suppliers"],
@@ -129,7 +146,7 @@ export default function MapaTurismo() {
                   className="pl-10"
                 />
               </div>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <Select value={categoryFilter} onValueChange={handleCategoryChange}>
                 <SelectTrigger className="w-full sm:w-[220px]">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Filtrar categoria" />
@@ -243,7 +260,7 @@ export default function MapaTurismo() {
                     categoryFilter === cat ? "ring-2 ring-primary" : ""
                   }`}
                   onClick={() =>
-                    setCategoryFilter(categoryFilter === cat ? "all" : cat)
+                    handleCategoryChange(categoryFilter === cat ? "all" : cat)
                   }
                 >
                   {cat}
