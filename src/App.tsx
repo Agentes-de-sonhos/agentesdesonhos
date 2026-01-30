@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import FerramentasIA from "./pages/FerramentasIA";
 import MapaTurismo from "./pages/MapaTurismo";
+import SupplierDetail from "./pages/SupplierDetail";
 import Noticias from "./pages/Noticias";
 import Perfil from "./pages/Perfil";
 import Onboarding from "./pages/Onboarding";
@@ -63,6 +64,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MapaTurismo />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mapa-turismo/:id"
+              element={
+                <ProtectedRoute>
+                  <SupplierDetail />
                 </ProtectedRoute>
               }
             />
