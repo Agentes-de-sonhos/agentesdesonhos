@@ -419,6 +419,95 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_services: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          order_index: number
+          quote_id: string
+          service_data: Json
+          service_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          order_index?: number
+          quote_id: string
+          service_data?: Json
+          service_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          order_index?: number
+          quote_id?: string
+          service_data?: Json
+          service_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_services_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          adults_count: number
+          children_count: number
+          client_name: string
+          created_at: string
+          destination: string
+          end_date: string
+          id: string
+          share_token: string | null
+          start_date: string
+          status: string
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          adults_count?: number
+          children_count?: number
+          client_name: string
+          created_at?: string
+          destination: string
+          end_date: string
+          id?: string
+          share_token?: string | null
+          start_date: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          adults_count?: number
+          children_count?: number
+          client_name?: string
+          created_at?: string
+          destination?: string
+          end_date?: string
+          id?: string
+          share_token?: string | null
+          start_date?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       supplier_contacts: {
         Row: {
           created_at: string

@@ -9,6 +9,7 @@ import { AdminRoute } from "@/components/auth/AdminRoute";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import FerramentasIA from "./pages/FerramentasIA";
+import GerarOrcamento from "./pages/GerarOrcamento";
 import CriarRoteiro from "./pages/CriarRoteiro";
 import CriarConteudo from "./pages/CriarConteudo";
 import RoteiroPublico from "./pages/RoteiroPublico";
@@ -87,6 +88,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CriarConteudo />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ferramentas-ia/gerar-orcamento"
+              element={
+                <ProtectedRoute>
+                  <GerarOrcamento />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ferramentas-ia/gerar-orcamento/:id"
+              element={
+                <ProtectedRoute>
+                  <GerarOrcamento />
                 </ProtectedRoute>
               }
             />
