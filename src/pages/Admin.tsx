@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
 import { AdminSuppliersManager } from "@/components/admin/AdminSuppliersManager";
+import { AdminTradeSuppliersManager } from "@/components/admin/AdminTradeSuppliersManager";
 
 interface UserWithRole {
   id: string;
@@ -160,25 +161,33 @@ export default function Admin() {
         </div>
 
         {/* Tabs for Content Management */}
-        <Tabs defaultValue="news" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="trade-suppliers" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="trade-suppliers" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Diretório</span>
+            </TabsTrigger>
             <TabsTrigger value="news" className="flex items-center gap-2">
               <Newspaper className="h-4 w-4" />
-              Notícias
+              <span className="hidden sm:inline">Notícias</span>
             </TabsTrigger>
             <TabsTrigger value="trade" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Trade
+              <span className="hidden sm:inline">Trade</span>
             </TabsTrigger>
             <TabsTrigger value="suppliers" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
-              Fornecedores
+              <span className="hidden sm:inline">Links</span>
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Usuários
+              <span className="hidden sm:inline">Usuários</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="trade-suppliers">
+            <AdminTradeSuppliersManager />
+          </TabsContent>
 
           <TabsContent value="news">
             <AdminNewsManager />

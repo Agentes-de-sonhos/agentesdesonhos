@@ -107,6 +107,50 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          position: string | null
+          supplier_id: string
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          position?: string | null
+          supplier_id: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          position?: string | null
+          supplier_id?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_contacts_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "trade_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           created_at: string
@@ -137,6 +181,51 @@ export type Database = {
           title?: string
           updated_at?: string
           url?: string
+        }
+        Relationships: []
+      }
+      trade_suppliers: {
+        Row: {
+          category: string
+          created_at: string
+          how_to_sell: string | null
+          id: string
+          instagram_url: string | null
+          is_active: boolean
+          name: string
+          other_social_media: Json | null
+          practical_notes: string | null
+          sales_channel: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          how_to_sell?: string | null
+          id?: string
+          instagram_url?: string | null
+          is_active?: boolean
+          name: string
+          other_social_media?: Json | null
+          practical_notes?: string | null
+          sales_channel?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          how_to_sell?: string | null
+          id?: string
+          instagram_url?: string | null
+          is_active?: boolean
+          name?: string
+          other_social_media?: Json | null
+          practical_notes?: string | null
+          sales_channel?: string | null
+          updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
