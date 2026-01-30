@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Cloud, Loader2, Eye, EyeOff } from "lucide-react";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
@@ -34,15 +35,16 @@ const signupSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 type SignupFormData = z.infer<typeof signupSchema>;
 
+type AuthView = "login" | "signup" | "forgot-password";
+
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<AuthView>("login");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const navigate = useNavigate();
-  const location = useLocation();
   const { signIn, signUp, user } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
@@ -122,11 +124,21 @@ export default function Auth() {
   };
 
   const switchMode = () => {
-    setIsLogin(!isLogin);
+    setView(view === "login" ? "signup" : "login");
     setError(null);
     setSignupSuccess(false);
     loginForm.reset();
     signupForm.reset();
+  };
+
+  const handleForgotPassword = () => {
+    setView("forgot-password");
+    setError(null);
+  };
+
+  const handleBackToLogin = () => {
+    setView("login");
+    setError(null);
   };
 
   if (signupSuccess) {
@@ -143,7 +155,7 @@ export default function Auth() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => { setSignupSuccess(false); setIsLogin(true); }} className="w-full">
+            <Button onClick={() => { setSignupSuccess(false); setView("login"); }} className="w-full">
               Voltar para login
             </Button>
           </CardContent>
@@ -161,12 +173,14 @@ export default function Auth() {
           </div>
           <div>
             <CardTitle className="text-2xl font-display">
-              {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
+              {view === "login" ? "Bem-vindo de volta" : view === "signup" ? "Crie sua conta" : "Recuperar senha"}
             </CardTitle>
             <CardDescription className="mt-2">
-              {isLogin
+              {view === "login"
                 ? "Entre na sua conta para acessar o painel"
-                : "Junte-se ao Agentes de Sonhos"}
+                : view === "signup"
+                ? "Junte-se ao Agentes de Sonhos"
+                : "Recupere o acesso à sua conta"}
             </CardDescription>
           </div>
         </CardHeader>
@@ -177,7 +191,9 @@ export default function Auth() {
             </Alert>
           )}
 
-          {isLogin ? (
+          {view === "forgot-password" ? (
+            <ForgotPasswordForm onBack={handleBackToLogin} />
+          ) : view === "login" ? (
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                 <FormField
@@ -231,6 +247,15 @@ export default function Auth() {
                     </FormItem>
                   )}
                 />
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-sm text-muted-foreground hover:text-primary hover:underline"
+                  >
+                    Esqueceu a senha?
+                  </button>
+                </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Entrar
@@ -312,17 +337,19 @@ export default function Auth() {
             </form>
           )}
 
-          <div className="text-center pt-2">
-            <button
-              type="button"
-              onClick={switchMode}
-              className="text-sm text-primary hover:underline"
-            >
-              {isLogin
-                ? "Não tem conta? Cadastre-se"
-                : "Já tem conta? Faça login"}
-            </button>
-          </div>
+          {view !== "forgot-password" && (
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={switchMode}
+                className="text-sm text-primary hover:underline"
+              >
+                {view === "login"
+                  ? "Não tem conta? Cadastre-se"
+                  : "Já tem conta? Faça login"}
+              </button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
