@@ -2,3 +2,6 @@ project_id = "mlwwpckahhfsixplxwif"
 
 [functions.generate-itinerary]
 verify_jwt = false
+
+[functions.generate-content]
+verify_jwt = false
