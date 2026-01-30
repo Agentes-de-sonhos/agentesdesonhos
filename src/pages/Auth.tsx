@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Cloud, Loader2, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,15 +44,16 @@ export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn, signUp, user } = useAuth();
+  const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
 
-  const from = location.state?.from?.pathname || "/";
-
+  // Redirect based on role after login
   useEffect(() => {
-    if (user) {
-      navigate(from, { replace: true });
+    if (user && !roleLoading && role) {
+      const destination = role === "admin" ? "/admin" : "/dashboard";
+      navigate(destination, { replace: true });
     }
-  }, [user, navigate, from]);
+  }, [user, role, roleLoading, navigate]);
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),

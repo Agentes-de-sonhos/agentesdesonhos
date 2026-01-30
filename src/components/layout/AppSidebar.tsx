@@ -9,15 +9,17 @@ import {
   ChevronLeft,
   Cloud,
   LogOut,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 
-const menuItems = [
+const baseMenuItems = [
   {
     title: "Dashboard",
-    url: "/",
+    url: "/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -42,10 +44,21 @@ const menuItems = [
   },
 ];
 
+const adminMenuItem = {
+  title: "Administração",
+  url: "/admin",
+  icon: Shield,
+};
+
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { signOut } = useAuth();
+  const { isAdmin } = useUserRole();
+
+  const menuItems = isAdmin 
+    ? [adminMenuItem, ...baseMenuItems] 
+    : baseMenuItems;
 
   return (
     <aside
@@ -56,7 +69,7 @@ export function AppSidebar() {
     >
       {/* Header */}
       <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
-        <Link to="/" className="flex items-center gap-3">
+        <Link to="/dashboard" className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
             <Cloud className="h-5 w-5 text-primary-foreground" />
           </div>
@@ -86,7 +99,8 @@ export function AppSidebar() {
       {/* Navigation */}
       <nav className="flex flex-col gap-1 p-3">
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.url;
+          const isActive = location.pathname === item.url || 
+            (item.url === "/dashboard" && location.pathname === "/");
           return (
             <Link
               key={item.url}
