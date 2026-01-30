@@ -1,31 +1,42 @@
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Sparkles, Wand2, MessageSquare, Image, FileText } from "lucide-react";
-import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
+import { Sparkles, Wand2, MessageSquare, Image, FileText, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const tools = [
   {
     title: "Gerador de Roteiros",
-    description: "Crie roteiros completos e personalizados em segundos",
+    description: "Crie roteiros completos e personalizados em segundos com IA",
     icon: Wand2,
-    variant: "primary" as const,
+    href: "/ferramentas-ia/criar-roteiro",
+    available: true,
+    badge: "Disponível",
   },
   {
     title: "Assistente de Vendas",
     description: "Tire dúvidas e receba sugestões em tempo real",
     icon: MessageSquare,
-    variant: "default" as const,
+    href: "#",
+    available: false,
+    badge: "Em breve",
   },
   {
     title: "Criador de Posts",
     description: "Gere conteúdo para redes sociais automaticamente",
     icon: Image,
-    variant: "accent" as const,
+    href: "#",
+    available: false,
+    badge: "Em breve",
   },
   {
     title: "Editor de Propostas",
     description: "Transforme orçamentos em propostas profissionais",
     icon: FileText,
-    variant: "default" as const,
+    href: "#",
+    available: false,
+    badge: "Em breve",
   },
 ];
 
@@ -50,25 +61,42 @@ export default function FerramentasIA() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {tools.map((tool) => (
-            <QuickActionCard
-              key={tool.title}
-              title={tool.title}
-              description={tool.description}
-              icon={tool.icon}
-              variant={tool.variant}
-            />
-          ))}
-        </div>
-
-        <div className="rounded-2xl border border-dashed border-border bg-secondary/30 p-8 text-center">
-          <Sparkles className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 font-display text-lg font-semibold text-foreground">
-            Mais ferramentas em breve
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Estamos desenvolvendo novas funcionalidades para você
-          </p>
+          {tools.map((tool) => {
+            const Icon = tool.icon;
+            return (
+              <Card
+                key={tool.title}
+                className={tool.available ? "hover:shadow-md transition-shadow" : "opacity-60"}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <Badge variant={tool.available ? "default" : "secondary"}>
+                      {tool.badge}
+                    </Badge>
+                  </div>
+                  <CardTitle className="mt-3">{tool.title}</CardTitle>
+                  <CardDescription>{tool.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {tool.available ? (
+                    <Button asChild className="w-full">
+                      <Link to={tool.href}>
+                        Acessar
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button disabled className="w-full" variant="secondary">
+                      Em breve
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </DashboardLayout>

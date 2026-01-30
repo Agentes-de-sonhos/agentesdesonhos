@@ -101,6 +101,139 @@ export type Database = {
         }
         Relationships: []
       }
+      itineraries: {
+        Row: {
+          budget_level: string
+          created_at: string
+          destination: string
+          end_date: string
+          id: string
+          share_token: string | null
+          start_date: string
+          status: string
+          travelers_count: number
+          trip_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_level: string
+          created_at?: string
+          destination: string
+          end_date: string
+          id?: string
+          share_token?: string | null
+          start_date: string
+          status?: string
+          travelers_count?: number
+          trip_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_level?: string
+          created_at?: string
+          destination?: string
+          end_date?: string
+          id?: string
+          share_token?: string | null
+          start_date?: string
+          status?: string
+          travelers_count?: number
+          trip_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      itinerary_activities: {
+        Row: {
+          created_at: string
+          day_id: string
+          description: string | null
+          estimated_cost: string | null
+          estimated_duration: string | null
+          id: string
+          is_approved: boolean
+          location: string | null
+          order_index: number
+          period: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_id: string
+          description?: string | null
+          estimated_cost?: string | null
+          estimated_duration?: string | null
+          id?: string
+          is_approved?: boolean
+          location?: string | null
+          order_index?: number
+          period: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_id?: string
+          description?: string | null
+          estimated_cost?: string | null
+          estimated_duration?: string | null
+          id?: string
+          is_approved?: boolean
+          location?: string | null
+          order_index?: number
+          period?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itinerary_activities_day_id_fkey"
+            columns: ["day_id"]
+            isOneToOne: false
+            referencedRelation: "itinerary_days"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      itinerary_days: {
+        Row: {
+          created_at: string
+          date: string
+          day_number: number
+          id: string
+          itinerary_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          day_number: number
+          id?: string
+          itinerary_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          day_number?: number
+          id?: string
+          itinerary_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itinerary_days_itinerary_id_fkey"
+            columns: ["itinerary_id"]
+            isOneToOne: false
+            referencedRelation: "itineraries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           category: string
