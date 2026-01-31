@@ -21,14 +21,17 @@ export function useUserRole() {
         const { data, error } = await supabase
           .from("user_roles")
           .select("role")
-          .eq("user_id", user.id)
-          .maybeSingle();
+          .eq("user_id", user.id);
 
         if (error) {
           console.error("Error fetching user role:", error);
           setRole(null);
+        } else if (data && data.length > 0) {
+          // Prioritize admin role if user has multiple roles
+          const hasAdmin = data.some((r) => r.role === "admin");
+          setRole(hasAdmin ? "admin" : (data[0].role as AppRole));
         } else {
-          setRole((data?.role as AppRole) || "agente");
+          setRole("agente");
         }
       } catch (err) {
         console.error("Error fetching user role:", err);
