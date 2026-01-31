@@ -21,21 +21,21 @@ export type Feature =
   | 'agenda'
   | 'crm_basic'
   | 'trainings_recorded'
+  | 'financial'
   // Profissional features
   | 'ai_tools'
   | 'quote_generator'
   | 'trip_wallet'
   | 'reminders'
-  | 'financial'
   | 'trainings_live'
-  | 'community'
   // Premium features
   | 'ai_unlimited'
   | 'trails_premium'
   | 'certificates'
   | 'ranking'
   | 'premium_group'
-  | 'fam_tours';
+  | 'fam_tours'
+  | 'community';
 
 export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   essencial: [
@@ -45,6 +45,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'agenda',
     'crm_basic',
     'trainings_recorded',
+    'financial',
   ],
   profissional: [
     'news',
@@ -53,13 +54,12 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'agenda',
     'crm_basic',
     'trainings_recorded',
+    'financial',
     'ai_tools',
     'quote_generator',
     'trip_wallet',
     'reminders',
-    'financial',
     'trainings_live',
-    'community',
   ],
   premium: [
     'news',
@@ -68,19 +68,19 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'agenda',
     'crm_basic',
     'trainings_recorded',
+    'financial',
     'ai_tools',
     'quote_generator',
     'trip_wallet',
     'reminders',
-    'financial',
     'trainings_live',
-    'community',
     'ai_unlimited',
     'trails_premium',
     'certificates',
     'ranking',
     'premium_group',
     'fam_tours',
+    'community',
   ],
 };
 
@@ -131,17 +131,17 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   agenda: 'essencial',
   crm_basic: 'essencial',
   trainings_recorded: 'essencial',
+  financial: 'essencial',
   ai_tools: 'profissional',
   quote_generator: 'profissional',
   trip_wallet: 'profissional',
   reminders: 'profissional',
-  financial: 'profissional',
   trainings_live: 'profissional',
-  community: 'profissional',
   ai_unlimited: 'premium',
   trails_premium: 'premium',
   certificates: 'premium',
   ranking: 'premium',
   premium_group: 'premium',
   fam_tours: 'premium',
+  community: 'premium',
 };
