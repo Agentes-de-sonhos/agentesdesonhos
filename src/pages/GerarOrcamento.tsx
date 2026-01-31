@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,10 @@ import { ServiceList } from "@/components/quote/ServiceCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchAgentProfile, AgentProfile } from "@/hooks/useAgentProfile";
 import type { ServiceType, QuoteFormData } from "@/types/quote";
 import { SERVICE_TYPE_LABELS } from "@/types/quote";
 
@@ -19,10 +22,19 @@ export default function GerarOrcamento() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { createQuote, isCreating, publishQuote, isPublishing } = useQuotes();
   const { quote, addService, deleteService, isAddingService } = useQuote(id);
   
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null);
+  const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+
+  // Fetch agent profile for PDF generation
+  useEffect(() => {
+    if (user?.id) {
+      fetchAgentProfile(user.id, supabase).then(setAgentProfile);
+    }
+  }, [user?.id]);
 
   const handleCreateQuote = async (data: QuoteFormData) => {
     const newQuote = await createQuote(data);
@@ -41,6 +53,12 @@ export default function GerarOrcamento() {
     const url = `${window.location.origin}/orcamento/${token}`;
     await navigator.clipboard.writeText(url);
     toast({ title: "Link copiado!", description: "O link do orçamento foi copiado para a área de transferência." });
+  };
+
+  const handleGeneratePDF = () => {
+    if (quote) {
+      generateQuotePDF(quote, agentProfile);
+    }
   };
 
   if (!id) {
@@ -91,7 +109,7 @@ export default function GerarOrcamento() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => generateQuotePDF(quote)}>
+            <Button variant="outline" onClick={handleGeneratePDF}>
               <FileText className="mr-2 h-4 w-4" /> PDF
             </Button>
             <Button onClick={handlePublish} disabled={isPublishing}>

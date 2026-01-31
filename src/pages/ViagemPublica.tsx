@@ -4,13 +4,14 @@ import { ptBR } from "date-fns/locale";
 import { Wallet, MapPin, Calendar, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { generateTripPDF } from "@/components/trip/TripPDF";
 import { usePublicTrip } from "@/hooks/useTrips";
 
 export default function ViagemPublica() {
   const { token } = useParams();
-  const { trip, isLoading } = usePublicTrip(token);
+  const { trip, agentProfile, isLoading } = usePublicTrip(token);
 
   if (isLoading) {
     return (
@@ -42,6 +43,21 @@ export default function ViagemPublica() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/30">
       <div className="container max-w-4xl mx-auto py-8 px-4">
+        {/* Agency Logo Header */}
+        {agentProfile?.agency_logo_url ? (
+          <div className="text-center mb-6">
+            <img 
+              src={agentProfile.agency_logo_url} 
+              alt={agentProfile.agency_name || 'Logo'}
+              className="h-16 max-w-48 object-contain mx-auto"
+            />
+          </div>
+        ) : agentProfile?.agency_name ? (
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-semibold text-primary">{agentProfile.agency_name}</h2>
+          </div>
+        ) : null}
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
@@ -103,15 +119,37 @@ export default function ViagemPublica() {
 
         {/* Actions */}
         <div className="flex justify-center">
-          <Button size="lg" onClick={() => generateTripPDF(trip)}>
+          <Button size="lg" onClick={() => generateTripPDF(trip, agentProfile)}>
             <FileText className="mr-2 h-5 w-5" />
             Baixar PDF
           </Button>
         </div>
 
-        {/* Footer */}
-        <div className="text-center mt-12 text-sm text-muted-foreground">
-          <p>Agentes de Sonhos • Sua viagem começa aqui</p>
+        {/* Agent Signature Footer */}
+        <div className="mt-12 pt-6 border-t">
+          {agentProfile ? (
+            <div className="flex items-center justify-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={agentProfile.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {agentProfile.name?.charAt(0).toUpperCase() || '?'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-left">
+                <p className="font-semibold">{agentProfile.name}</p>
+                {agentProfile.phone && (
+                  <p className="text-sm text-muted-foreground">📱 {agentProfile.phone}</p>
+                )}
+                {agentProfile.agency_name && (
+                  <p className="text-sm text-muted-foreground">{agentProfile.agency_name}</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-sm text-muted-foreground">
+              Agentes de Sonhos • Sua viagem começa aqui
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -285,7 +285,7 @@ export function useTrip(id: string | undefined) {
 }
 
 export function usePublicTrip(token: string | undefined) {
-  const { data: trip, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["public-trip", token],
     queryFn: async () => {
       if (!token) return null;
@@ -306,7 +306,14 @@ export function usePublicTrip(token: string | undefined) {
 
       if (servicesError) throw servicesError;
 
-      return {
+      // Fetch agent profile for branding
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("name, phone, avatar_url, agency_name, agency_logo_url, city, state")
+        .eq("user_id", tripData.user_id)
+        .maybeSingle();
+
+      const trip = {
         ...tripData,
         services: servicesData.map((s) => ({
           ...s,
@@ -314,9 +321,15 @@ export function usePublicTrip(token: string | undefined) {
           service_data: s.service_data as unknown as TripServiceData,
         })),
       } as Trip;
+
+      return { trip, agentProfile: profileData };
     },
     enabled: !!token,
   });
 
-  return { trip, isLoading };
+  return { 
+    trip: data?.trip || null, 
+    agentProfile: data?.agentProfile || null,
+    isLoading 
+  };
 }

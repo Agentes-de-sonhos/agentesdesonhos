@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
+import type { AgentProfile } from "@/hooks/useAgentProfile";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea",
@@ -81,7 +82,56 @@ function getServiceDetails(service: QuoteService): string[] {
   return details;
 }
 
-export function generateQuotePDF(quote: Quote) {
+function generateAgencyHeader(profile: AgentProfile | null): string {
+  if (!profile?.agency_logo_url) {
+    return `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="font-size: 24px; color: #0f766e; margin: 0;">
+          ${profile?.agency_name || 'Agentes de Sonhos'}
+        </h1>
+      </div>
+    `;
+  }
+  
+  return `
+    <div style="text-align: center; margin-bottom: 32px;">
+      <img 
+        src="${profile.agency_logo_url}" 
+        alt="${profile.agency_name || 'Logo'}"
+        style="max-height: 80px; max-width: 200px; object-fit: contain; margin: 0 auto;"
+      />
+    </div>
+  `;
+}
+
+function generateAgentSignature(profile: AgentProfile | null): string {
+  if (!profile) {
+    return `
+      <div style="text-align: center; padding-top: 24px; border-top: 1px solid #e2e8f0;">
+        <p style="font-size: 13px; color: #64748b;">
+          Agentes de Sonhos • Sua viagem começa aqui
+        </p>
+      </div>
+    `;
+  }
+
+  const avatarHtml = profile.avatar_url
+    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 12px;" />`
+    : `<div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; margin-right: 12px;">${profile.name.charAt(0).toUpperCase()}</div>`;
+
+  return `
+    <div style="padding-top: 24px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+      ${avatarHtml}
+      <div style="text-align: left;">
+        <p style="font-weight: 600; font-size: 14px; color: #1e293b; margin: 0;">${profile.name}</p>
+        ${profile.phone ? `<p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">📱 ${profile.phone}</p>` : ''}
+        ${profile.agency_name ? `<p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">${profile.agency_name}</p>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+export function generateQuotePDF(quote: Quote, profile?: AgentProfile | null) {
   const startDate = new Date(quote.start_date);
   const endDate = new Date(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -129,6 +179,9 @@ export function generateQuotePDF(quote: Quote) {
     </head>
     <body>
       <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
+        <!-- Agency Logo/Header -->
+        ${generateAgencyHeader(profile || null)}
+
         <!-- Header -->
         <div style="text-align: center; margin-bottom: 40px;">
           <h1 style="font-size: 28px; color: #0f766e; margin-bottom: 8px;">
@@ -178,22 +231,22 @@ export function generateQuotePDF(quote: Quote) {
         </div>
 
         <!-- Total -->
-        <div style="background: #0f766e; color: white; border-radius: 12px; padding: 24px; text-align: center;">
+        <div style="background: #0f766e; color: white; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 40px;">
           <p style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Total Geral</p>
           <p style="font-size: 36px; font-weight: 700;">
             ${formatCurrency(quote.total_amount)}
           </p>
         </div>
 
-        <!-- Footer -->
-        <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e2e8f0; text-align: center;">
+        <!-- Validity Notice -->
+        <div style="text-align: center; margin-bottom: 32px;">
           <p style="font-size: 13px; color: #64748b;">
             Este orçamento é válido por 7 dias. Valores sujeitos a alteração conforme disponibilidade.
           </p>
-          <p style="font-size: 13px; color: #64748b; margin-top: 8px;">
-            Agentes de Sonhos • Sua viagem começa aqui
-          </p>
         </div>
+
+        <!-- Agent Signature -->
+        ${generateAgentSignature(profile || null)}
       </div>
     </body>
     </html>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,13 @@ import { TripServiceForm } from "@/components/trip/TripServiceForms";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { generateTripPDF } from "@/components/trip/TripPDF";
 import { useTrips, useTrip } from "@/hooks/useTrips";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchAgentProfile, AgentProfile } from "@/hooks/useAgentProfile";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { TripServiceType, TripFormData, TRIP_SERVICE_LABELS } from "@/types/trip";
+import type { TripServiceType, TripFormData } from "@/types/trip";
 
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea",
@@ -29,11 +32,20 @@ export default function TripWallet() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { createTrip, isCreating, shareTrip, isSharing } = useTrips();
   const { trip, addService, deleteService, uploadVoucher, isAddingService } = useTrip(id);
   
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+
+  // Fetch agent profile for PDF generation
+  useEffect(() => {
+    if (user?.id) {
+      fetchAgentProfile(user.id, supabase).then(setAgentProfile);
+    }
+  }, [user?.id]);
 
   const handleCreateTrip = async (data: TripFormData) => {
     const newTrip = await createTrip(data);
@@ -75,6 +87,12 @@ export default function TripWallet() {
       title: "Link copiado!", 
       description: "O link da viagem foi copiado para a área de transferência." 
     });
+  };
+
+  const handleGeneratePDF = () => {
+    if (trip) {
+      generateTripPDF(trip, agentProfile);
+    }
   };
 
   // Step 1: Create trip
@@ -140,7 +158,7 @@ export default function TripWallet() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => generateTripPDF(trip)}>
+            <Button variant="outline" onClick={handleGeneratePDF}>
               <FileText className="mr-2 h-4 w-4" /> PDF
             </Button>
             <Button onClick={handleShare} disabled={isSharing}>

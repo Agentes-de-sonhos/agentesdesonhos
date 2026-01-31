@@ -951,6 +951,7 @@ export type Database = {
       profiles: {
         Row: {
           address_number: string | null
+          agency_logo_url: string | null
           agency_name: string | null
           avatar_url: string | null
           city: string | null
@@ -970,6 +971,7 @@ export type Database = {
         }
         Insert: {
           address_number?: string | null
+          agency_logo_url?: string | null
           agency_name?: string | null
           avatar_url?: string | null
           city?: string | null
@@ -989,6 +991,7 @@ export type Database = {
         }
         Update: {
           address_number?: string | null
+          agency_logo_url?: string | null
           agency_name?: string | null
           avatar_url?: string | null
           city?: string | null
