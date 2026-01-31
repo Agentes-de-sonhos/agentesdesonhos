@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          city: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
@@ -358,6 +394,94 @@ export type Database = {
           url?: string
         }
         Relationships: []
+      }
+      opportunities: {
+        Row: {
+          client_id: string
+          created_at: string
+          destination: string
+          end_date: string | null
+          estimated_value: number
+          id: string
+          notes: string | null
+          passengers_count: number
+          stage: string
+          start_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          destination: string
+          end_date?: string | null
+          estimated_value?: number
+          id?: string
+          notes?: string | null
+          passengers_count?: number
+          stage?: string
+          start_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          destination?: string
+          end_date?: string | null
+          estimated_value?: number
+          id?: string
+          notes?: string | null
+          passengers_count?: number
+          stage?: string
+          start_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_history: {
+        Row: {
+          changed_at: string
+          from_stage: string | null
+          id: string
+          notes: string | null
+          opportunity_id: string
+          to_stage: string
+        }
+        Insert: {
+          changed_at?: string
+          from_stage?: string | null
+          id?: string
+          notes?: string | null
+          opportunity_id: string
+          to_stage: string
+        }
+        Update: {
+          changed_at?: string
+          from_stage?: string | null
+          id?: string
+          notes?: string | null
+          opportunity_id?: string
+          to_stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_history_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
