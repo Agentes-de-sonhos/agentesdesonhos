@@ -1,24 +1,19 @@
-import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, 
   Shield,
   UserCheck,
-  UserX,
-  Loader2,
   Newspaper,
   TrendingUp,
   Building2,
   FileText,
   Plane,
-  Calendar
+  Calendar,
+  GraduationCap,
+  Heart,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
 import { AdminSuppliersManager } from "@/components/admin/AdminSuppliersManager";
@@ -26,107 +21,52 @@ import { AdminTradeSuppliersManager } from "@/components/admin/AdminTradeSupplie
 import { AdminMaterialsManager } from "@/components/admin/AdminMaterialsManager";
 import { AdminFlightBlocksManager } from "@/components/admin/AdminFlightBlocksManager";
 import { AdminEventsManager } from "@/components/admin/AdminEventsManager";
-
-interface UserWithRole {
-  id: string;
-  email: string;
-  name: string;
-  role: "admin" | "agente";
-  created_at: string;
-}
+import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
+import { AdminCommunityManager } from "@/components/admin/AdminCommunityManager";
+import { AdminUserManager } from "@/components/admin/AdminUserManager";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Admin() {
-  const [users, setUsers] = useState<UserWithRole[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  async function fetchUsers() {
-    try {
-      const { data: profiles, error: profilesError } = await supabase
+  const { data: userStats } = useQuery({
+    queryKey: ["admin-user-stats"],
+    queryFn: async () => {
+      const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, name, created_at");
-
-      if (profilesError) throw profilesError;
-
-      const { data: roles, error: rolesError } = await supabase
+        .select("user_id");
+      
+      const { data: roles } = await supabase
         .from("user_roles")
-        .select("user_id, role");
+        .select("role");
+      
+      const { data: subscriptions } = await supabase
+        .from("subscriptions")
+        .select("plan");
 
-      if (rolesError) throw rolesError;
+      const total = profiles?.length || 0;
+      const admins = roles?.filter(r => r.role === "admin").length || 0;
+      const premium = subscriptions?.filter(s => s.plan === "premium").length || 0;
 
-      const combinedUsers: UserWithRole[] = (profiles || []).map((profile) => {
-        const userRole = roles?.find((r) => r.user_id === profile.user_id);
-        return {
-          id: profile.user_id,
-          email: "",
-          name: profile.name,
-          role: (userRole?.role as "admin" | "agente") || "agente",
-          created_at: profile.created_at,
-        };
-      });
-
-      setUsers(combinedUsers);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os usuários",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function toggleUserRole(userId: string, currentRole: "admin" | "agente") {
-    const newRole = currentRole === "admin" ? "agente" : "admin";
-
-    try {
-      const { error } = await supabase
-        .from("user_roles")
-        .update({ role: newRole })
-        .eq("user_id", userId);
-
-      if (error) throw error;
-
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
-      );
-
-      toast({
-        title: "Sucesso",
-        description: `Usuário atualizado para ${newRole}`,
-      });
-    } catch (error) {
-      console.error("Error updating role:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar o role do usuário",
-        variant: "destructive",
-      });
-    }
-  }
+      return { total, admins, premium };
+    },
+  });
 
   const stats = [
     {
       title: "Total de Usuários",
-      value: users.length,
+      value: userStats?.total || 0,
       icon: Users,
       color: "text-primary",
     },
     {
       title: "Administradores",
-      value: users.filter((u) => u.role === "admin").length,
+      value: userStats?.admins || 0,
       icon: Shield,
       color: "text-accent",
     },
     {
-      title: "Agentes",
-      value: users.filter((u) => u.role === "agente").length,
+      title: "Premium",
+      value: userStats?.premium || 0,
       icon: UserCheck,
       color: "text-green-500",
     },
@@ -141,7 +81,7 @@ export default function Admin() {
             Painel Administrativo
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie usuários, notícias e conteúdo da plataforma
+            Gerencie usuários, conteúdo, cursos e toda a plataforma
           </p>
         </div>
 
@@ -165,8 +105,12 @@ export default function Admin() {
         </div>
 
         {/* Tabs for Content Management */}
-        <Tabs defaultValue="trade-suppliers" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Usuários</span>
+            </TabsTrigger>
             <TabsTrigger value="trade-suppliers" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Diretório</span>
@@ -195,11 +139,19 @@ export default function Admin() {
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Links</span>
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Usuários</span>
+            <TabsTrigger value="academy" className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" />
+              <span className="hidden sm:inline">Academy</span>
+            </TabsTrigger>
+            <TabsTrigger value="community" className="flex items-center gap-2">
+              <Heart className="h-4 w-4" />
+              <span className="hidden sm:inline">Comunidade</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="users">
+            <AdminUserManager />
+          </TabsContent>
 
           <TabsContent value="trade-suppliers">
             <AdminTradeSuppliersManager />
@@ -229,77 +181,12 @@ export default function Admin() {
             <AdminSuppliersManager />
           </TabsContent>
 
-          <TabsContent value="users">
-            <Card className="border-0 shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Gerenciar Usuários
-                </CardTitle>
-                <CardDescription>
-                  Visualize e gerencie os usuários da plataforma
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                ) : users.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <UserX className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Nenhum usuário encontrado</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                            Nome
-                          </th>
-                          <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                            Role
-                          </th>
-                          <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                            Data de Cadastro
-                          </th>
-                          <th className="text-right py-3 px-4 font-medium text-muted-foreground">
-                            Ações
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {users.map((user) => (
-                          <tr key={user.id} className="border-b last:border-0">
-                            <td className="py-3 px-4 font-medium">{user.name}</td>
-                            <td className="py-3 px-4">
-                              <Badge
-                                variant={user.role === "admin" ? "default" : "secondary"}
-                              >
-                                {user.role === "admin" ? "Administrador" : "Agente"}
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-4 text-muted-foreground">
-                              {new Date(user.created_at).toLocaleDateString("pt-BR")}
-                            </td>
-                            <td className="py-3 px-4 text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleUserRole(user.id, user.role)}
-                              >
-                                {user.role === "admin" ? "Tornar Agente" : "Tornar Admin"}
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="academy">
+            <AdminAcademyManager />
+          </TabsContent>
+
+          <TabsContent value="community">
+            <AdminCommunityManager />
           </TabsContent>
         </Tabs>
       </div>
