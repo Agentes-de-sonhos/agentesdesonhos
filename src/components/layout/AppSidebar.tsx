@@ -17,6 +17,7 @@ import {
   Wallet,
   GraduationCap,
   Lock,
+  Calculator,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -40,25 +41,31 @@ const baseMenuItems: MenuItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: "Ferramentas IA",
-    url: "/ferramentas-ia",
-    icon: Sparkles,
-    requiredFeature: "ai_tools",
-  },
-  {
     title: "CRM",
     url: "/crm",
     icon: Users,
     requiredFeature: "crm_basic",
   },
   {
-    title: "Financeiro",
-    url: "/financeiro",
-    icon: Wallet,
-    requiredFeature: "financial",
+    title: "Gerar Orçamento",
+    url: "/ferramentas-ia/gerar-orcamento",
+    icon: Calculator,
+    requiredFeature: "quote_generator",
   },
   {
-    title: "Educa Academy",
+    title: "Trip Wallet",
+    url: "/ferramentas-ia/trip-wallet",
+    icon: Wallet,
+    requiredFeature: "trip_wallet",
+  },
+  {
+    title: "Ferramentas IA",
+    url: "/ferramentas-ia",
+    icon: Sparkles,
+    requiredFeature: "ai_tools",
+  },
+  {
+    title: "Educa Travel Academy",
     url: "/educa-academy",
     icon: GraduationCap,
   },
@@ -69,15 +76,15 @@ const baseMenuItems: MenuItem[] = [
     requiredFeature: "tourism_map",
   },
   {
+    title: "Bloqueios Aéreos",
+    url: "/bloqueios-aereos",
+    icon: Plane,
+  },
+  {
     title: "Materiais de Divulgação",
     url: "/materiais",
     icon: FileText,
     requiredFeature: "materials",
-  },
-  {
-    title: "Bloqueios Aéreos",
-    url: "/bloqueios-aereos",
-    icon: Plane,
   },
   {
     title: "Agenda",
