@@ -795,6 +795,45 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          ai_usage_count: number
+          ai_usage_reset_at: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_usage_count?: number
+          ai_usage_reset_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_usage_count?: number
+          ai_usage_reset_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       supplier_contacts: {
         Row: {
           created_at: string
@@ -1272,9 +1311,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
+      get_user_plan: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["subscription_plan"]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_feature_access: {
+        Args: { _feature: string; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -1286,6 +1334,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "agente"
+      subscription_plan: "essencial" | "profissional" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1414,6 +1463,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "agente"],
+      subscription_plan: ["essencial", "profissional", "premium"],
     },
   },
 } as const
