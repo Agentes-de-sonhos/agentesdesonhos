@@ -68,15 +68,15 @@ export function AdminCommunityManager() {
           Gerenciar Comunidade
         </CardTitle>
         <CardDescription>
-          Gerencie FunTrips, reuniões online, eventos presenciais, workshops e prêmios mensais
+          Gerencie Fam Trips, reuniões online, eventos presenciais, workshops e prêmios mensais
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="fun-trips" className="space-y-4">
+        <Tabs defaultValue="fam-trips" className="space-y-4">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="fun-trips" className="text-xs sm:text-sm">
+            <TabsTrigger value="fam-trips" className="text-xs sm:text-sm">
               <Plane className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">FunTrips</span>
+              <span className="hidden sm:inline">Fam Trips</span>
             </TabsTrigger>
             <TabsTrigger value="online-meetings" className="text-xs sm:text-sm">
               <Video className="h-4 w-4 mr-1" />
@@ -96,8 +96,8 @@ export function AdminCommunityManager() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="fun-trips">
-            <FunTripsManager />
+          <TabsContent value="fam-trips">
+            <FamTripsManager />
           </TabsContent>
           <TabsContent value="online-meetings">
             <OnlineMeetingsManager />
@@ -117,8 +117,8 @@ export function AdminCommunityManager() {
   );
 }
 
-// FunTrips Manager
-function FunTripsManager() {
+// Fam Trips Manager
+function FamTripsManager() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [form, setForm] = useState({
@@ -135,7 +135,7 @@ function FunTripsManager() {
   const queryClient = useQueryClient();
 
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ["admin-fun-trips"],
+    queryKey: ["admin-fam-trips"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fun_trips")
@@ -157,9 +157,9 @@ function FunTripsManager() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-fun-trips"] });
-      queryClient.invalidateQueries({ queryKey: ["fun-trips"] });
-      toast({ title: editingItem ? "FunTrip atualizada!" : "FunTrip criada!" });
+      queryClient.invalidateQueries({ queryKey: ["admin-fam-trips"] });
+      queryClient.invalidateQueries({ queryKey: ["fam-trips"] });
+      toast({ title: editingItem ? "Fam Trip atualizada!" : "Fam Trip criada!" });
       handleClose();
     },
     onError: () => {
@@ -173,9 +173,9 @@ function FunTripsManager() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-fun-trips"] });
-      queryClient.invalidateQueries({ queryKey: ["fun-trips"] });
-      toast({ title: "FunTrip excluída!" });
+      queryClient.invalidateQueries({ queryKey: ["admin-fam-trips"] });
+      queryClient.invalidateQueries({ queryKey: ["fam-trips"] });
+      toast({ title: "Fam Trip excluída!" });
     },
   });
 
@@ -218,7 +218,7 @@ function FunTripsManager() {
       <div className="flex justify-end">
         <Button onClick={() => handleOpen()}>
           <Plus className="h-4 w-4 mr-2" />
-          Nova FunTrip
+          Nova Fam Trip
         </Button>
       </div>
 
@@ -267,7 +267,7 @@ function FunTripsManager() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingItem ? "Editar FunTrip" : "Nova FunTrip"}</DialogTitle>
+            <DialogTitle>{editingItem ? "Editar Fam Trip" : "Nova Fam Trip"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="grid grid-cols-2 gap-4">

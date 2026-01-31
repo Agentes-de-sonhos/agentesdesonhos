@@ -1,6 +1,6 @@
 export type WorkshopCategory = 'contabilidade' | 'tributaria' | 'impostos' | 'juridico' | 'gestao';
 
-export interface FunTrip {
+export interface FamTrip {
   id: string;
   destination: string;
   trip_date: string;

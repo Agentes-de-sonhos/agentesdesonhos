@@ -1,6 +1,6 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useCommunity } from "@/hooks/useCommunity";
-import { FunTripsSection } from "@/components/community/FunTripsSection";
+import { FamTripsSection } from "@/components/community/FamTripsSection";
 import { OnlineMeetingsSection } from "@/components/community/OnlineMeetingsSection";
 import { InPersonEventsSection } from "@/components/community/InPersonEventsSection";
 import { WorkshopsSection } from "@/components/community/WorkshopsSection";
@@ -12,7 +12,7 @@ import { Users } from "lucide-react";
 
 export default function Community() {
   const {
-    funTrips,
+    famTrips,
     upcomingMeetings,
     pastMeetings,
     inPersonEvents,
@@ -64,8 +64,8 @@ export default function Community() {
           </p>
         </div>
 
-        {/* 1. FunTrips & Exclusive Opportunities */}
-        <FunTripsSection trips={funTrips} />
+        {/* 1. Fam Trips & Exclusive Opportunities */}
+        <FamTripsSection trips={famTrips} />
 
         {/* 2. Online Weekly Meetings */}
         <OnlineMeetingsSection upcoming={upcomingMeetings} past={pastMeetings} />
