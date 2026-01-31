@@ -107,9 +107,9 @@ export default function TripWallet() {
             <div>
               <h1 className="font-display text-2xl font-bold flex items-center gap-2">
                 <Wallet className="h-6 w-6 text-primary" />
-                Trip Wallet
+                Carteira Digital
               </h1>
-              <p className="text-muted-foreground">Organize vouchers e documentos da viagem</p>
+              <p className="text-muted-foreground">Organize vouchers, documentos e serviços da viagem do cliente</p>
             </div>
           </div>
           <Card className="max-w-2xl">

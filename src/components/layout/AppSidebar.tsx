@@ -105,7 +105,7 @@ const premiumMenuItems: MenuItem[] = [
     requiredFeature: "quote_generator",
   },
   {
-    title: "Trip Wallet",
+    title: "Carteira Digital",
     url: "/ferramentas-ia/trip-wallet",
     icon: Wallet,
     requiredFeature: "trip_wallet",

@@ -33,8 +33,8 @@ const tools = [
     badge: "Disponível",
   },
   {
-    title: "Trip Wallet",
-    description: "Organize vouchers e documentos da viagem do cliente",
+    title: "Carteira Digital",
+    description: "Organize vouchers, documentos e serviços da viagem do cliente em um único lugar",
     icon: Wallet,
     href: "/ferramentas-ia/trip-wallet",
     available: true,

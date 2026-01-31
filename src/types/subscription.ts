@@ -92,7 +92,7 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   essencial: 'Acesso básico às notícias, mapa do turismo, materiais e CRM',
-  profissional: 'Ferramentas IA, orçamentos, Trip Wallet e financeiro incluídos',
+  profissional: 'Ferramentas IA, orçamentos, Carteira Digital e financeiro incluídos',
   premium: 'Acesso completo com trilhas premium, certificados e benefícios exclusivos',
 };
 
@@ -111,7 +111,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   trainings_recorded: 'Treinamentos Gravados',
   ai_tools: 'Ferramentas IA',
   quote_generator: 'Gerador de Orçamentos',
-  trip_wallet: 'Trip Wallet',
+  trip_wallet: 'Carteira Digital',
   reminders: 'Lembretes Automáticos',
   financial: 'Módulo Financeiro',
   trainings_live: 'Treinamentos ao Vivo',
