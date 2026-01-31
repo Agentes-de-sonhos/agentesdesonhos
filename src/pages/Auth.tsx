@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Cloud, Loader2, Eye, EyeOff, Mail, KeyRound } from "lucide-react";
+import { Cloud, Loader2, Eye, EyeOff, Mail, KeyRound, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,25 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 type AuthMethod = "otp" | "password";
 type AuthView = "main" | "otp-verify" | "password-login" | "password-signup";
+
+// Brand Header Component
+function BrandHeader() {
+  return (
+    <div className="flex flex-col items-center space-y-3">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25 transition-transform hover:scale-105">
+        <Cloud className="h-8 w-8 text-primary-foreground" />
+      </div>
+      <div className="text-center">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
+          Agentes de Sonhos
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Plataforma inteligente para agentes de viagem
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function Auth() {
   const [view, setView] = useState<AuthView>("main");
@@ -80,10 +99,13 @@ export default function Auth() {
   
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Carregando...</p>
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25 animate-pulse">
+            <Cloud className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <p className="text-muted-foreground text-sm">Carregando...</p>
         </div>
       </div>
     );
@@ -92,10 +114,13 @@ export default function Auth() {
   // If user exists, show loading while redirecting
   if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Redirecionando...</p>
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
+            <Cloud className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <p className="text-muted-foreground text-sm">Redirecionando...</p>
         </div>
       </div>
     );
@@ -110,8 +135,6 @@ export default function Auth() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
-
-  // signupForm moved to MultiStepSignup component
 
   // OTP handlers
   const handleSendOtp = async (data: EmailFormData) => {
@@ -202,8 +225,6 @@ export default function Auth() {
     });
   };
 
-  // handleSignup moved to MultiStepSignup component
-
   // Navigation helpers
   const goToMain = () => {
     setView("main");
@@ -230,19 +251,20 @@ export default function Auth() {
   // Signup success screen
   if (signupSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20 p-4">
-        <Card className="w-full max-w-md shadow-xl border-0 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="text-center space-y-4">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary">
-              <Cloud className="h-7 w-7 text-primary-foreground" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <Card className="relative w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
+          <CardHeader className="pt-10 pb-4 text-center space-y-6">
+            <BrandHeader />
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">Verifique seu email</CardTitle>
+              <CardDescription className="text-base leading-relaxed">
+                Enviamos um link de confirmação para o seu email. Clique no link para ativar sua conta.
+              </CardDescription>
             </div>
-            <CardTitle className="text-2xl font-display">Verifique seu email</CardTitle>
-            <CardDescription className="text-base">
-              Enviamos um link de confirmação para o seu email. Clique no link para ativar sua conta.
-            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button onClick={goToMain} className="w-full">
+          <CardContent className="px-8 pb-10">
+            <Button onClick={goToMain} className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
               Voltar para login
             </Button>
           </CardContent>
@@ -254,22 +276,22 @@ export default function Auth() {
   // OTP Verification screen
   if (view === "otp-verify") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20 p-4">
-        <Card className="w-full max-w-md shadow-xl border-0 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="text-center space-y-4">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary">
-              <Cloud className="h-7 w-7 text-primary-foreground" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl font-display">Digite o código</CardTitle>
-              <CardDescription className="mt-2">
-                Enviamos um código de 6 dígitos para {pendingEmail}
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <Card className="relative w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
+          <CardHeader className="pt-10 pb-4 text-center space-y-6">
+            <BrandHeader />
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">Digite o código</CardTitle>
+              <CardDescription className="text-sm">
+                Enviamos um código de 6 dígitos para<br />
+                <span className="font-medium text-foreground">{pendingEmail}</span>
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="px-8 pb-10 space-y-6">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="rounded-xl">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -277,20 +299,20 @@ export default function Auth() {
             <div className="space-y-6">
               <div className="flex justify-center">
                 <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
+                  <InputOTPGroup className="gap-2">
+                    <InputOTPSlot index={0} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
+                    <InputOTPSlot index={1} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
+                    <InputOTPSlot index={2} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
+                    <InputOTPSlot index={3} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
+                    <InputOTPSlot index={4} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
+                    <InputOTPSlot index={5} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
                   </InputOTPGroup>
                 </InputOTP>
               </div>
 
               <Button
                 type="button"
-                className="w-full"
+                className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
                 disabled={isLoading || otpValue.length !== 6}
                 onClick={handleVerifyOtp}
               >
@@ -298,21 +320,21 @@ export default function Auth() {
                 Verificar código
               </Button>
 
-              <div className="flex flex-col gap-2 text-center">
+              <div className="flex flex-col gap-3 text-center pt-2">
                 <button
                   type="button"
                   onClick={handleResendCode}
                   disabled={isLoading}
-                  className="text-sm text-primary hover:underline disabled:opacity-50"
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
                 >
                   Reenviar código
                 </button>
                 <button
                   type="button"
                   onClick={goToMain}
-                  className="text-sm text-muted-foreground hover:text-foreground"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Usar outro email
+                  ← Usar outro email
                 </button>
               </div>
             </div>
@@ -323,58 +345,78 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20 p-4">
-      <Card className={`w-full shadow-xl border-0 bg-card/80 backdrop-blur-sm ${
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
+      {/* Subtle pattern overlay */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+      
+      <Card className={`relative w-full rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm transition-all duration-300 ${
         view === "password-signup" ? "max-w-2xl" : "max-w-md"
       }`}>
-        <CardHeader className="text-center space-y-4">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary">
-            <Cloud className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <div>
-            <CardTitle className="text-2xl font-display">
-              {view === "main" && "Acesse sua conta"}
-              {view === "password-login" && "Login com senha"}
-              {view === "password-signup" && "Cadastro de Agente"}
-            </CardTitle>
-            <CardDescription className="mt-2">
-              {view === "main" && "Informe seu email para receber o código de acesso"}
-              {view === "password-login" && "Entre com seu email e senha"}
-              {view === "password-signup" && "Complete seu cadastro em poucos passos"}
-            </CardDescription>
-          </div>
+        <CardHeader className={`text-center space-y-6 ${view === "password-signup" ? "pt-8 pb-4" : "pt-10 pb-4"}`}>
+          <BrandHeader />
+          
+          {view !== "password-signup" && (
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">
+                {view === "main" && "Acesse sua conta"}
+                {view === "password-login" && "Login com senha"}
+              </CardTitle>
+              <CardDescription className="text-sm">
+                {view === "main" && "Informe seu email para receber o código de acesso"}
+                {view === "password-login" && "Entre com seu email e senha cadastrados"}
+              </CardDescription>
+            </div>
+          )}
+          
+          {view === "password-signup" && (
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">Cadastro de Agente</CardTitle>
+              <CardDescription className="text-sm">Complete seu cadastro em poucos passos</CardDescription>
+            </div>
+          )}
         </CardHeader>
-        <CardContent className="space-y-4">
+        
+        <CardContent className={`space-y-5 ${view === "password-signup" ? "px-6 pb-8" : "px-8 pb-10"}`}>
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="rounded-xl">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {/* Main OTP view */}
           {view === "main" && (
-            <>
+            <div className="space-y-5">
               <Form {...emailForm}>
-                <form onSubmit={emailForm.handleSubmit(handleSendOtp)} className="space-y-4">
+                <form onSubmit={emailForm.handleSubmit(handleSendOtp)} className="space-y-5">
                   <FormField
                     control={emailForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Email
+                        </FormLabel>
                         <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="seu@email.com"
-                            autoComplete="email"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              type="email"
+                              placeholder="seu@email.com"
+                              autoComplete="email"
+                              className="h-12 pl-11 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] transition-all" 
+                    disabled={isLoading}
+                  >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Mail className="mr-2 h-4 w-4" />
                     Enviar código por email
@@ -382,45 +424,51 @@ export default function Auth() {
                 </form>
               </Form>
 
-              <div className="relative">
+              <div className="relative py-2">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t border-muted-foreground/10" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">ou</span>
+                  <span className="bg-card px-4 text-muted-foreground/60 font-medium">ou</span>
                 </div>
               </div>
 
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full h-12 rounded-xl text-base font-medium border-muted-foreground/20 hover:bg-muted/50 hover:border-muted-foreground/30 transition-all"
                 onClick={switchToPassword}
               >
                 <KeyRound className="mr-2 h-4 w-4" />
                 Entrar com senha
               </Button>
-            </>
+            </div>
           )}
 
           {/* Password Login view */}
           {view === "password-login" && (
-            <>
+            <div className="space-y-5">
               <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-5">
                   <FormField
                     control={loginForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Email
+                        </FormLabel>
                         <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="seu@email.com"
-                            autoComplete="email"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              type="email"
+                              placeholder="seu@email.com"
+                              autoComplete="email"
+                              className="h-12 pl-11 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -431,20 +479,24 @@ export default function Auth() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Senha</FormLabel>
+                        <FormLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Senha
+                        </FormLabel>
                         <FormControl>
                           <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                               type={showPassword ? "text" : "password"}
                               placeholder="••••••••"
                               autoComplete="current-password"
+                              className="h-12 pl-11 pr-12 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
                               {...field}
                             />
                             <Button
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                              className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent"
                               onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? (
@@ -459,42 +511,46 @@ export default function Auth() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] transition-all" 
+                    disabled={isLoading}
+                  >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Entrar
                   </Button>
                 </form>
               </Form>
 
-              <div className="text-center space-y-2">
+              <div className="text-center">
                 <button
                   type="button"
                   onClick={() => setView("password-signup")}
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
                 >
-                  Não tem conta? Cadastre-se
+                  Não tem conta? <span className="underline underline-offset-4">Cadastre-se</span>
                 </button>
               </div>
 
-              <div className="relative">
+              <div className="relative py-2">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t border-muted-foreground/10" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">ou</span>
+                  <span className="bg-card px-4 text-muted-foreground/60 font-medium">ou</span>
                 </div>
               </div>
 
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full h-12 rounded-xl text-base font-medium border-muted-foreground/20 hover:bg-muted/50 hover:border-muted-foreground/30 transition-all"
                 onClick={switchToOtp}
               >
                 <Mail className="mr-2 h-4 w-4" />
                 Entrar com código por email
               </Button>
-            </>
+            </div>
           )}
 
           {/* Password Signup view - Now uses MultiStepSignup */}
@@ -505,6 +561,15 @@ export default function Auth() {
             />
           )}
         </CardContent>
+        
+        {/* Footer branding */}
+        {view !== "password-signup" && (
+          <div className="pb-6 text-center">
+            <p className="text-[10px] text-muted-foreground/50">
+              Desenvolvido por <span className="font-medium">Nobre Digital Hub</span>
+            </p>
+          </div>
+        )}
       </Card>
     </div>
   );
