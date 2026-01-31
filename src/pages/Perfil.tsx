@@ -12,6 +12,7 @@ import {
   Loader2,
   Save,
   X,
+  Image,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 
 const brazilianStates = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -42,6 +44,7 @@ interface ProfileData {
   phone: string | null;
   avatar_url: string | null;
   agency_name: string | null;
+  agency_logo_url: string | null;
   cnpj: string | null;
   street: string | null;
   address_number: string | null;
@@ -58,9 +61,11 @@ export default function Perfil() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [formData, setFormData] = useState<ProfileData | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -87,6 +92,7 @@ export default function Perfil() {
           phone: (data as any).phone || null,
           avatar_url: (data as any).avatar_url || null,
           agency_name: (data as any).agency_name || null,
+          agency_logo_url: (data as any).agency_logo_url || null,
           cnpj: (data as any).cnpj || null,
           street: (data as any).street || null,
           address_number: (data as any).address_number || null,
@@ -105,9 +111,12 @@ export default function Perfil() {
     fetchProfile();
   }, [user]);
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
+  const handleImageUpload = async (
+    file: File,
+    type: "avatar" | "logo",
+    setUploading: (v: boolean) => void
+  ) => {
+    if (!user) return;
 
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
@@ -128,11 +137,11 @@ export default function Perfil() {
       return;
     }
 
-    setUploadingAvatar(true);
+    setUploading(true);
 
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/avatar.${fileExt}`;
+      const fileName = `${user.id}/${type}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -144,32 +153,42 @@ export default function Perfil() {
         .from("avatars")
         .getPublicUrl(fileName);
 
-      const newAvatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      const newUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      const updateField = type === "avatar" ? "avatar_url" : "agency_logo_url";
 
-      // Update profile with new avatar URL
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: newAvatarUrl } as any)
+        .update({ [updateField]: newUrl } as any)
         .eq("user_id", user.id);
 
       if (updateError) throw updateError;
 
-      setProfile((prev) => prev ? { ...prev, avatar_url: newAvatarUrl } : null);
-      setFormData((prev) => prev ? { ...prev, avatar_url: newAvatarUrl } : null);
+      setProfile((prev) => prev ? { ...prev, [updateField]: newUrl } : null);
+      setFormData((prev) => prev ? { ...prev, [updateField]: newUrl } : null);
 
       toast({
-        title: "Foto atualizada!",
-        description: "Sua foto de perfil foi carregada com sucesso.",
+        title: type === "avatar" ? "Foto atualizada!" : "Logo atualizada!",
+        description: "Imagem carregada com sucesso.",
       });
     } catch (err: any) {
       toast({
-        title: "Erro ao carregar foto",
+        title: "Erro ao carregar imagem",
         description: err.message,
         variant: "destructive",
       });
     } finally {
-      setUploadingAvatar(false);
+      setUploading(false);
     }
+  };
+
+  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) handleImageUpload(file, "avatar", setUploadingAvatar);
+  };
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) handleImageUpload(file, "logo", setUploadingLogo);
   };
 
   const handleSave = async () => {
@@ -264,18 +283,6 @@ export default function Perfil() {
       .toUpperCase();
   };
 
-  const getFullAddress = () => {
-    const parts = [
-      profile?.street,
-      profile?.address_number,
-      profile?.neighborhood,
-      profile?.city,
-      profile?.state,
-      profile?.zip_code,
-    ].filter(Boolean);
-    return parts.length > 0 ? parts.join(", ") : "Não informado";
-  };
-
   if (loading) {
     return (
       <DashboardLayout>
@@ -284,9 +291,9 @@ export default function Perfil() {
             <Skeleton className="h-9 w-48" />
             <Skeleton className="h-5 w-64 mt-2" />
           </div>
-          <div className="grid gap-6 lg:grid-cols-3">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64 lg:col-span-2" />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Skeleton className="h-96" />
+            <Skeleton className="h-96" />
           </div>
         </div>
       </DashboardLayout>
@@ -306,101 +313,66 @@ export default function Perfil() {
             </p>
           </div>
           {!editing && (
-            <Button onClick={() => navigate("/onboarding")} variant="outline">
+            <Button onClick={() => setEditing(true)} variant="outline">
               <Edit className="mr-2 h-4 w-4" />
-              Editar completo
+              Editar dados
             </Button>
           )}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Profile Card */}
-          <Card className="lg:col-span-1 shadow-card">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Agent Profile Card */}
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5 text-primary" />
+                Perfil do Agente
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Avatar Section */}
+              <div className="flex items-center gap-4">
                 <div className="relative">
-                  <Avatar className="h-24 w-24">
+                  <Avatar className="h-20 w-20">
                     <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback className="text-2xl font-semibold gradient-primary text-primary-foreground">
+                    <AvatarFallback className="text-xl font-semibold gradient-primary text-primary-foreground">
                       {getInitials()}
                     </AvatarFallback>
                   </Avatar>
                   <Button
                     size="icon"
                     variant="secondary"
-                    className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
-                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full"
+                    onClick={() => avatarInputRef.current?.click()}
                     disabled={uploadingAvatar}
                   >
                     {uploadingAvatar ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3 w-3 animate-spin" />
                     ) : (
-                      <Camera className="h-4 w-4" />
+                      <Camera className="h-3 w-3" />
                     )}
                   </Button>
                 </div>
                 <input
-                  ref={fileInputRef}
+                  ref={avatarInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
                   onChange={handleAvatarUpload}
                 />
-                <h2 className="mt-4 font-display text-xl font-semibold text-foreground">
-                  {profile?.name || "Usuário"}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {profile?.agency_name || "Agência não informada"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {user?.email}
-                </p>
+                <div>
+                  <p className="font-semibold">{profile?.name || "Seu nome"}</p>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Foto de perfil (assinatura em documentos)
+                  </p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Info Card */}
-          <Card className="lg:col-span-2 shadow-card">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="font-display">
-                  {editing ? "Editando dados" : "Informações"}
-                </CardTitle>
-                {editing ? (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCancel}
-                      disabled={saving}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Cancelar
-                    </Button>
-                    <Button size="sm" onClick={handleSave} disabled={saving}>
-                      {saving ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="mr-2 h-4 w-4" />
-                      )}
-                      Salvar
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditing(true)}
-                  >
-                    <Edit className="mr-2 h-4 w-4" />
-                    Editar
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
+              <Separator />
+
               {editing && formData ? (
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Nome completo</Label>
                     <Input
@@ -424,6 +396,98 @@ export default function Perfil() {
                       placeholder="(00) 00000-0000"
                     />
                   </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Nome</p>
+                      <p className="font-medium">{profile?.name || "Não informado"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Mail className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">E-mail</p>
+                      <p className="font-medium">{user?.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Phone className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Telefone / WhatsApp</p>
+                      <p className="font-medium">{profile?.phone || "Não informado"}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Agency Profile Card */}
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                Perfil da Agência
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Logo Section */}
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="h-20 w-20 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center overflow-hidden bg-muted/50">
+                    {profile?.agency_logo_url ? (
+                      <img
+                        src={profile.agency_logo_url}
+                        alt="Logo da agência"
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <Image className="h-8 w-8 text-muted-foreground/50" />
+                    )}
+                  </div>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full"
+                    onClick={() => logoInputRef.current?.click()}
+                    disabled={uploadingLogo}
+                  >
+                    {uploadingLogo ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Camera className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                />
+                <div>
+                  <p className="font-semibold">{profile?.agency_name || "Nome da agência"}</p>
+                  <p className="text-sm text-muted-foreground">{profile?.cnpj || "CNPJ"}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Logo exibida no topo dos documentos
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {editing && formData ? (
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Nome da agência</Label>
                     <Input
@@ -439,92 +503,43 @@ export default function Perfil() {
                       placeholder="00.000.000/0000-00"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>CEP</Label>
-                    <Input
-                      value={formData.zip_code || ""}
-                      onChange={(e) => updateField("zip_code", formatCEP(e.target.value))}
-                      placeholder="00000-000"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Estado</Label>
-                    <Select
-                      value={formData.state || ""}
-                      onValueChange={(value) => updateField("state", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {brazilianStates.map((state) => (
-                          <SelectItem key={state} value={state}>
-                            {state}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Cidade</Label>
-                    <Input
-                      value={formData.city || ""}
-                      onChange={(e) => updateField("city", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Bairro</Label>
-                    <Input
-                      value={formData.neighborhood || ""}
-                      onChange={(e) => updateField("neighborhood", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Rua</Label>
-                    <Input
-                      value={formData.street || ""}
-                      onChange={(e) => updateField("street", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Número</Label>
-                    <Input
-                      value={formData.address_number || ""}
-                      onChange={(e) => updateField("address_number", e.target.value)}
-                    />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Estado</Label>
+                      <Select
+                        value={formData.state || ""}
+                        onValueChange={(value) => updateField("state", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="UF" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brazilianStates.map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Cidade</Label>
+                      <Input
+                        value={formData.city || ""}
+                        onChange={(e) => updateField("city", e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Mail className="h-5 w-5 text-primary" />
+                      <Building2 className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">E-mail</p>
-                      <p className="text-sm font-medium">{user?.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Phone className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Telefone</p>
-                      <p className="text-sm font-medium">
-                        {profile?.phone || "Não informado"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <User className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">CPF</p>
-                      <p className="text-sm font-medium">
-                        {profile?.cpf || "Não informado"}
-                      </p>
+                      <p className="text-sm text-muted-foreground">Agência</p>
+                      <p className="font-medium">{profile?.agency_name || "Não informado"}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -532,19 +547,21 @@ export default function Perfil() {
                       <Building2 className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">CNPJ</p>
-                      <p className="text-sm font-medium">
-                        {profile?.cnpj || "Não informado"}
-                      </p>
+                      <p className="text-sm text-muted-foreground">CNPJ</p>
+                      <p className="font-medium">{profile?.cnpj || "Não informado"}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 sm:col-span-2">
+                  <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                       <MapPin className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Endereço</p>
-                      <p className="text-sm font-medium">{getFullAddress()}</p>
+                      <p className="text-sm text-muted-foreground">Localização</p>
+                      <p className="font-medium">
+                        {profile?.city && profile?.state
+                          ? `${profile.city}, ${profile.state}`
+                          : "Não informado"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -552,6 +569,24 @@ export default function Perfil() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Save/Cancel buttons when editing */}
+        {editing && (
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={handleCancel} disabled={saving}>
+              <X className="mr-2 h-4 w-4" />
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              Salvar alterações
+            </Button>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
