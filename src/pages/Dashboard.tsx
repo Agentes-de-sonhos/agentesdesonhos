@@ -140,7 +140,7 @@ export default function Dashboard() {
         ) : (
           <>
             {/* 1. News Feed & Trade Updates - TOP */}
-            <div className="grid gap-6 lg:grid-cols-2">
+            <section className="grid gap-6 lg:grid-cols-2">
               {/* News Feed */}
               <div>
                 <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
@@ -149,7 +149,7 @@ export default function Dashboard() {
                 {news && news.length > 0 ? (
                   <NewsFeedCard news={news} />
                 ) : (
-                  <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+                  <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground shadow-card">
                     <p>Nenhuma notícia disponível</p>
                   </div>
                 )}
@@ -163,23 +163,14 @@ export default function Dashboard() {
                 {tradeUpdates && tradeUpdates.length > 0 ? (
                   <TradeUpdatesCard updates={tradeUpdates} />
                 ) : (
-                  <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+                  <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground shadow-card">
                     <p>Nenhuma novidade do trade disponível</p>
                   </div>
                 )}
               </div>
-            </div>
+            </section>
 
-            {/* 2. Próximas Viagens e Lembretes */}
-            <TripRemindersCard />
-
-            {/* 3. Próximos Eventos & Buscar Bloqueios */}
-            <div className="grid gap-6 lg:grid-cols-2">
-              <UpcomingEventsCard />
-              <FlightBlocksSearchCard />
-            </div>
-
-            {/* 4. Mapa do Turismo - Categories */}
+            {/* 2. Mapa do Turismo - Categories */}
             <section>
               <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                 Mapa do Turismo
@@ -187,7 +178,7 @@ export default function Dashboard() {
               <SupplierCategoriesCard />
             </section>
 
-            {/* 5. Ferramentas IA */}
+            {/* 3. Ferramentas IA */}
             <section>
               <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                 Ferramentas IA
@@ -222,10 +213,16 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* External Links */}
-            {suppliers && suppliers.length > 0 && (
-              <ExternalLinksCard title="Atalhos Rápidos" links={suppliers} />
-            )}
+            {/* 4. Próximas Viagens e Lembretes */}
+            <section>
+              <TripRemindersCard />
+            </section>
+
+            {/* 5. Próximos Eventos & Buscar Bloqueios - BOTTOM */}
+            <section className="grid gap-6 lg:grid-cols-2">
+              <UpcomingEventsCard />
+              <FlightBlocksSearchCard />
+            </section>
           </>
         )}
       </div>
