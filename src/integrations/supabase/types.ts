@@ -392,6 +392,42 @@ export type Database = {
           },
         ]
       }
+      learning_trails: {
+        Row: {
+          created_at: string
+          description: string | null
+          destination: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          destination: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          destination?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           category: string
@@ -911,6 +947,99 @@ export type Database = {
         }
         Relationships: []
       }
+      trail_trainings: {
+        Row: {
+          created_at: string
+          id: string
+          order_index: number
+          trail_id: string
+          training_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          trail_id: string
+          training_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          trail_id?: string
+          training_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_trainings_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trail_trainings_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          instructor: string | null
+          is_active: boolean
+          materials_url: string | null
+          order_index: number
+          scheduled_at: string | null
+          thumbnail_url: string | null
+          title: string
+          training_type: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          instructor?: string | null
+          is_active?: boolean
+          materials_url?: string | null
+          order_index?: number
+          scheduled_at?: string | null
+          thumbnail_url?: string | null
+          title: string
+          training_type?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          instructor?: string | null
+          is_active?: boolean
+          materials_url?: string | null
+          order_index?: number
+          scheduled_at?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          training_type?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       trip_reminders: {
         Row: {
           created_at: string
@@ -1038,6 +1167,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_certificates: {
+        Row: {
+          agent_name: string
+          certificate_number: string
+          created_at: string
+          id: string
+          issued_at: string
+          trail_id: string
+          user_id: string
+        }
+        Insert: {
+          agent_name: string
+          certificate_number: string
+          created_at?: string
+          id?: string
+          issued_at?: string
+          trail_id: string
+          user_id: string
+        }
+        Update: {
+          agent_name?: string
+          certificate_number?: string
+          created_at?: string
+          id?: string
+          issued_at?: string
+          trail_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_certificates_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1058,6 +1225,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_training_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          is_completed: boolean
+          training_id: string
+          updated_at: string
+          user_id: string
+          watched_minutes: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          training_id: string
+          updated_at?: string
+          user_id: string
+          watched_minutes?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          training_id?: string
+          updated_at?: string
+          user_id?: string
+          watched_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_training_progress_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

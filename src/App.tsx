@@ -26,6 +26,7 @@ import BloqueiosAereos from "./pages/BloqueiosAereos";
 import Agenda from "./pages/Agenda";
 import CRM from "./pages/CRM";
 import Financeiro from "./pages/Financeiro";
+import EducaAcademy from "./pages/EducaAcademy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -206,6 +207,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Financeiro />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/educa-academy"
+              element={
+                <ProtectedRoute>
+                  <EducaAcademy />
                 </ProtectedRoute>
               }
             />
