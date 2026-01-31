@@ -13,6 +13,7 @@ import {
   Ship,
   Car,
   Loader2,
+  Wallet,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
@@ -193,26 +194,26 @@ export default function Dashboard() {
                   description="Gere roteiros personalizados com IA"
                   icon={Route}
                   variant="primary"
-                  onClick={() => navigate("/ferramentas-ia")}
+                  onClick={() => navigate("/ferramentas-ia/criar-roteiro")}
                 />
                 <QuickActionCard
                   title="Criar Conteúdo"
                   description="Posts e descrições automatizados"
                   icon={FileText}
                   variant="accent"
-                  onClick={() => navigate("/ferramentas-ia")}
+                  onClick={() => navigate("/ferramentas-ia/criar-conteudo")}
                 />
                 <QuickActionCard
-                  title="Especialista em Destinos"
-                  description="Consulte informações detalhadas"
-                  icon={MapPin}
-                  onClick={() => navigate("/ferramentas-ia")}
-                />
-                <QuickActionCard
-                  title="Converter Orçamento"
-                  description="Transforme pedidos em propostas"
+                  title="Gerar Orçamento"
+                  description="Monte orçamentos profissionais"
                   icon={Calculator}
-                  onClick={() => navigate("/ferramentas-ia")}
+                  onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}
+                />
+                <QuickActionCard
+                  title="Trip Wallet"
+                  description="Organize vouchers e documentos"
+                  icon={Wallet}
+                  onClick={() => navigate("/ferramentas-ia/trip-wallet")}
                 />
               </div>
             </section>
