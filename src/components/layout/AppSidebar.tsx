@@ -14,6 +14,7 @@ import {
   Plane,
   Calendar,
   Users,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,11 @@ const baseMenuItems = [
     title: "CRM",
     url: "/crm",
     icon: Users,
+  },
+  {
+    title: "Financeiro",
+    url: "/financeiro",
+    icon: Wallet,
   },
   {
     title: "Mapa do Turismo",
