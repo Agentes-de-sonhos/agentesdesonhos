@@ -26,6 +26,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { FlightBlocksImporter } from "./FlightBlocksImporter";
 
 interface BlockForm {
   operator: string;
@@ -172,14 +173,16 @@ export function AdminFlightBlocksManager() {
               Adicione e gerencie bloqueios de passagens aéreas
             </CardDescription>
           </div>
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setForm(initialForm)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Bloqueio
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
+          <div className="flex gap-2">
+            <FlightBlocksImporter />
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => setForm(initialForm)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Bloqueio
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>
                   {editingId ? "Editar Bloqueio" : "Novo Bloqueio"}
@@ -272,7 +275,8 @@ export function AdminFlightBlocksManager() {
                 </DialogFooter>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
