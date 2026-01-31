@@ -305,15 +305,22 @@ export function AppSidebar() {
         </div>
 
         {/* Footer */}
-        {!collapsed && (
-          <div className="absolute bottom-4 left-4 right-4 animate-fade-in">
-            <div className="rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-4">
-              <p className="text-xs font-medium text-muted-foreground">
-                Produtividade para o trade turístico
+        <div className="absolute bottom-4 left-4 right-4 animate-fade-in">
+          {!collapsed ? (
+            <div className="text-center">
+              <p className="text-[10px] text-muted-foreground/60">
+                Desenvolvido por
+              </p>
+              <p className="text-[11px] font-medium text-muted-foreground/80">
+                Nobre Digital Hub
               </p>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center">
+              <p className="text-[8px] text-muted-foreground/60">NDH</p>
+            </div>
+          )}
+        </div>
       </aside>
 
       <UpgradeDialog
