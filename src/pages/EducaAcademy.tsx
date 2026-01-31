@@ -3,8 +3,6 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -20,20 +18,24 @@ import {
   Award,
   BookOpen,
   TrendingUp,
+  Lock,
 } from "lucide-react";
 import { useAcademy } from "@/hooks/useAcademy";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useSubscription } from "@/hooks/useSubscription";
 import { TrailCard } from "@/components/academy/TrailCard";
 import { TrailDetail } from "@/components/academy/TrailDetail";
 import { RankingBoard } from "@/components/academy/RankingBoard";
 import { MyCertificates } from "@/components/academy/MyCertificates";
 import { CertificatePDF } from "@/components/academy/CertificatePDF";
 import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
+import { FeatureGate } from "@/components/subscription/FeatureGate";
 import type { TrailWithProgress, UserCertificate, LearningTrail } from "@/types/academy";
 
 export default function EducaAcademy() {
   const { trailsWithProgress, certificates, isLoading } = useAcademy();
   const { isAdmin } = useUserRole();
+  const { hasFeature } = useSubscription();
   const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCertificate, setSelectedCertificate] = useState<{
@@ -65,6 +67,9 @@ export default function EducaAcademy() {
     }
   };
 
+  const canAccessCertificates = hasFeature("certificates");
+  const canAccessRanking = hasFeature("ranking");
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -90,10 +95,12 @@ export default function EducaAcademy() {
             <TabsTrigger value="ranking" className="flex items-center gap-2">
               <Trophy className="h-4 w-4" />
               Ranking
+              {!canAccessRanking && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
             <TabsTrigger value="certificates" className="flex items-center gap-2">
               <Award className="h-4 w-4" />
               Meus Certificados
+              {!canAccessCertificates && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="admin" className="flex items-center gap-2">
@@ -131,8 +138,8 @@ export default function EducaAcademy() {
                   <Card>
                     <CardContent className="pt-6">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-green-500/10">
-                          <Award className="h-6 w-6 text-green-500" />
+                        <div className="p-3 rounded-lg bg-primary/10">
+                          <Award className="h-6 w-6 text-primary" />
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Trilhas Concluídas</p>
@@ -145,8 +152,8 @@ export default function EducaAcademy() {
                   <Card>
                     <CardContent className="pt-6">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-blue-500/10">
-                          <TrendingUp className="h-6 w-6 text-blue-500" />
+                        <div className="p-3 rounded-lg bg-primary/10">
+                          <TrendingUp className="h-6 w-6 text-primary" />
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Progresso Geral</p>
@@ -159,8 +166,8 @@ export default function EducaAcademy() {
                   <Card>
                     <CardContent className="pt-6">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-yellow-500/10">
-                          <Trophy className="h-6 w-6 text-yellow-500" />
+                        <div className="p-3 rounded-lg bg-primary/10">
+                          <Trophy className="h-6 w-6 text-primary" />
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Certificados</p>
@@ -229,12 +236,16 @@ export default function EducaAcademy() {
 
           {/* Ranking Tab */}
           <TabsContent value="ranking">
-            <RankingBoard />
+            <FeatureGate feature="ranking">
+              <RankingBoard />
+            </FeatureGate>
           </TabsContent>
 
           {/* Certificates Tab */}
           <TabsContent value="certificates">
-            <MyCertificates onViewCertificate={handleViewCertificate} />
+            <FeatureGate feature="certificates">
+              <MyCertificates onViewCertificate={handleViewCertificate} />
+            </FeatureGate>
           </TabsContent>
 
           {/* Admin Tab */}

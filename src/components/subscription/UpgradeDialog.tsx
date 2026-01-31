@@ -1,0 +1,162 @@
+import { Check, Crown, Lock, Sparkles, Star } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { 
+  Feature, 
+  SubscriptionPlan, 
+  PLAN_LABELS, 
+  PLAN_DESCRIPTIONS,
+  PLAN_FEATURES,
+  FEATURE_LABELS,
+  REQUIRED_PLAN_FOR_FEATURE
+} from "@/types/subscription";
+import { useSubscription } from "@/hooks/useSubscription";
+
+interface UpgradeDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  requiredFeature?: Feature;
+  title?: string;
+  description?: string;
+}
+
+const PLAN_ICONS: Record<SubscriptionPlan, React.ReactNode> = {
+  essencial: <Star className="h-5 w-5" />,
+  profissional: <Sparkles className="h-5 w-5" />,
+  premium: <Crown className="h-5 w-5" />,
+};
+
+const PLAN_COLORS: Record<SubscriptionPlan, string> = {
+  essencial: "border-muted bg-card",
+  profissional: "border-primary/50 bg-primary/5",
+  premium: "border-amber-500 bg-amber-50 dark:bg-amber-950/20",
+};
+
+const PLAN_BADGE_COLORS: Record<SubscriptionPlan, string> = {
+  essencial: "bg-muted text-muted-foreground",
+  profissional: "bg-primary text-primary-foreground",
+  premium: "bg-gradient-to-r from-amber-500 to-orange-500 text-white",
+};
+
+const plans: SubscriptionPlan[] = ["essencial", "profissional", "premium"];
+
+export function UpgradeDialog({
+  open,
+  onOpenChange,
+  requiredFeature,
+  title,
+  description,
+}: UpgradeDialogProps) {
+  const { plan: currentPlan, getPlanLabel } = useSubscription();
+
+  const requiredPlan = requiredFeature 
+    ? REQUIRED_PLAN_FOR_FEATURE[requiredFeature] 
+    : undefined;
+
+  const dialogTitle = title || (requiredFeature 
+    ? `${FEATURE_LABELS[requiredFeature]} - Recurso Bloqueado`
+    : "Escolha seu Plano");
+
+  const dialogDescription = description || (requiredPlan
+    ? `Este recurso está disponível a partir do plano ${getPlanLabel(requiredPlan)}. Faça upgrade para desbloquear.`
+    : "Compare os planos e escolha o melhor para você.");
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <Lock className="h-5 w-5 text-muted-foreground" />
+            <DialogTitle>{dialogTitle}</DialogTitle>
+          </div>
+          <DialogDescription>{dialogDescription}</DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 md:grid-cols-3 mt-4">
+          {plans.map((planKey) => {
+            const isCurrentPlan = planKey === currentPlan;
+            const isPlanHigher = plans.indexOf(planKey) > plans.indexOf(currentPlan);
+            const isRequiredPlan = planKey === requiredPlan;
+            const features = PLAN_FEATURES[planKey];
+
+            return (
+              <div
+                key={planKey}
+                className={cn(
+                  "relative rounded-xl border-2 p-4 transition-all",
+                  PLAN_COLORS[planKey],
+                  isRequiredPlan && "ring-2 ring-primary ring-offset-2",
+                  isCurrentPlan && "border-primary"
+                )}
+              >
+                {isCurrentPlan && (
+                  <Badge className="absolute -top-2 left-4 bg-primary">
+                    Seu plano atual
+                  </Badge>
+                )}
+                {isRequiredPlan && !isCurrentPlan && (
+                  <Badge className="absolute -top-2 left-4 bg-amber-500">
+                    Recomendado
+                  </Badge>
+                )}
+
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={cn("p-2 rounded-lg", PLAN_BADGE_COLORS[planKey])}>
+                    {PLAN_ICONS[planKey]}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{PLAN_LABELS[planKey]}</h3>
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground mb-4">
+                  {PLAN_DESCRIPTIONS[planKey]}
+                </p>
+
+                <div className="space-y-2 mb-4">
+                  {features.slice(0, 6).map((feature) => (
+                    <div key={feature} className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span>{FEATURE_LABELS[feature]}</span>
+                    </div>
+                  ))}
+                  {features.length > 6 && (
+                    <p className="text-xs text-muted-foreground ml-6">
+                      +{features.length - 6} recursos adicionais
+                    </p>
+                  )}
+                </div>
+
+                <Button
+                  className="w-full"
+                  variant={isPlanHigher ? "default" : "outline"}
+                  disabled={isCurrentPlan || !isPlanHigher}
+                >
+                  {isCurrentPlan 
+                    ? "Plano Atual" 
+                    : isPlanHigher 
+                      ? "Fazer Upgrade" 
+                      : "Plano Inferior"}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+          <p className="text-sm text-muted-foreground text-center">
+            Entre em contato com nosso suporte para alterar seu plano ou saber mais sobre os benefícios de cada opção.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
