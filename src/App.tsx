@@ -28,6 +28,7 @@ import Agenda from "./pages/Agenda";
 import CRM from "./pages/CRM";
 import Financeiro from "./pages/Financeiro";
 import EducaAcademy from "./pages/EducaAcademy";
+import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -217,6 +218,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EducaAcademy />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/comunidade"
+              element={
+                <ProtectedRoute>
+                  <Community />
                 </ProtectedRoute>
               }
             />

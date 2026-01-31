@@ -19,6 +19,7 @@ import {
   Lock,
   Calculator,
   DollarSign,
+  Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,12 @@ const baseMenuItems: MenuItem[] = [
     title: "Educa Travel Academy",
     url: "/educa-academy",
     icon: GraduationCap,
+  },
+  {
+    title: "Comunidade",
+    url: "/comunidade",
+    icon: Heart,
+    requiredFeature: "community",
   },
   {
     title: "Mapa do Turismo",
