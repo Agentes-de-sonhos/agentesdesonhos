@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
   Sparkles,
   Map,
   Newspaper,
@@ -18,11 +17,12 @@ import {
   GraduationCap,
   Lock,
   Calculator,
-  DollarSign,
   Heart,
+  Crown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -42,29 +42,8 @@ interface MenuItem {
   requiredFeature?: Feature;
 }
 
-// Main menu items (unlocked features first)
-const baseMenuItems: MenuItem[] = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "CRM",
-    url: "/crm",
-    icon: Users,
-    requiredFeature: "crm_basic",
-  },
-  {
-    title: "Financeiro",
-    url: "/financeiro",
-    icon: DollarSign,
-  },
-  {
-    title: "Educa Travel Academy",
-    url: "/educa-academy",
-    icon: GraduationCap,
-  },
+// Main menu items - first section
+const mainMenuItems: MenuItem[] = [
   {
     title: "Mapa do Turismo",
     url: "/mapa-turismo",
@@ -72,15 +51,20 @@ const baseMenuItems: MenuItem[] = [
     requiredFeature: "tourism_map",
   },
   {
-    title: "Bloqueios Aéreos",
-    url: "/bloqueios-aereos",
-    icon: Plane,
+    title: "EducaTravel Academy",
+    url: "/educa-academy",
+    icon: GraduationCap,
   },
   {
     title: "Materiais de Divulgação",
     url: "/materiais",
     icon: FileText,
     requiredFeature: "materials",
+  },
+  {
+    title: "Bloqueios Aéreos",
+    url: "/bloqueios-aereos",
+    icon: Plane,
   },
   {
     title: "Agenda",
@@ -96,7 +80,22 @@ const baseMenuItems: MenuItem[] = [
   },
 ];
 
-// Premium features shown at bottom with lock
+// Secondary menu items - after separator
+const secondaryMenuItems: MenuItem[] = [
+  {
+    title: "CRM",
+    url: "/crm",
+    icon: Users,
+    requiredFeature: "crm_basic",
+  },
+  {
+    title: "Financeiro",
+    url: "/financeiro",
+    icon: Wallet,
+  },
+];
+
+// Premium features section
 const premiumMenuItems: MenuItem[] = [
   {
     title: "Gerar Orçamento",
@@ -143,10 +142,6 @@ export function AppSidebar() {
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
-
-  const mainMenuItems = isAdmin 
-    ? [adminMenuItem, ...baseMenuItems] 
-    : baseMenuItems;
 
   const handleMenuClick = (item: MenuItem, e: React.MouseEvent) => {
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
@@ -218,12 +213,12 @@ export function AppSidebar() {
     <TooltipProvider delayDuration={300}>
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300",
+          "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 flex flex-col",
           collapsed ? "w-16" : "w-64"
         )}
       >
         {/* Header */}
-        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">
           <Link to="/dashboard" className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
               <Cloud className="h-5 w-5 text-primary-foreground" />
@@ -251,46 +246,76 @@ export function AppSidebar() {
           </Button>
         </div>
 
-        {/* Main Navigation */}
-        <nav className="flex flex-col gap-1 p-3">
-          {mainMenuItems.map((item) => renderMenuItem(item, false))}
-        </nav>
-
-        {/* Premium Features Section */}
-        <div className="px-3">
-          {!collapsed && (
-            <div className="mb-2 px-3 pt-2">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-                Recursos Premium
-              </p>
-            </div>
+        {/* Scrollable Navigation */}
+        <div className="flex-1 overflow-y-auto py-3">
+          {/* Admin menu item if admin */}
+          {isAdmin && (
+            <nav className="flex flex-col gap-1 px-3 mb-2">
+              {renderMenuItem(adminMenuItem, false)}
+            </nav>
           )}
-          <nav className="flex flex-col gap-1">
-            {premiumMenuItems.map((item) => renderMenuItem(item, true))}
+
+          {/* Main Navigation */}
+          <nav className="flex flex-col gap-1 px-3">
+            {mainMenuItems.map((item) => renderMenuItem(item, false))}
           </nav>
-        </div>
 
-        {/* Profile */}
-        <div className="px-3 mt-2">
-          {renderMenuItem(profileMenuItem, false)}
-        </div>
-
-        {/* Plan Badge */}
-        {!collapsed && (
-          <div className="absolute bottom-28 left-3 right-3">
-            <div className={cn(
-              "rounded-lg p-2 text-center text-xs font-medium",
-              plan === "premium" && "bg-warning/10 text-warning",
-              plan === "profissional" && "bg-primary/10 text-primary",
-              plan === "essencial" && "bg-muted text-muted-foreground"
-            )}>
-              Plano {plan.charAt(0).toUpperCase() + plan.slice(1)}
-            </div>
+          {/* Visual Separator */}
+          <div className="px-3 py-3">
+            <Separator className="bg-sidebar-border" />
           </div>
-        )}
 
-        {/* Logout Button */}
-        <div className="absolute bottom-20 left-3 right-3">
+          {/* Secondary Navigation (CRM, Financeiro) */}
+          <nav className="flex flex-col gap-1 px-3">
+            {secondaryMenuItems.map((item) => renderMenuItem(item, false))}
+          </nav>
+
+          {/* Premium Features Section */}
+          <div className="px-3 mt-4">
+            {!collapsed && (
+              <div className="mb-2 px-3 pt-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                  Recursos Premium
+                </p>
+              </div>
+            )}
+            <nav className="flex flex-col gap-1">
+              {premiumMenuItems.map((item) => renderMenuItem(item, true))}
+            </nav>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="flex-shrink-0 border-t border-sidebar-border p-3 space-y-2">
+          {/* Profile */}
+          {renderMenuItem(profileMenuItem, false)}
+
+          {/* Plan Badge */}
+          <div className={cn(
+            "rounded-lg p-2.5 flex items-center gap-2 transition-colors",
+            plan === "premium" && "bg-gradient-to-r from-warning/20 to-warning/10 border border-warning/30",
+            plan === "profissional" && "bg-primary/10 border border-primary/20",
+            plan === "essencial" && "bg-muted border border-border"
+          )}>
+            <Crown className={cn(
+              "h-4 w-4 flex-shrink-0",
+              plan === "premium" && "text-warning",
+              plan === "profissional" && "text-primary",
+              plan === "essencial" && "text-muted-foreground"
+            )} />
+            {!collapsed && (
+              <span className={cn(
+                "text-xs font-medium",
+                plan === "premium" && "text-warning",
+                plan === "profissional" && "text-primary",
+                plan === "essencial" && "text-muted-foreground"
+              )}>
+                Plano {plan.charAt(0).toUpperCase() + plan.slice(1)}
+              </span>
+            )}
+          </div>
+
+          {/* Logout Button */}
           <Button
             variant="ghost"
             className={cn(
@@ -302,12 +327,10 @@ export function AppSidebar() {
             <LogOut className="h-5 w-5 flex-shrink-0" />
             {!collapsed && <span>Sair</span>}
           </Button>
-        </div>
 
-        {/* Footer */}
-        <div className="absolute bottom-4 left-4 right-4 animate-fade-in">
+          {/* Footer */}
           {!collapsed ? (
-            <div className="text-center">
+            <div className="text-center pt-2">
               <p className="text-[10px] text-muted-foreground/60">
                 Desenvolvido por
               </p>
@@ -316,7 +339,7 @@ export function AppSidebar() {
               </p>
             </div>
           ) : (
-            <div className="text-center">
+            <div className="text-center pt-2">
               <p className="text-[8px] text-muted-foreground/60">NDH</p>
             </div>
           )}
