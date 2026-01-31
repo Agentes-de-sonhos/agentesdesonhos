@@ -25,6 +25,7 @@ import Materiais from "./pages/Materiais";
 import BloqueiosAereos from "./pages/BloqueiosAereos";
 import Agenda from "./pages/Agenda";
 import CRM from "./pages/CRM";
+import Financeiro from "./pages/Financeiro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -197,6 +198,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CRM />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/financeiro"
+              element={
+                <ProtectedRoute>
+                  <Financeiro />
                 </ProtectedRoute>
               }
             />

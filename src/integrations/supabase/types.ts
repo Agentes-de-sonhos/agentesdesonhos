@@ -98,6 +98,42 @@ export type Database = {
         }
         Relationships: []
       }
+      expense_entries: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string
+          entry_date: string
+          id: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description: string
+          entry_date?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string
+          entry_date?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       flight_blocks: {
         Row: {
           airline: string
@@ -178,6 +214,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      income_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          entry_date: string
+          id: string
+          notes: string | null
+          payment_method: string
+          sale_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          entry_date?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          sale_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          entry_date?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          sale_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "income_entries_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       itineraries: {
         Row: {
@@ -631,6 +711,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      sales: {
+        Row: {
+          client_name: string
+          created_at: string
+          destination: string
+          id: string
+          notes: string | null
+          opportunity_id: string | null
+          sale_amount: number
+          sale_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          destination: string
+          id?: string
+          notes?: string | null
+          opportunity_id?: string | null
+          sale_amount?: number
+          sale_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          destination?: string
+          id?: string
+          notes?: string | null
+          opportunity_id?: string | null
+          sale_amount?: number
+          sale_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supplier_contacts: {
         Row: {
