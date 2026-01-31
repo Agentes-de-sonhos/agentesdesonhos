@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MultiStepSignup } from "@/components/auth/MultiStepSignup";
 import {
   Form,
   FormControl,
@@ -35,15 +36,8 @@ const loginSchema = z.object({
   password: z.string().min(6, { message: "Senha deve ter no mínimo 6 caracteres" }),
 });
 
-const signupSchema = z.object({
-  name: z.string().trim().min(2, { message: "Nome deve ter no mínimo 2 caracteres" }).max(100),
-  email: z.string().trim().email({ message: "Email inválido" }),
-  password: z.string().min(6, { message: "Senha deve ter no mínimo 6 caracteres" }),
-});
-
 type EmailFormData = z.infer<typeof emailSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
-type SignupFormData = z.infer<typeof signupSchema>;
 
 type AuthMethod = "otp" | "password";
 type AuthView = "main" | "otp-verify" | "password-login" | "password-signup";
@@ -117,10 +111,7 @@ export default function Auth() {
     defaultValues: { email: "", password: "" },
   });
 
-  const signupForm = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: { name: "", email: "", password: "" },
-  });
+  // signupForm moved to MultiStepSignup component
 
   // OTP handlers
   const handleSendOtp = async (data: EmailFormData) => {
@@ -211,27 +202,7 @@ export default function Auth() {
     });
   };
 
-  const handleSignup = async (data: SignupFormData) => {
-    setError(null);
-    setIsLoading(true);
-    const { error } = await signUp(data.email, data.password, data.name);
-    setIsLoading(false);
-
-    if (error) {
-      if (error.message.includes("User already registered")) {
-        setError("Este email já está cadastrado");
-      } else {
-        setError(error.message);
-      }
-      return;
-    }
-
-    setSignupSuccess(true);
-    toast({
-      title: "Cadastro realizado!",
-      description: "Verifique seu email para confirmar a conta.",
-    });
-  };
+  // handleSignup moved to MultiStepSignup component
 
   // Navigation helpers
   const goToMain = () => {
@@ -241,7 +212,6 @@ export default function Auth() {
     setPendingEmail("");
     setSignupSuccess(false);
     loginForm.reset();
-    signupForm.reset();
     emailForm.reset();
   };
 
@@ -354,7 +324,9 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20 p-4">
-      <Card className="w-full max-w-md shadow-xl border-0 bg-card/80 backdrop-blur-sm">
+      <Card className={`w-full shadow-xl border-0 bg-card/80 backdrop-blur-sm ${
+        view === "password-signup" ? "max-w-2xl" : "max-w-md"
+      }`}>
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary">
             <Cloud className="h-7 w-7 text-primary-foreground" />
@@ -363,12 +335,12 @@ export default function Auth() {
             <CardTitle className="text-2xl font-display">
               {view === "main" && "Acesse sua conta"}
               {view === "password-login" && "Login com senha"}
-              {view === "password-signup" && "Criar conta"}
+              {view === "password-signup" && "Cadastro de Agente"}
             </CardTitle>
             <CardDescription className="mt-2">
               {view === "main" && "Informe seu email para receber o código de acesso"}
               {view === "password-login" && "Entre com seu email e senha"}
-              {view === "password-signup" && "Preencha os dados para criar sua conta"}
+              {view === "password-signup" && "Complete seu cadastro em poucos passos"}
             </CardDescription>
           </div>
         </CardHeader>
@@ -525,111 +497,12 @@ export default function Auth() {
             </>
           )}
 
-          {/* Password Signup view */}
+          {/* Password Signup view - Now uses MultiStepSignup */}
           {view === "password-signup" && (
-            <>
-              <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="signup-name" className="text-sm font-medium leading-none">
-                    Nome completo
-                  </label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Seu nome"
-                    autoComplete="name"
-                    {...signupForm.register("name")}
-                  />
-                  {signupForm.formState.errors.name && (
-                    <p className="text-sm font-medium text-destructive">
-                      {signupForm.formState.errors.name.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="signup-email" className="text-sm font-medium leading-none">
-                    Email
-                  </label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    autoComplete="email"
-                    {...signupForm.register("email")}
-                  />
-                  {signupForm.formState.errors.email && (
-                    <p className="text-sm font-medium text-destructive">
-                      {signupForm.formState.errors.email.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="signup-password" className="text-sm font-medium leading-none">
-                    Senha
-                  </label>
-                  <div className="relative">
-                    <Input
-                      id="signup-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      autoComplete="new-password"
-                      {...signupForm.register("password")}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
-                  </div>
-                  {signupForm.formState.errors.password && (
-                    <p className="text-sm font-medium text-destructive">
-                      {signupForm.formState.errors.password.message}
-                    </p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Criar conta
-                </Button>
-              </form>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setView("password-login")}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Já tem conta? Faça login
-                </button>
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">ou</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={switchToOtp}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Entrar com código por email
-              </Button>
-            </>
+            <MultiStepSignup
+              onComplete={() => setSignupSuccess(true)}
+              onCancel={() => setView("password-login")}
+            />
           )}
         </CardContent>
       </Card>
