@@ -15,6 +15,7 @@ import {
   Calendar,
   Users,
   Wallet,
+  GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,11 @@ const baseMenuItems = [
     title: "Financeiro",
     url: "/financeiro",
     icon: Wallet,
+  },
+  {
+    title: "Educa Academy",
+    url: "/educa-academy",
+    icon: GraduationCap,
   },
   {
     title: "Mapa do Turismo",
