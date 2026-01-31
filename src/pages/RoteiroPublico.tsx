@@ -241,6 +241,12 @@ export default function RoteiroPublico() {
         {/* Footer */}
         <div className="mt-12 text-center text-sm text-muted-foreground">
           <p>Roteiro criado com ❤️ por Agentes de Sonhos</p>
+          <p className="mt-4 text-xs text-muted-foreground/60">
+            Desenvolvido por{" "}
+            <span className="font-medium text-muted-foreground/80">
+              Nobre Digital Hub
+            </span>
+          </p>
         </div>
       </div>
     </div>
