@@ -59,18 +59,11 @@ const baseMenuItems: MenuItem[] = [
     title: "Financeiro",
     url: "/financeiro",
     icon: DollarSign,
-    requiredFeature: "financial",
   },
   {
     title: "Educa Travel Academy",
     url: "/educa-academy",
     icon: GraduationCap,
-  },
-  {
-    title: "Comunidade",
-    url: "/comunidade",
-    icon: Heart,
-    requiredFeature: "community",
   },
   {
     title: "Mapa do Turismo",
@@ -122,6 +115,12 @@ const premiumMenuItems: MenuItem[] = [
     url: "/ferramentas-ia",
     icon: Sparkles,
     requiredFeature: "ai_tools",
+  },
+  {
+    title: "Comunidade",
+    url: "/comunidade",
+    icon: Heart,
+    requiredFeature: "community",
   },
 ];
 
