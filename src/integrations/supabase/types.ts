@@ -50,6 +50,77 @@ export type Database = {
         }
         Relationships: []
       }
+      community_highlights: {
+        Row: {
+          contribution_summary: string
+          created_at: string
+          id: string
+          is_winner: boolean
+          month: number
+          updated_at: string
+          user_id: string
+          vote_count: number
+          year: number
+        }
+        Insert: {
+          contribution_summary: string
+          created_at?: string
+          id?: string
+          is_winner?: boolean
+          month: number
+          updated_at?: string
+          user_id: string
+          vote_count?: number
+          year: number
+        }
+        Update: {
+          contribution_summary?: string
+          created_at?: string
+          id?: string
+          is_winner?: boolean
+          month?: number
+          updated_at?: string
+          user_id?: string
+          vote_count?: number
+          year?: number
+        }
+        Relationships: []
+      }
+      community_votes: {
+        Row: {
+          created_at: string
+          highlight_id: string
+          id: string
+          month: number
+          voter_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          highlight_id: string
+          id?: string
+          month: number
+          voter_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          highlight_id?: string
+          id?: string
+          month?: number
+          voter_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_votes_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "community_highlights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_payments: {
         Row: {
           amount: number
@@ -217,6 +288,48 @@ export type Database = {
         }
         Relationships: []
       }
+      fun_trips: {
+        Row: {
+          available_spots: number
+          created_at: string
+          description: string | null
+          destination: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          partner_company: string
+          registration_url: string | null
+          trip_date: string
+          updated_at: string
+        }
+        Insert: {
+          available_spots?: number
+          created_at?: string
+          description?: string | null
+          destination: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          partner_company: string
+          registration_url?: string | null
+          trip_date: string
+          updated_at?: string
+        }
+        Update: {
+          available_spots?: number
+          created_at?: string
+          description?: string | null
+          destination?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          partner_company?: string
+          registration_url?: string | null
+          trip_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generated_content: {
         Row: {
           content_type: string
@@ -256,6 +369,45 @@ export type Database = {
           original_file_url?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      in_person_events: {
+        Row: {
+          city: string
+          created_at: string
+          event_date: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          location: string
+          registration_url: string | null
+          theme: string
+          updated_at: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          event_date: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location: string
+          registration_url?: string | null
+          theme: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          event_date?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string
+          registration_url?: string | null
+          theme?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -525,6 +677,39 @@ export type Database = {
           },
         ]
       }
+      monthly_prizes: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          month: number
+          prize_description: string | null
+          prize_image_url: string | null
+          prize_name: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          month: number
+          prize_description?: string | null
+          prize_image_url?: string | null
+          prize_name: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          month?: number
+          prize_description?: string | null
+          prize_image_url?: string | null
+          prize_name?: string
+          year?: number
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           category: string
@@ -555,6 +740,42 @@ export type Database = {
           title?: string
           updated_at?: string
           url?: string
+        }
+        Relationships: []
+      }
+      online_meetings: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_past: boolean
+          meeting_datetime: string
+          meeting_url: string | null
+          recording_url: string | null
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_past?: boolean
+          meeting_datetime: string
+          meeting_url?: string | null
+          recording_url?: string | null
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_past?: boolean
+          meeting_datetime?: string
+          meeting_url?: string | null
+          recording_url?: string | null
+          topic?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -645,6 +866,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      paid_trainings: {
+        Row: {
+          apply_url: string | null
+          compensation: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          partner_company: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          apply_url?: string | null
+          compensation: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          partner_company: string
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          apply_url?: string | null
+          compensation?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          partner_company?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      professional_workshops: {
+        Row: {
+          category: Database["public"]["Enums"]["workshop_category"]
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          instructor: string | null
+          is_active: boolean
+          materials_url: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["workshop_category"]
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          instructor?: string | null
+          is_active?: boolean
+          materials_url?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["workshop_category"]
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          instructor?: string | null
+          is_active?: boolean
+          materials_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1466,6 +1768,33 @@ export type Database = {
           },
         ]
       }
+      whatsapp_community: {
+        Row: {
+          benefits: string[] | null
+          id: string
+          invite_url: string
+          is_active: boolean
+          rules: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          benefits?: string[] | null
+          id?: string
+          invite_url: string
+          is_active?: boolean
+          rules?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          benefits?: string[] | null
+          id?: string
+          invite_url?: string
+          is_active?: boolean
+          rules?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1492,10 +1821,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_voted_this_month: {
+        Args: { _month: number; _user_id: string; _year: number }
+        Returns: boolean
+      }
+      has_won_this_year: {
+        Args: { _user_id: string; _year: number }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "agente"
       subscription_plan: "essencial" | "profissional" | "premium"
+      workshop_category:
+        | "contabilidade"
+        | "tributaria"
+        | "impostos"
+        | "juridico"
+        | "gestao"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1625,6 +1968,13 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "agente"],
       subscription_plan: ["essencial", "profissional", "premium"],
+      workshop_category: [
+        "contabilidade",
+        "tributaria",
+        "impostos",
+        "juridico",
+        "gestao",
+      ],
     },
   },
 } as const

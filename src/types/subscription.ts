@@ -28,6 +28,7 @@ export type Feature =
   | 'reminders'
   | 'financial'
   | 'trainings_live'
+  | 'community'
   // Premium features
   | 'ai_unlimited'
   | 'trails_premium'
@@ -58,6 +59,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'reminders',
     'financial',
     'trainings_live',
+    'community',
   ],
   premium: [
     'news',
@@ -72,6 +74,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'reminders',
     'financial',
     'trainings_live',
+    'community',
     'ai_unlimited',
     'trails_premium',
     'certificates',
@@ -112,6 +115,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   reminders: 'Lembretes Automáticos',
   financial: 'Módulo Financeiro',
   trainings_live: 'Treinamentos ao Vivo',
+  community: 'Comunidade',
   ai_unlimited: 'IA Ilimitada',
   trails_premium: 'Trilhas Premium',
   certificates: 'Certificados',
@@ -133,6 +137,7 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   reminders: 'profissional',
   financial: 'profissional',
   trainings_live: 'profissional',
+  community: 'profissional',
   ai_unlimited: 'premium',
   trails_premium: 'premium',
   certificates: 'premium',
