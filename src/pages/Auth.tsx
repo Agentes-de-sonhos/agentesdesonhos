@@ -72,9 +72,20 @@ export default function Auth() {
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const navigate = useNavigate();
-  const { sendOtp, verifyOtp, signIn, signUp, user, isNewUser, setIsNewUser } = useAuth();
+  const { sendOtp, verifyOtp, signIn, user, loading: authLoading, isNewUser } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
+
+  // All useForm hooks MUST be called before any early returns
+  const emailForm = useForm<EmailFormData>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: { email: "" },
+  });
+
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
   // Redirect authenticated users away from auth page
   useEffect(() => {
@@ -95,8 +106,6 @@ export default function Auth() {
   }, [user, role, roleLoading, isNewUser, navigate]);
 
   // Show loading while checking auth state
-  const { loading: authLoading } = useAuth();
-  
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
@@ -125,16 +134,6 @@ export default function Auth() {
       </div>
     );
   }
-
-  const emailForm = useForm<EmailFormData>({
-    resolver: zodResolver(emailSchema),
-    defaultValues: { email: "" },
-  });
-
-  const loginForm = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
-  });
 
   // OTP handlers
   const handleSendOtp = async (data: EmailFormData) => {
