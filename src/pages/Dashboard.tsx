@@ -23,6 +23,7 @@ import { TradeUpdatesCard } from "@/components/dashboard/TradeUpdatesCard";
 import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
 import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
 import { FlightBlocksSearchCard } from "@/components/dashboard/FlightBlocksSearchCard";
+import { TripRemindersCard } from "@/components/dashboard/TripRemindersCard";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
 
@@ -169,13 +170,16 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* 2. Próximos Eventos & Buscar Bloqueios */}
+            {/* 2. Próximas Viagens e Lembretes */}
+            <TripRemindersCard />
+
+            {/* 3. Próximos Eventos & Buscar Bloqueios */}
             <div className="grid gap-6 lg:grid-cols-2">
               <UpcomingEventsCard />
               <FlightBlocksSearchCard />
             </div>
 
-            {/* 3. Mapa do Turismo - Categories */}
+            {/* 4. Mapa do Turismo - Categories */}
             <section>
               <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                 Mapa do Turismo
@@ -183,7 +187,7 @@ export default function Dashboard() {
               <SupplierCategoriesCard />
             </section>
 
-            {/* 4. Ferramentas IA */}
+            {/* 5. Ferramentas IA */}
             <section>
               <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                 Ferramentas IA

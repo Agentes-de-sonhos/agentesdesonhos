@@ -784,6 +784,50 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_reminders: {
+        Row: {
+          created_at: string
+          days_before: number
+          follow_up_note: string | null
+          id: string
+          is_completed: boolean
+          reminder_date: string
+          trip_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days_before: number
+          follow_up_note?: string | null
+          id?: string
+          is_completed?: boolean
+          reminder_date: string
+          trip_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days_before?: number
+          follow_up_note?: string | null
+          id?: string
+          is_completed?: boolean
+          reminder_date?: string
+          trip_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_reminders_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_services: {
         Row: {
           created_at: string
