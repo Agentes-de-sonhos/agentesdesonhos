@@ -310,6 +310,7 @@ export type Database = {
           destination: string
           end_date: string
           id: string
+          share_expires_at: string | null
           share_token: string | null
           start_date: string
           status: string
@@ -324,6 +325,7 @@ export type Database = {
           destination: string
           end_date: string
           id?: string
+          share_expires_at?: string | null
           share_token?: string | null
           start_date: string
           status?: string
@@ -338,6 +340,7 @@ export type Database = {
           destination?: string
           end_date?: string
           id?: string
+          share_expires_at?: string | null
           share_token?: string | null
           start_date?: string
           status?: string
@@ -753,6 +756,7 @@ export type Database = {
           destination: string
           end_date: string
           id: string
+          share_expires_at: string | null
           share_token: string | null
           start_date: string
           status: string
@@ -768,6 +772,7 @@ export type Database = {
           destination: string
           end_date: string
           id?: string
+          share_expires_at?: string | null
           share_token?: string | null
           start_date: string
           status?: string
@@ -783,6 +788,7 @@ export type Database = {
           destination?: string
           end_date?: string
           id?: string
+          share_expires_at?: string | null
           share_token?: string | null
           start_date?: string
           status?: string
@@ -1325,6 +1331,7 @@ export type Database = {
           destination: string
           end_date: string
           id: string
+          share_expires_at: string | null
           share_token: string | null
           start_date: string
           status: string
@@ -1337,6 +1344,7 @@ export type Database = {
           destination: string
           end_date: string
           id?: string
+          share_expires_at?: string | null
           share_token?: string | null
           start_date: string
           status?: string
@@ -1349,6 +1357,7 @@ export type Database = {
           destination?: string
           end_date?: string
           id?: string
+          share_expires_at?: string | null
           share_token?: string | null
           start_date?: string
           status?: string
@@ -1463,6 +1472,7 @@ export type Database = {
     }
     Functions: {
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
+      generate_secure_share_token: { Args: never; Returns: string }
       get_user_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["subscription_plan"]

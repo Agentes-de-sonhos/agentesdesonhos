@@ -171,7 +171,12 @@ export default function CriarRoteiro() {
   };
 
   const handlePublish = async (itineraryId: string) => {
-    const shareToken = crypto.randomUUID().slice(0, 8);
+    // Generate cryptographically secure 32-character hex token
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    const shareToken = Array.from(array)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
 
     await updateItineraryStatus.mutateAsync({
       itineraryId,
