@@ -13,6 +13,7 @@ import {
   FileText,
   Plane,
   Calendar,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,11 @@ const baseMenuItems = [
     title: "Ferramentas IA",
     url: "/ferramentas-ia",
     icon: Sparkles,
+  },
+  {
+    title: "CRM",
+    url: "/crm",
+    icon: Users,
   },
   {
     title: "Mapa do Turismo",

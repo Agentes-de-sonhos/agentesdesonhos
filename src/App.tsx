@@ -24,6 +24,7 @@ import Auth from "./pages/Auth";
 import Materiais from "./pages/Materiais";
 import BloqueiosAereos from "./pages/BloqueiosAereos";
 import Agenda from "./pages/Agenda";
+import CRM from "./pages/CRM";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -188,6 +189,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Onboarding />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/crm"
+              element={
+                <ProtectedRoute>
+                  <CRM />
                 </ProtectedRoute>
               }
             />
