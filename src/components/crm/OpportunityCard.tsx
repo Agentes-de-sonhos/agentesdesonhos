@@ -122,7 +122,7 @@ export function OpportunityCard({ opportunity, onDragStart }: OpportunityCardPro
                 </DropdownMenuItem>
                 {opportunity.stage === "closed" && (
                   <DropdownMenuItem onClick={handleCreateTripWallet}>
-                    <Wallet className="mr-2 h-4 w-4" /> Criar Trip Wallet
+                    <Wallet className="mr-2 h-4 w-4" /> Criar Carteira Digital
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />

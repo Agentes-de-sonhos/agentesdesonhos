@@ -205,8 +205,8 @@ export default function Dashboard() {
                   onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}
                 />
                 <QuickActionCard
-                  title="Trip Wallet"
-                  description="Organize vouchers e documentos"
+                  title="Carteira Digital"
+                  description="Organize vouchers, documentos e serviços da viagem"
                   icon={Wallet}
                   onClick={() => navigate("/ferramentas-ia/trip-wallet")}
                 />

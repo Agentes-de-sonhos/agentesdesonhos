@@ -93,7 +93,7 @@ export function TripRemindersCard() {
             <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>Nenhum lembrete pendente</p>
             <p className="text-sm mt-1">
-              Cadastre viagens no Trip Wallet para receber lembretes automáticos
+              Cadastre viagens na Carteira Digital para receber lembretes automáticos
             </p>
           </div>
         </CardContent>

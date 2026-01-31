@@ -64,7 +64,7 @@ export default function ViagemPublica() {
             <Wallet className="h-8 w-8 text-primary" />
           </div>
           <h1 className="font-display text-3xl font-bold text-primary mb-2">
-            Trip Wallet
+            Carteira Digital
           </h1>
           <p className="text-muted-foreground">
             Organizador de Viagem

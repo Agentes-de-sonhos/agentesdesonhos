@@ -76,7 +76,7 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
     return `
       <div style="text-align: center; margin-bottom: 24px;">
         <h1 style="font-size: 24px; color: #0f766e; margin: 0;">
-          ${profile?.agency_name || '🧳 Trip Wallet'}
+          ${profile?.agency_name || '🧳 Carteira Digital'}
         </h1>
       </div>
     `;
@@ -167,7 +167,7 @@ export function generateTripPDF(trip: Trip, profile?: AgentProfile | null) {
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Trip Wallet - ${trip.client_name}</title>
+      <title>Carteira Digital - ${trip.client_name}</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -189,7 +189,7 @@ export function generateTripPDF(trip: Trip, profile?: AgentProfile | null) {
         <!-- Header -->
         <div style="text-align: center; margin-bottom: 40px;">
           <h1 style="font-size: 32px; color: #0f766e; margin-bottom: 8px;">
-            🧳 Trip Wallet
+            🧳 Carteira Digital
           </h1>
           <p style="color: #64748b; font-size: 14px;">
             Organizador de Viagem
