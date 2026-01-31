@@ -18,6 +18,7 @@ import {
   GraduationCap,
   Lock,
   Calculator,
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,12 @@ const baseMenuItems: MenuItem[] = [
     url: "/crm",
     icon: Users,
     requiredFeature: "crm_basic",
+  },
+  {
+    title: "Financeiro",
+    url: "/financeiro",
+    icon: DollarSign,
+    requiredFeature: "financial",
   },
   {
     title: "Educa Travel Academy",

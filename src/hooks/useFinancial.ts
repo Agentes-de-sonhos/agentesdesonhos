@@ -4,13 +4,20 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import type { 
   Sale, 
+  SaleProduct,
+  CustomerPayment,
+  SupplierPayment,
   IncomeEntry, 
   ExpenseEntry, 
   FinancialSummary, 
-  SaleFormData, 
+  SaleFormData,
+  SaleProductFormData,
+  CustomerPaymentFormData,
+  SupplierPaymentFormData,
   IncomeFormData, 
   ExpenseFormData,
   ExpenseCategory,
+  ProductType,
 } from "@/types/financial";
 
 export function useFinancial() {
@@ -18,7 +25,7 @@ export function useFinancial() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch sales
+  // Fetch sales with products
   const { data: sales = [], isLoading: salesLoading } = useQuery({
     queryKey: ["sales", user?.id],
     queryFn: async () => {
@@ -34,7 +41,59 @@ export function useFinancial() {
     enabled: !!user,
   });
 
-  // Fetch income entries
+  // Fetch sale products
+  const { data: saleProducts = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["sale_products", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("sale_products")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data.map(p => ({
+        ...p,
+        product_type: p.product_type as ProductType,
+        commission_type: p.commission_type as 'percentage' | 'fixed',
+      })) as SaleProduct[];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch customer payments
+  const { data: customerPayments = [], isLoading: customerPaymentsLoading } = useQuery({
+    queryKey: ["customer_payments", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("customer_payments")
+        .select("*, sale:sales(*)")
+        .eq("user_id", user.id)
+        .order("payment_date", { ascending: false });
+      if (error) throw error;
+      return data as CustomerPayment[];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch supplier payments
+  const { data: supplierPayments = [], isLoading: supplierPaymentsLoading } = useQuery({
+    queryKey: ["supplier_payments", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("supplier_payments")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("payment_date", { ascending: false });
+      if (error) throw error;
+      return data as SupplierPayment[];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch income entries (legacy)
   const { data: incomeEntries = [], isLoading: incomeLoading } = useQuery({
     queryKey: ["income_entries", user?.id],
     queryFn: async () => {
@@ -50,7 +109,7 @@ export function useFinancial() {
     enabled: !!user,
   });
 
-  // Fetch expense entries
+  // Fetch expense entries (legacy)
   const { data: expenseEntries = [], isLoading: expenseLoading } = useQuery({
     queryKey: ["expense_entries", user?.id],
     queryFn: async () => {
@@ -69,7 +128,7 @@ export function useFinancial() {
     enabled: !!user,
   });
 
-  // Calculate summary
+  // Calculate enhanced summary
   const summary: FinancialSummary = (() => {
     const today = new Date().toISOString().split("T")[0];
     const monthStart = new Date();
@@ -89,18 +148,38 @@ export function useFinancial() {
       .filter(s => s.sale_date >= yearStart)
       .reduce((sum, s) => sum + Number(s.sale_amount), 0);
 
-    const totalSales = sales.reduce((sum, s) => sum + Number(s.sale_amount), 0);
-    const totalIncome = incomeEntries.reduce((sum, e) => sum + Number(e.amount), 0);
-    const totalExpenses = expenseEntries.reduce((sum, e) => sum + Number(e.amount), 0);
+    const totalSales = saleProducts.reduce((sum, p) => sum + Number(p.sale_price), 0) || 
+                       sales.reduce((sum, s) => sum + Number(s.sale_amount), 0);
+    
+    const totalCosts = saleProducts.reduce((sum, p) => sum + Number(p.cost_price), 0);
+    
+    const grossProfit = totalSales - totalCosts;
+    
+    const totalCommissions = saleProducts.reduce((sum, p) => {
+      if (p.commission_type === 'percentage') {
+        return sum + (Number(p.sale_price) * Number(p.commission_value) / 100);
+      }
+      return sum + Number(p.commission_value);
+    }, 0);
+    
+    const netProfit = grossProfit - totalCommissions;
+
+    const totalCustomerPayments = customerPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalSupplierPayments = supplierPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const cashBalance = totalCustomerPayments - totalSupplierPayments;
 
     return {
       salesToday,
       salesMonth,
       salesYear,
       totalSales,
-      totalIncome,
-      totalExpenses,
-      result: totalIncome - totalExpenses,
+      totalCosts,
+      grossProfit,
+      totalCommissions,
+      netProfit,
+      totalCustomerPayments,
+      totalSupplierPayments,
+      cashBalance,
     };
   })();
 
@@ -136,7 +215,8 @@ export function useFinancial() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
-      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      queryClient.invalidateQueries({ queryKey: ["customer_payments"] });
       toast({ title: "Venda excluída", description: "A venda foi removida." });
     },
     onError: (error) => {
@@ -144,7 +224,125 @@ export function useFinancial() {
     },
   });
 
-  // Create income mutation
+  // Create sale product mutation
+  const createSaleProductMutation = useMutation({
+    mutationFn: async ({ saleId, ...formData }: SaleProductFormData & { saleId: string }) => {
+      if (!user) throw new Error("User not authenticated");
+      const { data, error } = await supabase
+        .from("sale_products")
+        .insert({
+          user_id: user.id,
+          sale_id: saleId,
+          ...formData,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      toast({ title: "Produto adicionado", description: "O produto foi vinculado à venda." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao adicionar produto", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete sale product mutation
+  const deleteSaleProductMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("sale_products").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      toast({ title: "Produto removido", description: "O produto foi desvinculado." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao remover produto", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Create customer payment mutation
+  const createCustomerPaymentMutation = useMutation({
+    mutationFn: async (formData: CustomerPaymentFormData) => {
+      if (!user) throw new Error("User not authenticated");
+      const { data, error } = await supabase
+        .from("customer_payments")
+        .insert({
+          user_id: user.id,
+          ...formData,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer_payments"] });
+      toast({ title: "Recebimento registrado", description: "O pagamento do cliente foi salvo." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao registrar recebimento", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete customer payment mutation
+  const deleteCustomerPaymentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("customer_payments").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer_payments"] });
+      toast({ title: "Recebimento excluído", description: "O pagamento foi removido." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao excluir recebimento", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Create supplier payment mutation
+  const createSupplierPaymentMutation = useMutation({
+    mutationFn: async (formData: SupplierPaymentFormData) => {
+      if (!user) throw new Error("User not authenticated");
+      const { data, error } = await supabase
+        .from("supplier_payments")
+        .insert({
+          user_id: user.id,
+          ...formData,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["supplier_payments"] });
+      toast({ title: "Pagamento registrado", description: "O pagamento ao fornecedor foi salvo." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao registrar pagamento", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete supplier payment mutation
+  const deleteSupplierPaymentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("supplier_payments").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["supplier_payments"] });
+      toast({ title: "Pagamento excluído", description: "O pagamento foi removido." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao excluir pagamento", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Legacy income mutation
   const createIncomeMutation = useMutation({
     mutationFn: async (formData: IncomeFormData) => {
       if (!user) throw new Error("User not authenticated");
@@ -168,7 +366,6 @@ export function useFinancial() {
     },
   });
 
-  // Delete income mutation
   const deleteIncomeMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("income_entries").delete().eq("id", id);
@@ -183,7 +380,7 @@ export function useFinancial() {
     },
   });
 
-  // Create expense mutation
+  // Legacy expense mutation
   const createExpenseMutation = useMutation({
     mutationFn: async (formData: ExpenseFormData) => {
       if (!user) throw new Error("User not authenticated");
@@ -207,7 +404,6 @@ export function useFinancial() {
     },
   });
 
-  // Delete expense mutation
   const deleteExpenseMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("expense_entries").delete().eq("id", id);
@@ -224,17 +420,28 @@ export function useFinancial() {
 
   return {
     sales,
+    saleProducts,
+    customerPayments,
+    supplierPayments,
     incomeEntries,
     expenseEntries,
     summary,
-    isLoading: salesLoading || incomeLoading || expenseLoading,
+    isLoading: salesLoading || productsLoading || customerPaymentsLoading || supplierPaymentsLoading || incomeLoading || expenseLoading,
     createSale: createSaleMutation.mutateAsync,
     deleteSale: deleteSaleMutation.mutateAsync,
+    createSaleProduct: createSaleProductMutation.mutateAsync,
+    deleteSaleProduct: deleteSaleProductMutation.mutateAsync,
+    createCustomerPayment: createCustomerPaymentMutation.mutateAsync,
+    deleteCustomerPayment: deleteCustomerPaymentMutation.mutateAsync,
+    createSupplierPayment: createSupplierPaymentMutation.mutateAsync,
+    deleteSupplierPayment: deleteSupplierPaymentMutation.mutateAsync,
     createIncome: createIncomeMutation.mutateAsync,
     deleteIncome: deleteIncomeMutation.mutateAsync,
     createExpense: createExpenseMutation.mutateAsync,
     deleteExpense: deleteExpenseMutation.mutateAsync,
-    isCreating: createSaleMutation.isPending || createIncomeMutation.isPending || createExpenseMutation.isPending,
+    isCreating: createSaleMutation.isPending || createSaleProductMutation.isPending || 
+                createCustomerPaymentMutation.isPending || createSupplierPaymentMutation.isPending ||
+                createIncomeMutation.isPending || createExpenseMutation.isPending,
   };
 }
 

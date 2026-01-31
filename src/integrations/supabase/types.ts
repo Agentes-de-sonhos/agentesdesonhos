@@ -50,6 +50,50 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          sale_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          sale_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          sale_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_payments_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -748,6 +792,56 @@ export type Database = {
         }
         Relationships: []
       }
+      sale_products: {
+        Row: {
+          commission_type: string
+          commission_value: number
+          cost_price: number
+          created_at: string
+          description: string | null
+          id: string
+          product_type: string
+          sale_id: string
+          sale_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          commission_type?: string
+          commission_value?: number
+          cost_price?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          product_type: string
+          sale_id: string
+          sale_price?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          commission_type?: string
+          commission_value?: number
+          cost_price?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          product_type?: string
+          sale_id?: string
+          sale_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_products_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales: {
         Row: {
           client_name: string
@@ -874,6 +968,63 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "trade_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          sale_id: string | null
+          sale_product_id: string | null
+          supplier_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          sale_id?: string | null
+          sale_product_id?: string | null
+          supplier_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          sale_id?: string | null
+          sale_product_id?: string | null
+          supplier_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_payments_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_payments_sale_product_id_fkey"
+            columns: ["sale_product_id"]
+            isOneToOne: false
+            referencedRelation: "sale_products"
             referencedColumns: ["id"]
           },
         ]

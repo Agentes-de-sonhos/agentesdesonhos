@@ -3,8 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancialDashboard } from "@/components/financial/FinancialDashboard";
 import { SalesManager } from "@/components/financial/SalesManager";
-import { IncomeManager } from "@/components/financial/IncomeManager";
-import { ExpenseManager } from "@/components/financial/ExpenseManager";
+import { CashFlowManager } from "@/components/financial/CashFlowManager";
 import { FinancialReports } from "@/components/financial/FinancialReports";
 import { useFinancial } from "@/hooks/useFinancial";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
@@ -21,7 +20,7 @@ export default function Financeiro() {
               Financeiro
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Gerencie vendas, recebimentos e despesas
+              Gerencie vendas, produtos, custos e fluxo de caixa
             </p>
           </div>
 
@@ -34,10 +33,9 @@ export default function Financeiro() {
               <FinancialDashboard summary={summary} />
 
               <Tabs defaultValue="vendas" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4 max-w-xl">
+                <TabsList className="grid w-full grid-cols-3 max-w-md">
                   <TabsTrigger value="vendas">Vendas</TabsTrigger>
-                  <TabsTrigger value="entradas">Entradas</TabsTrigger>
-                  <TabsTrigger value="saidas">Saídas</TabsTrigger>
+                  <TabsTrigger value="caixa">Fluxo de Caixa</TabsTrigger>
                   <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
                 </TabsList>
 
@@ -45,12 +43,8 @@ export default function Financeiro() {
                   <SalesManager />
                 </TabsContent>
 
-                <TabsContent value="entradas">
-                  <IncomeManager />
-                </TabsContent>
-
-                <TabsContent value="saidas">
-                  <ExpenseManager />
+                <TabsContent value="caixa">
+                  <CashFlowManager />
                 </TabsContent>
 
                 <TabsContent value="relatorios">
