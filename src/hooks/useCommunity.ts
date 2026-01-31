@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import type {
-  FunTrip,
+  FamTrip,
   OnlineMeeting,
   InPersonEvent,
   ProfessionalWorkshop,
@@ -18,16 +18,16 @@ export function useCommunity() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Fun Trips
-  const { data: funTrips = [], isLoading: loadingFunTrips } = useQuery({
-    queryKey: ["fun-trips"],
+  // Fam Trips
+  const { data: famTrips = [], isLoading: loadingFamTrips } = useQuery({
+    queryKey: ["fam-trips"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fun_trips")
         .select("*")
         .order("trip_date", { ascending: true });
       if (error) throw error;
-      return data as FunTrip[];
+      return data as FamTrip[];
     },
   });
 
@@ -194,7 +194,7 @@ export function useCommunity() {
   });
 
   const isLoading =
-    loadingFunTrips ||
+    loadingFamTrips ||
     loadingMeetings ||
     loadingEvents ||
     loadingWorkshops ||
@@ -204,7 +204,7 @@ export function useCommunity() {
     loadingPrize;
 
   return {
-    funTrips,
+    famTrips,
     upcomingMeetings,
     pastMeetings,
     inPersonEvents,

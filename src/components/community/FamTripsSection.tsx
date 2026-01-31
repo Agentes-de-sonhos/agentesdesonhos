@@ -4,19 +4,19 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Users, Building2, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { FunTrip } from "@/types/community";
+import type { FamTrip } from "@/types/community";
 
-interface FunTripsSectionProps {
-  trips: FunTrip[];
+interface FamTripsSectionProps {
+  trips: FamTrip[];
 }
 
-export function FunTripsSection({ trips }: FunTripsSectionProps) {
+export function FamTripsSection({ trips }: FamTripsSectionProps) {
   if (trips.length === 0) {
     return (
       <section>
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <MapPin className="h-5 w-5 text-primary" />
-          FunTrips & Oportunidades Exclusivas
+          Fam Trips & Oportunidades Exclusivas
         </h2>
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
@@ -31,7 +31,7 @@ export function FunTripsSection({ trips }: FunTripsSectionProps) {
     <section>
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
         <MapPin className="h-5 w-5 text-primary" />
-        FunTrips & Oportunidades Exclusivas
+        Fam Trips & Oportunidades Exclusivas
       </h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {trips.map((trip) => (
