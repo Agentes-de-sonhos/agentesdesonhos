@@ -63,17 +63,49 @@ export default function Auth() {
   const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
 
+  // Redirect authenticated users away from auth page
   useEffect(() => {
-    if (user && !roleLoading && role) {
-      // Check if user should complete onboarding
-      if (isNewUser) {
-        navigate("/onboarding", { replace: true });
-      } else {
-        const destination = role === "admin" ? "/admin" : "/dashboard";
-        navigate(destination, { replace: true });
-      }
+    if (!user) return;
+    
+    // Wait for role to load before deciding destination
+    if (roleLoading) return;
+    
+    // Check if user should complete onboarding
+    if (isNewUser) {
+      navigate("/onboarding", { replace: true });
+      return;
     }
+    
+    // Navigate based on role (default to dashboard if role not set)
+    const destination = role === "admin" ? "/admin" : "/dashboard";
+    navigate(destination, { replace: true });
   }, [user, role, roleLoading, isNewUser, navigate]);
+
+  // Show loading while checking auth state
+  const { loading: authLoading } = useAuth();
+  
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user exists, show loading while redirecting
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/20">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Redirecionando...</p>
+        </div>
+      </div>
+    );
+  }
 
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
