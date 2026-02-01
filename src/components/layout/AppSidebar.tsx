@@ -19,6 +19,7 @@ import {
   Calculator,
   Heart,
   Crown,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -120,6 +121,15 @@ const premiumMenuItems: MenuItem[] = [
     url: "/comunidade",
     icon: Heart,
     requiredFeature: "community",
+  },
+];
+
+// Coming Soon section
+const comingSoonMenuItems: MenuItem[] = [
+  {
+    title: "Mentorias",
+    url: "/mentorias",
+    icon: GraduationCap,
   },
 ];
 
@@ -281,6 +291,21 @@ export function AppSidebar() {
             )}
             <nav className="flex flex-col gap-1">
               {premiumMenuItems.map((item) => renderMenuItem(item, true))}
+            </nav>
+          </div>
+
+          {/* Coming Soon Section */}
+          <div className="px-3 mt-4">
+            {!collapsed && (
+              <div className="mb-2 px-3 pt-2 flex items-center gap-1.5">
+                <Clock className="h-3 w-3 text-muted-foreground/70" />
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                  Em Breve
+                </p>
+              </div>
+            )}
+            <nav className="flex flex-col gap-1">
+              {comingSoonMenuItems.map((item) => renderMenuItem(item, false))}
             </nav>
           </div>
         </div>
