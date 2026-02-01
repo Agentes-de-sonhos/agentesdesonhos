@@ -1327,6 +1327,83 @@ export type Database = {
         }
         Relationships: []
       }
+      promoter_presentation_usage: {
+        Row: {
+          feature_name: string
+          id: string
+          presentation_id: string
+          used_at: string
+        }
+        Insert: {
+          feature_name: string
+          id?: string
+          presentation_id: string
+          used_at?: string
+        }
+        Update: {
+          feature_name?: string
+          id?: string
+          presentation_id?: string
+          used_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promoter_presentation_usage_presentation_id_fkey"
+            columns: ["presentation_id"]
+            isOneToOne: false
+            referencedRelation: "promoter_presentations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promoter_presentations: {
+        Row: {
+          agency_name: string
+          agent_email: string
+          agent_name: string
+          agent_whatsapp: string
+          city: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          is_active: boolean
+          promoter_id: string
+          started_at: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          agency_name: string
+          agent_email: string
+          agent_name: string
+          agent_whatsapp: string
+          city: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean
+          promoter_id: string
+          started_at?: string
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          agency_name?: string
+          agent_email?: string
+          agent_name?: string
+          agent_whatsapp?: string
+          city?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean
+          promoter_id?: string
+          started_at?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       promoter_settings: {
         Row: {
           current_month_prize_description: string | null
@@ -2149,8 +2226,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_use_feature: {
+        Args: { _feature: string; _user_id: string }
+        Returns: boolean
+      }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       generate_secure_share_token: { Args: never; Returns: string }
+      get_active_presentation: { Args: { _user_id: string }; Returns: string }
       get_monthly_sales_ranking: {
         Args: { target_month: number; target_year: number }
         Returns: {
@@ -2190,7 +2272,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "agente"
+      app_role: "admin" | "agente" | "promotor"
       subscription_plan: "essencial" | "profissional" | "premium"
       workshop_category:
         | "contabilidade"
@@ -2325,7 +2407,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "agente"],
+      app_role: ["admin", "agente", "promotor"],
       subscription_plan: ["essencial", "profissional", "premium"],
       workshop_category: [
         "contabilidade",
