@@ -29,6 +29,8 @@ import CRM from "./pages/CRM";
 import Financeiro from "./pages/Financeiro";
 import EducaAcademy from "./pages/EducaAcademy";
 import Community from "./pages/Community";
+import Mentorias from "./pages/Mentorias";
+import MentoriaDetail from "./pages/MentoriaDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -226,6 +228,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Community />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mentorias"
+              element={
+                <ProtectedRoute>
+                  <Mentorias />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mentorias/:id"
+              element={
+                <ProtectedRoute>
+                  <MentoriaDetail />
                 </ProtectedRoute>
               }
             />

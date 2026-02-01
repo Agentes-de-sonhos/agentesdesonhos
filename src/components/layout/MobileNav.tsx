@@ -19,6 +19,7 @@ import {
   Heart,
   Crown,
   Menu,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,10 @@ const premiumMenuItems: MenuItem[] = [
   { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
   { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools" },
   { title: "Comunidade", url: "/comunidade", icon: Heart, requiredFeature: "community" },
+];
+
+const comingSoonMenuItems: MenuItem[] = [
+  { title: "Mentorias", url: "/mentorias", icon: GraduationCap },
 ];
 
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
@@ -181,6 +186,19 @@ export function MobileNav() {
               </div>
               <nav className="flex flex-col gap-1">
                 {premiumMenuItems.map((item) => renderMenuItem(item, true))}
+              </nav>
+            </div>
+
+            {/* Coming Soon Section */}
+            <div className="px-3 mt-4">
+              <div className="mb-2 px-3 pt-2 flex items-center gap-1.5">
+                <Clock className="h-3 w-3 text-muted-foreground/70" />
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                  Em Breve
+                </p>
+              </div>
+              <nav className="flex flex-col gap-1">
+                {comingSoonMenuItems.map((item) => renderMenuItem(item, false))}
               </nav>
             </div>
           </div>

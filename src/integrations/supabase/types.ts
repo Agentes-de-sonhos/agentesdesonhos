@@ -677,6 +677,268 @@ export type Database = {
           },
         ]
       }
+      mentorship_lessons: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          module_id: string
+          order_index: number
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          module_id: string
+          order_index?: number
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          module_id?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "mentorship_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorship_materials: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_type: string | null
+          file_url: string
+          id: string
+          mentorship_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          mentorship_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          mentorship_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_materials_mentorship_id_fkey"
+            columns: ["mentorship_id"]
+            isOneToOne: false
+            referencedRelation: "mentorships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorship_meetings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_past: boolean
+          meeting_date: string
+          meeting_url: string | null
+          mentorship_id: string
+          recording_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_past?: boolean
+          meeting_date: string
+          meeting_url?: string | null
+          mentorship_id: string
+          recording_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_past?: boolean
+          meeting_date?: string
+          meeting_url?: string | null
+          mentorship_id?: string
+          recording_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_meetings_mentorship_id_fkey"
+            columns: ["mentorship_id"]
+            isOneToOne: false
+            referencedRelation: "mentorships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorship_modules: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          mentorship_id: string
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          mentorship_id: string
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          mentorship_id?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_modules_mentorship_id_fkey"
+            columns: ["mentorship_id"]
+            isOneToOne: false
+            referencedRelation: "mentorships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorship_videos: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          mentorship_id: string
+          order_index: number
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          mentorship_id: string
+          order_index?: number
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          mentorship_id?: string
+          order_index?: number
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_videos_mentorship_id_fkey"
+            columns: ["mentorship_id"]
+            isOneToOne: false
+            referencedRelation: "mentorships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorships: {
+        Row: {
+          created_at: string
+          full_description: string | null
+          id: string
+          is_active: boolean
+          mentor_name: string
+          mentor_photo_url: string | null
+          name: string
+          objectives: string | null
+          order_index: number
+          short_description: string | null
+          specialty: string
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_description?: string | null
+          id?: string
+          is_active?: boolean
+          mentor_name: string
+          mentor_photo_url?: string | null
+          name: string
+          objectives?: string | null
+          order_index?: number
+          short_description?: string | null
+          specialty: string
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_description?: string | null
+          id?: string
+          is_active?: boolean
+          mentor_name?: string
+          mentor_photo_url?: string | null
+          name?: string
+          objectives?: string | null
+          order_index?: number
+          short_description?: string | null
+          specialty?: string
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       monthly_prizes: {
         Row: {
           created_at: string
