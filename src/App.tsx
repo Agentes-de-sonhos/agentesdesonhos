@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import Promotores from "./pages/Promotores";
 import FerramentasIA from "./pages/FerramentasIA";
 import GerarOrcamento from "./pages/GerarOrcamento";
 import CriarRoteiro from "./pages/CriarRoteiro";
@@ -68,6 +69,14 @@ const App = () => (
                 <AdminRoute>
                   <Admin />
                 </AdminRoute>
+              }
+            />
+            <Route
+              path="/promotores"
+              element={
+                <ProtectedRoute>
+                  <Promotores />
+                </ProtectedRoute>
               }
             />
             <Route
