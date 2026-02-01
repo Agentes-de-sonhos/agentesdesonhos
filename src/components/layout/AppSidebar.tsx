@@ -20,6 +20,7 @@ import {
   Heart,
   Crown,
   Clock,
+  Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,11 @@ const premiumMenuItems: MenuItem[] = [
     url: "/comunidade",
     icon: Heart,
     requiredFeature: "community",
+  },
+  {
+    title: "Ranking Promotores",
+    url: "/ranking-promotores",
+    icon: Trophy,
   },
 ];
 

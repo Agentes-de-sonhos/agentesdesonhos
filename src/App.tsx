@@ -31,6 +31,7 @@ import EducaAcademy from "./pages/EducaAcademy";
 import Community from "./pages/Community";
 import Mentorias from "./pages/Mentorias";
 import MentoriaDetail from "./pages/MentoriaDetail";
+import RankingPromotores from "./pages/RankingPromotores";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -244,6 +245,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MentoriaDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ranking-promotores"
+              element={
+                <ProtectedRoute>
+                  <RankingPromotores />
                 </ProtectedRoute>
               }
             />
