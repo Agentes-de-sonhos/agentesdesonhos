@@ -20,8 +20,6 @@ import {
   Heart,
   Crown,
   Clock,
-  Trophy,
-  Presentation,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -124,11 +122,6 @@ const premiumMenuItems: MenuItem[] = [
     icon: Heart,
     requiredFeature: "community",
   },
-  {
-    title: "Ranking Promotores",
-    url: "/ranking-promotores",
-    icon: Trophy,
-  },
 ];
 
 // Coming Soon section
@@ -152,19 +145,12 @@ const adminMenuItem: MenuItem = {
   icon: Shield,
 };
 
-const promotorMenuItem: MenuItem = {
-  title: "Promotores",
-  url: "/promotores",
-  icon: Presentation,
-};
-
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const location = useLocation();
   const { signOut } = useAuth();
-  const { isAdmin, role } = useUserRole();
-  const isPromotor = role === "promotor";
+  const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
 
   const handleMenuClick = (item: MenuItem, e: React.MouseEvent) => {
@@ -276,13 +262,6 @@ export function AppSidebar() {
           {isAdmin && (
             <nav className="flex flex-col gap-1 px-3 mb-2">
               {renderMenuItem(adminMenuItem, false)}
-            </nav>
-          )}
-
-          {/* Promotor menu item if promotor */}
-          {isPromotor && (
-            <nav className="flex flex-col gap-1 px-3 mb-2">
-              {renderMenuItem(promotorMenuItem, false)}
             </nav>
           )}
 

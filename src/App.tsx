@@ -9,7 +9,6 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
-import Promotores from "./pages/Promotores";
 import FerramentasIA from "./pages/FerramentasIA";
 import GerarOrcamento from "./pages/GerarOrcamento";
 import CriarRoteiro from "./pages/CriarRoteiro";
@@ -32,7 +31,6 @@ import EducaAcademy from "./pages/EducaAcademy";
 import Community from "./pages/Community";
 import Mentorias from "./pages/Mentorias";
 import MentoriaDetail from "./pages/MentoriaDetail";
-import RankingPromotores from "./pages/RankingPromotores";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,14 +67,6 @@ const App = () => (
                 <AdminRoute>
                   <Admin />
                 </AdminRoute>
-              }
-            />
-            <Route
-              path="/promotores"
-              element={
-                <ProtectedRoute>
-                  <Promotores />
-                </ProtectedRoute>
               }
             />
             <Route
@@ -254,14 +244,6 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MentoriaDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ranking-promotores"
-              element={
-                <ProtectedRoute>
-                  <RankingPromotores />
                 </ProtectedRoute>
               }
             />
