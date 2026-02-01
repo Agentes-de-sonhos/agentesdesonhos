@@ -20,8 +20,6 @@ import {
   Crown,
   Menu,
   Clock,
-  Trophy,
-  Presentation,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -63,7 +61,6 @@ const premiumMenuItems: MenuItem[] = [
   { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
   { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools" },
   { title: "Comunidade", url: "/comunidade", icon: Heart, requiredFeature: "community" },
-  { title: "Ranking Promotores", url: "/ranking-promotores", icon: Trophy },
 ];
 
 const comingSoonMenuItems: MenuItem[] = [
@@ -72,7 +69,6 @@ const comingSoonMenuItems: MenuItem[] = [
 
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
-const promotorMenuItem: MenuItem = { title: "Promotores", url: "/promotores", icon: Presentation };
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -80,8 +76,7 @@ export function MobileNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { isAdmin, role } = useUserRole();
-  const isPromotor = role === "promotor";
+  const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
 
   const handleMenuClick = (item: MenuItem, e: React.MouseEvent) => {
@@ -168,12 +163,6 @@ export function MobileNav() {
             {isAdmin && (
               <nav className="flex flex-col gap-1 px-3 mb-2">
                 {renderMenuItem(adminMenuItem, false)}
-              </nav>
-            )}
-
-            {isPromotor && (
-              <nav className="flex flex-col gap-1 px-3 mb-2">
-                {renderMenuItem(promotorMenuItem, false)}
               </nav>
             )}
 

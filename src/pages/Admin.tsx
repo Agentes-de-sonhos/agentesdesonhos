@@ -13,8 +13,6 @@ import {
   Calendar,
   GraduationCap,
   Heart,
-  Trophy,
-  Presentation,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -26,8 +24,6 @@ import { AdminEventsManager } from "@/components/admin/AdminEventsManager";
 import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
 import { AdminCommunityManager } from "@/components/admin/AdminCommunityManager";
 import { AdminUserManager } from "@/components/admin/AdminUserManager";
-import { AdminPromoterManager } from "@/components/admin/AdminPromoterManager";
-import { AdminPromoterLeadsManager } from "@/components/admin/AdminPromoterLeadsManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -110,18 +106,10 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Usuários</span>
-            </TabsTrigger>
-            <TabsTrigger value="promoters" className="flex items-center gap-2">
-              <Trophy className="h-4 w-4" />
-              <span className="hidden sm:inline">Promotores</span>
-            </TabsTrigger>
-            <TabsTrigger value="leads" className="flex items-center gap-2">
-              <Presentation className="h-4 w-4" />
-              <span className="hidden sm:inline">Leads</span>
             </TabsTrigger>
             <TabsTrigger value="trade-suppliers" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
@@ -163,14 +151,6 @@ export default function Admin() {
 
           <TabsContent value="users">
             <AdminUserManager />
-          </TabsContent>
-
-          <TabsContent value="promoters">
-            <AdminPromoterManager />
-          </TabsContent>
-
-          <TabsContent value="leads">
-            <AdminPromoterLeadsManager />
           </TabsContent>
 
           <TabsContent value="trade-suppliers">
