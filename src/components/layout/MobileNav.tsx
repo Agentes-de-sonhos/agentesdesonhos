@@ -20,6 +20,7 @@ import {
   Crown,
   Menu,
   Clock,
+  Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ const premiumMenuItems: MenuItem[] = [
   { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
   { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools" },
   { title: "Comunidade", url: "/comunidade", icon: Heart, requiredFeature: "community" },
+  { title: "Ranking Promotores", url: "/ranking-promotores", icon: Trophy },
 ];
 
 const comingSoonMenuItems: MenuItem[] = [

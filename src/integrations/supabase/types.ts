@@ -1273,6 +1273,90 @@ export type Database = {
         }
         Relationships: []
       }
+      promoter_monthly_winners: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          id: string
+          is_confirmed: boolean
+          month: number
+          prize_description: string | null
+          prize_image_url: string | null
+          prize_name: string | null
+          ranking_criteria: string
+          total_revenue: number
+          total_sales_count: number
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          is_confirmed?: boolean
+          month: number
+          prize_description?: string | null
+          prize_image_url?: string | null
+          prize_name?: string | null
+          ranking_criteria?: string
+          total_revenue?: number
+          total_sales_count?: number
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          is_confirmed?: boolean
+          month?: number
+          prize_description?: string | null
+          prize_image_url?: string | null
+          prize_name?: string | null
+          ranking_criteria?: string
+          total_revenue?: number
+          total_sales_count?: number
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      promoter_settings: {
+        Row: {
+          current_month_prize_description: string | null
+          current_month_prize_image_url: string | null
+          current_month_prize_name: string | null
+          id: string
+          ranking_criteria: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          current_month_prize_description?: string | null
+          current_month_prize_image_url?: string | null
+          current_month_prize_name?: string | null
+          id?: string
+          ranking_criteria?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          current_month_prize_description?: string | null
+          current_month_prize_image_url?: string | null
+          current_month_prize_name?: string | null
+          id?: string
+          ranking_criteria?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       quote_services: {
         Row: {
           amount: number
@@ -2067,6 +2151,16 @@ export type Database = {
     Functions: {
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       generate_secure_share_token: { Args: never; Returns: string }
+      get_monthly_sales_ranking: {
+        Args: { target_month: number; target_year: number }
+        Returns: {
+          avatar_url: string
+          sales_count: number
+          total_revenue: number
+          user_id: string
+          user_name: string
+        }[]
+      }
       get_user_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["subscription_plan"]
