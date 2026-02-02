@@ -21,26 +21,10 @@ import {
   Building2,
   Layers,
 } from "lucide-react";
-import { MaterialsSection } from "@/components/materials/MaterialsSection";
+import { GallerySection } from "@/components/materials/GallerySection";
+import { GalleryModal } from "@/components/materials/GalleryModal";
 import { MaterialsFilterSheet } from "@/components/materials/MaterialsFilterSheet";
-import { MaterialPreviewModal } from "@/components/materials/MaterialPreviewModal";
-import { useMaterials } from "@/hooks/useMaterials";
-
-type Material = {
-  id: string;
-  title: string;
-  material_type: string;
-  category: string;
-  destination?: string | null;
-  file_url?: string | null;
-  video_url?: string | null;
-  thumbnail_url?: string | null;
-  published_at: string;
-  trade_suppliers?: {
-    id: string;
-    name: string;
-  } | null;
-};
+import { useMaterials, type MaterialGallery } from "@/hooks/useMaterials";
 
 const CATEGORIES = [
   "Todas",
@@ -63,29 +47,30 @@ export default function Materiais() {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedSupplier, setSelectedSupplier] = useState("Todos");
-  const [previewMaterial, setPreviewMaterial] = useState<Material | null>(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [selectedGallery, setSelectedGallery] = useState<MaterialGallery | null>(null);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const { 
     materials, 
     suppliers, 
     isLoading, 
     filterMaterials, 
-    groupByPeriod, 
-    groupByCategory, 
-    groupBySupplier 
+    groupIntoGalleries,
+    groupGalleriesByPeriod, 
+    groupGalleriesByCategory, 
+    groupGalleriesBySupplier 
   } = useMaterials();
 
-  // Filter materials
-  const filteredMaterials = useMemo(() => 
-    filterMaterials(materials, searchTerm, selectedCategory, selectedType, selectedSupplier),
-    [materials, searchTerm, selectedCategory, selectedType, selectedSupplier, filterMaterials]
-  );
+  // Filter materials first, then group into galleries
+  const galleries = useMemo(() => {
+    const filtered = filterMaterials(materials, searchTerm, selectedCategory, selectedType, selectedSupplier);
+    return groupIntoGalleries(filtered);
+  }, [materials, searchTerm, selectedCategory, selectedType, selectedSupplier, filterMaterials, groupIntoGalleries]);
 
-  // Group filtered materials
-  const byPeriod = useMemo(() => groupByPeriod(filteredMaterials), [filteredMaterials, groupByPeriod]);
-  const byCategory = useMemo(() => groupByCategory(filteredMaterials), [filteredMaterials, groupByCategory]);
-  const bySupplier = useMemo(() => groupBySupplier(filteredMaterials), [filteredMaterials, groupBySupplier]);
+  // Group galleries
+  const byPeriod = useMemo(() => groupGalleriesByPeriod(galleries), [galleries, groupGalleriesByPeriod]);
+  const byCategory = useMemo(() => groupGalleriesByCategory(galleries), [galleries, groupGalleriesByCategory]);
+  const bySupplier = useMemo(() => groupGalleriesBySupplier(galleries), [galleries, groupGalleriesBySupplier]);
 
   // Count active filters
   const activeFiltersCount = [
@@ -102,17 +87,17 @@ export default function Materiais() {
     setSelectedSupplier("Todos");
   };
 
-  const handlePreview = (material: Material) => {
-    setPreviewMaterial(material);
-    setIsPreviewOpen(true);
+  const handleOpenGallery = (gallery: MaterialGallery) => {
+    setSelectedGallery(gallery);
+    setIsGalleryOpen(true);
   };
 
-  const handleClosePreview = () => {
-    setIsPreviewOpen(false);
-    setPreviewMaterial(null);
+  const handleCloseGallery = () => {
+    setIsGalleryOpen(false);
+    setSelectedGallery(null);
   };
 
-  const hasContent = filteredMaterials && filteredMaterials.length > 0;
+  const hasContent = galleries && galleries.length > 0;
 
   return (
     <DashboardLayout>
@@ -124,7 +109,7 @@ export default function Materiais() {
               Materiais de Divulgação
             </h1>
             <p className="text-muted-foreground mt-1">
-              Sua biblioteca de mídia para vendas
+              Sua biblioteca de campanhas para vendas
             </p>
           </div>
 
@@ -247,34 +232,34 @@ export default function Materiais() {
           </div>
         ) : hasContent ? (
           <div className="space-y-8">
-            {/* Today's Materials */}
+            {/* Today's Galleries */}
             {byPeriod.today.length > 0 && (
-              <MaterialsSection 
+              <GallerySection 
                 title="Novos de Hoje" 
-                materials={byPeriod.today} 
+                galleries={byPeriod.today} 
                 variant="large"
                 icon={<Sparkles className="h-5 w-5 text-primary" />}
-                onPreview={handlePreview}
+                onOpen={handleOpenGallery}
               />
             )}
 
             {/* This Week */}
             {byPeriod.thisWeek.length > 0 && (
-              <MaterialsSection 
+              <GallerySection 
                 title="Desta Semana" 
-                materials={byPeriod.thisWeek}
+                galleries={byPeriod.thisWeek}
                 icon={<Calendar className="h-5 w-5 text-primary" />}
-                onPreview={handlePreview}
+                onOpen={handleOpenGallery}
               />
             )}
 
             {/* This Month */}
             {byPeriod.thisMonth.length > 0 && (
-              <MaterialsSection 
+              <GallerySection 
                 title="Deste Mês" 
-                materials={byPeriod.thisMonth}
+                galleries={byPeriod.thisMonth}
                 icon={<CalendarDays className="h-5 w-5 text-primary" />}
-                onPreview={handlePreview}
+                onOpen={handleOpenGallery}
               />
             )}
 
@@ -287,12 +272,12 @@ export default function Materiais() {
                 </h2>
                 {Object.entries(byCategory)
                   .sort(([, a], [, b]) => b.length - a.length)
-                  .map(([category, categoryMaterials]) => (
-                    <MaterialsSection 
+                  .map(([category, categoryGalleries]) => (
+                    <GallerySection 
                       key={category}
                       title={category} 
-                      materials={categoryMaterials}
-                      onPreview={handlePreview}
+                      galleries={categoryGalleries}
+                      onOpen={handleOpenGallery}
                     />
                   ))
                 }
@@ -310,25 +295,25 @@ export default function Materiais() {
                   .filter(([name]) => name !== "Outros")
                   .sort(([, a], [, b]) => b.length - a.length)
                   .slice(0, 5)
-                  .map(([supplierName, supplierMaterials]) => (
-                    <MaterialsSection 
+                  .map(([supplierName, supplierGalleries]) => (
+                    <GallerySection 
                       key={supplierName}
                       title={supplierName} 
-                      materials={supplierMaterials}
-                      onPreview={handlePreview}
+                      galleries={supplierGalleries}
+                      onOpen={handleOpenGallery}
                     />
                   ))
                 }
               </div>
             )}
 
-            {/* Older Materials */}
+            {/* Older Galleries */}
             {byPeriod.older.length > 0 && (
-              <MaterialsSection 
+              <GallerySection 
                 title="Materiais Anteriores" 
-                materials={byPeriod.older}
+                galleries={byPeriod.older}
                 icon={<Archive className="h-5 w-5 text-muted-foreground" />}
-                onPreview={handlePreview}
+                onOpen={handleOpenGallery}
               />
             )}
           </div>
@@ -350,11 +335,11 @@ export default function Materiais() {
           </div>
         )}
 
-        {/* Preview Modal */}
-        <MaterialPreviewModal
-          material={previewMaterial}
-          isOpen={isPreviewOpen}
-          onClose={handleClosePreview}
+        {/* Gallery Modal */}
+        <GalleryModal
+          gallery={selectedGallery}
+          isOpen={isGalleryOpen}
+          onClose={handleCloseGallery}
         />
       </div>
     </DashboardLayout>
