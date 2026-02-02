@@ -1,0 +1,134 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useActivePopup, GlobalPopup } from "@/hooks/useGlobalPopups";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { X, ExternalLink } from "lucide-react";
+
+const VIEWED_POPUPS_KEY = "viewed_popups_session";
+
+function getViewedPopups(): string[] {
+  try {
+    const stored = sessionStorage.getItem(VIEWED_POPUPS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function markPopupAsViewed(popupId: string): void {
+  try {
+    const viewed = getViewedPopups();
+    if (!viewed.includes(popupId)) {
+      viewed.push(popupId);
+      sessionStorage.setItem(VIEWED_POPUPS_KEY, JSON.stringify(viewed));
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+function hasViewedPopup(popupId: string): boolean {
+  return getViewedPopups().includes(popupId);
+}
+
+export function GlobalPopupModal() {
+  const navigate = useNavigate();
+  const { data: activePopup, isLoading } = useActivePopup();
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentPopup, setCurrentPopup] = useState<GlobalPopup | null>(null);
+
+  useEffect(() => {
+    if (!isLoading && activePopup && !hasViewedPopup(activePopup.id)) {
+      setCurrentPopup(activePopup);
+      setIsOpen(true);
+    }
+  }, [activePopup, isLoading]);
+
+  const handleClose = () => {
+    if (currentPopup) {
+      markPopupAsViewed(currentPopup.id);
+    }
+    setIsOpen(false);
+  };
+
+  const handleButtonClick = () => {
+    if (currentPopup?.button_link) {
+      markPopupAsViewed(currentPopup.id);
+      setIsOpen(false);
+      
+      // Check if it's an internal or external link
+      if (currentPopup.button_link.startsWith("http")) {
+        window.open(currentPopup.button_link, "_blank", "noopener,noreferrer");
+      } else {
+        navigate(currentPopup.button_link);
+      }
+    }
+  };
+
+  if (!currentPopup) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="max-w-md p-0 overflow-hidden gap-0 border-0">
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute right-3 top-3 z-10 rounded-full bg-background/80 backdrop-blur-sm p-1.5 hover:bg-background transition-colors"
+          aria-label="Fechar"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        {/* Image */}
+        {currentPopup.image_url && (
+          <div className="w-full aspect-video relative overflow-hidden">
+            <img
+              src={currentPopup.image_url}
+              alt={currentPopup.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold leading-tight">
+            {currentPopup.title}
+          </h2>
+          
+          {currentPopup.description && (
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {currentPopup.description}
+            </p>
+          )}
+
+          {/* Action Button */}
+          {currentPopup.has_button && currentPopup.button_text && (
+            <Button 
+              onClick={handleButtonClick}
+              className="w-full"
+              size="lg"
+            >
+              {currentPopup.button_text}
+              {currentPopup.button_link?.startsWith("http") && (
+                <ExternalLink className="h-4 w-4 ml-2" />
+              )}
+            </Button>
+          )}
+
+          {/* Close text button if no action button */}
+          {!currentPopup.has_button && (
+            <Button 
+              onClick={handleClose}
+              variant="outline"
+              className="w-full"
+            >
+              Entendi
+            </Button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
