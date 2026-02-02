@@ -128,9 +128,6 @@ export default function Dashboard() {
           <h1 className="font-display text-3xl font-bold text-foreground">
             Olá, Agente de Sonhos! 👋
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            O que você deseja criar hoje?
-          </p>
         </div>
 
         {isLoading ? (
