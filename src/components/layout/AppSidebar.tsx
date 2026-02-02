@@ -257,54 +257,61 @@ export function AppSidebar() {
         </div>
 
         {/* Scrollable Navigation */}
-        <div className="flex-1 overflow-y-auto py-3">
+        <div className="flex-1 overflow-y-auto py-4">
           {/* Admin menu item if admin */}
           {isAdmin && (
-            <nav className="flex flex-col gap-1 px-3 mb-2">
+            <nav className="flex flex-col gap-0.5 px-3 mb-3">
               {renderMenuItem(adminMenuItem, false)}
             </nav>
           )}
 
           {/* Main Navigation */}
-          <nav className="flex flex-col gap-1 px-3">
+          <nav className="flex flex-col gap-0.5 px-3">
             {mainMenuItems.map((item) => renderMenuItem(item, false))}
           </nav>
 
           {/* Visual Separator */}
-          <div className="px-3 py-3">
+          <div className="px-3 py-4">
             <Separator className="bg-sidebar-border" />
           </div>
 
           {/* Secondary Navigation (CRM, Financeiro) */}
-          <nav className="flex flex-col gap-1 px-3">
+          {!collapsed && (
+            <div className="mb-1.5 px-6">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                Gestão
+              </p>
+            </div>
+          )}
+          <nav className="flex flex-col gap-0.5 px-3">
             {secondaryMenuItems.map((item) => renderMenuItem(item, false))}
           </nav>
 
           {/* Premium Features Section */}
-          <div className="px-3 mt-4">
+          <div className="px-3 mt-5">
             {!collapsed && (
-              <div className="mb-2 px-3 pt-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              <div className="mb-1.5 px-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
                   Recursos Premium
                 </p>
               </div>
             )}
-            <nav className="flex flex-col gap-1">
+            <nav className="flex flex-col gap-0.5">
               {premiumMenuItems.map((item) => renderMenuItem(item, true))}
             </nav>
           </div>
 
           {/* Coming Soon Section */}
-          <div className="px-3 mt-4">
+          <div className="px-3 mt-5">
             {!collapsed && (
-              <div className="mb-2 px-3 pt-2 flex items-center gap-1.5">
-                <Clock className="h-3 w-3 text-muted-foreground/70" />
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              <div className="mb-1.5 px-3 flex items-center gap-1.5">
+                <Clock className="h-3 w-3 text-muted-foreground/50" />
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
                   Em Breve
                 </p>
               </div>
             )}
-            <nav className="flex flex-col gap-1">
+            <nav className="flex flex-col gap-0.5 opacity-60">
               {comingSoonMenuItems.map((item) => renderMenuItem(item, false))}
             </nav>
           </div>
