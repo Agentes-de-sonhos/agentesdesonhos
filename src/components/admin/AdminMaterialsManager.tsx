@@ -28,10 +28,11 @@ import {
   Trash2,
   Loader2,
   FileText,
-  Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { SupplierCombobox } from "./SupplierCombobox";
+import { MultiFileUpload } from "./MultiFileUpload";
 
 const CATEGORIES = [
   "Operadoras de turismo",
@@ -48,8 +49,16 @@ const CATEGORIES = [
 
 const MATERIAL_TYPES = ["Lâmina", "PDF", "Imagem", "Vídeo"];
 
+interface UploadedFile {
+  id: string;
+  name: string;
+  url: string;
+  type: "image" | "pdf" | "other";
+}
+
 interface MaterialForm {
   supplier_id: string;
+  supplier_name: string;
   category: string;
   material_type: string;
   title: string;
@@ -58,10 +67,12 @@ interface MaterialForm {
   video_url: string;
   thumbnail_url: string;
   is_active: boolean;
+  uploadedFiles: UploadedFile[];
 }
 
 const initialForm: MaterialForm = {
   supplier_id: "",
+  supplier_name: "",
   category: "",
   material_type: "",
   title: "",
@@ -70,13 +81,13 @@ const initialForm: MaterialForm = {
   video_url: "",
   thumbnail_url: "",
   is_active: true,
+  uploadedFiles: [],
 };
 
 export function AdminMaterialsManager() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MaterialForm>(initialForm);
-  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -107,15 +118,23 @@ export function AdminMaterialsManager() {
         .eq("is_active", true)
         .order("name");
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  const saveMutation = useMutation({
+  // Mutation for saving single material (edit mode)
+  const saveSingleMutation = useMutation({
     mutationFn: async (data: MaterialForm) => {
       const payload = {
-        ...data,
         supplier_id: data.supplier_id || null,
+        category: data.category,
+        material_type: data.material_type,
+        title: data.title,
+        destination: data.destination || null,
+        file_url: data.file_url || null,
+        video_url: data.video_url || null,
+        thumbnail_url: data.thumbnail_url || null,
+        is_active: data.is_active,
       };
 
       if (editingId) {
@@ -124,9 +143,6 @@ export function AdminMaterialsManager() {
           .update(payload)
           .eq("id", editingId);
         if (error) throw error;
-      } else {
-        const { error } = await supabase.from("materials").insert(payload);
-        if (error) throw error;
       }
     },
     onSuccess: () => {
@@ -134,7 +150,7 @@ export function AdminMaterialsManager() {
       queryClient.invalidateQueries({ queryKey: ["materials"] });
       toast({
         title: "Sucesso",
-        description: editingId ? "Material atualizado" : "Material criado",
+        description: "Material atualizado",
       });
       handleClose();
     },
@@ -143,6 +159,91 @@ export function AdminMaterialsManager() {
       toast({
         title: "Erro",
         description: "Não foi possível salvar o material",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation for creating multiple materials (new mode with multiple files)
+  const saveMultipleMutation = useMutation({
+    mutationFn: async (data: MaterialForm) => {
+      const basePayload = {
+        supplier_id: data.supplier_id || null,
+        category: data.category,
+        destination: data.destination || null,
+        is_active: data.is_active,
+      };
+
+      // For video type
+      if (data.material_type === "Vídeo") {
+        const { error } = await supabase.from("materials").insert({
+          ...basePayload,
+          material_type: "Vídeo",
+          title: data.title,
+          video_url: data.video_url,
+          file_url: null,
+          thumbnail_url: data.thumbnail_url || null,
+        });
+        if (error) throw error;
+        return 1;
+      }
+
+      // For files
+      if (data.uploadedFiles.length === 0) {
+        // Single URL input (legacy)
+        const { error } = await supabase.from("materials").insert({
+          ...basePayload,
+          material_type: data.material_type,
+          title: data.title,
+          file_url: data.file_url,
+          video_url: null,
+          thumbnail_url: null,
+        });
+        if (error) throw error;
+        return 1;
+      }
+
+      // Multiple files - create one material per file
+      const materialsToInsert = data.uploadedFiles.map((file, index) => {
+        // Determine material type based on file
+        let materialType = data.material_type;
+        if (!materialType || materialType === "") {
+          materialType = file.type === "pdf" ? "PDF" : "Imagem";
+        }
+
+        // Generate title for each file
+        const title = data.uploadedFiles.length > 1
+          ? `${data.title} (${index + 1})`
+          : data.title;
+
+        return {
+          ...basePayload,
+          material_type: materialType,
+          title,
+          file_url: file.url,
+          video_url: null,
+          thumbnail_url: null,
+        };
+      });
+
+      const { error } = await supabase.from("materials").insert(materialsToInsert);
+      if (error) throw error;
+      return materialsToInsert.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
+      toast({
+        title: "Sucesso",
+        description: `${count} material${count > 1 ? "is" : ""} criado${count > 1 ? "s" : ""}`,
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      console.error("Error saving materials:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar os materiais",
         variant: "destructive",
       });
     },
@@ -184,47 +285,11 @@ export function AdminMaterialsManager() {
     },
   });
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("materials")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("materials")
-        .getPublicUrl(filePath);
-
-      setForm((prev) => ({ ...prev, file_url: publicUrl }));
-      toast({
-        title: "Sucesso",
-        description: "Arquivo enviado com sucesso",
-      });
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível enviar o arquivo",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleEdit = (material: any) => {
     setEditingId(material.id);
     setForm({
       supplier_id: material.supplier_id || "",
+      supplier_name: material.trade_suppliers?.name || "",
       category: material.category,
       material_type: material.material_type,
       title: material.title,
@@ -233,6 +298,7 @@ export function AdminMaterialsManager() {
       video_url: material.video_url || "",
       thumbnail_url: material.thumbnail_url || "",
       is_active: material.is_active,
+      uploadedFiles: [],
     });
     setIsOpen(true);
   };
@@ -245,8 +311,15 @@ export function AdminMaterialsManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveMutation.mutate(form);
+    
+    if (editingId) {
+      saveSingleMutation.mutate(form);
+    } else {
+      saveMultipleMutation.mutate(form);
+    }
   };
+
+  const isPending = saveSingleMutation.isPending || saveMultipleMutation.isPending;
 
   return (
     <Card className="border-0 shadow-md">
@@ -268,13 +341,15 @@ export function AdminMaterialsManager() {
                 Novo Material
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingId ? "Editar Material" : "Novo Material"}
                 </DialogTitle>
                 <DialogDescription>
-                  Preencha as informações do material
+                  {editingId 
+                    ? "Atualize as informações do material" 
+                    : "Preencha as informações e faça upload de um ou mais arquivos"}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -285,9 +360,16 @@ export function AdminMaterialsManager() {
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, title: e.target.value }))
                     }
+                    placeholder="Nome do material"
                     required
                   />
+                  {!editingId && form.uploadedFiles.length > 1 && (
+                    <p className="text-xs text-muted-foreground">
+                      Cada arquivo terá o título com numeração sequencial
+                    </p>
+                  )}
                 </div>
+
                 <div className="space-y-2">
                   <Label>Destino</Label>
                   <Input
@@ -298,26 +380,22 @@ export function AdminMaterialsManager() {
                     placeholder="Ex: Paris, Maldivas, Caribe..."
                   />
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Fornecedor</Label>
-                    <Select
+                    <SupplierCombobox
+                      suppliers={suppliers || []}
                       value={form.supplier_id}
-                      onValueChange={(value) =>
-                        setForm((prev) => ({ ...prev, supplier_id: value }))
+                      onChange={(supplierId, supplierName) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          supplier_id: supplierId,
+                          supplier_name: supplierName,
+                        }))
                       }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {suppliers?.map((supplier) => (
-                          <SelectItem key={supplier.id} value={supplier.id}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      category={form.category}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Categoria *</Label>
@@ -340,6 +418,7 @@ export function AdminMaterialsManager() {
                     </Select>
                   </div>
                 </div>
+
                 <div className="space-y-2">
                   <Label>Tipo de Material *</Label>
                   <Select
@@ -360,6 +439,7 @@ export function AdminMaterialsManager() {
                     </SelectContent>
                   </Select>
                 </div>
+
                 {form.material_type === "Vídeo" ? (
                   <div className="space-y-2">
                     <Label>Link do Vídeo</Label>
@@ -371,51 +451,41 @@ export function AdminMaterialsManager() {
                       placeholder="https://youtube.com/..."
                     />
                   </div>
-                ) : (
+                ) : editingId ? (
+                  // Edit mode - single file URL
                   <div className="space-y-2">
-                    <Label>Arquivo</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={form.file_url}
-                        onChange={(e) =>
-                          setForm((prev) => ({ ...prev, file_url: e.target.value }))
-                        }
-                        placeholder="URL do arquivo"
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={uploading}
-                        onClick={() =>
-                          document.getElementById("file-upload")?.click()
-                        }
-                      >
-                        {uploading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Upload className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <input
-                        id="file-upload"
-                        type="file"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                        accept=".pdf,.jpg,.jpeg,.png,.webp"
-                      />
-                    </div>
+                    <Label>URL do Arquivo</Label>
+                    <Input
+                      value={form.file_url}
+                      onChange={(e) =>
+                        setForm((prev) => ({ ...prev, file_url: e.target.value }))
+                      }
+                      placeholder="URL do arquivo"
+                    />
+                  </div>
+                ) : (
+                  // Create mode - multiple file upload
+                  <div className="space-y-2">
+                    <Label>Arquivos</Label>
+                    <MultiFileUpload
+                      files={form.uploadedFiles}
+                      onFilesChange={(files) =>
+                        setForm((prev) => ({ ...prev, uploadedFiles: files }))
+                      }
+                      disabled={isPending}
+                    />
                   </div>
                 )}
-                <DialogFooter>
+
+                <DialogFooter className="gap-2 sm:gap-0">
                   <Button type="button" variant="outline" onClick={handleClose}>
                     Cancelar
                   </Button>
-                  <Button type="submit" disabled={saveMutation.isPending}>
-                    {saveMutation.isPending && (
+                  <Button type="submit" disabled={isPending}>
+                    {isPending && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    {editingId ? "Salvar" : "Criar"}
+                    {editingId ? "Salvar" : `Criar${form.uploadedFiles.length > 1 ? ` (${form.uploadedFiles.length})` : ""}`}
                   </Button>
                 </DialogFooter>
               </form>
