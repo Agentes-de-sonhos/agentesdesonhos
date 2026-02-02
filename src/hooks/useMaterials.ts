@@ -36,13 +36,35 @@ export function useMaterials() {
     },
   });
 
-  // Group materials into galleries by title + supplier + destination
+  // Normalize title by removing trailing numbering like (1), (2), etc.
+  const normalizeTitle = (title: string): string => {
+    return title
+      .trim()
+      .replace(/\s*\(\d+\)\s*$/, '') // Remove trailing (1), (2), etc.
+      .replace(/\s*-\s*\d+\s*$/, '') // Remove trailing - 1, - 2, etc.
+      .replace(/\s+\d+\s*$/, '')     // Remove trailing space + number
+      .trim()
+      .toLowerCase();
+  };
+
+  // Get display title (clean version without numbering)
+  const getDisplayTitle = (title: string): string => {
+    return title
+      .trim()
+      .replace(/\s*\(\d+\)\s*$/, '')
+      .replace(/\s*-\s*\d+\s*$/, '')
+      .replace(/\s+\d+\s*$/, '')
+      .trim();
+  };
+
+  // Group materials into galleries by normalized title + supplier + destination
   const groupIntoGalleries = (materials: Material[]): MaterialGallery[] => {
     const galleryMap = new Map<string, Material[]>();
     
     materials?.forEach((material) => {
-      // Create a unique key based on title, supplier, and destination
-      const key = `${material.title.trim().toLowerCase()}|${material.supplier_id || 'none'}|${(material.destination || '').trim().toLowerCase()}`;
+      // Create a unique key based on normalized title, supplier, and destination
+      const normalizedTitle = normalizeTitle(material.title);
+      const key = `${normalizedTitle}|${material.supplier_id || 'none'}|${(material.destination || '').trim().toLowerCase()}`;
       
       if (!galleryMap.has(key)) {
         galleryMap.set(key, []);
@@ -75,9 +97,12 @@ export function useMaterials() {
         }
       }
 
+      // Use clean display title (without numbering)
+      const displayTitle = getDisplayTitle(firstMaterial.title);
+
       return {
         id: key,
-        title: firstMaterial.title,
+        title: displayTitle || firstMaterial.title,
         category: firstMaterial.category,
         destination: firstMaterial.destination,
         supplier_id: firstMaterial.supplier_id,
