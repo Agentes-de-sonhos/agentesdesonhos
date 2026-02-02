@@ -53,8 +53,10 @@ interface MaterialForm {
   category: string;
   material_type: string;
   title: string;
+  destination: string;
   file_url: string;
   video_url: string;
+  thumbnail_url: string;
   is_active: boolean;
 }
 
@@ -63,8 +65,10 @@ const initialForm: MaterialForm = {
   category: "",
   material_type: "",
   title: "",
+  destination: "",
   file_url: "",
   video_url: "",
+  thumbnail_url: "",
   is_active: true,
 };
 
@@ -224,8 +228,10 @@ export function AdminMaterialsManager() {
       category: material.category,
       material_type: material.material_type,
       title: material.title,
+      destination: material.destination || "",
       file_url: material.file_url || "",
       video_url: material.video_url || "",
+      thumbnail_url: material.thumbnail_url || "",
       is_active: material.is_active,
     });
     setIsOpen(true);
@@ -280,6 +286,16 @@ export function AdminMaterialsManager() {
                       setForm((prev) => ({ ...prev, title: e.target.value }))
                     }
                     required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Destino</Label>
+                  <Input
+                    value={form.destination}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, destination: e.target.value }))
+                    }
+                    placeholder="Ex: Paris, Maldivas, Caribe..."
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
