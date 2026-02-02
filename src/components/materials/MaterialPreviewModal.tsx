@@ -9,19 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Download, 
-  X, 
   FileText, 
   Image as ImageIcon, 
   Video, 
   File,
   Calendar,
   Building2,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 
 interface Material {
   id: string;
@@ -59,8 +57,32 @@ const typeColors: Record<string, string> = {
   "Vídeo": "bg-secondary text-secondary-foreground",
 };
 
+// Get file extension from URL or material type
+const getFileExtension = (url: string, materialType: string): string => {
+  // Try to extract from URL
+  const urlMatch = url.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
+  if (urlMatch) return urlMatch[1].toLowerCase();
+  
+  // Fallback based on material type
+  const typeExtensions: Record<string, string> = {
+    "Imagem": "jpg",
+    "PDF": "pdf",
+    "Lâmina": "pdf",
+    "Vídeo": "mp4",
+  };
+  return typeExtensions[materialType] || "file";
+};
+
+// Sanitize filename for download
+const sanitizeFilename = (title: string): string => {
+  return title
+    .replace(/[^a-zA-Z0-9áàâãéèêíìîóòôõúùûçÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ\s-]/g, "")
+    .replace(/\s+/g, "_")
+    .substring(0, 100);
+};
+
 export function MaterialPreviewModal({ material, isOpen, onClose }: MaterialPreviewModalProps) {
-  const [pdfPage, setPdfPage] = useState(1);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!material) return null;
 
@@ -93,9 +115,59 @@ export function MaterialPreviewModal({ material, isOpen, onClose }: MaterialPrev
     return getYouTubeEmbedUrl(videoUrl) || getVimeoEmbedUrl(videoUrl) || videoUrl;
   };
 
-  const handleDownload = () => {
-    if (url) {
+  // Check if video is from external platform (YouTube/Vimeo)
+  const isExternalVideo = (videoUrl: string): boolean => {
+    return !!(getYouTubeEmbedUrl(videoUrl) || getVimeoEmbedUrl(videoUrl));
+  };
+
+  const handleDownload = async () => {
+    if (!url) return;
+
+    // For external videos (YouTube/Vimeo), open in new tab as download isn't possible
+    if (isVideo && material.video_url && isExternalVideo(material.video_url)) {
+      window.open(material.video_url, "_blank");
+      toast.info("Vídeos externos abrem na plataforma original");
+      return;
+    }
+
+    setIsDownloading(true);
+    
+    try {
+      // Fetch the file as blob
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error("Falha ao baixar arquivo");
+      }
+      
+      const blob = await response.blob();
+      
+      // Create download link
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      
+      // Set filename with proper extension
+      const extension = getFileExtension(url, material.material_type);
+      const filename = `${sanitizeFilename(material.title)}.${extension}`;
+      link.download = filename;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Cleanup blob URL
+      window.URL.revokeObjectURL(blobUrl);
+      
+      toast.success("Download iniciado!");
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Erro ao baixar arquivo. Tente novamente.");
+      // Fallback: open in new tab
       window.open(url, "_blank");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -193,9 +265,17 @@ export function MaterialPreviewModal({ material, isOpen, onClose }: MaterialPrev
           <Button variant="outline" onClick={onClose} className="order-2 sm:order-1">
             Fechar
           </Button>
-          <Button onClick={handleDownload} className="gap-2 order-1 sm:order-2">
-            <Download className="h-4 w-4" />
-            Baixar Material
+          <Button 
+            onClick={handleDownload} 
+            className="gap-2 order-1 sm:order-2"
+            disabled={isDownloading}
+          >
+            {isDownloading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {isDownloading ? "Baixando..." : "Baixar Material"}
           </Button>
         </div>
       </DialogContent>
