@@ -121,10 +121,10 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
             Olá, Agente de Sonhos! 👋
           </h1>
         </div>
@@ -135,55 +135,61 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
-            {/* 1. News Feed & Trade Updates - TOP */}
-            <section className="grid gap-6 lg:grid-cols-2">
-              <div>
-                <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+            {/* 1. News Feed & Trade Updates - TOP (stacked on mobile) */}
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+              <div className="order-1">
+                <h2 className="mb-3 sm:mb-4 font-display text-base sm:text-lg font-semibold text-foreground">
                   Principais Notícias do Dia
                 </h2>
                 {news && news.length > 0 ? (
                   <NewsFeedCard news={news} />
                 ) : (
-                  <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground shadow-card">
+                  <div className="rounded-xl border bg-card p-6 sm:p-8 text-center text-muted-foreground shadow-card">
                     <p>Nenhuma notícia disponível</p>
                   </div>
                 )}
               </div>
 
-              <div>
-                <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+              <div className="order-2">
+                <h2 className="mb-3 sm:mb-4 font-display text-base sm:text-lg font-semibold text-foreground">
                   Principais Novidades do Trade
                 </h2>
                 {tradeUpdates && tradeUpdates.length > 0 ? (
                   <TradeUpdatesCard updates={tradeUpdates} />
                 ) : (
-                  <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground shadow-card">
+                  <div className="rounded-xl border bg-card p-6 sm:p-8 text-center text-muted-foreground shadow-card">
                     <p>Nenhuma novidade do trade disponível</p>
                   </div>
                 )}
               </div>
             </section>
 
-            {/* 2. Productivity Section - Trips & Financial */}
-            <section className="grid gap-6 lg:grid-cols-2">
-              <TripRemindersCard />
-              <FinancialSummaryCard />
+            {/* 2. Productivity Section - Trips & Financial (stacked on mobile) */}
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+              <div className="order-3">
+                <TripRemindersCard />
+              </div>
+              <div className="order-4">
+                <FinancialSummaryCard />
+              </div>
             </section>
 
-            {/* 3. Mapa do Turismo */}
-            <section>
-              <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+            {/* 3. Mapa do Turismo (horizontal scroll on mobile) */}
+            <section className="order-5">
+              <h2 className="mb-3 sm:mb-4 font-display text-base sm:text-lg font-semibold text-foreground">
                 Mapa do Turismo
               </h2>
-              <SupplierCategoriesCard />
+              <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 sm:overflow-visible">
+                <SupplierCategoriesCard />
+              </div>
             </section>
 
             {/* 4. Ferramentas IA - Only Roteiro and Conteúdo */}
-            <section>
-              <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
+            <section className="order-6">
+              <h2 className="mb-3 sm:mb-4 font-display text-base sm:text-lg font-semibold text-foreground">
                 Ferramentas IA
               </h2>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
                 <QuickActionCard
                   title="Criar Roteiro"
                   description="Gere roteiros personalizados com IA"
@@ -201,10 +207,14 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* 5. Próximos Eventos & Buscar Bloqueios - BOTTOM */}
-            <section className="grid gap-6 lg:grid-cols-2">
-              <UpcomingEventsCard />
-              <FlightBlocksSearchCard />
+            {/* 5. Próximos Eventos & Buscar Bloqueios - BOTTOM (stacked on mobile) */}
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+              <div className="order-7">
+                <UpcomingEventsCard />
+              </div>
+              <div className="order-8">
+                <FlightBlocksSearchCard />
+              </div>
             </section>
           </>
         )}
