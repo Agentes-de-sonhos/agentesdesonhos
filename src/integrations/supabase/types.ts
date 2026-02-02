@@ -372,6 +372,54 @@ export type Database = {
         }
         Relationships: []
       }
+      global_popups: {
+        Row: {
+          button_link: string | null
+          button_text: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          has_button: boolean
+          id: string
+          image_url: string | null
+          is_active: boolean
+          start_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          has_button?: boolean
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          start_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          has_button?: boolean
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          start_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       in_person_events: {
         Row: {
           city: string

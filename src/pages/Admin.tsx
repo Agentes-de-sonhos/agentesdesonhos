@@ -13,6 +13,7 @@ import {
   Calendar,
   GraduationCap,
   Heart,
+  Megaphone,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -24,6 +25,7 @@ import { AdminEventsManager } from "@/components/admin/AdminEventsManager";
 import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
 import { AdminCommunityManager } from "@/components/admin/AdminCommunityManager";
 import { AdminUserManager } from "@/components/admin/AdminUserManager";
+import { AdminPopupsManager } from "@/components/admin/AdminPopupsManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -106,10 +108,14 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Usuários</span>
+            </TabsTrigger>
+            <TabsTrigger value="popups" className="flex items-center gap-2">
+              <Megaphone className="h-4 w-4" />
+              <span className="hidden sm:inline">Pop-ups</span>
             </TabsTrigger>
             <TabsTrigger value="trade-suppliers" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
@@ -151,6 +157,10 @@ export default function Admin() {
 
           <TabsContent value="users">
             <AdminUserManager />
+          </TabsContent>
+
+          <TabsContent value="popups">
+            <AdminPopupsManager />
           </TabsContent>
 
           <TabsContent value="trade-suppliers">
