@@ -1,14 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { 
   FileText, 
   Image, 
   Video, 
   File, 
-  Download, 
-  ExternalLink, 
-  Play 
+  Play,
+  Eye
 } from "lucide-react";
 
 interface MaterialCardProps {
@@ -28,6 +26,7 @@ interface MaterialCardProps {
     } | null;
   };
   variant?: "default" | "large";
+  onPreview?: () => void;
 }
 
 const typeIcons: Record<string, React.ElementType> = {
@@ -44,11 +43,10 @@ const typeColors: Record<string, string> = {
   "Vídeo": "bg-secondary text-secondary-foreground",
 };
 
-export function MaterialCard({ material, variant = "default" }: MaterialCardProps) {
+export function MaterialCard({ material, variant = "default", onPreview }: MaterialCardProps) {
   const Icon = typeIcons[material.material_type] || File;
   const typeColor = typeColors[material.material_type] || "bg-muted text-muted-foreground";
   const isVideo = material.material_type === "Vídeo";
-  const url = material.video_url || material.file_url;
 
   // Generate thumbnail - use uploaded thumbnail, video thumbnail, or file preview
   const getThumbnail = () => {
@@ -68,8 +66,8 @@ export function MaterialCard({ material, variant = "default" }: MaterialCardProp
   const isLarge = variant === "large";
 
   const handleClick = () => {
-    if (url) {
-      window.open(url, "_blank");
+    if (onPreview) {
+      onPreview();
     }
   };
 
@@ -103,10 +101,9 @@ export function MaterialCard({ material, variant = "default" }: MaterialCardProp
               <Play className="h-6 w-6 text-primary-foreground ml-1" />
             </div>
           ) : (
-            <Button variant="secondary" size="sm" className="gap-2">
-              <Download className="h-4 w-4" />
-              Baixar
-            </Button>
+            <div className="h-14 w-14 rounded-full bg-primary/90 flex items-center justify-center">
+              <Eye className="h-6 w-6 text-primary-foreground" />
+            </div>
           )}
         </div>
 

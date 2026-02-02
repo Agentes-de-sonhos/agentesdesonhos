@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MaterialCard } from "./MaterialCard";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface Material {
   id: string;
@@ -25,9 +24,10 @@ interface MaterialsSectionProps {
   materials: Material[];
   variant?: "default" | "large";
   icon?: React.ReactNode;
+  onPreview?: (material: Material) => void;
 }
 
-export function MaterialsSection({ title, materials, variant = "default", icon }: MaterialsSectionProps) {
+export function MaterialsSection({ title, materials, variant = "default", icon, onPreview }: MaterialsSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   if (!materials || materials.length === 0) return null;
@@ -76,7 +76,11 @@ export function MaterialsSection({ title, materials, variant = "default", icon }
       >
         {materials.map((material) => (
           <div key={material.id} className="snap-start flex-shrink-0">
-            <MaterialCard material={material} variant={variant} />
+            <MaterialCard 
+              material={material} 
+              variant={variant} 
+              onPreview={() => onPreview?.(material)}
+            />
           </div>
         ))}
       </div>

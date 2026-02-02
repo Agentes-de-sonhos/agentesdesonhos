@@ -17,14 +17,30 @@ import {
   Sparkles,
   Calendar,
   CalendarDays,
-  CalendarRange,
   Archive,
   Building2,
   Layers,
 } from "lucide-react";
 import { MaterialsSection } from "@/components/materials/MaterialsSection";
 import { MaterialsFilterSheet } from "@/components/materials/MaterialsFilterSheet";
+import { MaterialPreviewModal } from "@/components/materials/MaterialPreviewModal";
 import { useMaterials } from "@/hooks/useMaterials";
+
+type Material = {
+  id: string;
+  title: string;
+  material_type: string;
+  category: string;
+  destination?: string | null;
+  file_url?: string | null;
+  video_url?: string | null;
+  thumbnail_url?: string | null;
+  published_at: string;
+  trade_suppliers?: {
+    id: string;
+    name: string;
+  } | null;
+};
 
 const CATEGORIES = [
   "Todas",
@@ -47,6 +63,8 @@ export default function Materiais() {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedSupplier, setSelectedSupplier] = useState("Todos");
+  const [previewMaterial, setPreviewMaterial] = useState<Material | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const { 
     materials, 
@@ -82,6 +100,16 @@ export default function Materiais() {
     setSelectedCategory("Todas");
     setSelectedType("Todos");
     setSelectedSupplier("Todos");
+  };
+
+  const handlePreview = (material: Material) => {
+    setPreviewMaterial(material);
+    setIsPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    setPreviewMaterial(null);
   };
 
   const hasContent = filteredMaterials && filteredMaterials.length > 0;
@@ -226,6 +254,7 @@ export default function Materiais() {
                 materials={byPeriod.today} 
                 variant="large"
                 icon={<Sparkles className="h-5 w-5 text-primary" />}
+                onPreview={handlePreview}
               />
             )}
 
@@ -235,6 +264,7 @@ export default function Materiais() {
                 title="Desta Semana" 
                 materials={byPeriod.thisWeek}
                 icon={<Calendar className="h-5 w-5 text-primary" />}
+                onPreview={handlePreview}
               />
             )}
 
@@ -244,6 +274,7 @@ export default function Materiais() {
                 title="Deste Mês" 
                 materials={byPeriod.thisMonth}
                 icon={<CalendarDays className="h-5 w-5 text-primary" />}
+                onPreview={handlePreview}
               />
             )}
 
@@ -261,6 +292,7 @@ export default function Materiais() {
                       key={category}
                       title={category} 
                       materials={categoryMaterials}
+                      onPreview={handlePreview}
                     />
                   ))
                 }
@@ -283,6 +315,7 @@ export default function Materiais() {
                       key={supplierName}
                       title={supplierName} 
                       materials={supplierMaterials}
+                      onPreview={handlePreview}
                     />
                   ))
                 }
@@ -295,6 +328,7 @@ export default function Materiais() {
                 title="Materiais Anteriores" 
                 materials={byPeriod.older}
                 icon={<Archive className="h-5 w-5 text-muted-foreground" />}
+                onPreview={handlePreview}
               />
             )}
           </div>
@@ -315,6 +349,13 @@ export default function Materiais() {
             )}
           </div>
         )}
+
+        {/* Preview Modal */}
+        <MaterialPreviewModal
+          material={previewMaterial}
+          isOpen={isPreviewOpen}
+          onClose={handleClosePreview}
+        />
       </div>
     </DashboardLayout>
   );
