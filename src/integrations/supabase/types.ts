@@ -679,12 +679,14 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          destination: string | null
           file_url: string | null
           id: string
           is_active: boolean
           material_type: string
           published_at: string
           supplier_id: string | null
+          thumbnail_url: string | null
           title: string
           updated_at: string
           video_url: string | null
@@ -692,12 +694,14 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          destination?: string | null
           file_url?: string | null
           id?: string
           is_active?: boolean
           material_type: string
           published_at?: string
           supplier_id?: string | null
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
           video_url?: string | null
@@ -705,12 +709,14 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          destination?: string | null
           file_url?: string | null
           id?: string
           is_active?: boolean
           material_type?: string
           published_at?: string
           supplier_id?: string | null
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
           video_url?: string | null
