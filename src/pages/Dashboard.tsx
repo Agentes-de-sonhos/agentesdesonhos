@@ -4,7 +4,6 @@ import {
   Route,
   FileText,
   MapPin,
-  Calculator,
   Plane,
   Building2,
   CreditCard,
@@ -13,7 +12,6 @@ import {
   Ship,
   Car,
   Loader2,
-  Wallet,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
@@ -24,6 +22,7 @@ import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategorie
 import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
 import { FlightBlocksSearchCard } from "@/components/dashboard/FlightBlocksSearchCard";
 import { TripRemindersCard } from "@/components/dashboard/TripRemindersCard";
+import { FinancialSummaryCard } from "@/components/dashboard/FinancialSummaryCard";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
 
@@ -122,7 +121,7 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground">
@@ -138,7 +137,6 @@ export default function Dashboard() {
           <>
             {/* 1. News Feed & Trade Updates - TOP */}
             <section className="grid gap-6 lg:grid-cols-2">
-              {/* News Feed */}
               <div>
                 <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                   Principais Notícias do Dia
@@ -152,7 +150,6 @@ export default function Dashboard() {
                 )}
               </div>
 
-              {/* Trade Updates */}
               <div>
                 <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                   Principais Novidades do Trade
@@ -167,7 +164,13 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* 2. Mapa do Turismo - Categories */}
+            {/* 2. Productivity Section - Trips & Financial */}
+            <section className="grid gap-6 lg:grid-cols-2">
+              <TripRemindersCard />
+              <FinancialSummaryCard />
+            </section>
+
+            {/* 3. Mapa do Turismo */}
             <section>
               <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                 Mapa do Turismo
@@ -175,12 +178,12 @@ export default function Dashboard() {
               <SupplierCategoriesCard />
             </section>
 
-            {/* 3. Ferramentas IA */}
+            {/* 4. Ferramentas IA - Only Roteiro and Conteúdo */}
             <section>
               <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                 Ferramentas IA
               </h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <QuickActionCard
                   title="Criar Roteiro"
                   description="Gere roteiros personalizados com IA"
@@ -195,24 +198,7 @@ export default function Dashboard() {
                   variant="accent"
                   onClick={() => navigate("/ferramentas-ia/criar-conteudo")}
                 />
-                <QuickActionCard
-                  title="Gerar Orçamento"
-                  description="Monte orçamentos profissionais"
-                  icon={Calculator}
-                  onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}
-                />
-                <QuickActionCard
-                  title="Carteira Digital"
-                  description="Organize vouchers, documentos e serviços da viagem"
-                  icon={Wallet}
-                  onClick={() => navigate("/ferramentas-ia/trip-wallet")}
-                />
               </div>
-            </section>
-
-            {/* 4. Próximas Viagens e Lembretes */}
-            <section>
-              <TripRemindersCard />
             </section>
 
             {/* 5. Próximos Eventos & Buscar Bloqueios - BOTTOM */}
