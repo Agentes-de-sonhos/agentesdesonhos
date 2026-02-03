@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
 import {
   ArrowLeft,
   Building2,
@@ -376,6 +377,12 @@ export default function SupplierDetail() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Marketing Materials */}
+            <SupplierMaterialsCard 
+              supplierId={supplier.id} 
+              supplierName={supplier.name} 
+            />
           </div>
 
           {/* Sidebar */}
