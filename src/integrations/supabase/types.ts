@@ -1677,6 +1677,24 @@ export type Database = {
           },
         ]
       }
+      specialties: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           ai_usage_count: number
@@ -1817,6 +1835,42 @@ export type Database = {
           },
         ]
       }
+      supplier_specialties: {
+        Row: {
+          created_at: string
+          id: string
+          specialty_id: string
+          supplier_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          specialty_id: string
+          supplier_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          specialty_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_specialties_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_specialties_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "trade_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           created_at: string
@@ -1858,6 +1912,7 @@ export type Database = {
           id: string
           instagram_url: string | null
           is_active: boolean
+          logo_url: string | null
           name: string
           other_social_media: Json | null
           practical_notes: string | null
@@ -1872,6 +1927,7 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           is_active?: boolean
+          logo_url?: string | null
           name: string
           other_social_media?: Json | null
           practical_notes?: string | null
@@ -1886,6 +1942,7 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           is_active?: boolean
+          logo_url?: string | null
           name?: string
           other_social_media?: Json | null
           practical_notes?: string | null

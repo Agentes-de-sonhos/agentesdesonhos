@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,7 +20,10 @@ import {
   ChevronRight,
   Loader2,
   Filter,
+  Tag,
+  X,
 } from "lucide-react";
+import { useSuppliersWithSpecialties, useAllSpecialties } from "@/hooks/useSupplierSpecialties";
 
 const CATEGORIES = [
   "Operadoras de turismo",
@@ -37,24 +38,16 @@ const CATEGORIES = [
   "Guias",
 ];
 
-interface TradeSupplier {
+interface Specialty {
   id: string;
   name: string;
-  category: string;
-  how_to_sell: string | null;
-  sales_channel: string | null;
-  practical_notes: string | null;
-  website_url: string | null;
-  instagram_url: string | null;
-  other_social_media: any[];
-  is_active: boolean;
-  created_at: string;
 }
 
 export default function MapaTurismo() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
   const navigate = useNavigate();
 
   // Read category from URL on mount
@@ -63,30 +56,45 @@ export default function MapaTurismo() {
     if (categoria && CATEGORIES.includes(categoria)) {
       setCategoryFilter(categoria);
     }
+    
+    const especialidade = searchParams.get("especialidade");
+    if (especialidade) {
+      setSelectedSpecialties(especialidade.split(","));
+    }
   }, [searchParams]);
 
-  // Update URL when category changes
-  const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value);
-    if (value === "all") {
-      setSearchParams({});
-    } else {
-      setSearchParams({ categoria: value });
+  // Update URL when filters change
+  const updateUrlParams = (category: string, specialties: string[]) => {
+    const params: Record<string, string> = {};
+    if (category !== "all") {
+      params.categoria = category;
     }
+    if (specialties.length > 0) {
+      params.especialidade = specialties.join(",");
+    }
+    setSearchParams(params);
   };
 
-  const { data: suppliers, isLoading } = useQuery({
-    queryKey: ["trade-suppliers"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("trade_suppliers")
-        .select("*")
-        .eq("is_active", true)
-        .order("name");
-      if (error) throw error;
-      return data as TradeSupplier[];
-    },
-  });
+  const handleCategoryChange = (value: string) => {
+    setCategoryFilter(value);
+    updateUrlParams(value, selectedSpecialties);
+  };
+
+  const handleSpecialtyToggle = (specialtyName: string) => {
+    const newSpecialties = selectedSpecialties.includes(specialtyName)
+      ? selectedSpecialties.filter((s) => s !== specialtyName)
+      : [...selectedSpecialties, specialtyName];
+    setSelectedSpecialties(newSpecialties);
+    updateUrlParams(categoryFilter, newSpecialties);
+  };
+
+  const clearSpecialties = () => {
+    setSelectedSpecialties([]);
+    updateUrlParams(categoryFilter, []);
+  };
+
+  const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
+  const { data: allSpecialties = [] } = useAllSpecialties();
 
   const filteredSuppliers = suppliers?.filter((supplier) => {
     const matchesSearch = supplier.name
@@ -94,7 +102,17 @@ export default function MapaTurismo() {
       .includes(search.toLowerCase());
     const matchesCategory =
       categoryFilter === "all" || supplier.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    
+    // Check specialty filter
+    const matchesSpecialties =
+      selectedSpecialties.length === 0 ||
+      selectedSpecialties.some((specialtyName) =>
+        supplier.specialties?.some(
+          (s: Specialty) => s.name.toLowerCase() === specialtyName.toLowerCase()
+        )
+      );
+    
+    return matchesSearch && matchesCategory && matchesSpecialties;
   });
 
   const getCategoryColor = (category: string) => {
@@ -135,7 +153,7 @@ export default function MapaTurismo() {
 
         {/* Filters */}
         <Card className="shadow-card">
-          <CardContent className="p-4">
+          <CardContent className="p-4 space-y-4">
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -161,6 +179,45 @@ export default function MapaTurismo() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Specialty Filter */}
+            {allSpecialties.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Tag className="h-4 w-4" />
+                    Filtrar por especialidade
+                  </div>
+                  {selectedSpecialties.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearSpecialties}
+                      className="h-7 text-xs"
+                    >
+                      <X className="mr-1 h-3 w-3" />
+                      Limpar filtros
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {allSpecialties.map((specialty) => (
+                    <Badge
+                      key={specialty.id}
+                      variant={
+                        selectedSpecialties.includes(specialty.name)
+                          ? "default"
+                          : "outline"
+                      }
+                      className="cursor-pointer transition-all hover:scale-105"
+                      onClick={() => handleSpecialtyToggle(specialty.name)}
+                    >
+                      {specialty.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -190,20 +247,57 @@ export default function MapaTurismo() {
                 onClick={() => navigate(`/mapa-turismo/${supplier.id}`)}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground truncate">
-                        {supplier.name}
-                      </h3>
-                      <Badge
-                        variant="secondary"
-                        className={`mt-2 ${getCategoryColor(supplier.category)}`}
-                      >
-                        {supplier.category}
-                      </Badge>
+                  <div className="flex items-start gap-3">
+                    {/* Logo */}
+                    <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {supplier.logo_url ? (
+                        <img
+                          src={supplier.logo_url}
+                          alt={supplier.name}
+                          className="h-full w-full object-contain p-1"
+                        />
+                      ) : (
+                        <Building2 className="h-6 w-6 text-muted-foreground" />
+                      )}
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground truncate">
+                            {supplier.name}
+                          </h3>
+                          <Badge
+                            variant="secondary"
+                            className={`mt-1 text-xs ${getCategoryColor(supplier.category)}`}
+                          >
+                            {supplier.category}
+                          </Badge>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 flex-shrink-0" />
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Specialties */}
+                  {supplier.specialties && supplier.specialties.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {supplier.specialties.slice(0, 3).map((specialty: Specialty) => (
+                        <Badge
+                          key={specialty.id}
+                          variant="outline"
+                          className="text-xs bg-primary/5"
+                        >
+                          {specialty.name}
+                        </Badge>
+                      ))}
+                      {supplier.specialties.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{supplier.specialties.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
 
                   {supplier.sales_channel && (
                     <p className="mt-3 text-sm text-muted-foreground line-clamp-2">
