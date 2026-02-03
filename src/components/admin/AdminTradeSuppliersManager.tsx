@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,9 +30,13 @@ import {
   Building2,
   Users,
   X,
+  Tag,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SupplierContactsManager } from "./SupplierContactsManager";
+import { SupplierLogoUpload } from "./SupplierLogoUpload";
+import { SupplierSpecialtiesManager } from "./SupplierSpecialtiesManager";
+import { useSupplierSpecialties } from "@/hooks/useSupplierSpecialties";
 
 const CATEGORIES = [
   "Operadoras de turismo",
@@ -54,6 +58,11 @@ interface SocialMedia {
   url: string;
 }
 
+interface Specialty {
+  id: string;
+  name: string;
+}
+
 interface TradeSupplier {
   id: string;
   name: string;
@@ -63,6 +72,7 @@ interface TradeSupplier {
   practical_notes: string | null;
   website_url: string | null;
   instagram_url: string | null;
+  logo_url: string | null;
   other_social_media: SocialMedia[];
   is_active: boolean;
   created_at: string;
@@ -76,6 +86,7 @@ interface FormData {
   practical_notes: string;
   website_url: string;
   instagram_url: string;
+  logo_url: string | null;
   other_social_media: { type: string; url: string }[];
 }
 
@@ -87,6 +98,7 @@ const initialFormData: FormData = {
   practical_notes: "",
   website_url: "",
   instagram_url: "",
+  logo_url: null,
   other_social_media: [],
 };
 
@@ -96,9 +108,22 @@ export function AdminTradeSuppliersManager() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [activeTab, setActiveTab] = useState("info");
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
+  const [selectedSpecialties, setSelectedSpecialties] = useState<Specialty[]>([]);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Get supplier specialties when editing
+  const { supplierSpecialties, saveSpecialties, isSaving } = useSupplierSpecialties(
+    editingItem?.id || null
+  );
+
+  // Update selected specialties when editing supplier changes
+  useEffect(() => {
+    if (editingItem && supplierSpecialties) {
+      setSelectedSpecialties(supplierSpecialties.map((ss) => ss.specialty));
+    }
+  }, [editingItem, supplierSpecialties]);
 
   const { data: suppliers, isLoading } = useQuery({
     queryKey: ["admin-trade-suppliers"],
@@ -108,7 +133,7 @@ export function AdminTradeSuppliersManager() {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data.map((item) => {
+      return data.map((item: any) => {
         const socialMedia = Array.isArray(item.other_social_media)
           ? (item.other_social_media as unknown as SocialMedia[])
           : [];
@@ -122,21 +147,35 @@ export function AdminTradeSuppliersManager() {
 
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const { error } = await supabase.from("trade_suppliers").insert({
-        name: data.name,
-        category: data.category,
-        how_to_sell: data.how_to_sell || null,
-        sales_channel: data.sales_channel || null,
-        practical_notes: data.practical_notes || null,
-        website_url: data.website_url || null,
-        instagram_url: data.instagram_url || null,
-        other_social_media: data.other_social_media,
-      });
+      const { data: newSupplier, error } = await supabase
+        .from("trade_suppliers")
+        .insert({
+          name: data.name,
+          category: data.category,
+          how_to_sell: data.how_to_sell || null,
+          sales_channel: data.sales_channel || null,
+          practical_notes: data.practical_notes || null,
+          website_url: data.website_url || null,
+          instagram_url: data.instagram_url || null,
+          logo_url: data.logo_url || null,
+          other_social_media: data.other_social_media,
+        })
+        .select()
+        .single();
       if (error) throw error;
+      return newSupplier;
     },
-    onSuccess: () => {
+    onSuccess: async (newSupplier) => {
+      // Save specialties for new supplier
+      if (selectedSpecialties.length > 0) {
+        await saveSpecialties({
+          supplierId: newSupplier.id,
+          specialtyIds: selectedSpecialties.map((s) => s.id),
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["admin-trade-suppliers"] });
       queryClient.invalidateQueries({ queryKey: ["trade-suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["suppliers-with-specialties"] });
       toast({ title: "Fornecedor criado com sucesso!" });
       resetForm();
     },
@@ -163,20 +202,27 @@ export function AdminTradeSuppliersManager() {
         practical_notes?: string | null;
         website_url?: string | null;
         instagram_url?: string | null;
+        logo_url?: string | null;
         other_social_media?: unknown;
         is_active?: boolean;
       };
     }) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await supabase
         .from("trade_suppliers")
         .update(data as any)
         .eq("id", id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: async (id) => {
+      // Save specialties
+      await saveSpecialties({
+        supplierId: id,
+        specialtyIds: selectedSpecialties.map((s) => s.id),
+      });
       queryClient.invalidateQueries({ queryKey: ["admin-trade-suppliers"] });
       queryClient.invalidateQueries({ queryKey: ["trade-suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["suppliers-with-specialties"] });
       toast({ title: "Fornecedor atualizado!" });
       resetForm();
     },
@@ -200,6 +246,7 @@ export function AdminTradeSuppliersManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-trade-suppliers"] });
       queryClient.invalidateQueries({ queryKey: ["trade-suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["suppliers-with-specialties"] });
       toast({ title: "Fornecedor removido!" });
     },
     onError: (error) => {
@@ -214,6 +261,7 @@ export function AdminTradeSuppliersManager() {
   const resetForm = () => {
     setFormData(initialFormData);
     setEditingItem(null);
+    setSelectedSpecialties([]);
     setIsOpen(false);
     setActiveTab("info");
   };
@@ -240,6 +288,7 @@ export function AdminTradeSuppliersManager() {
           practical_notes: formData.practical_notes || null,
           website_url: formData.website_url || null,
           instagram_url: formData.instagram_url || null,
+          logo_url: formData.logo_url || null,
           other_social_media: formData.other_social_media,
         },
       });
@@ -258,6 +307,7 @@ export function AdminTradeSuppliersManager() {
       practical_notes: item.practical_notes || "",
       website_url: item.website_url || "",
       instagram_url: item.instagram_url || "",
+      logo_url: item.logo_url || null,
       other_social_media: item.other_social_media || [],
     });
     setIsOpen(true);
@@ -323,13 +373,23 @@ export function AdminTradeSuppliersManager() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="info">Informações</TabsTrigger>
+                  <TabsTrigger value="specialties">Especialidades</TabsTrigger>
                   <TabsTrigger value="details">Detalhes</TabsTrigger>
                   <TabsTrigger value="social">Redes Sociais</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="info" className="space-y-4 mt-4">
+                  {/* Logo Upload */}
+                  <SupplierLogoUpload
+                    logoUrl={formData.logo_url}
+                    onLogoChange={(url) =>
+                      setFormData({ ...formData, logo_url: url })
+                    }
+                    supplierId={editingItem?.id}
+                  />
+
                   <div>
                     <Label>Nome da Empresa *</Label>
                     <Input
@@ -385,6 +445,14 @@ export function AdminTradeSuppliersManager() {
                       placeholder="https://instagram.com/..."
                     />
                   </div>
+                </TabsContent>
+
+                <TabsContent value="specialties" className="space-y-4 mt-4">
+                  <SupplierSpecialtiesManager
+                    supplierId={editingItem?.id || null}
+                    selectedSpecialties={selectedSpecialties}
+                    onSpecialtiesChange={setSelectedSpecialties}
+                  />
                 </TabsContent>
 
                 <TabsContent value="details" className="space-y-4 mt-4">
@@ -496,9 +564,9 @@ export function AdminTradeSuppliersManager() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={createMutation.isPending || updateMutation.isPending}
+                disabled={createMutation.isPending || updateMutation.isPending || isSaving}
               >
-                {(createMutation.isPending || updateMutation.isPending) && (
+                {(createMutation.isPending || updateMutation.isPending || isSaving) && (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 )}
                 {editingItem ? "Salvar" : "Criar"}
@@ -524,8 +592,17 @@ export function AdminTradeSuppliersManager() {
                 className="flex items-center justify-between p-3 rounded-lg border bg-card"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Building2 className="h-4 w-4 text-primary" />
+                  {/* Logo or placeholder */}
+                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {item.logo_url ? (
+                      <img
+                        src={item.logo_url}
+                        alt={item.name}
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <Building2 className="h-5 w-5 text-muted-foreground" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{item.name}</p>

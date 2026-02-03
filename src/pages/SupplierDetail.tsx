@@ -23,11 +23,17 @@ import {
   ShoppingCart,
   Users,
   FileText,
+  Tag,
 } from "lucide-react";
 
 interface SocialMedia {
   type: string;
   url: string;
+}
+
+interface Specialty {
+  id: string;
+  name: string;
 }
 
 interface TradeSupplier {
@@ -39,9 +45,11 @@ interface TradeSupplier {
   practical_notes: string | null;
   website_url: string | null;
   instagram_url: string | null;
+  logo_url: string | null;
   other_social_media: SocialMedia[] | null;
   is_active: boolean;
   created_at: string;
+  specialties?: Specialty[];
 }
 
 interface SupplierContact {
@@ -70,7 +78,16 @@ export default function SupplierDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trade_suppliers")
-        .select("*")
+        .select(`
+          *,
+          supplier_specialties (
+            specialty_id,
+            specialties (
+              id,
+              name
+            )
+          )
+        `)
         .eq("id", id)
         .maybeSingle();
       if (error) throw error;
@@ -78,9 +95,11 @@ export default function SupplierDetail() {
       const socialMedia = Array.isArray(data.other_social_media) 
         ? (data.other_social_media as unknown as SocialMedia[]) 
         : [];
+      const specialties = data.supplier_specialties?.map((ss: any) => ss.specialties) || [];
       return {
         ...data,
         other_social_media: socialMedia,
+        specialties,
       } as TradeSupplier;
     },
     enabled: !!id,
@@ -162,8 +181,17 @@ export default function SupplierDetail() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-primary">
-              <Building2 className="h-8 w-8 text-primary-foreground" />
+            {/* Logo or fallback */}
+            <div className="h-20 w-20 rounded-2xl bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 border">
+              {supplier.logo_url ? (
+                <img
+                  src={supplier.logo_url}
+                  alt={supplier.name}
+                  className="h-full w-full object-contain p-2"
+                />
+              ) : (
+                <Building2 className="h-10 w-10 text-muted-foreground" />
+              )}
             </div>
             <div>
               <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
@@ -172,6 +200,22 @@ export default function SupplierDetail() {
               <Badge variant="secondary" className="mt-2">
                 {supplier.category}
               </Badge>
+              
+              {/* Specialties */}
+              {supplier.specialties && supplier.specialties.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {supplier.specialties.map((specialty) => (
+                    <Badge
+                      key={specialty.id}
+                      variant="outline"
+                      className="text-xs bg-primary/5"
+                    >
+                      <Tag className="mr-1 h-3 w-3" />
+                      {specialty.name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex gap-2">
@@ -336,6 +380,31 @@ export default function SupplierDetail() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Specialties Card */}
+            {supplier.specialties && supplier.specialties.length > 0 && (
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Tag className="h-5 w-5" />
+                    Especialidades
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {supplier.specialties.map((specialty) => (
+                      <Badge
+                        key={specialty.id}
+                        variant="secondary"
+                        className="bg-primary/10 text-primary"
+                      >
+                        {specialty.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Social Media */}
             {supplier.other_social_media &&
               supplier.other_social_media.length > 0 && (
