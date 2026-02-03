@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Building2,
   Search,
@@ -21,7 +22,7 @@ import {
   Loader2,
   Filter,
   Tag,
-  X,
+  MapPin,
 } from "lucide-react";
 import { useSuppliersWithSpecialties, useAllSpecialties } from "@/hooks/useSupplierSpecialties";
 
@@ -80,21 +81,24 @@ export default function MapaTurismo() {
     updateUrlParams(value, selectedSpecialties);
   };
 
-  const handleSpecialtyToggle = (specialtyName: string) => {
-    const newSpecialties = selectedSpecialties.includes(specialtyName)
-      ? selectedSpecialties.filter((s) => s !== specialtyName)
-      : [...selectedSpecialties, specialtyName];
-    setSelectedSpecialties(newSpecialties);
-    updateUrlParams(categoryFilter, newSpecialties);
+  const handleSpecialtiesChange = (specialties: string[]) => {
+    setSelectedSpecialties(specialties);
+    updateUrlParams(categoryFilter, specialties);
   };
 
-  const clearSpecialties = () => {
-    setSelectedSpecialties([]);
-    updateUrlParams(categoryFilter, []);
+  const handleCategoryChipClick = (cat: string) => {
+    const newCategory = categoryFilter === cat ? "all" : cat;
+    handleCategoryChange(newCategory);
   };
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
   const { data: allSpecialties = [] } = useAllSpecialties();
+
+  // Convert specialties to multi-select options
+  const specialtyOptions = allSpecialties.map((s) => ({
+    value: s.name,
+    label: s.name,
+  }));
 
   const filteredSuppliers = suppliers?.filter((supplier) => {
     const matchesSearch = supplier.name
@@ -117,19 +121,22 @@ export default function MapaTurismo() {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      "Operadoras de turismo": "bg-blue-500/10 text-blue-600",
-      "Consolidadoras": "bg-purple-500/10 text-purple-600",
-      "Companhias aéreas": "bg-sky-500/10 text-sky-600",
-      "Hospedagem": "bg-amber-500/10 text-amber-600",
-      "Locadoras de veículos": "bg-green-500/10 text-green-600",
-      "Cruzeiros": "bg-cyan-500/10 text-cyan-600",
-      "Seguros viagem": "bg-red-500/10 text-red-600",
-      "Parques e atrações": "bg-pink-500/10 text-pink-600",
-      "Receptivos": "bg-orange-500/10 text-orange-600",
-      "Guias": "bg-teal-500/10 text-teal-600",
+      "Operadoras de turismo": "bg-blue-500/10 text-blue-600 border-blue-200 hover:bg-blue-500/20",
+      "Consolidadoras": "bg-purple-500/10 text-purple-600 border-purple-200 hover:bg-purple-500/20",
+      "Companhias aéreas": "bg-sky-500/10 text-sky-600 border-sky-200 hover:bg-sky-500/20",
+      "Hospedagem": "bg-amber-500/10 text-amber-600 border-amber-200 hover:bg-amber-500/20",
+      "Locadoras de veículos": "bg-green-500/10 text-green-600 border-green-200 hover:bg-green-500/20",
+      "Cruzeiros": "bg-cyan-500/10 text-cyan-600 border-cyan-200 hover:bg-cyan-500/20",
+      "Seguros viagem": "bg-red-500/10 text-red-600 border-red-200 hover:bg-red-500/20",
+      "Parques e atrações": "bg-pink-500/10 text-pink-600 border-pink-200 hover:bg-pink-500/20",
+      "Receptivos": "bg-orange-500/10 text-orange-600 border-orange-200 hover:bg-orange-500/20",
+      "Guias": "bg-teal-500/10 text-teal-600 border-teal-200 hover:bg-teal-500/20",
     };
     return colors[category] || "bg-muted text-muted-foreground";
   };
+
+  const activeFiltersCount =
+    (categoryFilter !== "all" ? 1 : 0) + selectedSpecialties.length;
 
   return (
     <DashboardLayout>
@@ -138,7 +145,7 @@ export default function MapaTurismo() {
         <div>
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-primary">
-              <Building2 className="h-6 w-6 text-primary-foreground" />
+              <MapPin className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
               <h1 className="font-display text-3xl font-bold text-foreground">
@@ -151,23 +158,29 @@ export default function MapaTurismo() {
           </div>
         </div>
 
-        {/* Filters */}
-        <Card className="shadow-card">
-          <CardContent className="p-4 space-y-4">
-            <div className="flex flex-col gap-4 sm:flex-row">
+        {/* Filters Section */}
+        <Card className="shadow-card border-0 bg-card/80 backdrop-blur-sm">
+          <CardContent className="p-6 space-y-5">
+            {/* Primary Filters Row */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+              {/* Search */}
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por nome da empresa..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11 bg-background/50"
                 />
               </div>
+
+              {/* Category Dropdown */}
               <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="w-full sm:w-[220px]">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Filtrar categoria" />
+                <SelectTrigger className="w-full lg:w-[240px] h-11 bg-background/50">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Categoria" />
+                  </div>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as categorias</SelectItem>
@@ -180,42 +193,70 @@ export default function MapaTurismo() {
               </Select>
             </div>
 
-            {/* Specialty Filter */}
+            {/* Specialties Filter */}
             {allSpecialties.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Tag className="h-4 w-4" />
-                    Filtrar por especialidade
-                  </div>
-                  {selectedSpecialties.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearSpecialties}
-                      className="h-7 text-xs"
-                    >
-                      <X className="mr-1 h-3 w-3" />
-                      Limpar filtros
-                    </Button>
-                  )}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground shrink-0">
+                  <Tag className="h-4 w-4" />
+                  Especialidades:
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {allSpecialties.map((specialty) => (
-                    <Badge
-                      key={specialty.id}
-                      variant={
-                        selectedSpecialties.includes(specialty.name)
-                          ? "default"
-                          : "outline"
-                      }
-                      className="cursor-pointer transition-all hover:scale-105"
-                      onClick={() => handleSpecialtyToggle(specialty.name)}
-                    >
-                      {specialty.name}
-                    </Badge>
-                  ))}
-                </div>
+                <MultiSelect
+                  options={specialtyOptions}
+                  selected={selectedSpecialties}
+                  onChange={handleSpecialtiesChange}
+                  placeholder="Filtrar por especialidade..."
+                  searchPlaceholder="Buscar especialidade..."
+                  emptyMessage="Nenhuma especialidade encontrada."
+                  className="flex-1 bg-background/50"
+                />
+              </div>
+            )}
+
+            {/* Categories Chips */}
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">
+                Categorias disponíveis
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((cat) => (
+                  <Badge
+                    key={cat}
+                    variant="outline"
+                    className={`cursor-pointer transition-all duration-200 px-3 py-1.5 text-xs font-medium ${getCategoryColor(cat)} ${
+                      categoryFilter === cat
+                        ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-md"
+                        : "opacity-80 hover:opacity-100"
+                    }`}
+                    onClick={() => handleCategoryChipClick(cat)}
+                  >
+                    {cat}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Active Filters Summary */}
+            {activeFiltersCount > 0 && (
+              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">
+                    {filteredSuppliers?.length || 0}
+                  </span>{" "}
+                  fornecedor{filteredSuppliers?.length !== 1 ? "es" : ""} encontrado
+                  {filteredSuppliers?.length !== 1 ? "s" : ""}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-8"
+                  onClick={() => {
+                    setCategoryFilter("all");
+                    setSelectedSpecialties([]);
+                    setSearchParams({});
+                  }}
+                >
+                  Limpar todos os filtros
+                </Button>
               </div>
             )}
           </CardContent>
@@ -227,15 +268,29 @@ export default function MapaTurismo() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : filteredSuppliers?.length === 0 ? (
-          <Card className="shadow-card">
-            <CardContent className="py-12 text-center">
-              <Building2 className="mx-auto h-12 w-12 text-muted-foreground/50" />
-              <p className="mt-4 text-muted-foreground">
+          <Card className="shadow-card border-0">
+            <CardContent className="py-16 text-center">
+              <div className="mx-auto h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                <Building2 className="h-8 w-8 text-muted-foreground/50" />
+              </div>
+              <p className="text-lg font-medium text-foreground">
                 Nenhum fornecedor encontrado
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mt-1">
                 Tente ajustar os filtros de busca
               </p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => {
+                  setSearch("");
+                  setCategoryFilter("all");
+                  setSelectedSpecialties([]);
+                  setSearchParams({});
+                }}
+              >
+                Limpar filtros
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -243,50 +298,50 @@ export default function MapaTurismo() {
             {filteredSuppliers?.map((supplier) => (
               <Card
                 key={supplier.id}
-                className="group cursor-pointer shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
+                className="group cursor-pointer shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
                 onClick={() => navigate(`/mapa-turismo/${supplier.id}`)}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
                     {/* Logo */}
-                    <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-border/50">
                       {supplier.logo_url ? (
                         <img
                           src={supplier.logo_url}
                           alt={supplier.name}
-                          className="h-full w-full object-contain p-1"
+                          className="h-full w-full object-contain p-1.5"
                         />
                       ) : (
-                        <Building2 className="h-6 w-6 text-muted-foreground" />
+                        <Building2 className="h-7 w-7 text-muted-foreground" />
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-foreground truncate">
+                          <h3 className="font-semibold text-foreground truncate text-base">
                             {supplier.name}
                           </h3>
                           <Badge
                             variant="secondary"
-                            className={`mt-1 text-xs ${getCategoryColor(supplier.category)}`}
+                            className={`mt-1.5 text-xs ${getCategoryColor(supplier.category)}`}
                           >
                             {supplier.category}
                           </Badge>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 flex-shrink-0" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 flex-shrink-0 mt-0.5" />
                       </div>
                     </div>
                   </div>
 
                   {/* Specialties */}
                   {supplier.specialties && supplier.specialties.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
+                    <div className="mt-4 flex flex-wrap gap-1.5">
                       {supplier.specialties.slice(0, 3).map((specialty: Specialty) => (
                         <Badge
                           key={specialty.id}
                           variant="outline"
-                          className="text-xs bg-primary/5"
+                          className="text-xs bg-primary/5 border-primary/20"
                         >
                           {specialty.name}
                         </Badge>
@@ -305,12 +360,12 @@ export default function MapaTurismo() {
                     </p>
                   )}
 
-                  <div className="mt-4 flex items-center gap-2">
+                  <div className="mt-4 flex items-center gap-2 pt-3 border-t border-border/50">
                     {supplier.website_url && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 hover:bg-primary/10"
                         onClick={(e) => {
                           e.stopPropagation();
                           window.open(supplier.website_url!, "_blank");
@@ -323,7 +378,7 @@ export default function MapaTurismo() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 hover:bg-primary/10"
                         onClick={(e) => {
                           e.stopPropagation();
                           window.open(supplier.instagram_url!, "_blank");
@@ -332,37 +387,16 @@ export default function MapaTurismo() {
                         <Instagram className="h-4 w-4" />
                       </Button>
                     )}
+                    <div className="flex-1" />
+                    <span className="text-xs text-muted-foreground">
+                      Ver detalhes →
+                    </span>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
-
-        {/* Category Legend */}
-        <Card className="shadow-card">
-          <CardContent className="p-4">
-            <p className="text-sm font-medium text-foreground mb-3">
-              Categorias disponíveis
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => (
-                <Badge
-                  key={cat}
-                  variant="secondary"
-                  className={`cursor-pointer transition-opacity hover:opacity-80 ${getCategoryColor(cat)} ${
-                    categoryFilter === cat ? "ring-2 ring-primary" : ""
-                  }`}
-                  onClick={() =>
-                    handleCategoryChange(categoryFilter === cat ? "all" : cat)
-                  }
-                >
-                  {cat}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </DashboardLayout>
   );
