@@ -57,13 +57,14 @@ export function GallerySection({ title, galleries, variant = "default", icon, on
         </div>
       </div>
 
+      {/* Mobile: vertical single column, Desktop: horizontal scroll */}
       <div 
         ref={scrollRef}
-        className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent snap-x snap-mandatory"
+        className="flex flex-col sm:flex-row gap-4 sm:gap-4 sm:overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent sm:snap-x sm:snap-mandatory"
         style={{ scrollbarWidth: "thin" }}
       >
         {galleries.map((gallery) => (
-          <div key={gallery.id} className="snap-start flex-shrink-0">
+          <div key={gallery.id} className="sm:snap-start sm:flex-shrink-0 w-full sm:w-auto px-1 sm:px-0">
             <GalleryCard 
               gallery={gallery} 
               variant={variant} 

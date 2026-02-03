@@ -58,21 +58,25 @@ export function GalleryCard({ gallery, variant = "default", onOpen }: GalleryCar
 
   return (
     <Card 
-      className={`group border-0 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden bg-card hover:scale-[1.02] ${
-        isLarge ? "min-w-[280px] sm:min-w-[320px]" : "min-w-[240px] sm:min-w-[280px]"
+      className={`group border-0 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden bg-card hover:scale-[1.02] w-full ${
+        isLarge 
+          ? "min-w-[280px] sm:min-w-[320px] max-w-full sm:max-w-[320px]" 
+          : "min-w-[240px] sm:min-w-[280px] max-w-full sm:max-w-[280px]"
       }`}
       onClick={onOpen}
     >
-      {/* Thumbnail */}
-      <div className={`relative overflow-hidden bg-gradient-to-br from-muted to-muted/50 ${
-        isLarge ? "h-40 sm:h-48" : "h-32 sm:h-40"
+      {/* Thumbnail - taller for vertical promotional formats */}
+      <div className={`relative overflow-hidden bg-gradient-to-br from-muted/30 via-muted/20 to-muted/40 backdrop-blur-sm ${
+        isLarge ? "h-56 sm:h-64" : "h-48 sm:h-56"
       }`}>
         {thumbnail ? (
-          <img 
-            src={thumbnail} 
-            alt={gallery.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
+          <div className="w-full h-full flex items-center justify-center bg-muted/30">
+            <img 
+              src={thumbnail} 
+              alt={gallery.title}
+              className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Icon className={`${isLarge ? "h-16 w-16" : "h-12 w-12"} text-muted-foreground/50`} />
