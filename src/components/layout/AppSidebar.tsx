@@ -90,7 +90,7 @@ const secondaryMenuItems: MenuItem[] = [
     requiredFeature: "crm_basic",
   },
   {
-    title: "Financeiro",
+    title: "Meta de Vendas",
     url: "/financeiro",
     icon: Wallet,
   },
