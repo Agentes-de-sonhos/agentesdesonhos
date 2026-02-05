@@ -69,9 +69,6 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Sidebar premium colors
-        "sidebar-baby-blue": "hsl(200 85% 95%)",
-        "sidebar-pool-blue": "hsl(201 94% 44%)",
       },
       borderRadius: {
         lg: "var(--radius)",

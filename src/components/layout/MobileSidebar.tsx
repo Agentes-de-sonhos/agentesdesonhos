@@ -109,10 +109,9 @@ export function MobileSidebar() {
       <div className="relative flex-shrink-0">
         <item.icon
           className={cn(
-            "h-5 w-5 transition-all duration-200",
-            isActive && !isLocked ? "text-white" : "",
-            isLocked ? "text-muted-foreground" : "",
-            !isActive && !isLocked && "group-hover:text-white group-hover:scale-110"
+            "h-5 w-5 transition-colors",
+            isActive && !isLocked ? "text-primary-foreground" : "",
+            isLocked ? "text-muted-foreground" : ""
           )}
         />
         {showPremiumLock && (
@@ -129,12 +128,12 @@ export function MobileSidebar() {
             <button
               onClick={(e) => handleMenuClick(item, e)}
               className={cn(
-                "group w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200",
+                "w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200",
                 isActive && !isLocked
-                  ? "bg-primary text-white shadow-lg shadow-primary/25"
+                  ? "bg-primary text-primary-foreground shadow-md"
                   : isLocked
                     ? "opacity-50"
-                    : "text-slate-700 hover:bg-primary hover:text-white hover:shadow-md hover:shadow-primary/20"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent"
               )}
             >
               {iconElement}
@@ -156,19 +155,16 @@ export function MobileSidebar() {
         key={item.url}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
-          "group w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left",
+          "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left",
           isActive && !isLocked
-            ? "bg-primary text-white shadow-lg shadow-primary/25"
+            ? "bg-primary text-primary-foreground shadow-md"
             : isLocked
               ? "opacity-60"
-              : "text-slate-700 hover:bg-primary hover:text-white hover:shadow-md hover:shadow-primary/20"
+              : "text-sidebar-foreground hover:bg-sidebar-accent"
         )}
       >
         {iconElement}
-        <span className={cn(
-          "truncate transition-colors duration-200",
-          isLocked && "text-muted-foreground group-hover:text-muted-foreground"
-        )}>
+        <span className={cn("truncate", isLocked && "text-muted-foreground")}>
           {item.title}
         </span>
         {showPremiumLock && (
@@ -191,31 +187,29 @@ export function MobileSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen border-r border-white/20 flex flex-col lg:hidden transition-all duration-300 ease-out",
-          "bg-gradient-to-b from-[hsl(200_85%_95%)] to-[hsl(200_80%_92%)]",
-          "sidebar-clouds shadow-lg shadow-primary/5",
+          "fixed left-0 top-0 z-50 h-screen border-r border-sidebar-border bg-sidebar flex flex-col lg:hidden transition-all duration-300 ease-out",
           expanded ? "w-[280px] shadow-2xl" : "w-14"
         )}
       >
         {/* Header */}
         <div className={cn(
-          "flex items-center border-b border-white/30 flex-shrink-0 transition-all duration-300 bg-white/20 backdrop-blur-sm",
+          "flex items-center border-b border-sidebar-border flex-shrink-0 transition-all duration-300",
           expanded ? "h-16 px-4 justify-between" : "h-14 justify-center"
         )}>
           {expanded ? (
             <>
               <Link to="/dashboard" onClick={() => setExpanded(false)} className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary shadow-lg shadow-primary/30">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
                   <Cloud className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <h1 className="font-display text-lg font-semibold text-slate-800 animate-fade-in">
+                <h1 className="font-display text-lg font-semibold text-sidebar-foreground animate-fade-in">
                   Agentes de Sonhos
                 </h1>
               </Link>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-slate-600 hover:text-slate-800 hover:bg-white/50"
+                className="h-8 w-8 text-muted-foreground hover:text-sidebar-foreground"
                 onClick={() => setExpanded(false)}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -225,7 +219,7 @@ export function MobileSidebar() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 text-slate-600 hover:text-slate-800 hover:bg-white/50"
+              className="h-10 w-10 text-muted-foreground hover:text-sidebar-foreground"
               onClick={() => setExpanded(true)}
             >
               <ChevronRight className="h-5 w-5" />
@@ -255,13 +249,13 @@ export function MobileSidebar() {
 
           {/* Separator */}
           <div className={cn("py-3", expanded ? "px-3" : "px-2")}>
-            <Separator className="bg-slate-300/50" />
+            <Separator className="bg-sidebar-border" />
           </div>
 
           {/* Secondary Navigation (CRM, Financeiro) */}
           {expanded && (
             <div className="mb-1.5 px-6">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
                 Gestão
               </p>
             </div>
@@ -277,7 +271,7 @@ export function MobileSidebar() {
           <div className={cn("mt-4", expanded ? "px-3" : "px-2")}>
             {expanded && (
               <div className="mb-1.5 px-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
                   Recursos Premium
                 </p>
               </div>
@@ -294,8 +288,8 @@ export function MobileSidebar() {
           <div className={cn("mt-4", expanded ? "px-3" : "px-2")}>
             {expanded && (
               <div className="mb-1.5 px-3 flex items-center gap-1.5">
-                <Clock className="h-3 w-3 text-slate-400" />
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <Clock className="h-3 w-3 text-muted-foreground/50" />
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
                   Em Breve
                 </p>
               </div>
@@ -311,7 +305,7 @@ export function MobileSidebar() {
 
         {/* Bottom Section */}
         <div className={cn(
-          "flex-shrink-0 border-t border-white/30 space-y-2 bg-white/10 backdrop-blur-sm",
+          "flex-shrink-0 border-t border-sidebar-border space-y-2",
           expanded ? "p-3" : "p-2 flex flex-col items-center"
         )}>
           {/* Profile */}
@@ -320,22 +314,22 @@ export function MobileSidebar() {
           {/* Plan Badge - only when expanded */}
           {expanded && (
             <div className={cn(
-              "rounded-xl p-2.5 flex items-center gap-2 transition-all duration-200 shadow-sm",
-              plan === "premium" && "bg-gradient-to-r from-amber-100 to-amber-50 border border-amber-300/50",
-              plan === "profissional" && "bg-white/80 border border-primary/30",
-              plan === "essencial" && "bg-white/60 border border-slate-200"
+              "rounded-lg p-2.5 flex items-center gap-2 transition-colors",
+              plan === "premium" && "bg-gradient-to-r from-warning/20 to-warning/10 border border-warning/30",
+              plan === "profissional" && "bg-primary/10 border border-primary/20",
+              plan === "essencial" && "bg-muted border border-border"
             )}>
               <Crown className={cn(
                 "h-4 w-4 flex-shrink-0",
                 plan === "premium" && "text-warning",
                 plan === "profissional" && "text-primary",
-                plan === "essencial" && "text-slate-500"
+                plan === "essencial" && "text-muted-foreground"
               )} />
               <span className={cn(
                 "text-xs font-medium",
                 plan === "premium" && "text-warning",
                 plan === "profissional" && "text-primary",
-                plan === "essencial" && "text-slate-600"
+                plan === "essencial" && "text-muted-foreground"
               )}>
                 Plano {plan.charAt(0).toUpperCase() + plan.slice(1)}
               </span>
@@ -346,7 +340,7 @@ export function MobileSidebar() {
           {expanded ? (
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 text-slate-600 hover:text-destructive hover:bg-white/60 rounded-xl"
+              className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               onClick={handleSignOut}
             >
               <LogOut className="h-5 w-5 flex-shrink-0" />
@@ -358,7 +352,7 @@ export function MobileSidebar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-10 w-10 text-slate-600 hover:text-destructive hover:bg-white/60 rounded-xl"
+                  className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                   onClick={handleSignOut}
                 >
                   <LogOut className="h-5 w-5" />
@@ -373,8 +367,8 @@ export function MobileSidebar() {
           {/* Footer */}
           {expanded && (
             <div className="text-center pt-2">
-              <p className="text-[10px] text-slate-400">Desenvolvido por</p>
-              <p className="text-[11px] font-medium text-slate-500">Nobre Digital Hub</p>
+              <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>
+              <p className="text-[11px] font-medium text-muted-foreground/80">Nobre Digital Hub</p>
             </div>
           )}
         </div>

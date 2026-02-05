@@ -117,38 +117,6 @@
   }
 }
 
-/* Cloud texture for sidebar */
-.sidebar-clouds {
-  background-image: 
-    radial-gradient(ellipse 120px 80px at 20% 30%, hsl(0 0% 100% / 0.15) 0%, transparent 70%),
-    radial-gradient(ellipse 100px 60px at 70% 20%, hsl(0 0% 100% / 0.12) 0%, transparent 65%),
-    radial-gradient(ellipse 80px 50px at 40% 70%, hsl(0 0% 100% / 0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 140px 90px at 80% 80%, hsl(0 0% 100% / 0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 60px 40px at 15% 85%, hsl(0 0% 100% / 0.1) 0%, transparent 60%);
-}
-
-.dark .sidebar-clouds {
-  background-image: 
-    radial-gradient(ellipse 120px 80px at 20% 30%, hsl(0 0% 100% / 0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 100px 60px at 70% 20%, hsl(0 0% 100% / 0.04) 0%, transparent 65%),
-    radial-gradient(ellipse 80px 50px at 40% 70%, hsl(0 0% 100% / 0.03) 0%, transparent 60%),
-    radial-gradient(ellipse 140px 90px at 80% 80%, hsl(0 0% 100% / 0.03) 0%, transparent 70%),
-    radial-gradient(ellipse 60px 40px at 15% 85%, hsl(0 0% 100% / 0.04) 0%, transparent 60%);
-}
-
-/* Sidebar menu item hover effect */
-.sidebar-menu-item {
-  @apply transition-all duration-200 ease-out;
-}
-
-.sidebar-menu-item:hover:not(.sidebar-menu-item-active):not(.sidebar-menu-item-locked) {
-  @apply bg-primary text-white;
-}
-
-.sidebar-menu-item:hover:not(.sidebar-menu-item-active):not(.sidebar-menu-item-locked) svg {
-  @apply text-white;
-}
-
 @layer base {
   * {
     @apply border-border;
