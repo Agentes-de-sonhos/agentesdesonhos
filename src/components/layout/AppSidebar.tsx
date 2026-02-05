@@ -20,6 +20,8 @@ import {
   Heart,
   Crown,
   Clock,
+  Kanban,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -81,18 +83,24 @@ const mainMenuItems: MenuItem[] = [
   },
 ];
 
-// Secondary menu items - after separator
-const secondaryMenuItems: MenuItem[] = [
+// Client management section
+const clientManagementItems: MenuItem[] = [
   {
-    title: "Funil de Vendas",
-    url: "/crm",
+    title: "Clientes",
+    url: "/gestao-clientes/clientes",
     icon: Users,
     requiredFeature: "crm_basic",
   },
   {
+    title: "Funil de Vendas",
+    url: "/gestao-clientes/funil",
+    icon: Kanban,
+    requiredFeature: "crm_basic",
+  },
+  {
     title: "Meta de Vendas",
-    url: "/financeiro",
-    icon: Wallet,
+    url: "/gestao-clientes/metas",
+    icon: Target,
   },
 ];
 
@@ -298,16 +306,16 @@ export function AppSidebar() {
             <Separator className="bg-sidebar-border" />
           </div>
 
-          {/* Secondary Navigation (CRM, Financeiro) */}
+          {/* Client Management Section */}
           {!collapsed && (
             <div className="mb-1.5 px-6">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-                Gestão
+                Gestão de Clientes
               </p>
             </div>
           )}
           <nav className="flex flex-col gap-0.5 px-3">
-            {secondaryMenuItems.map((item) => renderMenuItem(item, false))}
+            {clientManagementItems.map((item) => renderMenuItem(item, false))}
           </nav>
 
           {/* Premium Features Section */}

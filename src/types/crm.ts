@@ -6,10 +6,32 @@ export interface Client {
   phone: string | null;
   city: string | null;
   notes: string | null;
+  status: ClientStatus;
+  travel_preferences: string | null;
+  internal_notes: string | null;
+  last_interaction_at: string;
   created_at: string;
   updated_at: string;
   opportunities?: Opportunity[];
+  total_spent?: number;
+  trips_count?: number;
 }
+
+export type ClientStatus = 'lead' | 'em_negociacao' | 'cliente_ativo' | 'fidelizado';
+
+export const CLIENT_STATUS_LABELS: Record<ClientStatus, string> = {
+  lead: 'Lead',
+  em_negociacao: 'Em Negociação',
+  cliente_ativo: 'Cliente Ativo',
+  fidelizado: 'Fidelizado',
+};
+
+export const CLIENT_STATUS_COLORS: Record<ClientStatus, string> = {
+  lead: 'bg-blue-500',
+  em_negociacao: 'bg-yellow-500',
+  cliente_ativo: 'bg-green-500',
+  fidelizado: 'bg-purple-500',
+};
 
 export interface Opportunity {
   id: string;
@@ -22,6 +44,8 @@ export interface Opportunity {
   estimated_value: number;
   notes: string | null;
   stage: OpportunityStage;
+  stage_entered_at: string;
+  follow_up_date: string | null;
   created_at: string;
   updated_at: string;
   client?: Client;
@@ -34,6 +58,16 @@ export interface OpportunityHistory {
   to_stage: string;
   changed_at: string;
   notes: string | null;
+}
+
+export interface SalesGoal {
+  id: string;
+  user_id: string;
+  month: number;
+  year: number;
+  target_amount: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export type OpportunityStage =

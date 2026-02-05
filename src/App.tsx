@@ -27,6 +27,7 @@ import BloqueiosAereos from "./pages/BloqueiosAereos";
 import Agenda from "./pages/Agenda";
 import CRM from "./pages/CRM";
 import Financeiro from "./pages/Financeiro";
+import GestaoClientes from "./pages/GestaoClientes";
 import EducaAcademy from "./pages/EducaAcademy";
 import Community from "./pages/Community";
 import Mentorias from "./pages/Mentorias";
@@ -212,6 +213,38 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Financeiro />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gestao-clientes"
+              element={
+                <ProtectedRoute>
+                  <GestaoClientes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gestao-clientes/clientes"
+              element={
+                <ProtectedRoute>
+                  <GestaoClientes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gestao-clientes/funil"
+              element={
+                <ProtectedRoute>
+                  <GestaoClientes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gestao-clientes/metas"
+              element={
+                <ProtectedRoute>
+                  <GestaoClientes />
                 </ProtectedRoute>
               }
             />
