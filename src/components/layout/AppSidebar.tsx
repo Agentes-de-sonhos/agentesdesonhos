@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sparkles,
   Map,
@@ -149,6 +149,7 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
@@ -157,7 +158,9 @@ export function AppSidebar() {
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
       e.preventDefault();
       setUpgradeFeature(item.requiredFeature);
+      return;
     }
+    navigate(item.url);
   };
 
   const renderMenuItem = (item: MenuItem, isPremiumSection: boolean = false) => {
@@ -166,26 +169,26 @@ export function AppSidebar() {
     const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
     const showPremiumLock = isPremiumSection && isLocked;
 
-    const menuLink = (
-      <Link
+    const menuButton = (
+      <button
         key={item.url}
-        to={isLocked ? "#" : item.url}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
-          "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 w-full text-left",
           isActive && !isLocked
-            ? "bg-primary text-primary-foreground shadow-md"
+            ? "bg-primary text-white shadow-lg shadow-primary/25"
             : isLocked
               ? "opacity-60 cursor-pointer hover:opacity-70"
-              : "text-sidebar-foreground hover:bg-sidebar-accent"
+              : "text-sidebar-foreground hover:bg-primary hover:text-white hover:shadow-md hover:shadow-primary/20"
         )}
       >
         <div className="relative">
           <item.icon
             className={cn(
-              "h-5 w-5 flex-shrink-0 transition-transform duration-200",
-              !isActive && !isLocked && "group-hover:scale-110",
-              isLocked && "text-muted-foreground"
+              "h-5 w-5 flex-shrink-0 transition-all duration-200",
+              isActive ? "text-white" : "",
+              !isActive && !isLocked && "group-hover:scale-110 group-hover:text-white",
+              isLocked && "text-muted-foreground group-hover:text-muted-foreground"
             )}
           />
           {showPremiumLock && (
@@ -193,21 +196,24 @@ export function AppSidebar() {
           )}
         </div>
         {!collapsed && (
-          <span className={cn("animate-fade-in truncate", isLocked && "text-muted-foreground")}>
+          <span className={cn(
+            "animate-fade-in truncate transition-colors duration-200",
+            isLocked && "text-muted-foreground group-hover:text-muted-foreground"
+          )}>
             {item.title}
           </span>
         )}
         {!collapsed && showPremiumLock && (
           <Lock className="h-3.5 w-3.5 ml-auto text-warning flex-shrink-0" />
         )}
-      </Link>
+      </button>
     );
 
     if (showPremiumLock && !collapsed) {
       return (
         <Tooltip key={item.url}>
           <TooltipTrigger asChild>
-            {menuLink}
+            {menuButton}
           </TooltipTrigger>
           <TooltipContent side="right" className="bg-popover border">
             <p className="text-sm">Disponível nos planos Pro ou Premium</p>
@@ -216,26 +222,28 @@ export function AppSidebar() {
       );
     }
 
-    return menuLink;
+    return menuButton;
   };
 
   return (
     <TooltipProvider delayDuration={300}>
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 flex-col hidden lg:flex",
+          "fixed left-0 top-0 z-40 h-screen border-r border-white/20 transition-all duration-300 flex-col hidden lg:flex",
+          "bg-gradient-to-b from-[hsl(200_85%_95%)] to-[hsl(200_80%_92%)]",
+          "sidebar-clouds shadow-lg shadow-primary/5",
           collapsed ? "w-16" : "w-64"
         )}
       >
         {/* Header */}
-        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">
+        <div className="flex h-16 items-center justify-between border-b border-white/30 px-4 flex-shrink-0 bg-white/20 backdrop-blur-sm">
           <Link to="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary shadow-lg shadow-primary/30">
               <Cloud className="h-5 w-5 text-primary-foreground" />
             </div>
             {!collapsed && (
               <div className="animate-fade-in">
-                <h1 className="font-display text-lg font-semibold text-sidebar-foreground">
+                <h1 className="font-display text-lg font-semibold text-slate-800">
                   Agentes de Sonhos
                 </h1>
               </div>
@@ -244,7 +252,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-sidebar-foreground"
+            className="h-8 w-8 text-slate-600 hover:text-slate-800 hover:bg-white/50"
             onClick={() => setCollapsed(!collapsed)}
           >
             <ChevronLeft
@@ -272,13 +280,13 @@ export function AppSidebar() {
 
           {/* Visual Separator */}
           <div className="px-3 py-4">
-            <Separator className="bg-sidebar-border" />
+            <Separator className="bg-slate-300/50" />
           </div>
 
           {/* Secondary Navigation (CRM, Financeiro) */}
           {!collapsed && (
             <div className="mb-1.5 px-6">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 Gestão
               </p>
             </div>
@@ -291,7 +299,7 @@ export function AppSidebar() {
           <div className="px-3 mt-5">
             {!collapsed && (
               <div className="mb-1.5 px-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   Recursos Premium
                 </p>
               </div>
@@ -305,8 +313,8 @@ export function AppSidebar() {
           <div className="px-3 mt-5">
             {!collapsed && (
               <div className="mb-1.5 px-3 flex items-center gap-1.5">
-                <Clock className="h-3 w-3 text-muted-foreground/50" />
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
+                <Clock className="h-3 w-3 text-slate-400" />
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Em Breve
                 </p>
               </div>
@@ -318,29 +326,29 @@ export function AppSidebar() {
         </div>
 
         {/* Bottom Section */}
-        <div className="flex-shrink-0 border-t border-sidebar-border p-3 space-y-2">
+        <div className="flex-shrink-0 border-t border-white/30 p-3 space-y-2 bg-white/10 backdrop-blur-sm">
           {/* Profile */}
           {renderMenuItem(profileMenuItem, false)}
 
           {/* Plan Badge */}
           <div className={cn(
-            "rounded-lg p-2.5 flex items-center gap-2 transition-colors",
-            plan === "premium" && "bg-gradient-to-r from-warning/20 to-warning/10 border border-warning/30",
-            plan === "profissional" && "bg-primary/10 border border-primary/20",
-            plan === "essencial" && "bg-muted border border-border"
+            "rounded-xl p-2.5 flex items-center gap-2 transition-all duration-200 shadow-sm",
+            plan === "premium" && "bg-gradient-to-r from-amber-100 to-amber-50 border border-amber-300/50",
+            plan === "profissional" && "bg-white/80 border border-primary/30",
+            plan === "essencial" && "bg-white/60 border border-slate-200"
           )}>
             <Crown className={cn(
               "h-4 w-4 flex-shrink-0",
               plan === "premium" && "text-warning",
               plan === "profissional" && "text-primary",
-              plan === "essencial" && "text-muted-foreground"
+              plan === "essencial" && "text-slate-500"
             )} />
             {!collapsed && (
               <span className={cn(
                 "text-xs font-medium",
                 plan === "premium" && "text-warning",
                 plan === "profissional" && "text-primary",
-                plan === "essencial" && "text-muted-foreground"
+                plan === "essencial" && "text-slate-600"
               )}>
                 Plano {plan.charAt(0).toUpperCase() + plan.slice(1)}
               </span>
@@ -351,7 +359,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             className={cn(
-              "w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10",
+              "w-full justify-start gap-3 text-slate-600 hover:text-destructive hover:bg-white/60 rounded-xl",
               collapsed && "justify-center px-0"
             )}
             onClick={signOut}
@@ -363,16 +371,16 @@ export function AppSidebar() {
           {/* Footer */}
           {!collapsed ? (
             <div className="text-center pt-2">
-              <p className="text-[10px] text-muted-foreground/60">
+              <p className="text-[10px] text-slate-400">
                 Desenvolvido por
               </p>
-              <p className="text-[11px] font-medium text-muted-foreground/80">
+              <p className="text-[11px] font-medium text-slate-500">
                 Nobre Digital Hub
               </p>
             </div>
           ) : (
             <div className="text-center pt-2">
-              <p className="text-[8px] text-muted-foreground/60">NDH</p>
+              <p className="text-[8px] text-slate-400">NDH</p>
             </div>
           )}
         </div>
