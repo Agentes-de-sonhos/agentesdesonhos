@@ -24,13 +24,7 @@ export function FinancialSummaryCard() {
 
   if (isLoading) {
     return (
-      <Card className="shadow-card">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-primary" />
-            <CardTitle className="font-display text-lg">Resumo Financeiro</CardTitle>
-          </div>
-        </CardHeader>
+      <Card className="border-0 shadow-md">
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </CardContent>
@@ -39,39 +33,33 @@ export function FinancialSummaryCard() {
   }
 
   return (
-    <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-primary" />
-            <CardTitle className="font-display text-lg">Resumo Financeiro</CardTitle>
-          </div>
+    <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
+      <CardContent className="pt-6 space-y-4">
+        <div className="flex justify-end">
           <Button
             variant="ghost"
             size="sm"
-            className="text-primary hover:text-primary/80"
+            className="text-[hsl(var(--section-financial))] hover:text-[hsl(var(--section-financial))]/80 -mt-2"
             onClick={() => navigate("/financeiro")}
           >
             Ver detalhes
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
         {/* Monthly Sales Highlight */}
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+        <div className="rounded-xl border border-[hsl(var(--section-financial))]/20 bg-[hsl(var(--section-financial))]/5 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Vendas do Mês</p>
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-2xl font-bold text-[hsl(var(--section-financial))]">
                 {formatCurrency(summary.salesMonth)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {salesCountMonth} venda{salesCountMonth !== 1 ? "s" : ""} registrada{salesCountMonth !== 1 ? "s" : ""}
               </p>
             </div>
-            <div className="rounded-full bg-primary/10 p-3">
-              <TrendingUp className="h-6 w-6 text-primary" />
+            <div className="rounded-full bg-[hsl(var(--section-financial))]/10 p-3">
+              <TrendingUp className="h-6 w-6 text-[hsl(var(--section-financial))]" />
             </div>
           </div>
         </div>

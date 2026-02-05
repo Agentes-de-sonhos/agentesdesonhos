@@ -65,13 +65,7 @@ export function TripRemindersCard() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Bell className="h-5 w-5 text-primary" />
-            Próximas Viagens e Lembretes
-          </CardTitle>
-        </CardHeader>
+      <Card className="border-0 shadow-md">
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </CardContent>
@@ -81,14 +75,8 @@ export function TripRemindersCard() {
 
   if (reminders.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Bell className="h-5 w-5 text-primary" />
-            Próximas Viagens e Lembretes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="border-0 shadow-md">
+        <CardContent className="pt-6">
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>Nenhum lembrete pendente</p>
@@ -103,17 +91,13 @@ export function TripRemindersCard() {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Bell className="h-5 w-5 text-primary" />
-            Próximas Viagens e Lembretes
-            <Badge variant="outline" className="ml-2">
-              {reminders.length}
+      <Card className="border-0 shadow-md">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <Badge variant="outline" className="text-[hsl(var(--section-reminders))] border-[hsl(var(--section-reminders))]">
+              {reminders.length} lembrete{reminders.length !== 1 ? "s" : ""}
             </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </div>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             {reminders.slice(0, 10).map((reminder) => (
               <div

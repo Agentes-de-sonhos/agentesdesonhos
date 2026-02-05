@@ -46,9 +46,6 @@ export function UpcomingEventsCard() {
   if (isLoading) {
     return (
       <Card className="border-0 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-lg font-display">Próximos Eventos</CardTitle>
-        </CardHeader>
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </CardContent>
@@ -58,24 +55,18 @@ export function UpcomingEventsCard() {
 
   return (
     <Card className="border-0 shadow-md">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-display flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            Próximos Eventos
-          </CardTitle>
+      <CardContent className="pt-6">
+        <div className="flex justify-end mb-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/agenda")}
-            className="text-primary hover:text-primary/80"
+            className="text-[hsl(var(--section-events))] hover:text-[hsl(var(--section-events))]/80 -mt-2"
           >
             Ver agenda completa
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0">
         {events && events.length > 0 ? (
           <div className="space-y-3">
             {events.map((event) => (

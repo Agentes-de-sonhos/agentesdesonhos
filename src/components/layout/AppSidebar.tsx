@@ -172,20 +172,21 @@ export function AppSidebar() {
         to={isLocked ? "#" : item.url}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
-          "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
           isActive && !isLocked
-            ? "bg-primary text-primary-foreground shadow-md"
+            ? "bg-[hsl(var(--sidebar-hover))] text-white shadow-md"
             : isLocked
               ? "opacity-60 cursor-pointer hover:opacity-70"
-              : "text-sidebar-foreground hover:bg-sidebar-accent"
+              : "text-sidebar-foreground hover:bg-[hsl(var(--sidebar-hover))] hover:text-white"
         )}
       >
-        <div className="relative">
+        <div className="relative transition-colors duration-300">
           <item.icon
             className={cn(
-              "h-5 w-5 flex-shrink-0 transition-transform duration-200",
-              !isActive && !isLocked && "group-hover:scale-110",
-              isLocked && "text-muted-foreground"
+              "h-5 w-5 flex-shrink-0 transition-all duration-300",
+              !isActive && !isLocked && "group-hover:scale-110 group-hover:text-white",
+              isLocked && "text-muted-foreground",
+              isActive && !isLocked && "text-white"
             )}
           />
           {showPremiumLock && (
@@ -193,7 +194,12 @@ export function AppSidebar() {
           )}
         </div>
         {!collapsed && (
-          <span className={cn("animate-fade-in truncate", isLocked && "text-muted-foreground")}>
+          <span className={cn(
+            "animate-fade-in truncate transition-colors duration-300",
+            isLocked && "text-muted-foreground",
+            !isActive && !isLocked && "group-hover:text-white",
+            isActive && !isLocked && "text-white"
+          )}>
             {item.title}
           </span>
         )}
@@ -209,8 +215,25 @@ export function AppSidebar() {
           <TooltipTrigger asChild>
             {menuLink}
           </TooltipTrigger>
-          <TooltipContent side="right" className="bg-popover border">
+          <TooltipContent side="right" className="bg-[hsl(var(--sidebar-hover))] text-white border-none shadow-lg">
             <p className="text-sm">Disponível nos planos Pro ou Premium</p>
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    // Add tooltip for collapsed mode
+    if (collapsed) {
+      return (
+        <Tooltip key={item.url}>
+          <TooltipTrigger asChild>
+            {menuLink}
+          </TooltipTrigger>
+          <TooltipContent 
+            side="right" 
+            className="bg-[hsl(var(--sidebar-hover))] text-white border-none shadow-lg px-3 py-2"
+          >
+            <p className="text-sm font-medium">{item.title}</p>
           </TooltipContent>
         </Tooltip>
       );

@@ -81,24 +81,18 @@ export function FlightBlocksSearchCard() {
 
   return (
     <Card className="border-0 shadow-md">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-display flex items-center gap-2">
-            <Plane className="h-5 w-5 text-primary" />
-            Buscar Bloqueios Aéreos
-          </CardTitle>
+      <CardContent className="pt-6 space-y-4">
+        <div className="flex justify-end -mt-2 mb-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleViewAll}
-            className="text-primary hover:text-primary/80"
+            className="text-[hsl(var(--section-flights))] hover:text-[hsl(var(--section-flights))]/80"
           >
             Ver todos
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0 space-y-4">
         {/* Search Form */}
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="relative">
@@ -157,7 +151,7 @@ export function FlightBlocksSearchCard() {
                     onClick={() => navigate("/bloqueios-aereos")}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                      <div className="p-2 rounded-lg bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
                         <Plane className="h-4 w-4" />
                       </div>
                       <div>

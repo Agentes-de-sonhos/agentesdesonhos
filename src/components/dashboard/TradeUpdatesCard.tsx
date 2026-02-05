@@ -22,18 +22,12 @@ const typeStyles = {
 
 export function TradeUpdatesCard({ updates }: TradeUpdatesCardProps) {
   return (
-    <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          <CardTitle className="font-display text-lg">Novidades do Trade</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
+      <CardContent className="pt-6 space-y-4">
         {updates.map((update) => (
           <div
             key={update.id}
-            className="rounded-xl border border-border bg-secondary/20 p-4 transition-all duration-200 hover:bg-secondary/40"
+            className="rounded-xl border border-[hsl(var(--section-trade))]/20 bg-[hsl(var(--section-trade))]/5 p-4 transition-all duration-200 hover:bg-[hsl(var(--section-trade))]/10"
           >
             <div className="flex items-start justify-between gap-2">
               <h4 className="text-sm font-medium text-foreground">

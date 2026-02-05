@@ -5,7 +5,7 @@ interface QuickActionCardProps {
   title: string;
   description: string;
   icon: LucideIcon;
-  variant?: "primary" | "accent" | "default";
+  variant?: "primary" | "accent" | "default" | "ai";
   onClick?: () => void;
 }
 
@@ -20,25 +20,27 @@ export function QuickActionCard({
     <button
       onClick={onClick}
       className={cn(
-        "group relative flex flex-col items-start gap-3 rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1",
-        "shadow-card hover:shadow-card-hover",
-        variant === "primary" && "gradient-primary text-primary-foreground",
-        variant === "accent" && "gradient-accent text-accent-foreground",
-        variant === "default" && "bg-card text-card-foreground hover:bg-secondary/50"
+        "group relative flex flex-col items-start gap-3 rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1 border-0",
+        "shadow-md hover:shadow-lg",
+        variant === "primary" && "bg-gradient-to-br from-[hsl(var(--section-ai))] to-[hsl(280_100%_55%)] text-white",
+        variant === "accent" && "bg-gradient-to-br from-[hsl(var(--section-map))] to-[hsl(28_100%_60%)] text-white",
+        variant === "default" && "bg-card text-card-foreground hover:bg-secondary/50",
+        variant === "ai" && "bg-gradient-to-br from-[hsl(var(--section-ai))] to-[hsl(280_100%_55%)] text-white"
       )}
     >
       <div
         className={cn(
           "flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110",
-          variant === "primary" && "bg-primary-foreground/20",
-          variant === "accent" && "bg-accent-foreground/20",
+          variant === "primary" && "bg-white/20",
+          variant === "accent" && "bg-white/20",
           variant === "default" && "bg-primary/10"
         )}
       >
         <Icon
           className={cn(
             "h-6 w-6",
-            variant === "default" && "text-primary"
+            variant === "default" && "text-primary",
+            (variant === "primary" || variant === "accent" || variant === "ai") && "text-white"
           )}
         />
       </div>

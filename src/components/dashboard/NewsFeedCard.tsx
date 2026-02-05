@@ -18,27 +18,22 @@ interface NewsFeedCardProps {
 
 export function NewsFeedCard({ title, news }: NewsFeedCardProps) {
   return (
-    <Card className="shadow-card hover:shadow-card-hover transition-shadow duration-300">
-      {title && (
-        <CardHeader className="pb-3">
-          <CardTitle className="font-display text-lg">{title}</CardTitle>
-        </CardHeader>
-      )}
-      <CardContent className="space-y-3">
+    <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
+      <CardContent className="pt-6 space-y-3">
         {news.map((item) => (
           <a
             key={item.id}
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-start gap-3 rounded-lg p-3 transition-all duration-200 hover:bg-secondary/50"
+            className="group flex items-start gap-3 rounded-xl p-3 transition-all duration-200 hover:bg-[hsl(var(--section-news))]/5"
           >
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">
+              <h4 className="text-sm font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors line-clamp-2">
                 {item.title}
               </h4>
               <div className="mt-2 flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs bg-[hsl(var(--section-news))]/10 text-[hsl(var(--section-news))]">
                   {item.category}
                 </Badge>
                 <span className="text-xs text-muted-foreground">{item.source}</span>
@@ -46,7 +41,7 @@ export function NewsFeedCard({ title, news }: NewsFeedCardProps) {
                 <span className="text-xs text-muted-foreground">{item.date}</span>
               </div>
             </div>
-            <ExternalLink className="h-4 w-4 flex-shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <ExternalLink className="h-4 w-4 flex-shrink-0 text-[hsl(var(--section-news))] opacity-0 transition-opacity group-hover:opacity-100" />
           </a>
         ))}
       </CardContent>
