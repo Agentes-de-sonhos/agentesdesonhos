@@ -84,7 +84,7 @@ const mainMenuItems: MenuItem[] = [
 // Secondary menu items - after separator
 const secondaryMenuItems: MenuItem[] = [
   {
-    title: "CRM",
+    title: "Funil de Vendas",
     url: "/crm",
     icon: Users,
     requiredFeature: "crm_basic",
