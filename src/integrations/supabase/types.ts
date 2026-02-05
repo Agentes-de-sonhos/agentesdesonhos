@@ -20,9 +20,13 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          internal_notes: string | null
+          last_interaction_at: string | null
           name: string
           notes: string | null
           phone: string | null
+          status: string | null
+          travel_preferences: string | null
           updated_at: string
           user_id: string
         }
@@ -31,9 +35,13 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          internal_notes?: string | null
+          last_interaction_at?: string | null
           name: string
           notes?: string | null
           phone?: string | null
+          status?: string | null
+          travel_preferences?: string | null
           updated_at?: string
           user_id: string
         }
@@ -42,9 +50,13 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          internal_notes?: string | null
+          last_interaction_at?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
+          status?: string | null
+          travel_preferences?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1102,10 +1114,12 @@ export type Database = {
           destination: string
           end_date: string | null
           estimated_value: number
+          follow_up_date: string | null
           id: string
           notes: string | null
           passengers_count: number
           stage: string
+          stage_entered_at: string | null
           start_date: string | null
           updated_at: string
           user_id: string
@@ -1116,10 +1130,12 @@ export type Database = {
           destination: string
           end_date?: string | null
           estimated_value?: number
+          follow_up_date?: string | null
           id?: string
           notes?: string | null
           passengers_count?: number
           stage?: string
+          stage_entered_at?: string | null
           start_date?: string | null
           updated_at?: string
           user_id: string
@@ -1130,10 +1146,12 @@ export type Database = {
           destination?: string
           end_date?: string | null
           estimated_value?: number
+          follow_up_date?: string | null
           id?: string
           notes?: string | null
           passengers_count?: number
           stage?: string
+          stage_entered_at?: string | null
           start_date?: string | null
           updated_at?: string
           user_id?: string
@@ -1632,6 +1650,7 @@ export type Database = {
       }
       sales: {
         Row: {
+          client_id: string | null
           client_name: string
           created_at: string
           destination: string
@@ -1644,6 +1663,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          client_id?: string | null
           client_name: string
           created_at?: string
           destination: string
@@ -1656,6 +1676,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          client_id?: string | null
           client_name?: string
           created_at?: string
           destination?: string
@@ -1669,6 +1690,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "sales_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sales_opportunity_id_fkey"
             columns: ["opportunity_id"]
             isOneToOne: false
@@ -1676,6 +1704,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sales_goals: {
+        Row: {
+          created_at: string | null
+          id: string
+          month: number
+          target_amount: number
+          updated_at: string | null
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          month: number
+          target_amount?: number
+          updated_at?: string | null
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          month?: number
+          target_amount?: number
+          updated_at?: string | null
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
       }
       specialties: {
         Row: {

@@ -2,11 +2,27 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Search, Edit2, Trash2, User, Phone, Mail, MapPin } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Eye,
+  DollarSign,
+  Plane,
+  Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +39,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -33,7 +56,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useClients } from "@/hooks/useCRM";
-import type { Client } from "@/types/crm";
+import { ClientProfile } from "./ClientProfile";
+import type { Client, ClientStatus } from "@/types/crm";
+import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
+import { cn } from "@/lib/utils";
 
 const clientSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
@@ -41,31 +67,44 @@ const clientSchema = z.object({
   phone: z.string().optional(),
   city: z.string().optional(),
   notes: z.string().optional(),
-  status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]).optional(),
+  status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]),
   travel_preferences: z.string().optional(),
   internal_notes: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
-export function ClientsManager() {
+export function ClientsModule() {
   const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
-    defaultValues: { name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      city: "",
+      notes: "",
+      status: "lead",
+      travel_preferences: "",
+      internal_notes: "",
+    },
   });
 
-  const filteredClients = clients.filter(
-    (c) =>
+  const filteredClients = clients.filter((c) => {
+    const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.email?.toLowerCase().includes(search.toLowerCase()) ||
-      c.city?.toLowerCase().includes(search.toLowerCase())
-  );
+      c.city?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "all" || c.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const handleOpenDialog = (client?: Client) => {
     if (client) {
@@ -82,7 +121,16 @@ export function ClientsManager() {
       });
     } else {
       setEditingClient(null);
-      form.reset({ name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "" });
+      form.reset({
+        name: "",
+        email: "",
+        phone: "",
+        city: "",
+        notes: "",
+        status: "lead",
+        travel_preferences: "",
+        internal_notes: "",
+      });
     }
     setIsDialogOpen(true);
   };
@@ -94,7 +142,7 @@ export function ClientsManager() {
       phone: data.phone || null,
       city: data.city || null,
       notes: data.notes || null,
-      status: data.status || "lead",
+      status: data.status,
       travel_preferences: data.travel_preferences || null,
       internal_notes: data.internal_notes || null,
     };
@@ -114,10 +162,26 @@ export function ClientsManager() {
     }
   };
 
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+
+  if (selectedClient) {
+    return (
+      <ClientProfile
+        client={selectedClient}
+        onBack={() => setSelectedClient(null)}
+        onEdit={() => {
+          handleOpenDialog(selectedClient);
+          setSelectedClient(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar clientes..."
@@ -126,13 +190,26 @@ export function ClientsManager() {
             className="pl-9"
           />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filtrar status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os status</SelectItem>
+            {Object.entries(CLIENT_STATUS_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => handleOpenDialog()}>
               <Plus className="mr-2 h-4 w-4" /> Novo Cliente
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingClient ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
             </DialogHeader>
@@ -179,14 +256,56 @@ export function ClientsManager() {
                     )}
                   />
                 </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input placeholder="São Paulo, SP" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.entries(CLIENT_STATUS_LABELS).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
-                  name="city"
+                  name="travel_preferences"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cidade</FormLabel>
+                      <FormLabel>Preferências de Viagem</FormLabel>
                       <FormControl>
-                        <Input placeholder="São Paulo, SP" {...field} />
+                        <Textarea
+                          placeholder="Ex: Prefere praias, viaja em família, classe executiva..."
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -197,9 +316,25 @@ export function ClientsManager() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Observações</FormLabel>
+                      <FormLabel>Observações Gerais</FormLabel>
                       <FormControl>
                         <Textarea placeholder="Anotações sobre o cliente..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="internal_notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Observações Internas</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Notas internas (não visíveis ao cliente)..."
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -232,8 +367,29 @@ export function ClientsManager() {
             <Card key={client.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{client.name}</CardTitle>
+                  <div className="flex-1">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      {client.name}
+                    </CardTitle>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "mt-1 text-white text-xs",
+                        CLIENT_STATUS_COLORS[client.status as ClientStatus] || "bg-gray-500"
+                      )}
+                    >
+                      {CLIENT_STATUS_LABELS[client.status as ClientStatus] || "Lead"}
+                    </Badge>
+                  </div>
                   <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setSelectedClient(client)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -256,25 +412,39 @@ export function ClientsManager() {
               <CardContent className="space-y-2 text-sm">
                 {client.email && (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-4 w-4" />
+                    <Mail className="h-4 w-4 flex-shrink-0" />
                     <span className="truncate">{client.email}</span>
                   </div>
                 )}
                 {client.phone && (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Phone className="h-4 w-4" />
+                    <Phone className="h-4 w-4 flex-shrink-0" />
                     <span>{client.phone}</span>
                   </div>
                 )}
                 {client.city && (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
                     <span>{client.city}</span>
                   </div>
                 )}
-                {client.notes && (
-                  <p className="text-muted-foreground text-xs mt-2 line-clamp-2">{client.notes}</p>
-                )}
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                    <Clock className="h-3 w-3" />
+                    <span>
+                      {formatDistanceToNow(new Date(client.last_interaction_at), {
+                        addSuffix: true,
+                        locale: ptBR,
+                      })}
+                    </span>
+                  </div>
+                  {client.total_spent && client.total_spent > 0 && (
+                    <div className="flex items-center gap-1 text-xs font-medium text-green-600">
+                      <DollarSign className="h-3 w-3" />
+                      {formatCurrency(client.total_spent)}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -291,7 +461,10 @@ export function ClientsManager() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground"
+            >
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>

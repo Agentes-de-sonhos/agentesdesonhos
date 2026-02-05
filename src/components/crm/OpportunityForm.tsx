@@ -40,6 +40,7 @@ const opportunitySchema = z.object({
   passengers_count: z.number().min(1, "Mínimo 1 passageiro"),
   estimated_value: z.number().min(0),
   notes: z.string().optional(),
+  follow_up_date: z.date().optional(),
 });
 
 type FormData = z.infer<typeof opportunitySchema>;
@@ -64,6 +65,7 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
       passengers_count: opportunity?.passengers_count || 1,
       estimated_value: opportunity?.estimated_value || 0,
       notes: opportunity?.notes || "",
+      follow_up_date: opportunity?.follow_up_date ? new Date(opportunity.follow_up_date) : undefined,
     },
   });
 
@@ -76,6 +78,7 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
       passengers_count: data.passengers_count,
       estimated_value: data.estimated_value,
       notes: data.notes,
+      follow_up_date: data.follow_up_date ? format(data.follow_up_date, "yyyy-MM-dd") : undefined,
     };
 
     if (opportunity) {
@@ -222,6 +225,33 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="follow_up_date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Data de Follow-up</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                    >
+                      {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

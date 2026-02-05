@@ -1,17 +1,19 @@
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import {
   MapPin,
   Users,
   Calendar,
-  DollarSign,
   MoreVertical,
   Edit2,
   Trash2,
   FileText,
   Wallet,
+  History,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,13 +41,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { OpportunityForm } from "./OpportunityForm";
+import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
 import { useOpportunities } from "@/hooks/useCRM";
-import type { Opportunity } from "@/types/crm";
+import { STAGE_LABELS, type Opportunity } from "@/types/crm";
+import { cn } from "@/lib/utils";
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
   onDragStart: (e: React.DragEvent, id: string) => void;
+  isOverdue?: boolean;
 }
 
 function formatCurrency(value: number) {
@@ -55,12 +65,12 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export function OpportunityCard({ opportunity, onDragStart }: OpportunityCardProps) {
+export function OpportunityCard({ opportunity, onDragStart, isOverdue }: OpportunityCardProps) {
   const navigate = useNavigate();
   const { deleteOpportunity } = useOpportunities();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-  const [showClosedDialog, setShowClosedDialog] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const handleDelete = async () => {
     await deleteOpportunity(opportunity.id);
@@ -68,7 +78,6 @@ export function OpportunityCard({ opportunity, onDragStart }: OpportunityCardPro
   };
 
   const handleCreateQuote = () => {
-    // Navigate to quote creation with pre-filled data
     navigate(`/ferramentas-ia/gerar-orcamento`, {
       state: {
         client_name: opportunity.client?.name,
@@ -91,12 +100,20 @@ export function OpportunityCard({ opportunity, onDragStart }: OpportunityCardPro
     });
   };
 
+  const timeInStage = formatDistanceToNow(new Date(opportunity.stage_entered_at), {
+    locale: ptBR,
+    addSuffix: false,
+  });
+
   return (
     <>
       <Card
         draggable
         onDragStart={(e) => onDragStart(e, opportunity.id)}
-        className="cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow bg-card"
+        className={cn(
+          "cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow bg-card",
+          isOverdue && "ring-2 ring-destructive/50"
+        )}
       >
         <CardContent className="p-3">
           <div className="flex items-start justify-between gap-2 mb-2">
@@ -117,6 +134,10 @@ export function OpportunityCard({ opportunity, onDragStart }: OpportunityCardPro
                 <DropdownMenuItem onClick={() => setIsEditing(true)}>
                   <Edit2 className="mr-2 h-4 w-4" /> Editar
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowHistory(true)}>
+                  <History className="mr-2 h-4 w-4" /> Histórico
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleCreateQuote}>
                   <FileText className="mr-2 h-4 w-4" /> Criar Orçamento
                 </DropdownMenuItem>
@@ -141,20 +162,36 @@ export function OpportunityCard({ opportunity, onDragStart }: OpportunityCardPro
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
                 <span>
-                  {opportunity.start_date && format(new Date(opportunity.start_date), "dd/MM", { locale: ptBR })}
+                  {opportunity.start_date &&
+                    format(new Date(opportunity.start_date), "dd/MM", { locale: ptBR })}
                   {opportunity.start_date && opportunity.end_date && " - "}
-                  {opportunity.end_date && format(new Date(opportunity.end_date), "dd/MM", { locale: ptBR })}
+                  {opportunity.end_date &&
+                    format(new Date(opportunity.end_date), "dd/MM", { locale: ptBR })}
                 </span>
               </div>
             )}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Users className="h-3 w-3" />
-                <span>{opportunity.passengers_count} pax</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  <span>{opportunity.passengers_count} pax</span>
+                </div>
+                {isOverdue && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+                    </TooltipTrigger>
+                    <TooltipContent>Follow-up atrasado!</TooltipContent>
+                  </Tooltip>
+                )}
               </div>
               <Badge variant="secondary" className="text-xs">
                 {formatCurrency(opportunity.estimated_value)}
               </Badge>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground pt-1 border-t">
+              <Clock className="h-3 w-3" />
+              <span>Há {timeInStage} nesta etapa</span>
             </div>
           </div>
         </CardContent>
@@ -173,17 +210,24 @@ export function OpportunityCard({ opportunity, onDragStart }: OpportunityCardPro
         </DialogContent>
       </Dialog>
 
+      <OpportunityHistoryDialog
+        opportunityId={opportunity.id}
+        open={showHistory}
+        onOpenChange={setShowHistory}
+      />
+
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir oportunidade?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground"
+            >
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
