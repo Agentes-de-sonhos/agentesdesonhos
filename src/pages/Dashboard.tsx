@@ -16,13 +16,13 @@ import {
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { NewsFeedCard } from "@/components/dashboard/NewsFeedCard";
-import { ExternalLinksCard } from "@/components/dashboard/ExternalLinksCard";
 import { TradeUpdatesCard } from "@/components/dashboard/TradeUpdatesCard";
 import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
 import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
 import { FlightBlocksSearchCard } from "@/components/dashboard/FlightBlocksSearchCard";
 import { TripRemindersCard } from "@/components/dashboard/TripRemindersCard";
 import { FinancialSummaryCard } from "@/components/dashboard/FinancialSummaryCard";
+import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
 
@@ -138,9 +138,7 @@ export default function Dashboard() {
             {/* 1. News Feed & Trade Updates - TOP (stacked on mobile) */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
               <div className="order-1">
-                <h2 className="mb-3 sm:mb-4 font-display text-base sm:text-lg font-semibold text-foreground">
-                  Principais Notícias do Dia
-                </h2>
+                <SectionHeader title="Principais Notícias do Dia" color="news" />
                 {news && news.length > 0 ? (
                   <NewsFeedCard news={news} />
                 ) : (
@@ -151,9 +149,7 @@ export default function Dashboard() {
               </div>
 
               <div className="order-2">
-                <h2 className="mb-3 sm:mb-4 font-display text-base sm:text-lg font-semibold text-foreground">
-                  Principais Novidades do Trade
-                </h2>
+                <SectionHeader title="Principais Novidades do Trade" color="trade" />
                 {tradeUpdates && tradeUpdates.length > 0 ? (
                   <TradeUpdatesCard updates={tradeUpdates} />
                 ) : (
@@ -167,18 +163,18 @@ export default function Dashboard() {
             {/* 2. Productivity Section - Trips & Financial (stacked on mobile) */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
               <div className="order-3">
+                <SectionHeader title="Próximas Viagens" color="reminders" />
                 <TripRemindersCard />
               </div>
               <div className="order-4">
+                <SectionHeader title="Resumo Financeiro" color="financial" />
                 <FinancialSummaryCard />
               </div>
             </section>
 
             {/* 3. Mapa do Turismo (horizontal scroll on mobile) */}
             <section className="order-5">
-              <h2 className="mb-3 sm:mb-4 font-display text-base sm:text-lg font-semibold text-foreground">
-                Mapa do Turismo
-              </h2>
+              <SectionHeader title="Mapa do Turismo" color="map" />
               <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 sm:overflow-visible">
                 <SupplierCategoriesCard />
               </div>
@@ -186,9 +182,7 @@ export default function Dashboard() {
 
             {/* 4. Ferramentas IA - Only Roteiro and Conteúdo */}
             <section className="order-6">
-              <h2 className="mb-3 sm:mb-4 font-display text-base sm:text-lg font-semibold text-foreground">
-                Ferramentas IA
-              </h2>
+              <SectionHeader title="Ferramentas IA" color="ai" />
               <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
                 <QuickActionCard
                   title="Criar Roteiro"
@@ -210,9 +204,11 @@ export default function Dashboard() {
             {/* 5. Próximos Eventos & Buscar Bloqueios - BOTTOM (stacked on mobile) */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
               <div className="order-7">
+                <SectionHeader title="Próximos Eventos" color="events" />
                 <UpcomingEventsCard />
               </div>
               <div className="order-8">
+                <SectionHeader title="Bloqueios Aéreos" color="flights" />
                 <FlightBlocksSearchCard />
               </div>
             </section>
