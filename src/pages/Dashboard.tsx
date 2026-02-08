@@ -115,10 +115,15 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 animate-fade-in">
-        {/* Header with Exchange Rate, Notifications, Profile & Logout */}
-        <div className="flex flex-col gap-3">
+        {/* Header with Welcome Message, Exchange Rate, Notifications, Profile & Logout */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          {/* Welcome message */}
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+            Olá, Agente de Sonhos! 👋
+          </h1>
+          
           {/* Top bar with all header elements */}
-          <div className="flex items-center justify-end gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <ExchangeRateCard />
             <div className="h-6 w-px bg-border hidden sm:block" />
             <NotificationsDropdown />
@@ -155,11 +160,6 @@ export default function Dashboard() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          
-          {/* Welcome message */}
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-            Olá, Agente de Sonhos! 👋
-          </h1>
         </div>
 
         {isLoading ? (
