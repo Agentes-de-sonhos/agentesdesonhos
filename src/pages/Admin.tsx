@@ -11,6 +11,7 @@ import {
   FileText,
   Plane,
   Calendar,
+  CalendarDays,
   GraduationCap,
   Heart,
   Megaphone,
@@ -22,6 +23,7 @@ import { AdminTradeSuppliersManager } from "@/components/admin/AdminTradeSupplie
 import { AdminMaterialsManager } from "@/components/admin/AdminMaterialsManager";
 import { AdminFlightBlocksManager } from "@/components/admin/AdminFlightBlocksManager";
 import { AdminEventsManager } from "@/components/admin/AdminEventsManager";
+import { AdminAgendaEventsManager } from "@/components/admin/AdminAgendaEventsManager";
 import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
 import { AdminCommunityManager } from "@/components/admin/AdminCommunityManager";
 import { AdminUserManager } from "@/components/admin/AdminUserManager";
@@ -108,7 +110,7 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Usuários</span>
@@ -131,6 +133,10 @@ export default function Admin() {
             </TabsTrigger>
             <TabsTrigger value="events" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Eventos</span>
+            </TabsTrigger>
+            <TabsTrigger value="agenda-events" className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
               <span className="hidden sm:inline">Agenda</span>
             </TabsTrigger>
             <TabsTrigger value="news" className="flex items-center gap-2">
@@ -177,6 +183,10 @@ export default function Admin() {
 
           <TabsContent value="events">
             <AdminEventsManager />
+          </TabsContent>
+
+          <TabsContent value="agenda-events">
+            <AdminAgendaEventsManager />
           </TabsContent>
 
           <TabsContent value="news">

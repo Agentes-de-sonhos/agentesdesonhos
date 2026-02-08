@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Calendar, CalendarDays, CalendarRange, Plus } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
@@ -9,6 +9,7 @@ import { MonthlyCalendar } from "@/components/agenda/MonthlyCalendar";
 import { WeeklyCalendar } from "@/components/agenda/WeeklyCalendar";
 import { EventModal } from "@/components/agenda/EventModal";
 import { CalendarLegend } from "@/components/agenda/CalendarLegend";
+import { EventTypeFilter } from "@/components/agenda/EventTypeFilter";
 import { CalendarEvent, ViewMode, AgencyEventType } from "@/types/agenda";
 import { addMonths, subMonths, addWeeks, subWeeks, format } from "date-fns";
 
@@ -22,14 +23,20 @@ export default function Agenda() {
 
   const {
     allEvents,
+    customEventTypes,
+    allEventTypes,
+    hiddenTypes,
     isLoading,
     createEvent,
     updateEvent,
     deleteEvent,
     hidePresetEvent,
+    createCustomType,
+    toggleEventTypeVisibility,
     isCreating,
     isUpdating,
     isDeleting,
+    isCreatingCustomType,
   } = useAgenda(currentYear);
 
   const handleDayClick = useCallback((date: string) => {
@@ -47,7 +54,7 @@ export default function Agenda() {
   const handleSaveEvent = useCallback((eventData: {
     title: string;
     description: string | null;
-    event_type: AgencyEventType;
+    event_type: string;
     event_date: string;
     event_time: string | null;
     color: string | null;
@@ -66,6 +73,10 @@ export default function Agenda() {
   const handleHidePresetEvent = useCallback((id: string) => {
     hidePresetEvent(id);
   }, [hidePresetEvent]);
+
+  const handleCreateCustomType = useCallback((name: string, color: string) => {
+    createCustomType({ name, color });
+  }, [createCustomType]);
 
   const navigateMonth = useCallback((direction: 'prev' | 'next') => {
     setCurrentDate(prev => direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1));
@@ -126,6 +137,13 @@ export default function Agenda() {
             </Button>
           </div>
         </div>
+
+        {/* Filter Bar */}
+        <EventTypeFilter
+          eventTypes={allEventTypes}
+          hiddenTypes={hiddenTypes}
+          onToggleType={toggleEventTypeVisibility}
+        />
 
         {/* Calendar Card */}
         <Card className="border-0 shadow-lg">
@@ -193,11 +211,14 @@ export default function Agenda() {
         onOpenChange={setIsModalOpen}
         selectedDate={selectedDate}
         event={selectedEvent}
+        customEventTypes={customEventTypes}
         onSave={handleSaveEvent}
         onUpdate={handleUpdateEvent}
         onDelete={handleDeleteEvent}
         onHide={handleHidePresetEvent}
+        onCreateCustomType={handleCreateCustomType}
         isLoading={isCreating || isUpdating || isDeleting}
+        isCreatingCustomType={isCreatingCustomType}
       />
     </DashboardLayout>
   );

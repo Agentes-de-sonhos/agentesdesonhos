@@ -2,7 +2,25 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { AgencyEvent, PresetEvent, HiddenPresetEvent, CalendarEvent, eventTypeColors } from "@/types/agenda";
+import { 
+  AgencyEvent, 
+  PresetEvent, 
+  HiddenPresetEvent, 
+  CalendarEvent, 
+  CustomEventType,
+  AgendaFilterPreferences,
+  eventTypeColors,
+  eventTypeLabels,
+  defaultAgencyEventTypes,
+  presetEventTypes,
+} from "@/types/agenda";
+
+export interface EventTypeOption {
+  id: string;
+  name: string;
+  color: string;
+  isCustom?: boolean;
+}
 
 export function useAgenda(year?: number) {
   const { user } = useAuth();
@@ -68,6 +86,70 @@ export function useAgenda(year?: number) {
     enabled: !!user?.id,
   });
 
+  // Fetch custom event types for the user
+  const { data: customEventTypes = [], isLoading: customTypesLoading } = useQuery({
+    queryKey: ["custom-event-types", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("custom_event_types")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      return data as CustomEventType[];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch filter preferences for the user
+  const { data: filterPreferences, isLoading: filterLoading } = useQuery({
+    queryKey: ["agenda-filter-preferences", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from("agenda_filter_preferences")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as AgendaFilterPreferences | null;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Build complete list of event types for filter
+  const allEventTypes: EventTypeOption[] = [
+    // Default agency event types
+    ...defaultAgencyEventTypes.map(type => ({
+      id: type,
+      name: eventTypeLabels[type],
+      color: eventTypeColors[type],
+      isCustom: false,
+    })),
+    // Preset event types
+    ...presetEventTypes.map(type => ({
+      id: type,
+      name: eventTypeLabels[type],
+      color: eventTypeColors[type],
+      isCustom: false,
+    })),
+    // Custom user types
+    ...customEventTypes.map(type => ({
+      id: `custom_${type.id}`,
+      name: type.name,
+      color: type.color,
+      isCustom: true,
+    })),
+  ];
+
+  // Get hidden types from preferences
+  const hiddenTypes = filterPreferences?.hidden_types || [];
+
   // Create agency event
   const createEventMutation = useMutation({
     mutationFn: async (event: {
@@ -125,6 +207,10 @@ export function useAgenda(year?: number) {
 
       if (error) throw error;
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["agency-events"] });
+      toast.success("Evento atualizado com sucesso!");
     },
     onError: (error) => {
       console.error("Error updating event:", error);
@@ -196,6 +282,74 @@ export function useAgenda(year?: number) {
     },
   });
 
+  // Create custom event type
+  const createCustomTypeMutation = useMutation({
+    mutationFn: async (typeData: { name: string; color: string }) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+      
+      const { data, error } = await supabase
+        .from("custom_event_types")
+        .insert({ 
+          user_id: user.id,
+          name: typeData.name,
+          color: typeData.color,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-event-types"] });
+      toast.success("Tipo de evento criado com sucesso!");
+    },
+    onError: (error: any) => {
+      console.error("Error creating custom type:", error);
+      if (error.code === '23505') {
+        toast.error("Já existe um tipo com esse nome");
+      } else {
+        toast.error("Erro ao criar tipo de evento");
+      }
+    },
+  });
+
+  // Update filter preferences
+  const updateFilterPreferencesMutation = useMutation({
+    mutationFn: async (hiddenTypes: string[]) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+      
+      const { data, error } = await supabase
+        .from("agenda_filter_preferences")
+        .upsert({ 
+          user_id: user.id,
+          hidden_types: hiddenTypes,
+        }, {
+          onConflict: 'user_id',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["agenda-filter-preferences"] });
+    },
+    onError: (error) => {
+      console.error("Error updating filter preferences:", error);
+      toast.error("Erro ao salvar preferências de filtro");
+    },
+  });
+
+  // Toggle event type visibility
+  const toggleEventTypeVisibility = (typeId: string, currentlyVisible: boolean) => {
+    const newHiddenTypes = currentlyVisible
+      ? [...hiddenTypes, typeId]
+      : hiddenTypes.filter(t => t !== typeId);
+    updateFilterPreferencesMutation.mutate(newHiddenTypes);
+  };
+
   // Combine all events into a unified format
   const hiddenIds = new Set(hiddenPresetEvents.map(h => h.preset_event_id));
   
@@ -213,7 +367,7 @@ export function useAgenda(year?: number) {
       client_id: event.client_id,
       opportunity_id: event.opportunity_id,
     })),
-    // Preset events (not hidden)
+    // Preset events (not hidden by user)
     ...presetEvents
       .filter(event => !hiddenIds.has(event.id))
       .map((event): CalendarEvent => ({
@@ -228,26 +382,43 @@ export function useAgenda(year?: number) {
       })),
   ];
 
+  // Filter events by hidden types
+  const filteredEvents = allEvents.filter(event => {
+    // Check if this event type is hidden in filters
+    const isTypeHidden = hiddenTypes.includes(event.event_type);
+    
+    // For custom types, check with custom_ prefix
+    const customType = customEventTypes.find(t => 
+      event.color === t.color && !defaultAgencyEventTypes.includes(event.event_type as any)
+    );
+    const isCustomTypeHidden = customType && hiddenTypes.includes(`custom_${customType.id}`);
+    
+    return !isTypeHidden && !isCustomTypeHidden;
+  });
+
   // Get events for a specific date
   const getEventsForDate = (date: string): CalendarEvent[] => {
-    return allEvents.filter(event => event.event_date === date);
+    return filteredEvents.filter(event => event.event_date === date);
   };
 
   // Get upcoming events (next 10)
   const getUpcomingEvents = (limit: number = 10): CalendarEvent[] => {
     const today = new Date().toISOString().split('T')[0];
-    return allEvents
+    return filteredEvents
       .filter(event => event.event_date >= today)
       .sort((a, b) => a.event_date.localeCompare(b.event_date))
       .slice(0, limit);
   };
 
   return {
-    allEvents,
+    allEvents: filteredEvents,
     agencyEvents,
     presetEvents,
     hiddenPresetEvents,
-    isLoading: agencyLoading || presetLoading || hiddenLoading,
+    customEventTypes,
+    allEventTypes,
+    hiddenTypes,
+    isLoading: agencyLoading || presetLoading || hiddenLoading || customTypesLoading || filterLoading,
     getEventsForDate,
     getUpcomingEvents,
     createEvent: createEventMutation.mutate,
@@ -255,8 +426,11 @@ export function useAgenda(year?: number) {
     deleteEvent: deleteEventMutation.mutate,
     hidePresetEvent: hidePresetEventMutation.mutate,
     unhidePresetEvent: unhidePresetEventMutation.mutate,
+    createCustomType: createCustomTypeMutation.mutate,
+    toggleEventTypeVisibility,
     isCreating: createEventMutation.isPending,
     isUpdating: updateEventMutation.isPending,
     isDeleting: deleteEventMutation.isPending,
+    isCreatingCustomType: createCustomTypeMutation.isPending,
   };
 }

@@ -17,20 +17,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarEvent, AgencyEventType, eventTypeLabels, eventTypeColors } from "@/types/agenda";
+import { 
+  CalendarEvent, 
+  AgencyEventType, 
+  eventTypeLabels, 
+  eventTypeColors,
+  defaultAgencyEventTypes,
+  CustomEventType,
+} from "@/types/agenda";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, EyeOff, Eye, Loader2 } from "lucide-react";
+import { Trash2, EyeOff, Loader2, Plus } from "lucide-react";
+import { CreateCustomTypeDialog } from "./CreateCustomTypeDialog";
 
 interface EventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedDate: string | null;
   event?: CalendarEvent | null;
+  customEventTypes?: CustomEventType[];
   onSave: (event: {
     title: string;
     description: string | null;
-    event_type: AgencyEventType;
+    event_type: string;
     event_date: string;
     event_time: string | null;
     color: string | null;
@@ -38,28 +47,31 @@ interface EventModalProps {
   onUpdate?: (id: string, event: Partial<CalendarEvent>) => void;
   onDelete?: (id: string) => void;
   onHide?: (id: string) => void;
-  onUnhide?: (id: string) => void;
+  onCreateCustomType?: (name: string, color: string) => void;
   isLoading?: boolean;
+  isCreatingCustomType?: boolean;
 }
-
-const agencyEventTypes: AgencyEventType[] = ['compromisso', 'trade', 'venda', 'lembrete'];
 
 export function EventModal({
   open,
   onOpenChange,
   selectedDate,
   event,
+  customEventTypes = [],
   onSave,
   onUpdate,
   onDelete,
   onHide,
+  onCreateCustomType,
   isLoading,
+  isCreatingCustomType,
 }: EventModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [eventType, setEventType] = useState<AgencyEventType>("compromisso");
+  const [eventType, setEventType] = useState<string>("compromisso");
   const [eventTime, setEventTime] = useState("");
   const [customColor, setCustomColor] = useState("");
+  const [showCreateTypeDialog, setShowCreateTypeDialog] = useState(false);
 
   const isEditing = !!event;
   const isPresetEvent = event?.isPreset;
@@ -68,7 +80,7 @@ export function EventModal({
     if (event) {
       setTitle(event.title);
       setDescription(event.description || "");
-      setEventType(event.event_type as AgencyEventType);
+      setEventType(event.event_type);
       setEventTime(event.event_time || "");
       setCustomColor(event.color || "");
     } else {
@@ -83,13 +95,25 @@ export function EventModal({
   const handleSave = () => {
     if (!title.trim() || !selectedDate) return;
 
+    // Determine color based on event type
+    let color = customColor;
+    if (!color) {
+      if (eventTypeColors[eventType]) {
+        color = eventTypeColors[eventType];
+      } else {
+        // Check if it's a custom type
+        const customType = customEventTypes.find(t => t.id === eventType);
+        color = customType?.color || '#6b7280';
+      }
+    }
+
     const eventData = {
       title: title.trim(),
       description: description.trim() || null,
       event_type: eventType,
       event_date: selectedDate,
       event_time: eventTime || null,
-      color: customColor || eventTypeColors[eventType],
+      color,
     };
 
     if (isEditing && event && onUpdate) {
@@ -115,122 +139,163 @@ export function EventModal({
     }
   };
 
+  const handleCreateCustomType = (name: string, color: string) => {
+    if (onCreateCustomType) {
+      onCreateCustomType(name, color);
+      setShowCreateTypeDialog(false);
+    }
+  };
+
   const formattedDate = selectedDate
     ? format(parseISO(selectedDate), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })
     : "";
 
+  // Build complete list of event types (default + custom)
+  const allEventTypes = [
+    ...defaultAgencyEventTypes.map(type => ({
+      id: type,
+      name: eventTypeLabels[type],
+      color: eventTypeColors[type],
+    })),
+    ...customEventTypes.map(type => ({
+      id: type.id,
+      name: type.name,
+      color: type.color,
+    })),
+  ];
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            {isPresetEvent
-              ? event?.title
-              : isEditing
-              ? "Editar Evento"
-              : "Novo Evento"}
-          </DialogTitle>
-          <DialogDescription className="capitalize">{formattedDate}</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {isPresetEvent
+                ? event?.title
+                : isEditing
+                ? "Editar Evento"
+                : "Novo Evento"}
+            </DialogTitle>
+            <DialogDescription className="capitalize">{formattedDate}</DialogDescription>
+          </DialogHeader>
 
-        {isPresetEvent ? (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: event?.color }}
-              />
-              <span className="text-sm text-muted-foreground">
-                {eventTypeLabels[event?.event_type || ""] || event?.event_type}
-              </span>
-            </div>
-            {event?.description && (
-              <p className="text-sm text-muted-foreground">{event.description}</p>
-            )}
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={handleHide}>
-                <EyeOff className="h-4 w-4 mr-2" />
-                Ocultar este evento
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Título *</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Nome do evento"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="eventType">Tipo de Evento</Label>
-              <Select value={eventType} onValueChange={(v) => setEventType(v as AgencyEventType)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {agencyEventTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: eventTypeColors[type] }}
-                        />
-                        {eventTypeLabels[type]}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="eventTime">Horário (opcional)</Label>
-              <Input
-                id="eventTime"
-                type="time"
-                value={eventTime}
-                onChange={(e) => setEventTime(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição (opcional)</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Detalhes do evento..."
-                rows={3}
-              />
-            </div>
-
-            <div className="flex justify-between pt-4">
-              {isEditing ? (
-                <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Excluir
-                </Button>
-              ) : (
-                <div />
+          {isPresetEvent ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: event?.color }}
+                />
+                <span className="text-sm text-muted-foreground">
+                  {eventTypeLabels[event?.event_type || ""] || event?.event_type}
+                </span>
+              </div>
+              {event?.description && (
+                <p className="text-sm text-muted-foreground">{event.description}</p>
               )}
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => onOpenChange(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleSave} disabled={!title.trim() || isLoading}>
-                  {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  {isEditing ? "Salvar" : "Criar"}
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={handleHide}>
+                  <EyeOff className="h-4 w-4 mr-2" />
+                  Ocultar este evento
                 </Button>
               </div>
             </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Título *</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Nome do evento"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="eventType">Tipo de Evento</Label>
+                <div className="flex gap-2">
+                  <Select value={eventType} onValueChange={setEventType}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allEventTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: type.color }}
+                            />
+                            {type.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowCreateTypeDialog(true)}
+                    title="Criar novo tipo"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="eventTime">Horário (opcional)</Label>
+                <Input
+                  id="eventTime"
+                  type="time"
+                  value={eventTime}
+                  onChange={(e) => setEventTime(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Descrição (opcional)</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Detalhes do evento..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex justify-between pt-4">
+                {isEditing ? (
+                  <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir
+                  </Button>
+                ) : (
+                  <div />
+                )}
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSave} disabled={!title.trim() || isLoading}>
+                    {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {isEditing ? "Salvar" : "Criar"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <CreateCustomTypeDialog
+        open={showCreateTypeDialog}
+        onOpenChange={setShowCreateTypeDialog}
+        onSave={handleCreateCustomType}
+        isLoading={isCreatingCustomType}
+      />
+    </>
   );
 }
