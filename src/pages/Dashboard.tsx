@@ -194,10 +194,10 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* 3. Productivity Section - Gestão de Clientes & Agenda */}
+            {/* 3. Productivity Section - Minha Meta & Agenda */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 order-3">
               <div>
-                <SectionHeader title="Gestão de Clientes" color="financial" />
+                <SectionHeader title="Minha Meta" color="financial" />
                 <ClientsManagementCard />
               </div>
               <div>
