@@ -50,14 +50,20 @@ export function TripRemindersCard() {
     await markCompleted(reminderId);
   };
 
-  const getDaysRemainingBadge = (days: number) => {
-    if (days <= 2) {
-      return <Badge variant="destructive">{days} dia{days !== 1 ? "s" : ""}</Badge>;
+  const getDaysRemainingBadge = (days: number, isReturn: boolean = false) => {
+    if (isReturn) {
+      return <Badge className="bg-accent text-accent-foreground">Retorno hoje</Badge>;
+    }
+    if (days === 0) {
+      return <Badge variant="destructive">Viaja hoje!</Badge>;
+    }
+    if (days === 1) {
+      return <Badge variant="destructive">Amanhã</Badge>;
+    }
+    if (days <= 3) {
+      return <Badge variant="destructive" className="opacity-90">{days} dias</Badge>;
     }
     if (days <= 7) {
-      return <Badge variant="destructive" className="opacity-80">{days} dias</Badge>;
-    }
-    if (days <= 15) {
       return <Badge variant="outline" className="border-primary text-primary">{days} dias</Badge>;
     }
     return <Badge variant="secondary">{days} dias</Badge>;
@@ -99,78 +105,84 @@ export function TripRemindersCard() {
             </Badge>
           </div>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-            {reminders.slice(0, 10).map((reminder) => (
-              <div
-                key={reminder.id}
-                className={cn(
-                  "border rounded-lg p-4 space-y-3 transition-colors",
-                  reminder.daysRemaining <= 2
-                    ? "border-destructive/50 bg-destructive/5"
-                    : reminder.daysRemaining <= 7
-                    ? "border-primary/50 bg-primary/5"
-                    : "border-border"
-                )}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-1 flex-1">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{reminder.trip?.client_name}</span>
-                      {getDaysRemainingBadge(reminder.daysRemaining)}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" />
-                      <span>{reminder.trip?.destination}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span>
-                        {reminder.trip?.start_date &&
-                          format(new Date(reminder.trip.start_date), "dd 'de' MMMM 'de' yyyy", {
-                            locale: ptBR,
-                          })}
-                      </span>
+            {reminders.slice(0, 10).map((reminder) => {
+              const isReturn = reminder.days_before === -1;
+              return (
+                <div
+                  key={reminder.id}
+                  className={cn(
+                    "border rounded-lg p-4 space-y-3 transition-colors",
+                    isReturn
+                      ? "border-accent/50 bg-accent/10"
+                      : reminder.daysRemaining <= 1
+                      ? "border-destructive/50 bg-destructive/5"
+                      : reminder.daysRemaining <= 3
+                      ? "border-primary/50 bg-primary/5"
+                      : "border-border"
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{reminder.trip?.client_name}</span>
+                        {getDaysRemainingBadge(reminder.daysRemaining, isReturn)}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5" />
+                        <span>{reminder.trip?.destination}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>
+                          {isReturn ? "Retorno: " : ""}
+                          {reminder.trip?.start_date &&
+                            format(new Date(isReturn ? reminder.trip.end_date : reminder.trip.start_date), "dd 'de' MMMM 'de' yyyy", {
+                              locale: ptBR,
+                            })}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {reminder.follow_up_note && (
-                  <div className="bg-muted/50 rounded p-2 text-sm">
-                    <span className="text-muted-foreground">Follow-up: </span>
-                    {reminder.follow_up_note}
+                  {reminder.follow_up_note && (
+                    <div className="bg-muted/50 rounded p-2 text-sm">
+                      <span className="text-muted-foreground">Follow-up: </span>
+                      {reminder.follow_up_note}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditFollowUp(reminder.id, reminder.follow_up_note)}
+                    >
+                      <Edit2 className="h-3.5 w-3.5 mr-1" />
+                      Follow-up
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/ferramentas-ia/trip-wallet/${reminder.trip_id}`)}
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                      Abrir Viagem
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                      onClick={() => handleMarkCompleted(reminder.id)}
+                      disabled={isUpdating}
+                    >
+                      <Check className="h-3.5 w-3.5 mr-1" />
+                      Concluir
+                    </Button>
                   </div>
-                )}
-
-                <div className="flex items-center gap-2 pt-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditFollowUp(reminder.id, reminder.follow_up_note)}
-                  >
-                    <Edit2 className="h-3.5 w-3.5 mr-1" />
-                    Follow-up
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/ferramentas-ia/trip-wallet/${reminder.trip_id}`)}
-                  >
-                    <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                    Abrir Viagem
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary hover:text-primary/80 hover:bg-primary/10"
-                    onClick={() => handleMarkCompleted(reminder.id)}
-                    disabled={isUpdating}
-                  >
-                    <Check className="h-3.5 w-3.5 mr-1" />
-                    Concluir
-                  </Button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
