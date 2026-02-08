@@ -1211,6 +1211,67 @@ export type Database = {
         }
         Relationships: []
       }
+      notes: {
+        Row: {
+          client_id: string | null
+          content: string | null
+          created_at: string
+          event_id: string | null
+          id: string
+          is_favorite: boolean | null
+          opportunity_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          content?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          opportunity_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          content?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          opportunity_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "agency_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       online_meetings: {
         Row: {
           created_at: string
