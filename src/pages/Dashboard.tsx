@@ -221,11 +221,6 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* 5. Próximos Eventos - BOTTOM */}
-            <section className="order-5">
-              <SectionHeader title="Próximos Eventos" color="events" />
-              <UpcomingEventsCard />
-            </section>
           </>
         )}
       </div>
