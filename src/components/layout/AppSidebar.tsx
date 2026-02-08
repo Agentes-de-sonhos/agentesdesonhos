@@ -350,47 +350,6 @@ export function AppSidebar() {
 
         {/* Bottom Section */}
         <div className="flex-shrink-0 border-t border-sidebar-border p-3 space-y-2">
-          {/* Profile */}
-          {renderMenuItem(profileMenuItem, false)}
-
-          {/* Plan Badge */}
-          <div className={cn(
-            "rounded-lg p-2.5 flex items-center gap-2 transition-colors",
-            plan === "premium" && "bg-gradient-to-r from-warning/20 to-warning/10 border border-warning/30",
-            plan === "profissional" && "bg-primary/10 border border-primary/20",
-            plan === "essencial" && "bg-muted border border-border"
-          )}>
-            <Crown className={cn(
-              "h-4 w-4 flex-shrink-0",
-              plan === "premium" && "text-warning",
-              plan === "profissional" && "text-primary",
-              plan === "essencial" && "text-muted-foreground"
-            )} />
-            {!collapsed && (
-              <span className={cn(
-                "text-xs font-medium",
-                plan === "premium" && "text-warning",
-                plan === "profissional" && "text-primary",
-                plan === "essencial" && "text-muted-foreground"
-              )}>
-                Plano {plan.charAt(0).toUpperCase() + plan.slice(1)}
-              </span>
-            )}
-          </div>
-
-          {/* Logout Button */}
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10",
-              collapsed && "justify-center px-0"
-            )}
-            onClick={signOut}
-          >
-            <LogOut className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && <span>Sair</span>}
-          </Button>
-
           {/* Footer */}
           {!collapsed ? (
             <div className="text-center pt-2">
