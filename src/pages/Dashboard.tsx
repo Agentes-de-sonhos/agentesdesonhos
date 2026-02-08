@@ -20,6 +20,8 @@ import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
+import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
+import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
 
@@ -97,8 +99,15 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 animate-fade-in">
-        {/* Header */}
-        <div>
+        {/* Header with Exchange Rate and Notifications */}
+        <div className="flex flex-col gap-3">
+          {/* Top bar with exchange rate and notifications */}
+          <div className="flex items-center justify-between">
+            <ExchangeRateCard />
+            <NotificationsDropdown />
+          </div>
+          
+          {/* Welcome message */}
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
             Olá, Agente de Sonhos! 👋
           </h1>
