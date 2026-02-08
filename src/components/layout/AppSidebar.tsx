@@ -82,6 +82,11 @@ const mainMenuItems: MenuItem[] = [
     icon: StickyNote,
   },
   {
+    title: "Calculadora",
+    url: "/calculadora",
+    icon: Calculator,
+  },
+  {
     title: "Notícias",
     url: "/noticias",
     icon: Newspaper,
