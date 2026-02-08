@@ -18,6 +18,8 @@ import {
   Users,
   Wallet,
   Heart,
+  GraduationCap,
+  Image,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
@@ -235,7 +237,28 @@ export default function Dashboard() {
             {/* 5. Outras Ferramentas */}
             <section className="order-5">
               <SectionHeader title="Outras Ferramentas" color="tools" />
-              <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+              <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-9">
+                <QuickActionCard
+                  title="Bloqueios Aéreos"
+                  description="Voos promocionais"
+                  icon={Plane}
+                  variant="secondary"
+                  onClick={() => navigate("/bloqueios-aereos")}
+                />
+                <QuickActionCard
+                  title="Materiais"
+                  description="Artes e divulgação"
+                  icon={Image}
+                  variant="secondary"
+                  onClick={() => navigate("/materiais")}
+                />
+                <QuickActionCard
+                  title="Educa Travel"
+                  description="Academy e cursos"
+                  icon={GraduationCap}
+                  variant="secondary"
+                  onClick={() => navigate("/educa-academy")}
+                />
                 <QuickActionCard
                   title="Bloco de Notas"
                   description="Anotações rápidas"
