@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      agency_events: {
+        Row: {
+          client_id: string | null
+          color: string | null
+          created_at: string
+          description: string | null
+          event_date: string
+          event_time: string | null
+          event_type: string
+          id: string
+          opportunity_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          event_type?: string
+          id?: string
+          opportunity_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_time?: string | null
+          event_type?: string
+          id?: string
+          opportunity_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_events_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           city: string | null
@@ -431,6 +491,35 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      hidden_preset_events: {
+        Row: {
+          hidden_at: string
+          id: string
+          preset_event_id: string
+          user_id: string
+        }
+        Insert: {
+          hidden_at?: string
+          id?: string
+          preset_event_id: string
+          user_id: string
+        }
+        Update: {
+          hidden_at?: string
+          id?: string
+          preset_event_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hidden_preset_events_preset_event_id_fkey"
+            columns: ["preset_event_id"]
+            isOneToOne: false
+            referencedRelation: "preset_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       in_person_events: {
         Row: {
@@ -1236,6 +1325,45 @@ export type Database = {
           is_active?: boolean
           partner_company?: string
           topic?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      preset_events: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          event_date: string
+          event_type: string
+          id: string
+          is_active: boolean
+          recurring_yearly: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          recurring_yearly?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          recurring_yearly?: boolean
+          title?: string
           updated_at?: string
         }
         Relationships: []
