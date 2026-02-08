@@ -122,30 +122,49 @@ export function useAgenda(year?: number) {
     enabled: !!user?.id,
   });
 
-  // Build complete list of event types for filter
-  const allEventTypes: EventTypeOption[] = [
-    // Default agency event types
-    ...defaultAgencyEventTypes.map(type => ({
-      id: type,
-      name: eventTypeLabels[type],
-      color: eventTypeColors[type],
-      isCustom: false,
-    })),
-    // Preset event types
-    ...presetEventTypes.map(type => ({
-      id: type,
-      name: eventTypeLabels[type],
-      color: eventTypeColors[type],
-      isCustom: false,
-    })),
-    // Custom user types
-    ...customEventTypes.map(type => ({
-      id: `custom_${type.id}`,
-      name: type.name,
-      color: type.color,
-      isCustom: true,
-    })),
-  ];
+  // Build complete list of event types for filter (deduplicated)
+  const seenTypeIds = new Set<string>();
+  const allEventTypes: EventTypeOption[] = [];
+  
+  // Default agency event types
+  defaultAgencyEventTypes.forEach(type => {
+    if (!seenTypeIds.has(type)) {
+      seenTypeIds.add(type);
+      allEventTypes.push({
+        id: type,
+        name: eventTypeLabels[type],
+        color: eventTypeColors[type],
+        isCustom: false,
+      });
+    }
+  });
+  
+  // Preset event types (skip duplicates like 'trade')
+  presetEventTypes.forEach(type => {
+    if (!seenTypeIds.has(type)) {
+      seenTypeIds.add(type);
+      allEventTypes.push({
+        id: type,
+        name: eventTypeLabels[type],
+        color: eventTypeColors[type],
+        isCustom: false,
+      });
+    }
+  });
+  
+  // Custom user types
+  customEventTypes.forEach(type => {
+    const customId = `custom_${type.id}`;
+    if (!seenTypeIds.has(customId)) {
+      seenTypeIds.add(customId);
+      allEventTypes.push({
+        id: customId,
+        name: type.name,
+        color: type.color,
+        isCustom: true,
+      });
+    }
+  });
 
   // Get hidden types from preferences
   const hiddenTypes = filterPreferences?.hidden_types || [];
