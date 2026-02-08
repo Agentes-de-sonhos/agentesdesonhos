@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
-import { format, parseISO, differenceInDays } from "date-fns";
+import { format, parseISO, differenceInDays, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,12 @@ export function UpcomingAgendaEventsCard() {
   const navigate = useNavigate();
   const { getUpcomingEvents, isLoading } = useAgenda();
 
-  const upcomingEvents = getUpcomingEvents(10);
+  const now = new Date();
+  
+  // Filter events to only show current month events (max 10)
+  const upcomingEvents = getUpcomingEvents(50)
+    .filter((event) => isSameMonth(parseISO(event.event_date), now))
+    .slice(0, 10);
 
   if (isLoading) {
     return (
@@ -46,7 +51,7 @@ export function UpcomingAgendaEventsCard() {
         {upcomingEvents.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Nenhum evento próximo</p>
+            <p className="text-sm">Nenhum evento programado para este mês</p>
             <Button
               variant="outline"
               size="sm"
