@@ -237,7 +237,7 @@ export default function Dashboard() {
             {/* 5. Outras Ferramentas */}
             <section className="order-5">
               <SectionHeader title="Outras Ferramentas" color="tools" />
-              <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-9">
+              <div className="grid gap-4 grid-cols-3">
                 <QuickActionCard
                   title="Bloqueios Aéreos"
                   description="Voos promocionais"

@@ -20,7 +20,7 @@ export function QuickActionCard({
     <button
       onClick={onClick}
       className={cn(
-        "group relative flex flex-col items-start gap-3 rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1 border-0",
+        "group relative flex flex-col items-center justify-center gap-3 rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-1 border-0 min-h-[160px]",
         "shadow-md hover:shadow-lg",
         variant === "primary" && "bg-gradient-to-br from-[hsl(var(--section-ai))] to-[hsl(280_100%_55%)] text-white",
         variant === "accent" && "bg-gradient-to-br from-[hsl(var(--section-map))] to-[hsl(28_100%_60%)] text-white",
