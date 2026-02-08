@@ -13,6 +13,11 @@ import {
   Loader2,
   User,
   LogOut,
+  StickyNote,
+  Calculator,
+  Users,
+  Wallet,
+  Heart,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
@@ -223,6 +228,55 @@ export default function Dashboard() {
                   icon={FileText}
                   variant="accent"
                   onClick={() => navigate("/ferramentas-ia/criar-conteudo")}
+                />
+              </div>
+            </section>
+
+            {/* 5. Outras Ferramentas */}
+            <section className="order-5">
+              <SectionHeader title="Outras Ferramentas" color="tools" />
+              <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+                <QuickActionCard
+                  title="Bloco de Notas"
+                  description="Anotações rápidas"
+                  icon={StickyNote}
+                  variant="secondary"
+                  onClick={() => navigate("/bloco-notas")}
+                />
+                <QuickActionCard
+                  title="Calculadora"
+                  description="Cálculos e conversões"
+                  icon={Calculator}
+                  variant="secondary"
+                  onClick={() => navigate("/calculadora")}
+                />
+                <QuickActionCard
+                  title="Gestão de Clientes"
+                  description="CRM e funil de vendas"
+                  icon={Users}
+                  variant="secondary"
+                  onClick={() => navigate("/gestao-clientes")}
+                />
+                <QuickActionCard
+                  title="Gerar Orçamento"
+                  description="Propostas comerciais"
+                  icon={FileText}
+                  variant="secondary"
+                  onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}
+                />
+                <QuickActionCard
+                  title="Carteira Digital"
+                  description="Vouchers e documentos"
+                  icon={Wallet}
+                  variant="secondary"
+                  onClick={() => navigate("/ferramentas-ia/trip-wallet")}
+                />
+                <QuickActionCard
+                  title="Comunidade"
+                  description="Networking e eventos"
+                  icon={Heart}
+                  variant="secondary"
+                  onClick={() => navigate("/comunidade")}
                 />
               </div>
             </section>

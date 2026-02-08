@@ -5,7 +5,7 @@ interface QuickActionCardProps {
   title: string;
   description: string;
   icon: LucideIcon;
-  variant?: "primary" | "accent" | "default" | "ai";
+  variant?: "primary" | "accent" | "default" | "ai" | "secondary";
   onClick?: () => void;
 }
 
@@ -25,7 +25,8 @@ export function QuickActionCard({
         variant === "primary" && "bg-gradient-to-br from-[hsl(var(--section-ai))] to-[hsl(280_100%_55%)] text-white",
         variant === "accent" && "bg-gradient-to-br from-[hsl(var(--section-map))] to-[hsl(28_100%_60%)] text-white",
         variant === "default" && "bg-card text-card-foreground hover:bg-secondary/50",
-        variant === "ai" && "bg-gradient-to-br from-[hsl(var(--section-ai))] to-[hsl(280_100%_55%)] text-white"
+        variant === "ai" && "bg-gradient-to-br from-[hsl(var(--section-ai))] to-[hsl(280_100%_55%)] text-white",
+        variant === "secondary" && "bg-secondary/50 text-foreground hover:bg-secondary/80 border border-border/50"
       )}
     >
       <div
@@ -33,13 +34,14 @@ export function QuickActionCard({
           "flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110",
           variant === "primary" && "bg-white/20",
           variant === "accent" && "bg-white/20",
-          variant === "default" && "bg-primary/10"
+          variant === "default" && "bg-primary/10",
+          variant === "secondary" && "bg-primary/10"
         )}
       >
         <Icon
           className={cn(
             "h-6 w-6",
-            variant === "default" && "text-primary",
+            (variant === "default" || variant === "secondary") && "text-primary",
             (variant === "primary" || variant === "accent" || variant === "ai") && "text-white"
           )}
         />
@@ -49,7 +51,7 @@ export function QuickActionCard({
         <p
           className={cn(
             "mt-1 text-sm",
-            variant === "default" ? "text-muted-foreground" : "opacity-80"
+            (variant === "default" || variant === "secondary") ? "text-muted-foreground" : "opacity-80"
           )}
         >
           {description}
