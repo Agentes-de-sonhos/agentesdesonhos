@@ -87,9 +87,14 @@ export function Calculator() {
 
     if (previousValue !== null && operation) {
       const result = calculate(previousValue, currentValue, operation);
-      const resultStr = String(
-        Number.isInteger(result) ? result : result.toFixed(10)
-      ).replace(/\.?0+$/, "");
+
+      // Format result (trim trailing zeros only for decimals)
+      const resultStr = Number.isInteger(result)
+        ? String(result)
+        : result
+            .toFixed(10)
+            .replace(/0+$/, "")
+            .replace(/\.$/, "");
 
       // Add to history
       const operationStr = `${previousValue} ${operation} ${currentValue}`;
