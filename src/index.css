@@ -85,6 +85,7 @@
     --section-ai: 280 100% 65%;
     --section-events: 340 82% 52%;
     --section-flights: 187 92% 48%;
+    --section-tools: 215 25% 50%;
     
     /* Sidebar Hover */
     --sidebar-hover: 199 89% 48%;
@@ -137,6 +138,7 @@
     --section-ai: 280 100% 70%;
     --section-events: 340 82% 62%;
     --section-flights: 187 92% 58%;
+    --section-tools: 215 25% 60%;
     
     --sidebar-hover: 199 89% 58%;
   }
