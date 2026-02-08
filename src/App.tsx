@@ -25,6 +25,7 @@ import Auth from "./pages/Auth";
 import Materiais from "./pages/Materiais";
 import BloqueiosAereos from "./pages/BloqueiosAereos";
 import Agenda from "./pages/Agenda";
+import BlocoNotas from "./pages/BlocoNotas";
 import CRM from "./pages/CRM";
 import Financeiro from "./pages/Financeiro";
 import GestaoClientes from "./pages/GestaoClientes";
@@ -181,6 +182,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Agenda />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bloco-notas"
+              element={
+                <ProtectedRoute>
+                  <BlocoNotas />
                 </ProtectedRoute>
               }
             />

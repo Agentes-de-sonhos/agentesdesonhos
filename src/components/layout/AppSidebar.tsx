@@ -22,6 +22,7 @@ import {
   Clock,
   Kanban,
   Target,
+  StickyNote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,11 @@ const mainMenuItems: MenuItem[] = [
     url: "/agenda",
     icon: Calendar,
     requiredFeature: "agenda",
+  },
+  {
+    title: "Bloco de Notas",
+    url: "/bloco-notas",
+    icon: StickyNote,
   },
   {
     title: "Notícias",
