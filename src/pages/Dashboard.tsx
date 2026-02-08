@@ -18,12 +18,12 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { NewsFeedCard } from "@/components/dashboard/NewsFeedCard";
 import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
-import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
+import { TripRemindersCard } from "@/components/dashboard/TripRemindersCard";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -176,16 +176,22 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* 2. Principais Notícias (unified news) */}
-            <section className="order-2">
-              <SectionHeader title="Principais Notícias" color="news" />
-              {news && news.length > 0 ? (
-                <NewsFeedCard news={news} />
-              ) : (
-                <div className="rounded-xl border bg-card p-6 sm:p-8 text-center text-muted-foreground shadow-card">
-                  <p>Nenhuma notícia disponível</p>
-                </div>
-              )}
+            {/* 2. Notícias e Próximas Viagens - lado a lado */}
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 order-2">
+              <div>
+                <SectionHeader title="Principais Notícias" color="news" />
+                {news && news.length > 0 ? (
+                  <NewsFeedCard news={news} />
+                ) : (
+                  <div className="rounded-xl border bg-card p-6 sm:p-8 text-center text-muted-foreground shadow-card">
+                    <p>Nenhuma notícia disponível</p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <SectionHeader title="Próximas Viagens" color="reminders" />
+                <TripRemindersCard />
+              </div>
             </section>
 
             {/* 3. Productivity Section - Gestão de Clientes & Agenda */}
