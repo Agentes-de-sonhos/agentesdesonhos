@@ -13,9 +13,25 @@ export function UpcomingAgendaEventsCard() {
 
   const now = new Date();
   
-  // Filter events to only show current month events (max 10)
+  // Event types to show on dashboard
+  const allowedEventTypes = [
+    'compromisso',
+    'trade',
+    'reuniao',
+    'aniversario',
+    'treinamento',
+    'comemorativo',
+  ];
+  
+  // Filter events to only show current month events with allowed types (max 10)
+  // Also includes custom event types (those not in the default list)
   const upcomingEvents = getUpcomingEvents(50)
-    .filter((event) => isSameMonth(parseISO(event.event_date), now))
+    .filter((event) => {
+      const isCurrentMonth = isSameMonth(parseISO(event.event_date), now);
+      const isAllowedType = allowedEventTypes.includes(event.event_type);
+      const isCustomType = !['compromisso', 'trade', 'venda', 'lembrete', 'reuniao', 'viagem', 'aniversario', 'feriado', 'comemorativo', 'treinamento'].includes(event.event_type);
+      return isCurrentMonth && (isAllowedType || isCustomType);
+    })
     .slice(0, 10);
 
   if (isLoading) {
