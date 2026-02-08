@@ -70,7 +70,7 @@ const mainMenuItems: MenuItem[] = [
     icon: Plane,
   },
   {
-    title: "Agenda",
+    title: "Minha Agenda",
     url: "/agenda",
     icon: Calendar,
     requiredFeature: "agenda",

@@ -22,6 +22,7 @@ import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
 import { FlightBlocksSearchCard } from "@/components/dashboard/FlightBlocksSearchCard";
 import { TripRemindersCard } from "@/components/dashboard/TripRemindersCard";
 import { FinancialSummaryCard } from "@/components/dashboard/FinancialSummaryCard";
+import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
@@ -160,8 +161,8 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* 2. Productivity Section - Trips & Financial (stacked on mobile) */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+            {/* 2. Productivity Section - Trips, Financial & Agenda (stacked on mobile) */}
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-3">
               <div className="order-3">
                 <SectionHeader title="Próximas Viagens" color="reminders" />
                 <TripRemindersCard />
@@ -170,10 +171,14 @@ export default function Dashboard() {
                 <SectionHeader title="Resumo Financeiro" color="financial" />
                 <FinancialSummaryCard />
               </div>
+              <div className="order-5">
+                <SectionHeader title="Minha Agenda" color="events" />
+                <UpcomingAgendaEventsCard />
+              </div>
             </section>
 
             {/* 3. Mapa do Turismo (horizontal scroll on mobile) */}
-            <section className="order-5">
+            <section className="order-6">
               <SectionHeader title="Mapa do Turismo" color="map" />
               <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 sm:overflow-visible">
                 <SupplierCategoriesCard />
@@ -181,7 +186,7 @@ export default function Dashboard() {
             </section>
 
             {/* 4. Ferramentas IA - Only Roteiro and Conteúdo */}
-            <section className="order-6">
+            <section className="order-7">
               <SectionHeader title="Ferramentas IA" color="ai" />
               <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
                 <QuickActionCard
@@ -203,11 +208,11 @@ export default function Dashboard() {
 
             {/* 5. Próximos Eventos & Buscar Bloqueios - BOTTOM (stacked on mobile) */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-              <div className="order-7">
+              <div className="order-8">
                 <SectionHeader title="Próximos Eventos" color="events" />
                 <UpcomingEventsCard />
               </div>
-              <div className="order-8">
+              <div className="order-9">
                 <SectionHeader title="Bloqueios Aéreos" color="flights" />
                 <FlightBlocksSearchCard />
               </div>
