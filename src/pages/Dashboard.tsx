@@ -11,6 +11,8 @@ import {
   Ship,
   Car,
   Loader2,
+  User,
+  LogOut,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
@@ -24,6 +26,14 @@ import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Icon mapping for suppliers
 const iconMap: Record<string, LucideIcon> = {
@@ -38,6 +48,12 @@ const iconMap: Record<string, LucideIcon> = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   // Fetch news from database (unified news - trade + general)
   const { data: news, isLoading: newsLoading } = useQuery({
@@ -99,12 +115,45 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 animate-fade-in">
-        {/* Header with Exchange Rate and Notifications */}
+        {/* Header with Exchange Rate, Notifications, Profile & Logout */}
         <div className="flex flex-col gap-3">
-          {/* Top bar with exchange rate and notifications */}
-          <div className="flex items-center justify-between">
+          {/* Top bar with all header elements */}
+          <div className="flex items-center justify-end gap-2 sm:gap-3">
             <ExchangeRateCard />
+            <div className="h-6 w-px bg-border hidden sm:block" />
             <NotificationsDropdown />
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-full hover:bg-primary/10"
+                    onClick={() => navigate("/perfil")}
+                  >
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Meu Perfil</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-full hover:bg-destructive/10"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-5 w-5 text-muted-foreground hover:text-destructive" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Sair</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           
           {/* Welcome message */}
