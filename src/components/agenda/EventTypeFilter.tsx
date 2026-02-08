@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
@@ -24,40 +22,47 @@ export function EventTypeFilter({
   className,
 }: EventTypeFilterProps) {
   return (
-    <div className={cn("flex flex-wrap items-center gap-3 p-3 bg-muted/50 rounded-lg border", className)}>
-      <span className="text-sm font-medium text-muted-foreground mr-2">Filtrar:</span>
-      {eventTypes.map((type) => {
-        const isVisible = !hiddenTypes.includes(type.id);
-        return (
-          <div
-            key={type.id}
-            className="flex items-center gap-1.5 cursor-pointer group"
-            onClick={() => onToggleType(type.id, isVisible)}
-          >
-            <Checkbox
-              checked={isVisible}
-              onCheckedChange={(checked) => onToggleType(type.id, !checked)}
-              className="h-3.5 w-3.5"
-              style={{
-                borderColor: type.color,
-                backgroundColor: isVisible ? type.color : 'transparent',
-              }}
-            />
-            <div
-              className="w-2.5 h-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: type.color }}
-            />
-            <Label
+    <div className={cn("flex flex-wrap items-center gap-4 p-4 bg-muted/30 rounded-lg border border-border/50", className)}>
+      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Filtrar:</span>
+      <div className="flex flex-wrap items-center gap-3">
+        {eventTypes.map((type) => {
+          const isVisible = !hiddenTypes.includes(type.id);
+          return (
+            <button
+              key={type.id}
+              onClick={() => onToggleType(type.id, isVisible)}
               className={cn(
-                "text-xs cursor-pointer select-none transition-opacity",
-                !isVisible && "opacity-50 line-through"
+                "group relative flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200",
+                "hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                !isVisible && "opacity-40"
               )}
+              title={isVisible ? `Ocultar ${type.name}` : `Mostrar ${type.name}`}
+              type="button"
             >
-              {type.name}
-            </Label>
-          </div>
-        );
-      })}
+              {/* Circle indicator - single visual element */}
+              <div
+                className={cn(
+                  "w-3 h-3 rounded-full shrink-0 ring-2 transition-all duration-200",
+                  isVisible ? "ring-offset-2" : "ring-offset-0 opacity-60"
+                )}
+                style={{
+                  backgroundColor: type.color,
+                  borderColor: type.color,
+                }}
+              />
+              {/* Label */}
+              <Label
+                className={cn(
+                  "text-xs font-medium cursor-pointer select-none transition-all duration-200 whitespace-nowrap",
+                  !isVisible && "line-through opacity-60"
+                )}
+              >
+                {type.name}
+              </Label>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
