@@ -40,27 +40,8 @@ export function Calculator() {
     }
   }, [display, waitingForOperand]);
 
-  // Handle operations
-  const handleOperation = useCallback(
-    (nextOperation: string) => {
-      const currentValue = parseFloat(display);
-
-      if (previousValue === null) {
-        setPreviousValue(currentValue);
-      } else if (operation) {
-        const result = calculate(previousValue, currentValue, operation);
-        setDisplay(String(result));
-        setPreviousValue(result);
-      }
-
-      setOperation(nextOperation);
-      setWaitingForOperand(true);
-    },
-    [display, previousValue, operation]
-  );
-
   // Calculate result based on operation
-  const calculate = (
+  const calculate = useCallback((
     prev: number,
     current: number,
     op: string
@@ -79,7 +60,26 @@ export function Calculator() {
       default:
         return current;
     }
-  };
+  }, []);
+
+  // Handle operations
+  const handleOperation = useCallback(
+    (nextOperation: string) => {
+      const currentValue = parseFloat(display);
+
+      if (previousValue === null) {
+        setPreviousValue(currentValue);
+      } else if (operation) {
+        const result = calculate(previousValue, currentValue, operation);
+        setDisplay(String(result));
+        setPreviousValue(result);
+      }
+
+      setOperation(nextOperation);
+      setWaitingForOperand(true);
+    },
+    [display, previousValue, operation, calculate]
+  );
 
   // Handle equals
   const handleEquals = useCallback(() => {
@@ -103,7 +103,7 @@ export function Calculator() {
       setOperation(null);
       setWaitingForOperand(true);
     }
-  }, [display, previousValue, operation]);
+  }, [display, previousValue, operation, calculate]);
 
   // Handle percentage
   const handlePercentage = useCallback(() => {
