@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
-import { format, parseISO, differenceInDays, isSameMonth } from "date-fns";
+import { format, differenceInCalendarDays, isSameMonth, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,9 @@ export function UpcomingAgendaEventsCard() {
   const navigate = useNavigate();
   const { getUpcomingEvents, isLoading } = useAgenda();
 
+  // Use local date components to avoid UTC shift
   const now = new Date();
+  const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   
   // Event types to show on dashboard
   const allowedEventTypes = [
@@ -27,7 +29,9 @@ export function UpcomingAgendaEventsCard() {
   // Also includes custom event types (those not in the default list)
   const upcomingEvents = getUpcomingEvents(50)
     .filter((event) => {
-      const isCurrentMonth = isSameMonth(parseISO(event.event_date), now);
+      const [y, m, d] = event.event_date.split('-').map(Number);
+      const evDate = new Date(y, m - 1, d);
+      const isCurrentMonth = isSameMonth(evDate, todayLocal);
       const isAllowedType = allowedEventTypes.includes(event.event_type);
       const isCustomType = !['compromisso', 'trade', 'venda', 'lembrete', 'reuniao', 'viagem', 'aniversario', 'feriado', 'comemorativo', 'treinamento'].includes(event.event_type);
       return isCurrentMonth && (isAllowedType || isCustomType);
@@ -80,14 +84,16 @@ export function UpcomingAgendaEventsCard() {
         ) : (
           <div className="space-y-2">
             {upcomingEvents.map((event) => {
-              const eventDate = parseISO(event.event_date);
-              const daysUntil = differenceInDays(eventDate, new Date());
-              
-              let daysLabel = "";
-              if (daysUntil === 0) daysLabel = "Hoje";
-              else if (daysUntil === 1) daysLabel = "Amanhã";
-              else if (daysUntil < 7) daysLabel = `Em ${daysUntil} dias`;
-              else daysLabel = format(eventDate, "dd/MM");
+               // Parse date using local components to avoid UTC timezone shift
+               const [y, m, d] = event.event_date.split('-').map(Number);
+               const eventDate = new Date(y, m - 1, d);
+               const daysUntil = differenceInCalendarDays(eventDate, todayLocal);
+               
+               let daysLabel = "";
+               if (daysUntil === 0) daysLabel = "Hoje";
+               else if (daysUntil === 1) daysLabel = "Amanhã";
+               else if (daysUntil < 7) daysLabel = `Em ${daysUntil} dias`;
+               else daysLabel = format(eventDate, "dd/MM");
 
               return (
                 <div
