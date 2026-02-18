@@ -1441,6 +1441,83 @@ export type Database = {
         }
         Relationships: []
       }
+      playbook_destinations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          order_index: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          order_index?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          order_index?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      playbook_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          destination_id: string
+          id: string
+          order_index: number
+          tab_key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          destination_id: string
+          id?: string
+          order_index?: number
+          tab_key: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          destination_id?: string
+          id?: string
+          order_index?: number
+          tab_key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_sections_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "playbook_destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       preset_events: {
         Row: {
           color: string | null
