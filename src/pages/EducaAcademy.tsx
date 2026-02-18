@@ -30,6 +30,7 @@ import { MyCertificates } from "@/components/academy/MyCertificates";
 import { CertificatePDF } from "@/components/academy/CertificatePDF";
 import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
 import { FeatureGate } from "@/components/subscription/FeatureGate";
+import { PlaybookList } from "@/components/playbook/PlaybookList";
 import type { TrailWithProgress, UserCertificate, LearningTrail } from "@/types/academy";
 
 export default function EducaAcademy() {
@@ -91,6 +92,10 @@ export default function EducaAcademy() {
             <TabsTrigger value="trails" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Trilhas
+            </TabsTrigger>
+            <TabsTrigger value="playbooks" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Playbooks
             </TabsTrigger>
             <TabsTrigger value="ranking" className="flex items-center gap-2">
               <Trophy className="h-4 w-4" />
@@ -232,6 +237,11 @@ export default function EducaAcademy() {
                 )}
               </div>
             )}
+          </TabsContent>
+
+          {/* Playbooks Tab */}
+          <TabsContent value="playbooks">
+            <PlaybookList />
           </TabsContent>
 
           {/* Ranking Tab */}

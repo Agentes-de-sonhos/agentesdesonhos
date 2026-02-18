@@ -34,6 +34,7 @@ import EducaAcademy from "./pages/EducaAcademy";
 import Community from "./pages/Community";
 import Mentorias from "./pages/Mentorias";
 import MentoriaDetail from "./pages/MentoriaDetail";
+import PlaybookViewer from "./components/playbook/PlaybookViewer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -295,6 +296,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <MentoriaDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/playbook/:slug"
+              element={
+                <ProtectedRoute>
+                  <PlaybookViewer />
                 </ProtectedRoute>
               }
             />

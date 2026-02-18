@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Heart,
   Megaphone,
+  BookOpen,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -26,6 +27,7 @@ import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
 import { AdminCommunityManager } from "@/components/admin/AdminCommunityManager";
 import { AdminUserManager } from "@/components/admin/AdminUserManager";
 import { AdminPopupsManager } from "@/components/admin/AdminPopupsManager";
+import { AdminPlaybookManager } from "@/components/admin/AdminPlaybookManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -108,7 +110,7 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Usuários</span>
@@ -152,6 +154,10 @@ export default function Admin() {
             <TabsTrigger value="community" className="flex items-center gap-2">
               <Heart className="h-4 w-4" />
               <span className="hidden sm:inline">Comunidade</span>
+            </TabsTrigger>
+            <TabsTrigger value="playbooks" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Playbooks</span>
             </TabsTrigger>
           </TabsList>
 
@@ -197,6 +203,10 @@ export default function Admin() {
 
           <TabsContent value="community">
             <AdminCommunityManager />
+          </TabsContent>
+
+          <TabsContent value="playbooks">
+            <AdminPlaybookManager />
           </TabsContent>
         </Tabs>
       </div>
