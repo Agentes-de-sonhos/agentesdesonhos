@@ -43,7 +43,7 @@ type AuthView = "main" | "otp-verify" | "password-login" | "password-signup";
 function BrandHeader() {
   return (
     <div className="flex flex-col items-center space-y-3">
-      <img src={logoAgentes} alt="Agentes de Sonhos" className="h-42 w-auto" />
+      <img src={logoAgentes} alt="Agentes de Sonhos" className="h-34 w-auto" />
       <p className="mt-1 text-sm text-muted-foreground">
         Plataforma inteligente para agentes de viagem
       </p>
@@ -100,7 +100,7 @@ export default function Auth() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <div className="flex flex-col items-center gap-4">
-          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-30 w-auto animate-pulse" />
+          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-24 w-auto animate-pulse" />
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <p className="text-muted-foreground text-sm">Carregando...</p>
         </div>
@@ -113,7 +113,7 @@ export default function Auth() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <div className="flex flex-col items-center gap-4">
-          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-30 w-auto" />
+          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-24 w-auto" />
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <p className="text-muted-foreground text-sm">Redirecionando...</p>
         </div>
