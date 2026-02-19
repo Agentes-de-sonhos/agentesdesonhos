@@ -43,7 +43,7 @@ type AuthView = "main" | "otp-verify" | "password-login" | "password-signup";
 function BrandHeader() {
   return (
     <div className="flex flex-col items-center space-y-3">
-      <img src={logoAgentes} alt="Agentes de Sonhos" className="h-28 w-auto" />
+      <img src={logoAgentes} alt="Agentes de Sonhos" className="h-42 w-auto" />
       <p className="mt-1 text-sm text-muted-foreground">
         Plataforma inteligente para agentes de viagem
       </p>
@@ -100,7 +100,7 @@ export default function Auth() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <div className="flex flex-col items-center gap-4">
-          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-20 w-auto animate-pulse" />
+          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-30 w-auto animate-pulse" />
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <p className="text-muted-foreground text-sm">Carregando...</p>
         </div>
@@ -113,7 +113,7 @@ export default function Auth() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <div className="flex flex-col items-center gap-4">
-          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-20 w-auto" />
+          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-30 w-auto" />
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <p className="text-muted-foreground text-sm">Redirecionando...</p>
         </div>
@@ -392,6 +392,16 @@ export default function Auth() {
                 <KeyRound className="mr-2 h-4 w-4" />
                 Entrar com senha
               </Button>
+
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => { switchToPassword(); setTimeout(() => setView("password-signup"), 0); }}
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  Não tem conta? <span className="underline underline-offset-4">Cadastre-se</span>
+                </button>
+              </div>
             </div>
           )}
 
