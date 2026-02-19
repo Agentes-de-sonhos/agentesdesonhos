@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Cloud, Loader2, Eye, EyeOff, Mail, KeyRound, Lock } from "lucide-react";
+import { Loader2, Eye, EyeOff, Mail, KeyRound, Lock } from "lucide-react";
+import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
@@ -46,17 +47,10 @@ type AuthView = "main" | "otp-verify" | "password-login" | "password-signup";
 function BrandHeader() {
   return (
     <div className="flex flex-col items-center space-y-3">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25 transition-transform hover:scale-105">
-        <Cloud className="h-8 w-8 text-primary-foreground" />
-      </div>
-      <div className="text-center">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
-          Agentes de Sonhos
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Plataforma inteligente para agentes de viagem
-        </p>
-      </div>
+      <img src={logoAgentes} alt="Agentes de Sonhos" className="h-28 w-auto" />
+      <p className="mt-1 text-sm text-muted-foreground">
+        Plataforma inteligente para agentes de viagem
+      </p>
     </div>
   );
 }
@@ -110,9 +104,7 @@ export default function Auth() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <div className="flex flex-col items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25 animate-pulse">
-            <Cloud className="h-8 w-8 text-primary-foreground" />
-          </div>
+          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-20 w-auto animate-pulse" />
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <p className="text-muted-foreground text-sm">Carregando...</p>
         </div>
@@ -125,9 +117,7 @@ export default function Auth() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <div className="flex flex-col items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
-            <Cloud className="h-8 w-8 text-primary-foreground" />
-          </div>
+          <img src={logoAgentes} alt="Agentes de Sonhos" className="h-20 w-auto" />
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <p className="text-muted-foreground text-sm">Redirecionando...</p>
         </div>
