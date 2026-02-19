@@ -21,11 +21,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+// OTP input no longer used - magic link flow
 
 // Schemas
 const emailSchema = z.object({
@@ -61,12 +57,12 @@ export default function Auth() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
-  const [otpValue, setOtpValue] = useState("");
+  const [_otpValue, setOtpValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const navigate = useNavigate();
-  const { sendOtp, verifyOtp, signIn, user, loading: authLoading, isNewUser } = useAuth();
+  const { sendOtp, signIn, user, loading: authLoading, isNewUser } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
 
@@ -140,38 +136,12 @@ export default function Auth() {
     setPendingEmail(data.email);
     setView("otp-verify");
     toast({
-      title: "Código enviado!",
-      description: "Verifique seu email e insira o código de verificação.",
+      title: "Link enviado!",
+      description: "Verifique seu email e clique no link de acesso.",
     });
   };
 
-  const handleVerifyOtp = async () => {
-    if (otpValue.length !== 6) {
-      setError("Por favor, insira o código completo de 6 dígitos");
-      return;
-    }
-
-    setError(null);
-    setIsLoading(true);
-    const { error } = await verifyOtp(pendingEmail, otpValue);
-    setIsLoading(false);
-
-    if (error) {
-      if (error.message.includes("Token has expired")) {
-        setError("Código expirado. Solicite um novo código.");
-      } else if (error.message.includes("Invalid") || error.message.includes("invalid")) {
-        setError("Código inválido. Verifique e tente novamente.");
-      } else {
-        setError(error.message);
-      }
-      return;
-    }
-
-    toast({
-      title: "Bem-vindo!",
-      description: "Login realizado com sucesso.",
-    });
-  };
+  // handleVerifyOtp removed - magic link flow used instead
 
   const handleResendCode = async () => {
     setError(null);
@@ -262,7 +232,7 @@ export default function Auth() {
     );
   }
 
-  // OTP Verification screen
+  // Magic Link confirmation screen
   if (view === "otp-verify") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
@@ -271,9 +241,9 @@ export default function Auth() {
           <CardHeader className="pt-10 pb-4 text-center space-y-6">
             <BrandHeader />
             <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">Digite o código</CardTitle>
+              <CardTitle className="text-xl font-semibold">Verifique seu email</CardTitle>
               <CardDescription className="text-sm">
-                Enviamos um código de 6 dígitos para<br />
+                Enviamos um link de acesso para<br />
                 <span className="font-medium text-foreground">{pendingEmail}</span>
               </CardDescription>
             </div>
@@ -286,28 +256,12 @@ export default function Auth() {
             )}
 
             <div className="space-y-6">
-              <div className="flex justify-center">
-                <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
-                  <InputOTPGroup className="gap-2">
-                    <InputOTPSlot index={0} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
-                    <InputOTPSlot index={1} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
-                    <InputOTPSlot index={2} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
-                    <InputOTPSlot index={3} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
-                    <InputOTPSlot index={4} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
-                    <InputOTPSlot index={5} className="rounded-xl border-muted-foreground/20 h-14 w-12 text-lg" />
-                  </InputOTPGroup>
-                </InputOTP>
+              <div className="flex flex-col items-center gap-3 py-4">
+                <Mail className="h-12 w-12 text-primary/70" />
+                <p className="text-sm text-muted-foreground text-center leading-relaxed">
+                  Clique no link enviado para seu email para acessar sua conta. O link é válido por tempo limitado.
+                </p>
               </div>
-
-              <Button
-                type="button"
-                className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
-                disabled={isLoading || otpValue.length !== 6}
-                onClick={handleVerifyOtp}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Verificar código
-              </Button>
 
               <div className="flex flex-col gap-3 text-center pt-2">
                 <button
@@ -316,7 +270,14 @@ export default function Auth() {
                   disabled={isLoading}
                   className="text-sm font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
                 >
-                  Reenviar código
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Reenviando...
+                    </span>
+                  ) : (
+                    "Reenviar link"
+                  )}
                 </button>
                 <button
                   type="button"
@@ -344,14 +305,14 @@ export default function Auth() {
         <CardHeader className={`text-center space-y-6 ${view === "password-signup" ? "pt-8 pb-4" : "pt-10 pb-4"}`}>
           <BrandHeader />
           
-          {view !== "password-signup" && (
+           {view !== "password-signup" && (
             <div className="space-y-2">
               <CardTitle className="text-xl font-semibold">
                 {view === "main" && "Acesse sua conta"}
                 {view === "password-login" && "Login com senha"}
               </CardTitle>
               <CardDescription className="text-sm">
-                {view === "main" && "Informe seu email para receber o código de acesso"}
+                {view === "main" && "Informe seu email para receber o link de acesso"}
                 {view === "password-login" && "Entre com seu email e senha cadastrados"}
               </CardDescription>
             </div>
@@ -408,7 +369,7 @@ export default function Auth() {
                   >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Mail className="mr-2 h-4 w-4" />
-                    Enviar código por email
+                    Enviar link de acesso por email
                   </Button>
                 </form>
               </Form>
