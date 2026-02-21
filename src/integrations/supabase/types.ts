@@ -2540,6 +2540,7 @@ export type Database = {
       }
       trips: {
         Row: {
+          access_password: string | null
           client_name: string
           created_at: string
           destination: string
@@ -2553,6 +2554,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          access_password?: string | null
           client_name: string
           created_at?: string
           destination: string
@@ -2566,6 +2568,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          access_password?: string | null
           client_name?: string
           created_at?: string
           destination?: string
@@ -2755,6 +2758,10 @@ export type Database = {
       has_won_this_year: {
         Args: { _user_id: string; _year: number }
         Returns: boolean
+      }
+      verify_trip_access: {
+        Args: { p_password: string; p_token: string }
+        Returns: Json
       }
     }
     Enums: {

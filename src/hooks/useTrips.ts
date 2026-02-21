@@ -4,6 +4,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import type { Trip, TripService, TripFormData, TripServiceType, TripServiceData } from "@/types/trip";
 
+function generatePassword(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 export function useTrips() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -13,13 +17,11 @@ export function useTrips() {
     queryKey: ["trips", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
       const { data, error } = await supabase
         .from("trips")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       return data as Trip[];
     },
@@ -30,6 +32,12 @@ export function useTrips() {
     mutationFn: async (formData: TripFormData) => {
       if (!user) throw new Error("User not authenticated");
 
+      // Generate share token and password automatically
+      const array = new Uint8Array(16);
+      crypto.getRandomValues(array);
+      const shareToken = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+      const password = generatePassword();
+
       const { data, error } = await supabase
         .from("trips")
         .insert({
@@ -39,6 +47,8 @@ export function useTrips() {
           start_date: formData.start_date,
           end_date: formData.end_date,
           status: "active",
+          share_token: shareToken,
+          access_password: password,
         })
         .select()
         .single();
@@ -48,75 +58,62 @@ export function useTrips() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trips"] });
-      toast({
-        title: "Viagem criada",
-        description: "A viagem foi criada com sucesso.",
-      });
+      toast({ title: "Carteira criada", description: "A carteira digital foi criada com sucesso." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao criar viagem",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao criar carteira", description: error.message, variant: "destructive" });
     },
   });
 
   const deleteTripMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("trips")
-        .delete()
-        .eq("id", id);
-
+      const { error } = await supabase.from("trips").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trips"] });
-      toast({
-        title: "Viagem excluída",
-        description: "A viagem foi excluída com sucesso.",
-      });
+      toast({ title: "Carteira excluída", description: "A carteira foi excluída com sucesso." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao excluir viagem",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
     },
   });
 
-  const shareTripMutation = useMutation({
-    mutationFn: async (id: string) => {
-      // Generate cryptographically secure 32-character hex token
-      const array = new Uint8Array(16);
-      crypto.getRandomValues(array);
-      const shareToken = Array.from(array)
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-      
+  const updatePasswordMutation = useMutation({
+    mutationFn: async ({ id, password }: { id: string; password: string }) => {
       const { error } = await supabase
         .from("trips")
-        .update({ share_token: shareToken })
+        .update({ access_password: password })
         .eq("id", id);
-
       if (error) throw error;
-      return shareToken;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trips"] });
-      toast({
-        title: "Link gerado",
-        description: "O link de compartilhamento foi gerado.",
-      });
+      queryClient.invalidateQueries({ queryKey: ["trip"] });
+      toast({ title: "Senha atualizada", description: "A senha da carteira foi alterada." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao gerar link",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao atualizar senha", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const regeneratePasswordMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const newPassword = generatePassword();
+      const { error } = await supabase
+        .from("trips")
+        .update({ access_password: newPassword })
+        .eq("id", id);
+      if (error) throw error;
+      return newPassword;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
+      queryClient.invalidateQueries({ queryKey: ["trip"] });
+      toast({ title: "Nova senha gerada", description: "Uma nova senha foi gerada para a carteira." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao gerar senha", description: error.message, variant: "destructive" });
     },
   });
 
@@ -125,9 +122,9 @@ export function useTrips() {
     isLoading,
     createTrip: createTripMutation.mutateAsync,
     deleteTrip: deleteTripMutation.mutateAsync,
-    shareTrip: shareTripMutation.mutateAsync,
+    updatePassword: updatePasswordMutation.mutateAsync,
+    regeneratePassword: regeneratePasswordMutation.mutateAsync,
     isCreating: createTripMutation.isPending,
-    isSharing: shareTripMutation.isPending,
   };
 }
 
@@ -140,13 +137,11 @@ export function useTrip(id: string | undefined) {
     queryKey: ["trip", id],
     queryFn: async () => {
       if (!id) return null;
-
       const { data: tripData, error: tripError } = await supabase
         .from("trips")
         .select("*")
         .eq("id", id)
         .single();
-
       if (tripError) throw tripError;
 
       const { data: servicesData, error: servicesError } = await supabase
@@ -154,7 +149,6 @@ export function useTrip(id: string | undefined) {
         .select("*")
         .eq("trip_id", id)
         .order("order_index", { ascending: true });
-
       if (servicesError) throw servicesError;
 
       return {
@@ -171,10 +165,7 @@ export function useTrip(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type,
-      service_data,
-      voucher_url,
-      voucher_name,
+      service_type, service_data, voucher_url, voucher_name,
     }: {
       service_type: TripServiceType;
       service_data: TripServiceData;
@@ -182,7 +173,6 @@ export function useTrip(id: string | undefined) {
       voucher_name?: string;
     }) => {
       if (!id) throw new Error("Trip ID is required");
-
       const currentServices = trip?.services || [];
       const nextOrderIndex = currentServices.length;
 
@@ -198,79 +188,44 @@ export function useTrip(id: string | undefined) {
         })
         .select()
         .single();
-
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trip", id] });
-      queryClient.invalidateQueries({ queryKey: ["trips"] });
-      toast({
-        title: "Serviço adicionado",
-        description: "O serviço foi adicionado à viagem.",
-      });
+      toast({ title: "Serviço adicionado", description: "O serviço foi adicionado à carteira." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao adicionar serviço",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao adicionar serviço", description: error.message, variant: "destructive" });
     },
   });
 
   const deleteServiceMutation = useMutation({
     mutationFn: async (serviceId: string) => {
       const service = trip?.services?.find((s) => s.id === serviceId);
-      
-      // Delete voucher from storage if exists
       if (service?.voucher_url && user) {
         const path = service.voucher_url.split('/vouchers/')[1];
-        if (path) {
-          await supabase.storage.from("vouchers").remove([path]);
-        }
+        if (path) await supabase.storage.from("vouchers").remove([path]);
       }
-
-      const { error } = await supabase
-        .from("trip_services")
-        .delete()
-        .eq("id", serviceId);
-
+      const { error } = await supabase.from("trip_services").delete().eq("id", serviceId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trip", id] });
-      queryClient.invalidateQueries({ queryKey: ["trips"] });
-      toast({
-        title: "Serviço removido",
-        description: "O serviço foi removido da viagem.",
-      });
+      toast({ title: "Serviço removido", description: "O serviço foi removido da carteira." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao remover serviço",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao remover serviço", description: error.message, variant: "destructive" });
     },
   });
 
   const uploadVoucher = async (file: File): Promise<{ url: string; name: string }> => {
     if (!user) throw new Error("User not authenticated");
-    
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/${id}/${crypto.randomUUID()}.${fileExt}`;
-    
-    const { error } = await supabase.storage
-      .from("vouchers")
-      .upload(fileName, file);
-
+    const { error } = await supabase.storage.from("vouchers").upload(fileName, file);
     if (error) throw error;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from("vouchers")
-      .getPublicUrl(fileName);
-
+    const { data: { publicUrl } } = supabase.storage.from("vouchers").getPublicUrl(fileName);
     return { url: publicUrl, name: file.name };
   };
 
@@ -285,51 +240,42 @@ export function useTrip(id: string | undefined) {
 }
 
 export function usePublicTrip(token: string | undefined) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["public-trip", token],
     queryFn: async () => {
+      // This is just a check to see if the token exists (without password)
+      // The actual data fetching happens through the RPC with password
       if (!token) return null;
-
-      const { data: tripData, error: tripError } = await supabase
-        .from("trips")
-        .select("*")
-        .eq("share_token", token)
-        .single();
-
-      if (tripError) throw tripError;
-
-      const { data: servicesData, error: servicesError } = await supabase
-        .from("trip_services")
-        .select("*")
-        .eq("trip_id", tripData.id)
-        .order("order_index", { ascending: true });
-
-      if (servicesError) throw servicesError;
-
-      // Fetch agent profile for branding
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("name, phone, avatar_url, agency_name, agency_logo_url, city, state")
-        .eq("user_id", tripData.user_id)
-        .maybeSingle();
-
-      const trip = {
-        ...tripData,
-        services: servicesData.map((s) => ({
-          ...s,
-          service_type: s.service_type as TripServiceType,
-          service_data: s.service_data as unknown as TripServiceData,
-        })),
-      } as Trip;
-
-      return { trip, agentProfile: profileData };
+      return { tokenValid: true };
     },
     enabled: !!token,
   });
 
-  return { 
-    trip: data?.trip || null, 
-    agentProfile: data?.agentProfile || null,
-    isLoading 
+  return { tokenValid: !!data, isLoading };
+}
+
+export async function verifyTripAccess(token: string, password: string) {
+  const { data, error } = await supabase.rpc('verify_trip_access', {
+    p_token: token,
+    p_password: password,
+  });
+
+  if (error) throw error;
+
+  const result = data as any;
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  return {
+    trip: {
+      ...result.trip,
+      services: (result.services || []).map((s: any) => ({
+        ...s,
+        service_type: s.service_type as TripServiceType,
+        service_data: s.service_data as TripServiceData,
+      })),
+    } as Trip,
+    agentProfile: result.agent_profile,
   };
 }

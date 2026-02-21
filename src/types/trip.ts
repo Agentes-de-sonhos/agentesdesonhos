@@ -7,6 +7,7 @@ export interface Trip {
   end_date: string;
   status: 'active' | 'archived';
   share_token: string | null;
+  access_password: string | null;
   created_at: string;
   updated_at: string;
   services?: TripService[];

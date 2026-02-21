@@ -131,6 +131,14 @@ const App = () => (
               }
             />
             <Route
+              path="/ferramentas-ia/trip-wallet/nova"
+              element={
+                <ProtectedRoute>
+                  <TripWallet />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/ferramentas-ia/trip-wallet/:id"
               element={
                 <ProtectedRoute>
