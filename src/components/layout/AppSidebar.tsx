@@ -278,7 +278,7 @@ export function AppSidebar() {
             {!collapsed && (
               <div className="animate-fade-in">
                 <h1 className="font-display text-lg font-semibold text-sidebar-foreground">
-                  Agentes de Sonhos
+                  Página Inicial
                 </h1>
               </div>
             )}
