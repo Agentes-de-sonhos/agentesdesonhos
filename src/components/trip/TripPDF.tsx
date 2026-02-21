@@ -58,10 +58,23 @@ function getServiceDetails(service: TripService): string[] {
       if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
     case "car_rental":
-      details.push(`Tipo: ${data.car_type}`);
-      details.push(`Retirada: ${data.pickup_location}`);
-      details.push(`Devolução: ${data.dropoff_location}`);
+      if (data.rental_company) details.push(`Locadora: ${data.rental_company}`);
+      if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);
+      const catLabels: Record<string, string> = { economico: 'Econômico', compacto: 'Compacto', intermediario: 'Intermediário', suv: 'SUV', premium: 'Premium', luxo: 'Luxo', van: 'Van' };
+      details.push(`Categoria: ${catLabels[data.car_type] || data.car_type || ''}`);
+      if (data.car_model) details.push(`Modelo: ${data.car_model}`);
+      if (data.transmission) details.push(`Transmissão: ${data.transmission === 'automatico' ? 'Automático' : 'Manual'}`);
+      details.push(`Retirada: ${data.pickup_location || ''}${data.pickup_date ? ` • ${formatDate(data.pickup_date)}` : ''}${data.pickup_time ? ` às ${data.pickup_time}` : ''}`);
+      details.push(`Devolução: ${data.dropoff_location || ''}${data.dropoff_date ? ` • ${formatDate(data.dropoff_date)}` : ''}${data.dropoff_time ? ` às ${data.dropoff_time}` : ''}`);
+      if (data.drivers?.length > 0) details.push(`Condutores: ${data.drivers.map((d: any) => d.name).join(', ')}`);
+      if (data.fuel_policy) {
+        const fuelLabels: Record<string, string> = { cheio_cheio: 'Cheio-Cheio', cheio_vazio: 'Cheio-Vazio', outro: 'Outro' };
+        details.push(`Combustível: ${fuelLabels[data.fuel_policy] || data.fuel_policy}`);
+      }
+      if (data.deposit_amount) details.push(`Caução: ${data.deposit_amount}`);
+      if (data.required_documents) details.push(`Documentos: ${data.required_documents}`);
       if (data.notes) details.push(`Obs: ${data.notes}`);
+      break;
       break;
     case "transfer":
       details.push(`Tipo: ${data.transfer_type === "arrival" ? "Chegada" : "Saída"}`);

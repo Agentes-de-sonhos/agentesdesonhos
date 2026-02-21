@@ -103,10 +103,79 @@ export interface TripHotelData {
   notes: string;
 }
 
+export interface TripCarRentalDriver {
+  name: string;
+  document: string;
+  age: string;
+  notes: string;
+}
+
 export interface TripCarRentalData {
+  // Rental company
+  rental_company: string;
+  reservation_code: string;
+  reservation_status: 'confirmada' | 'emitida' | 'a_retirar';
+  // Pickup
   pickup_location: string;
+  pickup_address: string;
+  pickup_city: string;
+  pickup_country: string;
+  pickup_date: string;
+  pickup_time: string;
+  pickup_terminal: string;
+  pickup_instructions: string;
+  pickup_phone: string;
+  pickup_maps_url: string;
+  // Dropoff
   dropoff_location: string;
+  dropoff_address: string;
+  dropoff_city: string;
+  dropoff_country: string;
+  dropoff_date: string;
+  dropoff_time: string;
+  dropoff_instructions: string;
+  dropoff_late_policy: string;
+  // Vehicle
   car_type: string;
+  car_model: string;
+  transmission: 'automatico' | 'manual' | '';
+  fuel_type: string;
+  doors: string;
+  passenger_capacity: string;
+  luggage_capacity: string;
+  plate: string;
+  car_notes: string;
+  // Insurance
+  basic_insurance: string;
+  full_insurance: string;
+  third_party_protection: string;
+  theft_protection: string;
+  damage_protection: string;
+  deductible: string;
+  insurance_coverage: string;
+  insurance_notes: string;
+  // Deposit & payment
+  deposit_amount: string;
+  deposit_method: string;
+  card_in_driver_name: string;
+  payment_method: string;
+  payment_status: string;
+  // Drivers
+  drivers: TripCarRentalDriver[];
+  additional_driver_fee: string;
+  // Fuel policy
+  fuel_policy: string;
+  fuel_rules: string;
+  fuel_penalty: string;
+  fuel_notes: string;
+  // Important info
+  required_documents: string;
+  minimum_age: string;
+  international_permit: string;
+  traffic_rules: string;
+  emergency_contact: string;
+  agency_contact: string;
+  // General
   notes: string;
 }
 

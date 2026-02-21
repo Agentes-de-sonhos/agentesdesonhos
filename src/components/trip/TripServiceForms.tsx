@@ -646,87 +646,461 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
   );
 }
 
-// Car Rental Form
+// Car Rental Form - Professional
 const carRentalSchema = z.object({
+  rental_company: z.string().min(2, "Locadora é obrigatória"),
+  reservation_code: z.string().optional(),
+  reservation_status: z.enum(["confirmada", "emitida", "a_retirar"]),
   pickup_location: z.string().min(2, "Local de retirada é obrigatório"),
+  pickup_address: z.string().optional(),
+  pickup_city: z.string().optional(),
+  pickup_country: z.string().optional(),
+  pickup_date: z.string().optional(),
+  pickup_time: z.string().optional(),
+  pickup_terminal: z.string().optional(),
+  pickup_instructions: z.string().optional(),
+  pickup_phone: z.string().optional(),
+  pickup_maps_url: z.string().optional(),
   dropoff_location: z.string().min(2, "Local de devolução é obrigatório"),
-  car_type: z.string().min(1, "Tipo de carro é obrigatório"),
+  dropoff_address: z.string().optional(),
+  dropoff_city: z.string().optional(),
+  dropoff_country: z.string().optional(),
+  dropoff_date: z.string().optional(),
+  dropoff_time: z.string().optional(),
+  dropoff_instructions: z.string().optional(),
+  dropoff_late_policy: z.string().optional(),
+  car_type: z.string().min(1, "Categoria é obrigatória"),
+  car_model: z.string().optional(),
+  transmission: z.string().optional(),
+  fuel_type: z.string().optional(),
+  doors: z.string().optional(),
+  passenger_capacity: z.string().optional(),
+  luggage_capacity: z.string().optional(),
+  plate: z.string().optional(),
+  car_notes: z.string().optional(),
+  basic_insurance: z.string().optional(),
+  full_insurance: z.string().optional(),
+  third_party_protection: z.string().optional(),
+  theft_protection: z.string().optional(),
+  damage_protection: z.string().optional(),
+  deductible: z.string().optional(),
+  insurance_coverage: z.string().optional(),
+  insurance_notes: z.string().optional(),
+  deposit_amount: z.string().optional(),
+  deposit_method: z.string().optional(),
+  card_in_driver_name: z.string().optional(),
+  payment_method: z.string().optional(),
+  payment_status: z.string().optional(),
+  additional_driver_fee: z.string().optional(),
+  fuel_policy: z.string().optional(),
+  fuel_rules: z.string().optional(),
+  fuel_penalty: z.string().optional(),
+  fuel_notes: z.string().optional(),
+  required_documents: z.string().optional(),
+  minimum_age: z.string().optional(),
+  international_permit: z.string().optional(),
+  traffic_rules: z.string().optional(),
+  emergency_contact: z.string().optional(),
+  agency_contact: z.string().optional(),
   notes: z.string().optional(),
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps, "serviceType">) {
+interface CarDriverInput {
+  name: string; document: string; age: string; notes: string;
+}
+
+const emptyDriver = (): CarDriverInput => ({ name: '', document: '', age: '', notes: '' });
+
+function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const [file, setFile] = useState<File | null>(null);
+  const [drivers, setDrivers] = useState<CarDriverInput[]>(
+    defaultValues?.drivers?.length > 0 ? defaultValues.drivers : [emptyDriver()]
+  );
+
   const form = useForm<z.infer<typeof carRentalSchema>>({
     resolver: zodResolver(carRentalSchema),
-    defaultValues: { pickup_location: "", dropoff_location: "", car_type: "", notes: "" },
+    defaultValues: {
+      rental_company: defaultValues?.rental_company || "",
+      reservation_code: defaultValues?.reservation_code || "",
+      reservation_status: defaultValues?.reservation_status || "confirmada",
+      pickup_location: defaultValues?.pickup_location || "",
+      pickup_address: defaultValues?.pickup_address || "",
+      pickup_city: defaultValues?.pickup_city || "",
+      pickup_country: defaultValues?.pickup_country || "",
+      pickup_date: defaultValues?.pickup_date || "",
+      pickup_time: defaultValues?.pickup_time || "",
+      pickup_terminal: defaultValues?.pickup_terminal || "",
+      pickup_instructions: defaultValues?.pickup_instructions || "",
+      pickup_phone: defaultValues?.pickup_phone || "",
+      pickup_maps_url: defaultValues?.pickup_maps_url || "",
+      dropoff_location: defaultValues?.dropoff_location || "",
+      dropoff_address: defaultValues?.dropoff_address || "",
+      dropoff_city: defaultValues?.dropoff_city || "",
+      dropoff_country: defaultValues?.dropoff_country || "",
+      dropoff_date: defaultValues?.dropoff_date || "",
+      dropoff_time: defaultValues?.dropoff_time || "",
+      dropoff_instructions: defaultValues?.dropoff_instructions || "",
+      dropoff_late_policy: defaultValues?.dropoff_late_policy || "",
+      car_type: defaultValues?.car_type || "",
+      car_model: defaultValues?.car_model || "",
+      transmission: defaultValues?.transmission || "",
+      fuel_type: defaultValues?.fuel_type || "",
+      doors: defaultValues?.doors || "",
+      passenger_capacity: defaultValues?.passenger_capacity || "",
+      luggage_capacity: defaultValues?.luggage_capacity || "",
+      plate: defaultValues?.plate || "",
+      car_notes: defaultValues?.car_notes || "",
+      basic_insurance: defaultValues?.basic_insurance || "",
+      full_insurance: defaultValues?.full_insurance || "",
+      third_party_protection: defaultValues?.third_party_protection || "",
+      theft_protection: defaultValues?.theft_protection || "",
+      damage_protection: defaultValues?.damage_protection || "",
+      deductible: defaultValues?.deductible || "",
+      insurance_coverage: defaultValues?.insurance_coverage || "",
+      insurance_notes: defaultValues?.insurance_notes || "",
+      deposit_amount: defaultValues?.deposit_amount || "",
+      deposit_method: defaultValues?.deposit_method || "",
+      card_in_driver_name: defaultValues?.card_in_driver_name || "",
+      payment_method: defaultValues?.payment_method || "",
+      payment_status: defaultValues?.payment_status || "",
+      additional_driver_fee: defaultValues?.additional_driver_fee || "",
+      fuel_policy: defaultValues?.fuel_policy || "",
+      fuel_rules: defaultValues?.fuel_rules || "",
+      fuel_penalty: defaultValues?.fuel_penalty || "",
+      fuel_notes: defaultValues?.fuel_notes || "",
+      required_documents: defaultValues?.required_documents || "",
+      minimum_age: defaultValues?.minimum_age || "",
+      international_permit: defaultValues?.international_permit || "",
+      traffic_rules: defaultValues?.traffic_rules || "",
+      emergency_contact: defaultValues?.emergency_contact || "",
+      agency_contact: defaultValues?.agency_contact || "",
+      notes: defaultValues?.notes || "",
+    },
   });
 
   const handleSubmit = (values: z.infer<typeof carRentalSchema>) => {
-    onSubmit(
-      {
-        pickup_location: values.pickup_location,
-        dropoff_location: values.dropoff_location,
-        car_type: values.car_type,
-        notes: values.notes || "",
-      },
-      file || undefined
-    );
+    onSubmit({ ...values, drivers }, file || undefined);
   };
+
+  const statusLabels: Record<string, string> = { confirmada: 'Confirmada', emitida: 'Emitida', a_retirar: 'A Retirar' };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === RESUMO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚗 Informações Principais</h4>
+          <div className="h-px bg-border" />
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="pickup_location" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Local de Retirada</FormLabel>
-              <FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl>
-              <FormMessage />
+          <FormField control={form.control} name="rental_company" render={({ field }) => (
+            <FormItem><FormLabel>Locadora *</FormLabel><FormControl><Input placeholder="Hertz, Alamo, Localiza..." {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="reservation_code" render={({ field }) => (
+            <FormItem><FormLabel>Código da Reserva</FormLabel><FormControl><Input placeholder="ABC123" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="reservation_status" render={({ field }) => (
+            <FormItem><FormLabel>Status da Reserva</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="confirmada">Confirmada</SelectItem>
+                  <SelectItem value="emitida">Emitida</SelectItem>
+                  <SelectItem value="a_retirar">A Retirar</SelectItem>
+                </SelectContent>
+              </Select>
             </FormItem>
           )} />
-          <FormField control={form.control} name="dropoff_location" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Local de Devolução</FormLabel>
-              <FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl>
-              <FormMessage />
+          <FormField control={form.control} name="car_type" render={({ field }) => (
+            <FormItem><FormLabel>Categoria *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="economico">Econômico</SelectItem>
+                  <SelectItem value="compacto">Compacto</SelectItem>
+                  <SelectItem value="intermediario">Intermediário</SelectItem>
+                  <SelectItem value="suv">SUV</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="luxo">Luxo</SelectItem>
+                  <SelectItem value="van">Van</SelectItem>
+                </SelectContent>
+              </Select><FormMessage />
             </FormItem>
           )} />
         </div>
 
-        <FormField control={form.control} name="car_type" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Tipo de Carro</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="economico">Econômico</SelectItem>
-                <SelectItem value="compacto">Compacto</SelectItem>
-                <SelectItem value="intermediario">Intermediário</SelectItem>
-                <SelectItem value="suv">SUV</SelectItem>
-                <SelectItem value="luxo">Luxo</SelectItem>
-                <SelectItem value="van">Van</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
+        {/* === RETIRADA === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Dados de Retirada</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="pickup_location" render={({ field }) => (
+            <FormItem><FormLabel>Local de Retirada *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="pickup_address" render={({ field }) => (
+            <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input placeholder="Terminal 2E, Área de locação" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="pickup_city" render={({ field }) => (
+            <FormItem><FormLabel>Cidade</FormLabel><FormControl><Input placeholder="Paris" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="pickup_date" render={({ field }) => (
+            <FormItem><FormLabel>Data de Retirada</FormLabel><FormControl><Input type="date" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="pickup_time" render={({ field }) => (
+            <FormItem><FormLabel>Horário</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="pickup_terminal" render={({ field }) => (
+            <FormItem><FormLabel>Balcão / Terminal</FormLabel><FormControl><Input placeholder="Terminal 2" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="pickup_phone" render={({ field }) => (
+            <FormItem><FormLabel>Telefone da Locadora</FormLabel><FormControl><Input placeholder="+33 1 234 5678" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="pickup_instructions" render={({ field }) => (
+          <FormItem><FormLabel>Instruções de Retirada</FormLabel><FormControl><Textarea placeholder="Siga as placas para 'Car Rental'..." rows={2} {...field} /></FormControl></FormItem>
+        )} />
+        <FormField control={form.control} name="pickup_maps_url" render={({ field }) => (
+          <FormItem><FormLabel>Link Google Maps (Retirada)</FormLabel><FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl></FormItem>
         )} />
 
+        {/* === DEVOLUÇÃO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🔁 Dados de Devolução</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="dropoff_location" render={({ field }) => (
+            <FormItem><FormLabel>Local de Devolução *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="dropoff_address" render={({ field }) => (
+            <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input placeholder="Área de devolução" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="dropoff_city" render={({ field }) => (
+            <FormItem><FormLabel>Cidade</FormLabel><FormControl><Input placeholder="Paris" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="dropoff_date" render={({ field }) => (
+            <FormItem><FormLabel>Data de Devolução</FormLabel><FormControl><Input type="date" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="dropoff_time" render={({ field }) => (
+            <FormItem><FormLabel>Horário</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="dropoff_instructions" render={({ field }) => (
+          <FormItem><FormLabel>Instruções de Devolução</FormLabel><FormControl><Textarea placeholder="Estacionar na área indicada..." rows={2} {...field} /></FormControl></FormItem>
+        )} />
+        <FormField control={form.control} name="dropoff_late_policy" render={({ field }) => (
+          <FormItem><FormLabel>Política de Atraso</FormLabel><FormControl><Input placeholder="Cobrança por hora adicional..." {...field} /></FormControl></FormItem>
+        )} />
+
+        {/* === VEÍCULO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚘 Detalhes do Veículo</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="car_model" render={({ field }) => (
+            <FormItem><FormLabel>Modelo</FormLabel><FormControl><Input placeholder="Corolla ou similar" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="transmission" render={({ field }) => (
+            <FormItem><FormLabel>Transmissão</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="automatico">Automático</SelectItem>
+                  <SelectItem value="manual">Manual</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-4">
+          <FormField control={form.control} name="fuel_type" render={({ field }) => (
+            <FormItem><FormLabel>Combustível</FormLabel><FormControl><Input placeholder="Gasolina" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="doors" render={({ field }) => (
+            <FormItem><FormLabel>Portas</FormLabel><FormControl><Input placeholder="4" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="passenger_capacity" render={({ field }) => (
+            <FormItem><FormLabel>Passageiros</FormLabel><FormControl><Input placeholder="5" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="luggage_capacity" render={({ field }) => (
+            <FormItem><FormLabel>Bagagem</FormLabel><FormControl><Input placeholder="2 malas" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="plate" render={({ field }) => (
+            <FormItem><FormLabel>Placa (se disponível)</FormLabel><FormControl><Input placeholder="ABC-1234" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="car_notes" render={({ field }) => (
+            <FormItem><FormLabel>Observações do Veículo</FormLabel><FormControl><Input placeholder="Ar condicionado, GPS..." {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+
+        {/* === SEGUROS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛡️ Seguros da Locação</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="basic_insurance" render={({ field }) => (
+            <FormItem><FormLabel>Seguro Básico</FormLabel><FormControl><Input placeholder="Sim / Não / Incluso" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="full_insurance" render={({ field }) => (
+            <FormItem><FormLabel>Seguro Total (CDW/LDW)</FormLabel><FormControl><Input placeholder="CDW incluso" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="third_party_protection" render={({ field }) => (
+            <FormItem><FormLabel>Proteção Terceiros</FormLabel><FormControl><Input placeholder="Sim/Não" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="theft_protection" render={({ field }) => (
+            <FormItem><FormLabel>Proteção Roubo</FormLabel><FormControl><Input placeholder="Sim/Não" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="damage_protection" render={({ field }) => (
+            <FormItem><FormLabel>Proteção Danos</FormLabel><FormControl><Input placeholder="Sim/Não" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="deductible" render={({ field }) => (
+            <FormItem><FormLabel>Franquia</FormLabel><FormControl><Input placeholder="€ 800" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="insurance_coverage" render={({ field }) => (
+            <FormItem><FormLabel>Cobertura</FormLabel><FormControl><Input placeholder="Danos ao veículo até..." {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="insurance_notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações do Seguro</FormLabel><FormControl><Textarea placeholder="Informações importantes sobre o seguro..." rows={2} {...field} /></FormControl></FormItem>
+        )} />
+
+        {/* === CAUÇÃO E PAGAMENTO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">💳 Caução e Pagamento</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="deposit_amount" render={({ field }) => (
+            <FormItem><FormLabel>Valor da Caução</FormLabel><FormControl><Input placeholder="€ 1.200" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="deposit_method" render={({ field }) => (
+            <FormItem><FormLabel>Forma da Caução</FormLabel><FormControl><Input placeholder="Cartão de crédito" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="card_in_driver_name" render={({ field }) => (
+            <FormItem><FormLabel>Cartão no Nome do Condutor</FormLabel><FormControl><Input placeholder="Sim / Obrigatório" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="payment_status" render={({ field }) => (
+            <FormItem><FormLabel>Status do Pagamento</FormLabel><FormControl><Input placeholder="Pré-pago / A pagar no destino" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+
+        {/* === CONDUTORES === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Condutores</h4>
+          <div className="h-px bg-border" />
+        </div>
+        {drivers.map((d, i) => (
+          <div key={i} className="border rounded-lg p-3 space-y-2 bg-muted/20">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">{i === 0 ? 'Condutor Principal' : `Condutor Adicional ${i}`}</span>
+              {drivers.length > 1 && (
+                <Button type="button" variant="ghost" size="sm" className="h-7 text-destructive" onClick={() => setDrivers(drivers.filter((_, idx) => idx !== i))}>
+                  <X className="h-3 w-3 mr-1" /> Remover
+                </Button>
+              )}
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Nome Completo</label>
+                <Input className="mt-1" placeholder="João Silva" value={d.name} onChange={(e) => { const u = [...drivers]; u[i] = { ...u[i], name: e.target.value }; setDrivers(u); }} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Documento (CNH/Passaporte)</label>
+                <Input className="mt-1" placeholder="123456789" value={d.document} onChange={(e) => { const u = [...drivers]; u[i] = { ...u[i], document: e.target.value }; setDrivers(u); }} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Idade</label>
+                <Input className="mt-1" placeholder="30" value={d.age} onChange={(e) => { const u = [...drivers]; u[i] = { ...u[i], age: e.target.value }; setDrivers(u); }} />
+              </div>
+            </div>
+          </div>
+        ))}
+        <Button type="button" variant="outline" className="w-full" onClick={() => setDrivers([...drivers, emptyDriver()])}>
+          <Plus className="h-4 w-4 mr-2" /> Adicionar Condutor
+        </Button>
+        <FormField control={form.control} name="additional_driver_fee" render={({ field }) => (
+          <FormItem><FormLabel>Taxa Condutor Adicional</FormLabel><FormControl><Input placeholder="€ 10/dia" {...field} /></FormControl></FormItem>
+        )} />
+
+        {/* === COMBUSTÍVEL === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⛽ Política de Combustível</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="fuel_policy" render={({ field }) => (
+            <FormItem><FormLabel>Política</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="cheio_cheio">Cheio-Cheio</SelectItem>
+                  <SelectItem value="cheio_vazio">Cheio-Vazio</SelectItem>
+                  <SelectItem value="outro">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="fuel_penalty" render={({ field }) => (
+            <FormItem><FormLabel>Penalidade</FormLabel><FormControl><Input placeholder="Cobrança por litro não reposto" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="fuel_notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações de Combustível</FormLabel><FormControl><Textarea placeholder="Posto mais próximo, tipo de combustível..." rows={2} {...field} /></FormControl></FormItem>
+        )} />
+
+        {/* === ORIENTAÇÕES === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações Importantes</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="required_documents" render={({ field }) => (
+            <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><Textarea placeholder="CNH válida, passaporte..." rows={2} {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="minimum_age" render={({ field }) => (
+            <FormItem><FormLabel>Idade Mínima</FormLabel><FormControl><Input placeholder="21 anos" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="international_permit" render={({ field }) => (
+            <FormItem><FormLabel>Permissão Internacional (PID)</FormLabel><FormControl><Input placeholder="Sim / Não / Obrigatório" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="emergency_contact" render={({ field }) => (
+            <FormItem><FormLabel>Contato de Emergência</FormLabel><FormControl><Input placeholder="+33 1 234 5678" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="traffic_rules" render={({ field }) => (
+          <FormItem><FormLabel>Regras de Trânsito</FormLabel><FormControl><Textarea placeholder="Velocidade máxima, pedágios, estacionamento..." rows={2} {...field} /></FormControl></FormItem>
+        )} />
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Observações</FormLabel>
-            <FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
+          <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Informações adicionais..." rows={3} {...field} /></FormControl></FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} />
+        <VoucherUpload file={file} setFile={setFile} label="Voucher / Contrato da Locação" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
           </Button>
         </div>
       </form>
