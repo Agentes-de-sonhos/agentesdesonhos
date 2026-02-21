@@ -3833,39 +3833,551 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   );
 }
 
-// Other Form
+// Other Form - Concierge Digital
 const otherSchema = z.object({
-  description: z.string().min(5, "Descrição é obrigatória"),
+  service_name: z.string().min(2, "Nome do serviço é obrigatório"),
+  other_service_type: z.string().optional(),
+  custom_type_name: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  date: z.date().optional(),
+  time: z.string().optional(),
+  duration: z.string().optional(),
+  status: z.string().optional(),
+  location_name: z.string().optional(),
+  address: z.string().optional(),
+  maps_url: z.string().optional(),
+  meeting_point: z.string().optional(),
+  how_to_arrive: z.string().optional(),
+  contact_name: z.string().optional(),
+  contact_company: z.string().optional(),
+  contact_phone: z.string().optional(),
+  contact_whatsapp: z.string().optional(),
+  contact_email: z.string().optional(),
+  contact_language: z.string().optional(),
+  reservation_code: z.string().optional(),
+  chip_operator: z.string().optional(),
+  chip_type: z.string().optional(),
+  chip_activation_instructions: z.string().optional(),
+  chip_activation_url: z.string().optional(),
+  chip_support: z.string().optional(),
+  guide_name: z.string().optional(),
+  guide_language: z.string().optional(),
+  guide_tour_time: z.string().optional(),
+  guide_tour_duration: z.string().optional(),
+  guide_meeting_point: z.string().optional(),
+  agency_tips: z.string().optional(),
+  agency_notes: z.string().optional(),
+  agency_contact: z.string().optional(),
+  emergency_contact: z.string().optional(),
+  description: z.string().optional(),
 });
 
-function OtherForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps, "serviceType">) {
+const OTHER_SERVICE_TYPES = [
+  { value: 'restaurante', label: '🍽️ Restaurante' },
+  { value: 'guia_turistico', label: '🧭 Guia Turístico' },
+  { value: 'chip_internet', label: '📶 Chip / Internet' },
+  { value: 'experiencia', label: '✨ Experiência Exclusiva' },
+  { value: 'evento', label: '📅 Evento' },
+  { value: 'spa_wellness', label: '🧘 Spa / Bem-estar' },
+  { value: 'servico_vip', label: '👑 Serviço VIP' },
+  { value: 'concierge', label: '🛎️ Concierge' },
+  { value: 'personalizado', label: '⭐ Personalizado' },
+];
+
+function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [file, setFile] = useState<File | null>(null);
+
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
-    defaultValues: { description: "" },
+    defaultValues: {
+      service_name: defaultValues?.service_name || "",
+      other_service_type: defaultValues?.other_service_type || "",
+      custom_type_name: defaultValues?.custom_type_name || "",
+      city: defaultValues?.city || "",
+      country: defaultValues?.country || "",
+      time: defaultValues?.time || "",
+      duration: defaultValues?.duration || "",
+      status: defaultValues?.status || "confirmado",
+      location_name: defaultValues?.location_name || "",
+      address: defaultValues?.address || "",
+      maps_url: defaultValues?.maps_url || "",
+      meeting_point: defaultValues?.meeting_point || "",
+      how_to_arrive: defaultValues?.how_to_arrive || "",
+      contact_name: defaultValues?.contact_name || "",
+      contact_company: defaultValues?.contact_company || "",
+      contact_phone: defaultValues?.contact_phone || "",
+      contact_whatsapp: defaultValues?.contact_whatsapp || "",
+      contact_email: defaultValues?.contact_email || "",
+      contact_language: defaultValues?.contact_language || "",
+      reservation_code: defaultValues?.reservation_code || "",
+      chip_operator: defaultValues?.chip_operator || "",
+      chip_type: defaultValues?.chip_type || "",
+      chip_activation_instructions: defaultValues?.chip_activation_instructions || "",
+      chip_activation_url: defaultValues?.chip_activation_url || "",
+      chip_support: defaultValues?.chip_support || "",
+      guide_name: defaultValues?.guide_name || "",
+      guide_language: defaultValues?.guide_language || "",
+      guide_tour_time: defaultValues?.guide_tour_time || "",
+      guide_tour_duration: defaultValues?.guide_tour_duration || "",
+      guide_meeting_point: defaultValues?.guide_meeting_point || "",
+      agency_tips: defaultValues?.agency_tips || "",
+      agency_notes: defaultValues?.agency_notes || "",
+      agency_contact: defaultValues?.agency_contact || "",
+      emergency_contact: defaultValues?.emergency_contact || "",
+      description: defaultValues?.description || "",
+      ...(defaultValues?.date ? { date: parseLocal(defaultValues.date) } : {}),
+    },
   });
 
+  const watchedType = form.watch("other_service_type");
+  const isChip = watchedType === 'chip_internet';
+  const isGuide = watchedType === 'guia_turistico';
+
   const handleSubmit = (values: z.infer<typeof otherSchema>) => {
-    onSubmit({ description: values.description }, file || undefined);
+    onSubmit(
+      {
+        service_name: values.service_name,
+        other_service_type: values.other_service_type || "",
+        custom_type_name: values.custom_type_name || "",
+        city: values.city || "",
+        country: values.country || "",
+        date: values.date ? format(values.date, "yyyy-MM-dd") : "",
+        time: values.time || "",
+        duration: values.duration || "",
+        status: values.status || "",
+        location_name: values.location_name || "",
+        address: values.address || "",
+        maps_url: values.maps_url || "",
+        meeting_point: values.meeting_point || "",
+        how_to_arrive: values.how_to_arrive || "",
+        contact_name: values.contact_name || "",
+        contact_company: values.contact_company || "",
+        contact_phone: values.contact_phone || "",
+        contact_whatsapp: values.contact_whatsapp || "",
+        contact_email: values.contact_email || "",
+        contact_language: values.contact_language || "",
+        reservation_code: values.reservation_code || "",
+        chip_operator: values.chip_operator || "",
+        chip_type: values.chip_type || "",
+        chip_activation_instructions: values.chip_activation_instructions || "",
+        chip_activation_url: values.chip_activation_url || "",
+        chip_support: values.chip_support || "",
+        guide_name: values.guide_name || "",
+        guide_language: values.guide_language || "",
+        guide_tour_time: values.guide_tour_time || "",
+        guide_tour_duration: values.guide_tour_duration || "",
+        guide_meeting_point: values.guide_meeting_point || "",
+        agency_tips: values.agency_tips || "",
+        agency_notes: values.agency_notes || "",
+        agency_contact: values.agency_contact || "",
+        emergency_contact: values.emergency_contact || "",
+        description: values.description || "",
+        notes: values.description || "",
+      },
+      file || undefined
+    );
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField control={form.control} name="description" render={({ field }) => (
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === INFO PRINCIPAL === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛎️ Informações do Serviço</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="service_name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Serviço *</FormLabel>
+              <FormControl><Input placeholder="Restaurante Le Jules Verne, Chip T-Mobile..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="other_service_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo do Serviço</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  {OTHER_SERVICE_TYPES.map(t => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {watchedType === 'personalizado' && (
+          <FormField control={form.control} name="custom_type_name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Tipo Personalizado</FormLabel>
+              <FormControl><Input placeholder="Ex: Fotógrafo, Personal Shopper..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        )}
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="city" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cidade</FormLabel>
+              <FormControl><Input placeholder="Paris" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="country" render={({ field }) => (
+            <FormItem>
+              <FormLabel>País</FormLabel>
+              <FormControl><Input placeholder="França" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="status" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="confirmado">✅ Confirmado</SelectItem>
+                  <SelectItem value="agendado">📅 Agendado</SelectItem>
+                  <SelectItem value="opcional">🔄 Opcional</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="reservation_code" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código de Reserva</FormLabel>
+              <FormControl><Input placeholder="ABC123" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === AGENDAMENTO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Agendamento</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="date" render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Data do Serviço</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                      {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="time" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horário</FormLabel>
+              <FormControl><Input type="time" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="duration" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Duração Estimada</FormLabel>
+              <FormControl><Input placeholder="2h, meio dia..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === LOCALIZAÇÃO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Localização</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="location_name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Local</FormLabel>
+              <FormControl><Input placeholder="Torre Eiffel, Hotel Lobby..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="address" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Endereço Completo</FormLabel>
+              <FormControl><Input placeholder="Av. Gustave Eiffel, 5..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="maps_url" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link do Google Maps</FormLabel>
+              <FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="meeting_point" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ponto de Encontro</FormLabel>
+              <FormControl><Input placeholder="Recepção, entrada principal..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="how_to_arrive" render={({ field }) => (
           <FormItem>
-            <FormLabel>Descrição do Serviço</FormLabel>
-            <FormControl><Textarea placeholder="Descreva o serviço..." rows={3} {...field} /></FormControl>
+            <FormLabel>Como Chegar</FormLabel>
+            <FormControl><Textarea placeholder="Instruções de como chegar ao local..." rows={2} {...field} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Documento" />
+        {/* === CONTATO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Contato do Prestador</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="contact_name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Contato</FormLabel>
+              <FormControl><Input placeholder="Nome da pessoa responsável" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="contact_company" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Empresa / Estabelecimento</FormLabel>
+              <FormControl><Input placeholder="Nome da empresa" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="contact_phone" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefone</FormLabel>
+              <FormControl><Input placeholder="+33 1 4411 2323" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="contact_whatsapp" render={({ field }) => (
+            <FormItem>
+              <FormLabel>WhatsApp</FormLabel>
+              <FormControl><Input placeholder="+5511999999999" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="contact_email" render={({ field }) => (
+            <FormItem>
+              <FormLabel>E-mail</FormLabel>
+              <FormControl><Input placeholder="contato@empresa.com" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="contact_language" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Idioma de Atendimento</FormLabel>
+            <FormControl><Input placeholder="Português, Inglês, Francês..." {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === CHIP / INTERNET (CONDICIONAL) === */}
+        {isChip && (
+          <>
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📶 Chip / Internet</h4>
+              <div className="h-px bg-border" />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField control={form.control} name="chip_operator" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Operadora</FormLabel>
+                  <FormControl><Input placeholder="T-Mobile, Airalo, Holafly..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="chip_type" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="esim">eSIM (digital)</SelectItem>
+                      <SelectItem value="fisico">Chip Físico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+
+            <FormField control={form.control} name="chip_activation_instructions" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Instruções de Ativação</FormLabel>
+                <FormControl><Textarea placeholder="Passo a passo para ativar o chip..." rows={3} {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField control={form.control} name="chip_activation_url" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Link de Ativação</FormLabel>
+                  <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="chip_support" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Suporte Técnico</FormLabel>
+                  <FormControl><Input placeholder="Telefone ou e-mail do suporte" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+          </>
+        )}
+
+        {/* === GUIA TURÍSTICO (CONDICIONAL) === */}
+        {isGuide && (
+          <>
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧭 Guia Turístico</h4>
+              <div className="h-px bg-border" />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField control={form.control} name="guide_name" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome do Guia</FormLabel>
+                  <FormControl><Input placeholder="Nome completo" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="guide_language" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Idioma do Guia</FormLabel>
+                  <FormControl><Input placeholder="Português, Espanhol..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormField control={form.control} name="guide_tour_time" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Horário do Tour</FormLabel>
+                  <FormControl><Input type="time" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="guide_tour_duration" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Duração do Passeio</FormLabel>
+                  <FormControl><Input placeholder="3h, meio dia..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="guide_meeting_point" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ponto de Encontro</FormLabel>
+                  <FormControl><Input placeholder="Entrada principal, lobby..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+          </>
+        )}
+
+        {/* === DESCRIÇÃO === */}
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descrição / Detalhes</FormLabel>
+            <FormControl><Textarea placeholder="Informações adicionais do serviço..." rows={2} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === DICAS DA AGÊNCIA === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧠 Orientações da Agência</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <FormField control={form.control} name="agency_tips" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Dicas do seu Agente de Viagem</FormLabel>
+            <FormControl><Textarea placeholder="Dress code, dicas locais, melhor horário..." rows={3} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <FormField control={form.control} name="agency_notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações da Agência</FormLabel>
+            <FormControl><Textarea placeholder="Observações internas ou para o cliente..." rows={2} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === CONTATOS DE SUPORTE === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📞 Contatos de Suporte</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="agency_contact" render={({ field }) => (
+            <FormItem>
+              <FormLabel>WhatsApp da Agência</FormLabel>
+              <FormControl><Input placeholder="+5511999999999" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="emergency_contact" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contato de Emergência</FormLabel>
+              <FormControl><Input placeholder="+5511999999999" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <VoucherUpload file={file} setFile={setFile} label="Comprovante / Voucher / Documento" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
           </Button>
         </div>
       </form>
