@@ -29,7 +29,7 @@ const SERVICE_LABELS: Record<TripServiceType, string> = {
 const TAB_ORDER: TripServiceType[] = ["flight", "hotel", "attraction", "insurance", "car_rental", "transfer", "cruise", "other"];
 
 function formatDate(dateStr: string) {
-  try { return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR }); }
+  try { const [y,m,d] = dateStr.split('-').map(Number); return format(new Date(y, m-1, d), "dd/MM/yyyy", { locale: ptBR }); }
   catch { return dateStr; }
 }
 
