@@ -261,6 +261,10 @@ export function AppSidebar() {
     return menuLink;
   };
 
+  const handleLogout = async () => {
+    await signOut();
+  };
+
   return (
     <TooltipProvider delayDuration={300}>
       <aside
@@ -361,6 +365,33 @@ export function AppSidebar() {
 
         {/* Bottom Section */}
         <div className="flex-shrink-0 border-t border-sidebar-border p-3 space-y-2">
+          {/* Logout Button */}
+          {collapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-full h-9 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-[hsl(var(--sidebar-hover))] text-white border-none shadow-lg px-3 py-2">
+                <p className="text-sm font-medium">Sair</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-9 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive text-sm"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          )}
           {/* Footer */}
           {!collapsed ? (
             <div className="text-center pt-2">
