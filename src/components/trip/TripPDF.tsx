@@ -117,10 +117,27 @@ function getServiceDetails(service: TripService): string[] {
       if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
     }
-    case "attraction":
+    case "attraction": {
+      const typeMap: Record<string, string> = { parque: 'Parque', show: 'Show', passeio: 'Passeio', museu: 'Museu', tour: 'Tour', evento: 'Evento', experiencia: 'Experiência' };
+      const statusMap: Record<string, string> = { confirmado: 'Confirmado', reservado: 'Reservado', flexivel: 'Flexível', utilizado: 'Utilizado' };
       details.push(`${data.name}`);
+      if (data.attraction_type) details.push(`Tipo: ${typeMap[data.attraction_type] || data.attraction_type}`);
+      if (data.city) details.push(`Local: ${data.city}${data.country ? `, ${data.country}` : ''}`);
       details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity}`);
+      if (data.status) details.push(`Status: ${statusMap[data.status] || data.status}`);
+      if (data.entry_time) details.push(`Entrada: ${data.entry_time}`);
+      if (data.duration) details.push(`Duração: ${data.duration}`);
+      if (data.ticket_code) details.push(`Código: ${data.ticket_code}`);
+      if (data.confirmation_code) details.push(`Confirmação: ${data.confirmation_code}`);
+      if (data.venue_name) details.push(`Local: ${data.venue_name}`);
+      if (data.address) details.push(`Endereço: ${data.address}`);
+      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => `${p.name} (${p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})`).join(', ')}`);
+      if (data.usage_instructions) details.push(`Instruções: ${data.usage_instructions}`);
+      if (data.cancellation_policy) details.push(`Cancelamento: ${data.cancellation_policy}`);
+      if (data.agency_tips) details.push(`Dicas: ${data.agency_tips}`);
+      if (data.agency_notes) details.push(`Obs: ${data.agency_notes}`);
       break;
+    }
     case "insurance":
       details.push(`Seguradora: ${data.provider}`);
       details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);

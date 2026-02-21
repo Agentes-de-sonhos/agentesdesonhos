@@ -311,10 +311,58 @@ export interface TripTransferData {
   notes: string;
 }
 
-export interface TripAttractionData {
+export interface TripAttractionPassenger {
   name: string;
+  ticket_type: 'adulto' | 'crianca' | 'senior';
+  document: string;
+  notes: string;
+}
+
+export interface TripAttractionData {
+  // Main info
+  name: string;
+  attraction_type: 'parque' | 'show' | 'passeio' | 'museu' | 'tour' | 'evento' | 'experiencia' | '';
+  city: string;
+  country: string;
   date: string;
+  status: 'confirmado' | 'reservado' | 'flexivel' | 'utilizado' | '';
   quantity: number;
+  // Usage details
+  entry_time: string;
+  usage_window: string;
+  duration: string;
+  access_type: '1_dia' | 'multi_day' | 'open_date' | 'horario_marcado' | '';
+  requires_reservation: string;
+  usage_instructions: string;
+  // QR Code / Tickets
+  ticket_code: string;
+  confirmation_code: string;
+  order_number: string;
+  // Location
+  address: string;
+  venue_name: string;
+  maps_url: string;
+  entry_point: string;
+  // Passengers
+  passengers: TripAttractionPassenger[];
+  // Policies
+  cancellation_policy: string;
+  change_policy: string;
+  attraction_rules: string;
+  prohibited_items: string;
+  dress_code: string;
+  required_documents: string;
+  // Agency tips
+  agency_tips: string;
+  // Contacts
+  attraction_contact: string;
+  operator_contact: string;
+  agency_contact: string;
+  emergency_contact: string;
+  // Agency notes
+  agency_notes: string;
+  // Legacy
+  notes: string;
 }
 
 export interface TripInsuranceData {
