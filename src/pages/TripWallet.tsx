@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +40,7 @@ const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
 export default function TripWallet() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
   const { createTrip, isCreating, updateTrip, isUpdating, updatePassword, regeneratePassword, deleteTrip } = useTrips();
@@ -56,6 +57,13 @@ export default function TripWallet() {
   const [editingPassword, setEditingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isEditingTrip, setIsEditingTrip] = useState(false);
+
+  // Auto-enable edit mode from URL query param
+  useEffect(() => {
+    if (searchParams.get("edit") === "true" && trip) {
+      setIsEditingTrip(true);
+    }
+  }, [searchParams, trip]);
 
   useEffect(() => {
     if (user?.id) {
