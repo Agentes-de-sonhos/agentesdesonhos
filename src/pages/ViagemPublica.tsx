@@ -236,8 +236,9 @@ export default function ViagemPublica() {
 
   if (!tripData) return null;
 
-  const startDate = new Date(tripData.start_date);
-  const endDate = new Date(tripData.end_date);
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
+  const startDate = parseLocal(tripData.start_date);
+  const endDate = parseLocal(tripData.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   const services = tripData.services || [];
 

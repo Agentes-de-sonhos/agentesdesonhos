@@ -59,11 +59,16 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
   });
 
   const handleSubmit = (values: FormValues) => {
+    const from = values.dateRange.from;
+    const to = values.dateRange.to;
+    // Use local date parts to avoid UTC timezone shift
+    const formatLocalDate = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     onSubmit({
       client_name: values.client_name,
       destination: values.destination,
-      start_date: format(values.dateRange.from, "yyyy-MM-dd"),
-      end_date: format(values.dateRange.to, "yyyy-MM-dd"),
+      start_date: formatLocalDate(from),
+      end_date: formatLocalDate(to),
     });
   };
 

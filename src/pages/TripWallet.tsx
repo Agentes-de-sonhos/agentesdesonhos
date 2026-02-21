@@ -16,6 +16,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAgentProfile, AgentProfile } from "@/hooks/useAgentProfile";
 import { format } from "date-fns";
+
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
 import { ptBR } from "date-fns/locale";
 import type { TripServiceType, TripFormData } from "@/types/trip";
 
@@ -168,8 +173,8 @@ export default function TripWallet() {
     );
   }
 
-  const startDate = new Date(trip.start_date);
-  const endDate = new Date(trip.end_date);
+  const startDate = parseLocalDate(trip.start_date);
+  const endDate = parseLocalDate(trip.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   return (

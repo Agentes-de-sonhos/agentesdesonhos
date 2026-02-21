@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isAfter, isBefore, isWithinInterval, startOfDay } from "date-fns";
+
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
 import { ptBR } from "date-fns/locale";
 import {
   Wallet, Plus, MapPin, Calendar, ExternalLink, Copy, Trash2, Eye, Pencil, Lock, Loader2
@@ -22,8 +27,8 @@ type FilterType = "all" | "future" | "active" | "past";
 
 function getTripStatus(trip: Trip): { label: string; variant: "default" | "secondary" | "outline" } {
   const today = startOfDay(new Date());
-  const start = startOfDay(new Date(trip.start_date));
-  const end = startOfDay(new Date(trip.end_date));
+  const start = startOfDay(parseLocalDate(trip.start_date));
+  const end = startOfDay(parseLocalDate(trip.end_date));
 
   if (isAfter(start, today)) return { label: "Futura", variant: "secondary" };
   if (isBefore(end, today)) return { label: "Concluída", variant: "outline" };
@@ -35,8 +40,8 @@ function filterTrips(trips: Trip[], filter: FilterType): Trip[] {
   const today = startOfDay(new Date());
 
   return trips.filter((trip) => {
-    const start = startOfDay(new Date(trip.start_date));
-    const end = startOfDay(new Date(trip.end_date));
+    const start = startOfDay(parseLocalDate(trip.start_date));
+    const end = startOfDay(parseLocalDate(trip.end_date));
 
     switch (filter) {
       case "future": return isAfter(start, today);
@@ -138,7 +143,7 @@ export function TripWalletList() {
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
-                          {format(new Date(trip.start_date), "dd/MM", { locale: ptBR })} - {format(new Date(trip.end_date), "dd/MM/yy", { locale: ptBR })}
+                          {format(parseLocalDate(trip.start_date), "dd/MM", { locale: ptBR })} - {format(parseLocalDate(trip.end_date), "dd/MM/yy", { locale: ptBR })}
                         </span>
                       </div>
                       {trip.access_password && (
