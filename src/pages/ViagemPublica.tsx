@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Wallet, MapPin, Calendar, FileText, Loader2, Lock, Plane, Hotel, Car, Bus,
-  Ticket, Shield, Ship, Download, ExternalLink, Eye, MessageSquare
+  Ticket, Shield, Ship, TrainFront, Download, ExternalLink, Eye, MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,16 +17,16 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
-  attraction: Ticket, insurance: Shield, cruise: Ship, other: FileText,
+  attraction: Ticket, insurance: Shield, cruise: Ship, train: TrainFront, other: FileText,
 };
 
 const SERVICE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagens", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", other: "Outros",
+  cruise: "Cruzeiro", train: "Trem", other: "Outros",
 };
 
-const TAB_ORDER: TripServiceType[] = ["flight", "hotel", "attraction", "insurance", "car_rental", "transfer", "cruise", "other"];
+const TAB_ORDER: TripServiceType[] = ["flight", "train", "hotel", "attraction", "insurance", "car_rental", "transfer", "cruise", "other"];
 
 function formatDate(dateStr: string) {
   try { const [y,m,d] = dateStr.split('-').map(Number); return format(new Date(y, m-1, d), "dd/MM/yyyy", { locale: ptBR }); }
@@ -50,6 +50,18 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       return { title: data.provider, details: [`Cobertura: ${data.coverage}`], dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
     case "cruise":
       return { title: data.ship_name, details: [`Rota: ${data.route}`], dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
+    case "train": {
+      const time = data.departure_time && data.arrival_time ? `${data.departure_time} → ${data.arrival_time}` : '';
+      const details: string[] = [];
+      if (data.train_company) details.push(`${data.train_company}${data.train_number ? ` • Trem ${data.train_number}` : ''}`);
+      if (data.travel_class) details.push(`Classe: ${data.travel_class}`);
+      if (data.coach || data.seat) details.push(`${data.coach ? `Vagão ${data.coach}` : ''}${data.seat ? ` • Assento ${data.seat}` : ''}`);
+      if (data.origin_station) details.push(`Embarque: ${data.origin_station}`);
+      if (data.destination_station) details.push(`Desembarque: ${data.destination_station}`);
+      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.boarding_notes) details.push(`📋 ${data.boarding_notes}`);
+      return { title: `${data.origin_city} → ${data.destination_city}`, details, dates: data.travel_date ? `${formatDate(data.travel_date)}${time ? ` • ${time}` : ''}` : undefined };
+    }
     case "other":
       return { title: "Serviço", details: [data.description] };
     default:
@@ -131,6 +143,8 @@ function ServiceTab({ type, count, active, onClick }: {
 // Service Card for Public View
 function PublicServiceCard({ service }: { service: TripService }) {
   const { title, details, dates } = getServiceDetails(service);
+  const data = service.service_data as any;
+  const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
 
   return (
     <Card className="border-border/50">
@@ -144,6 +158,24 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {details.map((d, i) => (
           <p key={i} className="text-sm text-muted-foreground">{d}</p>
         ))}
+        {isTrainWithMaps && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {data.origin_maps_url && (
+              <a href={data.origin_maps_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7">
+                  <MapPin className="h-3 w-3 mr-1" /> Rota até embarque
+                </Button>
+              </a>
+            )}
+            {data.destination_maps_url && (
+              <a href={data.destination_maps_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7">
+                  <MapPin className="h-3 w-3 mr-1" /> Rota até desembarque
+                </Button>
+              </a>
+            )}
+          </div>
+        )}
         {service.voucher_url && (
           <a
             href={service.voucher_url}

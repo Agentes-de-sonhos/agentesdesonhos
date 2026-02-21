@@ -33,6 +33,7 @@ export type TripServiceType =
   | 'attraction'
   | 'insurance'
   | 'cruise'
+  | 'train'
   | 'other';
 
 export interface TripFlightData {
@@ -85,6 +86,26 @@ export interface TripCruiseData {
   end_date: string;
 }
 
+export interface TripTrainData {
+  origin_city: string;
+  origin_station: string;
+  destination_city: string;
+  destination_station: string;
+  travel_date: string;
+  departure_time: string;
+  arrival_time: string;
+  train_company: string;
+  train_number: string;
+  travel_class: string;
+  coach: string;
+  seat: string;
+  platform: string;
+  passengers: { name: string; notes?: string }[];
+  boarding_notes: string;
+  origin_maps_url: string;
+  destination_maps_url: string;
+}
+
 export interface TripOtherData {
   description: string;
 }
@@ -97,6 +118,7 @@ export type TripServiceData =
   | TripAttractionData 
   | TripInsuranceData 
   | TripCruiseData 
+  | TripTrainData
   | TripOtherData;
 
 export interface TripFormData {
@@ -114,6 +136,7 @@ export const TRIP_SERVICE_LABELS: Record<TripServiceType, string> = {
   attraction: 'Ingressos/Atrações',
   insurance: 'Seguro Viagem',
   cruise: 'Cruzeiro',
+  train: 'Trem',
   other: 'Outros',
 };
 
@@ -125,5 +148,6 @@ export const TRIP_SERVICE_ICONS: Record<TripServiceType, string> = {
   attraction: 'Ticket',
   insurance: 'Shield',
   cruise: 'Ship',
+  train: 'TrainFront',
   other: 'FileText',
 };

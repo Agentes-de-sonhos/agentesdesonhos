@@ -819,6 +819,295 @@ function OtherForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps,
   );
 }
 
+// Train Form
+const trainSchema = z.object({
+  origin_city: z.string().min(2, "Cidade de origem é obrigatória"),
+  origin_station: z.string().optional(),
+  destination_city: z.string().min(2, "Cidade de destino é obrigatória"),
+  destination_station: z.string().optional(),
+  travel_date: z.date({ required_error: "Data da viagem é obrigatória" }),
+  departure_time: z.string().optional(),
+  arrival_time: z.string().optional(),
+  train_company: z.string().optional(),
+  train_number: z.string().optional(),
+  travel_class: z.string().optional(),
+  coach: z.string().optional(),
+  seat: z.string().optional(),
+  platform: z.string().optional(),
+  boarding_notes: z.string().optional(),
+  origin_maps_url: z.string().optional(),
+  destination_maps_url: z.string().optional(),
+});
+
+function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
+  const [file, setFile] = useState<File | null>(null);
+  const [passengers, setPassengers] = useState<{ name: string; notes?: string }[]>(
+    defaultValues?.passengers || []
+  );
+  const [newPassengerName, setNewPassengerName] = useState("");
+
+  const form = useForm<z.infer<typeof trainSchema>>({
+    resolver: zodResolver(trainSchema),
+    defaultValues: {
+      origin_city: defaultValues?.origin_city || "",
+      origin_station: defaultValues?.origin_station || "",
+      destination_city: defaultValues?.destination_city || "",
+      destination_station: defaultValues?.destination_station || "",
+      departure_time: defaultValues?.departure_time || "",
+      arrival_time: defaultValues?.arrival_time || "",
+      train_company: defaultValues?.train_company || "",
+      train_number: defaultValues?.train_number || "",
+      travel_class: defaultValues?.travel_class || "",
+      coach: defaultValues?.coach || "",
+      seat: defaultValues?.seat || "",
+      platform: defaultValues?.platform || "",
+      boarding_notes: defaultValues?.boarding_notes || "",
+      origin_maps_url: defaultValues?.origin_maps_url || "",
+      destination_maps_url: defaultValues?.destination_maps_url || "",
+      ...(defaultValues?.travel_date ? { travel_date: parseLocal(defaultValues.travel_date) } : {}),
+    },
+  });
+
+  const addPassenger = () => {
+    if (!newPassengerName.trim()) return;
+    setPassengers([...passengers, { name: newPassengerName.trim() }]);
+    setNewPassengerName("");
+  };
+
+  const removePassenger = (index: number) => {
+    setPassengers(passengers.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = (values: z.infer<typeof trainSchema>) => {
+    onSubmit(
+      {
+        origin_city: values.origin_city,
+        origin_station: values.origin_station || "",
+        destination_city: values.destination_city,
+        destination_station: values.destination_station || "",
+        travel_date: format(values.travel_date, "yyyy-MM-dd"),
+        departure_time: values.departure_time || "",
+        arrival_time: values.arrival_time || "",
+        train_company: values.train_company || "",
+        train_number: values.train_number || "",
+        travel_class: values.travel_class || "",
+        coach: values.coach || "",
+        seat: values.seat || "",
+        platform: values.platform || "",
+        passengers,
+        boarding_notes: values.boarding_notes || "",
+        origin_maps_url: values.origin_maps_url || "",
+        destination_maps_url: values.destination_maps_url || "",
+      },
+      file || undefined
+    );
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {/* Origin / Destination */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="origin_city" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cidade de Origem *</FormLabel>
+              <FormControl><Input placeholder="Paris" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="destination_city" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cidade de Destino *</FormLabel>
+              <FormControl><Input placeholder="Londres" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="origin_station" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estação de Embarque</FormLabel>
+              <FormControl><Input placeholder="Gare du Nord" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="destination_station" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estação de Desembarque</FormLabel>
+              <FormControl><Input placeholder="St Pancras International" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {/* Date & Times */}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="travel_date" render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Data da Viagem *</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                      {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="departure_time" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horário de Partida</FormLabel>
+              <FormControl><Input type="time" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="arrival_time" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horário de Chegada</FormLabel>
+              <FormControl><Input type="time" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {/* Train Details */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="train_company" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Companhia Ferroviária</FormLabel>
+              <FormControl><Input placeholder="Eurostar, SNCF, Trenitalia..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="train_number" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Número do Trem</FormLabel>
+              <FormControl><Input placeholder="ES 9024" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-4">
+          <FormField control={form.control} name="travel_class" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Classe</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="first_class">First Class</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="coach" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Vagão</FormLabel>
+              <FormControl><Input placeholder="12" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="seat" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Assento</FormLabel>
+              <FormControl><Input placeholder="45A" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="platform" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Plataforma</FormLabel>
+              <FormControl><Input placeholder="3" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {/* Passengers */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Passageiros</label>
+          {passengers.map((p, i) => (
+            <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+              <span className="text-sm flex-1">{p.name}</span>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => removePassenger(i)}>
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Nome do passageiro"
+              value={newPassengerName}
+              onChange={(e) => setNewPassengerName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addPassenger(); } }}
+              className="flex-1"
+            />
+            <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
+              <Plus className="h-3 w-3 mr-1" /> Adicionar
+            </Button>
+          </div>
+        </div>
+
+        {/* Boarding Notes */}
+        <FormField control={form.control} name="boarding_notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Orientações de Embarque</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Horário recomendado de chegada, como validar o bilhete, regras de bagagem..." 
+                rows={3} 
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* Maps URLs */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="origin_maps_url" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Google Maps - Estação Embarque</FormLabel>
+              <FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="destination_maps_url" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Google Maps - Estação Desembarque</FormLabel>
+              <FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <VoucherUpload file={file} setFile={setFile} label="Bilhete/Voucher/QR Code" />
+
+        <div className="flex gap-2 justify-end">
+          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
 // Main Service Form component
 export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, defaultValues, isEditing }: TripServiceFormProps) {
   const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing };
@@ -830,6 +1119,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
     case "attraction": return <AttractionForm {...props} />;
     case "insurance": return <InsuranceForm {...props} />;
     case "cruise": return <CruiseForm {...props} />;
+    case "train": return <TrainForm {...props} />;
     case "other": return <OtherForm {...props} />;
     default: return null;
   }

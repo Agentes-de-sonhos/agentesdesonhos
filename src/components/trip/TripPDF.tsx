@@ -11,6 +11,7 @@ const SERVICE_LABELS: Record<TripServiceType, string> = {
   attraction: "Ingressos/Atrações",
   insurance: "Seguro Viagem",
   cruise: "Cruzeiro",
+  train: "Trem",
   other: "Outros",
 };
 
@@ -63,6 +64,17 @@ function getServiceDetails(service: TripService): string[] {
       details.push(`Navio: ${data.ship_name}`);
       details.push(`Rota: ${data.route}`);
       details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
+      break;
+    case "train":
+      details.push(`🚆 ${data.origin_city} → ${data.destination_city}`);
+      if (data.travel_date) details.push(`Data: ${formatDate(data.travel_date)}${data.departure_time ? ` • ${data.departure_time} → ${data.arrival_time || ''}` : ''}`);
+      if (data.train_company) details.push(`Companhia: ${data.train_company}${data.train_number ? ` • Trem ${data.train_number}` : ''}`);
+      if (data.travel_class) details.push(`Classe: ${data.travel_class}`);
+      if (data.coach || data.seat) details.push(`${data.coach ? `Vagão ${data.coach}` : ''}${data.seat ? ` • Assento ${data.seat}` : ''}`);
+      if (data.origin_station) details.push(`Embarque: ${data.origin_station}`);
+      if (data.destination_station) details.push(`Desembarque: ${data.destination_station}`);
+      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.boarding_notes) details.push(`Orientações: ${data.boarding_notes}`);
       break;
     case "other":
       details.push(data.description);
