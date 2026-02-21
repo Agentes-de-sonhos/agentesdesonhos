@@ -56,7 +56,15 @@ function getServiceDescription(service: TripService): string {
       const model = data.car_model || data.car_type || '';
       return `${company ? company + ' • ' : ''}${model} — ${city1}${city2 && city2 !== city1 ? ` → ${city2}` : ''}`;
     }
-    case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
+    case "transfer": {
+      const typeMap: Record<string, string> = { arrival: 'Transfer IN', departure: 'Transfer OUT', inter_hotel: 'Inter-hotel' };
+      const typeLbl = typeMap[data.transfer_type] || data.transfer_type;
+      const route = data.origin_location && data.destination_location 
+        ? `${data.origin_location} → ${data.destination_location}` 
+        : data.location || '';
+      const company = data.company_name ? `${data.company_name} • ` : '';
+      return `${company}${typeLbl} — ${route}`;
+    }
     case "attraction": return `${data.name} (${data.quantity}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
     case "cruise": return `${data.cruise_company ? data.cruise_company + ' • ' : ''}${data.ship_name} - ${data.route}`;
@@ -100,7 +108,13 @@ function getServiceDates(service: TripService): string {
       }
       return '';
     }
-    case "transfer":
+    case "transfer": {
+      const dateStr = data.date ? formatDate(data.date) : '';
+      const timeStr = data.time ? ` às ${data.time}` : '';
+      const modeMap: Record<string, string> = { privativo: 'Privativo', compartilhado: 'Compartilhado', shuttle: 'Shuttle' };
+      const mode = data.transfer_mode ? ` • ${modeMap[data.transfer_mode] || data.transfer_mode}` : '';
+      return `${dateStr}${timeStr}${mode}`;
+    }
     case "attraction": return formatDate(data.date);
     case "insurance": return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
     case "cruise": {

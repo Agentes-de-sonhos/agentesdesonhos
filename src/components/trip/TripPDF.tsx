@@ -92,11 +92,31 @@ function getServiceDetails(service: TripService): string[] {
       if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
       break;
-    case "transfer":
-      details.push(`Tipo: ${data.transfer_type === "arrival" ? "Chegada" : "Saída"}`);
-      details.push(`Local: ${data.location}`);
-      details.push(`Data: ${formatDate(data.date)}`);
+    case "transfer": {
+      const typeMap: Record<string, string> = { arrival: 'Transfer IN', departure: 'Transfer OUT', inter_hotel: 'Inter-hotel' };
+      const modeMap: Record<string, string> = { privativo: 'Privativo', compartilhado: 'Compartilhado', shuttle: 'Shuttle' };
+      const statusMap: Record<string, string> = { confirmado: 'Confirmado', agendado: 'Agendado', pendente: 'Pendente' };
+      details.push(`Tipo: ${typeMap[data.transfer_type] || data.transfer_type}`);
+      if (data.transfer_mode) details.push(`Modalidade: ${modeMap[data.transfer_mode] || data.transfer_mode}`);
+      if (data.transfer_status) details.push(`Status: ${statusMap[data.transfer_status] || data.transfer_status}`);
+      const route = data.origin_location && data.destination_location 
+        ? `${data.origin_location} → ${data.destination_location}` 
+        : data.location || '';
+      if (route) details.push(`Rota: ${route}`);
+      if (data.city) details.push(`Cidade: ${data.city}`);
+      if (data.date) details.push(`Data: ${formatDate(data.date)}${data.time ? ` às ${data.time}` : ''}`);
+      if (data.company_name) details.push(`Empresa: ${data.company_name}`);
+      if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);
+      if (data.flight_number) details.push(`Voo: ${data.flight_number}`);
+      if (data.meeting_instructions) details.push(`Instruções: ${data.meeting_instructions}`);
+      if (data.driver_name) details.push(`Motorista: ${data.driver_name}`);
+      if (data.driver_phone) details.push(`Telefone: ${data.driver_phone}`);
+      if (data.vehicle_type) details.push(`Veículo: ${data.vehicle_type}`);
+      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.plan_b) details.push(`Plano B: ${data.plan_b}`);
+      if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
+    }
     case "attraction":
       details.push(`${data.name}`);
       details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity}`);

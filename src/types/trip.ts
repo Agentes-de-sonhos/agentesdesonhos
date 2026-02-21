@@ -243,10 +243,72 @@ export interface TripCarRentalData {
   notes: string;
 }
 
+export interface TripTransferPassenger {
+  name: string;
+  age: string;
+  passenger_type: 'adulto' | 'crianca' | 'bebe';
+  needs_child_seat: string;
+  notes: string;
+}
+
 export interface TripTransferData {
-  transfer_type: 'arrival' | 'departure';
-  location: string;
+  // Main info
+  transfer_type: 'arrival' | 'departure' | 'inter_hotel';
+  transfer_mode: 'privativo' | 'compartilhado' | 'shuttle' | '';
+  transfer_status: 'confirmado' | 'agendado' | 'pendente' | '';
+  city: string;
   date: string;
+  time: string;
+  origin_location: string;
+  destination_location: string;
+  company_name: string;
+  reservation_code: string;
+  // Arrival details (Transfer IN)
+  flight_number: string;
+  arrival_time: string;
+  arrival_airport: string;
+  arrival_terminal: string;
+  driver_wait_time: string;
+  reception_type: string;
+  meeting_instructions: string;
+  // Departure details (Transfer OUT)
+  hotel_departure_time: string;
+  departure_flight_time: string;
+  departure_airport: string;
+  recommended_departure: string;
+  boarding_point: string;
+  departure_alert: string;
+  // Pickup & Dropoff locations
+  pickup_address: string;
+  pickup_maps_url: string;
+  destination_address: string;
+  destination_maps_url: string;
+  location_notes: string;
+  // Driver & Contact
+  driver_name: string;
+  driver_phone: string;
+  driver_language: string;
+  vehicle_plate: string;
+  // Vehicle
+  vehicle_type: string;
+  vehicle_capacity: string;
+  luggage_capacity: string;
+  air_conditioning: string;
+  accessibility: string;
+  vehicle_notes: string;
+  // Passengers
+  passengers: TripTransferPassenger[];
+  adults_count: string;
+  children_count: string;
+  // Important info
+  required_documents: string;
+  emergency_contact: string;
+  agency_contact: string;
+  plan_b: string;
+  agency_notes: string;
+  // Legacy compat
+  location: string;
+  notes: string;
 }
 
 export interface TripAttractionData {

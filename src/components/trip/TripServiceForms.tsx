@@ -1688,26 +1688,143 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   );
 }
 
-// Transfer Form
+// Transfer Form - Professional module
 const transferSchema = z.object({
-  transfer_type: z.enum(["arrival", "departure"]),
-  location: z.string().min(2, "Local é obrigatório"),
+  transfer_type: z.enum(["arrival", "departure", "inter_hotel"]),
+  transfer_mode: z.string().optional(),
+  transfer_status: z.string().optional(),
+  city: z.string().optional(),
   date: z.date({ required_error: "Data é obrigatória" }),
+  time: z.string().optional(),
+  origin_location: z.string().min(2, "Origem é obrigatória"),
+  destination_location: z.string().min(2, "Destino é obrigatório"),
+  company_name: z.string().optional(),
+  reservation_code: z.string().optional(),
+  // Arrival
+  flight_number: z.string().optional(),
+  arrival_time: z.string().optional(),
+  arrival_airport: z.string().optional(),
+  arrival_terminal: z.string().optional(),
+  driver_wait_time: z.string().optional(),
+  reception_type: z.string().optional(),
+  meeting_instructions: z.string().optional(),
+  // Departure
+  hotel_departure_time: z.string().optional(),
+  departure_flight_time: z.string().optional(),
+  departure_airport: z.string().optional(),
+  recommended_departure: z.string().optional(),
+  boarding_point: z.string().optional(),
+  departure_alert: z.string().optional(),
+  // Locations
+  pickup_address: z.string().optional(),
+  pickup_maps_url: z.string().optional(),
+  destination_address: z.string().optional(),
+  destination_maps_url: z.string().optional(),
+  location_notes: z.string().optional(),
+  // Driver
+  driver_name: z.string().optional(),
+  driver_phone: z.string().optional(),
+  driver_language: z.string().optional(),
+  vehicle_plate: z.string().optional(),
+  // Vehicle
+  vehicle_type: z.string().optional(),
+  vehicle_capacity: z.string().optional(),
+  luggage_capacity: z.string().optional(),
+  air_conditioning: z.string().optional(),
+  accessibility: z.string().optional(),
+  vehicle_notes: z.string().optional(),
+  // Passengers
+  adults_count: z.string().optional(),
+  children_count: z.string().optional(),
+  // Important
+  required_documents: z.string().optional(),
+  emergency_contact: z.string().optional(),
+  agency_contact: z.string().optional(),
+  plan_b: z.string().optional(),
+  agency_notes: z.string().optional(),
+  notes: z.string().optional(),
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps, "serviceType">) {
+interface TransferPassengerInput {
+  name: string;
+  age: string;
+  passenger_type: 'adulto' | 'crianca' | 'bebe';
+  needs_child_seat: string;
+  notes: string;
+}
+
+const emptyTransferPassenger = (): TransferPassengerInput => ({
+  name: '', age: '', passenger_type: 'adulto', needs_child_seat: 'nao', notes: '',
+});
+
+function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const [file, setFile] = useState<File | null>(null);
+  const [passengers, setPassengers] = useState<TransferPassengerInput[]>(
+    defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
+  );
+
   const form = useForm<z.infer<typeof transferSchema>>({
     resolver: zodResolver(transferSchema),
-    defaultValues: { transfer_type: "arrival", location: "" },
+    defaultValues: {
+      transfer_type: defaultValues?.transfer_type || "arrival",
+      transfer_mode: defaultValues?.transfer_mode || "",
+      transfer_status: defaultValues?.transfer_status || "confirmado",
+      city: defaultValues?.city || "",
+      date: defaultValues?.date ? new Date(defaultValues.date + 'T12:00:00') : undefined,
+      time: defaultValues?.time || "",
+      origin_location: defaultValues?.origin_location || "",
+      destination_location: defaultValues?.destination_location || "",
+      company_name: defaultValues?.company_name || "",
+      reservation_code: defaultValues?.reservation_code || "",
+      flight_number: defaultValues?.flight_number || "",
+      arrival_time: defaultValues?.arrival_time || "",
+      arrival_airport: defaultValues?.arrival_airport || "",
+      arrival_terminal: defaultValues?.arrival_terminal || "",
+      driver_wait_time: defaultValues?.driver_wait_time || "",
+      reception_type: defaultValues?.reception_type || "",
+      meeting_instructions: defaultValues?.meeting_instructions || "",
+      hotel_departure_time: defaultValues?.hotel_departure_time || "",
+      departure_flight_time: defaultValues?.departure_flight_time || "",
+      departure_airport: defaultValues?.departure_airport || "",
+      recommended_departure: defaultValues?.recommended_departure || "",
+      boarding_point: defaultValues?.boarding_point || "",
+      departure_alert: defaultValues?.departure_alert || "",
+      pickup_address: defaultValues?.pickup_address || "",
+      pickup_maps_url: defaultValues?.pickup_maps_url || "",
+      destination_address: defaultValues?.destination_address || "",
+      destination_maps_url: defaultValues?.destination_maps_url || "",
+      location_notes: defaultValues?.location_notes || "",
+      driver_name: defaultValues?.driver_name || "",
+      driver_phone: defaultValues?.driver_phone || "",
+      driver_language: defaultValues?.driver_language || "",
+      vehicle_plate: defaultValues?.vehicle_plate || "",
+      vehicle_type: defaultValues?.vehicle_type || "",
+      vehicle_capacity: defaultValues?.vehicle_capacity || "",
+      luggage_capacity: defaultValues?.luggage_capacity || "",
+      air_conditioning: defaultValues?.air_conditioning || "",
+      accessibility: defaultValues?.accessibility || "",
+      vehicle_notes: defaultValues?.vehicle_notes || "",
+      adults_count: defaultValues?.adults_count || "",
+      children_count: defaultValues?.children_count || "",
+      required_documents: defaultValues?.required_documents || "",
+      emergency_contact: defaultValues?.emergency_contact || "",
+      agency_contact: defaultValues?.agency_contact || "",
+      plan_b: defaultValues?.plan_b || "",
+      agency_notes: defaultValues?.agency_notes || "",
+      notes: defaultValues?.notes || "",
+    },
   });
+
+  const transferType = form.watch("transfer_type");
 
   const handleSubmit = (values: z.infer<typeof transferSchema>) => {
     onSubmit(
       {
-        transfer_type: values.transfer_type,
-        location: values.location,
+        ...values,
         date: format(values.date, "yyyy-MM-dd"),
+        passengers,
+        // Legacy compat
+        location: `${values.origin_location} → ${values.destination_location}`,
       },
       file || undefined
     );
@@ -1715,57 +1832,390 @@ function TransferForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormPro
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField control={form.control} name="transfer_type" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Tipo de Transfer</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="arrival">Chegada (Aeroporto → Hotel)</SelectItem>
-                <SelectItem value="departure">Saída (Hotel → Aeroporto)</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === RESUMO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚐 Informações Principais</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="transfer_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Serviço *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="arrival">Transfer IN (Chegada)</SelectItem>
+                  <SelectItem value="departure">Transfer OUT (Saída)</SelectItem>
+                  <SelectItem value="inter_hotel">Inter-hotel</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="transfer_mode" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Modalidade</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="privativo">Privativo</SelectItem>
+                  <SelectItem value="compartilhado">Compartilhado</SelectItem>
+                  <SelectItem value="shuttle">Shuttle</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="transfer_status" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="confirmado">Confirmado</SelectItem>
+                  <SelectItem value="agendado">Agendado</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="origin_location" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Origem *</FormLabel>
+              <FormControl><Input placeholder="Aeroporto CDG / Hotel Marriott" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="destination_location" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Destino *</FormLabel>
+              <FormControl><Input placeholder="Hotel / Aeroporto / Porto" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="city" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cidade / Destino</FormLabel>
+              <FormControl><Input placeholder="Paris" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="date" render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Data *</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                      {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="time" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horário</FormLabel>
+              <FormControl><Input type="time" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="company_name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Empresa Receptiva</FormLabel>
+              <FormControl><Input placeholder="Civitatis, GetTransfer..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="reservation_code" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código da Reserva</FormLabel>
+              <FormControl><Input placeholder="TRF-12345" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === TRANSFER IN (ARRIVAL) === */}
+        {(transferType === 'arrival') && (
+          <>
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✈️ Detalhes da Chegada (Transfer IN)</h4>
+              <div className="h-px bg-border" />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormField control={form.control} name="flight_number" render={({ field }) => (
+                <FormItem><FormLabel>Nº do Voo</FormLabel><FormControl><Input placeholder="LA8084" {...field} /></FormControl></FormItem>
+              )} />
+              <FormField control={form.control} name="arrival_time" render={({ field }) => (
+                <FormItem><FormLabel>Horário Previsto de Chegada</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
+              )} />
+              <FormField control={form.control} name="arrival_airport" render={({ field }) => (
+                <FormItem><FormLabel>Aeroporto de Chegada</FormLabel><FormControl><Input placeholder="CDG" {...field} /></FormControl></FormItem>
+              )} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormField control={form.control} name="arrival_terminal" render={({ field }) => (
+                <FormItem><FormLabel>Terminal</FormLabel><FormControl><Input placeholder="Terminal 2E" {...field} /></FormControl></FormItem>
+              )} />
+              <FormField control={form.control} name="driver_wait_time" render={({ field }) => (
+                <FormItem><FormLabel>Tempo de Espera do Motorista</FormLabel><FormControl><Input placeholder="1h após pouso" {...field} /></FormControl></FormItem>
+              )} />
+              <FormField control={form.control} name="reception_type" render={({ field }) => (
+                <FormItem><FormLabel>Tipo de Recepção</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="placa">Com placa / nome</SelectItem>
+                      <SelectItem value="balcao">Balcão da empresa</SelectItem>
+                      <SelectItem value="ponto_fixo">Ponto fixo de encontro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+            </div>
+            <FormField control={form.control} name="meeting_instructions" render={({ field }) => (
+              <FormItem><FormLabel>Onde encontrar o motorista *</FormLabel><FormControl><Textarea placeholder="Ex: Saída do desembarque, portão B, motorista com placa com seu nome" rows={3} {...field} /></FormControl></FormItem>
+            )} />
+          </>
+        )}
+
+        {/* === TRANSFER OUT (DEPARTURE) === */}
+        {(transferType === 'departure') && (
+          <>
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧳 Detalhes da Saída (Transfer OUT)</h4>
+              <div className="h-px bg-border" />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormField control={form.control} name="hotel_departure_time" render={({ field }) => (
+                <FormItem><FormLabel>Horário de Saída do Hotel</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
+              )} />
+              <FormField control={form.control} name="departure_flight_time" render={({ field }) => (
+                <FormItem><FormLabel>Horário do Voo</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
+              )} />
+              <FormField control={form.control} name="departure_airport" render={({ field }) => (
+                <FormItem><FormLabel>Aeroporto</FormLabel><FormControl><Input placeholder="GRU" {...field} /></FormControl></FormItem>
+              )} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField control={form.control} name="recommended_departure" render={({ field }) => (
+                <FormItem><FormLabel>Saída Recomendada</FormLabel><FormControl><Input placeholder="4h antes do voo" {...field} /></FormControl></FormItem>
+              )} />
+              <FormField control={form.control} name="boarding_point" render={({ field }) => (
+                <FormItem><FormLabel>Ponto de Embarque</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="lobby">Lobby / Recepção</SelectItem>
+                      <SelectItem value="entrada">Entrada Principal</SelectItem>
+                      <SelectItem value="estacionamento">Estacionamento</SelectItem>
+                      <SelectItem value="outro">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+            </div>
+            <FormField control={form.control} name="departure_alert" render={({ field }) => (
+              <FormItem><FormLabel>Alerta ao Passageiro</FormLabel><FormControl><Input placeholder="Esteja no lobby com 10 minutos de antecedência" {...field} /></FormControl></FormItem>
+            )} />
+          </>
+        )}
+
+        {/* === LOCAIS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Locais de Embarque e Desembarque</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="pickup_address" render={({ field }) => (
+            <FormItem><FormLabel>Endereço de Embarque</FormLabel><FormControl><Input placeholder="Endereço completo" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="pickup_maps_url" render={({ field }) => (
+            <FormItem><FormLabel>Google Maps (Embarque)</FormLabel><FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="destination_address" render={({ field }) => (
+            <FormItem><FormLabel>Endereço de Destino</FormLabel><FormControl><Input placeholder="Endereço completo" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="destination_maps_url" render={({ field }) => (
+            <FormItem><FormLabel>Google Maps (Destino)</FormLabel><FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="location_notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações Logísticas</FormLabel><FormControl><Textarea placeholder="Ex: acesso restrito, portaria lateral..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        <FormField control={form.control} name="location" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Local</FormLabel>
-            <FormControl><Input placeholder="Aeroporto CDG → Hotel Marriott" {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
+        {/* === MOTORISTA === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Motorista e Contato</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="driver_name" render={({ field }) => (
+            <FormItem><FormLabel>Nome do Motorista</FormLabel><FormControl><Input placeholder="Carlos" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="driver_phone" render={({ field }) => (
+            <FormItem><FormLabel>Telefone / WhatsApp</FormLabel><FormControl><Input placeholder="+33 6 1234 5678" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="driver_language" render={({ field }) => (
+            <FormItem><FormLabel>Idioma do Motorista</FormLabel><FormControl><Input placeholder="Inglês, Espanhol" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="vehicle_plate" render={({ field }) => (
+            <FormItem><FormLabel>Placa do Veículo</FormLabel><FormControl><Input placeholder="AB-123-CD" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+
+        {/* === VEÍCULO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚗 Detalhes do Veículo</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="vehicle_type" render={({ field }) => (
+            <FormItem><FormLabel>Tipo de Veículo</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sedan">Sedan</SelectItem>
+                  <SelectItem value="suv">SUV</SelectItem>
+                  <SelectItem value="van">Van</SelectItem>
+                  <SelectItem value="minibus">Micro-ônibus</SelectItem>
+                  <SelectItem value="onibus">Ônibus</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="vehicle_capacity" render={({ field }) => (
+            <FormItem><FormLabel>Capacidade de Passageiros</FormLabel><FormControl><Input placeholder="4" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="luggage_capacity" render={({ field }) => (
+            <FormItem><FormLabel>Capacidade de Bagagem</FormLabel><FormControl><Input placeholder="3 malas" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="air_conditioning" render={({ field }) => (
+            <FormItem><FormLabel>Ar-condicionado</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Sim</SelectItem>
+                  <SelectItem value="nao">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="accessibility" render={({ field }) => (
+            <FormItem><FormLabel>Acessibilidade</FormLabel><FormControl><Input placeholder="Cadeirante, etc." {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="vehicle_notes" render={({ field }) => (
+            <FormItem><FormLabel>Observações do Veículo</FormLabel><FormControl><Input placeholder="Wi-Fi, água..." {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+
+        {/* === PASSAGEIROS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👨‍👩‍👧 Passageiros</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="adults_count" render={({ field }) => (
+            <FormItem><FormLabel>Adultos</FormLabel><FormControl><Input placeholder="2" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="children_count" render={({ field }) => (
+            <FormItem><FormLabel>Crianças / Bebês</FormLabel><FormControl><Input placeholder="1" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        {passengers.map((p, i) => (
+          <div key={i} className="border rounded-lg p-3 space-y-2 bg-muted/20">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">Passageiro {i + 1}</span>
+              <Button type="button" variant="ghost" size="sm" className="h-7 text-destructive" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
+                <X className="h-3 w-3 mr-1" /> Remover
+              </Button>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Nome</label>
+                <Input className="mt-1" placeholder="Nome completo" value={p.name} onChange={(e) => { const u = [...passengers]; u[i] = { ...u[i], name: e.target.value }; setPassengers(u); }} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Tipo</label>
+                <Select value={p.passenger_type} onValueChange={(v: any) => { const u = [...passengers]; u[i] = { ...u[i], passenger_type: v }; setPassengers(u); }}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="adulto">Adulto</SelectItem>
+                    <SelectItem value="crianca">Criança</SelectItem>
+                    <SelectItem value="bebe">Bebê</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Cadeirinha</label>
+                <Select value={p.needs_child_seat} onValueChange={(v) => { const u = [...passengers]; u[i] = { ...u[i], needs_child_seat: v }; setPassengers(u); }}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="sim">Sim</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        ))}
+        <Button type="button" variant="outline" className="w-full" onClick={() => setPassengers([...passengers, emptyTransferPassenger()])}>
+          <Plus className="h-4 w-4 mr-2" /> Adicionar Passageiro
+        </Button>
+
+        {/* === ORIENTAÇÕES === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações Importantes</h4>
+          <div className="h-px bg-border" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="required_documents" render={({ field }) => (
+            <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><Textarea placeholder="Passaporte, voucher impresso..." rows={2} {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="emergency_contact" render={({ field }) => (
+            <FormItem><FormLabel>Contato de Emergência</FormLabel><FormControl><Input placeholder="+33 1 234 5678" {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="agency_contact" render={({ field }) => (
+            <FormItem><FormLabel>Contato da Agência</FormLabel><FormControl><Input placeholder="+55 11 99999-9999" {...field} /></FormControl></FormItem>
+          )} />
+          <FormField control={form.control} name="plan_b" render={({ field }) => (
+            <FormItem><FormLabel>Plano B (atraso de voo, etc.)</FormLabel><FormControl><Textarea placeholder="Em caso de atraso, ligar para..." rows={2} {...field} /></FormControl></FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="agency_notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações da Agência</FormLabel><FormControl><Textarea placeholder="Informações adicionais para o passageiro..." rows={3} {...field} /></FormControl></FormItem>
+        )} />
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Notas gerais..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        <FormField control={form.control} name="date" render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Data</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                    {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        )} />
-
-        <VoucherUpload file={file} setFile={setFile} />
+        <VoucherUpload file={file} setFile={setFile} label="Voucher / Confirmação do Transfer" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
           </Button>
         </div>
       </form>
