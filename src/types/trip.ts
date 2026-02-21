@@ -80,10 +80,45 @@ export interface TripInsuranceData {
 }
 
 export interface TripCruiseData {
+  // Main info
+  cruise_company: string;
   ship_name: string;
   route: string;
+  embarkation_port: string;
+  disembarkation_port: string;
   start_date: string;
   end_date: string;
+  booking_number: string;
+  // Cabin
+  cabin_type: string;
+  cabin_number: string;
+  cabin_category: string;
+  deck: string;
+  occupancy: string;
+  meal_plan: string;
+  // Passengers
+  passengers: { name: string; birth_date?: string; document?: string; notes?: string }[];
+  // Itinerary
+  itinerary: { date: string; port: string; arrival_time: string; departure_time: string; stop_type: string; notes: string }[];
+  // Check-in
+  checkin_url: string;
+  checkin_status: string;
+  checkin_deadline: string;
+  // Boarding instructions
+  boarding_terminal: string;
+  port_address: string;
+  port_maps_url: string;
+  recommended_arrival: string;
+  required_documents: string;
+  baggage_policy: string;
+  dress_code: string;
+  company_rules: string;
+  boarding_notes: string;
+  // Ship operational
+  onboard_currency: string;
+  onboard_language: string;
+  voltage: string;
+  ship_website: string;
 }
 
 export interface TripTrainData {

@@ -43,7 +43,7 @@ function getServiceDescription(service: TripService): string {
     case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
     case "attraction": return `${data.name} (${data.quantity}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
-    case "cruise": return `${data.ship_name} - ${data.route}`;
+    case "cruise": return `${data.cruise_company ? data.cruise_company + ' • ' : ''}${data.ship_name} - ${data.route}`;
     case "train": return `${data.origin_city} → ${data.destination_city}${data.train_company ? ` (${data.train_company})` : ''}`;
     case "other": return data.description;
     default: return "Serviço";
@@ -57,8 +57,17 @@ function getServiceDates(service: TripService): string {
     case "hotel": return `${formatDate(data.check_in)} - ${formatDate(data.check_out)}`;
     case "transfer":
     case "attraction": return formatDate(data.date);
-    case "insurance":
-    case "cruise": return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
+    case "insurance": return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
+    case "cruise": {
+      const nights = (() => {
+        try {
+          const [sy,sm,sd] = data.start_date.split('-').map(Number);
+          const [ey,em,ed] = data.end_date.split('-').map(Number);
+          return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24));
+        } catch { return null; }
+      })();
+      return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}${nights ? ` (${nights} noites)` : ''}`;
+    }
     case "train": return data.travel_date ? `${formatDate(data.travel_date)}${data.departure_time ? ` • ${data.departure_time} → ${data.arrival_time || ''}` : ''}` : '';
     default: return "";
   }
