@@ -94,8 +94,22 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       }
       return { title: `${catLabel}${catLabel && titleStr ? ' • ' : ''}${titleStr}`, details: carDetails, dates: datesStr };
     }
-    case "transfer":
-      return { title: `${data.transfer_type === "arrival" ? "Chegada" : "Saída"}`, details: [data.location], dates: formatDate(data.date) };
+    case "transfer": {
+      const typeMap: Record<string, string> = { arrival: 'Transfer IN', departure: 'Transfer OUT', inter_hotel: 'Inter-hotel' };
+      const modeMap: Record<string, string> = { privativo: 'Privativo', compartilhado: 'Compartilhado', shuttle: 'Shuttle' };
+      const statusMap: Record<string, string> = { confirmado: '✅ Confirmado', agendado: '📅 Agendado', pendente: '⏳ Pendente' };
+      const transferDetails: string[] = [];
+      const typeLbl = typeMap[data.transfer_type] || data.transfer_type;
+      if (data.transfer_mode) transferDetails.push(`Modalidade: ${modeMap[data.transfer_mode] || data.transfer_mode}`);
+      if (data.transfer_status) transferDetails.push(`Status: ${statusMap[data.transfer_status] || data.transfer_status}`);
+      if (data.company_name) transferDetails.push(`Empresa: ${data.company_name}`);
+      if (data.reservation_code) transferDetails.push(`Reserva: ${data.reservation_code}`);
+      if (data.city) transferDetails.push(`Cidade: ${data.city}`);
+      const route = data.origin_location && data.destination_location 
+        ? `${data.origin_location} → ${data.destination_location}` 
+        : data.location || '';
+      return { title: `${typeLbl} — ${route}`, details: transferDetails, dates: data.date ? `${formatDate(data.date)}${data.time ? ` às ${data.time}` : ''}` : undefined };
+    }
     case "attraction":
       return { title: data.name, details: [`Quantidade: ${data.quantity}x`], dates: formatDate(data.date) };
     case "insurance":
@@ -221,6 +235,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isFlight = service.service_type === 'flight';
   const isCarRental = service.service_type === 'car_rental';
   const isHotel = service.service_type === 'hotel';
+  const isTransfer = service.service_type === 'transfer';
 
   return (
     <Card className="border-border/50">
@@ -618,6 +633,132 @@ function PublicServiceCard({ service }: { service: TripService }) {
             {data.international_permit && <p className="text-xs text-muted-foreground">PID (Permissão Internacional): {data.international_permit}</p>}
             {data.traffic_rules && <p className="text-xs text-muted-foreground italic">{data.traffic_rules}</p>}
             {data.emergency_contact && <p className="text-xs text-muted-foreground">📞 Emergência: {data.emergency_contact}</p>}
+          </div>
+        )}
+
+        {/* Transfer - Arrival details */}
+        {isTransfer && data.transfer_type === 'arrival' && (data.flight_number || data.arrival_airport || data.meeting_instructions) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">✈️ Detalhes da Chegada</p>
+            {data.flight_number && <p className="text-xs text-muted-foreground">Voo: {data.flight_number}</p>}
+            {data.arrival_time && <p className="text-xs text-muted-foreground">Chegada prevista: {data.arrival_time}</p>}
+            {data.arrival_airport && <p className="text-xs text-muted-foreground">Aeroporto: {data.arrival_airport}{data.arrival_terminal ? ` • Terminal ${data.arrival_terminal}` : ''}</p>}
+            {data.driver_wait_time && <p className="text-xs text-muted-foreground">Espera do motorista: {data.driver_wait_time}</p>}
+            {data.reception_type && <p className="text-xs text-muted-foreground">Recepção: {data.reception_type === 'placa' ? 'Com placa / nome' : data.reception_type === 'balcao' ? 'Balcão da empresa' : 'Ponto fixo'}</p>}
+            {data.meeting_instructions && (
+              <div className="mt-1 p-2 bg-primary/5 border border-primary/20 rounded">
+                <p className="text-xs font-medium text-primary">📍 Onde encontrar o motorista:</p>
+                <p className="text-xs text-foreground">{data.meeting_instructions}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Transfer - Departure details */}
+        {isTransfer && data.transfer_type === 'departure' && (data.hotel_departure_time || data.departure_airport || data.departure_alert) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🧳 Detalhes da Saída</p>
+            {data.hotel_departure_time && <p className="text-xs text-muted-foreground">Saída do hotel: {data.hotel_departure_time}</p>}
+            {data.departure_flight_time && <p className="text-xs text-muted-foreground">Horário do voo: {data.departure_flight_time}</p>}
+            {data.departure_airport && <p className="text-xs text-muted-foreground">Aeroporto: {data.departure_airport}</p>}
+            {data.recommended_departure && <p className="text-xs text-muted-foreground">Saída recomendada: {data.recommended_departure}</p>}
+            {data.boarding_point && <p className="text-xs text-muted-foreground">Embarque: {data.boarding_point === 'lobby' ? 'Lobby / Recepção' : data.boarding_point === 'entrada' ? 'Entrada Principal' : data.boarding_point === 'estacionamento' ? 'Estacionamento' : data.boarding_point}</p>}
+            {data.departure_alert && (
+              <div className="mt-1 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded">
+                <p className="text-xs font-medium text-amber-700 dark:text-amber-400">⚠️ {data.departure_alert}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Transfer - Driver & Contact */}
+        {isTransfer && (data.driver_name || data.driver_phone) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">👤 Motorista</p>
+            {data.driver_name && <p className="text-xs text-muted-foreground">Nome: {data.driver_name}</p>}
+            {data.driver_language && <p className="text-xs text-muted-foreground">Idioma: {data.driver_language}</p>}
+            {data.vehicle_plate && <p className="text-xs text-muted-foreground">Placa: {data.vehicle_plate}</p>}
+            {data.driver_phone && (
+              <div className="flex gap-2 mt-2">
+                <a href={`tel:${data.driver_phone}`}>
+                  <Button variant="outline" size="sm" className="text-xs h-7">📞 Ligar</Button>
+                </a>
+                <a href={`https://wa.me/${data.driver_phone.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="text-xs h-7">💬 WhatsApp</Button>
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Transfer - Vehicle */}
+        {isTransfer && (data.vehicle_type || data.vehicle_capacity) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🚗 Veículo</p>
+            {data.vehicle_type && <p className="text-xs text-muted-foreground">Tipo: {data.vehicle_type === 'sedan' ? 'Sedan' : data.vehicle_type === 'suv' ? 'SUV' : data.vehicle_type === 'van' ? 'Van' : data.vehicle_type === 'minibus' ? 'Micro-ônibus' : data.vehicle_type === 'onibus' ? 'Ônibus' : data.vehicle_type}</p>}
+            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+              {data.vehicle_capacity && <span>👤 {data.vehicle_capacity} passageiros</span>}
+              {data.luggage_capacity && <span>🧳 {data.luggage_capacity}</span>}
+              {data.air_conditioning === 'sim' && <span>❄️ Ar-condicionado</span>}
+            </div>
+            {data.accessibility && <p className="text-xs text-muted-foreground">♿ {data.accessibility}</p>}
+            {data.vehicle_notes && <p className="text-xs text-muted-foreground italic">{data.vehicle_notes}</p>}
+          </div>
+        )}
+
+        {/* Transfer - Passengers */}
+        {isTransfer && data.passengers?.length > 0 && (
+          <div className="mt-2">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👨‍👩‍👧 Passageiros</p>
+            {data.passengers.map((p: any, i: number) => (
+              <p key={i} className="text-xs text-muted-foreground">
+                {p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})
+                {p.needs_child_seat === 'sim' ? ' 🪑 Cadeirinha' : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Transfer - Locations & Maps */}
+        {isTransfer && (data.pickup_address || data.destination_address || data.pickup_maps_url || data.destination_maps_url) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📍 Locais</p>
+            {data.pickup_address && <p className="text-xs text-muted-foreground">Embarque: {data.pickup_address}</p>}
+            {data.destination_address && <p className="text-xs text-muted-foreground">Destino: {data.destination_address}</p>}
+            {data.location_notes && <p className="text-xs text-muted-foreground italic">{data.location_notes}</p>}
+            <div className="flex flex-wrap gap-2 mt-1">
+              {data.pickup_maps_url && (
+                <a href={data.pickup_maps_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="text-xs h-7">
+                    <MapPin className="h-3 w-3 mr-1" /> Embarque no mapa
+                  </Button>
+                </a>
+              )}
+              {data.destination_maps_url && (
+                <a href={data.destination_maps_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="text-xs h-7">
+                    <MapPin className="h-3 w-3 mr-1" /> Destino no mapa
+                  </Button>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Transfer - Important info */}
+        {isTransfer && (data.required_documents || data.emergency_contact || data.plan_b || data.agency_notes) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">⚠️ Orientações</p>
+            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
+            {data.emergency_contact && <p className="text-xs text-muted-foreground">📞 Emergência: {data.emergency_contact}</p>}
+            {data.agency_contact && <p className="text-xs text-muted-foreground">📱 Agência: {data.agency_contact}</p>}
+            {data.plan_b && (
+              <div className="mt-1 p-2 bg-primary/5 border border-primary/20 rounded">
+                <p className="text-xs font-medium text-primary">🔄 Plano B:</p>
+                <p className="text-xs text-foreground">{data.plan_b}</p>
+              </div>
+            )}
+            {data.agency_notes && <p className="text-xs text-muted-foreground italic mt-1">{data.agency_notes}</p>}
           </div>
         )}
 
