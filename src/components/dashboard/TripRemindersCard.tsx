@@ -137,9 +137,11 @@ export function TripRemindersCard() {
                         <span>
                           {isReturn ? "Retorno: " : ""}
                           {reminder.trip?.start_date &&
-                            format(new Date(isReturn ? reminder.trip.end_date : reminder.trip.start_date), "dd 'de' MMMM 'de' yyyy", {
-                              locale: ptBR,
-                            })}
+                            (() => {
+                              const d = (isReturn ? reminder.trip.end_date : reminder.trip.start_date);
+                              const [y,m,day] = d.split('-').map(Number);
+                              return format(new Date(y, m-1, day), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+                            })()}
                         </span>
                       </div>
                     </div>

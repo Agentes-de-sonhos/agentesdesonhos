@@ -121,8 +121,9 @@ function generateAgentSignature(profile: AgentProfile | null): string {
 }
 
 export function generateTripPDF(trip: Trip, profile?: AgentProfile | null) {
-  const startDate = new Date(trip.start_date);
-  const endDate = new Date(trip.end_date);
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
+  const startDate = parseLocal(trip.start_date);
+  const endDate = parseLocal(trip.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   // Group services by type
