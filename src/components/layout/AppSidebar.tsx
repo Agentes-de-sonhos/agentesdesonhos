@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sparkles,
   Map,
@@ -168,6 +168,7 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
@@ -365,6 +366,33 @@ export function AppSidebar() {
 
         {/* Bottom Section */}
         <div className="flex-shrink-0 border-t border-sidebar-border p-3 space-y-2">
+          {/* Profile Button */}
+          {collapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-full h-9 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-foreground"
+                  onClick={() => navigate("/perfil")}
+                >
+                  <User className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-[hsl(var(--sidebar-hover))] text-white border-none shadow-lg px-3 py-2">
+                <p className="text-sm font-medium">Meu Perfil</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-9 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-foreground text-sm"
+              onClick={() => navigate("/perfil")}
+            >
+              <User className="h-4 w-4" />
+              Meu Perfil
+            </Button>
+          )}
           {/* Logout Button */}
           {collapsed ? (
             <Tooltip>
