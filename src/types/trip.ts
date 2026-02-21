@@ -365,11 +365,65 @@ export interface TripAttractionData {
   notes: string;
 }
 
+export interface TripInsuredPerson {
+  name: string;
+  birth_date: string;
+  document: string;
+  coverage_type: 'individual' | 'familiar' | '';
+  notes: string;
+}
+
+export interface TripInsuranceCoverage {
+  name: string;
+  value: string;
+  included: boolean;
+}
+
 export interface TripInsuranceData {
+  // Main info
   provider: string;
+  plan_name: string;
+  policy_number: string;
+  destination_covered: string;
+  coverage_type: 'internacional' | 'nacional' | 'schengen' | 'global' | '';
   start_date: string;
   end_date: string;
+  status: 'ativo' | 'expirado' | 'futuro' | '';
+  // Coverages
+  medical_assistance: string;
+  hospital_expenses: string;
+  lost_baggage: string;
+  trip_cancellation: string;
+  trip_interruption: string;
+  dental_assistance: string;
+  medical_repatriation: string;
+  covid_coverage: string;
   coverage: string;
+  // Emergency contacts
+  emergency_phone: string;
+  emergency_whatsapp: string;
+  emergency_email: string;
+  emergency_24h: string;
+  emergency_languages: string;
+  insurer_website: string;
+  // Emergency procedure
+  how_to_activate: string;
+  required_documents_claim: string;
+  hospital_procedure: string;
+  reimbursement_info: string;
+  // Insured persons
+  insured_persons: TripInsuredPerson[];
+  // Trip details
+  trip_purpose: 'lazer' | 'negocios' | 'intercambio' | '';
+  special_activities: string;
+  coverage_observations: string;
+  // Agency tips
+  agency_tips: string;
+  agency_notes: string;
+  agency_contact: string;
+  emergency_contact_agency: string;
+  // Legacy compat
+  notes: string;
 }
 
 export interface TripCruiseData {

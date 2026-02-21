@@ -138,11 +138,29 @@ function getServiceDetails(service: TripService): string[] {
       if (data.agency_notes) details.push(`Obs: ${data.agency_notes}`);
       break;
     }
-    case "insurance":
+    case "insurance": {
       details.push(`Seguradora: ${data.provider}`);
+      if (data.plan_name) details.push(`Plano: ${data.plan_name}`);
+      if (data.policy_number) details.push(`Apólice: ${data.policy_number}`);
       details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
-      details.push(`Cobertura: ${data.coverage}`);
+      if (data.destination_covered) details.push(`Destino coberto: ${data.destination_covered}`);
+      if (data.coverage_type) details.push(`Tipo: ${data.coverage_type}`);
+      if (data.status) details.push(`Status: ${data.status === 'ativo' ? 'Ativo' : data.status === 'expirado' ? 'Expirado' : 'Futuro'}`);
+      if (data.coverage) details.push(`Cobertura: ${data.coverage}`);
+      if (data.medical_assistance) details.push(`Assistência Médica: ${data.medical_assistance}`);
+      if (data.hospital_expenses) details.push(`Despesas Hospitalares: ${data.hospital_expenses}`);
+      if (data.lost_baggage) details.push(`Bagagem Extraviada: ${data.lost_baggage}`);
+      if (data.trip_cancellation) details.push(`Cancelamento: ${data.trip_cancellation}`);
+      if (data.dental_assistance) details.push(`Odontológica: ${data.dental_assistance}`);
+      if (data.medical_repatriation) details.push(`Repatriação: ${data.medical_repatriation}`);
+      if (data.emergency_phone) details.push(`📞 Emergência: ${data.emergency_phone}`);
+      if (data.emergency_whatsapp) details.push(`💬 WhatsApp: ${data.emergency_whatsapp}`);
+      if (data.insured_persons?.length > 0) details.push(`Segurados: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
+      if (data.how_to_activate) details.push(`Como acionar: ${data.how_to_activate}`);
+      if (data.agency_tips) details.push(`Dicas: ${data.agency_tips}`);
+      if (data.agency_notes || data.notes) details.push(`Obs: ${data.agency_notes || data.notes}`);
       break;
+    }
     case "cruise":
       if (data.cruise_company) details.push(`Companhia: ${data.cruise_company}`);
       details.push(`Navio: ${data.ship_name}`);
