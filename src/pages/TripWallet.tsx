@@ -3,10 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Wallet } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff } from "lucide-react";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
+import { TripWalletList } from "@/components/trip/TripWalletList";
 import { generateTripPDF } from "@/components/trip/TripPDF";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,14 +35,16 @@ export default function TripWallet() {
   const { id } = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { createTrip, isCreating, shareTrip, isSharing } = useTrips();
-  const { trip, addService, deleteService, uploadVoucher, isAddingService } = useTrip(id);
-  
+  const { createTrip, isCreating, updatePassword, regeneratePassword } = useTrips();
+  const { trip, addService, deleteService, uploadVoucher, isAddingService } = useTrip(id && id !== "nova" ? id : undefined);
+
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [editingPassword, setEditingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
 
-  // Fetch agent profile for PDF generation
   useEffect(() => {
     if (user?.id) {
       fetchAgentProfile(user.id, supabase).then(setAgentProfile);
@@ -49,53 +53,60 @@ export default function TripWallet() {
 
   const handleCreateTrip = async (data: TripFormData) => {
     const newTrip = await createTrip(data);
-    navigate(`/ferramentas-ia/trip-wallet/${newTrip.id}`);
+    navigate(`/ferramentas-ia/trip-wallet/${newTrip.id}`, { replace: true });
   };
 
   const handleAddService = async (serviceData: any, file?: File) => {
     if (!selectedServiceType) return;
-    
     try {
       setIsUploading(true);
       let voucher_url: string | undefined;
       let voucher_name: string | undefined;
-      
       if (file) {
         const result = await uploadVoucher(file);
         voucher_url = result.url;
         voucher_name = result.name;
       }
-      
-      await addService({ 
-        service_type: selectedServiceType, 
-        service_data: serviceData, 
-        voucher_url,
-        voucher_name,
-      });
+      await addService({ service_type: selectedServiceType, service_data: serviceData, voucher_url, voucher_name });
       setSelectedServiceType(null);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleShare = async () => {
+  const handleCopyLink = () => {
+    if (!trip?.share_token) return;
+    const url = `${window.location.origin}/viagem/${trip.share_token}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Link copiado!", description: "O link da carteira foi copiado." });
+  };
+
+  const handleCopyPassword = () => {
+    if (!trip?.access_password) return;
+    navigator.clipboard.writeText(trip.access_password);
+    toast({ title: "Senha copiada!", description: "A senha foi copiada." });
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!id || !newPassword || newPassword.length < 4) {
+      toast({ title: "Senha inválida", description: "A senha deve ter pelo menos 4 caracteres.", variant: "destructive" });
+      return;
+    }
+    await updatePassword({ id, password: newPassword });
+    setEditingPassword(false);
+    setNewPassword("");
+  };
+
+  const handleRegeneratePassword = async () => {
     if (!id) return;
-    const token = await shareTrip(id);
-    const url = `${window.location.origin}/viagem/${token}`;
-    await navigator.clipboard.writeText(url);
-    toast({ 
-      title: "Link copiado!", 
-      description: "O link da viagem foi copiado para a área de transferência." 
-    });
+    await regeneratePassword(id);
   };
 
   const handleGeneratePDF = () => {
-    if (trip) {
-      generateTripPDF(trip, agentProfile);
-    }
+    if (trip) generateTripPDF(trip, agentProfile);
   };
 
-  // Step 1: Create trip
+  // Listing view (no ID or default route)
   if (!id) {
     return (
       <DashboardLayout>
@@ -109,7 +120,30 @@ export default function TripWallet() {
                 <Wallet className="h-6 w-6 text-primary" />
                 Carteira Digital
               </h1>
-              <p className="text-muted-foreground">Organize vouchers, documentos e serviços da viagem do cliente</p>
+              <p className="text-muted-foreground">Organize vouchers, documentos e serviços das viagens</p>
+            </div>
+          </div>
+          <TripWalletList />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Create new trip
+  if (id === "nova") {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia/trip-wallet")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="font-display text-2xl font-bold flex items-center gap-2">
+                <Wallet className="h-6 w-6 text-primary" />
+                Nova Carteira
+              </h1>
+              <p className="text-muted-foreground">Crie uma carteira digital para a viagem do cliente</p>
             </div>
           </div>
           <Card className="max-w-2xl">
@@ -123,7 +157,7 @@ export default function TripWallet() {
     );
   }
 
-  // Loading state
+  // Loading
   if (!trip) {
     return (
       <DashboardLayout>
@@ -138,13 +172,13 @@ export default function TripWallet() {
   const endDate = new Date(trip.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-  // Step 2 & 3: Add services and view
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia/trip-wallet")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -157,12 +191,12 @@ export default function TripWallet() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleGeneratePDF}>
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
               <FileText className="mr-2 h-4 w-4" /> PDF
             </Button>
-            <Button onClick={handleShare} disabled={isSharing}>
-              <LinkIcon className="mr-2 h-4 w-4" /> {trip.share_token ? "Copiar Link" : "Compartilhar"}
+            <Button variant="outline" size="sm" onClick={handleCopyLink}>
+              <Copy className="mr-2 h-4 w-4" /> Copiar Link
             </Button>
           </div>
         </div>
@@ -194,8 +228,8 @@ export default function TripWallet() {
                         </Button>
                       ))}
                     </div>
-                    <TripServiceList 
-                      services={trip.services || []} 
+                    <TripServiceList
+                      services={trip.services || []}
                       onDeleteService={deleteService}
                       groupByType={true}
                     />
@@ -205,36 +239,86 @@ export default function TripWallet() {
             </Card>
           </div>
 
-          {/* Summary Section */}
-          <div>
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Access Card */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Resumo da Viagem</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Lock className="h-4 w-4" /> Acesso do Cliente
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Cliente</span>
-                    <span className="font-medium">{trip.client_name}</span>
+              <CardContent className="space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Senha de acesso</p>
+                  {editingPassword ? (
+                    <div className="flex gap-2">
+                      <Input
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Nova senha"
+                        className="h-8 text-sm"
+                      />
+                      <Button size="sm" variant="outline" className="h-8" onClick={handleUpdatePassword}>Salvar</Button>
+                      <Button size="sm" variant="ghost" className="h-8" onClick={() => { setEditingPassword(false); setNewPassword(""); }}>✕</Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <code className="bg-muted px-2 py-1 rounded text-sm font-mono flex-1">
+                        {showPassword ? trip.access_password : "••••••"}
+                      </code>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopyPassword}>
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex gap-2 mt-2">
+                    <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => setEditingPassword(true)}>
+                      Editar senha
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-xs h-7" onClick={handleRegeneratePassword}>
+                      <RefreshCw className="mr-1 h-3 w-3" /> Regenerar
+                    </Button>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Destino</span>
-                    <span className="font-medium">{trip.destination}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Período</span>
-                    <span className="font-medium">{days} dias</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Serviços</span>
-                    <span className="font-medium">{trip.services?.length || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Documentos</span>
-                    <span className="font-medium">
-                      {trip.services?.filter(s => s.voucher_url).length || 0}
-                    </span>
-                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Link da carteira</p>
+                  <Button variant="outline" size="sm" className="w-full text-xs" onClick={handleCopyLink}>
+                    <Copy className="mr-2 h-3 w-3" /> Copiar link para o cliente
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Summary Card */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Resumo</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Cliente</span>
+                  <span className="font-medium">{trip.client_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Destino</span>
+                  <span className="font-medium">{trip.destination}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Período</span>
+                  <span className="font-medium">{days} dias</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Serviços</span>
+                  <span className="font-medium">{trip.services?.length || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Documentos</span>
+                  <span className="font-medium">{trip.services?.filter(s => s.voucher_url).length || 0}</span>
                 </div>
               </CardContent>
             </Card>
