@@ -36,9 +36,59 @@ export type TripServiceType =
   | 'train'
   | 'other';
 
+export interface TripFlightSegment {
+  origin_airport: string;
+  origin_city: string;
+  destination_airport: string;
+  destination_city: string;
+  flight_date: string;
+  departure_time: string;
+  arrival_time: string;
+  flight_number: string;
+  airline: string;
+  terminal: string;
+  gate: string;
+  segment_type: 'ida' | 'conexao' | 'volta';
+}
+
+export interface TripFlightPassenger {
+  name: string;
+  passenger_type: 'adulto' | 'crianca' | 'bebe';
+  document: string;
+  seat: string;
+  notes: string;
+}
+
 export interface TripFlightData {
+  // Summary
+  main_airline: string;
   origin_city: string;
   destination_city: string;
+  trip_type: 'ida' | 'ida_volta' | 'multi_trechos';
+  locator_code: string;
+  flight_status: 'confirmado' | 'emitido' | 'pendente';
+  // Segments
+  segments: TripFlightSegment[];
+  // Passengers
+  passengers: TripFlightPassenger[];
+  // Baggage
+  carry_on: string;
+  checked_baggage: string;
+  extra_baggage: string;
+  baggage_rules: string;
+  baggage_notes: string;
+  // Check-in
+  checkin_url: string;
+  checkin_status: 'pendente' | 'realizado';
+  checkin_open_date: string;
+  checkin_notes: string;
+  // Boarding instructions
+  recommended_arrival: string;
+  boarding_terminal: string;
+  required_documents: string;
+  immigration_rules: string;
+  boarding_notes: string;
+  // Legacy compat
   airline: string;
   departure_date: string;
   return_date: string;

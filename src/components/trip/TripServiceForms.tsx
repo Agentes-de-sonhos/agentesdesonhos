@@ -74,123 +74,448 @@ function VoucherUpload({ file, setFile, label = "Voucher/Documento" }: VoucherUp
   );
 }
 
-// Flight Form
+// Flight Form - Professional multi-segment
 const flightSchema = z.object({
+  main_airline: z.string().min(2, "Companhia aérea principal é obrigatória"),
   origin_city: z.string().min(2, "Cidade de origem é obrigatória"),
   destination_city: z.string().min(2, "Cidade de destino é obrigatória"),
-  airline: z.string().min(2, "Companhia aérea é obrigatória"),
-  departure_date: z.date({ required_error: "Data de ida é obrigatória" }),
-  return_date: z.date({ required_error: "Data de volta é obrigatória" }),
-  notes: z.string().optional(),
+  trip_type: z.enum(["ida", "ida_volta", "multi_trechos"]),
+  locator_code: z.string().optional(),
+  flight_status: z.enum(["confirmado", "emitido", "pendente"]),
+  carry_on: z.string().optional(),
+  checked_baggage: z.string().optional(),
+  extra_baggage: z.string().optional(),
+  baggage_rules: z.string().optional(),
+  baggage_notes: z.string().optional(),
+  checkin_url: z.string().optional(),
+  checkin_status: z.enum(["pendente", "realizado"]),
+  checkin_open_date: z.string().optional(),
+  checkin_notes: z.string().optional(),
+  recommended_arrival: z.string().optional(),
+  boarding_terminal: z.string().optional(),
+  required_documents: z.string().optional(),
+  immigration_rules: z.string().optional(),
+  boarding_notes: z.string().optional(),
+});
+
+interface FlightSegmentInput {
+  origin_airport: string; origin_city: string; destination_airport: string; destination_city: string;
+  flight_date: string; departure_time: string; arrival_time: string; flight_number: string;
+  airline: string; terminal: string; gate: string; segment_type: 'ida' | 'conexao' | 'volta';
+}
+
+interface FlightPassengerInput {
+  name: string; passenger_type: 'adulto' | 'crianca' | 'bebe'; document: string; seat: string; notes: string;
+}
+
+const emptySegment = (): FlightSegmentInput => ({
+  origin_airport: '', origin_city: '', destination_airport: '', destination_city: '',
+  flight_date: '', departure_time: '', arrival_time: '', flight_number: '',
+  airline: '', terminal: '', gate: '', segment_type: 'ida',
+});
+
+const emptyPassenger = (): FlightPassengerInput => ({
+  name: '', passenger_type: 'adulto', document: '', seat: '', notes: '',
 });
 
 function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
-  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [file, setFile] = useState<File | null>(null);
+  const [segments, setSegments] = useState<FlightSegmentInput[]>(
+    defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
+  );
+  const [passengers, setPassengers] = useState<FlightPassengerInput[]>(
+    defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
+  );
+  const [newPax, setNewPax] = useState<FlightPassengerInput>(emptyPassenger());
+
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
     defaultValues: {
+      main_airline: defaultValues?.main_airline || defaultValues?.airline || "",
       origin_city: defaultValues?.origin_city || "",
       destination_city: defaultValues?.destination_city || "",
-      airline: defaultValues?.airline || "",
-      notes: defaultValues?.notes || "",
-      ...(defaultValues?.departure_date ? { departure_date: parseLocal(defaultValues.departure_date) } : {}),
-      ...(defaultValues?.return_date ? { return_date: parseLocal(defaultValues.return_date) } : {}),
+      trip_type: defaultValues?.trip_type || "ida_volta",
+      locator_code: defaultValues?.locator_code || "",
+      flight_status: defaultValues?.flight_status || "confirmado",
+      carry_on: defaultValues?.carry_on || "",
+      checked_baggage: defaultValues?.checked_baggage || "",
+      extra_baggage: defaultValues?.extra_baggage || "",
+      baggage_rules: defaultValues?.baggage_rules || "",
+      baggage_notes: defaultValues?.baggage_notes || "",
+      checkin_url: defaultValues?.checkin_url || "",
+      checkin_status: defaultValues?.checkin_status || "pendente",
+      checkin_open_date: defaultValues?.checkin_open_date || "",
+      checkin_notes: defaultValues?.checkin_notes || "",
+      recommended_arrival: defaultValues?.recommended_arrival || "",
+      boarding_terminal: defaultValues?.boarding_terminal || "",
+      required_documents: defaultValues?.required_documents || "",
+      immigration_rules: defaultValues?.immigration_rules || "",
+      boarding_notes: defaultValues?.boarding_notes || "",
     },
   });
 
+  const updateSegment = (index: number, field: keyof FlightSegmentInput, value: string) => {
+    const updated = [...segments];
+    (updated[index] as any)[field] = value;
+    setSegments(updated);
+  };
+
+  const addPassenger = () => {
+    if (!newPax.name.trim()) return;
+    setPassengers([...passengers, { ...newPax }]);
+    setNewPax(emptyPassenger());
+  };
+
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
+    const firstSeg = segments[0];
+    const lastSeg = segments[segments.length - 1];
     onSubmit(
       {
+        main_airline: values.main_airline,
         origin_city: values.origin_city,
         destination_city: values.destination_city,
-        airline: values.airline,
-        departure_date: format(values.departure_date, "yyyy-MM-dd"),
-        return_date: format(values.return_date, "yyyy-MM-dd"),
-        notes: values.notes || "",
+        trip_type: values.trip_type,
+        locator_code: values.locator_code || "",
+        flight_status: values.flight_status,
+        segments,
+        passengers,
+        carry_on: values.carry_on || "",
+        checked_baggage: values.checked_baggage || "",
+        extra_baggage: values.extra_baggage || "",
+        baggage_rules: values.baggage_rules || "",
+        baggage_notes: values.baggage_notes || "",
+        checkin_url: values.checkin_url || "",
+        checkin_status: values.checkin_status,
+        checkin_open_date: values.checkin_open_date || "",
+        checkin_notes: values.checkin_notes || "",
+        recommended_arrival: values.recommended_arrival || "",
+        boarding_terminal: values.boarding_terminal || "",
+        required_documents: values.required_documents || "",
+        immigration_rules: values.immigration_rules || "",
+        boarding_notes: values.boarding_notes || "",
+        // Legacy compat
+        airline: values.main_airline,
+        departure_date: firstSeg?.flight_date || "",
+        return_date: lastSeg?.flight_date || firstSeg?.flight_date || "",
+        notes: values.boarding_notes || "",
       },
       file || undefined
     );
   };
 
+  const tripTypeLabels: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
+  const segmentTypeLabels: Record<string, string> = { ida: 'Ida', conexao: 'Conexão', volta: 'Volta' };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === RESUMO DO VOO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✈️ Informações Principais</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="main_airline" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Companhia Aérea Principal *</FormLabel>
+              <FormControl><Input placeholder="LATAM, GOL, Air France..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="locator_code" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código Localizador (PNR)</FormLabel>
+              <FormControl><Input placeholder="ABC123" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="origin_city" render={({ field }) => (
             <FormItem>
-              <FormLabel>Cidade de Origem</FormLabel>
+              <FormLabel>Origem *</FormLabel>
               <FormControl><Input placeholder="São Paulo" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )} />
           <FormField control={form.control} name="destination_city" render={({ field }) => (
             <FormItem>
-              <FormLabel>Cidade de Destino</FormLabel>
+              <FormLabel>Destino Final *</FormLabel>
               <FormControl><Input placeholder="Paris" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )} />
         </div>
 
-        <FormField control={form.control} name="airline" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Companhia Aérea</FormLabel>
-            <FormControl><Input placeholder="LATAM, GOL, Air France..." {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )} />
-
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="departure_date" render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data de Ida</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                      {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                </PopoverContent>
-              </Popover>
+          <FormField control={form.control} name="trip_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Viagem</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="ida">Somente Ida</SelectItem>
+                  <SelectItem value="ida_volta">Ida e Volta</SelectItem>
+                  <SelectItem value="multi_trechos">Multi-trechos</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )} />
-          <FormField control={form.control} name="return_date" render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data de Volta</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                      {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                </PopoverContent>
-              </Popover>
+          <FormField control={form.control} name="flight_status" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="confirmado">Confirmado</SelectItem>
+                  <SelectItem value="emitido">Emitido</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )} />
         </div>
 
-        <FormField control={form.control} name="notes" render={({ field }) => (
+        {/* === TRECHOS DE VOO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛫 Trechos de Voo</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        {segments.map((seg, i) => (
+          <div key={i} className="border rounded-lg p-4 space-y-3 bg-muted/20">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">Trecho {i + 1}</span>
+              {segments.length > 1 && (
+                <Button type="button" variant="ghost" size="sm" className="h-7 text-destructive" onClick={() => setSegments(segments.filter((_, idx) => idx !== i))}>
+                  <X className="h-3 w-3 mr-1" /> Remover
+                </Button>
+              )}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Tipo do Trecho</label>
+                <Select value={seg.segment_type} onValueChange={(v) => updateSegment(i, 'segment_type', v)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ida">Ida</SelectItem>
+                    <SelectItem value="conexao">Conexão</SelectItem>
+                    <SelectItem value="volta">Volta</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Companhia Aérea</label>
+                <Input className="mt-1" placeholder="LATAM" value={seg.airline} onChange={(e) => updateSegment(i, 'airline', e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Nº do Voo</label>
+                <Input className="mt-1" placeholder="LA8084" value={seg.flight_number} onChange={(e) => updateSegment(i, 'flight_number', e.target.value)} />
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Aeroporto Origem</label>
+                <Input className="mt-1" placeholder="GRU" value={seg.origin_airport} onChange={(e) => updateSegment(i, 'origin_airport', e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Cidade Origem</label>
+                <Input className="mt-1" placeholder="São Paulo" value={seg.origin_city} onChange={(e) => updateSegment(i, 'origin_city', e.target.value)} />
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Aeroporto Destino</label>
+                <Input className="mt-1" placeholder="CDG" value={seg.destination_airport} onChange={(e) => updateSegment(i, 'destination_airport', e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Cidade Destino</label>
+                <Input className="mt-1" placeholder="Paris" value={seg.destination_city} onChange={(e) => updateSegment(i, 'destination_city', e.target.value)} />
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-4">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Data do Voo</label>
+                <Input className="mt-1" type="date" value={seg.flight_date} onChange={(e) => updateSegment(i, 'flight_date', e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Partida</label>
+                <Input className="mt-1" type="time" value={seg.departure_time} onChange={(e) => updateSegment(i, 'departure_time', e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Chegada</label>
+                <Input className="mt-1" type="time" value={seg.arrival_time} onChange={(e) => updateSegment(i, 'arrival_time', e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Terminal</label>
+                <Input className="mt-1" placeholder="2E" value={seg.terminal} onChange={(e) => updateSegment(i, 'terminal', e.target.value)} />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Portão de Embarque</label>
+              <Input className="mt-1" placeholder="A32" value={seg.gate} onChange={(e) => updateSegment(i, 'gate', e.target.value)} />
+            </div>
+          </div>
+        ))}
+
+        <Button type="button" variant="outline" className="w-full" onClick={() => setSegments([...segments, emptySegment()])}>
+          <Plus className="h-4 w-4 mr-2" /> Adicionar Trecho de Voo
+        </Button>
+
+        {/* === PASSAGEIROS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Passageiros</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        {passengers.map((p, i) => (
+          <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
+            <span className="flex-1">{p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'}){p.seat ? ` • ${p.seat}` : ''}</span>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+        <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Input placeholder="Nome completo" value={newPax.name} onChange={(e) => setNewPax({ ...newPax, name: e.target.value })} />
+            <Select value={newPax.passenger_type} onValueChange={(v: any) => setNewPax({ ...newPax, passenger_type: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="adulto">Adulto</SelectItem>
+                <SelectItem value="crianca">Criança</SelectItem>
+                <SelectItem value="bebe">Bebê</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input placeholder="Assento (ex: 12A)" value={newPax.seat} onChange={(e) => setNewPax({ ...newPax, seat: e.target.value })} />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input placeholder="Documento (opcional)" value={newPax.document} onChange={(e) => setNewPax({ ...newPax, document: e.target.value })} />
+            <Input placeholder="Observações" value={newPax.notes} onChange={(e) => setNewPax({ ...newPax, notes: e.target.value })} />
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
+            <Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro
+          </Button>
+        </div>
+
+        {/* === BAGAGEM === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧳 Bagagem</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="carry_on" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bagagem de Mão</FormLabel>
+              <FormControl><Input placeholder="1x 10kg" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="checked_baggage" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bagagem Despachada</FormLabel>
+              <FormControl><Input placeholder="2x 23kg" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="extra_baggage" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bagagem Extra</FormLabel>
+              <FormControl><Input placeholder="Não inclusa" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="baggage_rules" render={({ field }) => (
           <FormItem>
-            <FormLabel>Observações</FormLabel>
-            <FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl>
-            <FormMessage />
+            <FormLabel>Regras de Bagagem</FormLabel>
+            <FormControl><Textarea placeholder="Peso máximo, dimensões, itens proibidos..." rows={2} {...field} /></FormControl>
           </FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Voucher/Ticket/Boarding Pass" />
+        {/* === CHECK-IN === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✅ Check-in Online</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="checkin_url" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link do Check-in</FormLabel>
+              <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="checkin_status" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status do Check-in</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="realizado">Realizado</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="checkin_open_date" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Abertura do Check-in</FormLabel>
+              <FormControl><Input placeholder="48h antes do voo" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="checkin_notes" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Observações do Check-in</FormLabel>
+              <FormControl><Input placeholder="Fazer check-in pelo app..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === ORIENTAÇÕES === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações de Embarque</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="recommended_arrival" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Antecedência no Aeroporto</FormLabel>
+              <FormControl><Input placeholder="3 horas antes" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="boarding_terminal" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Terminal de Embarque</FormLabel>
+              <FormControl><Input placeholder="Terminal 2" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="required_documents" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Documentos Obrigatórios</FormLabel>
+            <FormControl><Textarea placeholder="Passaporte válido, visto, certificado de vacinação..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="immigration_rules" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Regras de Imigração</FormLabel>
+            <FormControl><Textarea placeholder="Informações sobre alfândega, declarações..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="boarding_notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações Gerais</FormLabel>
+            <FormControl><Textarea placeholder="Informações adicionais para o passageiro..." rows={3} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        <VoucherUpload file={file} setFile={setFile} label="E-ticket / Cartão de Embarque" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
