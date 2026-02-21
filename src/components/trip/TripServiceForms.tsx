@@ -681,26 +681,142 @@ function InsuranceForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormPr
 
 // Cruise Form
 const cruiseSchema = z.object({
+  cruise_company: z.string().min(2, "Companhia marítima é obrigatória"),
   ship_name: z.string().min(2, "Nome do navio é obrigatório"),
   route: z.string().min(2, "Rota é obrigatória"),
-  start_date: z.date({ required_error: "Data início é obrigatória" }),
-  end_date: z.date({ required_error: "Data fim é obrigatória" }),
+  embarkation_port: z.string().min(2, "Porto de embarque é obrigatório"),
+  disembarkation_port: z.string().optional(),
+  start_date: z.date({ required_error: "Data embarque é obrigatória" }),
+  end_date: z.date({ required_error: "Data desembarque é obrigatória" }),
+  booking_number: z.string().optional(),
+  cabin_type: z.string().optional(),
+  cabin_number: z.string().optional(),
+  cabin_category: z.string().optional(),
+  deck: z.string().optional(),
+  occupancy: z.string().optional(),
+  meal_plan: z.string().optional(),
+  checkin_url: z.string().optional(),
+  checkin_status: z.string().optional(),
+  checkin_deadline: z.string().optional(),
+  boarding_terminal: z.string().optional(),
+  port_address: z.string().optional(),
+  port_maps_url: z.string().optional(),
+  recommended_arrival: z.string().optional(),
+  required_documents: z.string().optional(),
+  baggage_policy: z.string().optional(),
+  dress_code: z.string().optional(),
+  company_rules: z.string().optional(),
+  boarding_notes: z.string().optional(),
+  onboard_currency: z.string().optional(),
+  onboard_language: z.string().optional(),
+  voltage: z.string().optional(),
+  ship_website: z.string().optional(),
 });
 
-function CruiseForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps, "serviceType">) {
+function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [file, setFile] = useState<File | null>(null);
+  const [passengers, setPassengers] = useState<{ name: string; birth_date?: string; document?: string; notes?: string }[]>(
+    defaultValues?.passengers || []
+  );
+  const [newPaxName, setNewPaxName] = useState("");
+  const [newPaxBirth, setNewPaxBirth] = useState("");
+  const [newPaxDoc, setNewPaxDoc] = useState("");
+  const [newPaxNotes, setNewPaxNotes] = useState("");
+
+  const [itinerary, setItinerary] = useState<{ date: string; port: string; arrival_time: string; departure_time: string; stop_type: string; notes: string }[]>(
+    defaultValues?.itinerary || []
+  );
+  const [itDate, setItDate] = useState("");
+  const [itPort, setItPort] = useState("");
+  const [itArrival, setItArrival] = useState("");
+  const [itDeparture, setItDeparture] = useState("");
+  const [itType, setItType] = useState("parada");
+  const [itNotes, setItNotes] = useState("");
+
   const form = useForm<z.infer<typeof cruiseSchema>>({
     resolver: zodResolver(cruiseSchema),
-    defaultValues: { ship_name: "", route: "" },
+    defaultValues: {
+      cruise_company: defaultValues?.cruise_company || "",
+      ship_name: defaultValues?.ship_name || "",
+      route: defaultValues?.route || "",
+      embarkation_port: defaultValues?.embarkation_port || "",
+      disembarkation_port: defaultValues?.disembarkation_port || "",
+      booking_number: defaultValues?.booking_number || "",
+      cabin_type: defaultValues?.cabin_type || "",
+      cabin_number: defaultValues?.cabin_number || "",
+      cabin_category: defaultValues?.cabin_category || "",
+      deck: defaultValues?.deck || "",
+      occupancy: defaultValues?.occupancy || "",
+      meal_plan: defaultValues?.meal_plan || "",
+      checkin_url: defaultValues?.checkin_url || "",
+      checkin_status: defaultValues?.checkin_status || "pendente",
+      checkin_deadline: defaultValues?.checkin_deadline || "",
+      boarding_terminal: defaultValues?.boarding_terminal || "",
+      port_address: defaultValues?.port_address || "",
+      port_maps_url: defaultValues?.port_maps_url || "",
+      recommended_arrival: defaultValues?.recommended_arrival || "",
+      required_documents: defaultValues?.required_documents || "",
+      baggage_policy: defaultValues?.baggage_policy || "",
+      dress_code: defaultValues?.dress_code || "",
+      company_rules: defaultValues?.company_rules || "",
+      boarding_notes: defaultValues?.boarding_notes || "",
+      onboard_currency: defaultValues?.onboard_currency || "",
+      onboard_language: defaultValues?.onboard_language || "",
+      voltage: defaultValues?.voltage || "",
+      ship_website: defaultValues?.ship_website || "",
+      ...(defaultValues?.start_date ? { start_date: parseLocal(defaultValues.start_date) } : {}),
+      ...(defaultValues?.end_date ? { end_date: parseLocal(defaultValues.end_date) } : {}),
+    },
   });
+
+  const addPassenger = () => {
+    if (!newPaxName.trim()) return;
+    setPassengers([...passengers, { name: newPaxName.trim(), birth_date: newPaxBirth || undefined, document: newPaxDoc || undefined, notes: newPaxNotes || undefined }]);
+    setNewPaxName(""); setNewPaxBirth(""); setNewPaxDoc(""); setNewPaxNotes("");
+  };
+
+  const addItineraryStop = () => {
+    if (!itPort.trim()) return;
+    setItinerary([...itinerary, { date: itDate, port: itPort.trim(), arrival_time: itArrival, departure_time: itDeparture, stop_type: itType, notes: itNotes }]);
+    setItDate(""); setItPort(""); setItArrival(""); setItDeparture(""); setItType("parada"); setItNotes("");
+  };
 
   const handleSubmit = (values: z.infer<typeof cruiseSchema>) => {
     onSubmit(
       {
+        cruise_company: values.cruise_company,
         ship_name: values.ship_name,
         route: values.route,
+        embarkation_port: values.embarkation_port,
+        disembarkation_port: values.disembarkation_port || "",
         start_date: format(values.start_date, "yyyy-MM-dd"),
         end_date: format(values.end_date, "yyyy-MM-dd"),
+        booking_number: values.booking_number || "",
+        cabin_type: values.cabin_type || "",
+        cabin_number: values.cabin_number || "",
+        cabin_category: values.cabin_category || "",
+        deck: values.deck || "",
+        occupancy: values.occupancy || "",
+        meal_plan: values.meal_plan || "",
+        passengers,
+        itinerary,
+        checkin_url: values.checkin_url || "",
+        checkin_status: values.checkin_status || "pendente",
+        checkin_deadline: values.checkin_deadline || "",
+        boarding_terminal: values.boarding_terminal || "",
+        port_address: values.port_address || "",
+        port_maps_url: values.port_maps_url || "",
+        recommended_arrival: values.recommended_arrival || "",
+        required_documents: values.required_documents || "",
+        baggage_policy: values.baggage_policy || "",
+        dress_code: values.dress_code || "",
+        company_rules: values.company_rules || "",
+        boarding_notes: values.boarding_notes || "",
+        onboard_currency: values.onboard_currency || "",
+        onboard_language: values.onboard_language || "",
+        voltage: values.voltage || "",
+        ship_website: values.ship_website || "",
       },
       file || undefined
     );
@@ -708,27 +824,67 @@ function CruiseForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField control={form.control} name="ship_name" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nome do Navio</FormLabel>
-            <FormControl><Input placeholder="MSC Seaview, Costa Diadema..." {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )} />
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === INFORMAÇÕES PRINCIPAIS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚢 Informações do Cruzeiro</h4>
+          <div className="h-px bg-border" />
+        </div>
 
-        <FormField control={form.control} name="route" render={({ field }) => (
+        <FormField control={form.control} name="cruise_company" render={({ field }) => (
           <FormItem>
-            <FormLabel>Rota</FormLabel>
-            <FormControl><Input placeholder="Santos → Búzios → Ilha Grande → Santos" {...field} /></FormControl>
+            <FormLabel>Companhia Marítima *</FormLabel>
+            <FormControl><Input placeholder="MSC, Royal Caribbean, Costa..." {...field} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
 
         <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="ship_name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Navio *</FormLabel>
+              <FormControl><Input placeholder="MSC Seaview" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="booking_number" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código da Reserva</FormLabel>
+              <FormControl><Input placeholder="BK-123456" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="route" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Roteiro *</FormLabel>
+            <FormControl><Input placeholder="Caribe, Mediterrâneo, América do Sul..." {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="embarkation_port" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Porto de Embarque *</FormLabel>
+              <FormControl><Input placeholder="Santos" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="disembarkation_port" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Porto de Desembarque</FormLabel>
+              <FormControl><Input placeholder="Santos" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="start_date" render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Data Embarque</FormLabel>
+              <FormLabel>Data Embarque *</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -747,7 +903,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps
           )} />
           <FormField control={form.control} name="end_date" render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Data Desembarque</FormLabel>
+              <FormLabel>Data Desembarque *</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -766,12 +922,332 @@ function CruiseForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps
           )} />
         </div>
 
-        <VoucherUpload file={file} setFile={setFile} />
+        {/* === CABINE === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛏 Dados da Cabine</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="cabin_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Cabine</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="interna">Interna</SelectItem>
+                  <SelectItem value="externa">Externa</SelectItem>
+                  <SelectItem value="varanda">Varanda</SelectItem>
+                  <SelectItem value="suite">Suíte</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="cabin_number" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Número da Cabine</FormLabel>
+              <FormControl><Input placeholder="8042" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="cabin_category" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoria</FormLabel>
+              <FormControl><Input placeholder="Fantastica, Yacht Club..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="deck" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Deck (Andar)</FormLabel>
+              <FormControl><Input placeholder="Deck 9" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="occupancy" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ocupação</FormLabel>
+              <FormControl><Input placeholder="2 adultos + 1 criança" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="meal_plan" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Regime de Alimentação</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="pensao_completa">Pensão Completa</SelectItem>
+                <SelectItem value="all_inclusive">All Inclusive</SelectItem>
+                <SelectItem value="meia_pensao">Meia Pensão</SelectItem>
+                <SelectItem value="outro">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === PASSAGEIROS === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👥 Passageiros</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="space-y-2">
+          {passengers.map((p, i) => (
+            <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+              <div className="flex-1 text-sm">
+                <span className="font-medium">{p.name}</span>
+                {p.birth_date && <span className="text-muted-foreground"> • {p.birth_date}</span>}
+                {p.document && <span className="text-muted-foreground"> • {p.document}</span>}
+                {p.notes && <span className="text-muted-foreground italic"> • {p.notes}</span>}
+              </div>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input placeholder="Nome completo *" value={newPaxName} onChange={(e) => setNewPaxName(e.target.value)} />
+            <Input placeholder="Data de nascimento" value={newPaxBirth} onChange={(e) => setNewPaxBirth(e.target.value)} />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input placeholder="Documento" value={newPaxDoc} onChange={(e) => setNewPaxDoc(e.target.value)} />
+            <Input placeholder="Observações" value={newPaxNotes} onChange={(e) => setNewPaxNotes(e.target.value)} />
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
+            <Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro
+          </Button>
+        </div>
+
+        {/* === ITINERÁRIO === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🗺 Roteiro do Cruzeiro</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="space-y-2">
+          {itinerary.map((stop, i) => (
+            <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+              <div className="flex-1 text-sm">
+                <span className="font-medium">{stop.date ? `${stop.date} – ` : ''}{stop.port}</span>
+                <span className="text-muted-foreground"> ({stop.stop_type === 'embarque' ? 'Embarque' : stop.stop_type === 'navegacao' ? 'Navegação' : stop.stop_type === 'desembarque' ? 'Desembarque' : 'Parada'})</span>
+                {stop.arrival_time && <span className="text-muted-foreground"> {stop.arrival_time}</span>}
+                {stop.departure_time && <span className="text-muted-foreground"> – {stop.departure_time}</span>}
+                {stop.notes && <span className="text-muted-foreground italic"> • {stop.notes}</span>}
+              </div>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setItinerary(itinerary.filter((_, idx) => idx !== i))}>
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+          <div className="grid gap-2 sm:grid-cols-4">
+            <Input type="date" placeholder="Data" value={itDate} onChange={(e) => setItDate(e.target.value)} />
+            <Input placeholder="Porto / Local *" value={itPort} onChange={(e) => setItPort(e.target.value)} />
+            <Input type="time" placeholder="Chegada" value={itArrival} onChange={(e) => setItArrival(e.target.value)} />
+            <Input type="time" placeholder="Saída" value={itDeparture} onChange={(e) => setItDeparture(e.target.value)} />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Select value={itType} onValueChange={setItType}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="embarque">Embarque</SelectItem>
+                <SelectItem value="navegacao">Navegação</SelectItem>
+                <SelectItem value="parada">Parada</SelectItem>
+                <SelectItem value="desembarque">Desembarque</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input placeholder="Observações da parada" value={itNotes} onChange={(e) => setItNotes(e.target.value)} />
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={addItineraryStop}>
+            <Plus className="h-3 w-3 mr-1" /> Adicionar Parada
+          </Button>
+        </div>
+
+        {/* === CHECK-IN === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✅ Check-in Online</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="checkin_url" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link do Check-in</FormLabel>
+              <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="checkin_status" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="concluido">Concluído</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="checkin_deadline" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prazo Limite</FormLabel>
+              <FormControl><Input placeholder="48h antes do embarque" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === ORIENTAÇÕES DE EMBARQUE === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações de Embarque</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="boarding_terminal" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Terminal de Embarque</FormLabel>
+              <FormControl><Input placeholder="Terminal Marítimo de Santos" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="port_address" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Endereço do Porto</FormLabel>
+              <FormControl><Input placeholder="Av. Portuária, 123..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="port_maps_url" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Google Maps do Porto</FormLabel>
+              <FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="recommended_arrival" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horário Recomendado de Chegada</FormLabel>
+              <FormControl><Input placeholder="3 horas antes do embarque" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="required_documents" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Documentos Obrigatórios</FormLabel>
+            <FormControl><Textarea placeholder="Passaporte válido, visto, certidão de nascimento..." rows={2} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="baggage_policy" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Política de Bagagem</FormLabel>
+              <FormControl><Input placeholder="Máximo 2 malas por pessoa..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="dress_code" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Dress Code</FormLabel>
+              <FormControl><Input placeholder="Traje social nas noites de gala..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="company_rules" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Regras Importantes da Companhia</FormLabel>
+            <FormControl><Textarea placeholder="Regras sobre bebidas, política de cancelamento..." rows={2} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <FormField control={form.control} name="boarding_notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações Gerais</FormLabel>
+            <FormControl><Textarea placeholder="Informações adicionais para o passageiro..." rows={3} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === DADOS OPERACIONAIS === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚡ Dados Operacionais do Navio</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="onboard_currency" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Moeda a Bordo</FormLabel>
+              <FormControl><Input placeholder="Dólar americano" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="onboard_language" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Idioma Principal</FormLabel>
+              <FormControl><Input placeholder="Inglês, Português..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="voltage" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Voltagem</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="110v">110V</SelectItem>
+                  <SelectItem value="220v">220V</SelectItem>
+                  <SelectItem value="bivolt">Bivolt</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="ship_website" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Site Oficial do Navio</FormLabel>
+              <FormControl><Input placeholder="https://www.msccruises.com.br/" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <VoucherUpload file={file} setFile={setFile} label="Voucher / Boarding Pass / Confirmação" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
           </Button>
         </div>
       </form>

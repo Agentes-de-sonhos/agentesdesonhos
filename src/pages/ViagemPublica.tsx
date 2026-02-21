@@ -48,8 +48,28 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       return { title: data.name, details: [`Quantidade: ${data.quantity}x`], dates: formatDate(data.date) };
     case "insurance":
       return { title: data.provider, details: [`Cobertura: ${data.coverage}`], dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
-    case "cruise":
-      return { title: data.ship_name, details: [`Rota: ${data.route}`], dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
+    case "cruise": {
+      const nights = (() => {
+        try {
+          const [sy,sm,sd] = data.start_date.split('-').map(Number);
+          const [ey,em,ed] = data.end_date.split('-').map(Number);
+          return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24));
+        } catch { return null; }
+      })();
+      const cruiseDetails: string[] = [];
+      if (data.cruise_company) cruiseDetails.push(`Companhia: ${data.cruise_company}`);
+      cruiseDetails.push(`Roteiro: ${data.route}`);
+      if (data.embarkation_port) cruiseDetails.push(`Embarque: ${data.embarkation_port}`);
+      if (data.disembarkation_port) cruiseDetails.push(`Desembarque: ${data.disembarkation_port}`);
+      if (nights) cruiseDetails.push(`${nights} noites`);
+      if (data.booking_number) cruiseDetails.push(`Reserva: ${data.booking_number}`);
+      if (data.cabin_type) cruiseDetails.push(`Cabine: ${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}`);
+      if (data.deck) cruiseDetails.push(`Deck: ${data.deck}`);
+      if (data.occupancy) cruiseDetails.push(`Ocupação: ${data.occupancy}`);
+      if (data.meal_plan) cruiseDetails.push(`Alimentação: ${data.meal_plan === 'pensao_completa' ? 'Pensão Completa' : data.meal_plan === 'all_inclusive' ? 'All Inclusive' : data.meal_plan === 'meia_pensao' ? 'Meia Pensão' : data.meal_plan}`);
+      if (data.passengers?.length > 0) cruiseDetails.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      return { title: data.ship_name, details: cruiseDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
+    }
     case "train": {
       const time = data.departure_time && data.arrival_time ? `${data.departure_time} → ${data.arrival_time}` : '';
       const details: string[] = [];
@@ -145,6 +165,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const { title, details, dates } = getServiceDetails(service);
   const data = service.service_data as any;
   const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
+  const isCruise = service.service_type === 'cruise';
 
   return (
     <Card className="border-border/50">
@@ -158,6 +179,72 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {details.map((d, i) => (
           <p key={i} className="text-sm text-muted-foreground">{d}</p>
         ))}
+
+        {/* Cruise itinerary */}
+        {isCruise && data.itinerary?.length > 0 && (
+          <div className="mt-3 space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🗺 Roteiro</p>
+            {data.itinerary.map((stop: any, i: number) => (
+              <div key={i} className="text-xs text-muted-foreground pl-2 border-l-2 border-primary/20 py-0.5">
+                <span className="font-medium">{stop.date ? `${stop.date} – ` : ''}{stop.port}</span>
+                {stop.stop_type === 'navegacao' ? ' (Navegação)' : ''}
+                {stop.arrival_time && ` ${stop.arrival_time}`}
+                {stop.departure_time && ` – ${stop.departure_time}`}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Cruise boarding instructions */}
+        {isCruise && (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">⚠️ Orientações de Embarque</p>
+            {data.boarding_terminal && <p className="text-xs text-muted-foreground">Terminal: {data.boarding_terminal}</p>}
+            {data.recommended_arrival && <p className="text-xs text-muted-foreground">Chegada: {data.recommended_arrival}</p>}
+            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
+            {data.baggage_policy && <p className="text-xs text-muted-foreground">Bagagem: {data.baggage_policy}</p>}
+            {data.dress_code && <p className="text-xs text-muted-foreground">Dress Code: {data.dress_code}</p>}
+            {data.boarding_notes && <p className="text-xs text-muted-foreground italic">{data.boarding_notes}</p>}
+          </div>
+        )}
+
+        {/* Cruise check-in button */}
+        {isCruise && data.checkin_url && (
+          <div className="mt-3">
+            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer">
+              <Button variant="default" size="sm" className="text-xs w-full sm:w-auto">
+                ✅ Fazer Check-in do Cruzeiro
+              </Button>
+            </a>
+            {data.checkin_deadline && <p className="text-xs text-muted-foreground mt-1">Prazo: {data.checkin_deadline}</p>}
+          </div>
+        )}
+
+        {/* Cruise maps */}
+        {isCruise && data.port_maps_url && (
+          <div className="mt-2">
+            <a href={data.port_maps_url} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm" className="text-xs h-7">
+                <MapPin className="h-3 w-3 mr-1" /> Rota até o porto
+              </Button>
+            </a>
+          </div>
+        )}
+
+        {/* Cruise ship info */}
+        {isCruise && (data.onboard_currency || data.voltage || data.ship_website) && (
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+            {data.onboard_currency && <span>💰 {data.onboard_currency}</span>}
+            {data.voltage && <span>🔌 {data.voltage}</span>}
+            {data.ship_website && (
+              <a href={data.ship_website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                🚢 Site do navio
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Train maps */}
         {isTrainWithMaps && (
           <div className="flex flex-wrap gap-2 mt-3">
             {data.origin_maps_url && (

@@ -61,9 +61,27 @@ function getServiceDetails(service: TripService): string[] {
       details.push(`Cobertura: ${data.coverage}`);
       break;
     case "cruise":
+      if (data.cruise_company) details.push(`Companhia: ${data.cruise_company}`);
       details.push(`Navio: ${data.ship_name}`);
       details.push(`Rota: ${data.route}`);
+      if (data.embarkation_port) details.push(`Embarque: ${data.embarkation_port}`);
+      if (data.disembarkation_port) details.push(`Desembarque: ${data.disembarkation_port}`);
       details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
+      if (data.booking_number) details.push(`Reserva: ${data.booking_number}`);
+      if (data.cabin_type) details.push(`Cabine: ${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}`);
+      if (data.deck) details.push(`Deck: ${data.deck}`);
+      if (data.occupancy) details.push(`Ocupação: ${data.occupancy}`);
+      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.itinerary?.length > 0) {
+        details.push(`--- Roteiro ---`);
+        data.itinerary.forEach((stop: any) => {
+          details.push(`${stop.date ? stop.date + ' – ' : ''}${stop.port} (${stop.stop_type})${stop.arrival_time ? ' ' + stop.arrival_time : ''}${stop.departure_time ? ' – ' + stop.departure_time : ''}`);
+        });
+      }
+      if (data.boarding_terminal) details.push(`Terminal: ${data.boarding_terminal}`);
+      if (data.recommended_arrival) details.push(`Chegada recomendada: ${data.recommended_arrival}`);
+      if (data.required_documents) details.push(`Documentos: ${data.required_documents}`);
+      if (data.boarding_notes) details.push(`Orientações: ${data.boarding_notes}`);
       break;
     case "train":
       details.push(`🚆 ${data.origin_city} → ${data.destination_city}`);
