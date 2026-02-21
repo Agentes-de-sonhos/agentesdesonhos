@@ -187,7 +187,7 @@ export default function TripWallet() {
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
