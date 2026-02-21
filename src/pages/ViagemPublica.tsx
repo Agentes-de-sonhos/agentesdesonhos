@@ -110,8 +110,22 @@ function getServiceDetails(service: TripService): { title: string; details: stri
         : data.location || '';
       return { title: `${typeLbl} — ${route}`, details: transferDetails, dates: data.date ? `${formatDate(data.date)}${data.time ? ` às ${data.time}` : ''}` : undefined };
     }
-    case "attraction":
-      return { title: data.name, details: [`Quantidade: ${data.quantity}x`], dates: formatDate(data.date) };
+    case "attraction": {
+      const typeMap: Record<string, string> = { parque: '🎢 Parque', show: '🎭 Show', passeio: '🚤 Passeio', museu: '🏛️ Museu', tour: '🗺️ Tour', evento: '📅 Evento', experiencia: '✨ Experiência' };
+      const statusMap: Record<string, string> = { confirmado: '✅ Confirmado', reservado: '📅 Reservado', flexivel: '🔄 Flexível', utilizado: '☑️ Utilizado' };
+      const accessMap: Record<string, string> = { '1_dia': '1 Dia', 'multi_day': 'Multi-Day', 'open_date': 'Data Aberta', 'horario_marcado': 'Horário Marcado' };
+      const attractionDetails: string[] = [];
+      if (data.attraction_type) attractionDetails.push(`Tipo: ${typeMap[data.attraction_type] || data.attraction_type}`);
+      if (data.city) attractionDetails.push(`${data.city}${data.country ? `, ${data.country}` : ''}`);
+      if (data.status) attractionDetails.push(`Status: ${statusMap[data.status] || data.status}`);
+      attractionDetails.push(`Quantidade: ${data.quantity}x`);
+      if (data.access_type) attractionDetails.push(`Acesso: ${accessMap[data.access_type] || data.access_type}`);
+      if (data.entry_time) attractionDetails.push(`Entrada: ${data.entry_time}`);
+      if (data.duration) attractionDetails.push(`Duração: ${data.duration}`);
+      if (data.ticket_code) attractionDetails.push(`Ingresso: ${data.ticket_code}`);
+      if (data.confirmation_code) attractionDetails.push(`Confirmação: ${data.confirmation_code}`);
+      return { title: data.name, details: attractionDetails, dates: formatDate(data.date) };
+    }
     case "insurance":
       return { title: data.provider, details: [`Cobertura: ${data.coverage}`], dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
     case "cruise": {
@@ -236,6 +250,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isCarRental = service.service_type === 'car_rental';
   const isHotel = service.service_type === 'hotel';
   const isTransfer = service.service_type === 'transfer';
+  const isAttraction = service.service_type === 'attraction';
 
   return (
     <Card className="border-border/50">
@@ -762,7 +777,112 @@ function PublicServiceCard({ service }: { service: TripService }) {
           </div>
         )}
 
-        {/* Train maps */}
+        {/* Attraction - Ticket Codes */}
+        {isAttraction && (data.ticket_code || data.confirmation_code || data.order_number) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📱 Códigos do Ingresso</p>
+            {data.ticket_code && <p className="text-sm font-mono font-semibold text-foreground">🎟️ {data.ticket_code}</p>}
+            {data.confirmation_code && <p className="text-xs text-muted-foreground">Confirmação: {data.confirmation_code}</p>}
+            {data.order_number && <p className="text-xs text-muted-foreground">Pedido: {data.order_number}</p>}
+          </div>
+        )}
+
+        {/* Attraction - Usage details */}
+        {isAttraction && (data.entry_time || data.usage_window || data.duration || data.access_type) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📅 Detalhes de Uso</p>
+            {data.entry_time && <p className="text-xs text-muted-foreground">Horário de entrada: {data.entry_time}</p>}
+            {data.usage_window && <p className="text-xs text-muted-foreground">Janela de uso: {data.usage_window}</p>}
+            {data.duration && <p className="text-xs text-muted-foreground">Duração: {data.duration}</p>}
+            {data.access_type && <p className="text-xs text-muted-foreground">Acesso: {data.access_type === '1_dia' ? '1 Dia' : data.access_type === 'multi_day' ? 'Multi-Day' : data.access_type === 'open_date' ? 'Data Aberta' : 'Horário Marcado'}</p>}
+            {data.requires_reservation && <p className="text-xs text-muted-foreground">Reserva: {data.requires_reservation === 'sim' ? '✅ Necessária' : data.requires_reservation === 'recomendado' ? '📌 Recomendada' : '❌ Não necessária'}</p>}
+          </div>
+        )}
+
+        {/* Attraction - Usage instructions */}
+        {isAttraction && data.usage_instructions && (
+          <div className="mt-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-xs font-medium text-primary">📋 Instruções Importantes:</p>
+            <p className="text-xs text-foreground mt-1">{data.usage_instructions}</p>
+          </div>
+        )}
+
+        {/* Attraction - Passengers */}
+        {isAttraction && data.passengers?.length > 0 && (
+          <div className="mt-2">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👨‍👩‍👧 Ingressos por Pessoa</p>
+            {data.passengers.map((p: any, i: number) => (
+              <p key={i} className="text-xs text-muted-foreground">
+                🎟️ {p.name} ({p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})
+                {p.document ? ` • ${p.document}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Attraction - Location & Map */}
+        {isAttraction && (data.address || data.venue_name || data.maps_url) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📍 Localização</p>
+            {data.venue_name && <p className="text-xs text-muted-foreground font-medium">{data.venue_name}</p>}
+            {data.address && <p className="text-xs text-muted-foreground">{data.address}</p>}
+            {data.entry_point && <p className="text-xs text-muted-foreground">Entrada: {data.entry_point}</p>}
+            {data.maps_url && (
+              <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7 mt-1">
+                  <MapPin className="h-3 w-3 mr-1" /> Ver no mapa
+                </Button>
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Attraction - Rules & Policies */}
+        {isAttraction && (data.attraction_rules || data.cancellation_policy || data.prohibited_items || data.dress_code || data.required_documents) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📌 Regras e Políticas</p>
+            {data.cancellation_policy && <p className="text-xs text-muted-foreground">Cancelamento: {data.cancellation_policy}</p>}
+            {data.change_policy && <p className="text-xs text-muted-foreground">Alteração: {data.change_policy}</p>}
+            {data.attraction_rules && <p className="text-xs text-muted-foreground">{data.attraction_rules}</p>}
+            {data.prohibited_items && <p className="text-xs text-muted-foreground">🚫 Proibido: {data.prohibited_items}</p>}
+            {data.dress_code && <p className="text-xs text-muted-foreground">👔 Dress code: {data.dress_code}</p>}
+            {data.required_documents && <p className="text-xs text-muted-foreground">📄 Documentos: {data.required_documents}</p>}
+          </div>
+        )}
+
+        {/* Attraction - Agency Tips (Premium highlight) */}
+        {isAttraction && data.agency_tips && (
+          <div className="mt-2 p-3 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-xs font-semibold text-primary">🧠 Dicas do seu Agente de Viagem</p>
+            <p className="text-xs text-foreground mt-1 whitespace-pre-line">{data.agency_tips}</p>
+          </div>
+        )}
+
+        {/* Attraction - Contacts */}
+        {isAttraction && (data.attraction_contact || data.operator_contact || data.agency_contact) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📞 Contatos</p>
+            {data.attraction_contact && <p className="text-xs text-muted-foreground">Atração: {data.attraction_contact}</p>}
+            {data.operator_contact && <p className="text-xs text-muted-foreground">Operadora: {data.operator_contact}</p>}
+            {data.agency_contact && (
+              <a href={`https://wa.me/${data.agency_contact.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7 mt-1">
+                  <MessageSquare className="h-3 w-3 mr-1" /> Falar com a agência
+                </Button>
+              </a>
+            )}
+            {data.emergency_contact && <p className="text-xs text-muted-foreground">🆘 Emergência: {data.emergency_contact}</p>}
+          </div>
+        )}
+
+        {/* Attraction - Agency notes */}
+        {isAttraction && data.agency_notes && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📝 Observações</p>
+            <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>
+          </div>
+        )}
+
         {isTrainWithMaps && (
           <div className="flex flex-wrap gap-2 mt-3">
             {data.origin_maps_url && (

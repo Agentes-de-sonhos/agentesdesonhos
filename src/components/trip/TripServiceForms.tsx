@@ -2223,26 +2223,136 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
   );
 }
 
-// Attraction Form
+// Attraction Form - Professional module
 const attractionSchema = z.object({
-  name: z.string().min(2, "Nome é obrigatório"),
+  name: z.string().min(2, "Nome da atração é obrigatório"),
+  attraction_type: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
   date: z.date({ required_error: "Data é obrigatória" }),
+  status: z.string().optional(),
   quantity: z.number().min(1, "Mínimo 1 ingresso"),
+  entry_time: z.string().optional(),
+  usage_window: z.string().optional(),
+  duration: z.string().optional(),
+  access_type: z.string().optional(),
+  requires_reservation: z.string().optional(),
+  usage_instructions: z.string().optional(),
+  ticket_code: z.string().optional(),
+  confirmation_code: z.string().optional(),
+  order_number: z.string().optional(),
+  address: z.string().optional(),
+  venue_name: z.string().optional(),
+  maps_url: z.string().optional(),
+  entry_point: z.string().optional(),
+  cancellation_policy: z.string().optional(),
+  change_policy: z.string().optional(),
+  attraction_rules: z.string().optional(),
+  prohibited_items: z.string().optional(),
+  dress_code: z.string().optional(),
+  required_documents: z.string().optional(),
+  agency_tips: z.string().optional(),
+  attraction_contact: z.string().optional(),
+  operator_contact: z.string().optional(),
+  agency_contact: z.string().optional(),
+  emergency_contact: z.string().optional(),
+  agency_notes: z.string().optional(),
 });
 
-function AttractionForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps, "serviceType">) {
+interface AttractionPassengerInput {
+  name: string;
+  ticket_type: 'adulto' | 'crianca' | 'senior';
+  document: string;
+  notes: string;
+}
+
+function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [file, setFile] = useState<File | null>(null);
+  const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
+  const [newPax, setNewPax] = useState<AttractionPassengerInput>({ name: '', ticket_type: 'adulto', document: '', notes: '' });
+
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
-    defaultValues: { name: "", quantity: 1 },
+    defaultValues: {
+      name: defaultValues?.name || "",
+      attraction_type: defaultValues?.attraction_type || "",
+      city: defaultValues?.city || "",
+      country: defaultValues?.country || "",
+      status: defaultValues?.status || "confirmado",
+      quantity: defaultValues?.quantity || 1,
+      entry_time: defaultValues?.entry_time || "",
+      usage_window: defaultValues?.usage_window || "",
+      duration: defaultValues?.duration || "",
+      access_type: defaultValues?.access_type || "",
+      requires_reservation: defaultValues?.requires_reservation || "",
+      usage_instructions: defaultValues?.usage_instructions || "",
+      ticket_code: defaultValues?.ticket_code || "",
+      confirmation_code: defaultValues?.confirmation_code || "",
+      order_number: defaultValues?.order_number || "",
+      address: defaultValues?.address || "",
+      venue_name: defaultValues?.venue_name || "",
+      maps_url: defaultValues?.maps_url || "",
+      entry_point: defaultValues?.entry_point || "",
+      cancellation_policy: defaultValues?.cancellation_policy || "",
+      change_policy: defaultValues?.change_policy || "",
+      attraction_rules: defaultValues?.attraction_rules || "",
+      prohibited_items: defaultValues?.prohibited_items || "",
+      dress_code: defaultValues?.dress_code || "",
+      required_documents: defaultValues?.required_documents || "",
+      agency_tips: defaultValues?.agency_tips || "",
+      attraction_contact: defaultValues?.attraction_contact || "",
+      operator_contact: defaultValues?.operator_contact || "",
+      agency_contact: defaultValues?.agency_contact || "",
+      emergency_contact: defaultValues?.emergency_contact || "",
+      agency_notes: defaultValues?.agency_notes || "",
+      ...(defaultValues?.date ? { date: parseLocal(defaultValues.date) } : {}),
+    },
   });
+
+  const addPassenger = () => {
+    if (!newPax.name.trim()) return;
+    setPassengers([...passengers, { ...newPax }]);
+    setNewPax({ name: '', ticket_type: 'adulto', document: '', notes: '' });
+  };
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
     onSubmit(
       {
         name: values.name,
+        attraction_type: values.attraction_type || "",
+        city: values.city || "",
+        country: values.country || "",
         date: format(values.date, "yyyy-MM-dd"),
+        status: values.status || "",
         quantity: values.quantity,
+        entry_time: values.entry_time || "",
+        usage_window: values.usage_window || "",
+        duration: values.duration || "",
+        access_type: values.access_type || "",
+        requires_reservation: values.requires_reservation || "",
+        usage_instructions: values.usage_instructions || "",
+        ticket_code: values.ticket_code || "",
+        confirmation_code: values.confirmation_code || "",
+        order_number: values.order_number || "",
+        address: values.address || "",
+        venue_name: values.venue_name || "",
+        maps_url: values.maps_url || "",
+        entry_point: values.entry_point || "",
+        passengers,
+        cancellation_policy: values.cancellation_policy || "",
+        change_policy: values.change_policy || "",
+        attraction_rules: values.attraction_rules || "",
+        prohibited_items: values.prohibited_items || "",
+        dress_code: values.dress_code || "",
+        required_documents: values.required_documents || "",
+        agency_tips: values.agency_tips || "",
+        attraction_contact: values.attraction_contact || "",
+        operator_contact: values.operator_contact || "",
+        agency_contact: values.agency_contact || "",
+        emergency_contact: values.emergency_contact || "",
+        agency_notes: values.agency_notes || "",
+        notes: values.agency_notes || "",
       },
       file || undefined
     );
@@ -2250,57 +2360,399 @@ function AttractionForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormP
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === INFORMAÇÕES PRINCIPAIS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🎟️ Informações Principais</h4>
+          <div className="h-px bg-border" />
+        </div>
+
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
-            <FormLabel>Nome da Atração/Ingresso</FormLabel>
-            <FormControl><Input placeholder="Torre Eiffel, Museu do Louvre..." {...field} /></FormControl>
+            <FormLabel>Nome da Atração / Experiência *</FormLabel>
+            <FormControl><Input placeholder="Walt Disney World, Torre Eiffel, Coliseu..." {...field} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="date" render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                      {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                </PopoverContent>
-              </Popover>
+          <FormField control={form.control} name="attraction_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Experiência</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="parque">🎢 Parque</SelectItem>
+                  <SelectItem value="show">🎭 Show / Espetáculo</SelectItem>
+                  <SelectItem value="passeio">🚤 Passeio</SelectItem>
+                  <SelectItem value="museu">🏛️ Museu</SelectItem>
+                  <SelectItem value="tour">🗺️ Tour Guiado</SelectItem>
+                  <SelectItem value="evento">📅 Evento</SelectItem>
+                  <SelectItem value="experiencia">✨ Experiência</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )} />
-          <FormField control={form.control} name="quantity" render={({ field }) => (
+          <FormField control={form.control} name="status" render={({ field }) => (
             <FormItem>
-              <FormLabel>Quantidade</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={1}
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                />
-              </FormControl>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="confirmado">✅ Confirmado</SelectItem>
+                  <SelectItem value="reservado">📅 Reservado</SelectItem>
+                  <SelectItem value="flexivel">🔄 Flexível</SelectItem>
+                  <SelectItem value="utilizado">☑️ Utilizado</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )} />
         </div>
 
-        <VoucherUpload file={file} setFile={setFile} label="Voucher/Ingresso" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="city" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cidade</FormLabel>
+              <FormControl><Input placeholder="Orlando, Paris..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="country" render={({ field }) => (
+            <FormItem>
+              <FormLabel>País</FormLabel>
+              <FormControl><Input placeholder="EUA, França..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="quantity" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Qtd. Ingressos *</FormLabel>
+              <FormControl><Input type="number" min={1} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="date" render={({ field }) => (
+          <FormItem className="flex flex-col">
+            <FormLabel>Data de Uso *</FormLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <FormControl>
+                  <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                    {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione a data"}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+              </PopoverContent>
+            </Popover>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === DETALHES DE USO === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Detalhes de Uso</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="entry_time" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horário de Entrada</FormLabel>
+              <FormControl><Input type="time" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="usage_window" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Janela de Uso</FormLabel>
+              <FormControl><Input placeholder="Entre 9h e 18h" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="duration" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Duração Estimada</FormLabel>
+              <FormControl><Input placeholder="4 horas, dia inteiro..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="access_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Acesso</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="1_dia">1 Dia</SelectItem>
+                  <SelectItem value="multi_day">Multi-Day</SelectItem>
+                  <SelectItem value="open_date">Data Aberta</SelectItem>
+                  <SelectItem value="horario_marcado">Horário Marcado</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="requires_reservation" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Necessita Reserva?</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Sim</SelectItem>
+                  <SelectItem value="nao">Não</SelectItem>
+                  <SelectItem value="recomendado">Recomendado</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="usage_instructions" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Instruções Importantes de Uso</FormLabel>
+            <FormControl><Textarea placeholder="Como usar o ingresso, onde apresentar, regras de entrada..." rows={3} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === CÓDIGOS DO INGRESSO === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📱 Códigos do Ingresso</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="ticket_code" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código do Ingresso</FormLabel>
+              <FormControl><Input placeholder="ABC-123-XYZ" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="confirmation_code" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código de Confirmação</FormLabel>
+              <FormControl><Input placeholder="CONF-456" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="order_number" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nº do Pedido</FormLabel>
+              <FormControl><Input placeholder="#789012" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === LOCALIZAÇÃO === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Localização</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="venue_name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Local</FormLabel>
+              <FormControl><Input placeholder="Magic Kingdom, Louvre Museum..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="entry_point" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ponto de Entrada</FormLabel>
+              <FormControl><Input placeholder="Portão principal, Gate B..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="address" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Endereço Completo</FormLabel>
+            <FormControl><Input placeholder="Endereço da atração" {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <FormField control={form.control} name="maps_url" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Google Maps</FormLabel>
+            <FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === PASSAGEIROS === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👨‍👩‍👧 Passageiros</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="space-y-2">
+          {passengers.map((p, i) => (
+            <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
+              <span className="flex-1">
+                {p.name} ({p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})
+                {p.document ? ` • ${p.document}` : ''}
+              </span>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Input placeholder="Nome *" value={newPax.name} onChange={(e) => setNewPax({ ...newPax, name: e.target.value })} />
+            <Select value={newPax.ticket_type} onValueChange={(v: any) => setNewPax({ ...newPax, ticket_type: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="adulto">Adulto</SelectItem>
+                <SelectItem value="crianca">Criança</SelectItem>
+                <SelectItem value="senior">Senior</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input placeholder="Documento (se necessário)" value={newPax.document} onChange={(e) => setNewPax({ ...newPax, document: e.target.value })} />
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
+            <Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro
+          </Button>
+        </div>
+
+        {/* === REGRAS E POLÍTICAS === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📌 Regras e Políticas</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Política de Cancelamento</FormLabel>
+              <FormControl><Input placeholder="Cancelamento gratuito até 24h..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="change_policy" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Política de Alteração</FormLabel>
+              <FormControl><Input placeholder="Permite reagendamento..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="attraction_rules" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Regras da Atração</FormLabel>
+            <FormControl><Textarea placeholder="Regras de uso, altura mínima, restrições..." rows={2} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="prohibited_items" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Itens Proibidos</FormLabel>
+              <FormControl><Input placeholder="Câmeras, alimentos, bagagens..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="dress_code" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Dress Code</FormLabel>
+              <FormControl><Input placeholder="Roupas confortáveis, calçado fechado..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="required_documents" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Documentos Necessários</FormLabel>
+            <FormControl><Input placeholder="Passaporte, documento com foto..." {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === DICAS DA AGÊNCIA === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧠 Dicas do Agente de Viagem</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <FormField control={form.control} name="agency_tips" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Dicas Exclusivas</FormLabel>
+            <FormControl><Textarea placeholder="Melhor horário para visitar, como evitar filas, dicas de alimentação no local..." rows={4} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        {/* === CONTATOS === */}
+        <div className="space-y-1 pt-2">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📞 Contatos de Suporte</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="attraction_contact" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contato da Atração</FormLabel>
+              <FormControl><Input placeholder="Telefone / site da atração" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="operator_contact" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contato da Operadora</FormLabel>
+              <FormControl><Input placeholder="Telefone / e-mail da operadora" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="agency_contact" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contato da Agência</FormLabel>
+              <FormControl><Input placeholder="WhatsApp da agência" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="emergency_contact" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contato de Emergência</FormLabel>
+              <FormControl><Input placeholder="Telefone de emergência" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+
+        <FormField control={form.control} name="agency_notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações da Agência</FormLabel>
+            <FormControl><Textarea placeholder="Observações adicionais para o cliente..." rows={3} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <VoucherUpload file={file} setFile={setFile} label="Voucher / Ingresso (PDF ou Imagem)" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
           </Button>
         </div>
       </form>

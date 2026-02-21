@@ -65,7 +65,12 @@ function getServiceDescription(service: TripService): string {
       const company = data.company_name ? `${data.company_name} • ` : '';
       return `${company}${typeLbl} — ${route}`;
     }
-    case "attraction": return `${data.name} (${data.quantity}x)`;
+    case "attraction": {
+      const typeMap: Record<string, string> = { parque: '🎢', show: '🎭', passeio: '🚤', museu: '🏛️', tour: '🗺️', evento: '📅', experiencia: '✨' };
+      const typeIcon = data.attraction_type ? (typeMap[data.attraction_type] || '') + ' ' : '';
+      const city = data.city ? ` — ${data.city}` : '';
+      return `${typeIcon}${data.name} (${data.quantity}x)${city}`;
+    }
     case "insurance": return `${data.provider} - ${data.coverage}`;
     case "cruise": return `${data.cruise_company ? data.cruise_company + ' • ' : ''}${data.ship_name} - ${data.route}`;
     case "train": return `${data.origin_city} → ${data.destination_city}${data.train_company ? ` (${data.train_company})` : ''}`;
@@ -115,7 +120,11 @@ function getServiceDates(service: TripService): string {
       const mode = data.transfer_mode ? ` • ${modeMap[data.transfer_mode] || data.transfer_mode}` : '';
       return `${dateStr}${timeStr}${mode}`;
     }
-    case "attraction": return formatDate(data.date);
+    case "attraction": {
+      const statusMap: Record<string, string> = { confirmado: '✅', reservado: '📅', flexivel: '🔄', utilizado: '☑️' };
+      const statusIcon = data.status ? ` ${statusMap[data.status] || ''}` : '';
+      return `${formatDate(data.date)}${data.entry_time ? ` às ${data.entry_time}` : ''}${statusIcon}`;
+    }
     case "insurance": return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
     case "cruise": {
       const nights = (() => {
