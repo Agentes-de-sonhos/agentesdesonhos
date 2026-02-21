@@ -37,7 +37,14 @@ function formatDate(dateStr: string) {
 function getServiceDescription(service: TripService): string {
   const data = service.service_data as any;
   switch (service.service_type) {
-    case "flight": return `${data.origin_city} → ${data.destination_city} (${data.airline})`;
+    case "flight": {
+      const origin = data.origin_city || '';
+      const dest = data.destination_city || '';
+      const airline = data.main_airline || data.airline || '';
+      const segs = data.segments?.length || 0;
+      const segInfo = segs > 1 ? ` (${segs} trechos)` : '';
+      return `${origin} → ${dest} (${airline})${segInfo}`;
+    }
     case "hotel": return `${data.hotel_name} - ${data.city}`;
     case "car_rental": return `${data.car_type} - ${data.pickup_location}`;
     case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
@@ -53,7 +60,14 @@ function getServiceDescription(service: TripService): string {
 function getServiceDates(service: TripService): string {
   const data = service.service_data as any;
   switch (service.service_type) {
-    case "flight": return `${formatDate(data.departure_date)} - ${formatDate(data.return_date)}`;
+    case "flight": {
+      if (data.segments?.length > 0) {
+        const first = data.segments[0];
+        const last = data.segments[data.segments.length - 1];
+        return `${first.flight_date ? formatDate(first.flight_date) : ''} - ${last.flight_date ? formatDate(last.flight_date) : ''}`;
+      }
+      return data.departure_date ? `${formatDate(data.departure_date)} - ${formatDate(data.return_date)}` : '';
+    }
     case "hotel": return `${formatDate(data.check_in)} - ${formatDate(data.check_out)}`;
     case "transfer":
     case "attraction": return formatDate(data.date);

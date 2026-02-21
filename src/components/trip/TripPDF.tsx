@@ -30,10 +30,27 @@ function getServiceDetails(service: TripService): string[] {
   
   switch (service.service_type) {
     case "flight":
-      details.push(`${data.origin_city} → ${data.destination_city}`);
-      details.push(`Companhia: ${data.airline}`);
-      details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
-      if (data.notes) details.push(`Obs: ${data.notes}`);
+      details.push(`${data.origin_city || ''} → ${data.destination_city || ''}`);
+      details.push(`Companhia: ${data.main_airline || data.airline || ''}`);
+      if (data.locator_code) details.push(`Localizador: ${data.locator_code}`);
+      if (data.trip_type) {
+        const types: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
+        details.push(`Tipo: ${types[data.trip_type] || data.trip_type}`);
+      }
+      if (data.segments?.length > 0) {
+        details.push(`--- Trechos ---`);
+        data.segments.forEach((seg: any, i: number) => {
+          const segType = seg.segment_type === 'ida' ? 'Ida' : seg.segment_type === 'conexao' ? 'Conexão' : 'Volta';
+          details.push(`${segType}: ${seg.origin_airport || seg.origin_city} → ${seg.destination_airport || seg.destination_city} • ${seg.flight_date ? formatDate(seg.flight_date) : ''} ${seg.departure_time || ''} → ${seg.arrival_time || ''} • ${seg.airline || ''} ${seg.flight_number || ''}`);
+        });
+      } else {
+        details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
+      }
+      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.carry_on || data.checked_baggage) details.push(`Bagagem: ${data.carry_on ? `Mão: ${data.carry_on}` : ''} ${data.checked_baggage ? `Despachada: ${data.checked_baggage}` : ''}`);
+      if (data.recommended_arrival) details.push(`Antecedência: ${data.recommended_arrival}`);
+      if (data.required_documents) details.push(`Documentos: ${data.required_documents}`);
+      if (data.boarding_notes || data.notes) details.push(`Obs: ${data.boarding_notes || data.notes}`);
       break;
     case "hotel":
       details.push(`${data.hotel_name} - ${data.city}`);

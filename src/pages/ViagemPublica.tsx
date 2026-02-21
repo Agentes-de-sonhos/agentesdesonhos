@@ -36,8 +36,25 @@ function formatDate(dateStr: string) {
 function getServiceDetails(service: TripService): { title: string; details: string[]; dates?: string } {
   const data = service.service_data as any;
   switch (service.service_type) {
-    case "flight":
-      return { title: `${data.origin_city} → ${data.destination_city}`, details: [`Companhia: ${data.airline}`, ...(data.notes ? [`Obs: ${data.notes}`] : [])], dates: `${formatDate(data.departure_date)} - ${formatDate(data.return_date)}` };
+    case "flight": {
+      const tripTypeMap: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
+      const statusMap: Record<string, string> = { confirmado: '✅ Confirmado', emitido: '📄 Emitido', pendente: '⏳ Pendente' };
+      const details: string[] = [];
+      const airline = data.main_airline || data.airline || '';
+      if (airline) details.push(`Companhia: ${airline}`);
+      if (data.trip_type) details.push(`Tipo: ${tripTypeMap[data.trip_type] || data.trip_type}`);
+      if (data.locator_code) details.push(`Localizador: ${data.locator_code}`);
+      if (data.flight_status) details.push(`Status: ${statusMap[data.flight_status] || data.flight_status}`);
+      // Legacy compat
+      if (!data.segments && data.notes) details.push(`Obs: ${data.notes}`);
+      const firstDate = data.segments?.[0]?.flight_date || data.departure_date || '';
+      const lastDate = data.segments?.[data.segments?.length - 1]?.flight_date || data.return_date || '';
+      return { 
+        title: `${data.origin_city || ''} → ${data.destination_city || ''}`, 
+        details, 
+        dates: firstDate ? `${formatDate(firstDate)}${lastDate && lastDate !== firstDate ? ` - ${formatDate(lastDate)}` : ''}` : undefined
+      };
+    }
     case "hotel":
       return { title: `${data.hotel_name}`, details: [`${data.city}`, ...(data.notes ? [`Obs: ${data.notes}`] : [])], dates: `${formatDate(data.check_in)} - ${formatDate(data.check_out)}` };
     case "car_rental":
@@ -166,6 +183,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const data = service.service_data as any;
   const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
   const isCruise = service.service_type === 'cruise';
+  const isFlight = service.service_type === 'flight';
 
   return (
     <Card className="border-border/50">
@@ -179,6 +197,105 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {details.map((d, i) => (
           <p key={i} className="text-sm text-muted-foreground">{d}</p>
         ))}
+
+        {/* Flight segments timeline */}
+        {isFlight && data.segments?.length > 0 && (
+          <div className="mt-3 space-y-2">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🛫 Trechos</p>
+            {data.segments.map((seg: any, i: number) => {
+              const segTypeLabel = seg.segment_type === 'ida' ? 'Ida' : seg.segment_type === 'conexao' ? 'Conexão' : 'Volta';
+              // Connection time calc
+              let connectionInfo: string | null = null;
+              if (i > 0 && data.segments[i-1]) {
+                const prev = data.segments[i-1];
+                if (prev.flight_date === seg.flight_date && prev.arrival_time && seg.departure_time) {
+                  const [ph, pm] = prev.arrival_time.split(':').map(Number);
+                  const [sh, sm] = seg.departure_time.split(':').map(Number);
+                  const diff = (sh * 60 + sm) - (ph * 60 + pm);
+                  if (diff > 0) {
+                    const h = Math.floor(diff / 60);
+                    const m = diff % 60;
+                    connectionInfo = `Conexão em ${seg.origin_city || seg.origin_airport} — ${h}h${m > 0 ? `${m.toString().padStart(2, '0')}` : ''}`;
+                  }
+                }
+              }
+              return (
+                <div key={i}>
+                  {connectionInfo && (
+                    <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-md mb-1 font-medium">
+                      ✈️ {connectionInfo}
+                    </div>
+                  )}
+                  <div className="border-l-2 border-primary/30 pl-3 py-1">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">{segTypeLabel}</span>
+                      {seg.airline && <span className="text-muted-foreground">{seg.airline}</span>}
+                      {seg.flight_number && <span className="font-mono text-muted-foreground">{seg.flight_number}</span>}
+                    </div>
+                    <p className="text-sm font-medium mt-0.5">
+                      {seg.origin_airport || seg.origin_city} → {seg.destination_airport || seg.destination_city}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {seg.flight_date ? formatDate(seg.flight_date) : ''}
+                      {seg.departure_time ? ` • ${seg.departure_time}` : ''}
+                      {seg.arrival_time ? ` → ${seg.arrival_time}` : ''}
+                      {seg.terminal ? ` • Terminal ${seg.terminal}` : ''}
+                      {seg.gate ? ` • Portão ${seg.gate}` : ''}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Flight passengers */}
+        {isFlight && data.passengers?.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👤 Passageiros</p>
+            {data.passengers.map((p: any, i: number) => (
+              <p key={i} className="text-xs text-muted-foreground">
+                {p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})
+                {p.seat ? ` • Assento ${p.seat}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Flight baggage */}
+        {isFlight && (data.carry_on || data.checked_baggage) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">🧳 Bagagem</p>
+            {data.carry_on && <p className="text-xs text-muted-foreground">Mão: {data.carry_on}</p>}
+            {data.checked_baggage && <p className="text-xs text-muted-foreground">Despachada: {data.checked_baggage}</p>}
+            {data.extra_baggage && <p className="text-xs text-muted-foreground">Extra: {data.extra_baggage}</p>}
+            {data.baggage_rules && <p className="text-xs text-muted-foreground italic mt-1">{data.baggage_rules}</p>}
+          </div>
+        )}
+
+        {/* Flight boarding instructions */}
+        {isFlight && (data.recommended_arrival || data.required_documents || data.boarding_notes) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">⚠️ Orientações de Embarque</p>
+            {data.recommended_arrival && <p className="text-xs text-muted-foreground">Antecedência: {data.recommended_arrival}</p>}
+            {data.boarding_terminal && <p className="text-xs text-muted-foreground">Terminal: {data.boarding_terminal}</p>}
+            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
+            {data.immigration_rules && <p className="text-xs text-muted-foreground">Imigração: {data.immigration_rules}</p>}
+            {data.boarding_notes && <p className="text-xs text-muted-foreground italic">{data.boarding_notes}</p>}
+          </div>
+        )}
+
+        {/* Flight check-in */}
+        {isFlight && data.checkin_url && (
+          <div className="mt-3">
+            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer">
+              <Button variant="default" size="sm" className="text-xs w-full sm:w-auto">
+                ✅ Fazer Check-in Online
+              </Button>
+            </a>
+            {data.checkin_open_date && <p className="text-xs text-muted-foreground mt-1">Abertura: {data.checkin_open_date}</p>}
+          </div>
+        )}
 
         {/* Cruise itinerary */}
         {isCruise && data.itinerary?.length > 0 && (
