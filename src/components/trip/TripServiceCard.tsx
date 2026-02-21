@@ -71,7 +71,11 @@ function getServiceDescription(service: TripService): string {
       const city = data.city ? ` — ${data.city}` : '';
       return `${typeIcon}${data.name} (${data.quantity}x)${city}`;
     }
-    case "insurance": return `${data.provider} - ${data.coverage}`;
+    case "insurance": {
+      const plan = data.plan_name ? ` • ${data.plan_name}` : '';
+      const cov = data.coverage ? ` — ${data.coverage}` : '';
+      return `${data.provider}${plan}${cov}`;
+    }
     case "cruise": return `${data.cruise_company ? data.cruise_company + ' • ' : ''}${data.ship_name} - ${data.route}`;
     case "train": return `${data.origin_city} → ${data.destination_city}${data.train_company ? ` (${data.train_company})` : ''}`;
     case "other": return data.description;
@@ -125,7 +129,12 @@ function getServiceDates(service: TripService): string {
       const statusIcon = data.status ? ` ${statusMap[data.status] || ''}` : '';
       return `${formatDate(data.date)}${data.entry_time ? ` às ${data.entry_time}` : ''}${statusIcon}`;
     }
-    case "insurance": return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
+    case "insurance": {
+      const statusMap: Record<string, string> = { ativo: '🟢', expirado: '🔴', futuro: '🔵' };
+      const statusIcon = data.status ? ` ${statusMap[data.status] || ''}` : '';
+      const days = (() => { try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
+      return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}${days ? ` (${days} dias)` : ''}${statusIcon}`;
+    }
     case "cruise": {
       const nights = (() => {
         try {

@@ -126,8 +126,22 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       if (data.confirmation_code) attractionDetails.push(`Confirmação: ${data.confirmation_code}`);
       return { title: data.name, details: attractionDetails, dates: formatDate(data.date) };
     }
-    case "insurance":
-      return { title: data.provider, details: [`Cobertura: ${data.coverage}`], dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
+    case "insurance": {
+      const statusMap: Record<string, string> = { ativo: '✅ Ativo', expirado: '❌ Expirado', futuro: '📅 Futuro' };
+      const covTypeMap: Record<string, string> = { internacional: 'Internacional', nacional: 'Nacional', schengen: 'Schengen', global: 'Global' };
+      const insuranceDetails: string[] = [];
+      if (data.plan_name) insuranceDetails.push(`Plano: ${data.plan_name}`);
+      if (data.policy_number) insuranceDetails.push(`Apólice: ${data.policy_number}`);
+      if (data.status) insuranceDetails.push(`Status: ${statusMap[data.status] || data.status}`);
+      if (data.destination_covered) insuranceDetails.push(`Destino: ${data.destination_covered}`);
+      if (data.coverage_type) insuranceDetails.push(`Tipo: ${covTypeMap[data.coverage_type] || data.coverage_type}`);
+      if (data.coverage) insuranceDetails.push(`Cobertura: ${data.coverage}`);
+      if (data.medical_assistance) insuranceDetails.push(`Assistência Médica: ${data.medical_assistance}`);
+      if (data.insured_persons?.length > 0) insuranceDetails.push(`Segurados: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
+      if (data.emergency_phone) insuranceDetails.push(`📞 Emergência: ${data.emergency_phone}`);
+      const days2 = (() => { try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
+      return { title: data.provider, details: insuranceDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}${days2 ? ` (${days2} dias)` : ''}` };
+    }
     case "cruise": {
       const nights = (() => {
         try {
@@ -251,6 +265,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isHotel = service.service_type === 'hotel';
   const isTransfer = service.service_type === 'transfer';
   const isAttraction = service.service_type === 'attraction';
+  const isInsurance = service.service_type === 'insurance';
 
   return (
     <Card className="border-border/50">
@@ -883,6 +898,115 @@ function PublicServiceCard({ service }: { service: TripService }) {
           </div>
         )}
 
+        {/* Insurance - Emergency Contacts (PRIORITY) */}
+        {isInsurance && (data.emergency_phone || data.emergency_whatsapp || data.emergency_email) && (
+          <div className="mt-3 p-3 bg-destructive/5 border border-destructive/20 rounded-lg space-y-2">
+            <p className="text-xs font-semibold text-destructive uppercase tracking-wide">🆘 Contatos de Emergência</p>
+            {data.emergency_phone && (
+              <div className="flex items-center gap-2">
+                <a href={`tel:${data.emergency_phone}`} className="flex-1">
+                  <Button variant="destructive" size="sm" className="text-xs w-full">📞 Ligar Emergência: {data.emergency_phone}</Button>
+                </a>
+              </div>
+            )}
+            {data.emergency_whatsapp && (
+              <a href={`https://wa.me/${data.emergency_whatsapp.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer" className="block">
+                <Button variant="outline" size="sm" className="text-xs w-full">💬 WhatsApp Assistência</Button>
+              </a>
+            )}
+            {data.emergency_email && <p className="text-xs text-muted-foreground">✉️ {data.emergency_email}</p>}
+            {data.emergency_24h === 'sim' && <p className="text-xs text-primary font-medium">✅ Atendimento 24 horas</p>}
+            {data.emergency_languages && <p className="text-xs text-muted-foreground">🌐 Idiomas: {data.emergency_languages}</p>}
+            {data.insurer_website && (
+              <a href={data.insurer_website} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs w-full">🌐 Site da Seguradora</Button>
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Insurance - Coverages */}
+        {isInsurance && (data.medical_assistance || data.hospital_expenses || data.lost_baggage || data.trip_cancellation) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🏥 Coberturas</p>
+            <div className="grid grid-cols-1 gap-1">
+              {data.medical_assistance && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Assistência Médica</span><span className="font-medium">{data.medical_assistance}</span></div>}
+              {data.hospital_expenses && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Despesas Hospitalares</span><span className="font-medium">{data.hospital_expenses}</span></div>}
+              {data.lost_baggage && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Bagagem Extraviada</span><span className="font-medium">{data.lost_baggage}</span></div>}
+              {data.trip_cancellation && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Cancelamento</span><span className="font-medium">{data.trip_cancellation}</span></div>}
+              {data.trip_interruption && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Interrupção</span><span className="font-medium">{data.trip_interruption}</span></div>}
+              {data.dental_assistance && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Odontológica</span><span className="font-medium">{data.dental_assistance}</span></div>}
+              {data.medical_repatriation && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Repatriação</span><span className="font-medium">{data.medical_repatriation}</span></div>}
+              {data.covid_coverage && <div className="flex justify-between text-xs"><span className="text-muted-foreground">COVID</span><span className="font-medium">{data.covid_coverage}</span></div>}
+            </div>
+          </div>
+        )}
+
+        {/* Insurance - Policy details */}
+        {isInsurance && (data.policy_number || data.destination_covered || data.coverage_type) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🛡️ Dados da Apólice</p>
+            {data.policy_number && <p className="text-xs text-muted-foreground">Apólice: <span className="font-mono font-medium text-foreground">{data.policy_number}</span></p>}
+            {data.plan_name && <p className="text-xs text-muted-foreground">Plano: {data.plan_name}</p>}
+            {data.destination_covered && <p className="text-xs text-muted-foreground">Destino coberto: {data.destination_covered}</p>}
+            {data.coverage_type && <p className="text-xs text-muted-foreground">Tipo: {data.coverage_type === 'internacional' ? 'Internacional' : data.coverage_type === 'nacional' ? 'Nacional' : data.coverage_type === 'schengen' ? 'Schengen' : 'Global'}</p>}
+          </div>
+        )}
+
+        {/* Insurance - Emergency Procedure */}
+        {isInsurance && (data.how_to_activate || data.hospital_procedure || data.reimbursement_info) && (
+          <div className="mt-2 p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary">🆘 O que Fazer em Emergência</p>
+            {data.how_to_activate && <p className="text-xs text-foreground whitespace-pre-line">{data.how_to_activate}</p>}
+            {data.required_documents_claim && <p className="text-xs text-muted-foreground mt-1">📄 Documentos: {data.required_documents_claim}</p>}
+            {data.hospital_procedure && <p className="text-xs text-muted-foreground">🏥 {data.hospital_procedure}</p>}
+            {data.reimbursement_info && <p className="text-xs text-muted-foreground">💰 Reembolso: {data.reimbursement_info}</p>}
+          </div>
+        )}
+
+        {/* Insurance - Insured Persons */}
+        {isInsurance && data.insured_persons?.length > 0 && (
+          <div className="mt-2">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👨‍👩‍👧 Segurados</p>
+            {data.insured_persons.map((p: any, i: number) => (
+              <p key={i} className="text-xs text-muted-foreground">
+                {p.name}{p.coverage_type ? ` (${p.coverage_type === 'individual' ? 'Individual' : 'Familiar'})` : ''}
+                {p.birth_date ? ` • ${p.birth_date}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Insurance - Agency Tips */}
+        {isInsurance && data.agency_tips && (
+          <div className="mt-2 p-3 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-xs font-semibold text-primary">🧠 Orientações do seu Agente</p>
+            <p className="text-xs text-foreground mt-1 whitespace-pre-line">{data.agency_tips}</p>
+          </div>
+        )}
+
+        {/* Insurance - Agency Contact */}
+        {isInsurance && (data.agency_contact || data.emergency_contact_agency) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📞 Contato da Agência</p>
+            {data.agency_contact && (
+              <a href={`https://wa.me/${data.agency_contact.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7 w-full">
+                  <MessageSquare className="h-3 w-3 mr-1" /> Falar com a agência
+                </Button>
+              </a>
+            )}
+            {data.emergency_contact_agency && <p className="text-xs text-muted-foreground">🆘 Emergência: {data.emergency_contact_agency}</p>}
+          </div>
+        )}
+
+        {/* Insurance - Notes */}
+        {isInsurance && data.agency_notes && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📝 Observações</p>
+            <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>
+          </div>
+        )}
         {isTrainWithMaps && (
           <div className="flex flex-wrap gap-2 mt-3">
             {data.origin_maps_url && (

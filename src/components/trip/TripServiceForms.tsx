@@ -2760,28 +2760,117 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   );
 }
 
-// Insurance Form
+// Insurance Form - Premium
 const insuranceSchema = z.object({
   provider: z.string().min(2, "Seguradora é obrigatória"),
+  plan_name: z.string().optional(),
+  policy_number: z.string().optional(),
+  destination_covered: z.string().optional(),
+  coverage_type: z.string().optional(),
   start_date: z.date({ required_error: "Data início é obrigatória" }),
   end_date: z.date({ required_error: "Data fim é obrigatória" }),
-  coverage: z.string().min(2, "Cobertura é obrigatória"),
+  status: z.string().optional(),
+  medical_assistance: z.string().optional(),
+  hospital_expenses: z.string().optional(),
+  lost_baggage: z.string().optional(),
+  trip_cancellation: z.string().optional(),
+  trip_interruption: z.string().optional(),
+  dental_assistance: z.string().optional(),
+  medical_repatriation: z.string().optional(),
+  covid_coverage: z.string().optional(),
+  coverage: z.string().optional(),
+  emergency_phone: z.string().optional(),
+  emergency_whatsapp: z.string().optional(),
+  emergency_email: z.string().optional(),
+  emergency_24h: z.string().optional(),
+  emergency_languages: z.string().optional(),
+  insurer_website: z.string().optional(),
+  how_to_activate: z.string().optional(),
+  required_documents_claim: z.string().optional(),
+  hospital_procedure: z.string().optional(),
+  reimbursement_info: z.string().optional(),
+  trip_purpose: z.string().optional(),
+  special_activities: z.string().optional(),
+  coverage_observations: z.string().optional(),
+  agency_tips: z.string().optional(),
+  agency_notes: z.string().optional(),
+  agency_contact: z.string().optional(),
+  emergency_contact_agency: z.string().optional(),
+  notes: z.string().optional(),
 });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps, "serviceType">) {
+interface InsuredPersonInput {
+  name: string;
+  birth_date: string;
+  document: string;
+  coverage_type: 'individual' | 'familiar' | '';
+  notes: string;
+}
+
+const emptyInsured = (): InsuredPersonInput => ({ name: '', birth_date: '', document: '', coverage_type: '', notes: '' });
+
+function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [file, setFile] = useState<File | null>(null);
+  const [insuredPersons, setInsuredPersons] = useState<InsuredPersonInput[]>(
+    defaultValues?.insured_persons?.length > 0 ? defaultValues.insured_persons : []
+  );
+  const [newInsured, setNewInsured] = useState<InsuredPersonInput>(emptyInsured());
+
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: "", coverage: "" },
+    defaultValues: {
+      provider: defaultValues?.provider || "",
+      plan_name: defaultValues?.plan_name || "",
+      policy_number: defaultValues?.policy_number || "",
+      destination_covered: defaultValues?.destination_covered || "",
+      coverage_type: defaultValues?.coverage_type || "",
+      status: defaultValues?.status || "ativo",
+      medical_assistance: defaultValues?.medical_assistance || "",
+      hospital_expenses: defaultValues?.hospital_expenses || "",
+      lost_baggage: defaultValues?.lost_baggage || "",
+      trip_cancellation: defaultValues?.trip_cancellation || "",
+      trip_interruption: defaultValues?.trip_interruption || "",
+      dental_assistance: defaultValues?.dental_assistance || "",
+      medical_repatriation: defaultValues?.medical_repatriation || "",
+      covid_coverage: defaultValues?.covid_coverage || "",
+      coverage: defaultValues?.coverage || "",
+      emergency_phone: defaultValues?.emergency_phone || "",
+      emergency_whatsapp: defaultValues?.emergency_whatsapp || "",
+      emergency_email: defaultValues?.emergency_email || "",
+      emergency_24h: defaultValues?.emergency_24h || "",
+      emergency_languages: defaultValues?.emergency_languages || "",
+      insurer_website: defaultValues?.insurer_website || "",
+      how_to_activate: defaultValues?.how_to_activate || "",
+      required_documents_claim: defaultValues?.required_documents_claim || "",
+      hospital_procedure: defaultValues?.hospital_procedure || "",
+      reimbursement_info: defaultValues?.reimbursement_info || "",
+      trip_purpose: defaultValues?.trip_purpose || "",
+      special_activities: defaultValues?.special_activities || "",
+      coverage_observations: defaultValues?.coverage_observations || "",
+      agency_tips: defaultValues?.agency_tips || "",
+      agency_notes: defaultValues?.agency_notes || "",
+      agency_contact: defaultValues?.agency_contact || "",
+      emergency_contact_agency: defaultValues?.emergency_contact_agency || "",
+      notes: defaultValues?.notes || "",
+      ...(defaultValues?.start_date ? { start_date: parseLocal(defaultValues.start_date) } : {}),
+      ...(defaultValues?.end_date ? { end_date: parseLocal(defaultValues.end_date) } : {}),
+    },
   });
+
+  const addInsured = () => {
+    if (!newInsured.name.trim()) return;
+    setInsuredPersons([...insuredPersons, { ...newInsured }]);
+    setNewInsured(emptyInsured());
+  };
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
     onSubmit(
       {
-        provider: values.provider,
+        ...values,
         start_date: format(values.start_date, "yyyy-MM-dd"),
         end_date: format(values.end_date, "yyyy-MM-dd"),
-        coverage: values.coverage,
+        insured_persons: insuredPersons,
       },
       file || undefined
     );
@@ -2789,19 +2878,78 @@ function InsuranceForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormPr
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField control={form.control} name="provider" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Seguradora</FormLabel>
-            <FormControl><Input placeholder="Assist Card, Travel Ace..." {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )} />
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === INFORMAÇÕES PRINCIPAIS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛡️ Informações Principais</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="provider" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Seguradora *</FormLabel>
+              <FormControl><Input placeholder="Assist Card, Travel Ace..." {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="plan_name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Plano</FormLabel>
+              <FormControl><Input placeholder="AC 150 Mundo" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="policy_number" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Número da Apólice</FormLabel>
+              <FormControl><Input placeholder="POL-2025-123456" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="status" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="ativo">✅ Ativo</SelectItem>
+                  <SelectItem value="futuro">📅 Futuro</SelectItem>
+                  <SelectItem value="expirado">❌ Expirado</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="destination_covered" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Destino Coberto</FormLabel>
+              <FormControl><Input placeholder="Europa, Mundo, América do Norte..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="coverage_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Cobertura</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="internacional">Internacional</SelectItem>
+                  <SelectItem value="nacional">Nacional</SelectItem>
+                  <SelectItem value="schengen">Schengen</SelectItem>
+                  <SelectItem value="global">Global</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="start_date" render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Data Início</FormLabel>
+              <FormLabel>Início da Cobertura *</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -2812,7 +2960,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormPr
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover>
               <FormMessage />
@@ -2820,7 +2968,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormPr
           )} />
           <FormField control={form.control} name="end_date" render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Data Fim</FormLabel>
+              <FormLabel>Término da Cobertura *</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -2831,7 +2979,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormPr
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover>
               <FormMessage />
@@ -2839,20 +2987,269 @@ function InsuranceForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormPr
           )} />
         </div>
 
+        {/* === COBERTURAS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🏥 Coberturas do Seguro</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="medical_assistance" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Assistência Médica</FormLabel>
+              <FormControl><Input placeholder="USD 60.000" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="hospital_expenses" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Despesas Hospitalares</FormLabel>
+              <FormControl><Input placeholder="USD 60.000" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="lost_baggage" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bagagem Extraviada</FormLabel>
+              <FormControl><Input placeholder="USD 1.200" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="trip_cancellation" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cancelamento de Viagem</FormLabel>
+              <FormControl><Input placeholder="USD 5.000" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="trip_interruption" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Interrupção de Viagem</FormLabel>
+              <FormControl><Input placeholder="USD 5.000" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="dental_assistance" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Assistência Odontológica</FormLabel>
+              <FormControl><Input placeholder="USD 500" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="medical_repatriation" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Repatriação Sanitária</FormLabel>
+              <FormControl><Input placeholder="USD 30.000" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="covid_coverage" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cobertura COVID</FormLabel>
+              <FormControl><Input placeholder="USD 10.000 ou N/A" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
         <FormField control={form.control} name="coverage" render={({ field }) => (
           <FormItem>
-            <FormLabel>Cobertura</FormLabel>
-            <FormControl><Input placeholder="USD 60.000, USD 100.000..." {...field} /></FormControl>
-            <FormMessage />
+            <FormLabel>Cobertura Geral (resumo)</FormLabel>
+            <FormControl><Input placeholder="USD 60.000 - Cobertura Mundial" {...field} /></FormControl>
           </FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Apólice" />
+        {/* === CONTATOS DE EMERGÊNCIA === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📞 Contatos de Emergência</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="emergency_phone" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefone de Emergência Internacional</FormLabel>
+              <FormControl><Input placeholder="+55 11 99999-9999" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="emergency_whatsapp" render={({ field }) => (
+            <FormItem>
+              <FormLabel>WhatsApp da Seguradora</FormLabel>
+              <FormControl><Input placeholder="+55 11 99999-9999" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="emergency_email" render={({ field }) => (
+            <FormItem>
+              <FormLabel>E-mail de Assistência</FormLabel>
+              <FormControl><Input placeholder="assistencia@seguradora.com" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="emergency_24h" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Atendimento 24h?</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">✅ Sim</SelectItem>
+                  <SelectItem value="nao">❌ Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="emergency_languages" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Idiomas de Atendimento</FormLabel>
+              <FormControl><Input placeholder="Português, Inglês, Espanhol" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="insurer_website" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Site da Seguradora</FormLabel>
+              <FormControl><Input placeholder="https://www.seguradora.com" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === PROCEDIMENTO DE EMERGÊNCIA === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🆘 O que Fazer em Emergência</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <FormField control={form.control} name="how_to_activate" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Como Acionar o Seguro</FormLabel>
+            <FormControl><Textarea placeholder="1. Ligue para a central 24h&#10;2. Informe o número da apólice&#10;3. Descreva a situação..." rows={3} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="required_documents_claim" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Documentos Necessários</FormLabel>
+            <FormControl><Textarea placeholder="Apólice, passaporte, relatório médico..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="hospital_procedure" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Procedimento Hospitalar</FormLabel>
+            <FormControl><Textarea placeholder="Em caso de internação, entre em contato com a central antes..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="reimbursement_info" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Reembolso (se aplicável)</FormLabel>
+            <FormControl><Textarea placeholder="Guardar todos os comprovantes originais..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        {/* === SEGURADOS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👨‍👩‍👧 Segurados</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        {insuredPersons.map((p, i) => (
+          <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
+            <span className="flex-1">{p.name}{p.coverage_type ? ` (${p.coverage_type === 'individual' ? 'Individual' : 'Familiar'})` : ''}{p.birth_date ? ` • ${p.birth_date}` : ''}</span>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setInsuredPersons(insuredPersons.filter((_, idx) => idx !== i))}>
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+        <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input placeholder="Nome completo" value={newInsured.name} onChange={(e) => setNewInsured({ ...newInsured, name: e.target.value })} />
+            <Input type="date" placeholder="Data de nascimento" value={newInsured.birth_date} onChange={(e) => setNewInsured({ ...newInsured, birth_date: e.target.value })} />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input placeholder="Documento (opcional)" value={newInsured.document} onChange={(e) => setNewInsured({ ...newInsured, document: e.target.value })} />
+            <Select value={newInsured.coverage_type} onValueChange={(v: any) => setNewInsured({ ...newInsured, coverage_type: v })}>
+              <SelectTrigger><SelectValue placeholder="Tipo de cobertura" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="individual">Individual</SelectItem>
+                <SelectItem value="familiar">Familiar</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Input placeholder="Observações (opcional)" value={newInsured.notes} onChange={(e) => setNewInsured({ ...newInsured, notes: e.target.value })} />
+          <Button type="button" variant="outline" size="sm" onClick={addInsured}>
+            <Plus className="h-3 w-3 mr-1" /> Adicionar Segurado
+          </Button>
+        </div>
+
+        {/* === DADOS DA VIAGEM === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧳 Dados da Viagem</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="trip_purpose" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Viagem</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="lazer">Lazer</SelectItem>
+                  <SelectItem value="negocios">Negócios</SelectItem>
+                  <SelectItem value="intercambio">Intercâmbio</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="special_activities" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Esportes / Atividades Especiais</FormLabel>
+              <FormControl><Input placeholder="Ski, Mergulho, Trilhas..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="coverage_observations" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações da Cobertura</FormLabel>
+            <FormControl><Textarea placeholder="Detalhes específicos da cobertura..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        {/* === DICAS DA AGÊNCIA === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧠 Dicas da Agência</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <FormField control={form.control} name="agency_tips" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Orientações do Agente</FormLabel>
+            <FormControl><Textarea placeholder="Quando acionar o seguro, dicas sobre hospitais no destino, diferença entre reembolso e atendimento direto..." rows={4} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="agency_contact" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contato da Agência (WhatsApp)</FormLabel>
+              <FormControl><Input placeholder="+55 11 99999-9999" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="emergency_contact_agency" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Emergência da Agência</FormLabel>
+              <FormControl><Input placeholder="+55 11 99999-9999" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="agency_notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações Gerais</FormLabel>
+            <FormControl><Textarea placeholder="Informações adicionais..." rows={3} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        <VoucherUpload file={file} setFile={setFile} label="Apólice / Voucher do Seguro" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
           </Button>
         </div>
       </form>
