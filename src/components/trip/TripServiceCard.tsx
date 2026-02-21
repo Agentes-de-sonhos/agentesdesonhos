@@ -173,17 +173,21 @@ interface TripServiceCardProps {
   onEdit?: (service: TripService) => void;
   onReplaceVoucher?: (serviceId: string, file: File) => void;
   onRemoveVoucher?: (serviceId: string) => void;
+  onAddAttachment?: (serviceId: string, file: File) => void;
+  onRemoveAttachment?: (serviceId: string, index: number) => void;
   showActions?: boolean;
 }
 
 export function TripServiceCard({ 
-  service, onDelete, onEdit, onReplaceVoucher, onRemoveVoucher, showActions = true 
+  service, onDelete, onEdit, onReplaceVoucher, onRemoveVoucher, 
+  onAddAttachment, onRemoveAttachment, showActions = true 
 }: TripServiceCardProps) {
   const Icon = SERVICE_ICONS[service.service_type] || FileText;
   const label = SERVICE_LABELS[service.service_type] || "Serviço";
   const dates = getServiceDates(service);
   const notes = getServiceNotes(service);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -192,6 +196,16 @@ export function TripServiceCard({
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  const handleAddFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onAddAttachment) {
+      onAddAttachment(service.id, file);
+    }
+    if (addFileInputRef.current) addFileInputRef.current.value = '';
+  };
+
+  const attachments = service.attachments || [];
   
   return (
     <Card>
@@ -209,8 +223,38 @@ export function TripServiceCard({
               {dates && <p className="text-sm text-muted-foreground">{dates}</p>}
               {notes && <p className="text-xs text-muted-foreground mt-1 italic">{notes}</p>}
               
-              {/* Voucher section */}
-              {service.voucher_name && (
+              {/* Attachments section */}
+              {attachments.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {attachments.map((att, idx) => (
+                    <div key={idx} className="flex items-center gap-2 flex-wrap">
+                      <a
+                        href={att.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                      >
+                        <Download className="h-3 w-3" />
+                        {att.name}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                      {showActions && onRemoveAttachment && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 text-xs px-2 text-destructive hover:text-destructive"
+                          onClick={() => onRemoveAttachment(service.id, idx)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Legacy single voucher (if no attachments but has voucher) */}
+              {attachments.length === 0 && service.voucher_name && (
                 <div className="mt-2 flex items-center gap-2 flex-wrap">
                   <a
                     href={service.voucher_url || "#"}
@@ -222,55 +266,26 @@ export function TripServiceCard({
                     {service.voucher_name}
                     <ExternalLink className="h-3 w-3" />
                   </a>
-                  {showActions && onReplaceVoucher && (
-                    <>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        className="hidden"
-                        accept=".pdf,.jpg,.jpeg,.png,.webp"
-                        onChange={handleFileChange}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 text-xs px-2"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <RefreshCw className="h-3 w-3 mr-1" /> Substituir
-                      </Button>
-                    </>
-                  )}
-                  {showActions && onRemoveVoucher && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 text-xs px-2 text-destructive hover:text-destructive"
-                      onClick={() => onRemoveVoucher(service.id)}
-                    >
-                      <X className="h-3 w-3 mr-1" /> Remover
-                    </Button>
-                  )}
                 </div>
               )}
 
-              {/* Upload voucher if none exists */}
-              {!service.voucher_name && showActions && onReplaceVoucher && (
+              {/* Add more files */}
+              {showActions && onAddAttachment && (
                 <div className="mt-2">
                   <input
-                    ref={fileInputRef}
+                    ref={addFileInputRef}
                     type="file"
                     className="hidden"
                     accept=".pdf,.jpg,.jpeg,.png,.webp"
-                    onChange={handleFileChange}
+                    onChange={handleAddFile}
                   />
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-6 text-xs px-2"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => addFileInputRef.current?.click()}
                   >
-                    <Upload className="h-3 w-3 mr-1" /> Anexar voucher
+                    <Upload className="h-3 w-3 mr-1" /> {attachments.length > 0 ? "Adicionar arquivo" : "Anexar arquivo"}
                   </Button>
                 </div>
               )}
@@ -333,12 +348,15 @@ interface TripServiceListProps {
   onEditService?: (service: TripService) => void;
   onReplaceVoucher?: (serviceId: string, file: File) => void;
   onRemoveVoucher?: (serviceId: string) => void;
+  onAddAttachment?: (serviceId: string, file: File) => void;
+  onRemoveAttachment?: (serviceId: string, index: number) => void;
   showActions?: boolean;
   groupByType?: boolean;
 }
 
 export function TripServiceList({ 
   services, onDeleteService, onEditService, onReplaceVoucher, onRemoveVoucher, 
+  onAddAttachment, onRemoveAttachment,
   showActions = true, groupByType = false 
 }: TripServiceListProps) {
   if (services.length === 0) {
@@ -377,6 +395,8 @@ export function TripServiceList({
                   onEdit={onEditService}
                   onReplaceVoucher={onReplaceVoucher}
                   onRemoveVoucher={onRemoveVoucher}
+                  onAddAttachment={onAddAttachment}
+                  onRemoveAttachment={onRemoveAttachment}
                   showActions={showActions}
                 />
               ))}
@@ -397,6 +417,8 @@ export function TripServiceList({
           onEdit={onEditService}
           onReplaceVoucher={onReplaceVoucher}
           onRemoveVoucher={onRemoveVoucher}
+          onAddAttachment={onAddAttachment}
+          onRemoveAttachment={onRemoveAttachment}
           showActions={showActions}
         />
       ))}

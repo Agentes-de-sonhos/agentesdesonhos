@@ -203,6 +203,7 @@ export function useTrip(id: string | undefined) {
           ...s,
           service_type: s.service_type as TripServiceType,
           service_data: s.service_data as unknown as TripServiceData,
+          attachments: (s.attachments as any[] || []) as import("@/types/trip").TripAttachment[],
         })),
       } as Trip;
     },
@@ -227,12 +228,13 @@ export function useTrip(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type, service_data, voucher_url, voucher_name,
+      service_type, service_data, voucher_url, voucher_name, attachments,
     }: {
       service_type: TripServiceType;
       service_data: TripServiceData;
       voucher_url?: string;
       voucher_name?: string;
+      attachments?: { url: string; name: string }[];
     }) => {
       if (!id) throw new Error("Trip ID is required");
       const currentServices = trip?.services || [];
@@ -246,6 +248,7 @@ export function useTrip(id: string | undefined) {
           service_data: service_data as any,
           voucher_url: voucher_url || null,
           voucher_name: voucher_name || null,
+          attachments: (attachments || []) as any,
           order_index: nextOrderIndex,
         })
         .select()
@@ -276,16 +279,18 @@ export function useTrip(id: string | undefined) {
 
   const updateServiceMutation = useMutation({
     mutationFn: async ({
-      serviceId, service_data, voucher_url, voucher_name,
+      serviceId, service_data, voucher_url, voucher_name, attachments,
     }: {
       serviceId: string;
       service_data: TripServiceData;
       voucher_url?: string | null;
       voucher_name?: string | null;
+      attachments?: { url: string; name: string }[];
     }) => {
       const updateData: any = { service_data: service_data as any };
       if (voucher_url !== undefined) updateData.voucher_url = voucher_url;
       if (voucher_name !== undefined) updateData.voucher_name = voucher_name;
+      if (attachments !== undefined) updateData.attachments = attachments;
 
       const { error } = await supabase.from("trip_services").update(updateData).eq("id", serviceId);
       if (error) throw error;

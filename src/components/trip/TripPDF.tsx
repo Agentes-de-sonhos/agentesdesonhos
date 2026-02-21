@@ -291,16 +291,18 @@ export function generateTripPDF(trip: Trip, profile?: AgentProfile | null) {
     
     const servicesItems = services.map((service) => {
       const details = getServiceDetails(service);
-      const voucherLink = service.voucher_url 
-        ? `<a href="${service.voucher_url}" target="_blank" style="color: #0f766e; text-decoration: none; font-size: 12px;">📎 ${service.voucher_name || 'Ver documento'}</a>` 
-        : '';
+      const attachments = service.attachments?.length > 0 
+        ? service.attachments.map((att: any) => `<a href="${att.url}" target="_blank" style="color: #0f766e; text-decoration: none; font-size: 12px;">📎 ${att.name}</a>`).join(' ')
+        : service.voucher_url 
+          ? `<a href="${service.voucher_url}" target="_blank" style="color: #0f766e; text-decoration: none; font-size: 12px;">📎 ${service.voucher_name || 'Ver documento'}</a>` 
+          : '';
       
       return `
         <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; background: white;">
           <div style="margin-bottom: 4px;">
             ${details.map((d) => `<p style="margin: 2px 0; font-size: 13px; color: #475569;">${d}</p>`).join("")}
           </div>
-          ${voucherLink}
+          ${attachments}
         </div>
       `;
     }).join("");

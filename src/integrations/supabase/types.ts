@@ -2534,6 +2534,7 @@ export type Database = {
       }
       trip_services: {
         Row: {
+          attachments: Json
           created_at: string
           id: string
           order_index: number
@@ -2545,6 +2546,7 @@ export type Database = {
           voucher_url: string | null
         }
         Insert: {
+          attachments?: Json
           created_at?: string
           id?: string
           order_index?: number
@@ -2556,6 +2558,7 @@ export type Database = {
           voucher_url?: string | null
         }
         Update: {
+          attachments?: Json
           created_at?: string
           id?: string
           order_index?: number
