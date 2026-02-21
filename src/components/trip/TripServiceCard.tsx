@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, FileText, 
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, FileText, TrainFront,
   Trash2, Download, ExternalLink, Pencil, Upload, X, RefreshCw
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,13 +16,13 @@ import type { TripService, TripServiceType } from "@/types/trip";
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
-  attraction: Ticket, insurance: Shield, cruise: Ship, other: FileText,
+  attraction: Ticket, insurance: Shield, cruise: Ship, train: TrainFront, other: FileText,
 };
 
 const SERVICE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", other: "Outros",
+  cruise: "Cruzeiro", train: "Trem", other: "Outros",
 };
 
 function formatDate(dateStr: string) {
@@ -44,6 +44,7 @@ function getServiceDescription(service: TripService): string {
     case "attraction": return `${data.name} (${data.quantity}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
     case "cruise": return `${data.ship_name} - ${data.route}`;
+    case "train": return `${data.origin_city} → ${data.destination_city}${data.train_company ? ` (${data.train_company})` : ''}`;
     case "other": return data.description;
     default: return "Serviço";
   }
@@ -58,6 +59,7 @@ function getServiceDates(service: TripService): string {
     case "attraction": return formatDate(data.date);
     case "insurance":
     case "cruise": return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
+    case "train": return data.travel_date ? `${formatDate(data.travel_date)}${data.departure_time ? ` • ${data.departure_time} → ${data.arrival_time || ''}` : ''}` : '';
     default: return "";
   }
 }

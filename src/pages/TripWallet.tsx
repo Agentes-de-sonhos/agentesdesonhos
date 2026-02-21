@@ -34,7 +34,7 @@ import type { TripServiceType, TripFormData, TripService } from "@/types/trip";
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", other: "Outros",
+  cruise: "Cruzeiro", train: "Trem", other: "Outros",
 };
 
 export default function TripWallet() {
