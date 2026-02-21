@@ -52,11 +52,27 @@ function getServiceDetails(service: TripService): string[] {
       if (data.required_documents) details.push(`Documentos: ${data.required_documents}`);
       if (data.boarding_notes || data.notes) details.push(`Obs: ${data.boarding_notes || data.notes}`);
       break;
-    case "hotel":
-      details.push(`${data.hotel_name} - ${data.city}`);
+    case "hotel": {
+      const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: 'Boutique', resort: 'Resort', pousada: 'Pousada' };
+      const roomMap: Record<string, string> = { standard: 'Standard', superior: 'Superior', deluxe: 'Deluxe', suite: 'Suíte', suite_junior: 'Suíte Júnior', presidencial: 'Presidencial', apartamento: 'Apartamento', villa: 'Villa', bangalo: 'Bangalô' };
+      const mealMap: Record<string, string> = { somente_hospedagem: 'Somente Hospedagem', cafe_manha: 'Café da Manhã', meia_pensao: 'Meia Pensão', pensao_completa: 'Pensão Completa', all_inclusive: 'All Inclusive' };
+      details.push(`${data.hotel_name}${data.hotel_category ? ` ${catMap[data.hotel_category] || data.hotel_category}` : ''}`);
+      details.push(`${data.city}${data.country ? `, ${data.country}` : ''}`);
       details.push(`Check-in: ${formatDate(data.check_in)} | Check-out: ${formatDate(data.check_out)}`);
+      if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);
+      if (data.room_type) details.push(`Acomodação: ${roomMap[data.room_type] || data.room_type}`);
+      if (data.bed_type) details.push(`Cama: ${data.bed_type}`);
+      if (data.meal_plan) details.push(`Regime: ${mealMap[data.meal_plan] || data.meal_plan}`);
+      if (data.checkin_time) details.push(`Horário check-in: ${data.checkin_time}`);
+      if (data.checkout_time) details.push(`Horário check-out: ${data.checkout_time}`);
+      if (data.address) details.push(`Endereço: ${data.address}`);
+      if (data.hotel_phone) details.push(`Telefone: ${data.hotel_phone}`);
+      if (data.guests?.length > 0) details.push(`Hóspedes: ${data.guests.map((g: any) => g.name).join(', ')}`);
+      if (data.cancellation_policy) details.push(`Cancelamento: ${data.cancellation_policy}`);
+      if (data.mandatory_fees) details.push(`Taxas no destino: ${data.mandatory_fees}`);
       if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
+    }
     case "car_rental":
       if (data.rental_company) details.push(`Locadora: ${data.rental_company}`);
       if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);

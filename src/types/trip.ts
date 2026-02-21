@@ -95,11 +95,75 @@ export interface TripFlightData {
   notes: string;
 }
 
+export interface TripHotelGuest {
+  name: string;
+  age: string;
+  notes: string;
+}
+
 export interface TripHotelData {
+  // Main info
   hotel_name: string;
+  hotel_category: string;
   city: string;
+  country: string;
   check_in: string;
   check_out: string;
+  room_type: string;
+  reservation_status: 'confirmada' | 'emitida' | 'pre_reserva' | '';
+  reservation_code: string;
+  // Check-in details
+  checkin_time: string;
+  early_checkin: string;
+  checkin_holder: string;
+  checkin_instructions: string;
+  late_arrival_policy: string;
+  // Check-out details
+  checkout_time: string;
+  late_checkout: string;
+  late_checkout_fee: string;
+  checkout_instructions: string;
+  checkout_procedure: string;
+  // Room details
+  bed_type: string;
+  guest_count: string;
+  room_view: string;
+  meal_plan: string;
+  cleaning_policy: string;
+  amenities: string;
+  // Location & Contact
+  address: string;
+  hotel_phone: string;
+  hotel_email: string;
+  hotel_website: string;
+  maps_url: string;
+  // Food & Beverage
+  breakfast_hours: string;
+  restaurants_included: string;
+  food_notes: string;
+  all_inclusive_rules: string;
+  // What's included
+  breakfast_included: string;
+  wifi_included: string;
+  taxes_included: string;
+  resort_fee: string;
+  parking_included: string;
+  transfer_included: string;
+  other_inclusions: string;
+  // Policies
+  cancellation_policy: string;
+  change_policy: string;
+  children_policy: string;
+  pet_policy: string;
+  mandatory_fees: string;
+  hotel_deposit: string;
+  hotel_deposit_method: string;
+  // Guests
+  guests: TripHotelGuest[];
+  special_requests: string;
+  // Agency notes
+  agency_notes: string;
+  // Legacy compat
   notes: string;
 }
 

@@ -45,7 +45,10 @@ function getServiceDescription(service: TripService): string {
       const segInfo = segs > 1 ? ` (${segs} trechos)` : '';
       return `${origin} → ${dest} (${airline})${segInfo}`;
     }
-    case "hotel": return `${data.hotel_name} - ${data.city}`;
+    case "hotel": {
+      const cat = data.hotel_category ? (data.hotel_category === '3' ? '⭐⭐⭐' : data.hotel_category === '4' ? '⭐⭐⭐⭐' : data.hotel_category === '5' ? '⭐⭐⭐⭐⭐' : data.hotel_category) : '';
+      return `${data.hotel_name}${cat ? ` ${cat}` : ''} - ${data.city}${data.country ? `, ${data.country}` : ''}`;
+    }
     case "car_rental": {
       const company = data.rental_company || '';
       const city1 = data.pickup_city || data.pickup_location || '';
@@ -74,7 +77,16 @@ function getServiceDates(service: TripService): string {
       }
       return data.departure_date ? `${formatDate(data.departure_date)} - ${formatDate(data.return_date)}` : '';
     }
-    case "hotel": return `${formatDate(data.check_in)} - ${formatDate(data.check_out)}`;
+    case "hotel": {
+      const nights = (() => {
+        try {
+          const [sy,sm,sd] = data.check_in.split('-').map(Number);
+          const [ey,em,ed] = data.check_out.split('-').map(Number);
+          return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24));
+        } catch { return null; }
+      })();
+      return `${formatDate(data.check_in)} - ${formatDate(data.check_out)}${nights ? ` (${nights} noites)` : ''}`;
+    }
     case "car_rental": {
       if (data.pickup_date && data.dropoff_date) {
         const days = (() => {
