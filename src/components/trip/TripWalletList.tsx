@@ -161,6 +161,9 @@ export function TripWalletList() {
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/ferramentas-ia/trip-wallet/${trip.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/ferramentas-ia/trip-wallet/${trip.id}?edit=true`)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCopyLink(trip)}>
                         <Copy className="h-4 w-4" />
                       </Button>
