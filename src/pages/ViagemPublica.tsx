@@ -57,8 +57,29 @@ function getServiceDetails(service: TripService): { title: string; details: stri
     }
     case "hotel":
       return { title: `${data.hotel_name}`, details: [`${data.city}`, ...(data.notes ? [`Obs: ${data.notes}`] : [])], dates: `${formatDate(data.check_in)} - ${formatDate(data.check_out)}` };
-    case "car_rental":
-      return { title: data.car_type, details: [`Retirada: ${data.pickup_location}`, `Devolução: ${data.dropoff_location}`] };
+    case "car_rental": {
+      const carDetails: string[] = [];
+      const company = data.rental_company || '';
+      if (company) carDetails.push(`Locadora: ${company}`);
+      if (data.reservation_code) carDetails.push(`Reserva: ${data.reservation_code}`);
+      const statusMap: Record<string, string> = { confirmada: '✅ Confirmada', emitida: '📄 Emitida', a_retirar: '🚗 A Retirar' };
+      if (data.reservation_status) carDetails.push(`Status: ${statusMap[data.reservation_status] || data.reservation_status}`);
+      if (data.car_model) carDetails.push(`Modelo: ${data.car_model}`);
+      if (data.transmission) carDetails.push(`Transmissão: ${data.transmission === 'automatico' ? 'Automático' : 'Manual'}`);
+      if (data.pickup_location) carDetails.push(`Retirada: ${data.pickup_location}`);
+      if (data.dropoff_location && data.dropoff_location !== data.pickup_location) carDetails.push(`Devolução: ${data.dropoff_location}`);
+      const catLabels: Record<string, string> = { economico: 'Econômico', compacto: 'Compacto', intermediario: 'Intermediário', suv: 'SUV', premium: 'Premium', luxo: 'Luxo', van: 'Van' };
+      const catLabel = catLabels[data.car_type] || data.car_type || '';
+      const pickupCity = data.pickup_city || data.pickup_location || '';
+      const dropoffCity = data.dropoff_city || data.dropoff_location || '';
+      const titleStr = `${pickupCity}${dropoffCity && dropoffCity !== pickupCity ? ` → ${dropoffCity}` : ''}`;
+      let datesStr: string | undefined;
+      if (data.pickup_date && data.dropoff_date) {
+        const days = (() => { try { const [sy,sm,sd] = data.pickup_date.split('-').map(Number); const [ey,em,ed] = data.dropoff_date.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
+        datesStr = `${formatDate(data.pickup_date)} - ${formatDate(data.dropoff_date)}${days ? ` (${days} dias)` : ''}`;
+      }
+      return { title: `${catLabel}${catLabel && titleStr ? ' • ' : ''}${titleStr}`, details: carDetails, dates: datesStr };
+    }
     case "transfer":
       return { title: `${data.transfer_type === "arrival" ? "Chegada" : "Saída"}`, details: [data.location], dates: formatDate(data.date) };
     case "attraction":
@@ -184,6 +205,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
   const isCruise = service.service_type === 'cruise';
   const isFlight = service.service_type === 'flight';
+  const isCarRental = service.service_type === 'car_rental';
 
   return (
     <Card className="border-border/50">
@@ -358,6 +380,114 @@ function PublicServiceCard({ service }: { service: TripService }) {
                 🚢 Site do navio
               </a>
             )}
+          </div>
+        )}
+
+        {/* Car Rental - Pickup & Dropoff */}
+        {isCarRental && (data.pickup_date || data.pickup_time || data.pickup_address) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📍 Retirada</p>
+            {data.pickup_address && <p className="text-xs text-muted-foreground">{data.pickup_address}</p>}
+            {data.pickup_city && <p className="text-xs text-muted-foreground">{data.pickup_city}{data.pickup_country ? `, ${data.pickup_country}` : ''}</p>}
+            {data.pickup_date && <p className="text-xs text-muted-foreground">📅 {formatDate(data.pickup_date)}{data.pickup_time ? ` às ${data.pickup_time}` : ''}</p>}
+            {data.pickup_terminal && <p className="text-xs text-muted-foreground">Terminal: {data.pickup_terminal}</p>}
+            {data.pickup_phone && <p className="text-xs text-muted-foreground">📞 {data.pickup_phone}</p>}
+            {data.pickup_instructions && <p className="text-xs text-muted-foreground italic">{data.pickup_instructions}</p>}
+            {data.pickup_maps_url && (
+              <a href={data.pickup_maps_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7 mt-1">
+                  <MapPin className="h-3 w-3 mr-1" /> Ver no mapa
+                </Button>
+              </a>
+            )}
+          </div>
+        )}
+
+        {isCarRental && (data.dropoff_date || data.dropoff_address) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🔁 Devolução</p>
+            {data.dropoff_address && <p className="text-xs text-muted-foreground">{data.dropoff_address}</p>}
+            {data.dropoff_city && <p className="text-xs text-muted-foreground">{data.dropoff_city}{data.dropoff_country ? `, ${data.dropoff_country}` : ''}</p>}
+            {data.dropoff_date && <p className="text-xs text-muted-foreground">📅 {formatDate(data.dropoff_date)}{data.dropoff_time ? ` às ${data.dropoff_time}` : ''}</p>}
+            {data.dropoff_instructions && <p className="text-xs text-muted-foreground italic">{data.dropoff_instructions}</p>}
+            {data.dropoff_late_policy && <p className="text-xs text-muted-foreground">⏰ {data.dropoff_late_policy}</p>}
+          </div>
+        )}
+
+        {/* Car Rental - Vehicle details */}
+        {isCarRental && (data.car_model || data.doors || data.passenger_capacity) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🚘 Veículo</p>
+            {data.car_model && <p className="text-xs text-muted-foreground">Modelo: {data.car_model}</p>}
+            {data.transmission && <p className="text-xs text-muted-foreground">Transmissão: {data.transmission === 'automatico' ? 'Automático' : 'Manual'}</p>}
+            {data.fuel_type && <p className="text-xs text-muted-foreground">Combustível: {data.fuel_type}</p>}
+            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
+              {data.doors && <span>🚪 {data.doors} portas</span>}
+              {data.passenger_capacity && <span>👤 {data.passenger_capacity} passageiros</span>}
+              {data.luggage_capacity && <span>🧳 {data.luggage_capacity}</span>}
+            </div>
+            {data.plate && <p className="text-xs text-muted-foreground">Placa: {data.plate}</p>}
+          </div>
+        )}
+
+        {/* Car Rental - Insurance */}
+        {isCarRental && (data.basic_insurance || data.full_insurance || data.deductible) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🛡️ Seguros</p>
+            {data.basic_insurance && <p className="text-xs text-muted-foreground">Básico: {data.basic_insurance}</p>}
+            {data.full_insurance && <p className="text-xs text-muted-foreground">Total (CDW/LDW): {data.full_insurance}</p>}
+            {data.third_party_protection && <p className="text-xs text-muted-foreground">Terceiros: {data.third_party_protection}</p>}
+            {data.theft_protection && <p className="text-xs text-muted-foreground">Roubo: {data.theft_protection}</p>}
+            {data.damage_protection && <p className="text-xs text-muted-foreground">Danos: {data.damage_protection}</p>}
+            {data.deductible && <p className="text-xs text-muted-foreground font-medium">Franquia: {data.deductible}</p>}
+            {data.insurance_notes && <p className="text-xs text-muted-foreground italic">{data.insurance_notes}</p>}
+          </div>
+        )}
+
+        {/* Car Rental - Deposit alert */}
+        {isCarRental && data.deposit_amount && (
+          <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">💳 Caução e Pagamento</p>
+            <p className="text-xs text-amber-600 dark:text-amber-300">Caução: {data.deposit_amount}</p>
+            {data.deposit_method && <p className="text-xs text-amber-600 dark:text-amber-300">Forma: {data.deposit_method}</p>}
+            {data.card_in_driver_name && <p className="text-xs text-amber-600 dark:text-amber-300 font-medium">⚠️ Cartão no nome do condutor: {data.card_in_driver_name}</p>}
+            {data.payment_status && <p className="text-xs text-amber-600 dark:text-amber-300">Pagamento: {data.payment_status}</p>}
+          </div>
+        )}
+
+        {/* Car Rental - Drivers */}
+        {isCarRental && data.drivers?.length > 0 && (
+          <div className="mt-2">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👤 Condutores</p>
+            {data.drivers.map((d: any, i: number) => (
+              <p key={i} className="text-xs text-muted-foreground">
+                {i === 0 ? '🔑 ' : '👤 '}{d.name}{d.document ? ` • ${d.document}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Car Rental - Fuel Policy */}
+        {isCarRental && data.fuel_policy && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">⛽ Combustível</p>
+            <p className="text-xs text-muted-foreground">
+              Política: {data.fuel_policy === 'cheio_cheio' ? 'Cheio-Cheio' : data.fuel_policy === 'cheio_vazio' ? 'Cheio-Vazio' : data.fuel_policy}
+            </p>
+            {data.fuel_penalty && <p className="text-xs text-muted-foreground">Penalidade: {data.fuel_penalty}</p>}
+            {data.fuel_notes && <p className="text-xs text-muted-foreground italic">{data.fuel_notes}</p>}
+          </div>
+        )}
+
+        {/* Car Rental - Important info */}
+        {isCarRental && (data.required_documents || data.international_permit || data.traffic_rules) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">⚠️ Orientações</p>
+            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
+            {data.minimum_age && <p className="text-xs text-muted-foreground">Idade mínima: {data.minimum_age}</p>}
+            {data.international_permit && <p className="text-xs text-muted-foreground">PID (Permissão Internacional): {data.international_permit}</p>}
+            {data.traffic_rules && <p className="text-xs text-muted-foreground italic">{data.traffic_rules}</p>}
+            {data.emergency_contact && <p className="text-xs text-muted-foreground">📞 Emergência: {data.emergency_contact}</p>}
           </div>
         )}
 

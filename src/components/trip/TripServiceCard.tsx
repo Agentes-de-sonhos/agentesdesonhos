@@ -46,7 +46,13 @@ function getServiceDescription(service: TripService): string {
       return `${origin} → ${dest} (${airline})${segInfo}`;
     }
     case "hotel": return `${data.hotel_name} - ${data.city}`;
-    case "car_rental": return `${data.car_type} - ${data.pickup_location}`;
+    case "car_rental": {
+      const company = data.rental_company || '';
+      const city1 = data.pickup_city || data.pickup_location || '';
+      const city2 = data.dropoff_city || data.dropoff_location || '';
+      const model = data.car_model || data.car_type || '';
+      return `${company ? company + ' • ' : ''}${model} — ${city1}${city2 && city2 !== city1 ? ` → ${city2}` : ''}`;
+    }
     case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
     case "attraction": return `${data.name} (${data.quantity}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
@@ -69,6 +75,19 @@ function getServiceDates(service: TripService): string {
       return data.departure_date ? `${formatDate(data.departure_date)} - ${formatDate(data.return_date)}` : '';
     }
     case "hotel": return `${formatDate(data.check_in)} - ${formatDate(data.check_out)}`;
+    case "car_rental": {
+      if (data.pickup_date && data.dropoff_date) {
+        const days = (() => {
+          try {
+            const [sy,sm,sd] = data.pickup_date.split('-').map(Number);
+            const [ey,em,ed] = data.dropoff_date.split('-').map(Number);
+            return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24));
+          } catch { return null; }
+        })();
+        return `${formatDate(data.pickup_date)} - ${formatDate(data.dropoff_date)}${days ? ` (${days} dias)` : ''}`;
+      }
+      return '';
+    }
     case "transfer":
     case "attraction": return formatDate(data.date);
     case "insurance": return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
