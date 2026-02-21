@@ -126,15 +126,7 @@ const App = () => (
               path="/ferramentas-ia/trip-wallet"
               element={
                 <ProtectedRoute>
-                  <TripWallet key="trip-wallet-list" />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ferramentas-ia/trip-wallet/nova"
-              element={
-                <ProtectedRoute>
-                  <TripWallet key="trip-wallet-nova" />
+                  <TripWallet />
                 </ProtectedRoute>
               }
             />
@@ -142,7 +134,7 @@ const App = () => (
               path="/ferramentas-ia/trip-wallet/:id"
               element={
                 <ProtectedRoute>
-                  <TripWallet key="trip-wallet-detail" />
+                  <TripWallet />
                 </ProtectedRoute>
               }
             />
