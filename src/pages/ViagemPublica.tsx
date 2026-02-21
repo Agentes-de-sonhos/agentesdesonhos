@@ -1161,17 +1161,36 @@ function PublicServiceCard({ service }: { service: TripService }) {
             )}
           </div>
         )}
-        {service.voucher_url && (
-          <a
-            href={service.voucher_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 mt-3 text-xs text-primary font-medium hover:underline"
-          >
-            <Download className="h-3.5 w-3.5" />
-            {service.voucher_name || "Baixar documento"}
-            <ExternalLink className="h-3 w-3" />
-          </a>
+        {/* Attachments */}
+        {(service.attachments?.length > 0 || service.voucher_url) && (
+          <div className="mt-3 space-y-1">
+            {service.attachments?.length > 0 ? (
+              service.attachments.map((att: any, idx: number) => (
+                <a
+                  key={idx}
+                  href={att.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline mr-3"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {att.name}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              ))
+            ) : service.voucher_url ? (
+              <a
+                href={service.voucher_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+              >
+                <Download className="h-3.5 w-3.5" />
+                {service.voucher_name || "Baixar documento"}
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            ) : null}
+          </div>
         )}
       </CardContent>
     </Card>

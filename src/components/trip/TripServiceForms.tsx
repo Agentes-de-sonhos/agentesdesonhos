@@ -34,42 +34,60 @@ import type { TripServiceType } from "@/types/trip";
 
 interface TripServiceFormProps {
   serviceType: TripServiceType;
-  onSubmit: (data: any, file?: File) => void;
+  onSubmit: (data: any, files?: File[]) => void;
   onCancel: () => void;
   isLoading?: boolean;
   defaultValues?: any;
   isEditing?: boolean;
 }
 
-interface VoucherUploadProps {
-  file: File | null;
-  setFile: (file: File | null) => void;
+interface MultiFileUploadProps {
+  files: File[];
+  setFiles: (files: File[]) => void;
   label?: string;
 }
 
-function VoucherUpload({ file, setFile, label = "Voucher/Documento" }: VoucherUploadProps) {
+function MultiFileUpload({ files, setFiles, label = "Documentos / Vouchers" }: MultiFileUploadProps) {
+  const handleAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files || []);
+    if (newFiles.length > 0) {
+      setFiles([...files, ...newFiles]);
+    }
+    e.target.value = '';
+  };
+
+  const handleRemove = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">{label}</label>
-      {file ? (
-        <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-          <span className="text-sm truncate flex-1">{file.name}</span>
-          <Button type="button" variant="ghost" size="icon" onClick={() => setFile(null)}>
-            <X className="h-4 w-4" />
-          </Button>
+      {files.length > 0 && (
+        <div className="space-y-1">
+          {files.map((file, index) => (
+            <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+              <span className="text-sm truncate flex-1">{file.name}</span>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(index)}>
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
         </div>
-      ) : (
-        <label className="flex items-center justify-center gap-2 p-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
-          <Upload className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Clique para enviar</span>
-          <input
-            type="file"
-            className="hidden"
-            accept=".pdf,.jpg,.jpeg,.png,.webp"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-          />
-        </label>
       )}
+      <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+        <Upload className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">
+          {files.length > 0 ? "Adicionar mais arquivos" : "Clique para enviar arquivos"}
+        </span>
+        <input
+          type="file"
+          multiple
+          className="hidden"
+          accept=".pdf,.jpg,.jpeg,.png,.webp"
+          onChange={handleAdd}
+        />
+      </label>
     </div>
   );
 }
@@ -119,7 +137,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 });
 
 function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
   );
@@ -199,7 +217,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         return_date: lastSeg?.flight_date || firstSeg?.flight_date || "",
         notes: values.boarding_notes || "",
       },
-      file || undefined
+      files.length > 0 ? files : undefined
     );
   };
 
@@ -515,7 +533,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="E-ticket / Cartão de Embarque" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="E-ticket / Cartão de Embarque" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -593,7 +611,7 @@ const emptyGuest = (): HotelGuestInput => ({ name: '', age: '', notes: '' });
 
 function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [guests, setGuests] = useState<HotelGuestInput[]>(
     defaultValues?.guests?.length > 0 ? defaultValues.guests : []
   );
@@ -670,7 +688,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         check_out: format(values.check_out, "yyyy-MM-dd"),
         guests,
       },
-      file || undefined
+      files.length > 0 ? files : undefined
     );
   };
 
@@ -1213,7 +1231,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Voucher / Confirmação do Hotel" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Hotel" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -1292,7 +1310,7 @@ interface CarDriverInput {
 const emptyDriver = (): CarDriverInput => ({ name: '', document: '', age: '', notes: '' });
 
 function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [drivers, setDrivers] = useState<CarDriverInput[]>(
     defaultValues?.drivers?.length > 0 ? defaultValues.drivers : [emptyDriver()]
   );
@@ -1359,7 +1377,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   });
 
   const handleSubmit = (values: z.infer<typeof carRentalSchema>) => {
-    onSubmit({ ...values, drivers }, file || undefined);
+    onSubmit({ ...values, drivers }, files.length > 0 ? files : undefined);
   };
 
   const statusLabels: Record<string, string> = { confirmada: 'Confirmada', emitida: 'Emitida', a_retirar: 'A Retirar' };
@@ -1675,7 +1693,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Informações adicionais..." rows={3} {...field} /></FormControl></FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Voucher / Contrato da Locação" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Contrato da Locação" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -1758,7 +1776,7 @@ const emptyTransferPassenger = (): TransferPassengerInput => ({
 });
 
 function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<TransferPassengerInput[]>(
     defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
   );
@@ -1826,7 +1844,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
         // Legacy compat
         location: `${values.origin_location} → ${values.destination_location}`,
       },
-      file || undefined
+      files.length > 0 ? files : undefined
     );
   };
 
@@ -2210,7 +2228,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Notas gerais..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Voucher / Confirmação do Transfer" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Transfer" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -2268,7 +2286,7 @@ interface AttractionPassengerInput {
 
 function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
   const [newPax, setNewPax] = useState<AttractionPassengerInput>({ name: '', ticket_type: 'adulto', document: '', notes: '' });
 
@@ -2354,7 +2372,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         agency_notes: values.agency_notes || "",
         notes: values.agency_notes || "",
       },
-      file || undefined
+      files.length > 0 ? files : undefined
     );
   };
 
@@ -2747,7 +2765,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Voucher / Ingresso (PDF ou Imagem)" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Ingresso (PDF ou Imagem)" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -2811,7 +2829,7 @@ const emptyInsured = (): InsuredPersonInput => ({ name: '', birth_date: '', docu
 
 function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [insuredPersons, setInsuredPersons] = useState<InsuredPersonInput[]>(
     defaultValues?.insured_persons?.length > 0 ? defaultValues.insured_persons : []
   );
@@ -2872,7 +2890,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         end_date: format(values.end_date, "yyyy-MM-dd"),
         insured_persons: insuredPersons,
       },
-      file || undefined
+      files.length > 0 ? files : undefined
     );
   };
 
@@ -3244,7 +3262,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Apólice / Voucher do Seguro" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="Apólice / Voucher do Seguro" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -3293,7 +3311,7 @@ const cruiseSchema = z.object({
 
 function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; birth_date?: string; document?: string; notes?: string }[]>(
     defaultValues?.passengers || []
   );
@@ -3396,7 +3414,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         voltage: values.voltage || "",
         ship_website: values.ship_website || "",
       },
-      file || undefined
+      files.length > 0 ? files : undefined
     );
   };
 
@@ -3820,7 +3838,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           )} />
         </div>
 
-        <VoucherUpload file={file} setFile={setFile} label="Voucher / Boarding Pass / Confirmação" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Boarding Pass / Confirmação" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -3887,7 +3905,7 @@ const OTHER_SERVICE_TYPES = [
 
 function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
@@ -3976,7 +3994,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         description: values.description || "",
         notes: values.description || "",
       },
-      file || undefined
+      files.length > 0 ? files : undefined
     );
   };
 
@@ -4372,7 +4390,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        <VoucherUpload file={file} setFile={setFile} label="Comprovante / Voucher / Documento" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="Comprovante / Voucher / Documento" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -4407,7 +4425,7 @@ const trainSchema = z.object({
 
 function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; notes?: string }[]>(
     defaultValues?.passengers || []
   );
@@ -4466,7 +4484,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         origin_maps_url: values.origin_maps_url || "",
         destination_maps_url: values.destination_maps_url || "",
       },
-      file || undefined
+      files.length > 0 ? files : undefined
     );
   };
 
@@ -4661,7 +4679,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        <VoucherUpload file={file} setFile={setFile} label="Bilhete/Voucher/QR Code" />
+        <MultiFileUpload files={files} setFiles={setFiles} label="Bilhete/Voucher/QR Code" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>

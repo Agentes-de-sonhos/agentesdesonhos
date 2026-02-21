@@ -1,3 +1,8 @@
+export interface TripAttachment {
+  url: string;
+  name: string;
+}
+
 export interface Trip {
   id: string;
   user_id: string;
@@ -20,6 +25,7 @@ export interface TripService {
   service_data: TripServiceData;
   voucher_url: string | null;
   voucher_name: string | null;
+  attachments: TripAttachment[];
   order_index: number;
   created_at: string;
   updated_at: string;

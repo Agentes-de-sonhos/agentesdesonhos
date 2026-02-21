@@ -82,18 +82,24 @@ export default function TripWallet() {
     setIsEditingTrip(false);
   };
 
-  const handleAddService = async (serviceData: any, file?: File) => {
+  const handleAddService = async (serviceData: any, files?: File[]) => {
     if (!selectedServiceType) return;
     try {
       setIsUploading(true);
-      let voucher_url: string | undefined;
-      let voucher_name: string | undefined;
-      if (file) {
-        const result = await uploadVoucher(file);
-        voucher_url = result.url;
-        voucher_name = result.name;
+      const attachments: { url: string; name: string }[] = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const result = await uploadVoucher(file);
+          attachments.push(result);
+        }
       }
-      await addService({ service_type: selectedServiceType, service_data: serviceData, voucher_url, voucher_name });
+      await addService({ 
+        service_type: selectedServiceType, 
+        service_data: serviceData, 
+        voucher_url: attachments[0]?.url, 
+        voucher_name: attachments[0]?.name,
+        attachments,
+      });
       setSelectedServiceType(null);
     } finally {
       setIsUploading(false);
@@ -105,27 +111,59 @@ export default function TripWallet() {
     setSelectedServiceType(service.service_type);
   };
 
-  const handleUpdateService = async (serviceData: any, file?: File) => {
+  const handleUpdateService = async (serviceData: any, files?: File[]) => {
     if (!editingService) return;
     try {
       setIsUploading(true);
-      let voucher_url: string | null | undefined = undefined;
-      let voucher_name: string | null | undefined = undefined;
-      if (file) {
-        const result = await uploadVoucher(file);
-        voucher_url = result.url;
-        voucher_name = result.name;
+      let newAttachments: { url: string; name: string }[] | undefined;
+      if (files && files.length > 0) {
+        newAttachments = [];
+        for (const file of files) {
+          const result = await uploadVoucher(file);
+          newAttachments.push(result);
+        }
       }
       await updateService({
         serviceId: editingService.id,
         service_data: serviceData,
-        ...(voucher_url !== undefined ? { voucher_url, voucher_name } : {}),
+        ...(newAttachments ? { 
+          voucher_url: newAttachments[0]?.url, 
+          voucher_name: newAttachments[0]?.name,
+          attachments: [...(editingService.attachments || []), ...newAttachments],
+        } : {}),
       });
       setEditingService(null);
       setSelectedServiceType(null);
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleAddAttachment = async (serviceId: string, file: File) => {
+    try {
+      setIsUploading(true);
+      const result = await uploadVoucher(file);
+      const service = trip?.services?.find(s => s.id === serviceId);
+      const currentAttachments = service?.attachments || [];
+      await updateService({
+        serviceId,
+        service_data: service?.service_data!,
+        attachments: [...currentAttachments, result],
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveAttachment = async (serviceId: string, index: number) => {
+    const service = trip?.services?.find(s => s.id === serviceId);
+    if (!service) return;
+    const newAttachments = (service.attachments || []).filter((_, i) => i !== index);
+    await updateService({
+      serviceId,
+      service_data: service.service_data,
+      attachments: newAttachments,
+    });
   };
 
   const handleCancelServiceForm = () => {
@@ -360,6 +398,8 @@ export default function TripWallet() {
                       onEditService={handleEditService}
                       onReplaceVoucher={handleReplaceVoucher}
                       onRemoveVoucher={removeVoucher}
+                      onAddAttachment={handleAddAttachment}
+                      onRemoveAttachment={handleRemoveAttachment}
                       groupByType={true}
                     />
                   </>
