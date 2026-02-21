@@ -23,7 +23,7 @@ const SERVICE_ICONS: Record<TripServiceType, any> = {
 const SERVICE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagens", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", train: "Trem", other: "Outros",
+  cruise: "Cruzeiro", train: "Trem", other: "Outros Serviços",
 };
 
 const TAB_ORDER: TripServiceType[] = ["flight", "train", "hotel", "attraction", "insurance", "car_rental", "transfer", "cruise", "other"];
@@ -176,8 +176,34 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       if (data.boarding_notes) details.push(`📋 ${data.boarding_notes}`);
       return { title: `${data.origin_city} → ${data.destination_city}`, details, dates: data.travel_date ? `${formatDate(data.travel_date)}${time ? ` • ${time}` : ''}` : undefined };
     }
-    case "other":
-      return { title: "Serviço", details: [data.description] };
+    case "other": {
+      const otherTypeMap: Record<string, string> = { restaurante: '🍽️ Restaurante', guia_turistico: '🧭 Guia Turístico', chip_internet: '📶 Chip/Internet', experiencia: '✨ Experiência', evento: '📅 Evento', spa_wellness: '🧘 Spa/Bem-estar', servico_vip: '👑 Serviço VIP', concierge: '🛎️ Concierge', personalizado: '⭐ Personalizado' };
+      const statusMap: Record<string, string> = { confirmado: '✅ Confirmado', agendado: '📅 Agendado', opcional: '🔄 Opcional' };
+      const otherDetails: string[] = [];
+      if (data.other_service_type) otherDetails.push(`Tipo: ${otherTypeMap[data.other_service_type] || data.custom_type_name || data.other_service_type}`);
+      if (data.city) otherDetails.push(`Local: ${data.city}${data.country ? `, ${data.country}` : ''}`);
+      if (data.status) otherDetails.push(`Status: ${statusMap[data.status] || data.status}`);
+      if (data.date) otherDetails.push(`Data: ${formatDate(data.date)}${data.time ? ` às ${data.time}` : ''}`);
+      if (data.duration) otherDetails.push(`Duração: ${data.duration}`);
+      if (data.location_name) otherDetails.push(`Local: ${data.location_name}`);
+      if (data.address) otherDetails.push(`Endereço: ${data.address}`);
+      if (data.reservation_code) otherDetails.push(`Reserva: ${data.reservation_code}`);
+      if (data.contact_company) otherDetails.push(`Empresa: ${data.contact_company}`);
+      if (data.contact_name) otherDetails.push(`Contato: ${data.contact_name}`);
+      if (data.contact_phone) otherDetails.push(`Telefone: ${data.contact_phone}`);
+      // Chip specific
+      if (data.chip_operator) otherDetails.push(`Operadora: ${data.chip_operator}`);
+      if (data.chip_type) otherDetails.push(`Tipo: ${data.chip_type === 'esim' ? 'eSIM' : 'Chip Físico'}`);
+      if (data.chip_activation_instructions) otherDetails.push(`Ativação: ${data.chip_activation_instructions}`);
+      // Guide specific
+      if (data.guide_name) otherDetails.push(`Guia: ${data.guide_name}`);
+      if (data.guide_language) otherDetails.push(`Idioma: ${data.guide_language}`);
+      if (data.guide_meeting_point) otherDetails.push(`Ponto de encontro: ${data.guide_meeting_point}`);
+      if (data.description) otherDetails.push(data.description);
+      if (data.agency_tips) otherDetails.push(`Dicas: ${data.agency_tips}`);
+      if (data.agency_notes) otherDetails.push(`Obs: ${data.agency_notes}`);
+      return { title: data.service_name || 'Serviço', details: otherDetails, dates: data.date ? formatDate(data.date) : undefined };
+    }
     default:
       return { title: "Serviço", details: [] };
   }
@@ -266,6 +292,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isTransfer = service.service_type === 'transfer';
   const isAttraction = service.service_type === 'attraction';
   const isInsurance = service.service_type === 'insurance';
+  const isOther = service.service_type === 'other';
 
   return (
     <Card className="border-border/50">
@@ -1007,6 +1034,115 @@ function PublicServiceCard({ service }: { service: TripService }) {
             <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>
           </div>
         )}
+
+        {/* Other Service - Location & Contact */}
+        {isOther && (data.location_name || data.address || data.maps_url) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📍 Localização</p>
+            {data.location_name && <p className="text-xs text-muted-foreground font-medium">{data.location_name}</p>}
+            {data.address && <p className="text-xs text-muted-foreground">{data.address}</p>}
+            {data.meeting_point && <p className="text-xs text-muted-foreground">Ponto de encontro: {data.meeting_point}</p>}
+            {data.how_to_arrive && <p className="text-xs text-muted-foreground italic">{data.how_to_arrive}</p>}
+            {data.maps_url && (
+              <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7 mt-1">
+                  <MapPin className="h-3 w-3 mr-1" /> Abrir no mapa
+                </Button>
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Other Service - Contact */}
+        {isOther && (data.contact_name || data.contact_phone || data.contact_whatsapp) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-2">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">👤 Contato</p>
+            {data.contact_name && <p className="text-xs text-muted-foreground">{data.contact_name}{data.contact_company ? ` — ${data.contact_company}` : ''}</p>}
+            {data.contact_language && <p className="text-xs text-muted-foreground">🌐 {data.contact_language}</p>}
+            <div className="flex flex-wrap gap-2 mt-1">
+              {data.contact_phone && (
+                <a href={`tel:${data.contact_phone}`}>
+                  <Button variant="outline" size="sm" className="text-xs h-7">📞 Ligar</Button>
+                </a>
+              )}
+              {data.contact_whatsapp && (
+                <a href={`https://wa.me/${data.contact_whatsapp.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="text-xs h-7">💬 WhatsApp</Button>
+                </a>
+              )}
+              {data.contact_email && (
+                <a href={`mailto:${data.contact_email}`}>
+                  <Button variant="outline" size="sm" className="text-xs h-7">✉️ E-mail</Button>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Other - Chip / Internet */}
+        {isOther && data.other_service_type === 'chip_internet' && (data.chip_operator || data.chip_activation_instructions) && (
+          <div className="mt-2 p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary">📶 Chip / Internet</p>
+            {data.chip_operator && <p className="text-xs text-muted-foreground">Operadora: {data.chip_operator}</p>}
+            {data.chip_type && <p className="text-xs text-muted-foreground">Tipo: {data.chip_type === 'esim' ? 'eSIM (digital)' : 'Chip Físico'}</p>}
+            {data.chip_activation_instructions && (
+              <div className="mt-1">
+                <p className="text-xs font-medium text-foreground">📲 Instruções de Ativação:</p>
+                <p className="text-xs text-muted-foreground whitespace-pre-line">{data.chip_activation_instructions}</p>
+              </div>
+            )}
+            {data.chip_activation_url && (
+              <a href={data.chip_activation_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="default" size="sm" className="text-xs w-full mt-1">📲 Link de Ativação</Button>
+              </a>
+            )}
+            {data.chip_support && <p className="text-xs text-muted-foreground mt-1">Suporte: {data.chip_support}</p>}
+          </div>
+        )}
+
+        {/* Other - Guide */}
+        {isOther && data.other_service_type === 'guia_turistico' && (data.guide_name || data.guide_meeting_point) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🧭 Guia Turístico</p>
+            {data.guide_name && <p className="text-xs text-muted-foreground">Guia: {data.guide_name}</p>}
+            {data.guide_language && <p className="text-xs text-muted-foreground">Idioma: {data.guide_language}</p>}
+            {data.guide_tour_time && <p className="text-xs text-muted-foreground">Horário: {data.guide_tour_time}</p>}
+            {data.guide_tour_duration && <p className="text-xs text-muted-foreground">Duração: {data.guide_tour_duration}</p>}
+            {data.guide_meeting_point && <p className="text-xs text-muted-foreground">📍 Encontro: {data.guide_meeting_point}</p>}
+          </div>
+        )}
+
+        {/* Other - Agency Tips */}
+        {isOther && data.agency_tips && (
+          <div className="mt-2 p-3 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-xs font-semibold text-primary">🧠 Orientações do seu Agente</p>
+            <p className="text-xs text-foreground mt-1 whitespace-pre-line">{data.agency_tips}</p>
+          </div>
+        )}
+
+        {/* Other - Agency Contact */}
+        {isOther && (data.agency_contact || data.emergency_contact) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📞 Suporte</p>
+            {data.agency_contact && (
+              <a href={`https://wa.me/${data.agency_contact.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7 w-full">
+                  <MessageSquare className="h-3 w-3 mr-1" /> Falar com a agência
+                </Button>
+              </a>
+            )}
+            {data.emergency_contact && <p className="text-xs text-muted-foreground">🆘 Emergência: {data.emergency_contact}</p>}
+          </div>
+        )}
+
+        {/* Other - Notes */}
+        {isOther && data.agency_notes && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📝 Observações</p>
+            <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>
+          </div>
+        )}
+
         {isTrainWithMaps && (
           <div className="flex flex-wrap gap-2 mt-3">
             {data.origin_maps_url && (

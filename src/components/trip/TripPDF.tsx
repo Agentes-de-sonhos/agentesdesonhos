@@ -12,7 +12,7 @@ const SERVICE_LABELS: Record<TripServiceType, string> = {
   insurance: "Seguro Viagem",
   cruise: "Cruzeiro",
   train: "Trem",
-  other: "Outros",
+  other: "Outros Serviços",
 };
 
 function formatDate(dateStr: string) {
@@ -195,9 +195,29 @@ function getServiceDetails(service: TripService): string[] {
       if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
       if (data.boarding_notes) details.push(`Orientações: ${data.boarding_notes}`);
       break;
-    case "other":
-      details.push(data.description);
+    case "other": {
+      const otherTypeMap: Record<string, string> = { restaurante: 'Restaurante', guia_turistico: 'Guia Turístico', chip_internet: 'Chip/Internet', experiencia: 'Experiência', evento: 'Evento', spa_wellness: 'Spa/Bem-estar', servico_vip: 'Serviço VIP', concierge: 'Concierge', personalizado: 'Personalizado' };
+      const statusMap: Record<string, string> = { confirmado: 'Confirmado', agendado: 'Agendado', opcional: 'Opcional' };
+      if (data.service_name) details.push(`Serviço: ${data.service_name}`);
+      if (data.other_service_type) details.push(`Tipo: ${otherTypeMap[data.other_service_type] || data.custom_type_name || data.other_service_type}`);
+      if (data.city) details.push(`Local: ${data.city}${data.country ? `, ${data.country}` : ''}`);
+      if (data.date) details.push(`Data: ${formatDate(data.date)}${data.time ? ` às ${data.time}` : ''}`);
+      if (data.status) details.push(`Status: ${statusMap[data.status] || data.status}`);
+      if (data.duration) details.push(`Duração: ${data.duration}`);
+      if (data.location_name) details.push(`Local: ${data.location_name}`);
+      if (data.address) details.push(`Endereço: ${data.address}`);
+      if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);
+      if (data.contact_name) details.push(`Contato: ${data.contact_name}${data.contact_company ? ` — ${data.contact_company}` : ''}`);
+      if (data.contact_phone) details.push(`Telefone: ${data.contact_phone}`);
+      if (data.chip_operator) details.push(`Operadora: ${data.chip_operator} (${data.chip_type === 'esim' ? 'eSIM' : 'Chip Físico'})`);
+      if (data.chip_activation_instructions) details.push(`Ativação: ${data.chip_activation_instructions}`);
+      if (data.guide_name) details.push(`Guia: ${data.guide_name}${data.guide_language ? ` (${data.guide_language})` : ''}`);
+      if (data.guide_meeting_point) details.push(`Ponto de encontro: ${data.guide_meeting_point}`);
+      if (data.description) details.push(data.description);
+      if (data.agency_tips) details.push(`Dicas: ${data.agency_tips}`);
+      if (data.agency_notes) details.push(`Obs: ${data.agency_notes}`);
       break;
+    }
   }
   
   return details;

@@ -22,7 +22,7 @@ const SERVICE_ICONS: Record<TripServiceType, any> = {
 const SERVICE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", train: "Trem", other: "Outros",
+  cruise: "Cruzeiro", train: "Trem", other: "Outros Serviços",
 };
 
 function formatDate(dateStr: string) {
@@ -78,7 +78,13 @@ function getServiceDescription(service: TripService): string {
     }
     case "cruise": return `${data.cruise_company ? data.cruise_company + ' • ' : ''}${data.ship_name} - ${data.route}`;
     case "train": return `${data.origin_city} → ${data.destination_city}${data.train_company ? ` (${data.train_company})` : ''}`;
-    case "other": return data.description;
+    case "other": {
+      const typeMap: Record<string, string> = { restaurante: '🍽️', guia_turistico: '🧭', chip_internet: '📶', experiencia: '✨', evento: '📅', spa_wellness: '🧘', servico_vip: '👑', concierge: '🛎️', personalizado: '⭐' };
+      const typeIcon = data.other_service_type ? (typeMap[data.other_service_type] || '📋') + ' ' : '';
+      const name = data.service_name || data.description || 'Serviço';
+      const city = data.city ? ` — ${data.city}` : '';
+      return `${typeIcon}${name}${city}`;
+    }
     default: return "Serviço";
   }
 }
@@ -146,7 +152,13 @@ function getServiceDates(service: TripService): string {
       return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}${nights ? ` (${nights} noites)` : ''}`;
     }
     case "train": return data.travel_date ? `${formatDate(data.travel_date)}${data.departure_time ? ` • ${data.departure_time} → ${data.arrival_time || ''}` : ''}` : '';
-    default: return "";
+    case "other": {
+      const dateStr = data.date ? formatDate(data.date) : '';
+      const timeStr = data.time ? ` às ${data.time}` : '';
+      const statusMap: Record<string, string> = { confirmado: '✅', agendado: '📅', opcional: '🔄' };
+      const statusIcon = data.status ? ` ${statusMap[data.status] || ''}` : '';
+      return `${dateStr}${timeStr}${statusIcon}`;
+    }
   }
 }
 

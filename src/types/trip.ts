@@ -489,7 +489,51 @@ export interface TripTrainData {
 }
 
 export interface TripOtherData {
+  // Main info
+  service_name: string;
+  other_service_type: 'restaurante' | 'guia_turistico' | 'chip_internet' | 'experiencia' | 'evento' | 'spa_wellness' | 'servico_vip' | 'concierge' | 'personalizado' | '';
+  custom_type_name: string;
+  city: string;
+  country: string;
+  date: string;
+  time: string;
+  duration: string;
+  status: 'confirmado' | 'agendado' | 'opcional' | '';
+  // Location
+  location_name: string;
+  address: string;
+  maps_url: string;
+  meeting_point: string;
+  how_to_arrive: string;
+  // Contact
+  contact_name: string;
+  contact_company: string;
+  contact_phone: string;
+  contact_whatsapp: string;
+  contact_email: string;
+  contact_language: string;
+  // Reservation
+  reservation_code: string;
+  // Chip/Internet specific
+  chip_operator: string;
+  chip_type: 'esim' | 'fisico' | '';
+  chip_activation_instructions: string;
+  chip_activation_url: string;
+  chip_support: string;
+  // Guide specific
+  guide_name: string;
+  guide_language: string;
+  guide_tour_time: string;
+  guide_tour_duration: string;
+  guide_meeting_point: string;
+  // Agency
+  agency_tips: string;
+  agency_notes: string;
+  agency_contact: string;
+  emergency_contact: string;
+  // Legacy compat
   description: string;
+  notes: string;
 }
 
 export type TripServiceData = 
@@ -519,7 +563,7 @@ export const TRIP_SERVICE_LABELS: Record<TripServiceType, string> = {
   insurance: 'Seguro Viagem',
   cruise: 'Cruzeiro',
   train: 'Trem',
-  other: 'Outros',
+  other: 'Outros Serviços',
 };
 
 export const TRIP_SERVICE_ICONS: Record<TripServiceType, string> = {
