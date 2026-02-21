@@ -31,7 +31,8 @@ const SERVICE_LABELS: Record<TripServiceType, string> = {
 
 function formatDate(dateStr: string) {
   try {
-    return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR });
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return format(new Date(y, m - 1, d), "dd/MM/yyyy", { locale: ptBR });
   } catch {
     return dateStr;
   }
