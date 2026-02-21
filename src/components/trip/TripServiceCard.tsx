@@ -1,32 +1,28 @@
+import { useState, useRef } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, FileText, Trash2, Download, ExternalLink
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, FileText, 
+  Trash2, Download, ExternalLink, Pencil, Upload, X, RefreshCw
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { TripService, TripServiceType, TRIP_SERVICE_LABELS } from "@/types/trip";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import type { TripService, TripServiceType } from "@/types/trip";
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
-  flight: Plane,
-  hotel: Hotel,
-  car_rental: Car,
-  transfer: Bus,
-  attraction: Ticket,
-  insurance: Shield,
-  cruise: Ship,
-  other: FileText,
+  flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
+  attraction: Ticket, insurance: Shield, cruise: Ship, other: FileText,
 };
 
 const SERVICE_LABELS: Record<TripServiceType, string> = {
-  flight: "Passagem Aérea",
-  hotel: "Hospedagem",
-  car_rental: "Locação de Veículo",
-  transfer: "Transfer",
-  attraction: "Ingressos/Atrações",
-  insurance: "Seguro Viagem",
-  cruise: "Cruzeiro",
-  other: "Outros",
+  flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
+  transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
+  cruise: "Cruzeiro", other: "Outros",
 };
 
 function formatDate(dateStr: string) {
@@ -40,64 +36,68 @@ function formatDate(dateStr: string) {
 
 function getServiceDescription(service: TripService): string {
   const data = service.service_data as any;
-  
   switch (service.service_type) {
-    case "flight":
-      return `${data.origin_city} → ${data.destination_city} (${data.airline})`;
-    case "hotel":
-      return `${data.hotel_name} - ${data.city}`;
-    case "car_rental":
-      return `${data.car_type} - ${data.pickup_location}`;
-    case "transfer":
-      return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
-    case "attraction":
-      return `${data.name} (${data.quantity}x)`;
-    case "insurance":
-      return `${data.provider} - ${data.coverage}`;
-    case "cruise":
-      return `${data.ship_name} - ${data.route}`;
-    case "other":
-      return data.description;
-    default:
-      return "Serviço";
+    case "flight": return `${data.origin_city} → ${data.destination_city} (${data.airline})`;
+    case "hotel": return `${data.hotel_name} - ${data.city}`;
+    case "car_rental": return `${data.car_type} - ${data.pickup_location}`;
+    case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
+    case "attraction": return `${data.name} (${data.quantity}x)`;
+    case "insurance": return `${data.provider} - ${data.coverage}`;
+    case "cruise": return `${data.ship_name} - ${data.route}`;
+    case "other": return data.description;
+    default: return "Serviço";
   }
 }
 
 function getServiceDates(service: TripService): string {
   const data = service.service_data as any;
-  
   switch (service.service_type) {
-    case "flight":
-      return `${formatDate(data.departure_date)} - ${formatDate(data.return_date)}`;
-    case "hotel":
-      return `${formatDate(data.check_in)} - ${formatDate(data.check_out)}`;
+    case "flight": return `${formatDate(data.departure_date)} - ${formatDate(data.return_date)}`;
+    case "hotel": return `${formatDate(data.check_in)} - ${formatDate(data.check_out)}`;
     case "transfer":
-    case "attraction":
-      return formatDate(data.date);
+    case "attraction": return formatDate(data.date);
     case "insurance":
-    case "cruise":
-      return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
-    default:
-      return "";
+    case "cruise": return `${formatDate(data.start_date)} - ${formatDate(data.end_date)}`;
+    default: return "";
   }
+}
+
+function getServiceNotes(service: TripService): string | undefined {
+  const data = service.service_data as any;
+  return data.notes;
 }
 
 interface TripServiceCardProps {
   service: TripService;
   onDelete?: (id: string) => void;
+  onEdit?: (service: TripService) => void;
+  onReplaceVoucher?: (serviceId: string, file: File) => void;
+  onRemoveVoucher?: (serviceId: string) => void;
   showActions?: boolean;
 }
 
-export function TripServiceCard({ service, onDelete, showActions = true }: TripServiceCardProps) {
+export function TripServiceCard({ 
+  service, onDelete, onEdit, onReplaceVoucher, onRemoveVoucher, showActions = true 
+}: TripServiceCardProps) {
   const Icon = SERVICE_ICONS[service.service_type] || FileText;
   const label = SERVICE_LABELS[service.service_type] || "Serviço";
   const dates = getServiceDates(service);
+  const notes = getServiceNotes(service);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onReplaceVoucher) {
+      onReplaceVoucher(service.id, file);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
   
   return (
     <Card>
       <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
               <Icon className="h-5 w-5 text-primary" />
             </div>
@@ -106,11 +106,12 @@ export function TripServiceCard({ service, onDelete, showActions = true }: TripS
                 {label}
               </span>
               <p className="font-medium truncate">{getServiceDescription(service)}</p>
-              {dates && (
-                <p className="text-sm text-muted-foreground">{dates}</p>
-              )}
+              {dates && <p className="text-sm text-muted-foreground">{dates}</p>}
+              {notes && <p className="text-xs text-muted-foreground mt-1 italic">{notes}</p>}
+              
+              {/* Voucher section */}
               {service.voucher_name && (
-                <div className="mt-2 flex items-center gap-2">
+                <div className="mt-2 flex items-center gap-2 flex-wrap">
                   <a
                     href={service.voucher_url || "#"}
                     target="_blank"
@@ -121,19 +122,104 @@ export function TripServiceCard({ service, onDelete, showActions = true }: TripS
                     {service.voucher_name}
                     <ExternalLink className="h-3 w-3" />
                   </a>
+                  {showActions && onReplaceVoucher && (
+                    <>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={handleFileChange}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-xs px-2"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" /> Substituir
+                      </Button>
+                    </>
+                  )}
+                  {showActions && onRemoveVoucher && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs px-2 text-destructive hover:text-destructive"
+                      onClick={() => onRemoveVoucher(service.id)}
+                    >
+                      <X className="h-3 w-3 mr-1" /> Remover
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {/* Upload voucher if none exists */}
+              {!service.voucher_name && showActions && onReplaceVoucher && (
+                <div className="mt-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    onChange={handleFileChange}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-xs px-2"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-3 w-3 mr-1" /> Anexar voucher
+                  </Button>
                 </div>
               )}
             </div>
           </div>
-          {showActions && onDelete && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(service.id)}
-              className="text-muted-foreground hover:text-destructive shrink-0"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+          
+          {showActions && (
+            <div className="flex items-center gap-1 shrink-0">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(service)}
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
+              {onDelete && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remover serviço?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Este serviço será removido permanentemente da carteira.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => onDelete(service.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Remover
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
           )}
         </div>
       </CardContent>
@@ -144,11 +230,17 @@ export function TripServiceCard({ service, onDelete, showActions = true }: TripS
 interface TripServiceListProps {
   services: TripService[];
   onDeleteService?: (id: string) => void;
+  onEditService?: (service: TripService) => void;
+  onReplaceVoucher?: (serviceId: string, file: File) => void;
+  onRemoveVoucher?: (serviceId: string) => void;
   showActions?: boolean;
   groupByType?: boolean;
 }
 
-export function TripServiceList({ services, onDeleteService, showActions = true, groupByType = false }: TripServiceListProps) {
+export function TripServiceList({ 
+  services, onDeleteService, onEditService, onReplaceVoucher, onRemoveVoucher, 
+  showActions = true, groupByType = false 
+}: TripServiceListProps) {
   if (services.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -182,6 +274,9 @@ export function TripServiceList({ services, onDeleteService, showActions = true,
                   key={service.id}
                   service={service}
                   onDelete={onDeleteService}
+                  onEdit={onEditService}
+                  onReplaceVoucher={onReplaceVoucher}
+                  onRemoveVoucher={onRemoveVoucher}
                   showActions={showActions}
                 />
               ))}
@@ -199,6 +294,9 @@ export function TripServiceList({ services, onDeleteService, showActions = true,
           key={service.id}
           service={service}
           onDelete={onDeleteService}
+          onEdit={onEditService}
+          onReplaceVoucher={onReplaceVoucher}
+          onRemoveVoucher={onRemoveVoucher}
           showActions={showActions}
         />
       ))}

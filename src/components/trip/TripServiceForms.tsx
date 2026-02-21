@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,6 +37,8 @@ interface TripServiceFormProps {
   onSubmit: (data: any, file?: File) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  defaultValues?: any;
+  isEditing?: boolean;
 }
 
 interface VoucherUploadProps {
@@ -82,11 +84,19 @@ const flightSchema = z.object({
   notes: z.string().optional(),
 });
 
-function FlightForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [file, setFile] = useState<File | null>(null);
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
-    defaultValues: { origin_city: "", destination_city: "", airline: "", notes: "" },
+    defaultValues: {
+      origin_city: defaultValues?.origin_city || "",
+      destination_city: defaultValues?.destination_city || "",
+      airline: defaultValues?.airline || "",
+      notes: defaultValues?.notes || "",
+      ...(defaultValues?.departure_date ? { departure_date: parseLocal(defaultValues.departure_date) } : {}),
+      ...(defaultValues?.return_date ? { return_date: parseLocal(defaultValues.return_date) } : {}),
+    },
   });
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
@@ -185,7 +195,7 @@ function FlightForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
           </Button>
         </div>
       </form>
@@ -202,11 +212,18 @@ const hotelSchema = z.object({
   notes: z.string().optional(),
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [file, setFile] = useState<File | null>(null);
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
-    defaultValues: { hotel_name: "", city: "", notes: "" },
+    defaultValues: {
+      hotel_name: defaultValues?.hotel_name || "",
+      city: defaultValues?.city || "",
+      notes: defaultValues?.notes || "",
+      ...(defaultValues?.check_in ? { check_in: parseLocal(defaultValues.check_in) } : {}),
+      ...(defaultValues?.check_out ? { check_out: parseLocal(defaultValues.check_out) } : {}),
+    },
   });
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
@@ -803,16 +820,17 @@ function OtherForm({ onSubmit, onCancel, isLoading }: Omit<TripServiceFormProps,
 }
 
 // Main Service Form component
-export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading }: TripServiceFormProps) {
+export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, defaultValues, isEditing }: TripServiceFormProps) {
+  const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing };
   switch (serviceType) {
-    case "flight": return <FlightForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
-    case "hotel": return <HotelForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
-    case "car_rental": return <CarRentalForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
-    case "transfer": return <TransferForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
-    case "attraction": return <AttractionForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
-    case "insurance": return <InsuranceForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
-    case "cruise": return <CruiseForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
-    case "other": return <OtherForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
+    case "flight": return <FlightForm {...props} />;
+    case "hotel": return <HotelForm {...props} />;
+    case "car_rental": return <CarRentalForm {...props} />;
+    case "transfer": return <TransferForm {...props} />;
+    case "attraction": return <AttractionForm {...props} />;
+    case "insurance": return <InsuranceForm {...props} />;
+    case "cruise": return <CruiseForm {...props} />;
+    case "other": return <OtherForm {...props} />;
     default: return null;
   }
 }
