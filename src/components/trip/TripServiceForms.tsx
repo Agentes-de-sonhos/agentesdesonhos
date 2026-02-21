@@ -528,37 +528,147 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   );
 }
 
-// Hotel Form
+// Hotel Form - Professional
 const hotelSchema = z.object({
   hotel_name: z.string().min(2, "Nome do hotel é obrigatório"),
+  hotel_category: z.string().optional(),
   city: z.string().min(2, "Cidade é obrigatória"),
+  country: z.string().optional(),
   check_in: z.date({ required_error: "Check-in é obrigatório" }),
   check_out: z.date({ required_error: "Check-out é obrigatório" }),
+  room_type: z.string().optional(),
+  reservation_status: z.string().optional(),
+  reservation_code: z.string().optional(),
+  checkin_time: z.string().optional(),
+  early_checkin: z.string().optional(),
+  checkin_holder: z.string().optional(),
+  checkin_instructions: z.string().optional(),
+  late_arrival_policy: z.string().optional(),
+  checkout_time: z.string().optional(),
+  late_checkout: z.string().optional(),
+  late_checkout_fee: z.string().optional(),
+  checkout_instructions: z.string().optional(),
+  checkout_procedure: z.string().optional(),
+  bed_type: z.string().optional(),
+  guest_count: z.string().optional(),
+  room_view: z.string().optional(),
+  meal_plan: z.string().optional(),
+  cleaning_policy: z.string().optional(),
+  amenities: z.string().optional(),
+  address: z.string().optional(),
+  hotel_phone: z.string().optional(),
+  hotel_email: z.string().optional(),
+  hotel_website: z.string().optional(),
+  maps_url: z.string().optional(),
+  breakfast_hours: z.string().optional(),
+  restaurants_included: z.string().optional(),
+  food_notes: z.string().optional(),
+  all_inclusive_rules: z.string().optional(),
+  breakfast_included: z.string().optional(),
+  wifi_included: z.string().optional(),
+  taxes_included: z.string().optional(),
+  resort_fee: z.string().optional(),
+  parking_included: z.string().optional(),
+  transfer_included: z.string().optional(),
+  other_inclusions: z.string().optional(),
+  cancellation_policy: z.string().optional(),
+  change_policy: z.string().optional(),
+  children_policy: z.string().optional(),
+  pet_policy: z.string().optional(),
+  mandatory_fees: z.string().optional(),
+  hotel_deposit: z.string().optional(),
+  hotel_deposit_method: z.string().optional(),
+  special_requests: z.string().optional(),
+  agency_notes: z.string().optional(),
   notes: z.string().optional(),
 });
+
+interface HotelGuestInput {
+  name: string;
+  age: string;
+  notes: string;
+}
+
+const emptyGuest = (): HotelGuestInput => ({ name: '', age: '', notes: '' });
 
 function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [file, setFile] = useState<File | null>(null);
+  const [guests, setGuests] = useState<HotelGuestInput[]>(
+    defaultValues?.guests?.length > 0 ? defaultValues.guests : []
+  );
+  const [newGuest, setNewGuest] = useState<HotelGuestInput>(emptyGuest());
+
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
     defaultValues: {
       hotel_name: defaultValues?.hotel_name || "",
+      hotel_category: defaultValues?.hotel_category || "",
       city: defaultValues?.city || "",
+      country: defaultValues?.country || "",
+      room_type: defaultValues?.room_type || "",
+      reservation_status: defaultValues?.reservation_status || "",
+      reservation_code: defaultValues?.reservation_code || "",
+      checkin_time: defaultValues?.checkin_time || "",
+      early_checkin: defaultValues?.early_checkin || "",
+      checkin_holder: defaultValues?.checkin_holder || "",
+      checkin_instructions: defaultValues?.checkin_instructions || "",
+      late_arrival_policy: defaultValues?.late_arrival_policy || "",
+      checkout_time: defaultValues?.checkout_time || "",
+      late_checkout: defaultValues?.late_checkout || "",
+      late_checkout_fee: defaultValues?.late_checkout_fee || "",
+      checkout_instructions: defaultValues?.checkout_instructions || "",
+      checkout_procedure: defaultValues?.checkout_procedure || "",
+      bed_type: defaultValues?.bed_type || "",
+      guest_count: defaultValues?.guest_count || "",
+      room_view: defaultValues?.room_view || "",
+      meal_plan: defaultValues?.meal_plan || "",
+      cleaning_policy: defaultValues?.cleaning_policy || "",
+      amenities: defaultValues?.amenities || "",
+      address: defaultValues?.address || "",
+      hotel_phone: defaultValues?.hotel_phone || "",
+      hotel_email: defaultValues?.hotel_email || "",
+      hotel_website: defaultValues?.hotel_website || "",
+      maps_url: defaultValues?.maps_url || "",
+      breakfast_hours: defaultValues?.breakfast_hours || "",
+      restaurants_included: defaultValues?.restaurants_included || "",
+      food_notes: defaultValues?.food_notes || "",
+      all_inclusive_rules: defaultValues?.all_inclusive_rules || "",
+      breakfast_included: defaultValues?.breakfast_included || "",
+      wifi_included: defaultValues?.wifi_included || "",
+      taxes_included: defaultValues?.taxes_included || "",
+      resort_fee: defaultValues?.resort_fee || "",
+      parking_included: defaultValues?.parking_included || "",
+      transfer_included: defaultValues?.transfer_included || "",
+      other_inclusions: defaultValues?.other_inclusions || "",
+      cancellation_policy: defaultValues?.cancellation_policy || "",
+      change_policy: defaultValues?.change_policy || "",
+      children_policy: defaultValues?.children_policy || "",
+      pet_policy: defaultValues?.pet_policy || "",
+      mandatory_fees: defaultValues?.mandatory_fees || "",
+      hotel_deposit: defaultValues?.hotel_deposit || "",
+      hotel_deposit_method: defaultValues?.hotel_deposit_method || "",
+      special_requests: defaultValues?.special_requests || "",
+      agency_notes: defaultValues?.agency_notes || "",
       notes: defaultValues?.notes || "",
       ...(defaultValues?.check_in ? { check_in: parseLocal(defaultValues.check_in) } : {}),
       ...(defaultValues?.check_out ? { check_out: parseLocal(defaultValues.check_out) } : {}),
     },
   });
 
+  const addGuest = () => {
+    if (!newGuest.name.trim()) return;
+    setGuests([...guests, { ...newGuest }]);
+    setNewGuest(emptyGuest());
+  };
+
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
     onSubmit(
       {
-        hotel_name: values.hotel_name,
-        city: values.city,
+        ...values,
         check_in: format(values.check_in, "yyyy-MM-dd"),
         check_out: format(values.check_out, "yyyy-MM-dd"),
-        notes: values.notes || "",
+        guests,
       },
       file || undefined
     );
@@ -566,20 +676,51 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === INFORMAÇÕES PRINCIPAIS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🏨 Informações Principais</h4>
+          <div className="h-px bg-border" />
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome do Hotel</FormLabel>
-              <FormControl><Input placeholder="Hotel Marriott" {...field} /></FormControl>
+              <FormLabel>Nome do Hotel *</FormLabel>
+              <FormControl><Input placeholder="Hotel Marriott Paris" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )} />
+          <FormField control={form.control} name="hotel_category" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoria</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="3">3 Estrelas ⭐⭐⭐</SelectItem>
+                  <SelectItem value="4">4 Estrelas ⭐⭐⭐⭐</SelectItem>
+                  <SelectItem value="5">5 Estrelas ⭐⭐⭐⭐⭐</SelectItem>
+                  <SelectItem value="boutique">Boutique</SelectItem>
+                  <SelectItem value="resort">Resort</SelectItem>
+                  <SelectItem value="pousada">Pousada</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="city" render={({ field }) => (
             <FormItem>
-              <FormLabel>Cidade</FormLabel>
+              <FormLabel>Cidade *</FormLabel>
               <FormControl><Input placeholder="Paris" {...field} /></FormControl>
               <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="country" render={({ field }) => (
+            <FormItem>
+              <FormLabel>País</FormLabel>
+              <FormControl><Input placeholder="França" {...field} /></FormControl>
             </FormItem>
           )} />
         </div>
@@ -587,7 +728,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="check_in" render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Check-in</FormLabel>
+              <FormLabel>Check-in *</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -598,7 +739,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover>
               <FormMessage />
@@ -606,7 +747,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
           <FormField control={form.control} name="check_out" render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Check-out</FormLabel>
+              <FormLabel>Check-out *</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -617,7 +758,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover>
               <FormMessage />
@@ -625,20 +766,459 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        <FormField control={form.control} name="notes" render={({ field }) => (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="reservation_status" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status da Reserva</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="confirmada">Confirmada</SelectItem>
+                  <SelectItem value="emitida">Emitida</SelectItem>
+                  <SelectItem value="pre_reserva">Pré-reserva</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="reservation_code" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nº da Reserva</FormLabel>
+              <FormControl><Input placeholder="CONF-12345" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="room_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Acomodação</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="superior">Superior</SelectItem>
+                  <SelectItem value="deluxe">Deluxe</SelectItem>
+                  <SelectItem value="suite">Suíte</SelectItem>
+                  <SelectItem value="suite_junior">Suíte Júnior</SelectItem>
+                  <SelectItem value="presidencial">Presidencial</SelectItem>
+                  <SelectItem value="apartamento">Apartamento</SelectItem>
+                  <SelectItem value="villa">Villa</SelectItem>
+                  <SelectItem value="bangalo">Bangalô</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="bed_type" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Cama</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="king">King</SelectItem>
+                  <SelectItem value="queen">Queen</SelectItem>
+                  <SelectItem value="twin">Twin (2 Solteiro)</SelectItem>
+                  <SelectItem value="single">Solteiro</SelectItem>
+                  <SelectItem value="double">Casal</SelectItem>
+                  <SelectItem value="triple">Triplo</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === CHECK-IN DETAILS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Detalhes do Check-in</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="checkin_time" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horário do Check-in</FormLabel>
+              <FormControl><Input type="time" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="early_checkin" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Early Check-in</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Sim, incluso</SelectItem>
+                  <SelectItem value="nao">Não disponível</SelectItem>
+                  <SelectItem value="mediante_taxa">Mediante taxa</SelectItem>
+                  <SelectItem value="sob_consulta">Sob consulta</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="checkin_holder" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Titular da Reserva</FormLabel>
+              <FormControl><Input placeholder="Nome completo" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="checkin_instructions" render={({ field }) => (
           <FormItem>
-            <FormLabel>Observações</FormLabel>
-            <FormControl><Textarea placeholder="Tipo de quarto, regime..." {...field} /></FormControl>
-            <FormMessage />
+            <FormLabel>Instruções de Check-in</FormLabel>
+            <FormControl><Textarea placeholder="Instruções especiais para chegada..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="late_arrival_policy" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Política de Chegada Tardia</FormLabel>
+            <FormControl><Input placeholder="Recepção 24h, chave no cofre..." {...field} /></FormControl>
           </FormItem>
         )} />
 
-        <VoucherUpload file={file} setFile={setFile} label="Voucher do Hotel" />
+        {/* === CHECK-OUT DETAILS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧳 Detalhes do Check-out</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="checkout_time" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horário do Check-out</FormLabel>
+              <FormControl><Input type="time" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="late_checkout" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Late Check-out</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Sim, incluso</SelectItem>
+                  <SelectItem value="nao">Não disponível</SelectItem>
+                  <SelectItem value="mediante_taxa">Mediante taxa</SelectItem>
+                  <SelectItem value="sob_consulta">Sob consulta</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="late_checkout_fee" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Taxa Late Check-out</FormLabel>
+              <FormControl><Input placeholder="USD 50" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="checkout_procedure" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Procedimento de Check-out</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+              <SelectContent>
+                <SelectItem value="recepcao">Recepção</SelectItem>
+                <SelectItem value="express">Express</SelectItem>
+                <SelectItem value="online">Online</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormItem>
+        )} />
+
+        {/* === ACOMODAÇÃO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛏️ Detalhes da Acomodação</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="guest_count" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Hóspedes no Quarto</FormLabel>
+              <FormControl><Input placeholder="2 adultos" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="room_view" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Vista do Quarto</FormLabel>
+              <FormControl><Input placeholder="Vista mar, jardim..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="meal_plan" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Regime</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="somente_hospedagem">Somente Hospedagem</SelectItem>
+                  <SelectItem value="cafe_manha">Café da Manhã</SelectItem>
+                  <SelectItem value="meia_pensao">Meia Pensão</SelectItem>
+                  <SelectItem value="pensao_completa">Pensão Completa</SelectItem>
+                  <SelectItem value="all_inclusive">All Inclusive</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="amenities" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Amenities do Quarto</FormLabel>
+            <FormControl><Textarea placeholder="Ar condicionado, cofre, minibar, secador..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        {/* === LOCALIZAÇÃO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Localização e Contato</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <FormField control={form.control} name="address" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Endereço Completo</FormLabel>
+            <FormControl><Input placeholder="Rua, número, bairro..." {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="hotel_phone" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefone</FormLabel>
+              <FormControl><Input placeholder="+33 1 2345 6789" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="hotel_email" render={({ field }) => (
+            <FormItem>
+              <FormLabel>E-mail</FormLabel>
+              <FormControl><Input placeholder="reservas@hotel.com" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="hotel_website" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Site Oficial</FormLabel>
+              <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="maps_url" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link Google Maps</FormLabel>
+              <FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === ALIMENTAÇÃO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🍽️ Alimentação</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="breakfast_hours" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Horários do Café da Manhã</FormLabel>
+              <FormControl><Input placeholder="06:30 - 10:00" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="restaurants_included" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Restaurantes Inclusos</FormLabel>
+              <FormControl><Input placeholder="Principal, Pool Bar..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="food_notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações sobre Alimentação</FormLabel>
+            <FormControl><Textarea placeholder="Restrições, opções vegetarianas..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="all_inclusive_rules" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Regras do All Inclusive</FormLabel>
+            <FormControl><Textarea placeholder="Horários, restaurantes, bebidas..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        {/* === O QUE ESTÁ INCLUSO === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">💰 O que está incluso</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="breakfast_included" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Café da Manhã</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Sim</SelectItem>
+                  <SelectItem value="nao">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="wifi_included" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Wi-Fi</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Sim</SelectItem>
+                  <SelectItem value="nao">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="taxes_included" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Taxas Incluídas</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Sim</SelectItem>
+                  <SelectItem value="nao">Não</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField control={form.control} name="resort_fee" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Resort Fee</FormLabel>
+              <FormControl><Input placeholder="USD 35/noite" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="parking_included" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estacionamento</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Incluso</SelectItem>
+                  <SelectItem value="nao">Não incluso</SelectItem>
+                  <SelectItem value="pago">Pago à parte</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="transfer_included" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Transfer</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="sim">Incluso</SelectItem>
+                  <SelectItem value="nao">Não incluso</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )} />
+        </div>
+        <FormField control={form.control} name="other_inclusions" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Outros Serviços Inclusos</FormLabel>
+            <FormControl><Textarea placeholder="Spa, academia, piscina, toalhas de praia..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        {/* === POLÍTICAS === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧾 Políticas do Hotel</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Política de Cancelamento</FormLabel>
+            <FormControl><Textarea placeholder="Cancelamento gratuito até..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="children_policy" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Política de Crianças</FormLabel>
+              <FormControl><Input placeholder="Até 12 anos grátis..." {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="pet_policy" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Política de Pets</FormLabel>
+              <FormControl><Input placeholder="Aceita pets até 10kg" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="mandatory_fees" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Taxas Obrigatórias no Destino</FormLabel>
+              <FormControl><Input placeholder="City tax EUR 3/noite" {...field} /></FormControl>
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="hotel_deposit" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Caução no Hotel</FormLabel>
+              <FormControl><Input placeholder="EUR 200" {...field} /></FormControl>
+            </FormItem>
+          )} />
+        </div>
+
+        {/* === HÓSPEDES === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👨‍👩‍👧 Hóspedes</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        {guests.map((g, i) => (
+          <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
+            <span className="flex-1">{g.name}{g.age ? ` (${g.age})` : ''}{g.notes ? ` • ${g.notes}` : ''}</span>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setGuests(guests.filter((_, idx) => idx !== i))}>
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+        <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Input placeholder="Nome do hóspede" value={newGuest.name} onChange={(e) => setNewGuest({ ...newGuest, name: e.target.value })} />
+            <Input placeholder="Idade (opcional)" value={newGuest.age} onChange={(e) => setNewGuest({ ...newGuest, age: e.target.value })} />
+            <Input placeholder="Obs (aniversário, lua de mel...)" value={newGuest.notes} onChange={(e) => setNewGuest({ ...newGuest, notes: e.target.value })} />
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={addGuest} disabled={!newGuest.name.trim()}>
+            <Plus className="h-3 w-3 mr-1" /> Adicionar Hóspede
+          </Button>
+        </div>
+
+        <FormField control={form.control} name="special_requests" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Solicitações Especiais</FormLabel>
+            <FormControl><Textarea placeholder="Andar alto, berço, travesseiro extra..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        {/* === OBSERVAÇÕES === */}
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📝 Observações</h4>
+          <div className="h-px bg-border" />
+        </div>
+
+        <FormField control={form.control} name="agency_notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações da Agência</FormLabel>
+            <FormControl><Textarea placeholder="Notas internas da agência para o cliente..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Observações Gerais</FormLabel>
+            <FormControl><Textarea placeholder="Informações adicionais..." rows={2} {...field} /></FormControl>
+          </FormItem>
+        )} />
+
+        <VoucherUpload file={file} setFile={setFile} label="Voucher / Confirmação do Hotel" />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Adicionar</>}
           </Button>
         </div>
       </form>

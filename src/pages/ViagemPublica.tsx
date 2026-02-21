@@ -55,8 +55,22 @@ function getServiceDetails(service: TripService): { title: string; details: stri
         dates: firstDate ? `${formatDate(firstDate)}${lastDate && lastDate !== firstDate ? ` - ${formatDate(lastDate)}` : ''}` : undefined
       };
     }
-    case "hotel":
-      return { title: `${data.hotel_name}`, details: [`${data.city}`, ...(data.notes ? [`Obs: ${data.notes}`] : [])], dates: `${formatDate(data.check_in)} - ${formatDate(data.check_out)}` };
+    case "hotel": {
+      const statusMap: Record<string, string> = { confirmada: '✅ Confirmada', emitida: '📄 Emitida', pre_reserva: '⏳ Pré-reserva' };
+      const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: 'Boutique', resort: 'Resort', pousada: 'Pousada' };
+      const roomMap: Record<string, string> = { standard: 'Standard', superior: 'Superior', deluxe: 'Deluxe', suite: 'Suíte', suite_junior: 'Suíte Júnior', presidencial: 'Presidencial', apartamento: 'Apartamento', villa: 'Villa', bangalo: 'Bangalô' };
+      const mealMap: Record<string, string> = { somente_hospedagem: 'Somente Hospedagem', cafe_manha: 'Café da Manhã', meia_pensao: 'Meia Pensão', pensao_completa: 'Pensão Completa', all_inclusive: 'All Inclusive' };
+      const hotelDetails: string[] = [];
+      if (data.hotel_category) hotelDetails.push(`Categoria: ${catMap[data.hotel_category] || data.hotel_category}`);
+      hotelDetails.push(`${data.city}${data.country ? `, ${data.country}` : ''}`);
+      if (data.reservation_status) hotelDetails.push(`Status: ${statusMap[data.reservation_status] || data.reservation_status}`);
+      if (data.reservation_code) hotelDetails.push(`Reserva: ${data.reservation_code}`);
+      if (data.room_type) hotelDetails.push(`Acomodação: ${roomMap[data.room_type] || data.room_type}`);
+      if (data.meal_plan) hotelDetails.push(`Regime: ${mealMap[data.meal_plan] || data.meal_plan}`);
+      if (data.notes) hotelDetails.push(`Obs: ${data.notes}`);
+      const nights = (() => { try { const [sy,sm,sd] = data.check_in.split('-').map(Number); const [ey,em,ed] = data.check_out.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
+      return { title: data.hotel_name, details: hotelDetails, dates: `${formatDate(data.check_in)} - ${formatDate(data.check_out)}${nights ? ` (${nights} noites)` : ''}` };
+    }
     case "car_rental": {
       const carDetails: string[] = [];
       const company = data.rental_company || '';
@@ -206,6 +220,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isCruise = service.service_type === 'cruise';
   const isFlight = service.service_type === 'flight';
   const isCarRental = service.service_type === 'car_rental';
+  const isHotel = service.service_type === 'hotel';
 
   return (
     <Card className="border-border/50">
@@ -380,6 +395,121 @@ function PublicServiceCard({ service }: { service: TripService }) {
                 🚢 Site do navio
               </a>
             )}
+          </div>
+        )}
+
+        {/* Hotel - Check-in / Check-out details */}
+        {isHotel && (data.checkin_time || data.checkin_holder || data.reservation_code) && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📅 Check-in</p>
+            {data.checkin_time && <p className="text-xs text-muted-foreground">Horário: {data.checkin_time}</p>}
+            {data.early_checkin && <p className="text-xs text-muted-foreground">Early check-in: {data.early_checkin === 'sim' ? '✅ Incluso' : data.early_checkin === 'mediante_taxa' ? '💰 Mediante taxa' : data.early_checkin === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível'}</p>}
+            {data.checkin_holder && <p className="text-xs text-muted-foreground">Titular: {data.checkin_holder}</p>}
+            {data.checkin_instructions && <p className="text-xs text-muted-foreground italic">{data.checkin_instructions}</p>}
+            {data.late_arrival_policy && <p className="text-xs text-muted-foreground">Chegada tardia: {data.late_arrival_policy}</p>}
+          </div>
+        )}
+
+        {isHotel && (data.checkout_time || data.late_checkout || data.checkout_procedure) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🧳 Check-out</p>
+            {data.checkout_time && <p className="text-xs text-muted-foreground">Horário: {data.checkout_time}</p>}
+            {data.late_checkout && <p className="text-xs text-muted-foreground">Late check-out: {data.late_checkout === 'sim' ? '✅ Incluso' : data.late_checkout === 'mediante_taxa' ? `💰 Mediante taxa${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível'}</p>}
+            {data.checkout_procedure && <p className="text-xs text-muted-foreground">Procedimento: {data.checkout_procedure === 'recepcao' ? 'Recepção' : data.checkout_procedure === 'express' ? 'Express' : 'Online'}</p>}
+            {data.checkout_instructions && <p className="text-xs text-muted-foreground italic">{data.checkout_instructions}</p>}
+          </div>
+        )}
+
+        {/* Hotel - Room details */}
+        {isHotel && (data.bed_type || data.room_view || data.amenities) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🛏️ Acomodação</p>
+            {data.bed_type && <p className="text-xs text-muted-foreground">Cama: {data.bed_type === 'king' ? 'King' : data.bed_type === 'queen' ? 'Queen' : data.bed_type === 'twin' ? 'Twin (2 Solteiro)' : data.bed_type === 'single' ? 'Solteiro' : data.bed_type === 'double' ? 'Casal' : data.bed_type === 'triple' ? 'Triplo' : data.bed_type}</p>}
+            {data.guest_count && <p className="text-xs text-muted-foreground">Hóspedes: {data.guest_count}</p>}
+            {data.room_view && <p className="text-xs text-muted-foreground">Vista: {data.room_view}</p>}
+            {data.amenities && <p className="text-xs text-muted-foreground">Amenities: {data.amenities}</p>}
+          </div>
+        )}
+
+        {/* Hotel - Food */}
+        {isHotel && (data.breakfast_hours || data.restaurants_included || data.food_notes || data.all_inclusive_rules) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🍽️ Alimentação</p>
+            {data.breakfast_hours && <p className="text-xs text-muted-foreground">Café da manhã: {data.breakfast_hours}</p>}
+            {data.restaurants_included && <p className="text-xs text-muted-foreground">Restaurantes: {data.restaurants_included}</p>}
+            {data.food_notes && <p className="text-xs text-muted-foreground italic">{data.food_notes}</p>}
+            {data.all_inclusive_rules && <p className="text-xs text-muted-foreground">All Inclusive: {data.all_inclusive_rules}</p>}
+          </div>
+        )}
+
+        {/* Hotel - What's included */}
+        {isHotel && (data.breakfast_included || data.wifi_included || data.parking_included || data.resort_fee || data.other_inclusions) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">💰 Inclusos na Reserva</p>
+            <div className="flex flex-wrap gap-2 text-xs">
+              {data.breakfast_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">☕ Café</span>}
+              {data.wifi_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">📶 Wi-Fi</span>}
+              {data.taxes_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">✅ Taxas</span>}
+              {data.parking_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">🅿️ Estacionamento</span>}
+              {data.transfer_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">🚐 Transfer</span>}
+            </div>
+            {data.resort_fee && <p className="text-xs text-muted-foreground mt-1">Resort Fee: {data.resort_fee}</p>}
+            {data.other_inclusions && <p className="text-xs text-muted-foreground">{data.other_inclusions}</p>}
+          </div>
+        )}
+
+        {/* Hotel - Policies */}
+        {isHotel && (data.cancellation_policy || data.mandatory_fees || data.hotel_deposit) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">🧾 Políticas</p>
+            {data.cancellation_policy && <p className="text-xs text-muted-foreground">Cancelamento: {data.cancellation_policy}</p>}
+            {data.children_policy && <p className="text-xs text-muted-foreground">Crianças: {data.children_policy}</p>}
+            {data.pet_policy && <p className="text-xs text-muted-foreground">Pets: {data.pet_policy}</p>}
+            {data.mandatory_fees && <p className="text-xs text-muted-foreground font-medium">⚠️ Taxas no destino: {data.mandatory_fees}</p>}
+            {data.hotel_deposit && <p className="text-xs text-muted-foreground">Caução: {data.hotel_deposit}{data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}</p>}
+          </div>
+        )}
+
+        {/* Hotel - Guests */}
+        {isHotel && data.guests?.length > 0 && (
+          <div className="mt-2">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👨‍👩‍👧 Hóspedes</p>
+            {data.guests.map((g: any, i: number) => (
+              <p key={i} className="text-xs text-muted-foreground">
+                {g.name}{g.age ? ` (${g.age})` : ''}{g.notes ? ` • ${g.notes}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Hotel - Location & Map */}
+        {isHotel && (data.address || data.hotel_phone || data.maps_url) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📍 Localização e Contato</p>
+            {data.address && <p className="text-xs text-muted-foreground">{data.address}</p>}
+            {data.hotel_phone && <p className="text-xs text-muted-foreground">📞 {data.hotel_phone}</p>}
+            {data.hotel_email && <p className="text-xs text-muted-foreground">✉️ {data.hotel_email}</p>}
+            {data.maps_url && (
+              <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-xs h-7 mt-1">
+                  <MapPin className="h-3 w-3 mr-1" /> Ver no mapa
+                </Button>
+              </a>
+            )}
+            {data.hotel_website && (
+              <a href={data.hotel_website} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline block">
+                🌐 Site oficial do hotel
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Hotel - Special requests / Agency notes */}
+        {isHotel && (data.special_requests || data.agency_notes) && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📝 Observações</p>
+            {data.special_requests && <p className="text-xs text-muted-foreground">Solicitações: {data.special_requests}</p>}
+            {data.agency_notes && <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>}
           </div>
         )}
 
