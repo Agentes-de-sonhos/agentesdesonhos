@@ -4,11 +4,13 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2 } from "lucide-react";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { TripWalletList } from "@/components/trip/TripWalletList";
+import { TripEditForm } from "@/components/trip/TripEditForm";
+import { TripEditHistory } from "@/components/trip/TripEditHistory";
 import { generateTripPDF } from "@/components/trip/TripPDF";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,23 +18,23 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAgentProfile, AgentProfile } from "@/hooks/useAgentProfile";
 import { format } from "date-fns";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
 import { ptBR } from "date-fns/locale";
-import type { TripServiceType, TripFormData } from "@/types/trip";
+import type { TripServiceType, TripFormData, TripService } from "@/types/trip";
 
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
-  flight: "Passagem Aérea",
-  hotel: "Hospedagem",
-  car_rental: "Locação de Veículo",
-  transfer: "Transfer",
-  attraction: "Ingressos/Atrações",
-  insurance: "Seguro Viagem",
-  cruise: "Cruzeiro",
-  other: "Outros",
+  flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
+  transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
+  cruise: "Cruzeiro", other: "Outros",
 };
 
 export default function TripWallet() {
@@ -40,15 +42,20 @@ export default function TripWallet() {
   const { id } = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { createTrip, isCreating, updatePassword, regeneratePassword } = useTrips();
-  const { trip, addService, deleteService, uploadVoucher, isAddingService } = useTrip(id && id !== "nova" ? id : undefined);
+  const { createTrip, isCreating, updateTrip, isUpdating, updatePassword, regeneratePassword, deleteTrip } = useTrips();
+  const { 
+    trip, addService, updateService, deleteService, uploadVoucher, 
+    replaceVoucher, removeVoucher, isAddingService, isUpdatingService, editHistory 
+  } = useTrip(id && id !== "nova" ? id : undefined);
 
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
+  const [editingService, setEditingService] = useState<TripService | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [editingPassword, setEditingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [isEditingTrip, setIsEditingTrip] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -59,6 +66,12 @@ export default function TripWallet() {
   const handleCreateTrip = async (data: TripFormData) => {
     const newTrip = await createTrip(data);
     navigate(`/ferramentas-ia/trip-wallet/${newTrip.id}`, { replace: true });
+  };
+
+  const handleUpdateTrip = async (data: { client_name: string; destination: string; start_date: string; end_date: string; status: string }) => {
+    if (!id) return;
+    await updateTrip({ id, ...data });
+    setIsEditingTrip(false);
   };
 
   const handleAddService = async (serviceData: any, file?: File) => {
@@ -77,6 +90,43 @@ export default function TripWallet() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleEditService = (service: TripService) => {
+    setEditingService(service);
+    setSelectedServiceType(service.service_type);
+  };
+
+  const handleUpdateService = async (serviceData: any, file?: File) => {
+    if (!editingService) return;
+    try {
+      setIsUploading(true);
+      let voucher_url: string | null | undefined = undefined;
+      let voucher_name: string | null | undefined = undefined;
+      if (file) {
+        const result = await uploadVoucher(file);
+        voucher_url = result.url;
+        voucher_name = result.name;
+      }
+      await updateService({
+        serviceId: editingService.id,
+        service_data: serviceData,
+        ...(voucher_url !== undefined ? { voucher_url, voucher_name } : {}),
+      });
+      setEditingService(null);
+      setSelectedServiceType(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleCancelServiceForm = () => {
+    setSelectedServiceType(null);
+    setEditingService(null);
+  };
+
+  const handleReplaceVoucher = async (serviceId: string, file: File) => {
+    await replaceVoucher({ serviceId, file });
   };
 
   const handleCopyLink = () => {
@@ -107,11 +157,23 @@ export default function TripWallet() {
     await regeneratePassword(id);
   };
 
+  const handleDeleteTrip = async () => {
+    if (!id) return;
+    await deleteTrip(id);
+    navigate("/ferramentas-ia/trip-wallet");
+  };
+
+  const handleArchiveTrip = async () => {
+    if (!id || !trip) return;
+    const newStatus = trip.status === "archived" ? "active" : "archived";
+    await updateTrip({ id, status: newStatus });
+  };
+
   const handleGeneratePDF = () => {
     if (trip) generateTripPDF(trip, agentProfile);
   };
 
-  // Listing view (no ID or default route)
+  // Listing view
   if (!id) {
     return (
       <DashboardLayout>
@@ -197,14 +259,61 @@ export default function TripWallet() {
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => setIsEditingTrip(true)}>
+              <Pencil className="mr-2 h-4 w-4" /> Editar Carteira
+            </Button>
             <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
               <FileText className="mr-2 h-4 w-4" /> PDF
             </Button>
             <Button variant="outline" size="sm" onClick={handleCopyLink}>
               <Copy className="mr-2 h-4 w-4" /> Copiar Link
             </Button>
+            <Button variant="outline" size="sm" onClick={handleArchiveTrip}>
+              <Archive className="mr-2 h-4 w-4" /> {trip.status === "archived" ? "Reativar" : "Arquivar"}
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Excluir carteira permanentemente?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    A carteira de <strong>{trip.client_name}</strong> será excluída permanentemente, incluindo todos os serviços, documentos e histórico. Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteTrip}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Excluir Permanentemente
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
+
+        {/* Edit Trip Form */}
+        {isEditingTrip && (
+          <Card className="max-w-2xl">
+            <CardHeader>
+              <CardTitle>Editar Carteira</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TripEditForm
+                trip={trip}
+                onSubmit={handleUpdateTrip}
+                onCancel={() => setIsEditingTrip(false)}
+                isLoading={isUpdating}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Services Section */}
@@ -216,12 +325,16 @@ export default function TripWallet() {
               <CardContent>
                 {selectedServiceType ? (
                   <div className="space-y-4">
-                    <h3 className="font-medium">{SERVICE_TYPE_LABELS[selectedServiceType]}</h3>
+                    <h3 className="font-medium">
+                      {editingService ? "Editar " : ""}{SERVICE_TYPE_LABELS[selectedServiceType]}
+                    </h3>
                     <TripServiceForm
                       serviceType={selectedServiceType}
-                      onSubmit={handleAddService}
-                      onCancel={() => setSelectedServiceType(null)}
-                      isLoading={isAddingService || isUploading}
+                      onSubmit={editingService ? handleUpdateService : handleAddService}
+                      onCancel={handleCancelServiceForm}
+                      isLoading={isAddingService || isUpdatingService || isUploading}
+                      defaultValues={editingService?.service_data as any}
+                      isEditing={!!editingService}
                     />
                   </div>
                 ) : (
@@ -236,6 +349,9 @@ export default function TripWallet() {
                     <TripServiceList
                       services={trip.services || []}
                       onDeleteService={deleteService}
+                      onEditService={handleEditService}
+                      onReplaceVoucher={handleReplaceVoucher}
+                      onRemoveVoucher={removeVoucher}
                       groupByType={true}
                     />
                   </>
@@ -325,8 +441,15 @@ export default function TripWallet() {
                   <span className="text-muted-foreground">Documentos</span>
                   <span className="font-medium">{trip.services?.filter(s => s.voucher_url).length || 0}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Status</span>
+                  <span className="font-medium">{trip.status === "archived" ? "Arquivada" : "Ativa"}</span>
+                </div>
               </CardContent>
             </Card>
+
+            {/* Edit History */}
+            <TripEditHistory history={editHistory} />
           </div>
         </div>
       </div>
