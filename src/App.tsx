@@ -16,6 +16,8 @@ import CriarConteudo from "./pages/CriarConteudo";
 import RoteiroPublico from "./pages/RoteiroPublico";
 import TripWallet from "./pages/TripWallet";
 import ViagemPublica from "./pages/ViagemPublica";
+import CarteiraPublica from "./pages/CarteiraPublica";
+import ShortCodeRedirect from "./pages/ShortCodeRedirect";
 import MapaTurismo from "./pages/MapaTurismo";
 import SupplierDetail from "./pages/SupplierDetail";
 import Noticias from "./pages/Noticias";
@@ -139,6 +141,8 @@ const App = () => (
               }
             />
             <Route path="/viagem/:token" element={<ViagemPublica />} />
+            <Route path="/c/:slug" element={<CarteiraPublica />} />
+            <Route path="/v/:code" element={<ShortCodeRedirect />} />
             <Route
               path="/mapa-turismo"
               element={

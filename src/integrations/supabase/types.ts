@@ -2589,6 +2589,8 @@ export type Database = {
           id: string
           share_expires_at: string | null
           share_token: string | null
+          short_code: string | null
+          slug: string | null
           start_date: string
           status: string
           updated_at: string
@@ -2603,6 +2605,8 @@ export type Database = {
           id?: string
           share_expires_at?: string | null
           share_token?: string | null
+          short_code?: string | null
+          slug?: string | null
           start_date: string
           status?: string
           updated_at?: string
@@ -2617,6 +2621,8 @@ export type Database = {
           id?: string
           share_expires_at?: string | null
           share_token?: string | null
+          short_code?: string | null
+          slug?: string | null
           start_date?: string
           status?: string
           updated_at?: string
@@ -2762,6 +2768,15 @@ export type Database = {
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       generate_secure_share_token: { Args: never; Returns: string }
+      generate_trip_short_code: { Args: never; Returns: string }
+      generate_trip_slug: {
+        Args: {
+          p_client_name: string
+          p_destination: string
+          p_start_date: string
+        }
+        Returns: string
+      }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
       get_monthly_sales_ranking: {
         Args: { target_month: number; target_year: number }
@@ -2800,8 +2815,14 @@ export type Database = {
         Args: { _user_id: string; _year: number }
         Returns: boolean
       }
+      resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
+      unaccent: { Args: { "": string }; Returns: string }
       verify_trip_access: {
         Args: { p_password: string; p_token: string }
+        Returns: Json
+      }
+      verify_trip_access_by_slug: {
+        Args: { p_password: string; p_slug: string }
         Returns: Json
       }
     }
