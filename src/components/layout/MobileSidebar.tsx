@@ -366,10 +366,10 @@ export function MobileSidebar() {
 
           {/* Footer */}
           {expanded && (
-            <div className="text-center pt-2">
-              <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>
-              <p className="text-[11px] font-medium text-muted-foreground/80">Nobre Digital Hub</p>
-            </div>
+             <div className="text-center pt-2">
+               <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>
+               <p className="text-[11px] font-medium text-muted-foreground/80">Nobre Digital</p>
+             </div>
           )}
         </div>
       </aside>
