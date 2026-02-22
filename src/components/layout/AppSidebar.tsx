@@ -49,6 +49,12 @@ interface MenuItem {
 // Main menu items - first section
 const mainMenuItems: MenuItem[] = [
   {
+    title: "Notícias",
+    url: "/noticias",
+    icon: Newspaper,
+    requiredFeature: "news",
+  },
+  {
     title: "Mapa do Turismo",
     url: "/mapa-turismo",
     icon: Map,
@@ -85,12 +91,6 @@ const mainMenuItems: MenuItem[] = [
     title: "Calculadora",
     url: "/calculadora",
     icon: Calculator,
-  },
-  {
-    title: "Notícias",
-    url: "/noticias",
-    icon: Newspaper,
-    requiredFeature: "news",
   },
 ];
 
