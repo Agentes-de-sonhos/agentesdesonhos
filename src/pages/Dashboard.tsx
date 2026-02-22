@@ -24,6 +24,7 @@ import {
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { NewsFeedCard } from "@/components/dashboard/NewsFeedCard";
+import { CuratedNewsFeed } from "@/components/dashboard/CuratedNewsFeed";
 import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
@@ -187,11 +188,11 @@ export default function Dashboard() {
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 order-2">
               <div>
                 <SectionHeader title="Principais Notícias" color="news" />
-                {news && news.length > 0 ? (
-                  <NewsFeedCard news={news} />
-                ) : (
-                  <div className="rounded-xl border bg-card p-6 sm:p-8 text-center text-muted-foreground shadow-card">
-                    <p>Nenhuma notícia disponível</p>
+                <CuratedNewsFeed />
+                {/* Fallback to manual news if no curated news */}
+                {news && news.length > 0 && (
+                  <div className="mt-3">
+                    <NewsFeedCard news={news} />
                   </div>
                 )}
               </div>
