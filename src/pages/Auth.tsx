@@ -526,7 +526,7 @@ export default function Auth() {
         {view !== "password-signup" && (
           <div className="pb-6 text-center">
             <p className="text-[10px] text-muted-foreground/50">
-              Desenvolvido por <span className="font-medium">Nobre Digital Hub</span>
+              Desenvolvido por <span className="font-medium">Nobre Digital</span>
             </p>
           </div>
         )}

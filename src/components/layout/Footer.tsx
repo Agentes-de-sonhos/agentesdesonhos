@@ -5,7 +5,7 @@ export function Footer() {
         <p className="text-xs text-muted-foreground/60">
           Desenvolvido por{" "}
           <span className="font-medium text-muted-foreground/80">
-            Nobre Digital Hub
+            Nobre Digital
           </span>
         </p>
       </div>

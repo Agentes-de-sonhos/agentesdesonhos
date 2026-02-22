@@ -1420,7 +1420,7 @@ export default function ViagemPublica() {
 
         <div className="mt-8 text-center">
           <p className="text-xs text-muted-foreground/60">
-            Desenvolvido por <span className="font-medium text-muted-foreground/80">Nobre Digital Hub</span>
+            Desenvolvido por <span className="font-medium text-muted-foreground/80">Nobre Digital</span>
           </p>
         </div>
       </div>

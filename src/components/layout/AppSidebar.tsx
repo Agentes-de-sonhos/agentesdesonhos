@@ -427,7 +427,7 @@ export function AppSidebar() {
                 Desenvolvido por
               </p>
               <p className="text-[11px] font-medium text-muted-foreground/80">
-                Nobre Digital Hub
+                Nobre Digital
               </p>
             </div>
           ) : (
