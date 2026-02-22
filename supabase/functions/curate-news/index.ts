@@ -208,6 +208,10 @@ serve(async (req) => {
         continue;
       }
 
+      const score = ai.relevancia_score || 0;
+      const isAlertaTrade = score >= 9;
+      const nivelAlerta = score >= 9 ? "alto" : score >= 7 ? "medio" : "nenhum";
+
       const { error: curatedError } = await supabase.from("noticias_dashboard").insert({
         noticia_bruta_id: raw.id,
         titulo_curto: ai.titulo_curto || raw.titulo_original.substring(0, 80),
@@ -215,10 +219,12 @@ serve(async (req) => {
         categoria: ai.categoria || "Turismo",
         fonte: raw.fonte,
         url_original: raw.url,
-        relevancia_score: ai.relevancia_score,
-        tipo_exibicao: ai.tipo_exibicao || "secundaria",
-        status: "pendente",
+        relevancia_score: score,
+        tipo_exibicao: isAlertaTrade ? "destaque" : (ai.tipo_exibicao || "secundaria"),
+        status: score >= 9 ? "sugerido_ia" : "pendente",
         data_publicacao: raw.data_publicacao || new Date().toISOString(),
+        alerta_trade: isAlertaTrade,
+        nivel_alerta: nivelAlerta,
       });
 
       if (curatedError) {

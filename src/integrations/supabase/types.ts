@@ -1310,6 +1310,7 @@ export type Database = {
       }
       noticias_dashboard: {
         Row: {
+          alerta_trade: boolean
           aprovado_em: string | null
           aprovado_por: string | null
           categoria: string
@@ -1317,6 +1318,7 @@ export type Database = {
           data_publicacao: string
           fonte: string
           id: string
+          nivel_alerta: string
           noticia_bruta_id: string | null
           relevancia_score: number
           resumo: string
@@ -1327,6 +1329,7 @@ export type Database = {
           url_original: string
         }
         Insert: {
+          alerta_trade?: boolean
           aprovado_em?: string | null
           aprovado_por?: string | null
           categoria: string
@@ -1334,6 +1337,7 @@ export type Database = {
           data_publicacao?: string
           fonte: string
           id?: string
+          nivel_alerta?: string
           noticia_bruta_id?: string | null
           relevancia_score?: number
           resumo: string
@@ -1344,6 +1348,7 @@ export type Database = {
           url_original: string
         }
         Update: {
+          alerta_trade?: boolean
           aprovado_em?: string | null
           aprovado_por?: string | null
           categoria?: string
@@ -1351,6 +1356,7 @@ export type Database = {
           data_publicacao?: string
           fonte?: string
           id?: string
+          nivel_alerta?: string
           noticia_bruta_id?: string | null
           relevancia_score?: number
           resumo?: string

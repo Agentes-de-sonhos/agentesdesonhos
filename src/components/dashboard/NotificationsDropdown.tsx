@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Calendar, Megaphone, Clock, Check, CheckCheck } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Bell, Calendar, Megaphone, Clock, Check, CheckCheck, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useAgenda } from "@/hooks/useAgenda";
 import { useReminders } from "@/hooks/useReminders";
+import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isTomorrow, parseISO, startOfDay, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -20,7 +22,7 @@ interface Notification {
   id: string;
   title: string;
   description?: string;
-  type: "agenda" | "reminder" | "admin";
+  type: "agenda" | "reminder" | "admin" | "trade_alert";
   date: Date;
   isRead: boolean;
   link?: string;
@@ -37,6 +39,22 @@ export function NotificationsDropdown() {
     }
   );
   const [isOpen, setIsOpen] = useState(false);
+
+  // Fetch trade alerts
+  const { data: tradeAlerts } = useQuery({
+    queryKey: ["trade-alerts-notifications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("noticias_dashboard")
+        .select("id, titulo_curto, data_publicacao")
+        .eq("alerta_trade", true)
+        .in("status", ["aprovado", "sugerido_ia"])
+        .order("data_publicacao", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   // Generate notifications from agenda events and reminders
   const notifications = useMemo(() => {
@@ -83,12 +101,25 @@ export function NotificationsDropdown() {
       }
     });
 
+    // Add trade alerts
+    (tradeAlerts || []).forEach((alert) => {
+      items.push({
+        id: `trade-${alert.id}`,
+        title: alert.titulo_curto,
+        description: "Nova notícia importante do trade",
+        type: "trade_alert",
+        date: new Date(alert.data_publicacao),
+        isRead: readNotifications.has(`trade-${alert.id}`),
+        link: "/noticias",
+      });
+    });
+
     // Sort by date, unread first
     return items.sort((a, b) => {
       if (a.isRead !== b.isRead) return a.isRead ? 1 : -1;
       return a.date.getTime() - b.date.getTime();
     });
-  }, [getUpcomingEvents, reminders, readNotifications]);
+  }, [getUpcomingEvents, reminders, tradeAlerts, readNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -119,6 +150,8 @@ export function NotificationsDropdown() {
         return <Calendar className="h-4 w-4 text-primary" />;
       case "reminder":
         return <Clock className="h-4 w-4 text-accent-foreground" />;
+      case "trade_alert":
+        return <AlertTriangle className="h-4 w-4 text-destructive" />;
       case "admin":
         return <Megaphone className="h-4 w-4 text-secondary-foreground" />;
     }
@@ -130,6 +163,8 @@ export function NotificationsDropdown() {
         return "Agenda";
       case "reminder":
         return "Lembrete";
+      case "trade_alert":
+        return "Alerta Trade";
       case "admin":
         return "Aviso";
     }
