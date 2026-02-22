@@ -1,6 +1,6 @@
 export type AgencyEventType = 'compromisso' | 'trade' | 'venda' | 'lembrete' | 'reuniao' | 'viagem' | 'aniversario';
 export type PresetEventType = 'feriado' | 'comemorativo' | 'trade' | 'treinamento';
-export type ViewMode = 'year' | 'month' | 'week';
+export type ViewMode = 'year' | 'month' | 'week' | 'day';
 
 export interface AgencyEvent {
   id: string;

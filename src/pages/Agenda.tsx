@@ -2,16 +2,17 @@ import { useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Calendar, CalendarDays, CalendarRange, Plus } from "lucide-react";
+import { Loader2, Calendar, CalendarDays, CalendarRange, Clock, Plus } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
 import { AnnualCalendar } from "@/components/agenda/AnnualCalendar";
 import { MonthlyCalendar } from "@/components/agenda/MonthlyCalendar";
 import { WeeklyCalendar } from "@/components/agenda/WeeklyCalendar";
+import { DailyCalendar } from "@/components/agenda/DailyCalendar";
 import { EventModal } from "@/components/agenda/EventModal";
 import { CalendarLegend } from "@/components/agenda/CalendarLegend";
 import { EventTypeFilter } from "@/components/agenda/EventTypeFilter";
 import { CalendarEvent, ViewMode, AgencyEventType } from "@/types/agenda";
-import { addMonths, subMonths, addWeeks, subWeeks, format } from "date-fns";
+import { addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, format } from "date-fns";
 
 export default function Agenda() {
   const [viewMode, setViewMode] = useState<ViewMode>("year");
@@ -86,6 +87,10 @@ export default function Agenda() {
     setCurrentDate(prev => direction === 'prev' ? subWeeks(prev, 1) : addWeeks(prev, 1));
   }, []);
 
+  const navigateDay = useCallback((direction: 'prev' | 'next') => {
+    setCurrentDate(prev => direction === 'prev' ? subDays(prev, 1) : addDays(prev, 1));
+  }, []);
+
   const goToToday = useCallback(() => {
     setCurrentDate(new Date());
     setCurrentYear(new Date().getFullYear());
@@ -135,6 +140,14 @@ export default function Agenda() {
               <Calendar className="h-4 w-4 mr-2" />
               Semana
             </Button>
+            <Button
+              variant={viewMode === "day" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("day")}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              Dia
+            </Button>
           </div>
         </div>
 
@@ -180,6 +193,16 @@ export default function Agenda() {
                     onDayClick={handleDayClick}
                     onEventClick={handleEventClick}
                     onNavigate={navigateWeek}
+                    onToday={goToToday}
+                  />
+                )}
+                {viewMode === "day" && (
+                  <DailyCalendar
+                    currentDate={currentDate}
+                    events={allEvents}
+                    onDayClick={handleDayClick}
+                    onEventClick={handleEventClick}
+                    onNavigate={navigateDay}
                     onToday={goToToday}
                   />
                 )}
