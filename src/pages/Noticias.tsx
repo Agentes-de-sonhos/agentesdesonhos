@@ -10,6 +10,7 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,15 @@ const CATEGORIAS_FILTER = [
   "Eventos",
 ];
 
+const CATEGORIA_COLORS: Record<string, string> = {
+  "Aéreo": "bg-sky-100 text-sky-700 border-sky-200",
+  "Destinos": "bg-emerald-100 text-emerald-700 border-emerald-200",
+  "Mercado": "bg-amber-100 text-amber-700 border-amber-200",
+  "Cruzeiros": "bg-indigo-100 text-indigo-700 border-indigo-200",
+  "Turismo": "bg-teal-100 text-teal-700 border-teal-200",
+  "Eventos": "bg-purple-100 text-purple-700 border-purple-200",
+};
+
 const PAGE_SIZE = 20;
 
 function formatDate(dateString: string): string {
@@ -58,63 +68,68 @@ function formatDate(dateString: string): string {
   return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function NewsCardBadges({ item }: { item: NoticiaHub }) {
+function CategoryBadge({ categoria }: { categoria: string }) {
+  const colorClass = CATEGORIA_COLORS[categoria] || "bg-muted text-muted-foreground border-border";
   return (
-    <div className="flex items-center gap-1.5 flex-wrap">
-      {item.alerta_trade && (
-        <Badge className="bg-destructive/15 text-destructive border-destructive/30 text-[10px] uppercase tracking-wider font-bold">
-          <AlertTriangle className="h-3 w-3 mr-1" />
-          Alerta do Trade
-        </Badge>
-      )}
-      {item.tipo_exibicao === "destaque" && !item.alerta_trade && (
-        <Badge className="bg-primary/15 text-primary border-primary/30 text-[10px] uppercase tracking-wider font-semibold">
-          <Star className="h-3 w-3 mr-1" />
-          Destaque
-        </Badge>
-      )}
-      {item.status === "sugerido_ia" && (
-        <Badge className="bg-accent text-accent-foreground border-0 text-[10px] uppercase tracking-wider font-semibold">
-          <Sparkles className="h-3 w-3 mr-1" />
-          Curadoria da IA
-        </Badge>
-      )}
-      {item.status === "aprovado" && !item.alerta_trade && item.tipo_exibicao !== "destaque" && (
-        <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
-          Aprovado
-        </Badge>
-      )}
-      <Badge variant="outline" className="text-[10px]">
-        {item.categoria}
-      </Badge>
-    </div>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${colorClass}`}>
+      {categoria}
+    </span>
   );
 }
 
-function NewsCard({ item, size = "normal" }: { item: NoticiaHub; size?: "large" | "normal" }) {
-  const isLarge = size === "large";
+function StatusBadge({ item }: { item: NoticiaHub }) {
+  if (item.alerta_trade) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+        <AlertTriangle className="h-3 w-3" />
+        Alerta do Trade
+      </span>
+    );
+  }
+  if (item.tipo_exibicao === "destaque") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+        <Star className="h-3 w-3" />
+        Destaque
+      </span>
+    );
+  }
+  if (item.status === "sugerido_ia") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 text-violet-700 border border-violet-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+        <Sparkles className="h-3 w-3" />
+        Curadoria da IA
+      </span>
+    );
+  }
+  return null;
+}
 
+/* ── Hero Card (top feature) ─────────────────────────────── */
+function HeroNewsCard({ item }: { item: NoticiaHub }) {
   return (
-    <a
-      href={item.url_original}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block group"
-    >
-      <Card className={`border-0 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover ${item.alerta_trade ? "ring-1 ring-destructive/20 bg-destructive/[0.02]" : ""}`}>
-        <CardContent className={isLarge ? "p-6" : "p-4"}>
-          <NewsCardBadges item={item} />
-          <h3 className={`font-display font-semibold text-foreground group-hover:text-primary transition-colors mt-2 leading-snug ${isLarge ? "text-lg" : "text-sm"}`}>
+    <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
+      <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/5 via-card to-card">
+        <CardContent className="p-8 md:p-10">
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <StatusBadge item={item} />
+            <CategoryBadge categoria={item.categoria} />
+            <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
+              <TrendingUp className="h-3.5 w-3.5" />
+              Score {item.relevancia_score}/10
+            </span>
+          </div>
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
             {item.titulo_curto}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
+          </h2>
+          <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-3xl">
             {item.resumo}
           </p>
-          <div className="flex items-center gap-2 mt-3">
-            <span className="text-xs text-muted-foreground font-medium">{item.fonte}</span>
-            <span className="text-xs text-muted-foreground">•</span>
-            <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-            <ExternalLink className="h-3.5 w-3.5 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center gap-3 mt-5 pt-4 border-t border-border/50">
+            <span className="text-sm font-semibold text-foreground/70">{item.fonte}</span>
+            <span className="text-sm text-muted-foreground">•</span>
+            <span className="text-sm text-muted-foreground">{formatDate(item.data_publicacao)}</span>
+            <ExternalLink className="h-4 w-4 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         </CardContent>
       </Card>
@@ -122,6 +137,75 @@ function NewsCard({ item, size = "normal" }: { item: NoticiaHub; size?: "large" 
   );
 }
 
+/* ── Alert Card (horizontal, premium) ────────────────────── */
+function AlertNewsCard({ item }: { item: NoticiaHub }) {
+  return (
+    <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
+      <Card className="border-0 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 bg-gradient-to-r from-orange-50 to-card ring-1 ring-orange-200/50">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <StatusBadge item={item} />
+            <CategoryBadge categoria={item.categoria} />
+          </div>
+          <h3 className="font-display text-lg font-bold text-foreground group-hover:text-orange-600 transition-colors leading-snug">
+            {item.titulo_curto}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+            {item.resumo}
+          </p>
+          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-orange-100">
+            <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
+            <span className="text-xs text-muted-foreground">•</span>
+            <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
+            <ExternalLink className="h-3.5 w-3.5 ml-auto text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        </CardContent>
+      </Card>
+    </a>
+  );
+}
+
+/* ── Standard Magazine Card ──────────────────────────────── */
+function MagazineNewsCard({ item }: { item: NoticiaHub }) {
+  return (
+    <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group h-full">
+      <Card className="border-0 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full">
+        <CardContent className="p-6 flex flex-col h-full">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <StatusBadge item={item} />
+            <CategoryBadge categoria={item.categoria} />
+          </div>
+          <h3 className="font-display text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-snug flex-grow">
+            {item.titulo_curto}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+            {item.resumo}
+          </p>
+          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/50">
+            <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
+            <span className="text-xs text-muted-foreground">•</span>
+            <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
+            <ExternalLink className="h-3.5 w-3.5 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        </CardContent>
+      </Card>
+    </a>
+  );
+}
+
+/* ── Section Header ──────────────────────────────────────── */
+function SectionTitle({ icon: Icon, title, color }: { icon: React.ElementType; title: string; color: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${color}`}>
+        <Icon className="h-4.5 w-4.5 text-white" />
+      </div>
+      <h2 className="font-display text-xl font-bold text-foreground">{title}</h2>
+    </div>
+  );
+}
+
+/* ── Main Page ───────────────────────────────────────────── */
 export default function Noticias() {
   const [activeFilter, setActiveFilter] = useState("Todas");
   const [page, setPage] = useState(1);
@@ -140,48 +224,50 @@ export default function Noticias() {
     },
   });
 
+  // ── Deduplicated sections ──
   const alertas = useMemo(
-    () => (allNews || []).filter((n) => n.alerta_trade && n.relevancia_score >= 9).slice(0, 3),
+    () => (allNews || []).filter((n) => n.alerta_trade).slice(0, 3),
     [allNews]
   );
 
-  const destaques = useMemo(
-    () =>
-      (allNews || [])
-        .filter((n) => n.status === "aprovado" && n.tipo_exibicao === "destaque" && !n.alerta_trade)
-        .slice(0, 3),
-    [allNews]
+  const alertaIds = useMemo(() => new Set(alertas.map((n) => n.id)), [alertas]);
+
+  // Hero = highest-scoring non-alert
+  const hero = useMemo(
+    () => (allNews || []).find((n) => !alertaIds.has(n.id)),
+    [allNews, alertaIds]
   );
 
-  const curadoriaIA = useMemo(
-    () => (allNews || []).filter((n) => n.status === "sugerido_ia").slice(0, 10),
-    [allNews]
+  const heroAndAlertIds = useMemo(() => {
+    const s = new Set(alertaIds);
+    if (hero) s.add(hero.id);
+    return s;
+  }, [alertaIds, hero]);
+
+  // Curadoria = remaining items, no duplicates
+  const curadoria = useMemo(
+    () => (allNews || []).filter((n) => !heroAndAlertIds.has(n.id)),
+    [allNews, heroAndAlertIds]
   );
 
-  // Filtered list for the main paginated section
+  // Filtered list for pagination (respects active filter)
   const filteredNews = useMemo(() => {
     if (!allNews) return [];
-    let list = allNews;
-
     switch (activeFilter) {
       case "Destaques":
-        list = allNews.filter((n) => n.tipo_exibicao === "destaque");
-        break;
+        return allNews.filter((n) => n.tipo_exibicao === "destaque");
       case "Alertas do Trade":
-        list = allNews.filter((n) => n.alerta_trade);
-        break;
+        return allNews.filter((n) => n.alerta_trade);
       case "Todas":
-        break;
+        return allNews;
       default:
-        list = allNews.filter((n) => n.categoria === activeFilter);
+        return allNews.filter((n) => n.categoria === activeFilter);
     }
-    return list;
   }, [allNews, activeFilter]);
 
   const totalPages = Math.ceil(filteredNews.length / PAGE_SIZE);
   const paginatedNews = filteredNews.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // Reset page when filter changes
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
     setPage(1);
@@ -191,30 +277,34 @@ export default function Noticias() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-primary">
-            <Newspaper className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="font-display text-3xl font-bold text-foreground">
-              Notícias do Trade
-            </h1>
-            <p className="text-muted-foreground">
-              Curadoria inteligente para agentes de viagens
-            </p>
+      <div className="space-y-8 animate-fade-in">
+        {/* ── Hero Header ── */}
+        <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 md:p-10">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
+              <Newspaper className="h-7 w-7 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
+                Notícias do Trade
+              </h1>
+              <p className="text-muted-foreground text-base mt-0.5">
+                Curadoria inteligente para agentes de viagens
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {/* ── Filter Bar ── */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mt-2">
           {CATEGORIAS_FILTER.map((cat) => (
             <Button
               key={cat}
               variant={activeFilter === cat ? "default" : "outline"}
               size="sm"
-              className="whitespace-nowrap text-xs rounded-full"
+              className={`whitespace-nowrap text-xs rounded-full px-4 ${
+                activeFilter === cat ? "shadow-md shadow-primary/20" : ""
+              }`}
               onClick={() => handleFilterChange(cat)}
             >
               {cat}
@@ -223,95 +313,82 @@ export default function Noticias() {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Carregando notícias...</p>
           </div>
         ) : (
           <>
-            {/* Alertas do Trade */}
-            {showSections && alertas.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="font-display text-lg font-bold text-destructive flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" />
-                  Alertas do Trade
-                </h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {alertas.map((item) => (
-                    <NewsCard key={item.id} item={item} size="large" />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Destaques da Curadoria */}
-            {showSections && destaques.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
-                  <Star className="h-5 w-5 text-primary" />
-                  Destaques da Curadoria
-                </h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {destaques.map((item) => (
-                    <NewsCard key={item.id} item={item} size="large" />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Curadoria da IA */}
-            {showSections && curadoriaIA.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-accent-foreground" />
-                  Curadoria da IA
-                </h2>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {curadoriaIA.map((item) => (
-                    <NewsCard key={item.id} item={item} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* All / Filtered News */}
-            {paginatedNews.length > 0 && (
-              <section className="space-y-3">
-                {!showSections && (
-                  <h2 className="font-display text-lg font-bold text-foreground">
-                    {activeFilter}
-                  </h2>
+            {showSections && (
+              <>
+                {/* ── Hero Feature ── */}
+                {hero && (
+                  <section>
+                    <HeroNewsCard item={hero} />
+                  </section>
                 )}
-                {showSections && (
-                  <h2 className="font-display text-lg font-bold text-foreground">
-                    Todas as Notícias
-                  </h2>
+
+                {/* ── Alertas do Trade ── */}
+                {alertas.length > 0 && (
+                  <section className="space-y-4">
+                    <SectionTitle icon={AlertTriangle} title="Alertas do Trade" color="bg-orange-500" />
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {alertas.map((item) => (
+                        <AlertNewsCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </section>
                 )}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {paginatedNews.map((item) => (
-                    <NewsCard key={item.id} item={item} />
-                  ))}
+
+                {/* ── Curadoria Inteligente ── */}
+                {curadoria.length > 0 && (
+                  <section className="space-y-4">
+                    <SectionTitle icon={Sparkles} title="Curadoria Inteligente" color="bg-violet-500" />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {curadoria.slice(0, 10).map((item) => (
+                        <MagazineNewsCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* ── All remaining ── */}
+                {curadoria.length > 10 && (
+                  <section className="space-y-4">
+                    <SectionTitle icon={Newspaper} title="Todas as Notícias" color="bg-primary" />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {curadoria.slice(10).map((item) => (
+                        <MagazineNewsCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+
+            {/* ── Filtered View ── */}
+            {!showSections && paginatedNews.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="font-display text-xl font-bold text-foreground">{activeFilter}</h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {paginatedNews.map((item) =>
+                    item.alerta_trade ? (
+                      <AlertNewsCard key={item.id} item={item} />
+                    ) : (
+                      <MagazineNewsCard key={item.id} item={item} />
+                    )
+                  )}
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 pt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page === 1}
-                      onClick={() => setPage((p) => p - 1)}
-                    >
+                  <div className="flex items-center justify-center gap-3 pt-6">
+                    <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="rounded-full">
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm font-medium text-muted-foreground">
                       {page} de {totalPages}
                     </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page === totalPages}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
+                    <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage((p) => p + 1)} className="rounded-full">
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -319,11 +396,12 @@ export default function Noticias() {
               </section>
             )}
 
-            {/* Empty state */}
+            {/* ── Empty state ── */}
             {filteredNews.length === 0 && (
-              <div className="text-center py-16 text-muted-foreground">
-                <Newspaper className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhuma notícia encontrada para "{activeFilter}"</p>
+              <div className="text-center py-24 text-muted-foreground">
+                <Newspaper className="h-14 w-14 mx-auto mb-4 opacity-30" />
+                <p className="text-lg font-medium">Nenhuma notícia encontrada</p>
+                <p className="text-sm mt-1">Tente outro filtro de categoria</p>
               </div>
             )}
           </>
