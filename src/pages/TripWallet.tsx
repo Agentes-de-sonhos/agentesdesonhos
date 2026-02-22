@@ -4,7 +4,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2 } from "lucide-react";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
@@ -12,6 +12,7 @@ import { TripWalletList } from "@/components/trip/TripWalletList";
 import { TripEditForm } from "@/components/trip/TripEditForm";
 import { TripEditHistory } from "@/components/trip/TripEditHistory";
 import { generateTripPDF } from "@/components/trip/TripPDF";
+import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -57,7 +58,7 @@ export default function TripWallet() {
   const [editingPassword, setEditingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isEditingTrip, setIsEditingTrip] = useState(false);
-
+  const [showShareModal, setShowShareModal] = useState(false);
   // Auto-enable edit mode from URL query param
   useEffect(() => {
     if (searchParams.get("edit") === "true" && trip) {
@@ -176,8 +177,13 @@ export default function TripWallet() {
   };
 
   const handleCopyLink = () => {
-    if (!trip?.share_token) return;
-    const url = `${window.location.origin}/viagem/${trip.share_token}`;
+    if (!trip) return;
+    const url = trip.slug 
+      ? `${window.location.origin}/c/${trip.slug}`
+      : trip.share_token 
+        ? `${window.location.origin}/viagem/${trip.share_token}` 
+        : '';
+    if (!url) return;
     navigator.clipboard.writeText(url);
     toast({ title: "Link copiado!", description: "O link da carteira foi copiado." });
   };
@@ -311,8 +317,8 @@ export default function TripWallet() {
             <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
               <FileText className="mr-2 h-4 w-4" /> PDF
             </Button>
-            <Button variant="outline" size="sm" onClick={handleCopyLink}>
-              <Copy className="mr-2 h-4 w-4" /> Copiar Link
+            <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)}>
+              <Share2 className="mr-2 h-4 w-4" /> Compartilhar
             </Button>
             <Button variant="outline" size="sm" onClick={handleArchiveTrip}>
               <Archive className="mr-2 h-4 w-4" /> {trip.status === "archived" ? "Reativar" : "Arquivar"}
@@ -454,11 +460,16 @@ export default function TripWallet() {
                   </div>
                 </div>
 
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Link da carteira</p>
-                  <Button variant="outline" size="sm" className="w-full text-xs" onClick={handleCopyLink}>
-                    <Copy className="mr-2 h-3 w-3" /> Copiar link para o cliente
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground mb-1">Compartilhar</p>
+                  <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => setShowShareModal(true)}>
+                    <Share2 className="mr-2 h-3 w-3" /> Link, QR Code e Senha
                   </Button>
+                  {trip.slug && (
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      /c/{trip.slug}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -500,6 +511,9 @@ export default function TripWallet() {
             <TripEditHistory history={editHistory} />
           </div>
         </div>
+
+        {/* Share Modal */}
+        <ShareTripModal trip={trip} open={showShareModal} onOpenChange={setShowShareModal} />
       </div>
     </DashboardLayout>
   );

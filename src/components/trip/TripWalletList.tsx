@@ -61,8 +61,12 @@ export function TripWalletList() {
   const filteredTrips = filterTrips(trips, filter);
 
   const handleCopyLink = (trip: Trip) => {
-    if (!trip.share_token) return;
-    const url = `${window.location.origin}/viagem/${trip.share_token}`;
+    const url = trip.slug 
+      ? `${window.location.origin}/c/${trip.slug}`
+      : trip.share_token 
+        ? `${window.location.origin}/viagem/${trip.share_token}` 
+        : '';
+    if (!url) return;
     navigator.clipboard.writeText(url);
     toast({ title: "Link copiado!", description: "Link da carteira copiado para a área de transferência." });
   };

@@ -13,6 +13,8 @@ export interface Trip {
   status: 'active' | 'archived';
   share_token: string | null;
   access_password: string | null;
+  slug: string | null;
+  short_code: string | null;
   created_at: string;
   updated_at: string;
   services?: TripService[];
