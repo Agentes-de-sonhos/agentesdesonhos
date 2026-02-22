@@ -15,6 +15,7 @@ import {
   Heart,
   Megaphone,
   BookOpen,
+  Sparkles,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -28,6 +29,7 @@ import { AdminCommunityManager } from "@/components/admin/AdminCommunityManager"
 import { AdminUserManager } from "@/components/admin/AdminUserManager";
 import { AdminPopupsManager } from "@/components/admin/AdminPopupsManager";
 import { AdminPlaybookManager } from "@/components/admin/AdminPlaybookManager";
+import { AdminNewsCurationManager } from "@/components/admin/AdminNewsCurationManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -110,7 +112,7 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
+          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-13">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Usuários</span>
@@ -158,6 +160,10 @@ export default function Admin() {
             <TabsTrigger value="playbooks" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Playbooks</span>
+            </TabsTrigger>
+            <TabsTrigger value="curadoria" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              <span className="hidden sm:inline">Curadoria IA</span>
             </TabsTrigger>
           </TabsList>
 
@@ -207,6 +213,10 @@ export default function Admin() {
 
           <TabsContent value="playbooks">
             <AdminPlaybookManager />
+          </TabsContent>
+
+          <TabsContent value="curadoria">
+            <AdminNewsCurationManager />
           </TabsContent>
         </Tabs>
       </div>

@@ -1272,6 +1272,104 @@ export type Database = {
           },
         ]
       }
+      noticias_brutas: {
+        Row: {
+          conteudo: string | null
+          created_at: string
+          data_coleta: string
+          data_publicacao: string | null
+          fonte: string
+          id: string
+          processado: boolean
+          titulo_original: string
+          url: string
+        }
+        Insert: {
+          conteudo?: string | null
+          created_at?: string
+          data_coleta?: string
+          data_publicacao?: string | null
+          fonte: string
+          id?: string
+          processado?: boolean
+          titulo_original: string
+          url: string
+        }
+        Update: {
+          conteudo?: string | null
+          created_at?: string
+          data_coleta?: string
+          data_publicacao?: string | null
+          fonte?: string
+          id?: string
+          processado?: boolean
+          titulo_original?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      noticias_dashboard: {
+        Row: {
+          aprovado_em: string | null
+          aprovado_por: string | null
+          categoria: string
+          created_at: string
+          data_publicacao: string
+          fonte: string
+          id: string
+          noticia_bruta_id: string | null
+          relevancia_score: number
+          resumo: string
+          status: string
+          tipo_exibicao: string
+          titulo_curto: string
+          updated_at: string
+          url_original: string
+        }
+        Insert: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          categoria: string
+          created_at?: string
+          data_publicacao?: string
+          fonte: string
+          id?: string
+          noticia_bruta_id?: string | null
+          relevancia_score?: number
+          resumo: string
+          status?: string
+          tipo_exibicao?: string
+          titulo_curto: string
+          updated_at?: string
+          url_original: string
+        }
+        Update: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          categoria?: string
+          created_at?: string
+          data_publicacao?: string
+          fonte?: string
+          id?: string
+          noticia_bruta_id?: string | null
+          relevancia_score?: number
+          resumo?: string
+          status?: string
+          tipo_exibicao?: string
+          titulo_curto?: string
+          updated_at?: string
+          url_original?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "noticias_dashboard_noticia_bruta_id_fkey"
+            columns: ["noticia_bruta_id"]
+            isOneToOne: false
+            referencedRelation: "noticias_brutas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       online_meetings: {
         Row: {
           created_at: string
