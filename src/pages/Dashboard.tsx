@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
-import { NewsFeedCard } from "@/components/dashboard/NewsFeedCard";
+
 import { CuratedNewsFeed } from "@/components/dashboard/CuratedNewsFeed";
 import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
@@ -63,28 +63,6 @@ export default function Dashboard() {
     navigate("/auth");
   };
 
-  // Fetch news from database (unified news - trade + general)
-  const { data: news, isLoading: newsLoading } = useQuery({
-    queryKey: ["news"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("news")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return data.map((item) => ({
-        id: item.id,
-        title: item.title,
-        source: item.source,
-        url: item.url,
-        date: formatDate(item.created_at),
-        category: item.category,
-      }));
-    },
-  });
-
   // Fetch suppliers from database
   const { data: suppliers, isLoading: suppliersLoading } = useQuery({
     queryKey: ["suppliers"],
@@ -105,20 +83,7 @@ export default function Dashboard() {
     },
   });
 
-  function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffHours < 1) return "Agora";
-    if (diffHours < 24) return `Há ${diffHours} hora${diffHours > 1 ? "s" : ""}`;
-    if (diffDays === 1) return "Ontem";
-    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-  }
-
-  const isLoading = newsLoading || suppliersLoading;
+  const isLoading = suppliersLoading;
 
   return (
     <DashboardLayout>
@@ -189,12 +154,6 @@ export default function Dashboard() {
               <div>
                 <SectionHeader title="Principais Notícias" color="news" />
                 <CuratedNewsFeed />
-                {/* Fallback to manual news if no curated news */}
-                {news && news.length > 0 && (
-                  <div className="mt-3">
-                    <NewsFeedCard news={news} />
-                  </div>
-                )}
               </div>
               <div>
                 <SectionHeader title="Próximas Viagens" color="reminders" />
