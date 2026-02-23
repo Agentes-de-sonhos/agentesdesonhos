@@ -16,10 +16,6 @@ import {
   FolderOpen,
   Sparkles,
   Calendar,
-  CalendarDays,
-  Archive,
-  Building2,
-  Layers,
 } from "lucide-react";
 import { GallerySection } from "@/components/materials/GallerySection";
 import { GalleryModal } from "@/components/materials/GalleryModal";
@@ -57,8 +53,6 @@ export default function Materiais() {
     filterMaterials, 
     groupIntoGalleries,
     groupGalleriesByPeriod, 
-    groupGalleriesByCategory, 
-    groupGalleriesBySupplier 
   } = useMaterials();
 
   // Filter materials first, then group into galleries
@@ -69,8 +63,6 @@ export default function Materiais() {
 
   // Group galleries
   const byPeriod = useMemo(() => groupGalleriesByPeriod(galleries), [galleries, groupGalleriesByPeriod]);
-  const byCategory = useMemo(() => groupGalleriesByCategory(galleries), [galleries, groupGalleriesByCategory]);
-  const bySupplier = useMemo(() => groupGalleriesBySupplier(galleries), [galleries, groupGalleriesBySupplier]);
 
   // Count active filters
   const activeFiltersCount = [
@@ -232,10 +224,10 @@ export default function Materiais() {
           </div>
         ) : hasContent ? (
           <div className="space-y-8">
-            {/* Today's Galleries */}
+            {/* Material de Hoje */}
             {byPeriod.today.length > 0 && (
               <GallerySection 
-                title="Novos de Hoje" 
+                title="Material de Hoje" 
                 galleries={byPeriod.today} 
                 variant="large"
                 icon={<Sparkles className="h-5 w-5 text-primary" />}
@@ -243,76 +235,12 @@ export default function Materiais() {
               />
             )}
 
-            {/* This Week */}
-            {byPeriod.thisWeek.length > 0 && (
+            {/* Materiais dos Últimos 7 Dias */}
+            {byPeriod.last7Days.length > 0 && (
               <GallerySection 
-                title="Desta Semana" 
-                galleries={byPeriod.thisWeek}
+                title="Materiais dos Últimos 7 Dias" 
+                galleries={byPeriod.last7Days}
                 icon={<Calendar className="h-5 w-5 text-primary" />}
-                onOpen={handleOpenGallery}
-              />
-            )}
-
-            {/* This Month */}
-            {byPeriod.thisMonth.length > 0 && (
-              <GallerySection 
-                title="Deste Mês" 
-                galleries={byPeriod.thisMonth}
-                icon={<CalendarDays className="h-5 w-5 text-primary" />}
-                onOpen={handleOpenGallery}
-              />
-            )}
-
-            {/* By Category */}
-            {Object.keys(byCategory).length > 0 && (
-              <div className="space-y-6 pt-4 border-t">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-primary" />
-                  Por Categoria
-                </h2>
-                {Object.entries(byCategory)
-                  .sort(([, a], [, b]) => b.length - a.length)
-                  .map(([category, categoryGalleries]) => (
-                    <GallerySection 
-                      key={category}
-                      title={category} 
-                      galleries={categoryGalleries}
-                      onOpen={handleOpenGallery}
-                    />
-                  ))
-                }
-              </div>
-            )}
-
-            {/* By Supplier */}
-            {Object.keys(bySupplier).length > 1 && (
-              <div className="space-y-6 pt-4 border-t">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  Por Fornecedor
-                </h2>
-                {Object.entries(bySupplier)
-                  .filter(([name]) => name !== "Outros")
-                  .sort(([, a], [, b]) => b.length - a.length)
-                  .slice(0, 5)
-                  .map(([supplierName, supplierGalleries]) => (
-                    <GallerySection 
-                      key={supplierName}
-                      title={supplierName} 
-                      galleries={supplierGalleries}
-                      onOpen={handleOpenGallery}
-                    />
-                  ))
-                }
-              </div>
-            )}
-
-            {/* Older Galleries */}
-            {byPeriod.older.length > 0 && (
-              <GallerySection 
-                title="Materiais Anteriores" 
-                galleries={byPeriod.older}
-                icon={<Archive className="h-5 w-5 text-muted-foreground" />}
                 onOpen={handleOpenGallery}
               />
             )}

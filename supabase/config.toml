@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.curate-news]
 verify_jwt = false
+
+[functions.cleanup-materials]
+verify_jwt = false

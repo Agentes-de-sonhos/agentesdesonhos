@@ -7,6 +7,9 @@ export function useMaterials() {
   const { data: materials, isLoading, error } = useQuery({
     queryKey: ["materials"],
     queryFn: async () => {
+      // Only fetch materials from the last 7 days
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const { data, error } = await supabase
         .from("materials")
         .select(`
@@ -17,7 +20,8 @@ export function useMaterials() {
           )
         `)
         .eq("is_active", true)
-        .order("published_at", { ascending: false });
+        .gte("created_at", sevenDaysAgo.toISOString())
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Material[];
     },
@@ -120,31 +124,22 @@ export function useMaterials() {
     );
   };
 
-  // Group galleries by time period
-  const groupGalleriesByPeriod = (galleries: MaterialGallery[]): MaterialsByPeriod<MaterialGallery> => {
+  // Group galleries into "Today" and "Last 7 Days"
+  const groupGalleriesByPeriod = (galleries: MaterialGallery[]): { today: MaterialGallery[]; last7Days: MaterialGallery[] } => {
     const now = new Date();
     const todayStart = startOfDay(now);
-    const weekStart = startOfWeek(now, { weekStartsOn: 0 });
-    const monthStart = startOfMonth(now);
 
-    const result: MaterialsByPeriod<MaterialGallery> = {
-      today: [],
-      thisWeek: [],
-      thisMonth: [],
-      older: [],
+    const result = {
+      today: [] as MaterialGallery[],
+      last7Days: [] as MaterialGallery[],
     };
 
     galleries?.forEach((gallery) => {
-      const publishedDate = new Date(gallery.published_at);
-
-      if (isSameDay(publishedDate, now)) {
+      const createdDate = new Date(gallery.published_at);
+      if (createdDate >= todayStart) {
         result.today.push(gallery);
-      } else if (isWithinInterval(publishedDate, { start: weekStart, end: todayStart })) {
-        result.thisWeek.push(gallery);
-      } else if (isWithinInterval(publishedDate, { start: monthStart, end: weekStart })) {
-        result.thisMonth.push(gallery);
       } else {
-        result.older.push(gallery);
+        result.last7Days.push(gallery);
       }
     });
 
