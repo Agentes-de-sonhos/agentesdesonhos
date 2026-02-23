@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_definitions: {
+        Row: {
+          created_at: string
+          criteria_type: string
+          criteria_value: number
+          description: string | null
+          icon: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          criteria_type?: string
+          criteria_value?: number
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          criteria_type?: string
+          criteria_value?: number
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       agency_events: {
         Row: {
           client_id: string | null
@@ -793,6 +823,7 @@ export type Database = {
       }
       learning_trails: {
         Row: {
+          certificate_template_url: string | null
           created_at: string
           description: string | null
           destination: string
@@ -801,9 +832,11 @@ export type Database = {
           is_active: boolean
           name: string
           order_index: number
+          total_hours: number
           updated_at: string
         }
         Insert: {
+          certificate_template_url?: string | null
           created_at?: string
           description?: string | null
           destination: string
@@ -812,9 +845,11 @@ export type Database = {
           is_active?: boolean
           name: string
           order_index?: number
+          total_hours?: number
           updated_at?: string
         }
         Update: {
+          certificate_template_url?: string | null
           created_at?: string
           description?: string | null
           destination?: string
@@ -823,6 +858,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           order_index?: number
+          total_hours?: number
           updated_at?: string
         }
         Relationships: []
@@ -1927,6 +1963,79 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_options: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean
+          option_text: string
+          order_index: number
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          option_text: string
+          order_index?: number
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          option_text?: string
+          order_index?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          created_at: string
+          id: string
+          order_index: number
+          question_text: string
+          question_type: string
+          training_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          question_text: string
+          question_type?: string
+          training_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          question_text?: string
+          question_type?: string
+          training_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_services: {
         Row: {
           amount: number
@@ -2461,6 +2570,129 @@ export type Database = {
         }
         Relationships: []
       }
+      trail_exam_options: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean
+          option_text: string
+          order_index: number
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          option_text: string
+          order_index?: number
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          option_text?: string
+          order_index?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_exam_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "trail_exam_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trail_exam_questions: {
+        Row: {
+          created_at: string
+          id: string
+          order_index: number
+          question_text: string
+          question_type: string
+          trail_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          question_text: string
+          question_type?: string
+          trail_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          question_text?: string
+          question_type?: string
+          trail_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_exam_questions_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trail_materials: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          file_url: string | null
+          id: string
+          is_premium: boolean
+          material_type: string
+          order_index: number
+          title: string
+          trail_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          is_premium?: boolean
+          material_type?: string
+          order_index?: number
+          title: string
+          trail_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          is_premium?: boolean
+          material_type?: string
+          order_index?: number
+          title?: string
+          trail_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_materials_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trail_trainings: {
         Row: {
           created_at: string
@@ -2734,6 +2966,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievement_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_certificates: {
         Row: {
           agent_name: string
@@ -2768,6 +3029,82 @@ export type Database = {
             columns: ["trail_id"]
             isOneToOne: false
             referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_exam_attempts: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          passed: boolean
+          score: number
+          trail_id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          passed?: boolean
+          score?: number
+          trail_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          passed?: boolean
+          score?: number
+          trail_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_exam_attempts_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_quiz_attempts: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          passed: boolean
+          score: number
+          training_id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          passed?: boolean
+          score?: number
+          training_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          passed?: boolean
+          score?: number
+          training_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quiz_attempts_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
             referencedColumns: ["id"]
           },
         ]

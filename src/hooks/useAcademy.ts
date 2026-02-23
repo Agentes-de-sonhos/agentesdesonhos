@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,6 +10,15 @@ import type {
   UserCertificate,
   TrailWithProgress,
   RankingUser,
+  QuizQuestion,
+  QuizOption,
+  UserQuizAttempt,
+  TrailExamQuestion,
+  TrailExamOption,
+  UserExamAttempt,
+  TrailMaterial,
+  UserAchievement,
+  AchievementDefinition,
 } from "@/types/academy";
 
 export function useAcademy() {
@@ -18,7 +26,6 @@ export function useAcademy() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch all trails
   const { data: trails = [], isLoading: trailsLoading } = useQuery({
     queryKey: ["learning-trails"],
     queryFn: async () => {
@@ -31,7 +38,6 @@ export function useAcademy() {
     },
   });
 
-  // Fetch all trainings
   const { data: trainings = [], isLoading: trainingsLoading } = useQuery({
     queryKey: ["trainings"],
     queryFn: async () => {
@@ -44,7 +50,6 @@ export function useAcademy() {
     },
   });
 
-  // Fetch trail-training relationships
   const { data: trailTrainings = [] } = useQuery({
     queryKey: ["trail-trainings"],
     queryFn: async () => {
@@ -57,7 +62,6 @@ export function useAcademy() {
     },
   });
 
-  // Fetch user progress
   const { data: userProgress = [] } = useQuery({
     queryKey: ["user-training-progress", user?.id],
     queryFn: async () => {
@@ -72,7 +76,6 @@ export function useAcademy() {
     enabled: !!user,
   });
 
-  // Fetch user certificates
   const { data: certificates = [] } = useQuery({
     queryKey: ["user-certificates", user?.id],
     queryFn: async () => {
@@ -88,14 +91,78 @@ export function useAcademy() {
     enabled: !!user,
   });
 
-  // Compute trails with progress
+  // Quiz attempts for user
+  const { data: quizAttempts = [] } = useQuery({
+    queryKey: ["user-quiz-attempts", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("user_quiz_attempts")
+        .select("*")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data as UserQuizAttempt[];
+    },
+    enabled: !!user,
+  });
+
+  // Exam attempts for user
+  const { data: examAttempts = [] } = useQuery({
+    queryKey: ["user-exam-attempts", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("user_exam_attempts")
+        .select("*")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data as UserExamAttempt[];
+    },
+    enabled: !!user,
+  });
+
+  // User achievements
+  const { data: userAchievements = [] } = useQuery({
+    queryKey: ["user-achievements", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("user_achievements")
+        .select("*, achievement:achievement_definitions(*)")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data as (UserAchievement & { achievement: AchievementDefinition })[];
+    },
+    enabled: !!user,
+  });
+
+  // Has user passed quiz for a training?
+  const hasPassedQuiz = (trainingId: string) => {
+    return quizAttempts.some((a) => a.training_id === trainingId && a.passed);
+  };
+
+  // Has user passed exam for a trail?
+  const hasPassedExam = (trailId: string) => {
+    return examAttempts.some((a) => a.trail_id === trailId && a.passed);
+  };
+
+  // Best exam score for a trail
+  const bestExamScore = (trailId: string) => {
+    const attempts = examAttempts.filter((a) => a.trail_id === trailId);
+    return attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : 0;
+  };
+
+  // Compute trails with progress (quiz-based)
   const trailsWithProgress: TrailWithProgress[] = trails.map((trail) => {
     const trailTrainingsList = trailTrainings.filter((tt) => tt.trail_id === trail.id);
     const totalCount = trailTrainingsList.length;
     const completedCount = trailTrainingsList.filter((tt) =>
-      userProgress.some((p) => p.training_id === tt.training_id && p.is_completed)
+      hasPassedQuiz(tt.training_id)
     ).length;
     const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    const allQuizzesPassed = totalCount > 0 && completedCount === totalCount;
+    const examPassed = hasPassedExam(trail.id);
+    const hasCert = certificates.some((c) => c.trail_id === trail.id);
 
     return {
       ...trail,
@@ -103,58 +170,87 @@ export function useAcademy() {
       completedCount,
       totalCount,
       progressPercent,
+      allQuizzesPassed,
+      examPassed,
+      hasCertificate: hasCert,
     };
   });
 
-  // Mark training as completed
-  const markTrainingComplete = useMutation({
-    mutationFn: async ({ trainingId, watchedMinutes }: { trainingId: string; watchedMinutes?: number }) => {
+  // Submit quiz attempt
+  const submitQuiz = useMutation({
+    mutationFn: async ({ trainingId, answers, score, passed }: { trainingId: string; answers: Record<string, string>; score: number; passed: boolean }) => {
       if (!user) throw new Error("User not authenticated");
+      const { error } = await supabase.from("user_quiz_attempts").insert({
+        user_id: user.id,
+        training_id: trainingId,
+        answers: answers as any,
+        score,
+        passed,
+      });
+      if (error) throw error;
 
-      const { data: existing } = await supabase
-        .from("user_training_progress")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("training_id", trainingId)
-        .maybeSingle();
-
-      if (existing) {
-        const { error } = await supabase
+      // Also mark training progress
+      if (passed) {
+        const { data: existing } = await supabase
           .from("user_training_progress")
-          .update({
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("training_id", trainingId)
+          .maybeSingle();
+        if (existing) {
+          await supabase.from("user_training_progress").update({
             is_completed: true,
             completed_at: new Date().toISOString(),
-            watched_minutes: watchedMinutes || 0,
-          })
-          .eq("id", existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("user_training_progress").insert({
-          user_id: user.id,
-          training_id: trainingId,
-          is_completed: true,
-          completed_at: new Date().toISOString(),
-          watched_minutes: watchedMinutes || 0,
-        });
-        if (error) throw error;
+          }).eq("id", existing.id);
+        } else {
+          await supabase.from("user_training_progress").insert({
+            user_id: user.id,
+            training_id: trainingId,
+            is_completed: true,
+            completed_at: new Date().toISOString(),
+            watched_minutes: 0,
+          });
+        }
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user-quiz-attempts"] });
       queryClient.invalidateQueries({ queryKey: ["user-training-progress"] });
-      toast({ title: "Treinamento concluído!" });
-    },
-    onError: (error) => {
-      toast({ title: "Erro ao marcar conclusão", description: error.message, variant: "destructive" });
+      if (variables.passed) {
+        toast({ title: "Quiz aprovado! ✅", description: `Nota: ${variables.score}%` });
+      } else {
+        toast({ title: "Quiz não aprovado", description: `Nota: ${variables.score}%. Você precisa de 100% para avançar.`, variant: "destructive" });
+      }
     },
   });
 
-  // Generate certificate for completed trail
+  // Submit exam attempt
+  const submitExam = useMutation({
+    mutationFn: async ({ trailId, answers, score, passed }: { trailId: string; answers: Record<string, string>; score: number; passed: boolean }) => {
+      if (!user) throw new Error("User not authenticated");
+      const { error } = await supabase.from("user_exam_attempts").insert({
+        user_id: user.id,
+        trail_id: trailId,
+        answers: answers as any,
+        score,
+        passed,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user-exam-attempts"] });
+      if (variables.passed) {
+        toast({ title: "Prova final aprovada! 🎉", description: `Nota: ${variables.score}%` });
+      } else {
+        toast({ title: "Prova não aprovada", description: `Nota: ${variables.score}%. Mínimo: 75%.`, variant: "destructive" });
+      }
+    },
+  });
+
   const generateCertificate = useMutation({
     mutationFn: async ({ trailId, agentName }: { trailId: string; agentName: string }) => {
       if (!user) throw new Error("User not authenticated");
-
       const certificateNumber = `CERT-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
       const { error } = await supabase.from("user_certificates").insert({
         user_id: user.id,
         trail_id: trailId,
@@ -166,22 +262,14 @@ export function useAcademy() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-certificates"] });
-      toast({ title: "Certificado gerado com sucesso!" });
-    },
-    onError: (error) => {
-      toast({ title: "Erro ao gerar certificado", description: error.message, variant: "destructive" });
+      toast({ title: "Certificado gerado com sucesso! 🏆" });
     },
   });
 
-  // Check if trail is completed
+  const hasCertificate = (trailId: string) => certificates.some((c) => c.trail_id === trailId);
   const isTrailCompleted = (trailId: string) => {
     const trail = trailsWithProgress.find((t) => t.id === trailId);
-    return trail ? trail.progressPercent === 100 : false;
-  };
-
-  // Check if certificate exists for trail
-  const hasCertificate = (trailId: string) => {
-    return certificates.some((c) => c.trail_id === trailId);
+    return trail ? trail.allQuizzesPassed && trail.examPassed : false;
   };
 
   return {
@@ -191,64 +279,152 @@ export function useAcademy() {
     trailsWithProgress,
     userProgress,
     certificates,
+    quizAttempts,
+    examAttempts,
+    userAchievements,
     isLoading: trailsLoading || trainingsLoading,
-    markTrainingComplete,
+    hasPassedQuiz,
+    hasPassedExam,
+    bestExamScore,
+    submitQuiz,
+    submitExam,
     generateCertificate,
     isTrailCompleted,
     hasCertificate,
   };
 }
 
+// Hook for quiz questions
+export function useQuizQuestions(trainingId: string | null) {
+  return useQuery({
+    queryKey: ["quiz-questions", trainingId],
+    queryFn: async () => {
+      if (!trainingId) return [];
+      const { data: questions, error } = await supabase
+        .from("quiz_questions")
+        .select("*")
+        .eq("training_id", trainingId)
+        .order("order_index", { ascending: true });
+      if (error) throw error;
+
+      // Fetch options for each question
+      const questionIds = questions.map((q: any) => q.id);
+      if (questionIds.length === 0) return [];
+
+      const { data: options, error: optError } = await supabase
+        .from("quiz_options")
+        .select("*")
+        .in("question_id", questionIds)
+        .order("order_index", { ascending: true });
+      if (optError) throw optError;
+
+      return questions.map((q: any) => ({
+        ...q,
+        options: (options || []).filter((o: any) => o.question_id === q.id),
+      })) as QuizQuestion[];
+    },
+    enabled: !!trainingId,
+  });
+}
+
+// Hook for exam questions
+export function useExamQuestions(trailId: string | null) {
+  return useQuery({
+    queryKey: ["exam-questions", trailId],
+    queryFn: async () => {
+      if (!trailId) return [];
+      const { data: questions, error } = await supabase
+        .from("trail_exam_questions")
+        .select("*")
+        .eq("trail_id", trailId)
+        .order("order_index", { ascending: true });
+      if (error) throw error;
+
+      const questionIds = questions.map((q: any) => q.id);
+      if (questionIds.length === 0) return [];
+
+      const { data: options, error: optError } = await supabase
+        .from("trail_exam_options")
+        .select("*")
+        .in("question_id", questionIds)
+        .order("order_index", { ascending: true });
+      if (optError) throw optError;
+
+      return questions.map((q: any) => ({
+        ...q,
+        options: (options || []).filter((o: any) => o.question_id === q.id),
+      })) as TrailExamQuestion[];
+    },
+    enabled: !!trailId,
+  });
+}
+
+// Hook for trail materials
+export function useTrailMaterials(trailId: string | null) {
+  return useQuery({
+    queryKey: ["trail-materials", trailId],
+    queryFn: async () => {
+      if (!trailId) return [];
+      const { data, error } = await supabase
+        .from("trail_materials")
+        .select("*")
+        .eq("trail_id", trailId)
+        .order("order_index", { ascending: true });
+      if (error) throw error;
+      return data as TrailMaterial[];
+    },
+    enabled: !!trailId,
+  });
+}
+
 export function useAcademyRanking() {
   const { data: ranking = [], isLoading } = useQuery({
     queryKey: ["academy-ranking"],
     queryFn: async () => {
-      // Fetch all progress with profiles
-      const { data: progressData, error: progressError } = await supabase
-        .from("user_training_progress")
-        .select("user_id, is_completed, watched_minutes");
-      if (progressError) throw progressError;
-
-      // Fetch all certificates
       const { data: certData, error: certError } = await supabase
         .from("user_certificates")
         .select("user_id");
       if (certError) throw certError;
 
-      // Fetch profiles
-      const userIds = [...new Set([...progressData.map((p) => p.user_id), ...certData.map((c) => c.user_id)])];
-      
+      const { data: examData, error: examError } = await supabase
+        .from("user_exam_attempts")
+        .select("user_id, score, passed")
+        .eq("passed", true);
+      if (examError) throw examError;
+
+      const userIds = [...new Set([...certData.map((c: any) => c.user_id), ...examData.map((e: any) => e.user_id)])];
       if (userIds.length === 0) return [];
 
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("user_id, name, avatar_url")
+        .select("user_id, name, avatar_url, agency_name")
         .in("user_id", userIds);
       if (profilesError) throw profilesError;
 
-      // Build ranking
       const rankingMap = new Map<string, RankingUser>();
-
       userIds.forEach((userId) => {
-        const profile = profiles.find((p) => p.user_id === userId);
-        const userProgress = progressData.filter((p) => p.user_id === userId);
-        const userCerts = certData.filter((c) => c.user_id === userId);
+        const profile = profiles.find((p: any) => p.user_id === userId);
+        const userCerts = certData.filter((c: any) => c.user_id === userId);
+        const userExams = examData.filter((e: any) => e.user_id === userId);
+        const avgScore = userExams.length > 0
+          ? Math.round(userExams.reduce((sum: number, e: any) => sum + e.score, 0) / userExams.length)
+          : 0;
 
         rankingMap.set(userId, {
           user_id: userId,
           name: profile?.name || "Usuário",
           avatar_url: profile?.avatar_url || null,
+          agency_name: profile?.agency_name || null,
           trails_completed: userCerts.length,
-          total_watched_minutes: userProgress.reduce((sum, p) => sum + (p.watched_minutes || 0), 0),
+          total_score: userCerts.length * 100 + avgScore,
+          avg_exam_score: avgScore,
         });
       });
 
-      // Sort by trails completed, then by watched minutes
       return Array.from(rankingMap.values()).sort((a, b) => {
-        if (b.trails_completed !== a.trails_completed) {
-          return b.trails_completed - a.trails_completed;
-        }
-        return b.total_watched_minutes - a.total_watched_minutes;
+        if (b.trails_completed !== a.trails_completed) return b.trails_completed - a.trails_completed;
+        if (b.avg_exam_score !== a.avg_exam_score) return b.avg_exam_score - a.avg_exam_score;
+        return b.total_score - a.total_score;
       });
     },
   });
@@ -260,7 +436,6 @@ export function useAcademyAdmin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Create trail
   const createTrail = useMutation({
     mutationFn: async (trail: Partial<LearningTrail>) => {
       const { error } = await supabase.from("learning_trails").insert(trail as any);
@@ -270,12 +445,8 @@ export function useAcademyAdmin() {
       queryClient.invalidateQueries({ queryKey: ["learning-trails"] });
       toast({ title: "Trilha criada com sucesso!" });
     },
-    onError: (error) => {
-      toast({ title: "Erro ao criar trilha", description: error.message, variant: "destructive" });
-    },
   });
 
-  // Update trail
   const updateTrail = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<LearningTrail> & { id: string }) => {
       const { error } = await supabase.from("learning_trails").update(updates as any).eq("id", id);
@@ -285,12 +456,8 @@ export function useAcademyAdmin() {
       queryClient.invalidateQueries({ queryKey: ["learning-trails"] });
       toast({ title: "Trilha atualizada!" });
     },
-    onError: (error) => {
-      toast({ title: "Erro ao atualizar trilha", description: error.message, variant: "destructive" });
-    },
   });
 
-  // Delete trail
   const deleteTrail = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("learning_trails").delete().eq("id", id);
@@ -300,12 +467,8 @@ export function useAcademyAdmin() {
       queryClient.invalidateQueries({ queryKey: ["learning-trails"] });
       toast({ title: "Trilha excluída!" });
     },
-    onError: (error) => {
-      toast({ title: "Erro ao excluir trilha", description: error.message, variant: "destructive" });
-    },
   });
 
-  // Create training
   const createTraining = useMutation({
     mutationFn: async (training: Partial<Training>) => {
       const { error } = await supabase.from("trainings").insert(training as any);
@@ -313,14 +476,10 @@ export function useAcademyAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trainings"] });
-      toast({ title: "Treinamento criado com sucesso!" });
-    },
-    onError: (error) => {
-      toast({ title: "Erro ao criar treinamento", description: error.message, variant: "destructive" });
+      toast({ title: "Treinamento criado!" });
     },
   });
 
-  // Update training
   const updateTraining = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Training> & { id: string }) => {
       const { error } = await supabase.from("trainings").update(updates as any).eq("id", id);
@@ -330,12 +489,8 @@ export function useAcademyAdmin() {
       queryClient.invalidateQueries({ queryKey: ["trainings"] });
       toast({ title: "Treinamento atualizado!" });
     },
-    onError: (error) => {
-      toast({ title: "Erro ao atualizar treinamento", description: error.message, variant: "destructive" });
-    },
   });
 
-  // Delete training
   const deleteTraining = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("trainings").delete().eq("id", id);
@@ -345,12 +500,8 @@ export function useAcademyAdmin() {
       queryClient.invalidateQueries({ queryKey: ["trainings"] });
       toast({ title: "Treinamento excluído!" });
     },
-    onError: (error) => {
-      toast({ title: "Erro ao excluir treinamento", description: error.message, variant: "destructive" });
-    },
   });
 
-  // Link training to trail
   const linkTrainingToTrail = useMutation({
     mutationFn: async ({ trailId, trainingId, orderIndex = 0 }: { trailId: string; trainingId: string; orderIndex?: number }) => {
       const { error } = await supabase.from("trail_trainings").insert({
@@ -364,27 +515,107 @@ export function useAcademyAdmin() {
       queryClient.invalidateQueries({ queryKey: ["trail-trainings"] });
       toast({ title: "Treinamento vinculado à trilha!" });
     },
-    onError: (error) => {
-      toast({ title: "Erro ao vincular treinamento", description: error.message, variant: "destructive" });
-    },
   });
 
-  // Unlink training from trail
   const unlinkTrainingFromTrail = useMutation({
     mutationFn: async ({ trailId, trainingId }: { trailId: string; trainingId: string }) => {
-      const { error } = await supabase
-        .from("trail_trainings")
-        .delete()
-        .eq("trail_id", trailId)
-        .eq("training_id", trainingId);
+      const { error } = await supabase.from("trail_trainings").delete().eq("trail_id", trailId).eq("training_id", trainingId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trail-trainings"] });
       toast({ title: "Treinamento removido da trilha!" });
     },
-    onError: (error) => {
-      toast({ title: "Erro ao remover treinamento", description: error.message, variant: "destructive" });
+  });
+
+  // Quiz management
+  const saveQuizQuestion = useMutation({
+    mutationFn: async ({ trainingId, question, options }: { trainingId: string; question: Partial<QuizQuestion>; options: Partial<QuizOption>[] }) => {
+      const { data: q, error: qErr } = await supabase
+        .from("quiz_questions")
+        .insert({ ...question, training_id: trainingId } as any)
+        .select()
+        .single();
+      if (qErr) throw qErr;
+
+      if (options.length > 0) {
+        const { error: oErr } = await supabase
+          .from("quiz_options")
+          .insert(options.map((o) => ({ ...o, question_id: q.id })) as any);
+        if (oErr) throw oErr;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quiz-questions"] });
+      toast({ title: "Pergunta adicionada!" });
+    },
+  });
+
+  const deleteQuizQuestion = useMutation({
+    mutationFn: async (questionId: string) => {
+      const { error } = await supabase.from("quiz_questions").delete().eq("id", questionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quiz-questions"] });
+      toast({ title: "Pergunta removida!" });
+    },
+  });
+
+  // Exam management
+  const saveExamQuestion = useMutation({
+    mutationFn: async ({ trailId, question, options }: { trailId: string; question: Partial<TrailExamQuestion>; options: Partial<TrailExamOption>[] }) => {
+      const { data: q, error: qErr } = await supabase
+        .from("trail_exam_questions")
+        .insert({ ...question, trail_id: trailId } as any)
+        .select()
+        .single();
+      if (qErr) throw qErr;
+
+      if (options.length > 0) {
+        const { error: oErr } = await supabase
+          .from("trail_exam_options")
+          .insert(options.map((o) => ({ ...o, question_id: q.id })) as any);
+        if (oErr) throw oErr;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["exam-questions"] });
+      toast({ title: "Pergunta da prova adicionada!" });
+    },
+  });
+
+  const deleteExamQuestion = useMutation({
+    mutationFn: async (questionId: string) => {
+      const { error } = await supabase.from("trail_exam_questions").delete().eq("id", questionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["exam-questions"] });
+      toast({ title: "Pergunta da prova removida!" });
+    },
+  });
+
+  // Trail materials management
+  const saveTrailMaterial = useMutation({
+    mutationFn: async (material: Partial<TrailMaterial>) => {
+      const { error } = await supabase.from("trail_materials").insert(material as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trail-materials"] });
+      toast({ title: "Material adicionado!" });
+    },
+  });
+
+  const deleteTrailMaterial = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("trail_materials").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trail-materials"] });
+      toast({ title: "Material removido!" });
     },
   });
 
@@ -397,5 +628,11 @@ export function useAcademyAdmin() {
     deleteTraining,
     linkTrainingToTrail,
     unlinkTrainingFromTrail,
+    saveQuizQuestion,
+    deleteQuizQuestion,
+    saveExamQuestion,
+    deleteExamQuestion,
+    saveTrailMaterial,
+    deleteTrailMaterial,
   };
 }

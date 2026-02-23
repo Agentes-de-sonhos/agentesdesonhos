@@ -4,6 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +21,8 @@ import {
   BookOpen,
   TrendingUp,
   Lock,
+  Medal,
+  LayoutDashboard,
 } from "lucide-react";
 import { useAcademy } from "@/hooks/useAcademy";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -34,7 +38,7 @@ import { PlaybookList } from "@/components/playbook/PlaybookList";
 import type { TrailWithProgress, UserCertificate, LearningTrail } from "@/types/academy";
 
 export default function EducaAcademy() {
-  const { trailsWithProgress, certificates, isLoading } = useAcademy();
+  const { trailsWithProgress, certificates, isLoading, userAchievements } = useAcademy();
   const { isAdmin } = useUserRole();
   const { hasFeature } = useSubscription();
   const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
@@ -51,20 +55,17 @@ export default function EducaAcademy() {
   );
 
   const totalProgress = trailsWithProgress.length > 0
-    ? Math.round(
-        trailsWithProgress.reduce((sum, t) => sum + t.progressPercent, 0) / trailsWithProgress.length
-      )
+    ? Math.round(trailsWithProgress.reduce((sum, t) => sum + t.progressPercent, 0) / trailsWithProgress.length)
     : 0;
 
-  const completedTrails = trailsWithProgress.filter((t) => t.progressPercent === 100).length;
+  const completedTrails = trailsWithProgress.filter((t) => t.hasCertificate).length;
+  const inProgressTrails = trailsWithProgress.filter((t) => t.progressPercent > 0 && !t.hasCertificate);
 
   const handleViewCertificate = (certificateId: string) => {
     const cert = certificates.find((c) => c.id === certificateId);
     if (cert) {
       const trail = trailsWithProgress.find((t) => t.id === cert.trail_id);
-      if (trail) {
-        setSelectedCertificate({ certificate: cert, trail });
-      }
+      if (trail) setSelectedCertificate({ certificate: cert, trail });
     }
   };
 
@@ -75,115 +76,166 @@ export default function EducaAcademy() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <GraduationCap className="h-8 w-8 text-primary" />
-              Educa Travel Academy
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Trilhas de aprendizado para especialistas em destinos
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <GraduationCap className="h-8 w-8 text-primary" />
+            Educatravel Academy
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos
+          </p>
         </div>
 
-        <Tabs defaultValue="trails" className="space-y-6">
-          <TabsList>
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" /> Meu Painel
+            </TabsTrigger>
             <TabsTrigger value="trails" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Trilhas
+              <MapPin className="h-4 w-4" /> Trilhas
             </TabsTrigger>
             <TabsTrigger value="playbooks" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Playbooks
+              <BookOpen className="h-4 w-4" /> Playbooks
             </TabsTrigger>
             <TabsTrigger value="ranking" className="flex items-center gap-2">
-              <Trophy className="h-4 w-4" />
-              Ranking
+              <Trophy className="h-4 w-4" /> Ranking
               {!canAccessRanking && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
             <TabsTrigger value="certificates" className="flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Meus Certificados
+              <Award className="h-4 w-4" /> Certificados
               {!canAccessCertificates && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="admin" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Gerenciar
+                <BookOpen className="h-4 w-4" /> Gerenciar
               </TabsTrigger>
             )}
           </TabsList>
 
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard">
+            <div className="space-y-6">
+              {/* Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10"><MapPin className="h-5 w-5 text-primary" /></div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Trilhas Disponíveis</p>
+                        <p className="text-xl font-bold">{trailsWithProgress.length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-green-500/10"><Award className="h-5 w-5 text-green-500" /></div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Certificadas</p>
+                        <p className="text-xl font-bold">{completedTrails}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10"><TrendingUp className="h-5 w-5 text-primary" /></div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Progresso Geral</p>
+                        <p className="text-xl font-bold">{totalProgress}%</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-yellow-500/10"><Trophy className="h-5 w-5 text-yellow-500" /></div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Certificados</p>
+                        <p className="text-xl font-bold">{certificates.length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-accent/10"><Medal className="h-5 w-5 text-accent" /></div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Medalhas</p>
+                        <p className="text-xl font-bold">{userAchievements.length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* In Progress Trails */}
+              {inProgressTrails.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Continuar Aprendendo</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {inProgressTrails.map((trail) => (
+                        <div
+                          key={trail.id}
+                          className="flex items-center gap-4 p-3 rounded-lg border cursor-pointer hover:border-primary/50 transition-colors"
+                          onClick={() => setSelectedTrail(trail)}
+                        >
+                          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {trail.image_url ? (
+                              <img src={trail.image_url} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <MapPin className="h-5 w-5 text-primary" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{trail.name}</p>
+                            <p className="text-xs text-muted-foreground">{trail.completedCount}/{trail.totalCount} módulos</p>
+                          </div>
+                          <div className="w-24">
+                            <Progress value={trail.progressPercent} className="h-2" />
+                            <p className="text-xs text-right text-muted-foreground mt-1">{trail.progressPercent}%</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Achievements */}
+              {userAchievements.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2"><Medal className="h-5 w-5 text-yellow-500" /> Medalhas Conquistadas</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-3">
+                      {userAchievements.map((ua) => (
+                        <Badge key={ua.id} variant="secondary" className="px-3 py-2 text-sm bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400">
+                          <Medal className="h-4 w-4 mr-2" /> {ua.achievement?.name || "Medalha"}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
           {/* Trails Tab */}
           <TabsContent value="trails">
             {selectedTrail ? (
-              <TrailDetail
-                trail={selectedTrail}
-                onBack={() => setSelectedTrail(null)}
-              />
+              <TrailDetail trail={selectedTrail} onBack={() => setSelectedTrail(null)} />
             ) : (
               <div className="space-y-6">
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-primary/10">
-                          <MapPin className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Total de Trilhas</p>
-                          <p className="text-2xl font-bold">{trailsWithProgress.length}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-primary/10">
-                          <Award className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Trilhas Concluídas</p>
-                          <p className="text-2xl font-bold">{completedTrails}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-primary/10">
-                          <TrendingUp className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Progresso Geral</p>
-                          <p className="text-2xl font-bold">{totalProgress}%</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-primary/10">
-                          <Trophy className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Certificados</p>
-                          <p className="text-2xl font-bold">{certificates.length}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Search */}
                 <div className="relative max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -194,20 +246,13 @@ export default function EducaAcademy() {
                   />
                 </div>
 
-                {/* Trails Grid */}
                 {isLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                    {[1, 2, 3].map((i) => (
                       <Card key={i}>
-                        <Skeleton className="h-32 rounded-t-lg" />
-                        <CardHeader>
-                          <Skeleton className="h-6 w-3/4" />
-                          <Skeleton className="h-4 w-1/2" />
-                        </CardHeader>
-                        <CardContent>
-                          <Skeleton className="h-4 w-full" />
-                          <Skeleton className="h-2 w-full mt-4" />
-                        </CardContent>
+                        <Skeleton className="h-36 rounded-t-lg" />
+                        <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
+                        <CardContent><Skeleton className="h-2 w-full" /></CardContent>
                       </Card>
                     ))}
                   </div>
@@ -217,21 +262,14 @@ export default function EducaAcademy() {
                       <MapPin className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
                       <p className="text-lg font-medium">Nenhuma trilha encontrada</p>
                       <p className="text-muted-foreground">
-                        {searchQuery
-                          ? "Tente buscar por outro termo"
-                          : "Em breve novas trilhas serão adicionadas!"}
+                        {searchQuery ? "Tente buscar por outro termo" : "Em breve novas trilhas serão adicionadas!"}
                       </p>
                     </CardContent>
                   </Card>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredTrails.map((trail) => (
-                      <TrailCard
-                        key={trail.id}
-                        trail={trail}
-                        onSelect={setSelectedTrail}
-                        hasCertificate={certificates.some((c) => c.trail_id === trail.id)}
-                      />
+                      <TrailCard key={trail.id} trail={trail} onSelect={setSelectedTrail} />
                     ))}
                   </div>
                 )}
@@ -239,48 +277,27 @@ export default function EducaAcademy() {
             )}
           </TabsContent>
 
-          {/* Playbooks Tab */}
-          <TabsContent value="playbooks">
-            <PlaybookList />
-          </TabsContent>
+          <TabsContent value="playbooks"><PlaybookList /></TabsContent>
 
-          {/* Ranking Tab */}
           <TabsContent value="ranking">
-            <FeatureGate feature="ranking">
-              <RankingBoard />
-            </FeatureGate>
+            <FeatureGate feature="ranking"><RankingBoard /></FeatureGate>
           </TabsContent>
 
-          {/* Certificates Tab */}
           <TabsContent value="certificates">
             <FeatureGate feature="certificates">
               <MyCertificates onViewCertificate={handleViewCertificate} />
             </FeatureGate>
           </TabsContent>
 
-          {/* Admin Tab */}
           {isAdmin && (
-            <TabsContent value="admin">
-              <AdminAcademyManager />
-            </TabsContent>
+            <TabsContent value="admin"><AdminAcademyManager /></TabsContent>
           )}
         </Tabs>
 
-        {/* Certificate View Dialog */}
-        <Dialog
-          open={!!selectedCertificate}
-          onOpenChange={() => setSelectedCertificate(null)}
-        >
+        <Dialog open={!!selectedCertificate} onOpenChange={() => setSelectedCertificate(null)}>
           <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Certificado de Conclusão</DialogTitle>
-            </DialogHeader>
-            {selectedCertificate && (
-              <CertificatePDF
-                certificate={selectedCertificate.certificate}
-                trail={selectedCertificate.trail}
-              />
-            )}
+            <DialogHeader><DialogTitle>Certificado de Conclusão</DialogTitle></DialogHeader>
+            {selectedCertificate && <CertificatePDF certificate={selectedCertificate.certificate} trail={selectedCertificate.trail} />}
           </DialogContent>
         </Dialog>
       </div>

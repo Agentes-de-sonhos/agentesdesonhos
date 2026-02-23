@@ -6,6 +6,8 @@ export interface LearningTrail {
   image_url: string | null;
   order_index: number;
   is_active: boolean;
+  total_hours: number;
+  certificate_template_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -59,19 +61,116 @@ export interface UserCertificate {
   trail?: LearningTrail;
 }
 
+export interface QuizQuestion {
+  id: string;
+  training_id: string;
+  question_text: string;
+  question_type: 'multiple_choice' | 'true_false' | 'single_choice';
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+  options?: QuizOption[];
+}
+
+export interface QuizOption {
+  id: string;
+  question_id: string;
+  option_text: string;
+  is_correct: boolean;
+  order_index: number;
+  created_at: string;
+}
+
+export interface UserQuizAttempt {
+  id: string;
+  user_id: string;
+  training_id: string;
+  score: number;
+  passed: boolean;
+  answers: Record<string, string>;
+  created_at: string;
+}
+
+export interface TrailExamQuestion {
+  id: string;
+  trail_id: string;
+  question_text: string;
+  question_type: 'multiple_choice' | 'true_false' | 'single_choice';
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+  options?: TrailExamOption[];
+}
+
+export interface TrailExamOption {
+  id: string;
+  question_id: string;
+  option_text: string;
+  is_correct: boolean;
+  order_index: number;
+  created_at: string;
+}
+
+export interface UserExamAttempt {
+  id: string;
+  user_id: string;
+  trail_id: string;
+  score: number;
+  passed: boolean;
+  answers: Record<string, string>;
+  created_at: string;
+}
+
+export interface TrailMaterial {
+  id: string;
+  trail_id: string;
+  title: string;
+  description: string | null;
+  material_type: 'pdf' | 'video' | 'audio' | 'image' | 'link';
+  category: string;
+  file_url: string | null;
+  is_premium: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AchievementDefinition {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  criteria_type: string;
+  criteria_value: number;
+  created_at: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  user_id: string;
+  achievement_id: string;
+  earned_at: string;
+  achievement?: AchievementDefinition;
+}
+
 export interface TrailWithProgress extends LearningTrail {
   trainings: (TrailTraining & { training: Training })[];
   completedCount: number;
   totalCount: number;
   progressPercent: number;
+  allQuizzesPassed: boolean;
+  examPassed: boolean;
+  hasCertificate: boolean;
 }
 
 export interface RankingUser {
   user_id: string;
   name: string;
   avatar_url: string | null;
+  agency_name: string | null;
   trails_completed: number;
-  total_watched_minutes: number;
+  total_score: number;
+  avg_exam_score: number;
 }
 
 export const TRAINING_CATEGORIES = [
@@ -81,6 +180,16 @@ export const TRAINING_CATEGORIES = [
   { value: 'transporte', label: 'Transporte' },
   { value: 'produtos', label: 'Produtos' },
   { value: 'vendas', label: 'Vendas' },
+  { value: 'geral', label: 'Geral' },
+];
+
+export const MATERIAL_CATEGORIES = [
+  { value: 'apresentacoes', label: 'Apresentações' },
+  { value: 'materiais_venda', label: 'Materiais de Venda' },
+  { value: 'laminas', label: 'Lâminas de Divulgação' },
+  { value: 'videos_extras', label: 'Vídeos Extras' },
+  { value: 'podcasts', label: 'Podcasts' },
+  { value: 'infograficos', label: 'Infográficos' },
   { value: 'geral', label: 'Geral' },
 ];
 
@@ -99,4 +208,7 @@ export const POPULAR_DESTINATIONS = [
   'Dubai',
   'Europa',
   'Ásia',
+  'Disney',
+  'Cruzeiros',
+  'Destinos Premium',
 ];
