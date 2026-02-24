@@ -5,13 +5,13 @@ import {
   Newspaper,
   ExternalLink,
   Loader2,
-  AlertTriangle,
   Sparkles,
   Star,
   ChevronLeft,
   ChevronRight,
   TrendingUp,
   Trash2,
+  FileText,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -83,7 +83,7 @@ function StatusBadge({ item }: { item: NoticiaHub }) {
   if (item.alerta_trade) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-        <AlertTriangle className="h-3 w-3" />
+        <Star className="h-3 w-3" />
         Destaque do Trade
       </span>
     );
@@ -388,7 +388,7 @@ export default function Noticias() {
 
                 {alertas.length > 0 && (
                   <section className="space-y-4">
-                    <SectionTitle icon={AlertTriangle} title="Destaques do Trade" color="bg-orange-500" />
+                    <SectionTitle icon={Star} title="Destaques do Trade" color="bg-orange-500" />
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {alertas.map((item) => (
                         <AlertNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
@@ -399,7 +399,7 @@ export default function Noticias() {
 
                 {curadoria.length > 0 && (
                   <section className="space-y-4">
-                    <SectionTitle icon={Sparkles} title="Curadoria Inteligente" color="bg-violet-500" />
+                    <SectionTitle icon={FileText} title="Outras Notícias do Dia" color="bg-violet-500" />
                     <div className="grid gap-4 sm:grid-cols-2">
                       {curadoria.slice(0, 10).map((item) => (
                         <MagazineNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
