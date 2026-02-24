@@ -137,10 +137,6 @@ export default function Admin() {
               <CalendarDays className="h-4 w-4" />
               <span className="hidden sm:inline">Agenda</span>
             </TabsTrigger>
-            <TabsTrigger value="news" className="flex items-center gap-2">
-              <Newspaper className="h-4 w-4" />
-              <span className="hidden sm:inline">Notícias</span>
-            </TabsTrigger>
             <TabsTrigger value="trade" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Trade</span>
@@ -162,8 +158,8 @@ export default function Admin() {
               <span className="hidden sm:inline">Playbooks</span>
             </TabsTrigger>
             <TabsTrigger value="curadoria" className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
-              <span className="hidden sm:inline">Curadoria IA</span>
+              <Newspaper className="h-4 w-4" />
+              <span className="hidden sm:inline">Notícias</span>
             </TabsTrigger>
           </TabsList>
 
@@ -191,9 +187,6 @@ export default function Admin() {
             <AdminAgendaEventsManager />
           </TabsContent>
 
-          <TabsContent value="news">
-            <AdminNewsManager />
-          </TabsContent>
 
           <TabsContent value="trade">
             <AdminTradeUpdatesManager />
