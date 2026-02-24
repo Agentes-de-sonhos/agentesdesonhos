@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   Newspaper,
@@ -11,11 +11,14 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
+  Trash2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useToast } from "@/hooks/use-toast";
 
 interface NoticiaHub {
   id: string;
@@ -106,90 +109,126 @@ function StatusBadge({ item }: { item: NoticiaHub }) {
 }
 
 /* ── Hero Card (top feature) ─────────────────────────────── */
-function HeroNewsCard({ item }: { item: NoticiaHub }) {
+function HeroNewsCard({ item, isAdmin, onDelete }: { item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void }) {
   return (
-    <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
-      <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/5 via-card to-card">
-        <CardContent className="p-8 md:p-10">
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
-            <StatusBadge item={item} />
-            <CategoryBadge categoria={item.categoria} />
-            <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
-              <TrendingUp className="h-3.5 w-3.5" />
-              Score {item.relevancia_score}/10
-            </span>
-          </div>
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
-            {item.titulo_curto}
-          </h2>
-          <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-3xl">
-            {item.resumo}
-          </p>
-          <div className="flex items-center gap-3 mt-5 pt-4 border-t border-border/50">
-            <span className="text-sm font-semibold text-foreground/70">{item.fonte}</span>
-            <span className="text-sm text-muted-foreground">•</span>
-            <span className="text-sm text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-            <ExternalLink className="h-4 w-4 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </CardContent>
-      </Card>
-    </a>
+    <div className="relative group/card">
+      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
+        <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/5 via-card to-card">
+          <CardContent className="p-8 md:p-10">
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              <StatusBadge item={item} />
+              <CategoryBadge categoria={item.categoria} />
+              <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
+                <TrendingUp className="h-3.5 w-3.5" />
+                Score {item.relevancia_score}/10
+              </span>
+            </div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
+              {item.titulo_curto}
+            </h2>
+            <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-3xl">
+              {item.resumo}
+            </p>
+            <div className="flex items-center gap-3 mt-5 pt-4 border-t border-border/50">
+              <span className="text-sm font-semibold text-foreground/70">{item.fonte}</span>
+              <span className="text-sm text-muted-foreground">•</span>
+              <span className="text-sm text-muted-foreground">{formatDate(item.data_publicacao)}</span>
+              <ExternalLink className="h-4 w-4 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </CardContent>
+        </Card>
+      </a>
+      {isAdmin && onDelete && (
+        <Button
+          variant="destructive"
+          size="icon"
+          className="absolute top-3 right-3 h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-opacity shadow-lg"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(item.id); }}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
   );
 }
 
 /* ── Alert Card (horizontal, premium) ────────────────────── */
-function AlertNewsCard({ item }: { item: NoticiaHub }) {
+function AlertNewsCard({ item, isAdmin, onDelete }: { item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void }) {
   return (
-    <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
-      <Card className="border-0 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 bg-gradient-to-r from-orange-50 to-card ring-1 ring-orange-200/50">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <StatusBadge item={item} />
-            <CategoryBadge categoria={item.categoria} />
-          </div>
-          <h3 className="font-display text-lg font-bold text-foreground group-hover:text-orange-600 transition-colors leading-snug">
-            {item.titulo_curto}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-            {item.resumo}
-          </p>
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-orange-100">
-            <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
-            <span className="text-xs text-muted-foreground">•</span>
-            <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-            <ExternalLink className="h-3.5 w-3.5 ml-auto text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </CardContent>
-      </Card>
-    </a>
+    <div className="relative group/card">
+      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
+        <Card className="border-0 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 bg-gradient-to-r from-orange-50 to-card ring-1 ring-orange-200/50">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <StatusBadge item={item} />
+              <CategoryBadge categoria={item.categoria} />
+            </div>
+            <h3 className="font-display text-lg font-bold text-foreground group-hover:text-orange-600 transition-colors leading-snug">
+              {item.titulo_curto}
+            </h3>
+            <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+              {item.resumo}
+            </p>
+            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-orange-100">
+              <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
+              <span className="text-xs text-muted-foreground">•</span>
+              <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
+              <ExternalLink className="h-3.5 w-3.5 ml-auto text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </CardContent>
+        </Card>
+      </a>
+      {isAdmin && onDelete && (
+        <Button
+          variant="destructive"
+          size="icon"
+          className="absolute top-3 right-3 h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-opacity shadow-lg"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(item.id); }}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
   );
 }
 
 /* ── Standard Magazine Card ──────────────────────────────── */
-function MagazineNewsCard({ item }: { item: NoticiaHub }) {
+function MagazineNewsCard({ item, isAdmin, onDelete }: { item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void }) {
   return (
-    <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group h-full">
-      <Card className="border-0 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full">
-        <CardContent className="p-6 flex flex-col h-full">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <StatusBadge item={item} />
-            <CategoryBadge categoria={item.categoria} />
-          </div>
-          <h3 className="font-display text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-snug flex-grow">
-            {item.titulo_curto}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-            {item.resumo}
-          </p>
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/50">
-            <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
-            <span className="text-xs text-muted-foreground">•</span>
-            <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-            <ExternalLink className="h-3.5 w-3.5 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </CardContent>
-      </Card>
-    </a>
+    <div className="relative group/card h-full">
+      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group h-full">
+        <Card className="border-0 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full">
+          <CardContent className="p-6 flex flex-col h-full">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <StatusBadge item={item} />
+              <CategoryBadge categoria={item.categoria} />
+            </div>
+            <h3 className="font-display text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-snug flex-grow">
+              {item.titulo_curto}
+            </h3>
+            <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+              {item.resumo}
+            </p>
+            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/50">
+              <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
+              <span className="text-xs text-muted-foreground">•</span>
+              <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
+              <ExternalLink className="h-3.5 w-3.5 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </CardContent>
+        </Card>
+      </a>
+      {isAdmin && onDelete && (
+        <Button
+          variant="destructive"
+          size="icon"
+          className="absolute top-3 right-3 h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-opacity shadow-lg"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(item.id); }}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
   );
 }
 
@@ -209,20 +248,46 @@ function SectionTitle({ icon: Icon, title, color }: { icon: React.ElementType; t
 export default function Noticias() {
   const [activeFilter, setActiveFilter] = useState("Todas");
   const [page, setPage] = useState(1);
+  const { isAdmin } = useUserRole();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: allNews, isLoading } = useQuery({
     queryKey: ["noticias-hub"],
     queryFn: async () => {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from("noticias_dashboard")
         .select("*")
         .in("status", ["aprovado", "sugerido_ia"])
-        .order("relevancia_score", { ascending: false })
-        .limit(200);
+        .gte("data_publicacao", twentyFourHoursAgo)
+        .order("relevancia_score", { ascending: false });
       if (error) throw error;
       return data as NoticiaHub[];
     },
+    refetchInterval: 5 * 60 * 1000,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("noticias_dashboard").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["noticias-hub"] });
+      queryClient.invalidateQueries({ queryKey: ["curated-news-dashboard"] });
+      toast({ title: "Notícia excluída com sucesso" });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("Tem certeza que deseja excluir esta notícia?")) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   // ── Deduplicated sections ──
   const alertas = useMemo(
@@ -232,7 +297,6 @@ export default function Noticias() {
 
   const alertaIds = useMemo(() => new Set(alertas.map((n) => n.id)), [alertas]);
 
-  // Hero = highest-scoring non-alert
   const hero = useMemo(
     () => (allNews || []).find((n) => !alertaIds.has(n.id)),
     [allNews, alertaIds]
@@ -244,13 +308,11 @@ export default function Noticias() {
     return s;
   }, [alertaIds, hero]);
 
-  // Curadoria = remaining items, no duplicates
   const curadoria = useMemo(
     () => (allNews || []).filter((n) => !heroAndAlertIds.has(n.id)),
     [allNews, heroAndAlertIds]
   );
 
-  // Filtered list for pagination (respects active filter)
   const filteredNews = useMemo(() => {
     if (!allNews) return [];
     switch (activeFilter) {
@@ -289,7 +351,7 @@ export default function Noticias() {
                 Notícias do Trade
               </h1>
               <p className="text-muted-foreground text-base mt-0.5">
-                Curadoria inteligente para agentes de viagens
+                Curadoria inteligente — últimas 24 horas
               </p>
             </div>
           </div>
@@ -321,44 +383,40 @@ export default function Noticias() {
           <>
             {showSections && (
               <>
-                {/* ── Hero Feature ── */}
                 {hero && (
                   <section>
-                    <HeroNewsCard item={hero} />
+                    <HeroNewsCard item={hero} isAdmin={isAdmin} onDelete={handleDelete} />
                   </section>
                 )}
 
-                {/* ── Alertas do Trade ── */}
                 {alertas.length > 0 && (
                   <section className="space-y-4">
                     <SectionTitle icon={AlertTriangle} title="Alertas do Trade" color="bg-orange-500" />
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {alertas.map((item) => (
-                        <AlertNewsCard key={item.id} item={item} />
+                        <AlertNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
                       ))}
                     </div>
                   </section>
                 )}
 
-                {/* ── Curadoria Inteligente ── */}
                 {curadoria.length > 0 && (
                   <section className="space-y-4">
                     <SectionTitle icon={Sparkles} title="Curadoria Inteligente" color="bg-violet-500" />
                     <div className="grid gap-4 sm:grid-cols-2">
                       {curadoria.slice(0, 10).map((item) => (
-                        <MagazineNewsCard key={item.id} item={item} />
+                        <MagazineNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
                       ))}
                     </div>
                   </section>
                 )}
 
-                {/* ── All remaining ── */}
                 {curadoria.length > 10 && (
                   <section className="space-y-4">
                     <SectionTitle icon={Newspaper} title="Todas as Notícias" color="bg-primary" />
                     <div className="grid gap-4 sm:grid-cols-2">
                       {curadoria.slice(10).map((item) => (
-                        <MagazineNewsCard key={item.id} item={item} />
+                        <MagazineNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
                       ))}
                     </div>
                   </section>
@@ -366,16 +424,15 @@ export default function Noticias() {
               </>
             )}
 
-            {/* ── Filtered View ── */}
             {!showSections && paginatedNews.length > 0 && (
               <section className="space-y-4">
                 <h2 className="font-display text-xl font-bold text-foreground">{activeFilter}</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {paginatedNews.map((item) =>
                     item.alerta_trade ? (
-                      <AlertNewsCard key={item.id} item={item} />
+                      <AlertNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
                     ) : (
-                      <MagazineNewsCard key={item.id} item={item} />
+                      <MagazineNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
                     )
                   )}
                 </div>
@@ -396,12 +453,11 @@ export default function Noticias() {
               </section>
             )}
 
-            {/* ── Empty state ── */}
             {filteredNews.length === 0 && (
               <div className="text-center py-24 text-muted-foreground">
                 <Newspaper className="h-14 w-14 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">Nenhuma notícia encontrada</p>
-                <p className="text-sm mt-1">Tente outro filtro de categoria</p>
+                <p className="text-lg font-medium">Nenhuma notícia nas últimas 24 horas</p>
+                <p className="text-sm mt-1">Novas notícias aparecerão aqui conforme forem publicadas</p>
               </div>
             )}
           </>
