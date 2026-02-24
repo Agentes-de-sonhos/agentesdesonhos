@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // RSS feed sources
 const RSS_SOURCES = [
-  { name: "Panrotas", url: "https://www.panrotas.com.br/rss" },
+  { name: "Panrotas", url: "https://www.panrotas.com.br/feed" },
   { name: "Mercado & Eventos", url: "https://www.mercadoeeventos.com.br/feed/" },
   { name: "Brasilturis", url: "https://brasilturis.com.br/feed/" },
 ];
