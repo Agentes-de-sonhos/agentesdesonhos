@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface CuratedNews {
   id: string;
@@ -29,6 +31,7 @@ function formatDate(dateString: string): string {
 }
 
 export function CuratedNewsFeed() {
+  const navigate = useNavigate();
   const { data: news, isLoading } = useQuery({
     queryKey: ["curated-news-dashboard"],
     queryFn: async () => {
@@ -121,6 +124,18 @@ export function CuratedNewsFeed() {
             <ExternalLink className="h-4 w-4 flex-shrink-0 text-[hsl(var(--section-news))] opacity-0 transition-opacity group-hover:opacity-100 mt-0.5" />
           </a>
         ))}
+
+        {/* Botão para ver todas as notícias */}
+        <div className="pt-3 border-t">
+          <Button
+            variant="ghost"
+            className="w-full text-[hsl(var(--section-news))] hover:text-[hsl(var(--section-news))] hover:bg-[hsl(var(--section-news))]/5"
+            onClick={() => navigate("/noticias")}
+          >
+            Ler mais notícias
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
