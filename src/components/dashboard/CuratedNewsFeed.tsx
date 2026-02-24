@@ -32,13 +32,15 @@ export function CuratedNewsFeed() {
   const { data: news, isLoading } = useQuery({
     queryKey: ["curated-news-dashboard"],
     queryFn: async () => {
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
       const { data, error } = await supabase
         .from("noticias_dashboard")
         .select("*")
         .eq("status", "aprovado")
+        .gte("data_publicacao", startOfDay)
         .order("relevancia_score", { ascending: false })
-        .order("data_publicacao", { ascending: false })
-        .limit(8);
+        .order("data_publicacao", { ascending: false });
       if (error) throw error;
       return data as CuratedNews[];
     },
