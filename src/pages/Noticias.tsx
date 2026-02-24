@@ -401,18 +401,7 @@ export default function Noticias() {
                   <section className="space-y-4">
                     <SectionTitle icon={FileText} title="Outras Notícias do Dia" color="bg-violet-500" />
                     <div className="grid gap-4 sm:grid-cols-2">
-                      {curadoria.slice(0, 10).map((item) => (
-                        <MagazineNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {curadoria.length > 10 && (
-                  <section className="space-y-4">
-                    <SectionTitle icon={Newspaper} title="Todas as Notícias" color="bg-primary" />
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {curadoria.slice(10).map((item) => (
+                      {curadoria.map((item) => (
                         <MagazineNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
                       ))}
                     </div>
