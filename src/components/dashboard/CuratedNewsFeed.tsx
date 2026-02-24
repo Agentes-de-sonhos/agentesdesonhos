@@ -37,10 +37,12 @@ export function CuratedNewsFeed() {
         .select("*")
         .eq("status", "aprovado")
         .order("relevancia_score", { ascending: false })
-        .limit(5);
+        .order("data_publicacao", { ascending: false })
+        .limit(8);
       if (error) throw error;
       return data as CuratedNews[];
     },
+    refetchInterval: 5 * 60 * 1000, // Atualiza a cada 5 minutos
   });
 
   if (isLoading) {
