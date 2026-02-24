@@ -37,8 +37,7 @@ interface NoticiaHub {
 
 const CATEGORIAS_FILTER = [
   "Todas",
-  "Destaques",
-  "Alertas do Trade",
+  "Destaques do Trade",
   "Aéreo",
   "Destinos",
   "Mercado",
@@ -85,7 +84,7 @@ function StatusBadge({ item }: { item: NoticiaHub }) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
         <AlertTriangle className="h-3 w-3" />
-        Alerta do Trade
+        Destaque do Trade
       </span>
     );
   }
@@ -316,10 +315,8 @@ export default function Noticias() {
   const filteredNews = useMemo(() => {
     if (!allNews) return [];
     switch (activeFilter) {
-      case "Destaques":
-        return allNews.filter((n) => n.tipo_exibicao === "destaque");
-      case "Alertas do Trade":
-        return allNews.filter((n) => n.alerta_trade);
+      case "Destaques do Trade":
+        return allNews.filter((n) => n.tipo_exibicao === "destaque" || n.alerta_trade);
       case "Todas":
         return allNews;
       default:
@@ -391,7 +388,7 @@ export default function Noticias() {
 
                 {alertas.length > 0 && (
                   <section className="space-y-4">
-                    <SectionTitle icon={AlertTriangle} title="Alertas do Trade" color="bg-orange-500" />
+                    <SectionTitle icon={AlertTriangle} title="Destaques do Trade" color="bg-orange-500" />
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {alertas.map((item) => (
                         <AlertNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
