@@ -260,7 +260,7 @@ export default function Noticias() {
         .select("*")
         .in("status", ["aprovado", "sugerido_ia"])
         .gte("data_publicacao", twentyFourHoursAgo)
-        .order("relevancia_score", { ascending: false });
+        .order("data_publicacao", { ascending: true });
       if (error) throw error;
       return data as NoticiaHub[];
     },
