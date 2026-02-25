@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,11 @@ import {
   AlertTriangle,
   Lightbulb,
   CheckSquare,
+  GitBranch,
+  List,
 } from "lucide-react";
+
+const PlaybookMindMap = lazy(() => import("./PlaybookMindMap"));
 import { usePlaybook } from "@/hooks/usePlaybook";
 import { PlaybookTabContent } from "./PlaybookTabContent";
 import { PLAYBOOK_TABS } from "@/types/playbook";
@@ -39,6 +43,7 @@ export default function PlaybookViewer() {
   const navigate = useNavigate();
   const { destination, sections, isLoading } = usePlaybook(slug);
   const [activeTab, setActiveTab] = useState<string>(PLAYBOOK_TABS[0].key);
+  const [viewMode, setViewMode] = useState<"tabs" | "mindmap">("tabs");
 
   if (isLoading) {
     return (
@@ -91,48 +96,83 @@ export default function PlaybookViewer() {
               <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{destination.description}</p>
             )}
           </div>
+          <div className="flex items-center gap-1 bg-muted rounded-lg p-1 shrink-0">
+            <Button
+              size="sm"
+              variant={viewMode === "tabs" ? "default" : "ghost"}
+              onClick={() => setViewMode("tabs")}
+              className="h-8 gap-1.5"
+            >
+              <List className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline text-xs">Conteúdo</span>
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === "mindmap" ? "default" : "ghost"}
+              onClick={() => setViewMode("mindmap")}
+              className="h-8 gap-1.5"
+            >
+              <GitBranch className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline text-xs">Mapa Mental</span>
+            </Button>
+          </div>
         </div>
 
-        {/* Horizontal Tab Navigation */}
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-2 -mx-1 px-1">
-          <ScrollArea className="w-full">
-            <div className="flex gap-1.5 pb-2">
-              {PLAYBOOK_TABS.map((tab, index) => {
-                const Icon = iconMap[tab.icon] || Target;
-                const isActive = activeTab === tab.key;
-                const hasContent = sections.some((s) => s.tab_key === tab.key);
+        {viewMode === "tabs" ? (
+          <>
+            {/* Horizontal Tab Navigation */}
+            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-2 -mx-1 px-1">
+              <ScrollArea className="w-full">
+                <div className="flex gap-1.5 pb-2">
+                  {PLAYBOOK_TABS.map((tab, index) => {
+                    const Icon = iconMap[tab.icon] || Target;
+                    const isActive = activeTab === tab.key;
+                    const hasContent = sections.some((s) => s.tab_key === tab.key);
 
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={cn(
-                      "flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 shrink-0 border",
-                      isActive
-                        ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
-                        : hasContent
-                        ? "bg-card text-foreground border-border hover:border-primary/40 hover:bg-primary/5"
-                        : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                    <span className="sm:hidden">{index + 1}</span>
-                  </button>
-                );
-              })}
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setActiveTab(tab.key)}
+                        className={cn(
+                          "flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 shrink-0 border",
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
+                            : hasContent
+                            ? "bg-card text-foreground border-border hover:border-primary/40 hover:bg-primary/5"
+                            : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                        )}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">{tab.label}</span>
+                        <span className="sm:hidden">{index + 1}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
 
-        {/* Tab Content */}
-        <div className="min-h-[400px]">
-          <PlaybookTabContent
-            section={activeSection}
-            tabLabel={activeTabData.label}
-          />
-        </div>
+            {/* Tab Content */}
+            <div className="min-h-[400px]">
+              <PlaybookTabContent
+                section={activeSection}
+                tabLabel={activeTabData.label}
+              />
+            </div>
+          </>
+        ) : (
+          <Suspense fallback={<Skeleton className="h-[600px] w-full rounded-2xl" />}>
+            <PlaybookMindMap
+              destinationName={destination.name}
+              sections={sections}
+              onTabSelect={(tabKey) => {
+                setActiveTab(tabKey);
+                setViewMode("tabs");
+              }}
+            />
+          </Suspense>
+        )}
       </div>
     </DashboardLayout>
   );
