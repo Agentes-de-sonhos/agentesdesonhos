@@ -46,8 +46,8 @@ export function PlaybookList() {
           <BookOpen className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-foreground">Playbooks Comerciais</h2>
-          <p className="text-xs text-muted-foreground">Guias estratégicos interativos por destino</p>
+          <h2 className="text-lg font-bold text-foreground">Playbooks de Vendas</h2>
+          <p className="text-xs text-muted-foreground">Guias estratégicos de vendas por destino ou produto</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export function PlaybookList() {
               </div>
               <Badge variant="outline" className="mt-3 text-[10px]">
                 <BookOpen className="h-3 w-3 mr-1" />
-                16 módulos
+                14 módulos
               </Badge>
             </CardContent>
           </Card>
