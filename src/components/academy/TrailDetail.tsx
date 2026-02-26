@@ -174,10 +174,14 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
                           }`}
                           onClick={() => unlocked && setSelectedTraining(training)}
                         >
-                          <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                            quizPassed ? "bg-green-500 text-white" : !unlocked ? "bg-muted" : "bg-primary/10"
-                          }`}>
-                            {quizPassed ? <CheckCircle2 className="h-5 w-5" /> : !unlocked ? <Lock className="h-5 w-5" /> : <span className="font-medium">{index + 1}</span>}
+                          <div className="relative flex items-center justify-center w-10 h-10">
+                            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                              quizPassed ? "bg-green-500/15 border-2 border-green-500" : !unlocked ? "bg-muted border-2 border-muted-foreground/20" : "bg-primary/10 border-2 border-primary/30"
+                            }`}>
+                              <span className={`font-bold text-sm ${quizPassed ? "text-green-600" : !unlocked ? "text-muted-foreground" : "text-primary"}`}>{index + 1}</span>
+                            </div>
+                            {quizPassed && <CheckCircle2 className="absolute -top-1 -right-1 h-4 w-4 text-green-500 bg-background rounded-full" />}
+                            {!unlocked && <Lock className="absolute -top-1 -right-1 h-4 w-4 text-muted-foreground bg-background rounded-full" />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium truncate">{training.title}</h4>
