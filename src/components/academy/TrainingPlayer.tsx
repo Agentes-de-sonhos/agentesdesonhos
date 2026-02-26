@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { CheckCircle2, Play, FileText, Clock, User, ClipboardCheck } from "lucide-react";
 import type { Training } from "@/types/academy";
 
@@ -13,14 +12,12 @@ interface TrainingPlayerProps {
 function toEmbedUrl(url: string): string {
   try {
     const u = new URL(url);
-    // youtube.com/watch?v=ID -> youtube.com/embed/ID
     if ((u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) && !u.pathname.includes('/embed/')) {
       const videoId = u.hostname.includes('youtu.be')
         ? u.pathname.slice(1)
         : u.searchParams.get('v');
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
-    // vimeo.com/ID -> player.vimeo.com/video/ID
     if (u.hostname.includes('vimeo.com') && !u.hostname.includes('player.vimeo.com')) {
       const id = u.pathname.split('/').filter(Boolean).pop();
       if (id) return `https://player.vimeo.com/video/${id}`;
@@ -33,57 +30,68 @@ function toEmbedUrl(url: string): string {
 
 export function TrainingPlayer({ training, isCompleted, onComplete }: TrainingPlayerProps) {
   return (
-    <div className="flex flex-col h-full gap-4">
-      {/* Video Player - External embed only */}
-      <div className="flex-1 bg-black rounded-lg overflow-hidden relative min-h-[300px]">
-        {training.video_url ? (
-          <iframe
-            src={toEmbedUrl(training.video_url)}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-white/60">
-            <div className="text-center">
-              <Play className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <p>Vídeo não disponível</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <ScrollArea className="flex-shrink-0 max-h-[200px]">
-        <div className="space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-lg">{training.title}</h3>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                <span className="flex items-center gap-1"><Clock className="h-4 w-4" />{training.duration_minutes} min</span>
-                {training.instructor && <span className="flex items-center gap-1"><User className="h-4 w-4" />{training.instructor}</span>}
-                <Badge variant="outline">{training.category}</Badge>
+    <div className="flex flex-col gap-4">
+      {/* Video Player - 16:9 aspect ratio */}
+      <div className="w-full rounded-xl overflow-hidden bg-black shadow-lg">
+        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+          {training.video_url ? (
+            <iframe
+              src={toEmbedUrl(training.video_url)}
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-white/60">
+              <div className="text-center">
+                <Play className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">Vídeo não disponível</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              {training.materials_url && (
-                <Button variant="outline" size="sm" onClick={() => window.open(training.materials_url!, "_blank")}>
-                  <FileText className="h-4 w-4 mr-2" /> Material
-                </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Training Info */}
+      <div className="space-y-3 px-1">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-lg leading-tight">{training.title}</h3>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1.5 flex-wrap">
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {training.duration_minutes} min
+              </span>
+              {training.instructor && (
+                <span className="flex items-center gap-1">
+                  <User className="h-3.5 w-3.5" />
+                  {training.instructor}
+                </span>
               )}
-              {isCompleted ? (
-                <Button variant="outline" size="sm" disabled>
-                  <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" /> Aprovado
-                </Button>
-              ) : (
-                <Button size="sm" onClick={onComplete}>
-                  <ClipboardCheck className="h-4 w-4 mr-2" /> Fazer Quiz
-                </Button>
-              )}
+              <Badge variant="outline" className="text-xs">{training.category}</Badge>
             </div>
           </div>
-          {training.description && <p className="text-muted-foreground">{training.description}</p>}
+          <div className="flex items-center gap-2 shrink-0">
+            {training.materials_url && (
+              <Button variant="outline" size="sm" onClick={() => window.open(training.materials_url!, "_blank")}>
+                <FileText className="h-4 w-4 mr-1.5" /> Material
+              </Button>
+            )}
+            {isCompleted ? (
+              <Button variant="outline" size="sm" disabled className="text-green-600 border-green-200">
+                <CheckCircle2 className="h-4 w-4 mr-1.5" /> Aprovado
+              </Button>
+            ) : (
+              <Button size="sm" onClick={onComplete}>
+                <ClipboardCheck className="h-4 w-4 mr-1.5" /> Fazer Quiz
+              </Button>
+            )}
+          </div>
         </div>
-      </ScrollArea>
+        {training.description && (
+          <p className="text-sm text-muted-foreground leading-relaxed">{training.description}</p>
+        )}
+      </div>
     </div>
   );
 }
