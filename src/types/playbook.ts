@@ -35,21 +35,19 @@ export interface PlaybookBlock {
 }
 
 export const PLAYBOOK_TABS = [
-  { key: 'visao_estrategica', label: 'Visão Estratégica', icon: 'Target' },
+  { key: 'visao_geral', label: 'Visão Geral', icon: 'LayoutDashboard' },
+  { key: 'mapas_mentais', label: 'Mapas Mentais', icon: 'GitBranch' },
   { key: 'como_vender', label: 'Como Vender', icon: 'TrendingUp' },
+  { key: 'perfis_clientes', label: 'Perfis de Clientes', icon: 'Users' },
+  { key: 'pacote_ideal', label: 'Pacote Ideal', icon: 'Package' },
   { key: 'documentacao', label: 'Documentação', icon: 'FileText' },
   { key: 'logistica_aerea', label: 'Logística Aérea', icon: 'Plane' },
-  { key: 'chegada_transfer', label: 'Chegada & Transfer', icon: 'MapPin' },
   { key: 'hospedagem', label: 'Hospedagem', icon: 'Hotel' },
-  { key: 'transporte', label: 'Transporte', icon: 'Car' },
   { key: 'atracoes', label: 'Atrações', icon: 'Camera' },
   { key: 'gastronomia', label: 'Gastronomia', icon: 'UtensilsCrossed' },
-  { key: 'pacote_ideal', label: 'Pacote Ideal', icon: 'Package' },
-  { key: 'seguro_viagem', label: 'Seguro Viagem', icon: 'Shield' },
-  { key: 'perfis_clientes', label: 'Perfis de Clientes', icon: 'Users' },
   { key: 'viagens_combinadas', label: 'Viagens Combinadas', icon: 'Route' },
-  { key: 'alertas_golpes', label: 'Alertas & Golpes', icon: 'AlertTriangle' },
-  { key: 'dicas_insider', label: 'Dicas Insider', icon: 'Lightbulb' },
+  { key: 'segredos_destino', label: 'Segredos do Destino', icon: 'Lightbulb' },
+  { key: 'alertas_golpes', label: 'Alertas e Golpes', icon: 'AlertTriangle' },
   { key: 'checklist_final', label: 'Checklist Final', icon: 'CheckSquare' },
 ] as const;
 
