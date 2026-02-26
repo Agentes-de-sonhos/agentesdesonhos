@@ -25,6 +25,15 @@ export interface PlaybookContent {
   intro?: string;
   blocks?: PlaybookBlock[];
   pdf_url?: string;
+  pdf_files?: PlaybookPDFFile[];
+}
+
+export interface PlaybookPDFFile {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  pdf_url: string;
 }
 
 export interface PlaybookBlock {
