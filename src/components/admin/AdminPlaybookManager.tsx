@@ -18,8 +18,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, BookOpen, Save, X } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Save, X, Upload, FileText, Loader2 } from "lucide-react";
 import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
+import { useToast } from "@/hooks/use-toast";
 import { PLAYBOOK_TABS, type PlaybookBlock, type PlaybookSection, type PlaybookContent } from "@/types/playbook";
 
 export function AdminPlaybookManager() {
@@ -162,9 +163,12 @@ export function AdminPlaybookManager() {
 
 function SectionEditor({ destinationId }: { destinationId: string }) {
   const { upsertSection } = usePlaybookAdmin();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>(PLAYBOOK_TABS[0].key);
   const [intro, setIntro] = useState("");
   const [blocks, setBlocks] = useState<PlaybookBlock[]>([]);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
   const { data: destSections = [] } = useQuery({
@@ -189,9 +193,11 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
     if (section) {
       setIntro(section.content.intro || "");
       setBlocks(section.content.blocks || []);
+      setPdfUrl(section.content.pdf_url || "");
     } else {
       setIntro("");
       setBlocks([]);
+      setPdfUrl("");
     }
   };
 
@@ -199,6 +205,34 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
     loadTab(PLAYBOOK_TABS[0].key);
     setInitialized(true);
   }
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast({ title: "Formato inválido", description: "Selecione um arquivo PDF.", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const filePath = `${destinationId}/${activeTab}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("playbook-files")
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("playbook-files")
+        .getPublicUrl(filePath);
+
+      setPdfUrl(urlData.publicUrl);
+      toast({ title: "PDF enviado com sucesso!" });
+    } catch (err: any) {
+      toast({ title: "Erro no upload", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const addBlock = (type: PlaybookBlock['type']) => {
     setBlocks([...blocks, { id: crypto.randomUUID(), type, title: "", content: "", items: [] }]);
@@ -214,14 +248,20 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
 
   const handleSave = () => {
     const tabIndex = PLAYBOOK_TABS.findIndex((t) => t.key === activeTab);
+    const content: PlaybookContent = { intro, blocks };
+    if (activeTab === 'visao_geral' && pdfUrl) {
+      content.pdf_url = pdfUrl;
+    }
     upsertSection.mutate({
       destination_id: destinationId,
       tab_key: activeTab,
       title: PLAYBOOK_TABS[tabIndex].label,
-      content: { intro, blocks },
+      content,
       order_index: tabIndex,
     });
   };
+
+  const isVisaoGeral = activeTab === 'visao_geral';
 
   return (
     <div className="border-t px-4 py-4 space-y-4">
@@ -240,6 +280,47 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
       </div>
 
       <div className="space-y-3">
+        {/* PDF Upload for Visão Geral */}
+        {isVisaoGeral && (
+          <Card className="border-dashed border-primary/30 bg-primary/5">
+            <CardContent className="pt-4 pb-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <Label className="font-semibold">PDF da Visão Geral</Label>
+              </div>
+
+              {pdfUrl ? (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
+                  <FileText className="h-5 w-5 text-primary shrink-0" />
+                  <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">
+                    {pdfUrl.split('/').pop()}
+                  </a>
+                  <Button size="sm" variant="destructive" onClick={() => setPdfUrl("")} className="shrink-0">
+                    <Trash2 className="h-3 w-3 mr-1" /> Remover
+                  </Button>
+                </div>
+              ) : null}
+
+              <div className="flex items-center gap-3">
+                <Button size="sm" variant="outline" disabled={uploading} asChild>
+                  <label className="cursor-pointer">
+                    {uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                    {uploading ? "Enviando..." : "Enviar PDF"}
+                    <input type="file" accept=".pdf" className="hidden" onChange={handlePdfUpload} />
+                  </label>
+                </Button>
+                <span className="text-xs text-muted-foreground">ou cole a URL abaixo:</span>
+              </div>
+
+              <Input
+                value={pdfUrl}
+                onChange={(e) => setPdfUrl(e.target.value)}
+                placeholder="https://... (URL do PDF)"
+              />
+            </CardContent>
+          </Card>
+        )}
+
         <div>
           <Label>Introdução da Seção</Label>
           <Textarea value={intro} onChange={(e) => setIntro(e.target.value)} rows={3} placeholder="Texto introdutório..." />
