@@ -109,7 +109,7 @@ export function PlaybookPDFViewer({
       <div
         className={cn(
           "flex-1 overflow-x-hidden overflow-y-auto bg-muted/20",
-          isFullscreen ? "h-[calc(100vh-52px)]" : "h-[80vh] min-h-[500px]"
+          isFullscreen ? "h-[calc(100vh-52px)]" : "h-[90vh] min-h-[800px]"
         )}
       >
         <iframe
