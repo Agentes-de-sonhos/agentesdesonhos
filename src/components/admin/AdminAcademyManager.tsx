@@ -22,8 +22,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, MapPin, Link2 } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck } from "lucide-react";
 import { useAcademy, useAcademyAdmin } from "@/hooks/useAcademy";
+import { QuizManager } from "./QuizManager";
 import { POPULAR_DESTINATIONS, TRAINING_CATEGORIES, type LearningTrail, type Training } from "@/types/academy";
 import {
   AlertDialog,
@@ -534,6 +535,9 @@ export function AdminAcademyManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Quiz & Exam Manager */}
+      <QuizManager />
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
