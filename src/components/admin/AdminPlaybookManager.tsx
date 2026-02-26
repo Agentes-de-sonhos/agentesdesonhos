@@ -21,7 +21,7 @@ import {
 import { Plus, Pencil, Trash2, BookOpen, Save, X, Upload, FileText, Loader2 } from "lucide-react";
 import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
 import { useToast } from "@/hooks/use-toast";
-import { PLAYBOOK_TABS, type PlaybookBlock, type PlaybookSection, type PlaybookContent } from "@/types/playbook";
+import { PLAYBOOK_TABS, type PlaybookBlock, type PlaybookSection, type PlaybookContent, type PlaybookPDFFile } from "@/types/playbook";
 
 export function AdminPlaybookManager() {
   const { destinations } = usePlaybook();
@@ -168,6 +168,7 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
   const [intro, setIntro] = useState("");
   const [blocks, setBlocks] = useState<PlaybookBlock[]>([]);
   const [pdfUrl, setPdfUrl] = useState("");
+  const [pdfFiles, setPdfFiles] = useState<PlaybookPDFFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -194,10 +195,12 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
       setIntro(section.content.intro || "");
       setBlocks(section.content.blocks || []);
       setPdfUrl(section.content.pdf_url || "");
+      setPdfFiles(section.content.pdf_files || []);
     } else {
       setIntro("");
       setBlocks([]);
       setPdfUrl("");
+      setPdfFiles([]);
     }
   };
 
@@ -234,6 +237,43 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
     }
   };
 
+  const handleMindMapUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || file.type !== "application/pdf") {
+      toast({ title: "Formato inválido", description: "Selecione um arquivo PDF.", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const filePath = `${destinationId}/mapas_mentais/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("playbook-files")
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("playbook-files").getPublicUrl(filePath);
+      const newFile: PlaybookPDFFile = {
+        id: crypto.randomUUID(),
+        name: file.name.replace(/\.pdf$/i, ""),
+        pdf_url: urlData.publicUrl,
+        category: "Geral",
+      };
+      setPdfFiles((prev) => [...prev, newFile]);
+      toast({ title: "Mapa mental enviado!" });
+    } catch (err: any) {
+      toast({ title: "Erro no upload", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const updatePdfFile = (id: string, updates: Partial<PlaybookPDFFile>) => {
+    setPdfFiles((prev) => prev.map((f) => f.id === id ? { ...f, ...updates } : f));
+  };
+
+  const removePdfFile = (id: string) => {
+    setPdfFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+
   const addBlock = (type: PlaybookBlock['type']) => {
     setBlocks([...blocks, { id: crypto.randomUUID(), type, title: "", content: "", items: [] }]);
   };
@@ -252,6 +292,9 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
     if (activeTab === 'visao_geral' && pdfUrl) {
       content.pdf_url = pdfUrl;
     }
+    if (activeTab === 'mapas_mentais') {
+      content.pdf_files = pdfFiles;
+    }
     upsertSection.mutate({
       destination_id: destinationId,
       tab_key: activeTab,
@@ -262,6 +305,7 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
   };
 
   const isVisaoGeral = activeTab === 'visao_geral';
+  const isMapasMentais = activeTab === 'mapas_mentais';
 
   return (
     <div className="border-t px-4 py-4 space-y-4">
@@ -321,6 +365,63 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
           </Card>
         )}
 
+        {/* Mind Maps PDF Manager */}
+        {isMapasMentais && (
+          <Card className="border-dashed border-primary/30 bg-primary/5">
+            <CardContent className="pt-4 pb-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <Label className="font-semibold">PDFs de Mapas Mentais</Label>
+                  <Badge variant="secondary" className="text-xs">{pdfFiles.length}</Badge>
+                </div>
+                <Button size="sm" variant="outline" disabled={uploading} asChild>
+                  <label className="cursor-pointer">
+                    {uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                    {uploading ? "Enviando..." : "Adicionar PDF"}
+                    <input type="file" accept=".pdf" className="hidden" onChange={handleMindMapUpload} />
+                  </label>
+                </Button>
+              </div>
+
+              {pdfFiles.map((file) => (
+                <Card key={file.id} className="border bg-background">
+                  <CardContent className="pt-3 pb-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <FileText className="h-4 w-4 text-primary shrink-0" />
+                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <Input
+                          value={file.name}
+                          onChange={(e) => updatePdfFile(file.id, { name: e.target.value })}
+                          placeholder="Nome do mapa mental"
+                        />
+                        <Input
+                          value={file.description || ""}
+                          onChange={(e) => updatePdfFile(file.id, { description: e.target.value })}
+                          placeholder="Descrição (opcional)"
+                        />
+                        <Input
+                          value={file.category || ""}
+                          onChange={(e) => updatePdfFile(file.id, { category: e.target.value })}
+                          placeholder="Categoria (ex: Empresa)"
+                        />
+                      </div>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive shrink-0" onClick={() => removePdfFile(file.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {pdfFiles.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-3">
+                  Nenhum mapa mental adicionado. Clique em "Adicionar PDF" acima.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
         <div>
           <Label>Introdução da Seção</Label>
           <Textarea value={intro} onChange={(e) => setIntro(e.target.value)} rows={3} placeholder="Texto introdutório..." />
