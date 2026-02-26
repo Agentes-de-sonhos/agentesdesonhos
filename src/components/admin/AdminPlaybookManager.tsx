@@ -18,10 +18,29 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, BookOpen, Save, X, Upload, FileText, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Save, X, Upload, FileText, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
 import { useToast } from "@/hooks/use-toast";
 import { PLAYBOOK_TABS, type PlaybookBlock, type PlaybookSection, type PlaybookContent, type PlaybookPDFFile } from "@/types/playbook";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+const COMO_VENDER_SECTIONS = [
+  { id: "visao_comercial", label: "Visão Comercial do Destino" },
+  { id: "perfil_passageiro", label: "Perfil e Desejo do Passageiro" },
+  { id: "posicionamento", label: "Posicionamento na Venda" },
+  { id: "metodo_consultivo", label: "Venda Consultiva para Turismo" },
+  { id: "sete_passos", label: "7 Passos da Venda" },
+  { id: "argumentos", label: "Argumentos de Venda Prontos" },
+  { id: "objecoes", label: "Objeções Comuns e Respostas" },
+  { id: "erros", label: "Erros que Perdem Vendas" },
+  { id: "fechamento", label: "Estratégias de Fechamento" },
+  { id: "checklist", label: "Checklist Rápido de Venda" },
+] as const;
 
 export function AdminPlaybookManager() {
   const { destinations } = usePlaybook();
@@ -171,6 +190,11 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
   const [pdfFiles, setPdfFiles] = useState<PlaybookPDFFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  // Como Vender section-based state
+  const [sectionIntros, setSectionIntros] = useState<Record<string, string>>({});
+  const [sectionBlocks, setSectionBlocks] = useState<Record<string, PlaybookBlock[]>>({});
+
+
 
   const { data: destSections = [] } = useQuery({
     queryKey: ["playbook-sections", destinationId],
@@ -196,11 +220,26 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
       setBlocks(section.content.blocks || []);
       setPdfUrl(section.content.pdf_url || "");
       setPdfFiles(section.content.pdf_files || []);
+      // Load Como Vender section-based data
+      const content = section.content as any;
+      const intros: Record<string, string> = {};
+      const blks: Record<string, PlaybookBlock[]> = {};
+      COMO_VENDER_SECTIONS.forEach((s) => {
+        intros[s.id] = content?.sections?.[s.id]?.intro || "";
+        blks[s.id] = (content?.blocks || []).filter((b: any) => b.section === s.id);
+      });
+      setSectionIntros(intros);
+      setSectionBlocks(blks);
     } else {
       setIntro("");
       setBlocks([]);
       setPdfUrl("");
       setPdfFiles([]);
+      const emptyIntros: Record<string, string> = {};
+      const emptyBlks: Record<string, PlaybookBlock[]> = {};
+      COMO_VENDER_SECTIONS.forEach((s) => { emptyIntros[s.id] = ""; emptyBlks[s.id] = []; });
+      setSectionIntros(emptyIntros);
+      setSectionBlocks(emptyBlks);
     }
   };
 
@@ -290,12 +329,26 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
 
   const handleSave = () => {
     const tabIndex = PLAYBOOK_TABS.findIndex((t) => t.key === activeTab);
-    const content: PlaybookContent = { intro, blocks };
+    let content: any = { intro, blocks };
     if (activeTab === 'visao_geral' && pdfUrl) {
       content.pdf_url = pdfUrl;
     }
     if (activeTab === 'mapas_mentais') {
       content.pdf_files = pdfFiles;
+    }
+    if (activeTab === 'como_vender') {
+      // Flatten all section blocks with section field
+      const allBlocks: any[] = [];
+      const sections: Record<string, { intro?: string }> = {};
+      COMO_VENDER_SECTIONS.forEach((s) => {
+        if (sectionIntros[s.id]) {
+          sections[s.id] = { intro: sectionIntros[s.id] };
+        }
+        (sectionBlocks[s.id] || []).forEach((b) => {
+          allBlocks.push({ ...b, section: s.id });
+        });
+      });
+      content = { intro, blocks: allBlocks, sections };
     }
     upsertSection.mutate({
       destination_id: destinationId,
@@ -308,6 +361,7 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
 
   const isVisaoGeral = activeTab === 'visao_geral';
   const isMapasMentais = activeTab === 'mapas_mentais';
+  const isComoVender = activeTab === 'como_vender';
 
   return (
     <div className="border-t px-4 py-4 space-y-4">
@@ -424,43 +478,141 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
             </CardContent>
           </Card>
         )}
-        <div>
-          <Label>Introdução da Seção</Label>
-          <Textarea value={intro} onChange={(e) => setIntro(e.target.value)} rows={3} placeholder="Texto introdutório..." />
-        </div>
 
-        {blocks.map((block, i) => (
-          <Card key={block.id} className="border-dashed">
-            <CardContent className="pt-3 pb-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline">{block.type}</Badge>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeBlock(i)}>
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-              <Input value={block.title || ""} onChange={(e) => updateBlock(i, { title: e.target.value })} placeholder="Título do bloco" />
-              <Textarea value={block.content} onChange={(e) => updateBlock(i, { content: e.target.value })} rows={3} placeholder="Conteúdo..." />
-              <div>
-                <Label className="text-xs">Itens (um por linha)</Label>
-                <Textarea
-                  value={(block.items || []).join('\n')}
-                  onChange={(e) => updateBlock(i, { items: e.target.value.split('\n').filter(Boolean) })}
-                  rows={2}
-                  placeholder={"Item 1\nItem 2"}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {/* Como Vender: Section-based editor */}
+        {isComoVender ? (
+          <div className="space-y-3">
+            <div>
+              <Label>Introdução Geral (opcional)</Label>
+              <Textarea value={intro} onChange={(e) => setIntro(e.target.value)} rows={2} placeholder="Texto introdutório geral da aba Como Vender..." />
+            </div>
 
-        <div className="flex gap-2 flex-wrap">
-          <Button size="sm" variant="outline" onClick={() => addBlock('text')}>+ Texto</Button>
-          <Button size="sm" variant="outline" onClick={() => addBlock('tip')}>+ Dica</Button>
-          <Button size="sm" variant="outline" onClick={() => addBlock('alert')}>+ Alerta</Button>
-          <Button size="sm" variant="outline" onClick={() => addBlock('strategy')}>+ Estratégia</Button>
-          <Button size="sm" variant="outline" onClick={() => addBlock('checklist')}>+ Checklist</Button>
-          <Button size="sm" variant="outline" onClick={() => addBlock('highlight')}>+ Destaque</Button>
-        </div>
+            <Label className="text-sm font-semibold">Seções do Playbook</Label>
+            <Accordion type="multiple" className="space-y-2">
+              {COMO_VENDER_SECTIONS.map((sec) => {
+                const secBlocks = sectionBlocks[sec.id] || [];
+                const secIntro = sectionIntros[sec.id] || "";
+                const hasContent = secIntro || secBlocks.length > 0;
+
+                const addSecBlock = (type: PlaybookBlock['type']) => {
+                  setSectionBlocks((prev) => ({
+                    ...prev,
+                    [sec.id]: [...(prev[sec.id] || []), { id: crypto.randomUUID(), type, title: "", content: "", items: [] }],
+                  }));
+                };
+
+                const updateSecBlock = (idx: number, updates: Partial<PlaybookBlock>) => {
+                  setSectionBlocks((prev) => ({
+                    ...prev,
+                    [sec.id]: (prev[sec.id] || []).map((b, i) => i === idx ? { ...b, ...updates } : b),
+                  }));
+                };
+
+                const removeSecBlock = (idx: number) => {
+                  setSectionBlocks((prev) => ({
+                    ...prev,
+                    [sec.id]: (prev[sec.id] || []).filter((_, i) => i !== idx),
+                  }));
+                };
+
+                return (
+                  <AccordionItem key={sec.id} value={sec.id} className="border rounded-lg px-3">
+                    <AccordionTrigger className="text-sm font-medium py-3 hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        {sec.label}
+                        {hasContent && <Badge variant="secondary" className="text-[10px]">{secBlocks.length} blocos</Badge>}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3 pb-4">
+                      <div>
+                        <Label className="text-xs">Introdução da Seção</Label>
+                        <Textarea
+                          value={secIntro}
+                          onChange={(e) => setSectionIntros((prev) => ({ ...prev, [sec.id]: e.target.value }))}
+                          rows={2}
+                          placeholder={`Texto introdutório para "${sec.label}"...`}
+                        />
+                      </div>
+
+                      {secBlocks.map((block, i) => (
+                        <Card key={block.id} className="border-dashed">
+                          <CardContent className="pt-3 pb-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Badge variant="outline">{block.type}</Badge>
+                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeSecBlock(i)}>
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <Input value={block.title || ""} onChange={(e) => updateSecBlock(i, { title: e.target.value })} placeholder="Título do bloco" />
+                            <Textarea value={block.content} onChange={(e) => updateSecBlock(i, { content: e.target.value })} rows={3} placeholder="Conteúdo..." />
+                            <div>
+                              <Label className="text-xs">Itens (um por linha)</Label>
+                              <Textarea
+                                value={(block.items || []).join('\n')}
+                                onChange={(e) => updateSecBlock(i, { items: e.target.value.split('\n').filter(Boolean) })}
+                                rows={2}
+                                placeholder={"Item 1\nItem 2"}
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+
+                      <div className="flex gap-2 flex-wrap">
+                        <Button size="sm" variant="outline" onClick={() => addSecBlock('text')}>+ Texto</Button>
+                        <Button size="sm" variant="outline" onClick={() => addSecBlock('tip')}>+ Dica</Button>
+                        <Button size="sm" variant="outline" onClick={() => addSecBlock('alert')}>+ Alerta</Button>
+                        <Button size="sm" variant="outline" onClick={() => addSecBlock('strategy')}>+ Estratégia</Button>
+                        <Button size="sm" variant="outline" onClick={() => addSecBlock('checklist')}>+ Checklist</Button>
+                        <Button size="sm" variant="outline" onClick={() => addSecBlock('highlight')}>+ Destaque</Button>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          </div>
+        ) : (
+          <>
+            <div>
+              <Label>Introdução da Seção</Label>
+              <Textarea value={intro} onChange={(e) => setIntro(e.target.value)} rows={3} placeholder="Texto introdutório..." />
+            </div>
+
+            {blocks.map((block, i) => (
+              <Card key={block.id} className="border-dashed">
+                <CardContent className="pt-3 pb-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline">{block.type}</Badge>
+                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeBlock(i)}>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <Input value={block.title || ""} onChange={(e) => updateBlock(i, { title: e.target.value })} placeholder="Título do bloco" />
+                  <Textarea value={block.content} onChange={(e) => updateBlock(i, { content: e.target.value })} rows={3} placeholder="Conteúdo..." />
+                  <div>
+                    <Label className="text-xs">Itens (um por linha)</Label>
+                    <Textarea
+                      value={(block.items || []).join('\n')}
+                      onChange={(e) => updateBlock(i, { items: e.target.value.split('\n').filter(Boolean) })}
+                      rows={2}
+                      placeholder={"Item 1\nItem 2"}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            <div className="flex gap-2 flex-wrap">
+              <Button size="sm" variant="outline" onClick={() => addBlock('text')}>+ Texto</Button>
+              <Button size="sm" variant="outline" onClick={() => addBlock('tip')}>+ Dica</Button>
+              <Button size="sm" variant="outline" onClick={() => addBlock('alert')}>+ Alerta</Button>
+              <Button size="sm" variant="outline" onClick={() => addBlock('strategy')}>+ Estratégia</Button>
+              <Button size="sm" variant="outline" onClick={() => addBlock('checklist')}>+ Checklist</Button>
+              <Button size="sm" variant="outline" onClick={() => addBlock('highlight')}>+ Destaque</Button>
+            </div>
+          </>
+        )}
 
         <Button onClick={handleSave}>
           <Save className="h-4 w-4 mr-2" /> Salvar Seção
