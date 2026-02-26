@@ -218,7 +218,8 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
     }
     setUploading(true);
     try {
-      const filePath = `${destinationId}/${activeTab}/${Date.now()}_${file.name}`;
+      const sanitizedName = file.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const filePath = `${destinationId}/${activeTab}/${Date.now()}_${sanitizedName}`;
       const { error: uploadError } = await supabase.storage
         .from("playbook-files")
         .upload(filePath, file, { upsert: true });
@@ -245,7 +246,8 @@ function SectionEditor({ destinationId }: { destinationId: string }) {
     }
     setUploading(true);
     try {
-      const filePath = `${destinationId}/mapas_mentais/${Date.now()}_${file.name}`;
+      const sanitizedName = file.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const filePath = `${destinationId}/mapas_mentais/${Date.now()}_${sanitizedName}`;
       const { error: uploadError } = await supabase.storage
         .from("playbook-files")
         .upload(filePath, file, { upsert: true });
