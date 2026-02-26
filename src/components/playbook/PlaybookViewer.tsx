@@ -98,36 +98,33 @@ export default function PlaybookViewer() {
           </div>
         </div>
 
-        {/* Horizontal Tab Navigation */}
+        {/* Tab Navigation */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-2 -mx-1 px-1">
-          <ScrollArea className="w-full">
-            <div className="flex gap-1.5 pb-2">
-              {PLAYBOOK_TABS.map((tab) => {
-                const Icon = iconMap[tab.icon] || Target;
-                const isActive = activeTab === tab.key;
-                const hasContent = sections.some((s) => s.tab_key === tab.key);
+          <div className="flex flex-wrap gap-1.5 pb-2">
+            {PLAYBOOK_TABS.map((tab) => {
+              const Icon = iconMap[tab.icon] || Target;
+              const isActive = activeTab === tab.key;
+              const hasContent = sections.some((s) => s.tab_key === tab.key);
 
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={cn(
-                      "flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 shrink-0 border",
-                      isActive
-                        ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
-                        : hasContent
-                        ? "bg-card text-foreground border-border hover:border-primary/40 hover:bg-primary/5"
-                        : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={cn(
+                    "flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 border",
+                    isActive
+                      ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
+                      : hasContent
+                      ? "bg-card text-foreground border-border hover:border-primary/40 hover:bg-primary/5"
+                      : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Tab Content */}
