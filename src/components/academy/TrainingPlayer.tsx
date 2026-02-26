@@ -10,6 +10,27 @@ interface TrainingPlayerProps {
   onComplete: () => void;
 }
 
+function toEmbedUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    // youtube.com/watch?v=ID -> youtube.com/embed/ID
+    if ((u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) && !u.pathname.includes('/embed/')) {
+      const videoId = u.hostname.includes('youtu.be')
+        ? u.pathname.slice(1)
+        : u.searchParams.get('v');
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    // vimeo.com/ID -> player.vimeo.com/video/ID
+    if (u.hostname.includes('vimeo.com') && !u.hostname.includes('player.vimeo.com')) {
+      const id = u.pathname.split('/').filter(Boolean).pop();
+      if (id) return `https://player.vimeo.com/video/${id}`;
+    }
+    return url;
+  } catch {
+    return url;
+  }
+}
+
 export function TrainingPlayer({ training, isCompleted, onComplete }: TrainingPlayerProps) {
   return (
     <div className="flex flex-col h-full gap-4">
@@ -17,7 +38,7 @@ export function TrainingPlayer({ training, isCompleted, onComplete }: TrainingPl
       <div className="flex-1 bg-black rounded-lg overflow-hidden relative min-h-[300px]">
         {training.video_url ? (
           <iframe
-            src={training.video_url}
+            src={toEmbedUrl(training.video_url)}
             className="w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
