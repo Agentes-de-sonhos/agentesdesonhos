@@ -24,6 +24,7 @@ export interface PlaybookSection {
 export interface PlaybookContent {
   intro?: string;
   blocks?: PlaybookBlock[];
+  pdf_url?: string;
 }
 
 export interface PlaybookBlock {
