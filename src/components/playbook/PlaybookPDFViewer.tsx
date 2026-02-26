@@ -4,9 +4,6 @@ import {
   Download,
   Maximize,
   Minimize,
-  ZoomIn,
-  ZoomOut,
-  RotateCw,
   FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,7 +20,6 @@ export function PlaybookPDFViewer({
   subtitle = "Resumo Estratégico do Treinamento",
 }: PlaybookPDFViewerProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [zoom, setZoom] = useState(100);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = useCallback(async () => {
@@ -37,9 +33,6 @@ export function PlaybookPDFViewer({
     }
   }, []);
 
-  const handleZoomIn = () => setZoom((z) => Math.min(z + 25, 200));
-  const handleZoomOut = () => setZoom((z) => Math.max(z - 25, 50));
-  const handleZoomReset = () => setZoom(100);
 
   const handleDownload = () => {
     if (!pdfUrl) return;
@@ -64,7 +57,7 @@ export function PlaybookPDFViewer({
     );
   }
 
-  const embedUrl = `${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&zoom=${zoom}`;
+  const embedUrl = `${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
 
   return (
     <div
@@ -84,37 +77,6 @@ export function PlaybookPDFViewer({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          {/* Zoom controls */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleZoomOut}
-            disabled={zoom <= 50}
-            title="Reduzir zoom"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          <button
-            onClick={handleZoomReset}
-            className="text-xs font-medium text-muted-foreground hover:text-foreground px-1.5 min-w-[3rem] text-center transition-colors"
-            title="Restaurar zoom"
-          >
-            {zoom}%
-          </button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleZoomIn}
-            disabled={zoom >= 200}
-            title="Aumentar zoom"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-
-          <div className="w-px h-5 bg-border mx-1" />
-
           {/* Download */}
           <Button
             variant="ghost"
@@ -146,8 +108,8 @@ export function PlaybookPDFViewer({
       {/* PDF Embed */}
       <div
         className={cn(
-          "flex-1 bg-muted/20",
-          isFullscreen ? "h-[calc(100vh-52px)]" : "h-[75vh] min-h-[500px]"
+          "flex-1 overflow-x-hidden overflow-y-auto bg-muted/20",
+          isFullscreen ? "h-[calc(100vh-52px)]" : "h-[80vh] min-h-[500px]"
         )}
       >
         <iframe
@@ -155,6 +117,7 @@ export function PlaybookPDFViewer({
           className="w-full h-full border-0"
           title="Visualizador de PDF"
           loading="eager"
+          style={{ overflow: "hidden" }}
         />
       </div>
     </div>
