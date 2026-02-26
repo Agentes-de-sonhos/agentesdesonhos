@@ -33,6 +33,7 @@ import { usePlaybook } from "@/hooks/usePlaybook";
 import { PlaybookTabContent } from "./PlaybookTabContent";
 import { PlaybookPDFViewer } from "./PlaybookPDFViewer";
 import { PlaybookMindMapsViewer } from "./PlaybookMindMapsViewer";
+import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
 import { PLAYBOOK_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
 
@@ -141,6 +142,8 @@ export default function PlaybookViewer() {
             <PlaybookMindMapsViewer
               files={activeSection?.content?.pdf_files || []}
             />
+          ) : activeTab === 'como_vender' ? (
+            <PlaybookComoVenderTab section={activeSection} />
           ) : (
             <PlaybookTabContent
               section={activeSection}
