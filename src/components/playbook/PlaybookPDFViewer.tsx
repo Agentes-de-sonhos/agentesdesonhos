@@ -63,7 +63,7 @@ export function PlaybookPDFViewer({
     <div
       ref={containerRef}
       className={cn(
-        "flex flex-col rounded-2xl border border-border bg-card overflow-hidden",
+        "rounded-2xl border border-border bg-card overflow-hidden",
         isFullscreen && "fixed inset-0 z-50 rounded-none border-0"
       )}
     >
@@ -77,7 +77,6 @@ export function PlaybookPDFViewer({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          {/* Download */}
           <Button
             variant="ghost"
             size="icon"
@@ -87,8 +86,6 @@ export function PlaybookPDFViewer({
           >
             <Download className="h-4 w-4" />
           </Button>
-
-          {/* Fullscreen */}
           <Button
             variant="ghost"
             size="icon"
@@ -107,17 +104,18 @@ export function PlaybookPDFViewer({
 
       {/* PDF Embed */}
       <div
-        className={cn(
-          "flex-1 overflow-x-hidden overflow-y-auto bg-muted/20",
-          isFullscreen ? "h-[calc(100vh-52px)]" : "h-[90vh] min-h-[800px]"
-        )}
+        className="overflow-x-hidden overflow-y-auto bg-muted/20"
+        style={{
+          height: isFullscreen ? "calc(100vh - 52px)" : "calc(100vh - 200px)",
+          minHeight: isFullscreen ? undefined : "800px",
+        }}
       >
         <iframe
           src={embedUrl}
-          className="w-full h-full border-0"
+          className="border-0"
           title="Visualizador de PDF"
           loading="eager"
-          style={{ overflow: "hidden" }}
+          style={{ width: "100%", height: "100%", overflow: "hidden" }}
         />
       </div>
     </div>
