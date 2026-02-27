@@ -21,6 +21,7 @@ import {
   Clock,
   ChevronRight,
   ChevronLeft,
+  StickyNote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -47,10 +48,12 @@ interface MenuItem {
 const mainMenuItems: MenuItem[] = [
   { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
   { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
-  { title: "Materiais de Divulgação", url: "/materiais", icon: FileText, requiredFeature: "materials" },
   { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
-  { title: "Agenda", url: "/agenda", icon: Calendar, requiredFeature: "agenda" },
+  { title: "Materiais de Divulgação", url: "/materiais", icon: FileText, requiredFeature: "materials" },
   { title: "Notícias", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
+  { title: "Minha Agenda", url: "/agenda", icon: Calendar, requiredFeature: "agenda" },
+  { title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote },
+  { title: "Calculadora", url: "/calculadora", icon: Calculator },
 ];
 
 const secondaryMenuItems: MenuItem[] = [
