@@ -143,26 +143,26 @@ export default function Dashboard() {
           <>
 
             {/* 2. Notícias e Minha Agenda - lado a lado */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 order-2">
-              <div>
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
+              <div className="flex flex-col">
                 <SectionHeader title="Principais Notícias" color="news" />
-                <CuratedNewsFeed />
+                <div className="flex-1 [&>*]:h-full"><CuratedNewsFeed /></div>
               </div>
-              <div>
+              <div className="flex flex-col">
                 <SectionHeader title="Minha Agenda" color="events" />
-                <UpcomingAgendaEventsCard />
+                <div className="flex-1 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
               </div>
             </section>
 
             {/* 3. Minha Meta & Próximas Viagens */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 order-3">
-              <div>
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
+              <div className="flex flex-col">
                 <SectionHeader title="Minha Meta" color="financial" />
-                <ClientsManagementCard />
+                <div className="flex-1 [&>*]:h-full"><ClientsManagementCard /></div>
               </div>
-              <div>
+              <div className="flex flex-col">
                 <SectionHeader title="Próximas Viagens" color="reminders" />
-                <TripRemindersCard />
+                <div className="flex-1 [&>*]:h-full"><TripRemindersCard /></div>
               </div>
             </section>
 
