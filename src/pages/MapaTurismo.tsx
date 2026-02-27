@@ -114,18 +114,23 @@ export default function MapaTurismo() {
     label: s.name,
   }));
 
-  const filteredSuppliers = suppliers?.filter((supplier) => {
-    const matchesSearch = supplier.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || supplier.category === categoryFilter;
-    const matchesSpecialties =
-      selectedSpecialties.length === 0 ||
-      selectedSpecialties.some((specialtyName) =>
-        supplier.specialties?.some(
-          (s: Specialty) => s.name.toLowerCase() === specialtyName.toLowerCase()
-        )
-      );
-    return matchesSearch && matchesCategory && matchesSpecialties;
-  });
+  // Only show suppliers when a category is selected or search/specialty filters are active
+  const hasActiveFilter = categoryFilter !== "all" || search.length > 0 || selectedSpecialties.length > 0;
+
+  const filteredSuppliers = hasActiveFilter
+    ? suppliers?.filter((supplier) => {
+        const matchesSearch = supplier.name.toLowerCase().includes(search.toLowerCase());
+        const matchesCategory = categoryFilter === "all" || supplier.category === categoryFilter;
+        const matchesSpecialties =
+          selectedSpecialties.length === 0 ||
+          selectedSpecialties.some((specialtyName) =>
+            supplier.specialties?.some(
+              (s: Specialty) => s.name.toLowerCase() === specialtyName.toLowerCase()
+            )
+          );
+        return matchesSearch && matchesCategory && matchesSpecialties;
+      })
+    : [];
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
