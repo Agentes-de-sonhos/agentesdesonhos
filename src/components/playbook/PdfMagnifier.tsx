@@ -19,16 +19,28 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
 
   const ZOOM_SCALE = 2;
 
-  const isOverScrollbar = useCallback((e: React.MouseEvent | MouseEvent) => {
+  const checkScrollbar = useCallback((e: MouseEvent | React.MouseEvent) => {
     if (!containerRef.current) return false;
     const rect = containerRef.current.getBoundingClientRect();
-    const xFromRight = rect.right - e.clientX;
-    const yFromBottom = rect.bottom - e.clientY;
-    return xFromRight <= SCROLLBAR_WIDTH || yFromBottom <= SCROLLBAR_WIDTH;
+    return (rect.right - e.clientX) <= SCROLLBAR_WIDTH || (rect.bottom - e.clientY) <= SCROLLBAR_WIDTH;
   }, []);
 
+  // Track mouse position at container level to always update onScrollbar
+  const handleContainerMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isZoomed) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        setOrigin({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+      }
+    } else {
+      setOnScrollbar(checkScrollbar(e));
+    }
+  }, [isZoomed, checkScrollbar]);
+
   const handleOverlayMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button === 0 && !isOverScrollbar(e)) {
+    if (e.button === 0) {
       e.preventDefault();
       const rect = containerRef.current?.getBoundingClientRect();
       if (rect) {
@@ -38,22 +50,9 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
         setIsZoomed(true);
       }
     }
-  }, [isOverScrollbar]);
+  }, []);
 
-  const handleOverlayMouseMove = useCallback((e: React.MouseEvent) => {
-    if (isZoomed) {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (rect) {
-        const x = ((e.clientX - rect.left) / rect.width) * 100;
-        const y = ((e.clientY - rect.top) / rect.height) * 100;
-        setOrigin({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-      }
-    } else {
-      setOnScrollbar(isOverScrollbar(e));
-    }
-  }, [isZoomed, isOverScrollbar]);
-
-  const handleOverlayMouseUp = useCallback((e: React.MouseEvent) => {
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
     if (e.button === 0) setIsZoomed(false);
   }, []);
 
@@ -70,6 +69,7 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
       ref={containerRef}
       className="relative overflow-hidden bg-muted/20"
       style={{ height, minHeight }}
+      onMouseMove={handleContainerMouseMove}
       onMouseEnter={() => setShowHint(true)}
       onMouseLeave={() => { setShowHint(false); setIsZoomed(false); setOnScrollbar(false); }}
     >
@@ -86,25 +86,21 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
         }}
       />
 
-      {/* Overlay for zoom - pointer-events:none over scrollbar area */}
-      {!isZoomed && (
+      {/* Zoom overlay - hidden over scrollbar so scroll works, hidden when zoomed */}
+      {!isZoomed && !onScrollbar && (
         <div
           className="absolute inset-0 z-10"
-          style={{
-            cursor: onScrollbar ? "default" : "zoom-in",
-            pointerEvents: onScrollbar ? "none" : "auto",
-          }}
+          style={{ cursor: "zoom-in" }}
           onMouseDown={handleOverlayMouseDown}
-          onMouseMove={handleOverlayMouseMove}
         />
       )}
 
+      {/* Panning overlay when zoomed */}
       {isZoomed && (
         <div
           className="absolute inset-0 z-10"
           style={{ cursor: "none" }}
-          onMouseMove={handleOverlayMouseMove}
-          onMouseUp={handleOverlayMouseUp}
+          onMouseUp={handleMouseUp}
         />
       )}
 
