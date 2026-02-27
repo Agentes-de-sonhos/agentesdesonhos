@@ -15,9 +15,6 @@ import {
   Maximize,
   Minimize,
   GitBranch,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
 } from "lucide-react";
 import {
   Tooltip,
@@ -28,6 +25,7 @@ import {
 import type { PlaybookPDFFile } from "@/types/playbook";
 import { cn } from "@/lib/utils";
 import { useRef, useCallback } from "react";
+import { PdfMagnifier } from "./PdfMagnifier";
 
 interface PlaybookMindMapsViewerProps {
   files: PlaybookPDFFile[];
@@ -36,7 +34,6 @@ interface PlaybookMindMapsViewerProps {
 export function PlaybookMindMapsViewer({ files }: PlaybookMindMapsViewerProps) {
   const [selectedFile, setSelectedFile] = useState<PlaybookPDFFile | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [zoom, setZoom] = useState(100);
   const viewerRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = useCallback(async () => {
@@ -49,16 +46,6 @@ export function PlaybookMindMapsViewer({ files }: PlaybookMindMapsViewerProps) {
       setIsFullscreen(false);
     }
   }, []);
-
-  const zoomIn = () => setZoom((z) => Math.min(z + 25, 250));
-  const zoomOut = () => setZoom((z) => Math.max(z - 25, 50));
-  const zoomReset = () => setZoom(100);
-
-  // Reset zoom when changing file
-  const handleSelectFile = (file: PlaybookPDFFile) => {
-    setSelectedFile(file);
-    setZoom(100);
-  };
 
   if (!files || files.length === 0) {
     return (
@@ -101,7 +88,7 @@ export function PlaybookMindMapsViewer({ files }: PlaybookMindMapsViewerProps) {
                   <Card
                     key={file.id}
                     className="group cursor-pointer border hover:border-primary/40 hover:shadow-md transition-all duration-200"
-                    onClick={() => handleSelectFile(file)}
+                    onClick={() => setSelectedFile(file)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
@@ -152,33 +139,6 @@ export function PlaybookMindMapsViewer({ files }: PlaybookMindMapsViewerProps) {
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={zoomOut} disabled={zoom <= 50}>
-                        <ZoomOut className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Diminuir zoom</TooltipContent>
-                  </Tooltip>
-
-                  <button
-                    onClick={zoomReset}
-                    className="text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors min-w-[3rem] text-center"
-                  >
-                    {zoom}%
-                  </button>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={zoomIn} disabled={zoom >= 250}>
-                        <ZoomIn className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Aumentar zoom</TooltipContent>
-                  </Tooltip>
-
-                  <div className="w-px h-5 bg-border mx-1" />
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -210,21 +170,13 @@ export function PlaybookMindMapsViewer({ files }: PlaybookMindMapsViewerProps) {
               </div>
             </div>
 
-            {/* PDF */}
-            <div className="flex-1 overflow-auto bg-muted/20">
+            {/* PDF with magnifier */}
+            <div className="flex-1">
               {selectedFile && (
-                <iframe
+                <PdfMagnifier
                   src={`${selectedFile.pdf_url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
-                  className="border-0 origin-top-left"
                   title={selectedFile.name}
-                  loading="eager"
-                  style={{
-                    width: `${10000 / zoom}%`,
-                    height: `${10000 / zoom}%`,
-                    transform: `scale(${zoom / 100})`,
-                    transformOrigin: "top left",
-                    overflow: "hidden",
-                  }}
+                  height="100%"
                 />
               )}
             </div>

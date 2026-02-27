@@ -5,9 +5,6 @@ import {
   Maximize,
   Minimize,
   FileText,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -16,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PdfMagnifier } from "./PdfMagnifier";
 
 interface PlaybookPDFViewerProps {
   pdfUrl: string | undefined;
@@ -29,7 +27,6 @@ export function PlaybookPDFViewer({
   subtitle = "Resumo Estratégico do Treinamento",
 }: PlaybookPDFViewerProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [zoom, setZoom] = useState(100);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = useCallback(async () => {
@@ -42,11 +39,6 @@ export function PlaybookPDFViewer({
       setIsFullscreen(false);
     }
   }, []);
-
-  const zoomIn = () => setZoom((z) => Math.min(z + 25, 250));
-  const zoomOut = () => setZoom((z) => Math.max(z - 25, 50));
-  const zoomReset = () => setZoom(100);
-
 
   const handleDownload = () => {
     if (!pdfUrl) return;
@@ -94,35 +86,7 @@ export function PlaybookPDFViewer({
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={zoomOut} disabled={zoom <= 50}>
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Diminuir zoom</TooltipContent>
-            </Tooltip>
-
-            <button
-              onClick={zoomReset}
-              className="text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors min-w-[3rem] text-center"
-              title="Resetar zoom"
-            >
-              {zoom}%
-            </button>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={zoomIn} disabled={zoom >= 250}>
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Aumentar zoom</TooltipContent>
-            </Tooltip>
-
-            <div className="w-px h-5 bg-border mx-1" />
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} title="Baixar PDF">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload}>
                   <Download className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -141,28 +105,13 @@ export function PlaybookPDFViewer({
         </div>
       </div>
 
-      {/* PDF Embed */}
-      <div
-        className="overflow-x-hidden overflow-y-auto bg-muted/20"
-        style={{
-          height: isFullscreen ? "calc(100vh - 52px)" : "calc(100vh - 200px)",
-          minHeight: isFullscreen ? undefined : "800px",
-        }}
-      >
-        <iframe
-          src={embedUrl}
-          className="border-0 origin-top-left"
-          title="Visualizador de PDF"
-          loading="eager"
-          style={{
-            width: `${10000 / zoom}%`,
-            height: `${10000 / zoom}%`,
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: "top left",
-            overflow: "hidden",
-          }}
-        />
-      </div>
+      {/* PDF with magnifier */}
+      <PdfMagnifier
+        src={embedUrl}
+        title="Visualizador de PDF"
+        height={isFullscreen ? "calc(100vh - 52px)" : "calc(100vh - 200px)"}
+        minHeight={isFullscreen ? undefined : "800px"}
+      />
     </div>
   );
 }
