@@ -141,13 +141,6 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
-            {/* 1. Mapa do Turismo - TOP PRIORITY */}
-            <section className="order-1">
-              <SectionHeader title="Mapa do Turismo" color="map" />
-              <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 sm:overflow-visible">
-                <SupplierCategoriesCard />
-              </div>
-            </section>
 
             {/* 2. Notícias e Próximas Viagens - lado a lado */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 order-2">
