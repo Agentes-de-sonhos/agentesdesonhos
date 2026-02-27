@@ -68,9 +68,9 @@ export function NotificationsDropdown() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 rounded-full hover:bg-muted"
+          className="relative h-9 w-9 rounded-full bg-primary text-white hover:bg-primary/90"
         >
-          <Bell className="h-4.5 w-4.5 text-muted-foreground" />
+          <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
               {unreadCount > 9 ? "9+" : unreadCount}

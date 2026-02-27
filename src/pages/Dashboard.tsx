@@ -130,10 +130,10 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full hover:bg-primary/10"
+                    className="h-9 w-9 rounded-full bg-primary text-white hover:bg-primary/90"
                     onClick={() => navigate("/perfil")}
                   >
-                    <User className="h-5 w-5 text-muted-foreground" />
+                    <User className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -145,10 +145,10 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full hover:bg-destructive/10"
+                    className="h-9 w-9 rounded-full bg-primary text-white hover:bg-primary/90"
                     onClick={handleLogout}
                   >
-                    <LogOut className="h-5 w-5 text-muted-foreground hover:text-destructive" />
+                    <LogOut className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

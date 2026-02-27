@@ -86,15 +86,15 @@ export function ExchangeRateCard() {
 
   return (
     <TooltipProvider>
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 bg-foreground/90 rounded-full px-4 py-1.5">
         {rates.map((currency) => (
           <Tooltip key={currency.code}>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-default">
-                <span className="font-medium text-foreground/80">
+              <div className="flex items-center gap-1.5 text-xs cursor-default">
+                <span className="font-semibold text-white/90">
                   {currency.code}
                 </span>
-                <span className="text-foreground/60">
+                <span className="text-white/70">
                   R$ {formatCurrency(currency.rate)}
                 </span>
               </div>
