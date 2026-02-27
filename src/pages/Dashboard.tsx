@@ -56,11 +56,35 @@ const iconMap: Record<string, LucideIcon> = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
 
   const handleLogout = async () => {
     await signOut();
     navigate("/auth");
+  };
+
+  // Fetch user profile for first name
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const firstName = profile?.name?.split(" ")[0] || "Agente";
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Bom dia";
+    if (hour < 18) return "Boa tarde";
+    return "Boa noite";
   };
 
   // Fetch suppliers from database
@@ -92,7 +116,7 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* Welcome message */}
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-            Olá, Agente de Sonhos! 👋
+            {getGreeting()}, {firstName}!
           </h1>
           
           {/* Top bar with all header elements */}
