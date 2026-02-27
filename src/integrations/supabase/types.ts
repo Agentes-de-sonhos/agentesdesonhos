@@ -832,6 +832,7 @@ export type Database = {
           is_active: boolean
           name: string
           order_index: number
+          overview_pdf_url: string | null
           total_hours: number
           updated_at: string
         }
@@ -845,6 +846,7 @@ export type Database = {
           is_active?: boolean
           name: string
           order_index?: number
+          overview_pdf_url?: string | null
           total_hours?: number
           updated_at?: string
         }
@@ -858,6 +860,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           order_index?: number
+          overview_pdf_url?: string | null
           total_hours?: number
           updated_at?: string
         }

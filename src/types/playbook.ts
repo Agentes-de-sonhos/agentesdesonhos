@@ -45,8 +45,6 @@ export interface PlaybookBlock {
 }
 
 export const PLAYBOOK_TABS = [
-  { key: 'visao_geral', label: 'Visão Geral', icon: 'LayoutDashboard' },
-  { key: 'mapas_mentais', label: 'Mapas Mentais', icon: 'GitBranch' },
   { key: 'como_vender', label: 'Como Vender', icon: 'TrendingUp' },
   { key: 'perfis_clientes', label: 'Perfis de Clientes', icon: 'Users' },
   { key: 'pacote_ideal', label: 'Pacote Ideal', icon: 'Package' },

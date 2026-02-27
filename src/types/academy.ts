@@ -8,6 +8,7 @@ export interface LearningTrail {
   is_active: boolean;
   total_hours: number;
   certificate_template_url: string | null;
+  overview_pdf_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -184,9 +185,10 @@ export const TRAINING_CATEGORIES = [
 ];
 
 export const MATERIAL_CATEGORIES = [
+  { value: 'mapas_mentais', label: 'Mapas Mentais' },
   { value: 'apresentacoes', label: 'Apresentações' },
-  { value: 'materiais_venda', label: 'Materiais de Venda' },
   { value: 'laminas', label: 'Lâminas de Divulgação' },
+  { value: 'materiais_venda', label: 'Materiais de Venda' },
   { value: 'videos_extras', label: 'Vídeos Extras' },
   { value: 'podcasts', label: 'Podcasts' },
   { value: 'infograficos', label: 'Infográficos' },

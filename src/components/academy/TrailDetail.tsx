@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,11 @@ import {
   Unlock,
   ClipboardCheck,
   FolderOpen,
+  LayoutDashboard,
+  GitBranch,
+  Presentation,
+  Video,
+  Share2,
 } from "lucide-react";
 import type { TrailWithProgress, Training, TrailMaterial } from "@/types/academy";
 import { useAcademy, useQuizQuestions, useExamQuestions, useTrailMaterials } from "@/hooks/useAcademy";
@@ -34,7 +39,9 @@ import { TrainingPlayer } from "./TrainingPlayer";
 import { QuizPlayer } from "./QuizPlayer";
 import { CertificatePDF } from "./CertificatePDF";
 import { MATERIAL_CATEGORIES } from "@/types/academy";
-import { useEffect, useState as useStateAlias } from "react";
+import { PlaybookPDFViewer } from "@/components/playbook/PlaybookPDFViewer";
+import { PlaybookMindMapsViewer } from "@/components/playbook/PlaybookMindMapsViewer";
+import type { PlaybookPDFFile } from "@/types/playbook";
 
 interface TrailDetailProps {
   trail: TrailWithProgress;
@@ -72,7 +79,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     fetchUserName();
   }, [user]);
 
-  // Check if a module is unlocked (all previous quizzes passed)
   const isModuleUnlocked = (index: number) => {
     if (index === 0) return true;
     for (let i = 0; i < index; i++) {
@@ -82,8 +88,23 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     return true;
   };
 
-  const freeMaterials = trailMaterials.filter((m) => !m.is_premium);
-  const premiumMaterials = trailMaterials.filter((m) => m.is_premium);
+  // Categorize materials
+  const mindMapMaterials = trailMaterials.filter((m) => m.category === 'mapas_mentais');
+  const presentationMaterials = trailMaterials.filter((m) => m.category === 'apresentacoes');
+  const complementaryMaterials = trailMaterials.filter(
+    (m) => !['mapas_mentais', 'apresentacoes'].includes(m.category)
+  );
+
+  // Convert mind map materials to PlaybookPDFFile format for the viewer
+  const mindMapFiles: PlaybookPDFFile[] = mindMapMaterials
+    .filter((m) => m.file_url)
+    .map((m) => ({
+      id: m.id,
+      name: m.title,
+      description: m.description || undefined,
+      category: undefined,
+      pdf_url: m.file_url!,
+    }));
 
   return (
     <div className="space-y-6">
@@ -135,21 +156,65 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="modules" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="modules" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" /> Módulos
+      <Tabs defaultValue="visao_geral" className="space-y-4">
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="visao_geral" className="flex items-center gap-2">
+            <LayoutDashboard className="h-4 w-4" /> Visão Geral
+          </TabsTrigger>
+          <TabsTrigger value="mapas_mentais" className="flex items-center gap-2">
+            <GitBranch className="h-4 w-4" /> Mapas Mentais
+          </TabsTrigger>
+          <TabsTrigger value="apresentacoes" className="flex items-center gap-2">
+            <Presentation className="h-4 w-4" /> Apresentações
+          </TabsTrigger>
+          <TabsTrigger value="videos" className="flex items-center gap-2">
+            <Video className="h-4 w-4" /> Vídeos
           </TabsTrigger>
           <TabsTrigger value="exam" className="flex items-center gap-2">
             <ClipboardCheck className="h-4 w-4" /> Prova Final
           </TabsTrigger>
-          <TabsTrigger value="materials" className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4" /> Materiais
+          <TabsTrigger value="materiais" className="flex items-center gap-2">
+            <FolderOpen className="h-4 w-4" /> Materiais Complementares
           </TabsTrigger>
         </TabsList>
 
-        {/* Modules Tab */}
-        <TabsContent value="modules">
+        {/* Visão Geral Tab */}
+        <TabsContent value="visao_geral">
+          <PlaybookPDFViewer
+            pdfUrl={trail.overview_pdf_url || undefined}
+            title="Visão Geral"
+            subtitle={`Resumo Estratégico — ${trail.name}`}
+          />
+        </TabsContent>
+
+        {/* Mapas Mentais Tab */}
+        <TabsContent value="mapas_mentais">
+          <PlaybookMindMapsViewer files={mindMapFiles} />
+        </TabsContent>
+
+        {/* Apresentações Tab */}
+        <TabsContent value="apresentacoes">
+          {presentationMaterials.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="p-5 rounded-2xl bg-muted mb-5">
+                <Presentation className="h-12 w-12 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Apresentações</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                As apresentações desta trilha ainda não foram adicionadas. Em breve estarão disponíveis aqui.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {presentationMaterials.map((m) => (
+                <MaterialDownloadCard key={m.id} material={m} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Vídeos (Módulos) Tab */}
+        <TabsContent value="videos">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Módulos da Trilha</CardTitle>
@@ -254,47 +319,32 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           </Card>
         </TabsContent>
 
-        {/* Materials Tab */}
-        <TabsContent value="materials">
-          <div className="space-y-4">
-            {freeMaterials.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2"><Unlock className="h-5 w-5 text-green-500" /> Materiais Livres</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {freeMaterials.map((m) => (
-                      <MaterialItem key={m.id} material={m} locked={false} />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2"><Lock className="h-5 w-5 text-amber-500" /> Materiais Premium</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {premiumMaterials.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-4">Nenhum material premium nesta trilha.</p>
-                ) : !isCertified ? (
-                  <div className="text-center py-6">
-                    <Lock className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-                    <p className="font-medium">Conclua a trilha para desbloquear os materiais exclusivos</p>
-                    <p className="text-sm text-muted-foreground mt-1">{premiumMaterials.length} materiais premium disponíveis após certificação</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {premiumMaterials.map((m) => (
-                      <MaterialItem key={m.id} material={m} locked={false} />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+        {/* Materiais Complementares Tab */}
+        <TabsContent value="materiais">
+          {complementaryMaterials.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="p-5 rounded-2xl bg-muted mb-5">
+                <FolderOpen className="h-12 w-12 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Materiais Complementares</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                Lâminas, PDFs e vídeos para baixar e compartilhar com seus contatos. Em breve estarão disponíveis aqui.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <FolderOpen className="h-5 w-5 text-primary" />
+                <h3 className="text-base font-semibold">Materiais Complementares</h3>
+                <p className="text-sm text-muted-foreground">— Baixe e compartilhe com seus contatos</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {complementaryMaterials.map((m) => (
+                  <MaterialDownloadCard key={m.id} material={m} />
+                ))}
+              </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
@@ -347,7 +397,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   );
 }
 
-function MaterialItem({ material, locked }: { material: TrailMaterial; locked: boolean }) {
+function MaterialDownloadCard({ material }: { material: TrailMaterial }) {
   const icons: Record<string, typeof FileText> = {
     pdf: FileText,
     video: Play,
@@ -358,20 +408,58 @@ function MaterialItem({ material, locked }: { material: TrailMaterial; locked: b
   const Icon = icons[material.material_type] || FileText;
   const categoryLabel = MATERIAL_CATEGORIES.find((c) => c.value === material.category)?.label || material.category;
 
+  const handleDownload = () => {
+    if (material.file_url) {
+      const a = document.createElement("a");
+      a.href = material.file_url;
+      a.download = material.title;
+      a.target = "_blank";
+      a.click();
+    }
+  };
+
+  const handleShare = async () => {
+    if (material.file_url && navigator.share) {
+      try {
+        await navigator.share({
+          title: material.title,
+          text: material.description || `Confira: ${material.title}`,
+          url: material.file_url,
+        });
+      } catch {
+        // User cancelled or share not supported
+      }
+    } else if (material.file_url) {
+      await navigator.clipboard.writeText(material.file_url);
+    }
+  };
+
   return (
-    <div className={`flex items-center gap-3 p-3 rounded-lg border ${locked ? "opacity-50" : "hover:border-primary/50"}`}>
-      <div className="p-2 rounded-lg bg-primary/10">
-        <Icon className="h-5 w-5 text-primary" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{material.title}</p>
-        <p className="text-xs text-muted-foreground">{categoryLabel}</p>
-      </div>
-      {!locked && material.file_url && (
-        <Button variant="ghost" size="sm" onClick={() => window.open(material.file_url!, "_blank")}>
-          <Download className="h-4 w-4" />
-        </Button>
-      )}
-    </div>
+    <Card className="hover:border-primary/40 hover:shadow-md transition-all duration-200">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2.5 rounded-xl bg-primary/10 shrink-0">
+            <Icon className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-medium text-sm truncate">{material.title}</h4>
+            {material.description && (
+              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{material.description}</p>
+            )}
+            <Badge variant="outline" className="text-xs mt-1.5">{categoryLabel}</Badge>
+          </div>
+        </div>
+        {material.file_url && (
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+            <Button variant="outline" size="sm" className="flex-1" onClick={handleDownload}>
+              <Download className="h-3.5 w-3.5 mr-1.5" /> Baixar
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-1" onClick={handleShare}>
+              <Share2 className="h-3.5 w-3.5 mr-1.5" /> Compartilhar
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
