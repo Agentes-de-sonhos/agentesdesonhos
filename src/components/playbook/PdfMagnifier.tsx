@@ -16,18 +16,26 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
 
   const ZOOM_SCALE = 2;
 
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsZoomed(true);
-    updateOrigin(e);
-  }, []);
-
   const updateOrigin = useCallback((e: React.MouseEvent | MouseEvent) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     setOrigin({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 2) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsZoomed(true);
+      updateOrigin(e);
+    }
+  }, [updateOrigin]);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   }, []);
 
   const handleMouseMove = useCallback(
@@ -39,7 +47,10 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
 
   const handleMouseUp = useCallback(
     (e: React.MouseEvent) => {
-      if (e.button === 2) setIsZoomed(false);
+      if (e.button === 2) {
+        e.preventDefault();
+        setIsZoomed(false);
+      }
     },
     []
   );
@@ -49,29 +60,24 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
     const handleGlobalUp = (e: MouseEvent) => {
       if (e.button === 2) setIsZoomed(false);
     };
-    if (isZoomed) {
-      window.addEventListener("mouseup", handleGlobalUp);
-      return () => window.removeEventListener("mouseup", handleGlobalUp);
-    }
-  }, [isZoomed]);
-
-  // Prevent context menu globally while zoomed
-  useEffect(() => {
-    const prevent = (e: Event) => e.preventDefault();
-    if (isZoomed) {
-      window.addEventListener("contextmenu", prevent);
-      return () => window.removeEventListener("contextmenu", prevent);
-    }
-  }, [isZoomed]);
+    const preventCtx = (e: MouseEvent) => {
+      if (containerRef.current?.contains(e.target as Node)) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("mouseup", handleGlobalUp);
+    window.addEventListener("contextmenu", preventCtx);
+    return () => {
+      window.removeEventListener("mouseup", handleGlobalUp);
+      window.removeEventListener("contextmenu", preventCtx);
+    };
+  }, []);
 
   return (
     <div
       ref={containerRef}
       className="relative overflow-hidden bg-muted/20"
-      style={{ height, minHeight, cursor: isZoomed ? "none" : "default" }}
-      onContextMenu={handleContextMenu}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
+      style={{ height, minHeight }}
       onMouseEnter={() => setShowHint(true)}
       onMouseLeave={() => {
         setShowHint(false);
@@ -85,17 +91,22 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
         title={title}
         loading="eager"
         style={{
-          pointerEvents: isZoomed ? "none" : "auto",
+          pointerEvents: "none",
           transform: isZoomed ? `scale(${ZOOM_SCALE})` : "scale(1)",
           transformOrigin: `${origin.x}% ${origin.y}%`,
           transition: isZoomed ? "none" : "transform 0.2s ease-out",
         }}
       />
 
-      {/* Overlay to capture mouse events when zoomed */}
-      {isZoomed && (
-        <div className="absolute inset-0 z-10" style={{ cursor: "none" }} />
-      )}
+      {/* Interaction overlay - always on top to capture right-click */}
+      <div
+        className="absolute inset-0 z-10"
+        style={{ cursor: isZoomed ? "none" : "default" }}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        onContextMenu={handleContextMenu}
+      />
 
       {/* Custom cursor / magnifier indicator */}
       {isZoomed && (
