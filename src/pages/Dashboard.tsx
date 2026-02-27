@@ -130,7 +130,7 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-primary text-white hover:bg-primary/90"
+                    className="h-9 w-9 rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
                     onClick={() => navigate("/perfil")}
                   >
                     <User className="h-4 w-4" />
@@ -145,7 +145,7 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-primary text-white hover:bg-primary/90"
+                    className="h-9 w-9 rounded-full bg-destructive text-white hover:bg-destructive/90"
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
