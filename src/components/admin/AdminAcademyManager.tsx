@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TrailMaterialsManager } from "./TrailMaterialsManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast as sonnerToast } from "sonner";
 import { useAcademy, useAcademyAdmin } from "@/hooks/useAcademy";
 import { QuizManager } from "./QuizManager";
 import { POPULAR_DESTINATIONS, TRAINING_CATEGORIES, type LearningTrail, type Training } from "@/types/academy";
@@ -45,6 +48,8 @@ export function AdminAcademyManager() {
   const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
+  const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
   const [editingTraining, setEditingTraining] = useState<Training | null>(null);
@@ -142,13 +147,44 @@ export function AdminAcademyManager() {
     setTrainingDialogOpen(true);
   };
 
+  const sanitizeFileName = (name: string) => {
+    return name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9._-]/g, "_");
+  };
+
   const handleSaveTrail = async () => {
-    if (editingTrail) {
-      await updateTrail.mutateAsync({ id: editingTrail.id, ...trailForm });
-    } else {
-      await createTrail.mutateAsync(trailForm);
+    setUploadingOverviewPdf(true);
+    try {
+      let overviewUrl = trailForm.overview_pdf_url;
+
+      if (overviewPdfFile) {
+        const sanitized = sanitizeFileName(overviewPdfFile.name);
+        const path = `overview/${Date.now()}_${sanitized}`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, overviewPdfFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        overviewUrl = urlData.publicUrl;
+      }
+
+      const payload = { ...trailForm, overview_pdf_url: overviewUrl };
+      if (editingTrail) {
+        await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
+      } else {
+        await createTrail.mutateAsync(payload);
+      }
+      setTrailDialogOpen(false);
+      setOverviewPdfFile(null);
+    } catch (err: any) {
+      sonnerToast.error("Erro ao salvar trilha: " + err.message);
+    } finally {
+      setUploadingOverviewPdf(false);
     }
-    setTrailDialogOpen(false);
   };
 
   const handleSaveTraining = async () => {
@@ -374,12 +410,38 @@ export function AdminAcademyManager() {
               />
             </div>
             <div>
-              <Label>URL do PDF — Visão Geral</Label>
-              <Input
-                value={trailForm.overview_pdf_url}
-                onChange={(e) => setTrailForm({ ...trailForm, overview_pdf_url: e.target.value })}
-                placeholder="https://... (PDF de visão geral da trilha)"
-              />
+              <Label>PDF — Visão Geral</Label>
+              <div className="mt-1">
+                {trailForm.overview_pdf_url && !overviewPdfFile && (
+                  <div className="flex items-center gap-2 mb-2 p-2 border rounded bg-muted/30">
+                    <FileText className="h-4 w-4 text-primary" />
+                    <a href={trailForm.overview_pdf_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">
+                      PDF atual
+                    </a>
+                  </div>
+                )}
+                {overviewPdfFile ? (
+                  <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-medium flex-1 truncate">{overviewPdfFile.name}</span>
+                    <Button variant="ghost" size="sm" onClick={() => setOverviewPdfFile(null)}>Remover</Button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Clique para enviar PDF de Visão Geral</span>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setOverviewPdfFile(file);
+                      }}
+                      className="sr-only"
+                    />
+                  </label>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Switch
@@ -388,8 +450,9 @@ export function AdminAcademyManager() {
               />
               <Label>Trilha ativa</Label>
             </div>
-            <Button onClick={handleSaveTrail} className="w-full">
-              Salvar
+            <Button onClick={handleSaveTrail} className="w-full" disabled={uploadingOverviewPdf}>
+              {uploadingOverviewPdf && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {uploadingOverviewPdf ? "Enviando..." : "Salvar"}
             </Button>
           </div>
         </DialogContent>
@@ -546,6 +609,9 @@ export function AdminAcademyManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Trail Materials Manager */}
+      <TrailMaterialsManager />
 
       {/* Quiz & Exam Manager */}
       <QuizManager />
