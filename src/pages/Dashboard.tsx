@@ -142,27 +142,27 @@ export default function Dashboard() {
         ) : (
           <>
 
-            {/* 2. Notícias e Próximas Viagens - lado a lado */}
+            {/* 2. Notícias e Minha Agenda - lado a lado */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 order-2">
               <div>
                 <SectionHeader title="Principais Notícias" color="news" />
                 <CuratedNewsFeed />
               </div>
               <div>
-                <SectionHeader title="Próximas Viagens" color="reminders" />
-                <TripRemindersCard />
+                <SectionHeader title="Minha Agenda" color="events" />
+                <UpcomingAgendaEventsCard />
               </div>
             </section>
 
-            {/* 3. Productivity Section - Minha Meta & Agenda */}
+            {/* 3. Minha Meta & Próximas Viagens */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 order-3">
               <div>
                 <SectionHeader title="Minha Meta" color="financial" />
                 <ClientsManagementCard />
               </div>
               <div>
-                <SectionHeader title="Minha Agenda" color="events" />
-                <UpcomingAgendaEventsCard />
+                <SectionHeader title="Próximas Viagens" color="reminders" />
+                <TripRemindersCard />
               </div>
             </section>
 
