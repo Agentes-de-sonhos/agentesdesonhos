@@ -2,7 +2,6 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -15,7 +14,6 @@ import {
 import {
   GraduationCap,
   MapPin,
-  Search,
   Trophy,
   Award,
   BookOpen,
@@ -42,23 +40,15 @@ export default function EducaAcademy() {
   const { isAdmin } = useUserRole();
   const { hasFeature } = useSubscription();
   const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCertificate, setSelectedCertificate] = useState<{
     certificate: UserCertificate;
     trail: LearningTrail;
   } | null>(null);
 
-  const filteredTrails = trailsWithProgress.filter(
-    (trail) =>
-      trail.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      trail.destination.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const totalProgress = trailsWithProgress.length > 0
     ? Math.round(trailsWithProgress.reduce((sum, t) => sum + t.progressPercent, 0) / trailsWithProgress.length)
     : 0;
 
-  const completedTrails = trailsWithProgress.filter((t) => t.hasCertificate).length;
   const inProgressTrails = trailsWithProgress.filter((t) => t.progressPercent > 0 && !t.hasCertificate);
 
   const handleViewCertificate = (certificateId: string) => {
@@ -71,6 +61,15 @@ export default function EducaAcademy() {
 
   const canAccessCertificates = hasFeature("certificates");
   const canAccessRanking = hasFeature("ranking");
+
+  // If a trail is selected, show its detail view
+  if (selectedTrail) {
+    return (
+      <DashboardLayout>
+        <TrailDetail trail={selectedTrail} onBack={() => setSelectedTrail(null)} />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -90,9 +89,6 @@ export default function EducaAcademy() {
           <TabsList className="flex-wrap">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" /> Meu Painel
-            </TabsTrigger>
-            <TabsTrigger value="trails" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" /> Trilhas
             </TabsTrigger>
             <TabsTrigger value="playbooks" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" /> Playbooks
@@ -116,7 +112,7 @@ export default function EducaAcademy() {
           <TabsContent value="dashboard">
             <div className="space-y-6">
               {/* Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
@@ -124,17 +120,6 @@ export default function EducaAcademy() {
                       <div>
                         <p className="text-xs text-muted-foreground">Trilhas Disponíveis</p>
                         <p className="text-xl font-bold">{trailsWithProgress.length}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-green-500/10"><Award className="h-5 w-5 text-green-500" /></div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Certificadas</p>
-                        <p className="text-xl font-bold">{completedTrails}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -153,7 +138,7 @@ export default function EducaAcademy() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-yellow-500/10"><Trophy className="h-5 w-5 text-yellow-500" /></div>
+                      <div className="p-2 rounded-lg bg-yellow-500/10"><Award className="h-5 w-5 text-yellow-500" /></div>
                       <div>
                         <p className="text-xs text-muted-foreground">Certificados</p>
                         <p className="text-xl font-bold">{certificates.length}</p>
@@ -161,17 +146,19 @@ export default function EducaAcademy() {
                     </div>
                   </CardContent>
                 </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-accent/10"><Medal className="h-5 w-5 text-accent" /></div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Medalhas</p>
-                        <p className="text-xl font-bold">{userAchievements.length}</p>
+                {userAchievements.length > 0 && (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-accent/10"><Medal className="h-5 w-5 text-accent" /></div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Medalhas</p>
+                          <p className="text-xl font-bold">{userAchievements.length}</p>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* In Progress Trails */}
@@ -227,25 +214,13 @@ export default function EducaAcademy() {
                   </CardContent>
                 </Card>
               )}
-            </div>
-          </TabsContent>
 
-          {/* Trails Tab */}
-          <TabsContent value="trails">
-            {selectedTrail ? (
-              <TrailDetail trail={selectedTrail} onBack={() => setSelectedTrail(null)} />
-            ) : (
-              <div className="space-y-6">
-                <div className="relative max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar trilhas por nome ou destino..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-
+              {/* All Trails */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Trilhas Disponíveis
+                </h2>
                 {isLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map((i) => (
@@ -256,25 +231,23 @@ export default function EducaAcademy() {
                       </Card>
                     ))}
                   </div>
-                ) : filteredTrails.length === 0 ? (
+                ) : trailsWithProgress.length === 0 ? (
                   <Card>
                     <CardContent className="py-12 text-center">
                       <MapPin className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-                      <p className="text-lg font-medium">Nenhuma trilha encontrada</p>
-                      <p className="text-muted-foreground">
-                        {searchQuery ? "Tente buscar por outro termo" : "Em breve novas trilhas serão adicionadas!"}
-                      </p>
+                      <p className="text-lg font-medium">Nenhuma trilha disponível</p>
+                      <p className="text-muted-foreground">Em breve novas trilhas serão adicionadas!</p>
                     </CardContent>
                   </Card>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredTrails.map((trail) => (
+                    {trailsWithProgress.map((trail) => (
                       <TrailCard key={trail.id} trail={trail} onSelect={setSelectedTrail} />
                     ))}
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </TabsContent>
 
           <TabsContent value="playbooks"><PlaybookList /></TabsContent>
