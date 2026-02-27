@@ -263,19 +263,18 @@ export default function MapaTurismo() {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
+        ) : !hasActiveFilter ? (
+          <div className="py-12 text-center">
+            <p className="text-muted-foreground">
+              Selecione uma categoria acima para encontrar parceiros do trade turístico
+            </p>
+          </div>
         ) : filteredSuppliers?.length === 0 ? (
-          <Card className="shadow-card border-0">
-            <CardContent className="py-16 text-center">
-              <div className="mx-auto h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                <Building2 className="h-8 w-8 text-muted-foreground/50" />
-              </div>
-              <p className="text-lg font-medium text-foreground">Nenhum fornecedor encontrado</p>
-              <p className="text-sm text-muted-foreground mt-1">Tente ajustar os filtros de busca</p>
-              <Button variant="outline" className="mt-4" onClick={clearAllFilters}>
-                Limpar filtros
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="py-12 text-center">
+            <p className="text-muted-foreground">
+              Nenhum fornecedor encontrado para este filtro
+            </p>
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredSuppliers?.map((supplier) => (
