@@ -35,19 +35,16 @@ export function CuratedNewsFeed() {
   const { data: news, isLoading } = useQuery({
     queryKey: ["curated-news-dashboard"],
     queryFn: async () => {
-      const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
       const { data, error } = await supabase
         .from("noticias_dashboard")
         .select("*")
         .eq("status", "aprovado")
-        .gte("data_publicacao", startOfDay)
-        .order("relevancia_score", { ascending: false })
-        .order("data_publicacao", { ascending: false });
+        .order("data_publicacao", { ascending: false })
+        .limit(5);
       if (error) throw error;
       return data as CuratedNews[];
     },
-    refetchInterval: 5 * 60 * 1000, // Atualiza a cada 5 minutos
+    refetchInterval: 5 * 60 * 1000,
   });
 
   if (isLoading) {
@@ -62,45 +59,10 @@ export function CuratedNewsFeed() {
 
   if (!news || news.length === 0) return null;
 
-  const destaque = news.find((n) => n.tipo_exibicao === "destaque");
-  const secundarias = news.filter((n) => n !== destaque).slice(0, 4);
-
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardContent className="pt-6 space-y-1">
-        {/* Destaque */}
-        {destaque && (
-          <a
-            href={destaque.url_original}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group block rounded-xl p-4 -mx-1 transition-all duration-200 hover:bg-[hsl(var(--section-news))]/5 border-b pb-4 mb-2"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Badge className="bg-primary/15 text-primary border-0 text-[10px] uppercase tracking-wider font-semibold">
-                Destaque
-              </Badge>
-              <Badge variant="secondary" className="text-xs bg-[hsl(var(--section-news))]/10 text-[hsl(var(--section-news))]">
-                {destaque.categoria}
-              </Badge>
-            </div>
-            <h3 className="font-semibold text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors text-base leading-snug">
-              {destaque.titulo_curto}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
-              {destaque.resumo}
-            </p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs text-muted-foreground">{destaque.fonte}</span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">{formatDate(destaque.data_publicacao)}</span>
-              <ExternalLink className="h-3 w-3 ml-auto text-[hsl(var(--section-news))] opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </a>
-        )}
-
-        {/* Secundárias */}
-        {secundarias.map((item) => (
+        {news.map((item) => (
           <a
             key={item.id}
             href={item.url_original}
@@ -125,14 +87,13 @@ export function CuratedNewsFeed() {
           </a>
         ))}
 
-        {/* Botão para ver todas as notícias */}
         <div className="pt-3 border-t">
           <Button
             variant="ghost"
             className="w-full text-[hsl(var(--section-news))] hover:text-[hsl(var(--section-news))] hover:bg-[hsl(var(--section-news))]/5"
             onClick={() => navigate("/noticias")}
           >
-            Ler mais notícias
+            Mais notícias
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
