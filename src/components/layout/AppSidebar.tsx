@@ -6,6 +6,7 @@ import {
   Newspaper,
   User,
   ChevronLeft,
+  ChevronDown,
   Cloud,
   LogOut,
   Shield,
@@ -18,11 +19,11 @@ import {
   Lock,
   Calculator,
   Heart,
-  Crown,
-  Clock,
   Kanban,
-  Target,
   StickyNote,
+  Wrench,
+  Briefcase,
+  Crown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,132 +47,98 @@ interface MenuItem {
   requiredFeature?: Feature;
 }
 
-// Main menu items - first section
+// Main menu items - flat
 const mainMenuItems: MenuItem[] = [
-  {
-    title: "Mapa do Turismo",
-    url: "/mapa-turismo",
-    icon: Map,
-    requiredFeature: "tourism_map",
-  },
-  {
-    title: "EducaTravel Academy",
-    url: "/educa-academy",
-    icon: GraduationCap,
-  },
-  {
-    title: "Bloqueios Aéreos",
-    url: "/bloqueios-aereos",
-    icon: Plane,
-  },
-  {
-    title: "Materiais de Divulgação",
-    url: "/materiais",
-    icon: FileText,
-    requiredFeature: "materials",
-  },
-  {
-    title: "Notícias",
-    url: "/noticias",
-    icon: Newspaper,
-    requiredFeature: "news",
-  },
-  {
-    title: "Minha Agenda",
-    url: "/agenda",
-    icon: Calendar,
-    requiredFeature: "agenda",
-  },
-  {
-    title: "Bloco de Notas",
-    url: "/bloco-notas",
-    icon: StickyNote,
-  },
-  {
-    title: "Calculadora",
-    url: "/calculadora",
-    icon: Calculator,
-  },
+  { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
+  { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+  { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
+  { title: "Materiais de Divulgação", url: "/materiais", icon: FileText, requiredFeature: "materials" },
+  { title: "Notícias", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
 ];
 
-// Client management section
+// Ferramentas - collapsible
+const toolsItems: MenuItem[] = [
+  { title: "Minha Agenda", url: "/agenda", icon: Calendar, requiredFeature: "agenda" },
+  { title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote },
+  { title: "Calculadora", url: "/calculadora", icon: Calculator },
+];
+
+// Gestão de Clientes - collapsible
 const clientManagementItems: MenuItem[] = [
-  {
-    title: "Clientes",
-    url: "/gestao-clientes/clientes",
-    icon: Users,
-    requiredFeature: "crm_basic",
-  },
-  {
-    title: "Funil de Vendas",
-    url: "/gestao-clientes/funil",
-    icon: Kanban,
-    requiredFeature: "crm_basic",
-  },
-  {
-    title: "Meta de Vendas",
-    url: "/gestao-clientes/metas",
-    icon: Target,
-  },
+  { title: "Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
+  { title: "Funil de Vendas", url: "/gestao-clientes/funil", icon: Kanban, requiredFeature: "crm_basic" },
 ];
 
-// Premium features section
+// Recursos Premium - collapsible (includes Mentorias)
 const premiumMenuItems: MenuItem[] = [
-  {
-    title: "Gerar Orçamento",
-    url: "/ferramentas-ia/gerar-orcamento",
-    icon: Calculator,
-    requiredFeature: "quote_generator",
-  },
-  {
-    title: "Carteira Digital",
-    url: "/ferramentas-ia/trip-wallet",
-    icon: Wallet,
-    requiredFeature: "trip_wallet",
-  },
-  {
-    title: "Ferramentas IA",
-    url: "/ferramentas-ia",
-    icon: Sparkles,
-    requiredFeature: "ai_tools",
-  },
-  {
-    title: "Comunidade",
-    url: "/comunidade",
-    icon: Heart,
-    requiredFeature: "community",
-  },
+  { title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
+  { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
+  { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools" },
+  { title: "Comunidade", url: "/comunidade", icon: Heart, requiredFeature: "community" },
+  { title: "Mentorias", url: "/mentorias", icon: GraduationCap },
 ];
 
-// Coming Soon section
-const comingSoonMenuItems: MenuItem[] = [
-  {
-    title: "Mentorias",
-    url: "/mentorias",
-    icon: GraduationCap,
-  },
-];
+const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
 
-const profileMenuItem: MenuItem = {
-  title: "Perfil",
-  url: "/perfil",
-  icon: User,
-};
+interface CollapsibleSectionProps {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  items: MenuItem[];
+  collapsed: boolean;
+  isPremium?: boolean;
+  renderMenuItem: (item: MenuItem, isPremium: boolean) => React.ReactNode;
+  isOpen: boolean;
+  onToggle: () => void;
+}
 
-const adminMenuItem: MenuItem = {
-  title: "Administração",
-  url: "/admin",
-  icon: Shield,
-};
+function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = false, renderMenuItem, isOpen, onToggle }: CollapsibleSectionProps) {
+  if (collapsed) {
+    // In collapsed mode, just show the items as icons
+    return (
+      <nav className="flex flex-col gap-0.5 px-3">
+        {items.map((item) => renderMenuItem(item, isPremium))}
+      </nav>
+    );
+  }
+
+  return (
+    <div className="px-3">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-[hsl(var(--sidebar-hover))]/30 transition-all duration-200"
+      >
+        <Icon className="h-4 w-4 text-muted-foreground" />
+        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 flex-1 text-left">
+          {title}
+        </span>
+        <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground/50 transition-transform duration-200", isOpen && "rotate-180")} />
+      </button>
+      {isOpen && (
+        <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
+          {items.map((item) => renderMenuItem(item, isPremium))}
+        </nav>
+      )}
+    </div>
+  );
+}
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [clientsOpen, setClientsOpen] = useState(false);
+  const [premiumOpen, setPremiumOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
+
+  // Auto-open sections if current route is inside them
+  const isInTools = toolsItems.some((i) => location.pathname === i.url);
+  const isInClients = clientManagementItems.some((i) => location.pathname.startsWith(i.url));
+  const isInPremium = premiumMenuItems.some((i) => location.pathname === i.url);
 
   const handleMenuClick = (item: MenuItem, e: React.MouseEvent) => {
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
@@ -242,7 +209,6 @@ export function AppSidebar() {
       );
     }
 
-    // Add tooltip for collapsed mode
     if (collapsed) {
       return (
         <Tooltip key={item.url}>
@@ -304,7 +270,7 @@ export function AppSidebar() {
         </div>
 
         {/* Scrollable Navigation */}
-        <div className="flex-1 overflow-y-auto py-4">
+        <div className="flex-1 overflow-y-auto py-4 space-y-1">
           {/* Admin menu item if admin */}
           {isAdmin && (
             <nav className="flex flex-col gap-0.5 px-3 mb-3">
@@ -312,56 +278,49 @@ export function AppSidebar() {
             </nav>
           )}
 
-          {/* Main Navigation */}
+          {/* Main Navigation - flat */}
           <nav className="flex flex-col gap-0.5 px-3">
             {mainMenuItems.map((item) => renderMenuItem(item, false))}
           </nav>
 
-          {/* Visual Separator */}
-          <div className="px-3 py-4">
+          {/* Separator */}
+          <div className="px-3 py-2">
             <Separator className="bg-sidebar-border" />
           </div>
 
-          {/* Client Management Section */}
-          {!collapsed && (
-            <div className="mb-1.5 px-6">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-                Gestão de Clientes
-              </p>
-            </div>
-          )}
-          <nav className="flex flex-col gap-0.5 px-3">
-            {clientManagementItems.map((item) => renderMenuItem(item, false))}
-          </nav>
+          {/* Ferramentas - collapsible */}
+          <CollapsibleSection
+            title="Ferramentas"
+            icon={Wrench}
+            items={toolsItems}
+            collapsed={collapsed}
+            renderMenuItem={renderMenuItem}
+            isOpen={toolsOpen || isInTools}
+            onToggle={() => setToolsOpen(!toolsOpen)}
+          />
 
-          {/* Premium Features Section */}
-          <div className="px-3 mt-5">
-            {!collapsed && (
-              <div className="mb-1.5 px-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-                  Recursos Premium
-                </p>
-              </div>
-            )}
-            <nav className="flex flex-col gap-0.5">
-              {premiumMenuItems.map((item) => renderMenuItem(item, true))}
-            </nav>
-          </div>
+          {/* Gestão de Clientes - collapsible */}
+          <CollapsibleSection
+            title="Gestão de Clientes"
+            icon={Briefcase}
+            items={clientManagementItems}
+            collapsed={collapsed}
+            renderMenuItem={renderMenuItem}
+            isOpen={clientsOpen || isInClients}
+            onToggle={() => setClientsOpen(!clientsOpen)}
+          />
 
-          {/* Coming Soon Section */}
-          <div className="px-3 mt-5">
-            {!collapsed && (
-              <div className="mb-1.5 px-3 flex items-center gap-1.5">
-                <Clock className="h-3 w-3 text-muted-foreground/50" />
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-                  Em Breve
-                </p>
-              </div>
-            )}
-            <nav className="flex flex-col gap-0.5 opacity-60">
-              {comingSoonMenuItems.map((item) => renderMenuItem(item, false))}
-            </nav>
-          </div>
+          {/* Recursos Premium - collapsible */}
+          <CollapsibleSection
+            title="Recursos Premium"
+            icon={Crown}
+            items={premiumMenuItems}
+            collapsed={collapsed}
+            isPremium={true}
+            renderMenuItem={renderMenuItem}
+            isOpen={premiumOpen || isInPremium}
+            onToggle={() => setPremiumOpen(!premiumOpen)}
+          />
         </div>
 
         {/* Bottom Section */}
@@ -423,12 +382,8 @@ export function AppSidebar() {
           {/* Footer */}
           {!collapsed ? (
             <div className="text-center pt-2">
-              <p className="text-[10px] text-muted-foreground/60">
-                Desenvolvido por
-              </p>
-              <p className="text-[11px] font-medium text-muted-foreground/80">
-                Nobre Digital
-              </p>
+              <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>
+              <p className="text-[11px] font-medium text-muted-foreground/80">Nobre Digital</p>
             </div>
           ) : (
             <div className="text-center pt-2">
