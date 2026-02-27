@@ -49,12 +49,6 @@ interface MenuItem {
 // Main menu items - first section
 const mainMenuItems: MenuItem[] = [
   {
-    title: "Notícias",
-    url: "/noticias",
-    icon: Newspaper,
-    requiredFeature: "news",
-  },
-  {
     title: "Mapa do Turismo",
     url: "/mapa-turismo",
     icon: Map,
@@ -66,15 +60,21 @@ const mainMenuItems: MenuItem[] = [
     icon: GraduationCap,
   },
   {
+    title: "Bloqueios Aéreos",
+    url: "/bloqueios-aereos",
+    icon: Plane,
+  },
+  {
     title: "Materiais de Divulgação",
     url: "/materiais",
     icon: FileText,
     requiredFeature: "materials",
   },
   {
-    title: "Bloqueios Aéreos",
-    url: "/bloqueios-aereos",
-    icon: Plane,
+    title: "Notícias",
+    url: "/noticias",
+    icon: Newspaper,
+    requiredFeature: "news",
   },
   {
     title: "Minha Agenda",
