@@ -59,6 +59,21 @@ export function CuratedNewsFeed() {
 
   if (!news || news.length === 0) return null;
 
+  const getCategoryColor = (categoria: string) => {
+    const cat = categoria.toLowerCase();
+    if (cat.includes("aéreo") || cat.includes("aereo") || cat.includes("aviação")) return "bg-sky-500/10 text-sky-600";
+    if (cat.includes("cruzeiro") || cat.includes("marítimo")) return "bg-cyan-500/10 text-cyan-600";
+    if (cat.includes("hotel") || cat.includes("hospedagem")) return "bg-amber-500/10 text-amber-600";
+    if (cat.includes("evento")) return "bg-pink-500/10 text-pink-600";
+    if (cat.includes("turismo") || cat.includes("destino")) return "bg-green-500/10 text-green-600";
+    if (cat.includes("tecnologia") || cat.includes("digital")) return "bg-violet-500/10 text-violet-600";
+    if (cat.includes("regulação") || cat.includes("governo") || cat.includes("política")) return "bg-red-500/10 text-red-600";
+    if (cat.includes("econom") || cat.includes("mercado") || cat.includes("financ")) return "bg-emerald-500/10 text-emerald-600";
+    if (cat.includes("sustentab") || cat.includes("meio ambiente")) return "bg-lime-500/10 text-lime-600";
+    if (cat.includes("operador") || cat.includes("trade")) return "bg-blue-500/10 text-blue-600";
+    return "bg-purple-500/10 text-purple-600";
+  };
+
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardContent className="pt-6 space-y-1">
@@ -75,7 +90,7 @@ export function CuratedNewsFeed() {
                 {item.titulo_curto}
               </h4>
               <div className="mt-1.5 flex items-center gap-2">
-                <Badge variant="secondary" className="text-[10px] bg-[hsl(var(--section-news))]/10 text-[hsl(var(--section-news))]">
+                <Badge variant="secondary" className={`text-[10px] border-0 ${getCategoryColor(item.categoria)}`}>
                   {item.categoria}
                 </Badge>
                 <span className="text-xs text-muted-foreground">{item.fonte}</span>
