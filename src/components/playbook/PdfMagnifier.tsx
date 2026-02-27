@@ -16,62 +16,43 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
 
   const ZOOM_SCALE = 2;
 
-  const updateOrigin = useCallback((e: React.MouseEvent | MouseEvent) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setOrigin({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-  }, []);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button === 2) {
+  const handleOverlayMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 0) {
       e.preventDefault();
-      e.stopPropagation();
-      setIsZoomed(true);
-      updateOrigin(e);
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        setOrigin({ x, y });
+        setIsZoomed(true);
+      }
     }
-  }, [updateOrigin]);
-
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
   }, []);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (isZoomed) updateOrigin(e);
-    },
-    [isZoomed, updateOrigin]
-  );
+  const handleOverlayMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isZoomed) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      setOrigin({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+    }
+  }, [isZoomed]);
 
-  const handleMouseUp = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.button === 2) {
-        e.preventDefault();
-        setIsZoomed(false);
-      }
-    },
-    []
-  );
+  const handleOverlayMouseUp = useCallback((e: React.MouseEvent) => {
+    if (e.button === 0) {
+      setIsZoomed(false);
+    }
+  }, []);
 
   // Global mouseup fallback
   useEffect(() => {
-    const handleGlobalUp = (e: MouseEvent) => {
-      if (e.button === 2) setIsZoomed(false);
-    };
-    const preventCtx = (e: MouseEvent) => {
-      if (containerRef.current?.contains(e.target as Node)) {
-        e.preventDefault();
-      }
-    };
-    window.addEventListener("mouseup", handleGlobalUp);
-    window.addEventListener("contextmenu", preventCtx);
-    return () => {
-      window.removeEventListener("mouseup", handleGlobalUp);
-      window.removeEventListener("contextmenu", preventCtx);
-    };
-  }, []);
+    const up = (e: MouseEvent) => { if (e.button === 0) setIsZoomed(false); };
+    if (isZoomed) {
+      window.addEventListener("mouseup", up);
+      return () => window.removeEventListener("mouseup", up);
+    }
+  }, [isZoomed]);
 
   return (
     <div
@@ -79,36 +60,46 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
       className="relative overflow-hidden bg-muted/20"
       style={{ height, minHeight }}
       onMouseEnter={() => setShowHint(true)}
-      onMouseLeave={() => {
-        setShowHint(false);
-        setIsZoomed(false);
-      }}
+      onMouseLeave={() => { setShowHint(false); setIsZoomed(false); }}
     >
-      {/* PDF iframe */}
+      {/* PDF iframe - interactive when NOT zoomed so scrollbars work */}
       <iframe
         src={src}
         className="border-0 w-full h-full"
         title={title}
         loading="eager"
         style={{
-          pointerEvents: "none",
+          pointerEvents: isZoomed ? "none" : "auto",
           transform: isZoomed ? `scale(${ZOOM_SCALE})` : "scale(1)",
           transformOrigin: `${origin.x}% ${origin.y}%`,
           transition: isZoomed ? "none" : "transform 0.2s ease-out",
         }}
       />
 
-      {/* Interaction overlay - always on top to capture right-click */}
-      <div
-        className="absolute inset-0 z-10"
-        style={{ cursor: isZoomed ? "none" : "default" }}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onContextMenu={handleContextMenu}
-      />
+      {/* Overlay: only captures events when zoomed (for panning), 
+           otherwise pointer-events:none so iframe scrollbars work.
+           We use a SECOND always-visible overlay just for the cursor + initial click */}
+      
+      {/* Cursor overlay - thin, only captures mousedown to START zoom */}
+      {!isZoomed && (
+        <div
+          className="absolute inset-0 z-10"
+          style={{ cursor: "zoom-in" }}
+          onMouseDown={handleOverlayMouseDown}
+        />
+      )}
 
-      {/* Custom cursor / magnifier indicator */}
+      {/* Panning overlay - active only while zoomed */}
+      {isZoomed && (
+        <div
+          className="absolute inset-0 z-10"
+          style={{ cursor: "none" }}
+          onMouseMove={handleOverlayMouseMove}
+          onMouseUp={handleOverlayMouseUp}
+        />
+      )}
+
+      {/* Magnifier cursor indicator */}
       {isZoomed && (
         <div
           className="absolute z-20 pointer-events-none"
@@ -123,11 +114,11 @@ export function PdfMagnifier({ src, title = "PDF", height, minHeight }: PdfMagni
         </div>
       )}
 
-      {/* Hint badge */}
+      {/* Hint */}
       {showHint && !isZoomed && (
-        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-foreground/80 text-background text-[11px] font-medium backdrop-blur-sm pointer-events-none animate-in fade-in-0 duration-300">
+        <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-foreground/80 text-background text-[11px] font-medium backdrop-blur-sm pointer-events-none animate-in fade-in-0 duration-300">
           <Search className="h-3 w-3" />
-          Clique direito para zoom
+          Clique para zoom
         </div>
       )}
     </div>
