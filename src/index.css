@@ -87,8 +87,11 @@
     --section-flights: 187 92% 48%;
     --section-tools: 215 25% 50%;
     
-    /* Sidebar Hover */
+    /* Sidebar Hover per section */
     --sidebar-hover: 199 89% 48%;
+    --sidebar-hover-tools: 28 100% 55%;
+    --sidebar-hover-clients: 152 69% 40%;
+    --sidebar-hover-premium: 262 83% 58%;
   }
 
   .dark {

@@ -81,23 +81,34 @@ const premiumMenuItems: MenuItem[] = [
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
 
+type SidebarColor = 'default' | 'tools' | 'clients' | 'premium';
+
+const sidebarColorVar: Record<SidebarColor, string> = {
+  default: '--sidebar-hover',
+  tools: '--sidebar-hover-tools',
+  clients: '--sidebar-hover-clients',
+  premium: '--sidebar-hover-premium',
+};
+
 interface CollapsibleSectionProps {
   title: string;
   icon: React.ComponentType<{ className?: string }>;
   items: MenuItem[];
   collapsed: boolean;
   isPremium?: boolean;
-  renderMenuItem: (item: MenuItem, isPremium: boolean) => React.ReactNode;
+  colorScheme: SidebarColor;
+  renderMenuItem: (item: MenuItem, isPremium: boolean, colorScheme: SidebarColor) => React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
 }
 
-function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = false, renderMenuItem, isOpen, onToggle }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = false, colorScheme, renderMenuItem, isOpen, onToggle }: CollapsibleSectionProps) {
+  const cssVar = sidebarColorVar[colorScheme];
+
   if (collapsed) {
-    // In collapsed mode, just show the items as icons
     return (
       <nav className="flex flex-col gap-0.5 px-3">
-        {items.map((item) => renderMenuItem(item, isPremium))}
+        {items.map((item) => renderMenuItem(item, isPremium, colorScheme))}
       </nav>
     );
   }
@@ -106,9 +117,12 @@ function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = f
     <div className="px-3">
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-[hsl(var(--sidebar-hover))]/30 transition-all duration-200"
+        className={cn(
+          "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sidebar-foreground transition-all duration-200",
+          `hover:bg-[hsl(var(${cssVar}))]/30`
+        )}
       >
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <div className="h-4 w-4" style={{ color: `hsl(var(${cssVar}))` }}><Icon className="h-4 w-4" /></div>
         <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 flex-1 text-left">
           {title}
         </span>
@@ -116,7 +130,7 @@ function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = f
       </button>
       {isOpen && (
         <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-          {items.map((item) => renderMenuItem(item, isPremium))}
+          {items.map((item) => renderMenuItem(item, isPremium, colorScheme))}
         </nav>
       )}
     </div>
@@ -147,11 +161,13 @@ export function AppSidebar() {
     }
   };
 
-  const renderMenuItem = (item: MenuItem, isPremiumSection: boolean = false) => {
+  const renderMenuItem = (item: MenuItem, isPremiumSection: boolean = false, colorScheme: SidebarColor = 'default') => {
     const isActive = location.pathname === item.url || 
       (item.url === "/dashboard" && location.pathname === "/");
     const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
     const showPremiumLock = isPremiumSection && isLocked;
+    const cssVar = sidebarColorVar[colorScheme];
+    const hoverBg = `hsl(var(${cssVar}))`;
 
     const menuLink = (
       <Link
@@ -160,12 +176,12 @@ export function AppSidebar() {
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
           "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
-          isActive && !isLocked
-            ? "bg-[hsl(var(--sidebar-hover))] text-white shadow-md"
-            : isLocked
-              ? "opacity-60 cursor-pointer hover:opacity-70"
-              : "text-sidebar-foreground hover:bg-[hsl(var(--sidebar-hover))] hover:text-white"
+          isLocked && "opacity-60 cursor-pointer hover:opacity-70",
+          !isActive && !isLocked && "text-sidebar-foreground hover:text-white"
         )}
+        style={isActive && !isLocked ? { backgroundColor: hoverBg, color: 'white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' } : undefined}
+        onMouseEnter={(e) => { if (!isActive && !isLocked) e.currentTarget.style.backgroundColor = hoverBg; }}
+        onMouseLeave={(e) => { if (!isActive && !isLocked) e.currentTarget.style.backgroundColor = 'transparent'; }}
       >
         <div className="relative transition-colors duration-300">
           <item.icon
@@ -202,7 +218,7 @@ export function AppSidebar() {
           <TooltipTrigger asChild>
             {menuLink}
           </TooltipTrigger>
-          <TooltipContent side="right" className="bg-[hsl(var(--sidebar-hover))] text-white border-none shadow-lg">
+          <TooltipContent side="right" style={{ backgroundColor: hoverBg }} className="text-white border-none shadow-lg">
             <p className="text-sm">Disponível nos planos Pro ou Premium</p>
           </TooltipContent>
         </Tooltip>
@@ -217,7 +233,8 @@ export function AppSidebar() {
           </TooltipTrigger>
           <TooltipContent 
             side="right" 
-            className="bg-[hsl(var(--sidebar-hover))] text-white border-none shadow-lg px-3 py-2"
+            style={{ backgroundColor: hoverBg }}
+            className="text-white border-none shadow-lg px-3 py-2"
           >
             <p className="text-sm font-medium">{item.title}</p>
           </TooltipContent>
@@ -294,6 +311,7 @@ export function AppSidebar() {
             icon={Wrench}
             items={toolsItems}
             collapsed={collapsed}
+            colorScheme="tools"
             renderMenuItem={renderMenuItem}
             isOpen={toolsOpen || isInTools}
             onToggle={() => setToolsOpen(!toolsOpen)}
@@ -305,6 +323,7 @@ export function AppSidebar() {
             icon={Briefcase}
             items={clientManagementItems}
             collapsed={collapsed}
+            colorScheme="clients"
             renderMenuItem={renderMenuItem}
             isOpen={clientsOpen || isInClients}
             onToggle={() => setClientsOpen(!clientsOpen)}
@@ -317,6 +336,7 @@ export function AppSidebar() {
             items={premiumMenuItems}
             collapsed={collapsed}
             isPremium={true}
+            colorScheme="premium"
             renderMenuItem={renderMenuItem}
             isOpen={premiumOpen || isInPremium}
             onToggle={() => setPremiumOpen(!premiumOpen)}
