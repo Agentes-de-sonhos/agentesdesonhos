@@ -31,8 +31,8 @@ import {
 const PlaybookMindMap = lazy(() => import("./PlaybookMindMap"));
 import { usePlaybook } from "@/hooks/usePlaybook";
 import { PlaybookTabContent } from "./PlaybookTabContent";
-import { PlaybookPDFViewer } from "./PlaybookPDFViewer";
-import { PlaybookMindMapsViewer } from "./PlaybookMindMapsViewer";
+// PlaybookPDFViewer and PlaybookMindMapsViewer moved to TrailDetail
+// PlaybookMindMapsViewer moved to TrailDetail
 import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
 import { PLAYBOOK_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
@@ -132,17 +132,7 @@ export default function PlaybookViewer() {
 
         {/* Tab Content */}
         <div className="min-h-[400px]">
-          {activeTab === 'visao_geral' ? (
-            <PlaybookPDFViewer
-              pdfUrl={activeSection?.content?.pdf_url}
-              title="Visão Geral"
-              subtitle="Resumo Estratégico do Treinamento"
-            />
-          ) : activeTab === 'mapas_mentais' ? (
-            <PlaybookMindMapsViewer
-              files={activeSection?.content?.pdf_files || []}
-            />
-          ) : activeTab === 'como_vender' ? (
+          {activeTab === 'como_vender' ? (
             <PlaybookComoVenderTab section={activeSection} />
           ) : (
             <PlaybookTabContent

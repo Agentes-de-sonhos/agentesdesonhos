@@ -57,6 +57,7 @@ export function AdminAcademyManager() {
     description: "",
     destination: "",
     image_url: "",
+    overview_pdf_url: "",
     order_index: 0,
     is_active: true,
   });
@@ -85,6 +86,7 @@ export function AdminAcademyManager() {
         description: trail.description || "",
         destination: trail.destination,
         image_url: trail.image_url || "",
+        overview_pdf_url: (trail as any).overview_pdf_url || "",
         order_index: trail.order_index,
         is_active: trail.is_active,
       });
@@ -95,6 +97,7 @@ export function AdminAcademyManager() {
         description: "",
         destination: "",
         image_url: "",
+        overview_pdf_url: "",
         order_index: trails.length,
         is_active: true,
       });
@@ -368,6 +371,14 @@ export function AdminAcademyManager() {
                 value={trailForm.image_url}
                 onChange={(e) => setTrailForm({ ...trailForm, image_url: e.target.value })}
                 placeholder="https://..."
+              />
+            </div>
+            <div>
+              <Label>URL do PDF — Visão Geral</Label>
+              <Input
+                value={trailForm.overview_pdf_url}
+                onChange={(e) => setTrailForm({ ...trailForm, overview_pdf_url: e.target.value })}
+                placeholder="https://... (PDF de visão geral da trilha)"
               />
             </div>
             <div className="flex items-center gap-2">
