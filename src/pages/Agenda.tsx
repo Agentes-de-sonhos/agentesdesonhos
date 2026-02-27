@@ -15,7 +15,15 @@ import { CalendarEvent, ViewMode, AgencyEventType } from "@/types/agenda";
 import { addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, format } from "date-fns";
 
 export default function Agenda() {
-  const [viewMode, setViewMode] = useState<ViewMode>("year");
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem("agenda-view-mode");
+    return (saved as ViewMode) || "month";
+  });
+
+  const handleViewChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem("agenda-view-mode", mode);
+  }, []);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -117,36 +125,36 @@ export default function Agenda() {
 
           <div className="flex items-center gap-2">
             <Button
-              variant={viewMode === "year" ? "default" : "outline"}
+              variant={viewMode === "day" ? "default" : "outline"}
               size="sm"
-              onClick={() => setViewMode("year")}
+              onClick={() => handleViewChange("day")}
             >
-              <CalendarRange className="h-4 w-4 mr-2" />
-              Ano
-            </Button>
-            <Button
-              variant={viewMode === "month" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("month")}
-            >
-              <CalendarDays className="h-4 w-4 mr-2" />
-              Mês
+              <Clock className="h-4 w-4 mr-2" />
+              Dia
             </Button>
             <Button
               variant={viewMode === "week" ? "default" : "outline"}
               size="sm"
-              onClick={() => setViewMode("week")}
+              onClick={() => handleViewChange("week")}
             >
               <Calendar className="h-4 w-4 mr-2" />
               Semana
             </Button>
             <Button
-              variant={viewMode === "day" ? "default" : "outline"}
+              variant={viewMode === "month" ? "default" : "outline"}
               size="sm"
-              onClick={() => setViewMode("day")}
+              onClick={() => handleViewChange("month")}
             >
-              <Clock className="h-4 w-4 mr-2" />
-              Dia
+              <CalendarDays className="h-4 w-4 mr-2" />
+              Mês
+            </Button>
+            <Button
+              variant={viewMode === "year" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleViewChange("year")}
+            >
+              <CalendarRange className="h-4 w-4 mr-2" />
+              Ano
             </Button>
           </div>
         </div>
