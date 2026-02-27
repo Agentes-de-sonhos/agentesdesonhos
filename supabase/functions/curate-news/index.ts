@@ -221,7 +221,7 @@ serve(async (req) => {
         url_original: raw.url,
         relevancia_score: score,
         tipo_exibicao: isAlertaTrade ? "destaque" : (ai.tipo_exibicao || "secundaria"),
-        status: score >= 9 ? "sugerido_ia" : "pendente",
+        status: "pendente",
         data_publicacao: raw.data_publicacao || new Date().toISOString(),
         alerta_trade: isAlertaTrade,
         nivel_alerta: nivelAlerta,

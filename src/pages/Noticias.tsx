@@ -254,13 +254,12 @@ export default function Noticias() {
   const { data: allNews, isLoading } = useQuery({
     queryKey: ["noticias-hub"],
     queryFn: async () => {
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from("noticias_dashboard")
         .select("*")
-        .in("status", ["aprovado", "sugerido_ia"])
-        .gte("data_publicacao", twentyFourHoursAgo)
-        .order("data_publicacao", { ascending: true });
+        .eq("status", "aprovado")
+        .order("data_publicacao", { ascending: false })
+        .limit(50);
       if (error) throw error;
       return data as NoticiaHub[];
     },
@@ -348,7 +347,7 @@ export default function Noticias() {
                 Notícias do Trade
               </h1>
               <p className="text-muted-foreground text-base mt-0.5">
-                Curadoria inteligente — últimas 24 horas
+                Curadoria inteligente — notícias aprovadas
               </p>
             </div>
           </div>
