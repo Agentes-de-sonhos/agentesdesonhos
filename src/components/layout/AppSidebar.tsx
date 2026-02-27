@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sparkles,
@@ -39,6 +39,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface MenuItem {
   title: string;
@@ -98,17 +103,48 @@ interface CollapsibleSectionProps {
   isPremium?: boolean;
   colorScheme: SidebarColor;
   renderMenuItem: (item: MenuItem, isPremium: boolean, colorScheme: SidebarColor) => React.ReactNode;
+  renderPopoverMenuItem: (item: MenuItem, isPremium: boolean, colorScheme: SidebarColor) => React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
+  isActiveSection: boolean;
 }
 
-function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = false, colorScheme, renderMenuItem, isOpen, onToggle }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = false, colorScheme, renderMenuItem, renderPopoverMenuItem, isOpen, onToggle, isActiveSection }: CollapsibleSectionProps) {
   const cssVar = sidebarColorVar[colorScheme];
+  const hoverBg = `hsl(var(${cssVar}))`;
 
   if (collapsed) {
+    // Show single section icon with popover for sub-items
     return (
       <nav className="flex flex-col gap-0.5 px-3">
-        {items.map((item) => renderMenuItem(item, isPremium, colorScheme))}
+        <Popover>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <button
+                  className={cn(
+                    "group flex items-center justify-center rounded-xl px-3 py-2.5 transition-all duration-300 w-full",
+                    isActiveSection ? "text-white shadow-md" : "text-sidebar-foreground hover:text-white"
+                  )}
+                  style={isActiveSection ? { backgroundColor: hoverBg } : undefined}
+                  onMouseEnter={(e) => { if (!isActiveSection) e.currentTarget.style.backgroundColor = hoverBg; }}
+                  onMouseLeave={(e) => { if (!isActiveSection) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                >
+                  <Icon className={cn("h-5 w-5 flex-shrink-0 transition-all duration-300", !isActiveSection && "group-hover:scale-110 group-hover:text-white")} />
+                </button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="right" style={{ backgroundColor: hoverBg }} className="text-white border-none shadow-lg px-3 py-2">
+              <p className="text-sm font-medium">{title}</p>
+            </TooltipContent>
+          </Tooltip>
+          <PopoverContent side="right" align="start" className="w-56 p-2" sideOffset={8}>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 px-2 py-1.5">{title}</p>
+            <nav className="flex flex-col gap-0.5">
+              {items.map((item) => renderPopoverMenuItem(item, isPremium, colorScheme))}
+            </nav>
+          </PopoverContent>
+        </Popover>
       </nav>
     );
   }
@@ -138,7 +174,7 @@ function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = f
 }
 
 export function AppSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [clientsOpen, setClientsOpen] = useState(false);
@@ -154,12 +190,15 @@ export function AppSidebar() {
   const isInClients = clientManagementItems.some((i) => location.pathname.startsWith(i.url));
   const isInPremium = premiumMenuItems.some((i) => location.pathname === i.url);
 
-  const handleMenuClick = (item: MenuItem, e: React.MouseEvent) => {
+  const handleMenuClick = useCallback((item: MenuItem, e: React.MouseEvent) => {
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
       e.preventDefault();
       setUpgradeFeature(item.requiredFeature);
+      return;
     }
-  };
+    // Auto-collapse after navigation
+    setCollapsed(true);
+  }, [hasFeature]);
 
   const renderMenuItem = (item: MenuItem, isPremiumSection: boolean = false, colorScheme: SidebarColor = 'default') => {
     const isActive = location.pathname === item.url || 
@@ -245,6 +284,36 @@ export function AppSidebar() {
     return menuLink;
   };
 
+  // Render menu items for popover (when collapsed, inside section popover)
+  const renderPopoverMenuItem = (item: MenuItem, isPremiumSection: boolean = false, colorScheme: SidebarColor = 'default') => {
+    const isActive = location.pathname === item.url;
+    const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const cssVar = sidebarColorVar[colorScheme];
+    const hoverBg = `hsl(var(${cssVar}))`;
+
+    return (
+      <Link
+        key={item.url}
+        to={isLocked ? "#" : item.url}
+        onClick={(e) => {
+          handleMenuClick(item, e);
+        }}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
+          isActive ? "text-white" : "text-foreground hover:text-white",
+          isLocked && "opacity-60"
+        )}
+        style={isActive ? { backgroundColor: hoverBg, color: 'white' } : undefined}
+        onMouseEnter={(e) => { if (!isActive && !isLocked) e.currentTarget.style.backgroundColor = hoverBg; e.currentTarget.style.color = 'white'; }}
+        onMouseLeave={(e) => { if (!isActive && !isLocked) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = ''; } }}
+      >
+        <item.icon className="h-4 w-4 flex-shrink-0" />
+        <span className="truncate">{item.title}</span>
+        {isPremiumSection && isLocked && <Lock className="h-3 w-3 ml-auto text-warning" />}
+      </Link>
+    );
+  };
+
   const handleLogout = async () => {
     await signOut();
   };
@@ -313,8 +382,10 @@ export function AppSidebar() {
             collapsed={collapsed}
             colorScheme="tools"
             renderMenuItem={renderMenuItem}
+            renderPopoverMenuItem={renderPopoverMenuItem}
             isOpen={toolsOpen || isInTools}
             onToggle={() => setToolsOpen(!toolsOpen)}
+            isActiveSection={isInTools}
           />
 
           {/* Gestão de Clientes - collapsible */}
@@ -325,8 +396,10 @@ export function AppSidebar() {
             collapsed={collapsed}
             colorScheme="clients"
             renderMenuItem={renderMenuItem}
+            renderPopoverMenuItem={renderPopoverMenuItem}
             isOpen={clientsOpen || isInClients}
             onToggle={() => setClientsOpen(!clientsOpen)}
+            isActiveSection={isInClients}
           />
 
           {/* Recursos Premium - collapsible */}
@@ -338,8 +411,10 @@ export function AppSidebar() {
             isPremium={true}
             colorScheme="premium"
             renderMenuItem={renderMenuItem}
+            renderPopoverMenuItem={renderPopoverMenuItem}
             isOpen={premiumOpen || isInPremium}
             onToggle={() => setPremiumOpen(!premiumOpen)}
+            isActiveSection={isInPremium}
           />
         </div>
 
