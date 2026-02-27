@@ -156,8 +156,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="visao_geral" className="space-y-4">
+      <Tabs defaultValue="videos" className="space-y-4">
         <TabsList className="flex-wrap">
+          <TabsTrigger value="videos" className="flex items-center gap-2">
+            <Video className="h-4 w-4" /> Módulos
+          </TabsTrigger>
           <TabsTrigger value="visao_geral" className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4" /> Visão Geral
           </TabsTrigger>
@@ -167,14 +170,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <TabsTrigger value="apresentacoes" className="flex items-center gap-2">
             <Presentation className="h-4 w-4" /> Apresentações
           </TabsTrigger>
-          <TabsTrigger value="videos" className="flex items-center gap-2">
-            <Video className="h-4 w-4" /> Vídeos
+          <TabsTrigger value="materiais" className="flex items-center gap-2">
+            <FolderOpen className="h-4 w-4" /> Materiais Complementares
           </TabsTrigger>
           <TabsTrigger value="exam" className="flex items-center gap-2">
             <ClipboardCheck className="h-4 w-4" /> Prova Final
-          </TabsTrigger>
-          <TabsTrigger value="materiais" className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4" /> Materiais Complementares
           </TabsTrigger>
         </TabsList>
 
