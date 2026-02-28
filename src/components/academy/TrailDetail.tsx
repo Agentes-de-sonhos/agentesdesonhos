@@ -91,8 +91,9 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   // Categorize materials
   const mindMapMaterials = trailMaterials.filter((m) => m.category === 'mapas_mentais');
   const presentationMaterials = trailMaterials.filter((m) => m.category === 'apresentacoes');
+  const videoMaterials = trailMaterials.filter((m) => m.category === 'videos');
   const complementaryMaterials = trailMaterials.filter(
-    (m) => !['mapas_mentais', 'apresentacoes'].includes(m.category)
+    (m) => !['mapas_mentais', 'apresentacoes', 'videos'].includes(m.category)
   );
 
   // Convert mind map materials to PlaybookPDFFile format for the viewer
@@ -170,6 +171,9 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <TabsTrigger value="apresentacoes" className="flex items-center gap-2">
             <Presentation className="h-4 w-4" /> Apresentações
           </TabsTrigger>
+          <TabsTrigger value="videos_drive" className="flex items-center gap-2">
+            <Play className="h-4 w-4" /> Vídeos
+          </TabsTrigger>
           <TabsTrigger value="materiais" className="flex items-center gap-2">
             <FolderOpen className="h-4 w-4" /> Materiais Complementares
           </TabsTrigger>
@@ -208,6 +212,42 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {presentationMaterials.map((m) => (
                 <MaterialDownloadCard key={m.id} material={m} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Vídeos (Drive) Tab */}
+        <TabsContent value="videos_drive">
+          {videoMaterials.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="p-5 rounded-2xl bg-muted mb-5">
+                <Play className="h-12 w-12 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Vídeos</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                Os vídeos desta trilha ainda não foram adicionados. Em breve estarão disponíveis aqui.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {videoMaterials.map((m) => (
+                <Card key={m.id} className="cursor-pointer hover:border-primary/50 transition-colors group" onClick={() => window.open(m.file_url || '', '_blank')}>
+                  <CardContent className="p-5 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                        <Play className="h-5 w-5 text-primary" />
+                      </div>
+                      <h4 className="font-medium flex-1 line-clamp-2">{m.title}</h4>
+                    </div>
+                    {m.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-3">{m.description}</p>
+                    )}
+                    <p className="text-xs text-primary flex items-center gap-1 mt-2">
+                      Clique para abrir <Share2 className="h-3 w-3" />
+                    </p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
