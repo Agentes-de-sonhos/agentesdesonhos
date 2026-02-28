@@ -96,16 +96,19 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     (m) => !['mapas_mentais', 'apresentacoes', 'videos'].includes(m.category)
   );
 
-  // Convert mind map materials to PlaybookPDFFile format for the viewer
-  const mindMapFiles: PlaybookPDFFile[] = mindMapMaterials
-    .filter((m) => m.file_url)
-    .map((m) => ({
-      id: m.id,
-      name: m.title,
-      description: m.description || undefined,
-      category: undefined,
-      pdf_url: m.file_url!,
-    }));
+  const toPlaybookFiles = (materials: TrailMaterial[]): PlaybookPDFFile[] =>
+    materials
+      .filter((m) => m.file_url)
+      .map((m) => ({
+        id: m.id,
+        name: m.title,
+        description: m.description || undefined,
+        category: undefined,
+        pdf_url: m.file_url!,
+      }));
+
+  const mindMapFiles = toPlaybookFiles(mindMapMaterials);
+  const presentationFiles = toPlaybookFiles(presentationMaterials);
 
   return (
     <div className="space-y-6">
@@ -198,23 +201,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Apresentações Tab */}
         <TabsContent value="apresentacoes">
-          {presentationMaterials.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="p-5 rounded-2xl bg-muted mb-5">
-                <Presentation className="h-12 w-12 text-muted-foreground/40" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-1">Apresentações</h3>
-              <p className="text-sm text-muted-foreground max-w-md">
-                As apresentações desta trilha ainda não foram adicionadas. Em breve estarão disponíveis aqui.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {presentationMaterials.map((m) => (
-                <MaterialDownloadCard key={m.id} material={m} />
-              ))}
-            </div>
-          )}
+          <PlaybookMindMapsViewer files={presentationFiles} />
         </TabsContent>
 
         {/* Vídeos (Drive) Tab */}
