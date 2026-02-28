@@ -57,15 +57,8 @@ export function AdminAcademyManager() {
   const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'training' | 'material'; id: string } | null>(null);
   const [selectedTrailForLink, setSelectedTrailForLink] = useState<string>("");
 
-  // Material upload state
-  const [materialUploading, setMaterialUploading] = useState(false);
-  const [materialFile, setMaterialFile] = useState<File | null>(null);
-  const [materialForm, setMaterialForm] = useState({
-    title: "",
-    description: "",
-    category: "mapas_mentais",
-    material_type: "pdf" as "pdf" | "video" | "image" | "link",
-  });
+  // Material upload state per category
+  const [categoryUploading, setCategoryUploading] = useState<string | null>(null);
 
   // Fetch materials for the currently editing trail
   const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id);
@@ -229,43 +222,35 @@ export function AdminAcademyManager() {
     setTrainingDialogOpen(false);
   };
 
-  const handleSaveMaterial = async () => {
-    if (!editingTrail || !materialForm.title) {
-      sonnerToast.error("Preencha o título do material.");
-      return;
-    }
-    setMaterialUploading(true);
-    let fileUrl: string | null = null;
+  const handleUploadCategoryMaterial = async (file: File, category: string, label: string) => {
+    if (!editingTrail) return;
+    setCategoryUploading(category);
     try {
-      if (materialFile) {
-        const sanitized = sanitizeFileName(materialFile.name);
-        const path = `trails/${editingTrail.id}/${Date.now()}_${sanitized}`;
-        const { error: uploadError } = await supabase.storage
-          .from("academy-files")
-          .upload(path, materialFile);
-        if (uploadError) throw uploadError;
-        const { data: urlData } = supabase.storage
-          .from("academy-files")
-          .getPublicUrl(path);
-        fileUrl = urlData.publicUrl;
-      }
+      const sanitized = sanitizeFileName(file.name);
+      const path = `trails/${editingTrail.id}/${Date.now()}_${sanitized}`;
+      const { error: uploadError } = await supabase.storage
+        .from("academy-files")
+        .upload(path, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage
+        .from("academy-files")
+        .getPublicUrl(path);
+      const fileUrl = urlData.publicUrl;
       await saveTrailMaterial.mutateAsync({
         trail_id: editingTrail.id,
-        title: materialForm.title,
-        description: materialForm.description || null,
-        category: materialForm.category,
-        material_type: materialForm.material_type,
+        title: file.name.replace(/\.[^/.]+$/, ""),
+        description: null,
+        category,
+        material_type: "pdf",
         file_url: fileUrl,
         is_premium: false,
-        order_index: trailMaterials.length,
+        order_index: trailMaterials.filter(m => m.category === category).length,
       });
-      setMaterialFile(null);
-      setMaterialForm({ title: "", description: "", category: "mapas_mentais", material_type: "pdf" });
-      sonnerToast.success("Material adicionado com sucesso!");
+      sonnerToast.success(`${label} adicionado com sucesso!`);
     } catch (err: any) {
-      sonnerToast.error("Erro ao salvar material: " + err.message);
+      sonnerToast.error("Erro ao enviar: " + err.message);
     } finally {
-      setMaterialUploading(false);
+      setCategoryUploading(null);
     }
   };
 
@@ -527,131 +512,102 @@ export function AdminAcademyManager() {
               </TabsContent>
               <TabsContent value="materiais">
                 <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
-                  {/* Overview PDF */}
-                  <div className="border rounded-lg p-4 space-y-2 bg-muted/20">
-                    <Label className="text-sm font-semibold">PDF — Visão Geral</Label>
-                    {trailForm.overview_pdf_url && !overviewPdfFile && (
-                      <div className="flex items-center gap-2 p-2 border rounded bg-muted/30">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <a href={trailForm.overview_pdf_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">PDF atual</a>
-                      </div>
-                    )}
-                    {overviewPdfFile ? (
-                      <div className="flex items-center gap-2 p-2 border rounded bg-muted/30">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <span className="text-xs flex-1 truncate">{overviewPdfFile.name}</span>
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setOverviewPdfFile(null)}>Remover</Button>
-                      </div>
-                    ) : (
-                      <label className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
-                        <Upload className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Clique para enviar PDF de Visão Geral</span>
-                        <input type="file" accept=".pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) setOverviewPdfFile(f); }} className="sr-only" />
-                      </label>
-                    )}
-                    <Button onClick={handleSaveTrail} size="sm" className="w-full" disabled={uploadingOverviewPdf || !overviewPdfFile}>
-                      {uploadingOverviewPdf && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      {uploadingOverviewPdf ? "Enviando..." : "Salvar Visão Geral"}
-                    </Button>
-                  </div>
+                  {[
+                    { category: "visao_geral", label: "PDF — Visão Geral", isOverview: true },
+                    { category: "mapas_mentais", label: "Mapas Mentais" },
+                    { category: "apresentacoes", label: "Apresentações" },
+                    { category: "materiais_complementares", label: "Materiais Complementares" },
+                  ].map(({ category, label, isOverview }) => {
+                    const items = isOverview
+                      ? (trailForm.overview_pdf_url ? [{ id: "__overview", title: "Visão Geral", file_url: trailForm.overview_pdf_url }] : [])
+                      : trailMaterials.filter(m => m.category === category);
+                    const isUploading = isOverview ? uploadingOverviewPdf : categoryUploading === category;
 
-                  {/* Existing materials list */}
-                  {trailMaterials.length > 0 && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Título</TableHead>
-                          <TableHead>Categoria</TableHead>
-                          <TableHead>Arquivo</TableHead>
-                          <TableHead className="w-[50px]" />
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {trailMaterials.map((m) => (
-                          <TableRow key={m.id}>
-                            <TableCell className="font-medium text-sm">{m.title}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-xs">{getCategoryLabel(m.category)}</Badge>
-                            </TableCell>
-                            <TableCell>
-                              {m.file_url ? (
-                                <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-xs">Ver</a>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell>
-                              <Button variant="ghost" size="icon" onClick={() => { setItemToDelete({ type: "material", id: m.id }); setDeleteConfirmOpen(true); }}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
+                    return (
+                      <div key={category} className="border rounded-lg p-4 space-y-2 bg-muted/20">
+                        <Label className="text-sm font-semibold">{label}</Label>
+                        
+                        {/* Existing files */}
+                        {items.map((item) => (
+                          <div key={item.id} className="flex items-center gap-2 p-2 border rounded bg-muted/30">
+                            <FileText className="h-4 w-4 text-primary" />
+                            <a href={item.file_url!} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">
+                              {item.title || "Arquivo"}
+                            </a>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-xs"
+                              onClick={() => {
+                                if (isOverview) {
+                                  setTrailForm({ ...trailForm, overview_pdf_url: "" });
+                                  handleSaveTrail();
+                                } else {
+                                  setItemToDelete({ type: "material", id: item.id });
+                                  setDeleteConfirmOpen(true);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
                         ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                  {trailMaterials.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">Nenhum material cadastrado ainda.</p>
-                  )}
 
-                  {/* Add new material form */}
-                  <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
-                    <h4 className="text-sm font-semibold flex items-center gap-2">
-                      <Plus className="h-4 w-4" /> Adicionar Material
-                    </h4>
-                    <div>
-                      <Label className="text-xs">Título</Label>
-                      <Input
-                        value={materialForm.title}
-                        onChange={(e) => setMaterialForm({ ...materialForm, title: e.target.value })}
-                        placeholder="Ex: Mapa Mental — Hotelaria"
-                        className="h-9"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs">Categoria</Label>
-                        <Select value={materialForm.category} onValueChange={(v) => setMaterialForm({ ...materialForm, category: v })}>
-                          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {MATERIAL_CATEGORIES.map((c) => (
-                              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-xs">Tipo</Label>
-                        <Select value={materialForm.material_type} onValueChange={(v) => setMaterialForm({ ...materialForm, material_type: v as any })}>
-                          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pdf">PDF</SelectItem>
-                            <SelectItem value="video">Vídeo</SelectItem>
-                            <SelectItem value="image">Imagem</SelectItem>
-                            <SelectItem value="link">Link</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs">Arquivo</Label>
-                      {materialFile ? (
-                        <div className="flex items-center gap-2 p-2 border rounded bg-muted/30 mt-1">
-                          <FileText className="h-4 w-4 text-primary" />
-                          <span className="text-xs flex-1 truncate">{materialFile.name}</span>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setMaterialFile(null)}>Remover</Button>
-                        </div>
-                      ) : (
-                        <label className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors mt-1">
-                          <Upload className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">Clique para selecionar</span>
-                          <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4" onChange={(e) => { const f = e.target.files?.[0]; if (f) setMaterialFile(f); }} className="sr-only" />
+                        {/* Upload area */}
+                        <label className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                          {isUploading ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          ) : (
+                            <Upload className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {isUploading ? "Enviando..." : `Clique para enviar ${label}`}
+                          </span>
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            disabled={!!isUploading}
+                            onChange={async (e) => {
+                              const f = e.target.files?.[0];
+                              if (!f) return;
+                              if (isOverview) {
+                                setOverviewPdfFile(f);
+                                // Trigger save immediately
+                                setUploadingOverviewPdf(true);
+                                try {
+                                  const sanitized = sanitizeFileName(f.name);
+                                  const path = `overview/${Date.now()}_${sanitized}`;
+                                  const { error: uploadError } = await supabase.storage
+                                    .from("academy-files")
+                                    .upload(path, f);
+                                  if (uploadError) throw uploadError;
+                                  const { data: urlData } = supabase.storage
+                                    .from("academy-files")
+                                    .getPublicUrl(path);
+                                  const newUrl = urlData.publicUrl;
+                                  const payload = { ...trailForm, overview_pdf_url: newUrl, image_url: trailForm.image_url };
+                                  if (editingTrail) {
+                                    await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
+                                  }
+                                  setTrailForm(prev => ({ ...prev, overview_pdf_url: newUrl }));
+                                  setOverviewPdfFile(null);
+                                  sonnerToast.success("Visão Geral salva!");
+                                } catch (err: any) {
+                                  sonnerToast.error("Erro: " + err.message);
+                                } finally {
+                                  setUploadingOverviewPdf(false);
+                                }
+                              } else {
+                                await handleUploadCategoryMaterial(f, category, label);
+                              }
+                              e.target.value = "";
+                            }}
+                            className="sr-only"
+                          />
                         </label>
-                      )}
-                    </div>
-                    <Button onClick={handleSaveMaterial} className="w-full" size="sm" disabled={materialUploading || !materialForm.title}>
-                      {materialUploading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      {materialUploading ? "Enviando..." : "Adicionar Material"}
-                    </Button>
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </TabsContent>
             </Tabs>
