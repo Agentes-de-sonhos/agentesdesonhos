@@ -92,8 +92,8 @@ export function PlaybookMindMapsViewer({ files }: PlaybookMindMapsViewerProps) {
                   >
                     <CardContent className="p-0">
                       {file.thumbnail_url ? (
-                        <div className="overflow-hidden rounded-t-lg bg-muted/30 flex items-center justify-center p-2">
-                          <img src={file.thumbnail_url} alt={file.name} className="max-w-full max-h-48 object-contain" />
+                        <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-white flex items-center justify-center">
+                          <img src={file.thumbnail_url} alt={file.name} className="max-w-full max-h-full object-contain" />
                         </div>
                       ) : null}
                       <div className={`p-4 ${file.thumbnail_url ? '' : ''}`}>
