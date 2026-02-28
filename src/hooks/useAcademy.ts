@@ -608,6 +608,28 @@ export function useAcademyAdmin() {
     },
   });
 
+  const updateTrailMaterial = useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; title?: string; order_index?: number }) => {
+      const { error } = await supabase.from("trail_materials").update(updates as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trail-materials"] });
+    },
+  });
+
+  const reorderTrailMaterials = useMutation({
+    mutationFn: async (items: { id: string; order_index: number }[]) => {
+      for (const item of items) {
+        const { error } = await supabase.from("trail_materials").update({ order_index: item.order_index } as any).eq("id", item.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trail-materials"] });
+    },
+  });
+
   const deleteTrailMaterial = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("trail_materials").delete().eq("id", id);
@@ -633,6 +655,8 @@ export function useAcademyAdmin() {
     saveExamQuestion,
     deleteExamQuestion,
     saveTrailMaterial,
+    updateTrailMaterial,
+    reorderTrailMaterials,
     deleteTrailMaterial,
   };
 }
