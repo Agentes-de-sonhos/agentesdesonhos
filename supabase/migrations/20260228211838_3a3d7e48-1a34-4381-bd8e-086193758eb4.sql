@@ -1,0 +1,1 @@
+ALTER TABLE public.trail_materials ADD COLUMN IF NOT EXISTS thumbnail_url text DEFAULT NULL;
