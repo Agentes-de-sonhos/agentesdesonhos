@@ -144,6 +144,7 @@ export interface TrailMaterial {
   material_type: 'pdf' | 'video' | 'audio' | 'image' | 'link';
   category: string;
   file_url: string | null;
+  thumbnail_url: string | null;
   is_premium: boolean;
   order_index: number;
   created_at: string;

@@ -29,11 +29,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, Upload, FileText, FolderOpen, Loader2 } from "lucide-react";
+import { Plus, Trash2, Upload, FileText, FolderOpen, Loader2, Image as ImageIcon, X } from "lucide-react";
 import { useAcademy, useAcademyAdmin, useTrailMaterials } from "@/hooks/useAcademy";
 import { MATERIAL_CATEGORIES } from "@/types/academy";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ImageGalleryPicker } from "./ImageGalleryPicker";
 
 export function TrailMaterialsManager() {
   const { trails } = useAcademy();
@@ -45,12 +46,14 @@ export function TrailMaterialsManager() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [materialToDelete, setMaterialToDelete] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
     description: "",
     category: "mapas_mentais",
     material_type: "pdf" as "pdf" | "video" | "audio" | "image" | "link",
+    thumbnail_url: "" as string,
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -92,13 +95,14 @@ export function TrailMaterialsManager() {
         category: form.category,
         material_type: form.material_type,
         file_url: fileUrl,
+        thumbnail_url: form.thumbnail_url || null,
         is_premium: false,
         order_index: materials.length,
       });
 
       setDialogOpen(false);
       setSelectedFile(null);
-      setForm({ title: "", description: "", category: "mapas_mentais", material_type: "pdf" });
+      setForm({ title: "", description: "", category: "mapas_mentais", material_type: "pdf", thumbnail_url: "" });
     } catch (err: any) {
       toast.error("Erro ao salvar material: " + err.message);
     } finally {
@@ -153,6 +157,7 @@ export function TrailMaterialsManager() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[60px]">Capa</TableHead>
                 <TableHead>Título</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>Tipo</TableHead>
@@ -163,6 +168,15 @@ export function TrailMaterialsManager() {
             <TableBody>
               {materials.map((m) => (
                 <TableRow key={m.id}>
+                  <TableCell>
+                    {m.thumbnail_url ? (
+                      <img src={m.thumbnail_url} alt="" className="w-10 h-10 rounded object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className="font-medium">{m.title}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{getCategoryLabel(m.category)}</Badge>
@@ -262,6 +276,33 @@ export function TrailMaterialsManager() {
                 </Select>
               </div>
             </div>
+
+            {/* Thumbnail / Cover Image */}
+            <div>
+              <Label>Imagem de Capa</Label>
+              <div className="mt-1">
+                {form.thumbnail_url ? (
+                  <div className="flex items-center gap-3 p-2 border rounded-lg bg-muted/30">
+                    <img src={form.thumbnail_url} alt="Capa" className="w-16 h-16 rounded object-cover" />
+                    <span className="text-sm text-muted-foreground flex-1 truncate">Imagem selecionada</span>
+                    <Button variant="ghost" size="icon" onClick={() => setForm({ ...form, thumbnail_url: "" })}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-center gap-2"
+                    onClick={() => setGalleryOpen(true)}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    Selecionar imagem de capa
+                  </Button>
+                )}
+              </div>
+            </div>
+
             <div>
               <Label>Arquivo (PDF, imagem, etc.)</Label>
               <div className="mt-1">
@@ -295,6 +336,13 @@ export function TrailMaterialsManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Image Gallery Picker */}
+      <ImageGalleryPicker
+        open={galleryOpen}
+        onOpenChange={setGalleryOpen}
+        onSelect={(url) => setForm({ ...form, thumbnail_url: url })}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>

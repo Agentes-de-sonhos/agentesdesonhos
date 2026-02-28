@@ -2656,6 +2656,7 @@ export type Database = {
           is_premium: boolean
           material_type: string
           order_index: number
+          thumbnail_url: string | null
           title: string
           trail_id: string
           updated_at: string
@@ -2669,6 +2670,7 @@ export type Database = {
           is_premium?: boolean
           material_type?: string
           order_index?: number
+          thumbnail_url?: string | null
           title: string
           trail_id: string
           updated_at?: string
@@ -2682,6 +2684,7 @@ export type Database = {
           is_premium?: boolean
           material_type?: string
           order_index?: number
+          thumbnail_url?: string | null
           title?: string
           trail_id?: string
           updated_at?: string
