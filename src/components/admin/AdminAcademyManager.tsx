@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -23,12 +22,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X, Video, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X, Video, Users, GraduationCap, ClipboardCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useAcademy, useAcademyAdmin, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
-import { QuizManager } from "./QuizManager";
-import { POPULAR_DESTINATIONS, TRAINING_CATEGORIES, MATERIAL_CATEGORIES, type LearningTrail, type Training } from "@/types/academy";
+import { TrailTrainingsManager } from "./TrailTrainingsManager";
+import { TrailExamManager } from "./TrailExamManager";
+import { POPULAR_DESTINATIONS, MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,21 +41,17 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export function AdminAcademyManager() {
-  const { trails, trainings, trailTrainings } = useAcademy();
-  const { createTrail, updateTrail, deleteTrail, createTraining, updateTraining, deleteTraining, linkTrainingToTrail, unlinkTrainingFromTrail, saveTrailMaterial, updateTrailMaterial, reorderTrailMaterials, deleteTrailMaterial, saveTrailSpeaker, updateTrailSpeaker, deleteTrailSpeaker } = useAcademyAdmin();
+  const { trails } = useAcademy();
+  const { createTrail, updateTrail, deleteTrail, saveTrailMaterial, updateTrailMaterial, reorderTrailMaterials, deleteTrailMaterial, saveTrailSpeaker, updateTrailSpeaker, deleteTrailSpeaker } = useAcademyAdmin();
   
   const [trailDialogOpen, setTrailDialogOpen] = useState(false);
-  const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
-  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
   const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
-  const [editingTraining, setEditingTraining] = useState<Training | null>(null);
-  const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'training' | 'material' | 'speaker'; id: string } | null>(null);
-  const [selectedTrailForLink, setSelectedTrailForLink] = useState<string>("");
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'material' | 'speaker'; id: string } | null>(null);
 
   // Material upload state per category
   const [categoryUploading, setCategoryUploading] = useState<string | null>(null);
@@ -69,8 +65,8 @@ export function AdminAcademyManager() {
   const [editingSpeakerId, setEditingSpeakerId] = useState<string | null>(null);
 
   // Fetch materials and speakers for the currently editing trail
-  const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id);
-  const { data: trailSpeakers = [] } = useTrailSpeakers(editingTrail?.id);
+  const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id ?? null);
+  const { data: trailSpeakers = [] } = useTrailSpeakers(editingTrail?.id ?? null);
 
   // Trail form state
   const [trailForm, setTrailForm] = useState({
@@ -79,22 +75,6 @@ export function AdminAcademyManager() {
     destination: "",
     image_url: "",
     overview_pdf_url: "",
-    order_index: 0,
-    is_active: true,
-  });
-
-  // Training form state
-  const [trainingForm, setTrainingForm] = useState({
-    title: "",
-    description: "",
-    category: "geral",
-    training_type: "recorded" as "live" | "recorded",
-    video_url: "",
-    duration_minutes: 0,
-    thumbnail_url: "",
-    materials_url: "",
-    instructor: "",
-    scheduled_at: "",
     order_index: 0,
     is_active: true,
   });
@@ -124,43 +104,6 @@ export function AdminAcademyManager() {
       });
     }
     setTrailDialogOpen(true);
-  };
-
-  const handleOpenTrainingDialog = (training?: Training) => {
-    if (training) {
-      setEditingTraining(training);
-      setTrainingForm({
-        title: training.title,
-        description: training.description || "",
-        category: training.category,
-        training_type: training.training_type as "live" | "recorded",
-        video_url: training.video_url || "",
-        duration_minutes: training.duration_minutes,
-        thumbnail_url: training.thumbnail_url || "",
-        materials_url: training.materials_url || "",
-        instructor: training.instructor || "",
-        scheduled_at: training.scheduled_at || "",
-        order_index: training.order_index,
-        is_active: training.is_active,
-      });
-    } else {
-      setEditingTraining(null);
-      setTrainingForm({
-        title: "",
-        description: "",
-        category: "geral",
-        training_type: "recorded",
-        video_url: "",
-        duration_minutes: 0,
-        thumbnail_url: "",
-        materials_url: "",
-        instructor: "",
-        scheduled_at: "",
-        order_index: trainings.length,
-        is_active: true,
-      });
-    }
-    setTrainingDialogOpen(true);
   };
 
   const sanitizeFileName = (name: string) => {
@@ -218,19 +161,6 @@ export function AdminAcademyManager() {
     }
   };
 
-  const handleSaveTraining = async () => {
-    const data = {
-      ...trainingForm,
-      scheduled_at: trainingForm.scheduled_at || null,
-    };
-    if (editingTraining) {
-      await updateTraining.mutateAsync({ id: editingTraining.id, ...data });
-    } else {
-      await createTraining.mutateAsync(data);
-    }
-    setTrainingDialogOpen(false);
-  };
-
   const handleUploadCategoryMaterial = async (file: File, category: string, label: string) => {
     if (!editingTrail) return;
     setCategoryUploading(category);
@@ -271,8 +201,6 @@ export function AdminAcademyManager() {
       await deleteTrailMaterial.mutateAsync(itemToDelete.id);
     } else if (itemToDelete.type === "speaker") {
       await deleteTrailSpeaker.mutateAsync(itemToDelete.id);
-    } else {
-      await deleteTraining.mutateAsync(itemToDelete.id);
     }
     setDeleteConfirmOpen(false);
     setItemToDelete(null);
@@ -330,9 +258,6 @@ export function AdminAcademyManager() {
     }
   };
 
-  const getCategoryLabel = (value: string) =>
-    MATERIAL_CATEGORIES.find((c) => c.value === value)?.label || value;
-
   const handleSaveMaterialTitle = async (materialId: string) => {
     if (!editingMaterialTitle.trim()) return;
     await updateTrailMaterial.mutateAsync({ id: materialId, title: editingMaterialTitle.trim() });
@@ -384,21 +309,6 @@ export function AdminAcademyManager() {
     }
   };
 
-  const handleLinkTraining = async (trainingId: string) => {
-    if (!selectedTrailForLink) return;
-    await linkTrainingToTrail.mutateAsync({
-      trailId: selectedTrailForLink,
-      trainingId,
-    });
-  };
-
-  const handleUnlinkTraining = async (trailId: string, trainingId: string) => {
-    await unlinkTrainingFromTrail.mutateAsync({ trailId, trainingId });
-  };
-
-  const getTrailTrainings = (trailId: string) => {
-    return trailTrainings.filter((tt) => tt.trail_id === trailId);
-  };
   const renderTrailFormFields = () => (
     <>
       <div>
@@ -491,7 +401,6 @@ export function AdminAcademyManager() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Destino</TableHead>
-                <TableHead>Treinamentos</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
@@ -501,7 +410,6 @@ export function AdminAcademyManager() {
                 <TableRow key={trail.id}>
                   <TableCell className="font-medium">{trail.name}</TableCell>
                   <TableCell>{trail.destination}</TableCell>
-                  <TableCell>{getTrailTrainings(trail.id).length} treinamentos</TableCell>
                   <TableCell>
                     <Badge variant={trail.is_active ? "default" : "secondary"}>
                       {trail.is_active ? "Ativo" : "Inativo"}
@@ -509,16 +417,6 @@ export function AdminAcademyManager() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedTrailForLink(trail.id);
-                          setLinkDialogOpen(true);
-                        }}
-                      >
-                        <Link2 className="h-4 w-4" />
-                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => handleOpenTrailDialog(trail)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -541,69 +439,6 @@ export function AdminAcademyManager() {
         </CardContent>
       </Card>
 
-      {/* Trainings Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Treinamentos</CardTitle>
-          <Button onClick={() => handleOpenTrainingDialog()}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Treinamento
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Título</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Duração</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {trainings.map((training) => (
-                <TableRow key={training.id}>
-                  <TableCell className="font-medium">{training.title}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{training.category}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={training.training_type === "live" ? "destructive" : "secondary"}>
-                      {training.training_type === "live" ? "Ao vivo" : "Gravado"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{training.duration_minutes} min</TableCell>
-                  <TableCell>
-                    <Badge variant={training.is_active ? "default" : "secondary"}>
-                      {training.is_active ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenTrainingDialog(training)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setItemToDelete({ type: "training", id: training.id });
-                          setDeleteConfirmOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
       {/* Trail Dialog */}
       <Dialog open={trailDialogOpen} onOpenChange={setTrailDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh]">
@@ -612,11 +447,19 @@ export function AdminAcademyManager() {
           </DialogHeader>
           {editingTrail ? (
             <Tabs defaultValue="dados" className="w-full">
-              <TabsList className="w-full">
-                <TabsTrigger value="dados" className="flex-1">Dados da Trilha</TabsTrigger>
+              <TabsList className="w-full flex-wrap">
+                <TabsTrigger value="dados" className="flex-1">Dados</TabsTrigger>
+                <TabsTrigger value="treinamentos" className="flex-1">
+                  <ClipboardCheck className="h-4 w-4 mr-1" />
+                  Treinamentos
+                </TabsTrigger>
                 <TabsTrigger value="materiais" className="flex-1">
                   <FolderOpen className="h-4 w-4 mr-1" />
                   Materiais
+                </TabsTrigger>
+                <TabsTrigger value="prova" className="flex-1">
+                  <GraduationCap className="h-4 w-4 mr-1" />
+                  Prova Final
                 </TabsTrigger>
                 <TabsTrigger value="palestrantes" className="flex-1">
                   <Users className="h-4 w-4 mr-1" />
@@ -627,6 +470,9 @@ export function AdminAcademyManager() {
                 <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
                   {renderTrailFormFields()}
                 </div>
+              </TabsContent>
+              <TabsContent value="treinamentos">
+                <TrailTrainingsManager trailId={editingTrail.id} />
               </TabsContent>
               <TabsContent value="materiais">
                 <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
@@ -646,7 +492,6 @@ export function AdminAcademyManager() {
                       <div key={category} className="border rounded-lg p-4 space-y-2 bg-muted/20">
                         <Label className="text-sm font-semibold">{label}</Label>
                         
-                        {/* Existing files */}
                         {items.map((item) => (
                           <div
                             key={item.id}
@@ -711,33 +556,12 @@ export function AdminAcademyManager() {
                           </div>
                         ))}
 
-                        {/* Upload / Add area */}
                         {isVideoCategory ? (
                           <div className="space-y-2 pt-2 border-t">
-                            <Input
-                              placeholder="Título do vídeo"
-                              value={videoForm.title}
-                              onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })}
-                              className="h-8 text-sm"
-                            />
-                            <Input
-                              placeholder="Descrição (opcional)"
-                              value={videoForm.description}
-                              onChange={(e) => setVideoForm({ ...videoForm, description: e.target.value })}
-                              className="h-8 text-sm"
-                            />
-                            <Input
-                              placeholder="URL do vídeo (Google Drive, etc.)"
-                              value={videoForm.url}
-                              onChange={(e) => setVideoForm({ ...videoForm, url: e.target.value })}
-                              className="h-8 text-sm"
-                            />
-                            <Button
-                              size="sm"
-                              className="w-full"
-                              disabled={categoryUploading === "videos"}
-                              onClick={handleSaveVideoMaterial}
-                            >
+                            <Input placeholder="Título do vídeo" value={videoForm.title} onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })} className="h-8 text-sm" />
+                            <Input placeholder="Descrição (opcional)" value={videoForm.description} onChange={(e) => setVideoForm({ ...videoForm, description: e.target.value })} className="h-8 text-sm" />
+                            <Input placeholder="URL do vídeo (Google Drive, etc.)" value={videoForm.url} onChange={(e) => setVideoForm({ ...videoForm, url: e.target.value })} className="h-8 text-sm" />
+                            <Button size="sm" className="w-full" disabled={categoryUploading === "videos"} onClick={handleSaveVideoMaterial}>
                               {categoryUploading === "videos" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
                               Adicionar Vídeo
                             </Button>
@@ -799,9 +623,11 @@ export function AdminAcademyManager() {
                   })}
                 </div>
               </TabsContent>
+              <TabsContent value="prova">
+                <TrailExamManager trailId={editingTrail.id} />
+              </TabsContent>
               <TabsContent value="palestrantes">
                 <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
-                  {/* Existing speakers */}
                   {trailSpeakers.map((speaker) => (
                     <div key={speaker.id} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
                       {speaker.photo_url ? (
@@ -817,41 +643,30 @@ export function AdminAcademyManager() {
                           {[speaker.email, speaker.whatsapp_number].filter(Boolean).join(" · ") || "Sem contato"}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7"
-                        onClick={() => {
-                          setEditingSpeakerId(speaker.id);
-                          setSpeakerForm({
-                            full_name: speaker.full_name,
-                            photo_url: speaker.photo_url || "",
-                            linkedin_url: speaker.linkedin_url || "",
-                            whatsapp_number: speaker.whatsapp_number || "",
-                            email: speaker.email || "",
-                            bio: speaker.bio || "",
-                          });
-                          setSpeakerPhotoFile(null);
-                        }}
-                      >
+                      <Button variant="ghost" size="sm" className="h-7" onClick={() => {
+                        setEditingSpeakerId(speaker.id);
+                        setSpeakerForm({
+                          full_name: speaker.full_name,
+                          photo_url: speaker.photo_url || "",
+                          linkedin_url: speaker.linkedin_url || "",
+                          whatsapp_number: speaker.whatsapp_number || "",
+                          email: speaker.email || "",
+                          bio: speaker.bio || "",
+                        });
+                        setSpeakerPhotoFile(null);
+                      }}>
                         <Pencil className="h-3 w-3" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7"
-                        onClick={() => {
-                          setItemToDelete({ type: "speaker", id: speaker.id });
-                          setDeleteConfirmOpen(true);
-                        }}
-                      >
+                      <Button variant="ghost" size="sm" className="h-7" onClick={() => {
+                        setItemToDelete({ type: "speaker", id: speaker.id });
+                        setDeleteConfirmOpen(true);
+                      }}>
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   ))}
 
-                  {/* Add speaker form */}
-                   <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+                  <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-semibold">{editingSpeakerId ? "Editar Palestrante" : "Adicionar Palestrante"}</Label>
                       {editingSpeakerId && (
@@ -864,38 +679,13 @@ export function AdminAcademyManager() {
                         </Button>
                       )}
                     </div>
-                    <Input
-                      placeholder="Nome completo *"
-                      value={speakerForm.full_name}
-                      onChange={(e) => setSpeakerForm({ ...speakerForm, full_name: e.target.value })}
-                      className="h-8 text-sm"
-                    />
+                    <Input placeholder="Nome completo *" value={speakerForm.full_name} onChange={(e) => setSpeakerForm({ ...speakerForm, full_name: e.target.value })} className="h-8 text-sm" />
                     <div className="grid grid-cols-2 gap-2">
-                      <Input
-                        placeholder="E-mail"
-                        value={speakerForm.email}
-                        onChange={(e) => setSpeakerForm({ ...speakerForm, email: e.target.value })}
-                        className="h-8 text-sm"
-                      />
-                      <Input
-                        placeholder="WhatsApp (ex: 5511999999999)"
-                        value={speakerForm.whatsapp_number}
-                        onChange={(e) => setSpeakerForm({ ...speakerForm, whatsapp_number: e.target.value })}
-                        className="h-8 text-sm"
-                      />
+                      <Input placeholder="E-mail" value={speakerForm.email} onChange={(e) => setSpeakerForm({ ...speakerForm, email: e.target.value })} className="h-8 text-sm" />
+                      <Input placeholder="WhatsApp (ex: 5511999999999)" value={speakerForm.whatsapp_number} onChange={(e) => setSpeakerForm({ ...speakerForm, whatsapp_number: e.target.value })} className="h-8 text-sm" />
                     </div>
-                    <Input
-                      placeholder="URL do LinkedIn"
-                      value={speakerForm.linkedin_url}
-                      onChange={(e) => setSpeakerForm({ ...speakerForm, linkedin_url: e.target.value })}
-                      className="h-8 text-sm"
-                    />
-                    <Textarea
-                      placeholder="Bio / descrição curta"
-                      value={speakerForm.bio}
-                      onChange={(e) => setSpeakerForm({ ...speakerForm, bio: e.target.value })}
-                      className="text-sm min-h-[60px]"
-                    />
+                    <Input placeholder="URL do LinkedIn" value={speakerForm.linkedin_url} onChange={(e) => setSpeakerForm({ ...speakerForm, linkedin_url: e.target.value })} className="h-8 text-sm" />
+                    <Textarea placeholder="Bio / descrição curta" value={speakerForm.bio} onChange={(e) => setSpeakerForm({ ...speakerForm, bio: e.target.value })} className="text-sm min-h-[60px]" />
                     {speakerPhotoFile ? (
                       <div className="flex items-center gap-3 p-2 border rounded bg-muted/30">
                         <FileText className="h-4 w-4 text-primary" />
@@ -926,161 +716,6 @@ export function AdminAcademyManager() {
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Training Dialog */}
-      <Dialog open={trainingDialogOpen} onOpenChange={setTrainingDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingTraining ? "Editar Treinamento" : "Novo Treinamento"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-            <div>
-              <Label>Título</Label>
-              <Input
-                value={trainingForm.title}
-                onChange={(e) => setTrainingForm({ ...trainingForm, title: e.target.value })}
-                placeholder="Título do treinamento"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Categoria</Label>
-                <Select
-                  value={trainingForm.category}
-                  onValueChange={(v) => setTrainingForm({ ...trainingForm, category: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TRAINING_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Tipo</Label>
-                <Select
-                  value={trainingForm.training_type}
-                  onValueChange={(v) => setTrainingForm({ ...trainingForm, training_type: v as "live" | "recorded" })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recorded">Gravado</SelectItem>
-                    <SelectItem value="live">Ao vivo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label>Descrição</Label>
-              <Textarea
-                value={trainingForm.description}
-                onChange={(e) => setTrainingForm({ ...trainingForm, description: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>URL do Vídeo</Label>
-              <Input
-                value={trainingForm.video_url}
-                onChange={(e) => setTrainingForm({ ...trainingForm, video_url: e.target.value })}
-                placeholder="https://youtube.com/embed/..."
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Duração (minutos)</Label>
-                <Input
-                  type="number"
-                  value={trainingForm.duration_minutes}
-                  onChange={(e) => setTrainingForm({ ...trainingForm, duration_minutes: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-              <div>
-                <Label>Instrutor</Label>
-                <Input
-                  value={trainingForm.instructor}
-                  onChange={(e) => setTrainingForm({ ...trainingForm, instructor: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <Label>URL de Material Complementar</Label>
-              <Input
-                value={trainingForm.materials_url}
-                onChange={(e) => setTrainingForm({ ...trainingForm, materials_url: e.target.value })}
-              />
-            </div>
-            {trainingForm.training_type === "live" && (
-              <div>
-                <Label>Data/Hora (ao vivo)</Label>
-                <Input
-                  type="datetime-local"
-                  value={trainingForm.scheduled_at}
-                  onChange={(e) => setTrainingForm({ ...trainingForm, scheduled_at: e.target.value })}
-                />
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={trainingForm.is_active}
-                onCheckedChange={(v) => setTrainingForm({ ...trainingForm, is_active: v })}
-              />
-              <Label>Treinamento ativo</Label>
-            </div>
-            <Button onClick={handleSaveTraining} className="w-full">
-              Salvar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Link Training to Trail Dialog */}
-      <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Vincular Treinamentos à Trilha</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Selecione os treinamentos para adicionar à trilha:
-            </p>
-            <div className="space-y-2 max-h-[300px] overflow-y-auto">
-              {trainings.map((training) => {
-                const isLinked = trailTrainings.some(
-                  (tt) => tt.trail_id === selectedTrailForLink && tt.training_id === training.id
-                );
-                return (
-                  <div key={training.id} className="flex items-center justify-between p-2 border rounded">
-                    <span className="text-sm">{training.title}</span>
-                    {isLinked ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleUnlinkTraining(selectedTrailForLink, training.id)}
-                      >
-                        Remover
-                      </Button>
-                    ) : (
-                      <Button size="sm" onClick={() => handleLinkTraining(training.id)}>
-                        Adicionar
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Quiz & Exam Manager */}
-      <QuizManager />
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
