@@ -228,8 +228,8 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
               {videoMaterials.map((m) => (
                 <Card key={m.id} className="cursor-pointer hover:border-primary/50 transition-colors group overflow-hidden" onClick={() => window.open(m.file_url || '', '_blank')}>
                   {m.thumbnail_url && (
-                    <div className="overflow-hidden bg-muted/30 flex items-center justify-center p-2">
-                      <img src={m.thumbnail_url} alt={m.title} className="max-w-full max-h-48 object-contain" />
+                    <div className="aspect-[4/3] overflow-hidden bg-white flex items-center justify-center">
+                      <img src={m.thumbnail_url} alt={m.title} className="max-w-full max-h-full object-contain" />
                     </div>
                   )}
                   <CardContent className="p-5 space-y-2">
