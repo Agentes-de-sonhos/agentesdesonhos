@@ -22,13 +22,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, MapPin, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X, Video, Users, GraduationCap, ClipboardCheck } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X, Video, Users, GraduationCap, ClipboardCheck, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useAcademy, useAcademyAdmin, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
 import { TrailTrainingsManager } from "./TrailTrainingsManager";
 import { TrailExamManager } from "./TrailExamManager";
 import { POPULAR_DESTINATIONS, MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
+import { ImageGalleryPicker } from "./ImageGalleryPicker";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,6 +64,8 @@ export function AdminAcademyManager() {
   const [speakerPhotoFile, setSpeakerPhotoFile] = useState<File | null>(null);
   const [uploadingSpeakerPhoto, setUploadingSpeakerPhoto] = useState(false);
   const [editingSpeakerId, setEditingSpeakerId] = useState<string | null>(null);
+  const [thumbnailPickerOpen, setThumbnailPickerOpen] = useState(false);
+  const [thumbnailTargetMaterialId, setThumbnailTargetMaterialId] = useState<string | null>(null);
 
   // Fetch materials and speakers for the currently editing trail
   const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id ?? null);
@@ -505,7 +508,9 @@ export function AdminAcademyManager() {
                             {!isOverview && (
                               <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" />
                             )}
-                            {isVideoCategory ? <Video className="h-4 w-4 text-primary shrink-0" /> : <FileText className="h-4 w-4 text-primary shrink-0" />}
+                            {(item as any).thumbnail_url ? (
+                              <img src={(item as any).thumbnail_url} alt="" className="h-8 w-8 rounded object-cover shrink-0" />
+                            ) : isVideoCategory ? <Video className="h-4 w-4 text-primary shrink-0" /> : <FileText className="h-4 w-4 text-primary shrink-0" />}
                             {editingMaterialId === item.id ? (
                               <div className="flex items-center gap-1 flex-1">
                                 <Input
@@ -528,14 +533,28 @@ export function AdminAcademyManager() {
                               </a>
                             )}
                             {!isOverview && editingMaterialId !== item.id && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-1"
-                                onClick={() => { setEditingMaterialId(item.id); setEditingMaterialTitle(item.title || ""); }}
-                              >
-                                <Pencil className="h-3 w-3" />
-                              </Button>
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-1"
+                                  title="Definir imagem de capa"
+                                  onClick={() => {
+                                    setThumbnailTargetMaterialId(item.id);
+                                    setThumbnailPickerOpen(true);
+                                  }}
+                                >
+                                  <ImageIcon className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-1"
+                                  onClick={() => { setEditingMaterialId(item.id); setEditingMaterialTitle(item.title || ""); }}
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                              </>
                             )}
                             <Button
                               variant="ghost"
@@ -621,6 +640,21 @@ export function AdminAcademyManager() {
                       </div>
                     );
                   })}
+                  <ImageGalleryPicker
+                    open={thumbnailPickerOpen}
+                    onOpenChange={setThumbnailPickerOpen}
+                    onSelect={async (url) => {
+                      if (thumbnailTargetMaterialId) {
+                        try {
+                          await updateTrailMaterial.mutateAsync({ id: thumbnailTargetMaterialId, thumbnail_url: url } as any);
+                          sonnerToast.success("Capa atualizada!");
+                        } catch (err: any) {
+                          sonnerToast.error("Erro: " + err.message);
+                        }
+                        setThumbnailTargetMaterialId(null);
+                      }
+                    }}
+                  />
                 </div>
               </TabsContent>
               <TabsContent value="prova">

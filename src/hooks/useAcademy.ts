@@ -628,7 +628,7 @@ export function useAcademyAdmin() {
   });
 
   const updateTrailMaterial = useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; title?: string; order_index?: number }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; title?: string; order_index?: number; thumbnail_url?: string }) => {
       const { error } = await supabase.from("trail_materials").update(updates as any).eq("id", id);
       if (error) throw error;
     },
