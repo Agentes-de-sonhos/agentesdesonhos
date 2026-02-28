@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useAcademy, useAcademyAdmin, useTrailMaterials } from "@/hooks/useAcademy";
@@ -62,6 +62,7 @@ export function AdminAcademyManager() {
   const [editingMaterialId, setEditingMaterialId] = useState<string | null>(null);
   const [editingMaterialTitle, setEditingMaterialTitle] = useState("");
   const [draggedMaterialId, setDraggedMaterialId] = useState<string | null>(null);
+  const [videoForm, setVideoForm] = useState({ title: "", description: "", url: "" });
 
   // Fetch materials for the currently editing trail
   const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id);
@@ -296,6 +297,32 @@ export function AdminAcademyManager() {
     await reorderTrailMaterials.mutateAsync(updates);
     setDraggedMaterialId(null);
     sonnerToast.success("Ordem atualizada!");
+  };
+
+  const handleSaveVideoMaterial = async () => {
+    if (!editingTrail || !videoForm.title.trim() || !videoForm.url.trim()) {
+      sonnerToast.error("Preencha o título e a URL do vídeo.");
+      return;
+    }
+    setCategoryUploading("videos");
+    try {
+      await saveTrailMaterial.mutateAsync({
+        trail_id: editingTrail.id,
+        title: videoForm.title.trim(),
+        description: videoForm.description.trim() || null,
+        category: "videos",
+        material_type: "link",
+        file_url: videoForm.url.trim(),
+        is_premium: false,
+        order_index: trailMaterials.filter(m => m.category === "videos").length,
+      });
+      setVideoForm({ title: "", description: "", url: "" });
+      sonnerToast.success("Vídeo adicionado com sucesso!");
+    } catch (err: any) {
+      sonnerToast.error("Erro ao salvar vídeo: " + err.message);
+    } finally {
+      setCategoryUploading(null);
+    }
   };
 
   const handleLinkTraining = async (trainingId: string) => {
@@ -544,8 +571,9 @@ export function AdminAcademyManager() {
                     { category: "visao_geral", label: "PDF — Visão Geral", isOverview: true },
                     { category: "mapas_mentais", label: "Mapas Mentais" },
                     { category: "apresentacoes", label: "Apresentações" },
+                    { category: "videos", label: "Vídeos", isVideoCategory: true },
                     { category: "materiais_complementares", label: "Materiais Complementares" },
-                  ].map(({ category, label, isOverview }) => {
+                  ].map(({ category, label, isOverview, isVideoCategory }) => {
                     const items = isOverview
                       ? (trailForm.overview_pdf_url ? [{ id: "__overview", title: "Visão Geral", file_url: trailForm.overview_pdf_url }] : [])
                       : trailMaterials.filter(m => m.category === category);
@@ -569,7 +597,7 @@ export function AdminAcademyManager() {
                             {!isOverview && (
                               <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" />
                             )}
-                            <FileText className="h-4 w-4 text-primary shrink-0" />
+                            {isVideoCategory ? <Video className="h-4 w-4 text-primary shrink-0" /> : <FileText className="h-4 w-4 text-primary shrink-0" />}
                             {editingMaterialId === item.id ? (
                               <div className="flex items-center gap-1 flex-1">
                                 <Input
@@ -620,58 +648,89 @@ export function AdminAcademyManager() {
                           </div>
                         ))}
 
-                        {/* Upload area */}
-                        <label className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
-                          {isUploading ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                          ) : (
-                            <Upload className="h-4 w-4 text-muted-foreground" />
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {isUploading ? "Enviando..." : `Clique para enviar ${label}`}
-                          </span>
-                          <input
-                            type="file"
-                            accept=".pdf"
-                            disabled={!!isUploading}
-                            onChange={async (e) => {
-                              const f = e.target.files?.[0];
-                              if (!f) return;
-                              if (isOverview) {
-                                setOverviewPdfFile(f);
-                                // Trigger save immediately
-                                setUploadingOverviewPdf(true);
-                                try {
-                                  const sanitized = sanitizeFileName(f.name);
-                                  const path = `overview/${Date.now()}_${sanitized}`;
-                                  const { error: uploadError } = await supabase.storage
-                                    .from("academy-files")
-                                    .upload(path, f);
-                                  if (uploadError) throw uploadError;
-                                  const { data: urlData } = supabase.storage
-                                    .from("academy-files")
-                                    .getPublicUrl(path);
-                                  const newUrl = urlData.publicUrl;
-                                  const payload = { ...trailForm, overview_pdf_url: newUrl, image_url: trailForm.image_url };
-                                  if (editingTrail) {
-                                    await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
+                        {/* Upload / Add area */}
+                        {isVideoCategory ? (
+                          <div className="space-y-2 pt-2 border-t">
+                            <Input
+                              placeholder="Título do vídeo"
+                              value={videoForm.title}
+                              onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })}
+                              className="h-8 text-sm"
+                            />
+                            <Input
+                              placeholder="Descrição (opcional)"
+                              value={videoForm.description}
+                              onChange={(e) => setVideoForm({ ...videoForm, description: e.target.value })}
+                              className="h-8 text-sm"
+                            />
+                            <Input
+                              placeholder="URL do vídeo (Google Drive, etc.)"
+                              value={videoForm.url}
+                              onChange={(e) => setVideoForm({ ...videoForm, url: e.target.value })}
+                              className="h-8 text-sm"
+                            />
+                            <Button
+                              size="sm"
+                              className="w-full"
+                              disabled={categoryUploading === "videos"}
+                              onClick={handleSaveVideoMaterial}
+                            >
+                              {categoryUploading === "videos" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                              Adicionar Vídeo
+                            </Button>
+                          </div>
+                        ) : (
+                          <label className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                            {isUploading ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            ) : (
+                              <Upload className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <span className="text-xs text-muted-foreground">
+                              {isUploading ? "Enviando..." : `Clique para enviar ${label}`}
+                            </span>
+                            <input
+                              type="file"
+                              accept=".pdf"
+                              disabled={!!isUploading}
+                              onChange={async (e) => {
+                                const f = e.target.files?.[0];
+                                if (!f) return;
+                                if (isOverview) {
+                                  setOverviewPdfFile(f);
+                                  setUploadingOverviewPdf(true);
+                                  try {
+                                    const sanitized = sanitizeFileName(f.name);
+                                    const path = `overview/${Date.now()}_${sanitized}`;
+                                    const { error: uploadError } = await supabase.storage
+                                      .from("academy-files")
+                                      .upload(path, f);
+                                    if (uploadError) throw uploadError;
+                                    const { data: urlData } = supabase.storage
+                                      .from("academy-files")
+                                      .getPublicUrl(path);
+                                    const newUrl = urlData.publicUrl;
+                                    const payload = { ...trailForm, overview_pdf_url: newUrl, image_url: trailForm.image_url };
+                                    if (editingTrail) {
+                                      await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
+                                    }
+                                    setTrailForm(prev => ({ ...prev, overview_pdf_url: newUrl }));
+                                    setOverviewPdfFile(null);
+                                    sonnerToast.success("Visão Geral salva!");
+                                  } catch (err: any) {
+                                    sonnerToast.error("Erro: " + err.message);
+                                  } finally {
+                                    setUploadingOverviewPdf(false);
                                   }
-                                  setTrailForm(prev => ({ ...prev, overview_pdf_url: newUrl }));
-                                  setOverviewPdfFile(null);
-                                  sonnerToast.success("Visão Geral salva!");
-                                } catch (err: any) {
-                                  sonnerToast.error("Erro: " + err.message);
-                                } finally {
-                                  setUploadingOverviewPdf(false);
+                                } else {
+                                  await handleUploadCategoryMaterial(f, category, label);
                                 }
-                              } else {
-                                await handleUploadCategoryMaterial(f, category, label);
-                              }
-                              e.target.value = "";
-                            }}
-                            className="sr-only"
-                          />
-                        </label>
+                                e.target.value = "";
+                              }}
+                              className="sr-only"
+                            />
+                          </label>
+                        )}
                       </div>
                     );
                   })}
