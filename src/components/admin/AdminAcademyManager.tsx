@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrailMaterialsManager } from "./TrailMaterialsManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,12 +22,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText, FolderOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
-import { useAcademy, useAcademyAdmin } from "@/hooks/useAcademy";
+import { useAcademy, useAcademyAdmin, useTrailMaterials } from "@/hooks/useAcademy";
 import { QuizManager } from "./QuizManager";
-import { POPULAR_DESTINATIONS, TRAINING_CATEGORIES, type LearningTrail, type Training } from "@/types/academy";
+import { POPULAR_DESTINATIONS, TRAINING_CATEGORIES, MATERIAL_CATEGORIES, type LearningTrail, type Training } from "@/types/academy";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,7 +42,7 @@ import {
 
 export function AdminAcademyManager() {
   const { trails, trainings, trailTrainings } = useAcademy();
-  const { createTrail, updateTrail, deleteTrail, createTraining, updateTraining, deleteTraining, linkTrainingToTrail, unlinkTrainingFromTrail } = useAcademyAdmin();
+  const { createTrail, updateTrail, deleteTrail, createTraining, updateTraining, deleteTraining, linkTrainingToTrail, unlinkTrainingFromTrail, saveTrailMaterial, deleteTrailMaterial } = useAcademyAdmin();
   
   const [trailDialogOpen, setTrailDialogOpen] = useState(false);
   const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
@@ -53,8 +53,21 @@ export function AdminAcademyManager() {
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
   const [editingTraining, setEditingTraining] = useState<Training | null>(null);
-  const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'training'; id: string } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'training' | 'material'; id: string } | null>(null);
   const [selectedTrailForLink, setSelectedTrailForLink] = useState<string>("");
+
+  // Material upload state
+  const [materialUploading, setMaterialUploading] = useState(false);
+  const [materialFile, setMaterialFile] = useState<File | null>(null);
+  const [materialForm, setMaterialForm] = useState({
+    title: "",
+    description: "",
+    category: "mapas_mentais",
+    material_type: "pdf" as "pdf" | "video" | "image" | "link",
+  });
+
+  // Fetch materials for the currently editing trail
+  const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id);
 
   // Trail form state
   const [trailForm, setTrailForm] = useState({
@@ -200,16 +213,61 @@ export function AdminAcademyManager() {
     setTrainingDialogOpen(false);
   };
 
+  const handleSaveMaterial = async () => {
+    if (!editingTrail || !materialForm.title) {
+      sonnerToast.error("Preencha o título do material.");
+      return;
+    }
+    setMaterialUploading(true);
+    let fileUrl: string | null = null;
+    try {
+      if (materialFile) {
+        const sanitized = sanitizeFileName(materialFile.name);
+        const path = `trails/${editingTrail.id}/${Date.now()}_${sanitized}`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, materialFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        fileUrl = urlData.publicUrl;
+      }
+      await saveTrailMaterial.mutateAsync({
+        trail_id: editingTrail.id,
+        title: materialForm.title,
+        description: materialForm.description || null,
+        category: materialForm.category,
+        material_type: materialForm.material_type,
+        file_url: fileUrl,
+        is_premium: false,
+        order_index: trailMaterials.length,
+      });
+      setMaterialFile(null);
+      setMaterialForm({ title: "", description: "", category: "mapas_mentais", material_type: "pdf" });
+      sonnerToast.success("Material adicionado com sucesso!");
+    } catch (err: any) {
+      sonnerToast.error("Erro ao salvar material: " + err.message);
+    } finally {
+      setMaterialUploading(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!itemToDelete) return;
     if (itemToDelete.type === "trail") {
       await deleteTrail.mutateAsync(itemToDelete.id);
+    } else if (itemToDelete.type === "material") {
+      await deleteTrailMaterial.mutateAsync(itemToDelete.id);
     } else {
       await deleteTraining.mutateAsync(itemToDelete.id);
     }
     setDeleteConfirmOpen(false);
     setItemToDelete(null);
   };
+
+  const getCategoryLabel = (value: string) =>
+    MATERIAL_CATEGORIES.find((c) => c.value === value)?.label || value;
 
   const handleLinkTraining = async (trainingId: string) => {
     if (!selectedTrailForLink) return;
@@ -226,6 +284,85 @@ export function AdminAcademyManager() {
   const getTrailTrainings = (trailId: string) => {
     return trailTrainings.filter((tt) => tt.trail_id === trailId);
   };
+  const renderTrailFormFields = () => (
+    <>
+      <div>
+        <Label>Nome da Trilha</Label>
+        <Input
+          value={trailForm.name}
+          onChange={(e) => setTrailForm({ ...trailForm, name: e.target.value })}
+          placeholder="Ex: Especialista em Orlando"
+        />
+      </div>
+      <div>
+        <Label>Destino</Label>
+        <Select
+          value={trailForm.destination}
+          onValueChange={(v) => setTrailForm({ ...trailForm, destination: v })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o destino" />
+          </SelectTrigger>
+          <SelectContent>
+            {POPULAR_DESTINATIONS.map((dest) => (
+              <SelectItem key={dest} value={dest}>{dest}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label>Descrição</Label>
+        <Textarea
+          value={trailForm.description}
+          onChange={(e) => setTrailForm({ ...trailForm, description: e.target.value })}
+          placeholder="Descrição da trilha..."
+        />
+      </div>
+      <div>
+        <Label>URL da Imagem</Label>
+        <Input
+          value={trailForm.image_url}
+          onChange={(e) => setTrailForm({ ...trailForm, image_url: e.target.value })}
+          placeholder="https://..."
+        />
+      </div>
+      <div>
+        <Label>PDF — Visão Geral</Label>
+        <div className="mt-1">
+          {trailForm.overview_pdf_url && !overviewPdfFile && (
+            <div className="flex items-center gap-2 mb-2 p-2 border rounded bg-muted/30">
+              <FileText className="h-4 w-4 text-primary" />
+              <a href={trailForm.overview_pdf_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">PDF atual</a>
+            </div>
+          )}
+          {overviewPdfFile ? (
+            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+              <FileText className="h-5 w-5 text-primary" />
+              <span className="text-sm font-medium flex-1 truncate">{overviewPdfFile.name}</span>
+              <Button variant="ghost" size="sm" onClick={() => setOverviewPdfFile(null)}>Remover</Button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+              <Upload className="h-6 w-6 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Clique para enviar PDF de Visão Geral</span>
+              <input type="file" accept=".pdf" onChange={(e) => { const file = e.target.files?.[0]; if (file) setOverviewPdfFile(file); }} className="sr-only" />
+            </label>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={trailForm.is_active}
+          onCheckedChange={(v) => setTrailForm({ ...trailForm, is_active: v })}
+        />
+        <Label>Trilha ativa</Label>
+      </div>
+      <Button onClick={handleSaveTrail} className="w-full" disabled={uploadingOverviewPdf}>
+        {uploadingOverviewPdf && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        {uploadingOverviewPdf ? "Enviando..." : "Salvar"}
+      </Button>
+    </>
+  );
 
   return (
     <div className="space-y-6">
@@ -362,99 +499,131 @@ export function AdminAcademyManager() {
 
       {/* Trail Dialog */}
       <Dialog open={trailDialogOpen} onOpenChange={setTrailDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle>{editingTrail ? "Editar Trilha" : "Nova Trilha"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Nome da Trilha</Label>
-              <Input
-                value={trailForm.name}
-                onChange={(e) => setTrailForm({ ...trailForm, name: e.target.value })}
-                placeholder="Ex: Especialista em Orlando"
-              />
-            </div>
-            <div>
-              <Label>Destino</Label>
-              <Select
-                value={trailForm.destination}
-                onValueChange={(v) => setTrailForm({ ...trailForm, destination: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o destino" />
-                </SelectTrigger>
-                <SelectContent>
-                  {POPULAR_DESTINATIONS.map((dest) => (
-                    <SelectItem key={dest} value={dest}>
-                      {dest}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Descrição</Label>
-              <Textarea
-                value={trailForm.description}
-                onChange={(e) => setTrailForm({ ...trailForm, description: e.target.value })}
-                placeholder="Descrição da trilha..."
-              />
-            </div>
-            <div>
-              <Label>URL da Imagem</Label>
-              <Input
-                value={trailForm.image_url}
-                onChange={(e) => setTrailForm({ ...trailForm, image_url: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
-            <div>
-              <Label>PDF — Visão Geral</Label>
-              <div className="mt-1">
-                {trailForm.overview_pdf_url && !overviewPdfFile && (
-                  <div className="flex items-center gap-2 mb-2 p-2 border rounded bg-muted/30">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <a href={trailForm.overview_pdf_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">
-                      PDF atual
-                    </a>
+          {editingTrail ? (
+            <Tabs defaultValue="dados" className="w-full">
+              <TabsList className="w-full">
+                <TabsTrigger value="dados" className="flex-1">Dados da Trilha</TabsTrigger>
+                <TabsTrigger value="materiais" className="flex-1">
+                  <FolderOpen className="h-4 w-4 mr-1" />
+                  Materiais (PDFs)
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="dados">
+                <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
+                  {renderTrailFormFields()}
+                </div>
+              </TabsContent>
+              <TabsContent value="materiais">
+                <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
+                  {/* Existing materials list */}
+                  {trailMaterials.length > 0 && (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Título</TableHead>
+                          <TableHead>Categoria</TableHead>
+                          <TableHead>Arquivo</TableHead>
+                          <TableHead className="w-[50px]" />
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {trailMaterials.map((m) => (
+                          <TableRow key={m.id}>
+                            <TableCell className="font-medium text-sm">{m.title}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">{getCategoryLabel(m.category)}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              {m.file_url ? (
+                                <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-xs">Ver</a>
+                              ) : "—"}
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="icon" onClick={() => { setItemToDelete({ type: "material", id: m.id }); setDeleteConfirmOpen(true); }}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                  {trailMaterials.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">Nenhum material cadastrado ainda.</p>
+                  )}
+
+                  {/* Add new material form */}
+                  <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+                    <h4 className="text-sm font-semibold flex items-center gap-2">
+                      <Plus className="h-4 w-4" /> Adicionar Material
+                    </h4>
+                    <div>
+                      <Label className="text-xs">Título</Label>
+                      <Input
+                        value={materialForm.title}
+                        onChange={(e) => setMaterialForm({ ...materialForm, title: e.target.value })}
+                        placeholder="Ex: Mapa Mental — Hotelaria"
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs">Categoria</Label>
+                        <Select value={materialForm.category} onValueChange={(v) => setMaterialForm({ ...materialForm, category: v })}>
+                          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {MATERIAL_CATEGORIES.map((c) => (
+                              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Tipo</Label>
+                        <Select value={materialForm.material_type} onValueChange={(v) => setMaterialForm({ ...materialForm, material_type: v as any })}>
+                          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pdf">PDF</SelectItem>
+                            <SelectItem value="video">Vídeo</SelectItem>
+                            <SelectItem value="image">Imagem</SelectItem>
+                            <SelectItem value="link">Link</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Arquivo</Label>
+                      {materialFile ? (
+                        <div className="flex items-center gap-2 p-2 border rounded bg-muted/30 mt-1">
+                          <FileText className="h-4 w-4 text-primary" />
+                          <span className="text-xs flex-1 truncate">{materialFile.name}</span>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setMaterialFile(null)}>Remover</Button>
+                        </div>
+                      ) : (
+                        <label className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors mt-1">
+                          <Upload className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Clique para selecionar</span>
+                          <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4" onChange={(e) => { const f = e.target.files?.[0]; if (f) setMaterialFile(f); }} className="sr-only" />
+                        </label>
+                      )}
+                    </div>
+                    <Button onClick={handleSaveMaterial} className="w-full" size="sm" disabled={materialUploading || !materialForm.title}>
+                      {materialUploading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      {materialUploading ? "Enviando..." : "Adicionar Material"}
+                    </Button>
                   </div>
-                )}
-                {overviewPdfFile ? (
-                  <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-medium flex-1 truncate">{overviewPdfFile.name}</span>
-                    <Button variant="ghost" size="sm" onClick={() => setOverviewPdfFile(null)}>Remover</Button>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Clique para enviar PDF de Visão Geral</span>
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setOverviewPdfFile(file);
-                      }}
-                      className="sr-only"
-                    />
-                  </label>
-                )}
-              </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+              {renderTrailFormFields()}
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={trailForm.is_active}
-                onCheckedChange={(v) => setTrailForm({ ...trailForm, is_active: v })}
-              />
-              <Label>Trilha ativa</Label>
-            </div>
-            <Button onClick={handleSaveTrail} className="w-full" disabled={uploadingOverviewPdf}>
-              {uploadingOverviewPdf && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {uploadingOverviewPdf ? "Enviando..." : "Salvar"}
-            </Button>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -609,9 +778,6 @@ export function AdminAcademyManager() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Trail Materials Manager */}
-      <TrailMaterialsManager />
 
       {/* Quiz & Exam Manager */}
       <QuizManager />
