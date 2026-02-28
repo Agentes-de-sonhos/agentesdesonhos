@@ -66,6 +66,7 @@ export function AdminAcademyManager() {
   const [speakerForm, setSpeakerForm] = useState({ full_name: "", photo_url: "", linkedin_url: "", whatsapp_number: "", email: "", bio: "" });
   const [speakerPhotoFile, setSpeakerPhotoFile] = useState<File | null>(null);
   const [uploadingSpeakerPhoto, setUploadingSpeakerPhoto] = useState(false);
+  const [editingSpeakerId, setEditingSpeakerId] = useState<string | null>(null);
 
   // Fetch materials and speakers for the currently editing trail
   const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id);
@@ -297,16 +298,29 @@ export function AdminAcademyManager() {
           .getPublicUrl(path);
         photoUrl = urlData.publicUrl;
       }
-      await saveTrailSpeaker.mutateAsync({
-        trail_id: editingTrail.id,
-        full_name: speakerForm.full_name.trim(),
-        photo_url: photoUrl,
-        linkedin_url: speakerForm.linkedin_url.trim() || null,
-        whatsapp_number: speakerForm.whatsapp_number.trim() || null,
-        email: speakerForm.email.trim() || null,
-        bio: speakerForm.bio.trim() || null,
-        order_index: trailSpeakers.length,
-      });
+      if (editingSpeakerId) {
+        await updateTrailSpeaker.mutateAsync({
+          id: editingSpeakerId,
+          full_name: speakerForm.full_name.trim(),
+          photo_url: photoUrl,
+          linkedin_url: speakerForm.linkedin_url.trim() || null,
+          whatsapp_number: speakerForm.whatsapp_number.trim() || null,
+          email: speakerForm.email.trim() || null,
+          bio: speakerForm.bio.trim() || null,
+        });
+        setEditingSpeakerId(null);
+      } else {
+        await saveTrailSpeaker.mutateAsync({
+          trail_id: editingTrail.id,
+          full_name: speakerForm.full_name.trim(),
+          photo_url: photoUrl,
+          linkedin_url: speakerForm.linkedin_url.trim() || null,
+          whatsapp_number: speakerForm.whatsapp_number.trim() || null,
+          email: speakerForm.email.trim() || null,
+          bio: speakerForm.bio.trim() || null,
+          order_index: trailSpeakers.length,
+        });
+      }
       setSpeakerForm({ full_name: "", photo_url: "", linkedin_url: "", whatsapp_number: "", email: "", bio: "" });
       setSpeakerPhotoFile(null);
     } catch (err: any) {
@@ -808,6 +822,25 @@ export function AdminAcademyManager() {
                         size="sm"
                         className="h-7"
                         onClick={() => {
+                          setEditingSpeakerId(speaker.id);
+                          setSpeakerForm({
+                            full_name: speaker.full_name,
+                            photo_url: speaker.photo_url || "",
+                            linkedin_url: speaker.linkedin_url || "",
+                            whatsapp_number: speaker.whatsapp_number || "",
+                            email: speaker.email || "",
+                            bio: speaker.bio || "",
+                          });
+                          setSpeakerPhotoFile(null);
+                        }}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7"
+                        onClick={() => {
                           setItemToDelete({ type: "speaker", id: speaker.id });
                           setDeleteConfirmOpen(true);
                         }}
@@ -818,8 +851,19 @@ export function AdminAcademyManager() {
                   ))}
 
                   {/* Add speaker form */}
-                  <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
-                    <Label className="text-sm font-semibold">Adicionar Palestrante</Label>
+                   <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-semibold">{editingSpeakerId ? "Editar Palestrante" : "Adicionar Palestrante"}</Label>
+                      {editingSpeakerId && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => {
+                          setEditingSpeakerId(null);
+                          setSpeakerForm({ full_name: "", photo_url: "", linkedin_url: "", whatsapp_number: "", email: "", bio: "" });
+                          setSpeakerPhotoFile(null);
+                        }}>
+                          Cancelar edição
+                        </Button>
+                      )}
+                    </div>
                     <Input
                       placeholder="Nome completo *"
                       value={speakerForm.full_name}
@@ -868,8 +912,8 @@ export function AdminAcademyManager() {
                       </label>
                     )}
                     <Button size="sm" className="w-full" disabled={uploadingSpeakerPhoto} onClick={handleSaveSpeaker}>
-                      {uploadingSpeakerPhoto ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-                      Adicionar Palestrante
+                      {uploadingSpeakerPhoto ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : editingSpeakerId ? <Pencil className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                      {editingSpeakerId ? "Salvar Alterações" : "Adicionar Palestrante"}
                     </Button>
                   </div>
                 </div>
