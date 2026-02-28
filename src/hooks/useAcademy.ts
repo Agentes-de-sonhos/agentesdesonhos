@@ -17,6 +17,7 @@ import type {
   TrailExamOption,
   UserExamAttempt,
   TrailMaterial,
+  TrailSpeaker,
   UserAchievement,
   AchievementDefinition,
 } from "@/types/academy";
@@ -377,6 +378,24 @@ export function useTrailMaterials(trailId: string | null) {
   });
 }
 
+// Hook for trail speakers
+export function useTrailSpeakers(trailId: string | null) {
+  return useQuery({
+    queryKey: ["trail-speakers", trailId],
+    queryFn: async () => {
+      if (!trailId) return [];
+      const { data, error } = await supabase
+        .from("trail_speakers")
+        .select("*")
+        .eq("trail_id", trailId)
+        .order("order_index", { ascending: true });
+      if (error) throw error;
+      return data as TrailSpeaker[];
+    },
+    enabled: !!trailId,
+  });
+}
+
 export function useAcademyRanking() {
   const { data: ranking = [], isLoading } = useQuery({
     queryKey: ["academy-ranking"],
@@ -641,6 +660,40 @@ export function useAcademyAdmin() {
     },
   });
 
+  // Trail speakers management
+  const saveTrailSpeaker = useMutation({
+    mutationFn: async (speaker: Partial<TrailSpeaker>) => {
+      const { error } = await supabase.from("trail_speakers").insert(speaker as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trail-speakers"] });
+      toast({ title: "Palestrante adicionado!" });
+    },
+  });
+
+  const updateTrailSpeaker = useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<TrailSpeaker> & { id: string }) => {
+      const { error } = await supabase.from("trail_speakers").update(updates as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trail-speakers"] });
+      toast({ title: "Palestrante atualizado!" });
+    },
+  });
+
+  const deleteTrailSpeaker = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("trail_speakers").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trail-speakers"] });
+      toast({ title: "Palestrante removido!" });
+    },
+  });
+
   return {
     createTrail,
     updateTrail,
@@ -658,5 +711,8 @@ export function useAcademyAdmin() {
     updateTrailMaterial,
     reorderTrailMaterials,
     deleteTrailMaterial,
+    saveTrailSpeaker,
+    updateTrailSpeaker,
+    deleteTrailSpeaker,
   };
 }

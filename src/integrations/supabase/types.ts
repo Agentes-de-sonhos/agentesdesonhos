@@ -2696,6 +2696,56 @@ export type Database = {
           },
         ]
       }
+      trail_speakers: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          linkedin_url: string | null
+          order_index: number
+          photo_url: string | null
+          trail_id: string
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          linkedin_url?: string | null
+          order_index?: number
+          photo_url?: string | null
+          trail_id: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          linkedin_url?: string | null
+          order_index?: number
+          photo_url?: string | null
+          trail_id?: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_speakers_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trail_trainings: {
         Row: {
           created_at: string

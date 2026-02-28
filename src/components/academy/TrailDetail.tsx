@@ -30,9 +30,10 @@ import {
   Presentation,
   Video,
   Share2,
+  Users,
 } from "lucide-react";
 import type { TrailWithProgress, Training, TrailMaterial } from "@/types/academy";
-import { useAcademy, useQuizQuestions, useExamQuestions, useTrailMaterials } from "@/hooks/useAcademy";
+import { useAcademy, useQuizQuestions, useExamQuestions, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { TrainingPlayer } from "./TrainingPlayer";
@@ -41,6 +42,7 @@ import { CertificatePDF } from "./CertificatePDF";
 import { MATERIAL_CATEGORIES } from "@/types/academy";
 import { PlaybookPDFViewer } from "@/components/playbook/PlaybookPDFViewer";
 import { PlaybookMindMapsViewer } from "@/components/playbook/PlaybookMindMapsViewer";
+import { SpeakersTab } from "./SpeakersTab";
 import type { PlaybookPDFFile } from "@/types/playbook";
 
 interface TrailDetailProps {
@@ -60,6 +62,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const { data: quizQuestions = [] } = useQuizQuestions(showQuiz);
   const { data: examQuestions = [] } = useExamQuestions(showExam ? trail.id : null);
   const { data: trailMaterials = [] } = useTrailMaterials(trail.id);
+  const { data: trailSpeakers = [] } = useTrailSpeakers(trail.id);
 
   const certificate = certificates.find((c) => c.trail_id === trail.id);
   const canTakeExam = trail.allQuizzesPassed && !trail.examPassed;
@@ -182,6 +185,9 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           </TabsTrigger>
           <TabsTrigger value="exam" className="flex items-center gap-2">
             <ClipboardCheck className="h-4 w-4" /> Prova Final
+          </TabsTrigger>
+          <TabsTrigger value="palestrantes" className="flex items-center gap-2">
+            <Users className="h-4 w-4" /> Palestrantes
           </TabsTrigger>
         </TabsList>
 
@@ -372,6 +378,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
               </div>
             </div>
           )}
+        </TabsContent>
+
+        {/* Palestrantes Tab */}
+        <TabsContent value="palestrantes">
+          <SpeakersTab speakers={trailSpeakers} />
         </TabsContent>
       </Tabs>
 

@@ -23,10 +23,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X, Video } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X, Video, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
-import { useAcademy, useAcademyAdmin, useTrailMaterials } from "@/hooks/useAcademy";
+import { useAcademy, useAcademyAdmin, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
 import { QuizManager } from "./QuizManager";
 import { POPULAR_DESTINATIONS, TRAINING_CATEGORIES, MATERIAL_CATEGORIES, type LearningTrail, type Training } from "@/types/academy";
 import {
@@ -42,7 +42,7 @@ import {
 
 export function AdminAcademyManager() {
   const { trails, trainings, trailTrainings } = useAcademy();
-  const { createTrail, updateTrail, deleteTrail, createTraining, updateTraining, deleteTraining, linkTrainingToTrail, unlinkTrainingFromTrail, saveTrailMaterial, updateTrailMaterial, reorderTrailMaterials, deleteTrailMaterial } = useAcademyAdmin();
+  const { createTrail, updateTrail, deleteTrail, createTraining, updateTraining, deleteTraining, linkTrainingToTrail, unlinkTrainingFromTrail, saveTrailMaterial, updateTrailMaterial, reorderTrailMaterials, deleteTrailMaterial, saveTrailSpeaker, updateTrailSpeaker, deleteTrailSpeaker } = useAcademyAdmin();
   
   const [trailDialogOpen, setTrailDialogOpen] = useState(false);
   const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
@@ -54,7 +54,7 @@ export function AdminAcademyManager() {
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
   const [editingTraining, setEditingTraining] = useState<Training | null>(null);
-  const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'training' | 'material'; id: string } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'training' | 'material' | 'speaker'; id: string } | null>(null);
   const [selectedTrailForLink, setSelectedTrailForLink] = useState<string>("");
 
   // Material upload state per category
@@ -63,9 +63,13 @@ export function AdminAcademyManager() {
   const [editingMaterialTitle, setEditingMaterialTitle] = useState("");
   const [draggedMaterialId, setDraggedMaterialId] = useState<string | null>(null);
   const [videoForm, setVideoForm] = useState({ title: "", description: "", url: "" });
+  const [speakerForm, setSpeakerForm] = useState({ full_name: "", photo_url: "", linkedin_url: "", whatsapp_number: "", email: "", bio: "" });
+  const [speakerPhotoFile, setSpeakerPhotoFile] = useState<File | null>(null);
+  const [uploadingSpeakerPhoto, setUploadingSpeakerPhoto] = useState(false);
 
-  // Fetch materials for the currently editing trail
+  // Fetch materials and speakers for the currently editing trail
   const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id);
+  const { data: trailSpeakers = [] } = useTrailSpeakers(editingTrail?.id);
 
   // Trail form state
   const [trailForm, setTrailForm] = useState({
@@ -264,11 +268,52 @@ export function AdminAcademyManager() {
       await deleteTrail.mutateAsync(itemToDelete.id);
     } else if (itemToDelete.type === "material") {
       await deleteTrailMaterial.mutateAsync(itemToDelete.id);
+    } else if (itemToDelete.type === "speaker") {
+      await deleteTrailSpeaker.mutateAsync(itemToDelete.id);
     } else {
       await deleteTraining.mutateAsync(itemToDelete.id);
     }
     setDeleteConfirmOpen(false);
     setItemToDelete(null);
+  };
+
+  const handleSaveSpeaker = async () => {
+    if (!editingTrail || !speakerForm.full_name.trim()) {
+      sonnerToast.error("Preencha pelo menos o nome do palestrante.");
+      return;
+    }
+    setUploadingSpeakerPhoto(true);
+    try {
+      let photoUrl = speakerForm.photo_url || null;
+      if (speakerPhotoFile) {
+        const sanitized = sanitizeFileName(speakerPhotoFile.name);
+        const path = `speakers/${Date.now()}_${sanitized}`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, speakerPhotoFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        photoUrl = urlData.publicUrl;
+      }
+      await saveTrailSpeaker.mutateAsync({
+        trail_id: editingTrail.id,
+        full_name: speakerForm.full_name.trim(),
+        photo_url: photoUrl,
+        linkedin_url: speakerForm.linkedin_url.trim() || null,
+        whatsapp_number: speakerForm.whatsapp_number.trim() || null,
+        email: speakerForm.email.trim() || null,
+        bio: speakerForm.bio.trim() || null,
+        order_index: trailSpeakers.length,
+      });
+      setSpeakerForm({ full_name: "", photo_url: "", linkedin_url: "", whatsapp_number: "", email: "", bio: "" });
+      setSpeakerPhotoFile(null);
+    } catch (err: any) {
+      sonnerToast.error("Erro ao salvar palestrante: " + err.message);
+    } finally {
+      setUploadingSpeakerPhoto(false);
+    }
   };
 
   const getCategoryLabel = (value: string) =>
@@ -557,7 +602,11 @@ export function AdminAcademyManager() {
                 <TabsTrigger value="dados" className="flex-1">Dados da Trilha</TabsTrigger>
                 <TabsTrigger value="materiais" className="flex-1">
                   <FolderOpen className="h-4 w-4 mr-1" />
-                  Materiais (PDFs)
+                  Materiais
+                </TabsTrigger>
+                <TabsTrigger value="palestrantes" className="flex-1">
+                  <Users className="h-4 w-4 mr-1" />
+                  Palestrantes
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="dados">
@@ -734,6 +783,95 @@ export function AdminAcademyManager() {
                       </div>
                     );
                   })}
+                </div>
+              </TabsContent>
+              <TabsContent value="palestrantes">
+                <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
+                  {/* Existing speakers */}
+                  {trailSpeakers.map((speaker) => (
+                    <div key={speaker.id} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+                      {speaker.photo_url ? (
+                        <img src={speaker.photo_url} alt={speaker.full_name} className="h-10 w-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                          {speaker.full_name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{speaker.full_name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {[speaker.email, speaker.whatsapp_number].filter(Boolean).join(" · ") || "Sem contato"}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7"
+                        onClick={() => {
+                          setItemToDelete({ type: "speaker", id: speaker.id });
+                          setDeleteConfirmOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+
+                  {/* Add speaker form */}
+                  <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+                    <Label className="text-sm font-semibold">Adicionar Palestrante</Label>
+                    <Input
+                      placeholder="Nome completo *"
+                      value={speakerForm.full_name}
+                      onChange={(e) => setSpeakerForm({ ...speakerForm, full_name: e.target.value })}
+                      className="h-8 text-sm"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder="E-mail"
+                        value={speakerForm.email}
+                        onChange={(e) => setSpeakerForm({ ...speakerForm, email: e.target.value })}
+                        className="h-8 text-sm"
+                      />
+                      <Input
+                        placeholder="WhatsApp (ex: 5511999999999)"
+                        value={speakerForm.whatsapp_number}
+                        onChange={(e) => setSpeakerForm({ ...speakerForm, whatsapp_number: e.target.value })}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <Input
+                      placeholder="URL do LinkedIn"
+                      value={speakerForm.linkedin_url}
+                      onChange={(e) => setSpeakerForm({ ...speakerForm, linkedin_url: e.target.value })}
+                      className="h-8 text-sm"
+                    />
+                    <Textarea
+                      placeholder="Bio / descrição curta"
+                      value={speakerForm.bio}
+                      onChange={(e) => setSpeakerForm({ ...speakerForm, bio: e.target.value })}
+                      className="text-sm min-h-[60px]"
+                    />
+                    {speakerPhotoFile ? (
+                      <div className="flex items-center gap-3 p-2 border rounded bg-muted/30">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span className="text-sm truncate flex-1">{speakerPhotoFile.name}</span>
+                        <Button variant="ghost" size="sm" className="h-7" onClick={() => setSpeakerPhotoFile(null)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                        <Upload className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Foto do palestrante (opcional)</span>
+                        <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { const f = e.target.files?.[0]; if (f) setSpeakerPhotoFile(f); }} className="sr-only" />
+                      </label>
+                    )}
+                    <Button size="sm" className="w-full" disabled={uploadingSpeakerPhoto} onClick={handleSaveSpeaker}>
+                      {uploadingSpeakerPhoto ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                      Adicionar Palestrante
+                    </Button>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>

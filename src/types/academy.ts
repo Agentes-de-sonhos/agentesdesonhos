@@ -122,6 +122,20 @@ export interface UserExamAttempt {
   created_at: string;
 }
 
+export interface TrailSpeaker {
+  id: string;
+  trail_id: string;
+  full_name: string;
+  photo_url: string | null;
+  linkedin_url: string | null;
+  whatsapp_number: string | null;
+  email: string | null;
+  bio: string | null;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TrailMaterial {
   id: string;
   trail_id: string;
