@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText, FolderOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Link2, ClipboardCheck, Upload, Loader2, FileText, FolderOpen, GripVertical, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useAcademy, useAcademyAdmin, useTrailMaterials } from "@/hooks/useAcademy";
@@ -42,7 +42,7 @@ import {
 
 export function AdminAcademyManager() {
   const { trails, trainings, trailTrainings } = useAcademy();
-  const { createTrail, updateTrail, deleteTrail, createTraining, updateTraining, deleteTraining, linkTrainingToTrail, unlinkTrainingFromTrail, saveTrailMaterial, deleteTrailMaterial } = useAcademyAdmin();
+  const { createTrail, updateTrail, deleteTrail, createTraining, updateTraining, deleteTraining, linkTrainingToTrail, unlinkTrainingFromTrail, saveTrailMaterial, updateTrailMaterial, reorderTrailMaterials, deleteTrailMaterial } = useAcademyAdmin();
   
   const [trailDialogOpen, setTrailDialogOpen] = useState(false);
   const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
@@ -59,6 +59,9 @@ export function AdminAcademyManager() {
 
   // Material upload state per category
   const [categoryUploading, setCategoryUploading] = useState<string | null>(null);
+  const [editingMaterialId, setEditingMaterialId] = useState<string | null>(null);
+  const [editingMaterialTitle, setEditingMaterialTitle] = useState("");
+  const [draggedMaterialId, setDraggedMaterialId] = useState<string | null>(null);
 
   // Fetch materials for the currently editing trail
   const { data: trailMaterials = [] } = useTrailMaterials(editingTrail?.id);
@@ -269,6 +272,31 @@ export function AdminAcademyManager() {
 
   const getCategoryLabel = (value: string) =>
     MATERIAL_CATEGORIES.find((c) => c.value === value)?.label || value;
+
+  const handleSaveMaterialTitle = async (materialId: string) => {
+    if (!editingMaterialTitle.trim()) return;
+    await updateTrailMaterial.mutateAsync({ id: materialId, title: editingMaterialTitle.trim() });
+    setEditingMaterialId(null);
+    sonnerToast.success("Título atualizado!");
+  };
+
+  const handleDrop = async (targetId: string, category: string) => {
+    if (!draggedMaterialId || draggedMaterialId === targetId) {
+      setDraggedMaterialId(null);
+      return;
+    }
+    const items = trailMaterials.filter(m => m.category === category);
+    const draggedIdx = items.findIndex(m => m.id === draggedMaterialId);
+    const targetIdx = items.findIndex(m => m.id === targetId);
+    if (draggedIdx === -1 || targetIdx === -1) return;
+    const reordered = [...items];
+    const [moved] = reordered.splice(draggedIdx, 1);
+    reordered.splice(targetIdx, 0, moved);
+    const updates = reordered.map((m, i) => ({ id: m.id, order_index: i }));
+    await reorderTrailMaterials.mutateAsync(updates);
+    setDraggedMaterialId(null);
+    sonnerToast.success("Ordem atualizada!");
+  };
 
   const handleLinkTraining = async (trainingId: string) => {
     if (!selectedTrailForLink) return;
@@ -529,11 +557,50 @@ export function AdminAcademyManager() {
                         
                         {/* Existing files */}
                         {items.map((item) => (
-                          <div key={item.id} className="flex items-center gap-2 p-2 border rounded bg-muted/30">
-                            <FileText className="h-4 w-4 text-primary" />
-                            <a href={item.file_url!} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">
-                              {item.title || "Arquivo"}
-                            </a>
+                          <div
+                            key={item.id}
+                            className={`flex items-center gap-2 p-2 border rounded bg-muted/30 ${draggedMaterialId === item.id ? 'opacity-50' : ''}`}
+                            draggable={!isOverview && !editingMaterialId}
+                            onDragStart={() => !isOverview && setDraggedMaterialId(item.id)}
+                            onDragOver={(e) => { if (!isOverview) e.preventDefault(); }}
+                            onDrop={() => !isOverview && handleDrop(item.id, category)}
+                            onDragEnd={() => setDraggedMaterialId(null)}
+                          >
+                            {!isOverview && (
+                              <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" />
+                            )}
+                            <FileText className="h-4 w-4 text-primary shrink-0" />
+                            {editingMaterialId === item.id ? (
+                              <div className="flex items-center gap-1 flex-1">
+                                <Input
+                                  value={editingMaterialTitle}
+                                  onChange={(e) => setEditingMaterialTitle(e.target.value)}
+                                  className="h-7 text-sm"
+                                  onKeyDown={(e) => { if (e.key === 'Enter') handleSaveMaterialTitle(item.id); if (e.key === 'Escape') setEditingMaterialId(null); }}
+                                  autoFocus
+                                />
+                                <Button variant="ghost" size="sm" className="h-7 px-1" onClick={() => handleSaveMaterialTitle(item.id)}>
+                                  <Check className="h-3 w-3 text-green-600" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="h-7 px-1" onClick={() => setEditingMaterialId(null)}>
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <a href={item.file_url!} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">
+                                {item.title || "Arquivo"}
+                              </a>
+                            )}
+                            {!isOverview && editingMaterialId !== item.id && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-1"
+                                onClick={() => { setEditingMaterialId(item.id); setEditingMaterialTitle(item.title || ""); }}
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
