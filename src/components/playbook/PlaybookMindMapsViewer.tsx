@@ -90,23 +90,32 @@ export function PlaybookMindMapsViewer({ files }: PlaybookMindMapsViewerProps) {
                     className="group cursor-pointer border hover:border-primary/40 hover:shadow-md transition-all duration-200"
                     onClick={() => setSelectedFile(file)}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2.5 rounded-xl bg-primary/10 shrink-0 group-hover:bg-primary/20 transition-colors">
-                          <FileText className="h-5 w-5 text-primary" />
+                    <CardContent className="p-0">
+                      {file.thumbnail_url ? (
+                        <div className="aspect-[4/3] overflow-hidden rounded-t-lg">
+                          <img src={file.thumbnail_url} alt={file.name} className="w-full h-full object-cover" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors">
-                            {file.name}
-                          </h4>
-                          {file.description && (
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                              {file.description}
-                            </p>
+                      ) : null}
+                      <div className={`p-4 ${file.thumbnail_url ? '' : ''}`}>
+                        <div className="flex items-start gap-3">
+                          {!file.thumbnail_url && (
+                            <div className="p-2.5 rounded-xl bg-primary/10 shrink-0 group-hover:bg-primary/20 transition-colors">
+                              <FileText className="h-5 w-5 text-primary" />
+                            </div>
                           )}
-                          <div className="flex items-center gap-1.5 mt-2 text-xs text-primary font-medium">
-                            <Eye className="h-3.5 w-3.5" />
-                            Visualizar
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                              {file.name}
+                            </h4>
+                            {file.description && (
+                              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                {file.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-1.5 mt-2 text-xs text-primary font-medium">
+                              <Eye className="h-3.5 w-3.5" />
+                              Visualizar
+                            </div>
                           </div>
                         </div>
                       </div>
