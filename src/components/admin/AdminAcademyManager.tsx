@@ -50,6 +50,7 @@ export function AdminAcademyManager() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
   const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
   const [editingTraining, setEditingTraining] = useState<Training | null>(null);
@@ -171,6 +172,7 @@ export function AdminAcademyManager() {
     setUploadingOverviewPdf(true);
     try {
       let overviewUrl = trailForm.overview_pdf_url;
+      let imageUrl = trailForm.image_url;
 
       if (overviewPdfFile) {
         const sanitized = sanitizeFileName(overviewPdfFile.name);
@@ -185,7 +187,20 @@ export function AdminAcademyManager() {
         overviewUrl = urlData.publicUrl;
       }
 
-      const payload = { ...trailForm, overview_pdf_url: overviewUrl };
+      if (coverImageFile) {
+        const sanitized = sanitizeFileName(coverImageFile.name);
+        const path = `covers/${Date.now()}_${sanitized}`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, coverImageFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        imageUrl = urlData.publicUrl;
+      }
+
+      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl };
       if (editingTrail) {
         await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
       } else {
@@ -193,6 +208,7 @@ export function AdminAcademyManager() {
       }
       setTrailDialogOpen(false);
       setOverviewPdfFile(null);
+      setCoverImageFile(null);
     } catch (err: any) {
       sonnerToast.error("Erro ao salvar trilha: " + err.message);
     } finally {
@@ -319,33 +335,25 @@ export function AdminAcademyManager() {
         />
       </div>
       <div>
-        <Label>URL da Imagem</Label>
-        <Input
-          value={trailForm.image_url}
-          onChange={(e) => setTrailForm({ ...trailForm, image_url: e.target.value })}
-          placeholder="https://..."
-        />
-      </div>
-      <div>
-        <Label>PDF — Visão Geral</Label>
+        <Label>Imagem de Capa</Label>
         <div className="mt-1">
-          {trailForm.overview_pdf_url && !overviewPdfFile && (
-            <div className="flex items-center gap-2 mb-2 p-2 border rounded bg-muted/30">
-              <FileText className="h-4 w-4 text-primary" />
-              <a href={trailForm.overview_pdf_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">PDF atual</a>
+          {trailForm.image_url && !coverImageFile && (
+            <div className="flex items-center gap-2 mb-2">
+              <img src={trailForm.image_url} alt="Capa atual" className="h-16 w-24 object-cover rounded border" />
+              <span className="text-xs text-muted-foreground">Imagem atual</span>
             </div>
           )}
-          {overviewPdfFile ? (
+          {coverImageFile ? (
             <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
               <FileText className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium flex-1 truncate">{overviewPdfFile.name}</span>
-              <Button variant="ghost" size="sm" onClick={() => setOverviewPdfFile(null)}>Remover</Button>
+              <span className="text-sm font-medium flex-1 truncate">{coverImageFile.name}</span>
+              <Button variant="ghost" size="sm" onClick={() => setCoverImageFile(null)}>Remover</Button>
             </div>
           ) : (
             <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
               <Upload className="h-6 w-6 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Clique para enviar PDF de Visão Geral</span>
-              <input type="file" accept=".pdf" onChange={(e) => { const file = e.target.files?.[0]; if (file) setOverviewPdfFile(file); }} className="sr-only" />
+              <span className="text-sm text-muted-foreground">Clique para enviar imagem de capa</span>
+              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) setCoverImageFile(file); }} className="sr-only" />
             </label>
           )}
         </div>
@@ -519,6 +527,34 @@ export function AdminAcademyManager() {
               </TabsContent>
               <TabsContent value="materiais">
                 <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
+                  {/* Overview PDF */}
+                  <div className="border rounded-lg p-4 space-y-2 bg-muted/20">
+                    <Label className="text-sm font-semibold">PDF — Visão Geral</Label>
+                    {trailForm.overview_pdf_url && !overviewPdfFile && (
+                      <div className="flex items-center gap-2 p-2 border rounded bg-muted/30">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <a href={trailForm.overview_pdf_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline truncate flex-1">PDF atual</a>
+                      </div>
+                    )}
+                    {overviewPdfFile ? (
+                      <div className="flex items-center gap-2 p-2 border rounded bg-muted/30">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span className="text-xs flex-1 truncate">{overviewPdfFile.name}</span>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setOverviewPdfFile(null)}>Remover</Button>
+                      </div>
+                    ) : (
+                      <label className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                        <Upload className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Clique para enviar PDF de Visão Geral</span>
+                        <input type="file" accept=".pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) setOverviewPdfFile(f); }} className="sr-only" />
+                      </label>
+                    )}
+                    <Button onClick={handleSaveTrail} size="sm" className="w-full" disabled={uploadingOverviewPdf || !overviewPdfFile}>
+                      {uploadingOverviewPdf && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      {uploadingOverviewPdf ? "Enviando..." : "Salvar Visão Geral"}
+                    </Button>
+                  </div>
+
                   {/* Existing materials list */}
                   {trailMaterials.length > 0 && (
                     <Table>
