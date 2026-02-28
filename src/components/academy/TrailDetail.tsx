@@ -108,6 +108,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
         description: m.description || undefined,
         category: undefined,
         pdf_url: m.file_url!,
+        thumbnail_url: m.thumbnail_url || undefined,
       }));
 
   const mindMapFiles = toPlaybookFiles(mindMapMaterials);
@@ -225,7 +226,12 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {videoMaterials.map((m) => (
-                <Card key={m.id} className="cursor-pointer hover:border-primary/50 transition-colors group" onClick={() => window.open(m.file_url || '', '_blank')}>
+                <Card key={m.id} className="cursor-pointer hover:border-primary/50 transition-colors group overflow-hidden" onClick={() => window.open(m.file_url || '', '_blank')}>
+                  {m.thumbnail_url && (
+                    <div className="aspect-[16/9] overflow-hidden">
+                      <img src={m.thumbnail_url} alt={m.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
                   <CardContent className="p-5 space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">

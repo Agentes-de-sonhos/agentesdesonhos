@@ -34,6 +34,7 @@ export interface PlaybookPDFFile {
   description?: string;
   category?: string;
   pdf_url: string;
+  thumbnail_url?: string;
 }
 
 export interface PlaybookBlock {
