@@ -43,6 +43,7 @@ import { MATERIAL_CATEGORIES } from "@/types/academy";
 import { PlaybookPDFViewer } from "@/components/playbook/PlaybookPDFViewer";
 import { PlaybookMindMapsViewer } from "@/components/playbook/PlaybookMindMapsViewer";
 import { SpeakersTab } from "./SpeakersTab";
+import { TabIntroBlock } from "./TabIntroBlock";
 import type { PlaybookPDFFile } from "@/types/playbook";
 
 interface TrailDetailProps {
@@ -194,6 +195,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Visão Geral Tab */}
         <TabsContent value="visao_geral">
+          <TabIntroBlock
+            icon={LayoutDashboard}
+            title="Visão Geral"
+            description={"Nesta aba você encontra infográficos-resumo da trilha, desenvolvidos para apresentar os principais conteúdos de forma visual, simples e amigável.\nEles servem como apoio ao estudo e revisão rápida do aprendizado.\nImportante: esse material tem caráter exclusivamente educacional e não deve ser utilizado como material de divulgação."}
+          />
           <PlaybookPDFViewer
             pdfUrl={trail.overview_pdf_url || undefined}
             title="Visão Geral"
@@ -203,16 +209,31 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Mapas Mentais Tab */}
         <TabsContent value="mapas_mentais">
+          <TabIntroBlock
+            icon={GitBranch}
+            title="Mapas Mentais"
+            description="Resumos visuais e estratégicos para facilitar a memorização dos conteúdos. Ideal para revisar rapidamente os pontos-chave antes de atender um cliente ou fechar uma venda."
+          />
           <PlaybookMindMapsViewer files={mindMapFiles} />
         </TabsContent>
 
         {/* Apresentações Tab */}
         <TabsContent value="apresentacoes">
+          <TabIntroBlock
+            icon={Presentation}
+            title="Apresentações"
+            description={"Nesta aba estão disponíveis os slides utilizados pelos palestrantes nos módulos da trilha, como material de apoio ao seu aprendizado.\nApenas as apresentações previamente autorizadas pelos palestrantes e parceiros do destino são disponibilizadas, respeitando diretrizes institucionais e políticas de uso de conteúdo."}
+          />
           <PlaybookMindMapsViewer files={presentationFiles} />
         </TabsContent>
 
         {/* Vídeos (Drive) Tab */}
         <TabsContent value="videos_drive">
+          <TabIntroBlock
+            icon={Play}
+            title="Vídeos"
+            description={"Nesta aba você encontrará conteúdos em vídeo organizados em duas seções: os vídeos apresentados nos módulos da trilha e vídeos complementares selecionados para aprofundar os temas, com explicações práticas e dicas de vendas.\nOs materiais tornam o aprendizado mais dinâmico e reforçam os conteúdos da trilha."}
+          />
           {videoMaterials.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="p-5 rounded-2xl bg-muted mb-5">
@@ -254,6 +275,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Vídeos (Módulos) Tab */}
         <TabsContent value="videos">
+          <TabIntroBlock
+            icon={Video}
+            title="Módulos"
+            description={"Aqui você acessa o conteúdo principal da trilha, organizado por empresas e parceiros do destino.\nApós assistir ao conteúdo e responder o quiz de cada módulo, o próximo será liberado automaticamente, permitindo que você avance de forma estruturada na trilha."}
+          />
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Módulos da Trilha</CardTitle>
@@ -322,6 +348,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Exam Tab */}
         <TabsContent value="exam">
+          <TabIntroBlock
+            icon={ClipboardCheck}
+            title="Prova Final"
+            description={"Avaliação destinada a validar o conhecimento adquirido ao longo da trilha de treinamento.\nAo ser aprovado, o aluno poderá emitir o certificado da trilha e avançar na jornada dentro da EducaTravel Academy."}
+          />
           <Card>
             <CardContent className="py-6">
               {!trail.allQuizzesPassed ? (
@@ -360,6 +391,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Materiais Complementares Tab */}
         <TabsContent value="materiais">
+          <TabIntroBlock
+            icon={FolderOpen}
+            title="Divulgação"
+            description={"Nesta aba você encontra materiais prontos para divulgação do destino, como lâminas, carrosséis, reels, artes para redes sociais e WhatsApp.\nTambém há links editáveis no Canva para personalização das lâminas de pacotes, permitindo que os agentes adaptem os conteúdos conforme sua estratégia de vendas."}
+          />
           {complementaryMaterials.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="p-5 rounded-2xl bg-muted mb-5">
@@ -388,6 +424,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Palestrantes Tab */}
         <TabsContent value="palestrantes">
+          <TabIntroBlock
+            icon={Users}
+            title="Palestrantes"
+            description={"Conheça os especialistas e parceiros que contribuíram com a trilha de treinamento, compartilhando experiências práticas, conhecimentos do mercado e insights valiosos sobre o destino.\nNesta aba também estarão disponíveis os contatos profissionais, como LinkedIn, WhatsApp e e-mail, para conexão direta com os palestrantes."}
+          />
           <SpeakersTab speakers={trailSpeakers} />
         </TabsContent>
       </Tabs>
