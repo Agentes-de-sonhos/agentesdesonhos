@@ -216,9 +216,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <TabsTrigger value="materiais" className="flex items-center gap-2">
             <FolderOpen className="h-4 w-4" /> Materiais de Divulgação
           </TabsTrigger>
-          <TabsTrigger value="exam" className="flex items-center gap-2">
-            <ClipboardCheck className="h-4 w-4" /> Prova Final
-          </TabsTrigger>
           <TabsTrigger value="palestrantes" className="flex items-center gap-2">
             <Users className="h-4 w-4" /> Palestrantes
           </TabsTrigger>
@@ -380,49 +377,49 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
               </ScrollArea>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        {/* Exam Tab */}
-        <TabsContent value="exam">
-          <TabIntroBlock
-            icon={ClipboardCheck}
-            title="Prova Final"
-            description={"Avaliação destinada a validar o conhecimento adquirido ao longo da trilha de treinamento.\nAo ser aprovado, o aluno poderá emitir o certificado da trilha e avançar na jornada dentro da EducaTravel Academy."}
-          />
-          <Card>
-            <CardContent className="py-6">
-              {!trail.allQuizzesPassed ? (
-                <div className="text-center py-8">
-                  <Lock className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-                  <p className="text-lg font-medium">Prova Final Bloqueada</p>
-                  <p className="text-muted-foreground">Complete todos os módulos (quizzes) para desbloquear a prova final.</p>
-                </div>
-              ) : trail.examPassed ? (
-                <div className="text-center py-8">
-                  <CheckCircle2 className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                  <p className="text-lg font-medium">Prova Final Aprovada! 🎉</p>
-                  <p className="text-muted-foreground">Sua melhor nota: <span className="font-bold text-primary">{bestExamScore(trail.id)}%</span></p>
-                </div>
-              ) : showExam ? (
-                <QuizPlayer
-                  questions={examQuestions}
-                  passingScore={75}
-                  title="Prova Final"
-                  onSubmit={(answers, score, passed) => {
-                    submitExam.mutate({ trailId: trail.id, answers, score, passed });
-                    if (passed) setShowExam(false);
-                  }}
-                />
-              ) : (
-                <div className="text-center py-8">
-                  <ClipboardCheck className="h-16 w-16 mx-auto text-primary/50 mb-4" />
-                  <p className="text-lg font-medium">Prova Final Disponível</p>
-                  <p className="text-muted-foreground mb-4">Nota mínima para aprovação: 75%</p>
-                  <Button onClick={() => setShowExam(true)}>Iniciar Prova Final</Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Prova Final - inline after modules */}
+          <div className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ClipboardCheck className="h-5 w-5 text-primary" /> Prova Final
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!trail.allQuizzesPassed ? (
+                  <div className="text-center py-8">
+                    <Lock className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
+                    <p className="text-lg font-medium">Prova Final Bloqueada</p>
+                    <p className="text-muted-foreground">Complete todos os módulos (quizzes) para desbloquear a prova final.</p>
+                  </div>
+                ) : trail.examPassed ? (
+                  <div className="text-center py-8">
+                    <CheckCircle2 className="h-16 w-16 mx-auto text-green-500 mb-4" />
+                    <p className="text-lg font-medium">Prova Final Aprovada! 🎉</p>
+                    <p className="text-muted-foreground">Sua melhor nota: <span className="font-bold text-primary">{bestExamScore(trail.id)}%</span></p>
+                  </div>
+                ) : showExam ? (
+                  <QuizPlayer
+                    questions={examQuestions}
+                    passingScore={75}
+                    title="Prova Final"
+                    onSubmit={(answers, score, passed) => {
+                      submitExam.mutate({ trailId: trail.id, answers, score, passed });
+                      if (passed) setShowExam(false);
+                    }}
+                  />
+                ) : (
+                  <div className="text-center py-8">
+                    <ClipboardCheck className="h-16 w-16 mx-auto text-primary/50 mb-4" />
+                    <p className="text-lg font-medium">Prova Final Disponível</p>
+                    <p className="text-muted-foreground mb-4">Nota mínima para aprovação: 75%</p>
+                    <Button onClick={() => setShowExam(true)}>Iniciar Prova Final</Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Materiais Complementares Tab */}
