@@ -84,8 +84,14 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [playbookTab, setPlaybookTab] = useState<string>(PLAYBOOK_TABS[0].key);
 
   // Find matching playbook for this trail's destination
-  const destinationSlug = trail.destination.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
-  const { destination: playbookDestination, sections: playbookSections, isLoading: playbookLoading } = usePlaybook(destinationSlug);
+  // First load all destinations to find the matching slug, since trail.destination may not match the playbook slug directly
+  const { destinations: allPlaybookDestinations } = usePlaybook();
+  const matchedSlug = allPlaybookDestinations.find((d) =>
+    d.name.toLowerCase() === trail.destination.toLowerCase() ||
+    d.name.toLowerCase().includes(trail.destination.toLowerCase()) ||
+    trail.destination.toLowerCase().includes(d.name.toLowerCase())
+  )?.slug;
+  const { destination: playbookDestination, sections: playbookSections } = usePlaybook(matchedSlug);
   const { upsertSection } = usePlaybookAdmin();
 
   const { data: quizQuestions = [] } = useQuizQuestions(showQuiz);
@@ -216,14 +222,14 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <TabsTrigger value="exam" className="flex items-center gap-2">
             <ClipboardCheck className="h-4 w-4" /> Prova Final
           </TabsTrigger>
+          <TabsTrigger value="palestrantes" className="flex items-center gap-2">
+            <Users className="h-4 w-4" /> Palestrantes
+          </TabsTrigger>
           {playbookDestination && (
             <TabsTrigger value="playbook" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" /> Playbook
             </TabsTrigger>
           )}
-          <TabsTrigger value="palestrantes" className="flex items-center gap-2">
-            <Users className="h-4 w-4" /> Palestrantes
-          </TabsTrigger>
         </TabsList>
 
         {/* Visão Geral Tab */}
@@ -455,6 +461,16 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           )}
         </TabsContent>
 
+        {/* Palestrantes Tab */}
+        <TabsContent value="palestrantes">
+          <TabIntroBlock
+            icon={Users}
+            title="Palestrantes"
+            description={"Conheça os especialistas e parceiros que contribuíram com a trilha de treinamento, compartilhando experiências práticas, conhecimentos do mercado e insights valiosos sobre o destino.\nNesta aba também estarão disponíveis os contatos profissionais, como LinkedIn, WhatsApp e e-mail, para conexão direta com os palestrantes."}
+          />
+          <SpeakersTab speakers={trailSpeakers} />
+        </TabsContent>
+
         {/* Playbook Tab */}
         {playbookDestination && (
           <TabsContent value="playbook">
@@ -473,16 +489,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             />
           </TabsContent>
         )}
-
-        {/* Palestrantes Tab */}
-        <TabsContent value="palestrantes">
-          <TabIntroBlock
-            icon={Users}
-            title="Palestrantes"
-            description={"Conheça os especialistas e parceiros que contribuíram com a trilha de treinamento, compartilhando experiências práticas, conhecimentos do mercado e insights valiosos sobre o destino.\nNesta aba também estarão disponíveis os contatos profissionais, como LinkedIn, WhatsApp e e-mail, para conexão direta com os palestrantes."}
-          />
-          <SpeakersTab speakers={trailSpeakers} />
-        </TabsContent>
       </Tabs>
 
       {/* Training Player Dialog */}
