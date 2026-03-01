@@ -833,6 +833,7 @@ export type Database = {
           name: string
           order_index: number
           overview_pdf_url: string | null
+          playbook_destination_id: string | null
           total_hours: number
           updated_at: string
         }
@@ -847,6 +848,7 @@ export type Database = {
           name: string
           order_index?: number
           overview_pdf_url?: string | null
+          playbook_destination_id?: string | null
           total_hours?: number
           updated_at?: string
         }
@@ -861,10 +863,19 @@ export type Database = {
           name?: string
           order_index?: number
           overview_pdf_url?: string | null
+          playbook_destination_id?: string | null
           total_hours?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "learning_trails_playbook_destination_id_fkey"
+            columns: ["playbook_destination_id"]
+            isOneToOne: false
+            referencedRelation: "playbook_destinations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       materials: {
         Row: {

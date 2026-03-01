@@ -1,0 +1,1 @@
+ALTER TABLE public.learning_trails ADD COLUMN playbook_destination_id uuid REFERENCES public.playbook_destinations(id) ON DELETE SET NULL;
