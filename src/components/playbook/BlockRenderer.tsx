@@ -54,12 +54,7 @@ function RichTextBlock({ block }: { block: PlaybookBlock }) {
       <CardContent className="pt-5 pb-4">
         {block.title && <h4 className="font-semibold text-foreground mb-3 text-lg">{block.title}</h4>}
         <div
-          className="prose prose-sm max-w-none text-foreground/85 
-            prose-headings:text-foreground prose-headings:font-bold
-            prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
-            prose-p:leading-relaxed prose-li:leading-relaxed
-            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-            prose-strong:text-foreground prose-em:text-foreground/80"
+          className="playbook-content max-w-none text-foreground/85"
           dangerouslySetInnerHTML={{ __html: block.content }}
         />
       </CardContent>

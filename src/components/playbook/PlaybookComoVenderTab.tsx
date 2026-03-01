@@ -79,12 +79,7 @@ function SectionCard({
               )}
               {intro && (
                 <div
-                  className="prose prose-sm max-w-none text-foreground/85 
-                    prose-headings:text-foreground prose-headings:font-bold
-                    prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
-                    prose-p:leading-relaxed prose-li:leading-relaxed
-                    prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                    prose-strong:text-foreground prose-em:text-foreground/80"
+                  className="playbook-content max-w-none text-foreground/85"
                   dangerouslySetInnerHTML={{ __html: intro }}
                 />
               )}
@@ -256,12 +251,7 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
           <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10">
             <CardContent className="pt-5 pb-4">
               <div
-                className="prose prose-sm max-w-none text-foreground/85 
-                  prose-headings:text-foreground prose-headings:font-bold
-                  prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
-                  prose-p:leading-relaxed prose-li:leading-relaxed
-                  prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                  prose-strong:text-foreground prose-em:text-foreground/80"
+                className="playbook-content max-w-none text-foreground/85"
                 dangerouslySetInnerHTML={{ __html: globalIntro }}
               />
             </CardContent>
