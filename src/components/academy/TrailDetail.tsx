@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,7 @@ import {
 import type { TrailWithProgress, Training, TrailMaterial } from "@/types/academy";
 import { useAcademy, useQuizQuestions, useExamQuestions, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { TrainingPlayer } from "./TrainingPlayer";
 import { QuizPlayer } from "./QuizPlayer";
@@ -45,6 +46,26 @@ import { PlaybookMindMapsViewer } from "@/components/playbook/PlaybookMindMapsVi
 import { SpeakersTab } from "./SpeakersTab";
 import { TabIntroBlock } from "./TabIntroBlock";
 import type { PlaybookPDFFile } from "@/types/playbook";
+import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
+import { PlaybookTabContent } from "@/components/playbook/PlaybookTabContent";
+import { PlaybookComoVenderTab } from "@/components/playbook/PlaybookComoVenderTab";
+import { PLAYBOOK_TABS } from "@/types/playbook";
+import { cn } from "@/lib/utils";
+import {
+  Target,
+  TrendingUp,
+  Plane,
+  Hotel,
+  Car,
+  Camera,
+  UtensilsCrossed,
+  Package,
+  Shield,
+  Route,
+  AlertTriangle,
+  Lightbulb,
+  CheckSquare,
+} from "lucide-react";
 
 interface TrailDetailProps {
   trail: TrailWithProgress;
@@ -54,11 +75,18 @@ interface TrailDetailProps {
 export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const { hasPassedQuiz, hasPassedExam, bestExamScore, submitQuiz, submitExam, generateCertificate, hasCertificate, certificates } = useAcademy();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
   const [showQuiz, setShowQuiz] = useState<string | null>(null);
   const [showExam, setShowExam] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [userName, setUserName] = useState<string>("Agente de Viagens");
+  const [playbookTab, setPlaybookTab] = useState<string>(PLAYBOOK_TABS[0].key);
+
+  // Find matching playbook for this trail's destination
+  const destinationSlug = trail.destination.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+  const { destination: playbookDestination, sections: playbookSections, isLoading: playbookLoading } = usePlaybook(destinationSlug);
+  const { upsertSection } = usePlaybookAdmin();
 
   const { data: quizQuestions = [] } = useQuizQuestions(showQuiz);
   const { data: examQuestions = [] } = useExamQuestions(showExam ? trail.id : null);
@@ -188,6 +216,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <TabsTrigger value="exam" className="flex items-center gap-2">
             <ClipboardCheck className="h-4 w-4" /> Prova Final
           </TabsTrigger>
+          {playbookDestination && (
+            <TabsTrigger value="playbook" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" /> Playbook
+            </TabsTrigger>
+          )}
           <TabsTrigger value="palestrantes" className="flex items-center gap-2">
             <Users className="h-4 w-4" /> Palestrantes
           </TabsTrigger>
@@ -422,6 +455,25 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           )}
         </TabsContent>
 
+        {/* Playbook Tab */}
+        {playbookDestination && (
+          <TabsContent value="playbook">
+            <TabIntroBlock
+              icon={BookOpen}
+              title={`Playbook de Vendas — ${playbookDestination.name}`}
+              description="Acesse o playbook completo do destino com estratégias de vendas, perfis de clientes, dicas de hospedagem, atrações e muito mais. Um guia prático e completo para vender este destino com confiança."
+            />
+            <PlaybookEmbedded
+              destination={playbookDestination}
+              sections={playbookSections}
+              isAdmin={isAdmin}
+              upsertSection={upsertSection}
+              activeTab={playbookTab}
+              setActiveTab={setPlaybookTab}
+            />
+          </TabsContent>
+        )}
+
         {/* Palestrantes Tab */}
         <TabsContent value="palestrantes">
           <TabIntroBlock
@@ -478,6 +530,91 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           {certificate && <CertificatePDF certificate={certificate} trail={trail} />}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+const playbookIconMap: Record<string, typeof Target> = {
+  LayoutDashboard, Target, TrendingUp, FileText, Plane, MapPin, Hotel, Car, Camera,
+  UtensilsCrossed, Package, Shield, Users, Route, AlertTriangle, Lightbulb, CheckSquare, GitBranch,
+};
+
+function PlaybookEmbedded({
+  destination,
+  sections,
+  isAdmin,
+  upsertSection,
+  activeTab,
+  setActiveTab,
+}: {
+  destination: any;
+  sections: any[];
+  isAdmin: boolean;
+  upsertSection: any;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}) {
+  const activeSection = sections.find((s: any) => s.tab_key === activeTab);
+  const activeTabData = PLAYBOOK_TABS.find((t) => t.key === activeTab)!;
+
+  const handleSaveSection = useCallback(
+    async (content: any) => {
+      if (!destination || !isAdmin) return;
+      await upsertSection.mutateAsync({
+        destination_id: destination.id,
+        tab_key: activeTab,
+        title: activeTabData?.label || activeTab,
+        content,
+        order_index: PLAYBOOK_TABS.findIndex((t) => t.key === activeTab),
+      });
+    },
+    [destination, activeTab, activeTabData, isAdmin, upsertSection]
+  );
+
+  return (
+    <div className="space-y-4 mt-4">
+      {/* Playbook Tab Navigation */}
+      <div className="flex flex-wrap gap-1.5">
+        {PLAYBOOK_TABS.map((tab) => {
+          const Icon = playbookIconMap[tab.icon] || Target;
+          const isActive = activeTab === tab.key;
+          const hasContent = sections.some((s: any) => s.tab_key === tab.key);
+
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 border",
+                isActive
+                  ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
+                  : hasContent
+                  ? "bg-card text-foreground border-border hover:border-primary/40 hover:bg-primary/5"
+                  : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
+              )}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Playbook Tab Content */}
+      <div className="min-h-[300px]">
+        {activeTab === 'como_vender' ? (
+          <PlaybookComoVenderTab
+            section={activeSection}
+            onSaveSection={isAdmin ? handleSaveSection : undefined}
+          />
+        ) : (
+          <PlaybookTabContent
+            section={activeSection}
+            tabLabel={activeTabData.label}
+            onSaveSection={isAdmin ? handleSaveSection : undefined}
+          />
+        )}
+      </div>
     </div>
   );
 }
