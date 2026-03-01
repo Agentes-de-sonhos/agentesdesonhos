@@ -201,9 +201,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <TabsTrigger value="videos" className="flex items-center gap-2">
             <Video className="h-4 w-4" /> Módulos
           </TabsTrigger>
-          <TabsTrigger value="visao_geral" className="flex items-center gap-2">
-            <LayoutDashboard className="h-4 w-4" /> Visão Geral
-          </TabsTrigger>
           <TabsTrigger value="mapas_mentais" className="flex items-center gap-2">
             <GitBranch className="h-4 w-4" /> Mapas Mentais
           </TabsTrigger>
@@ -226,19 +223,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           )}
         </TabsList>
 
-        {/* Visão Geral Tab */}
-        <TabsContent value="visao_geral">
-          <TabIntroBlock
-            icon={LayoutDashboard}
-            title="Visão Geral"
-            description={"Nesta aba você encontra infográficos-resumo da trilha, desenvolvidos para apresentar os principais conteúdos de forma visual, simples e amigável.\nEles servem como apoio ao estudo e revisão rápida do aprendizado.\nImportante: esse material tem caráter exclusivamente educacional e não deve ser utilizado como material de divulgação."}
-          />
-          <PlaybookPDFViewer
-            pdfUrl={trail.overview_pdf_url || undefined}
-            title="Visão Geral"
-            subtitle={`Resumo Estratégico — ${trail.name}`}
-          />
-        </TabsContent>
 
         {/* Mapas Mentais Tab */}
         <TabsContent value="mapas_mentais">
