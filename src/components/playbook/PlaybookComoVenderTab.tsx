@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -103,33 +103,6 @@ interface PlaybookComoVenderTabProps {
 
 export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVenderTabProps) {
   const [activeSection, setActiveSection] = useState<SectionId>("visao_comercial");
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Observe which section is in view
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible.length > 0) {
-          const id = visible[0].target.id.replace("cv-", "") as SectionId;
-          setActiveSection(id);
-        }
-      },
-      { rootMargin: "-100px 0px -60% 0px", threshold: 0.1 }
-    );
-
-    COMO_VENDER_SECTIONS.forEach((s) => {
-      const el = document.getElementById(`cv-${s.id}`);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, [section]);
-
-  const scrollTo = useCallback((id: SectionId) => {
-    const el = document.getElementById(`cv-${id}`);
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
 
   // Parse section intros keyed by section id
   const sectionIntros: Record<string, string | undefined> = {};
@@ -150,7 +123,6 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
   }
 
   const globalIntro = content?.intro;
-
   const hasAnyContent = globalIntro || allBlocks.length > 0 || Object.values(sectionIntros).some(Boolean);
 
   // Save handler for individual sub-sections
@@ -187,8 +159,11 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
     );
   }
 
+  // Find active section definition
+  const activeDef = COMO_VENDER_SECTIONS.find((s) => s.id === activeSection)!;
+
   return (
-    <div className="flex gap-6" ref={containerRef}>
+    <div className="flex gap-6">
       {/* ── Sidebar / Table of Contents ── */}
       <nav className="hidden lg:block w-56 shrink-0">
         <div className="sticky top-24 space-y-1">
@@ -203,7 +178,7 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
             return (
               <button
                 key={s.id}
-                onClick={() => scrollTo(s.id)}
+                onClick={() => setActiveSection(s.id)}
                 className={cn(
                   "flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-left",
                   isActive
@@ -229,7 +204,7 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
             return (
               <button
                 key={s.id}
-                onClick={() => scrollTo(s.id)}
+                onClick={() => setActiveSection(s.id)}
                 className={cn(
                   "px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-all",
                   isActive
@@ -244,30 +219,15 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
         </div>
       </div>
 
-      {/* ── Main content ── */}
-      <div className="flex-1 min-w-0 space-y-6 pb-20 lg:pb-6">
-        {/* Global intro */}
-        {globalIntro && (
-          <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10">
-            <CardContent className="pt-5 pb-4">
-              <div
-                className="playbook-content max-w-none text-foreground/85"
-                dangerouslySetInnerHTML={{ __html: globalIntro }}
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Render each section */}
-        {COMO_VENDER_SECTIONS.map((s) => (
-          <SectionCard
-            key={s.id}
-            sectionDef={s}
-            blocks={sectionBlocks[s.id] || []}
-            intro={sectionIntros[s.id]}
-            onSaveIntro={onSaveSection ? (html) => handleSaveSectionIntro(s.id, html) : undefined}
-          />
-        ))}
+      {/* ── Main content: only the active section ── */}
+      <div className="flex-1 min-w-0 pb-20 lg:pb-6">
+        <SectionCard
+          key={activeSection}
+          sectionDef={activeDef}
+          blocks={sectionBlocks[activeSection] || []}
+          intro={sectionIntros[activeSection]}
+          onSaveIntro={onSaveSection ? (html) => handleSaveSectionIntro(activeSection, html) : undefined}
+        />
       </div>
     </div>
   );
