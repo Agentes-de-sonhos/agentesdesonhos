@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { PlaybookSection, PlaybookBlock } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
+import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
 import { cn } from "@/lib/utils";
 
 /* ── Fixed section definitions ── */
@@ -39,10 +40,19 @@ function getSectionBlocks(blocks: PlaybookBlock[] | undefined, sectionId: string
   return blocks.filter((b) => (b as any).section === sectionId);
 }
 
-/* ── Section card ── */
-function SectionCard({ sectionDef, blocks, intro }: { sectionDef: (typeof COMO_VENDER_SECTIONS)[number]; blocks: PlaybookBlock[]; intro?: string }) {
+/* ── Section card with inline editing ── */
+function SectionCard({
+  sectionDef,
+  blocks,
+  intro,
+  onSaveIntro,
+}: {
+  sectionDef: (typeof COMO_VENDER_SECTIONS)[number];
+  blocks: PlaybookBlock[];
+  intro?: string;
+  onSaveIntro?: (html: string) => Promise<void>;
+}) {
   const Icon = sectionDef.icon;
-  const hasContent = intro || blocks.length > 0;
 
   return (
     <section id={`cv-${sectionDef.id}`} className="scroll-mt-28">
@@ -56,12 +66,21 @@ function SectionCard({ sectionDef, blocks, intro }: { sectionDef: (typeof COMO_V
         </div>
 
         <CardContent className="pt-5 pb-6 space-y-4">
-          {!hasContent && (
-            <p className="text-sm text-muted-foreground italic">Conteúdo em breve para esta seção.</p>
-          )}
-
-          {intro && (
-            <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-line">{intro}</p>
+          {onSaveIntro ? (
+            <PlaybookInlineEditor
+              content={intro || ""}
+              onSave={onSaveIntro}
+              placeholder="Conteúdo em breve para esta seção."
+            />
+          ) : (
+            <>
+              {!intro && blocks.length === 0 && (
+                <p className="text-sm text-muted-foreground italic">Conteúdo em breve para esta seção.</p>
+              )}
+              {intro && (
+                <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-line">{intro}</p>
+              )}
+            </>
           )}
 
           {blocks.map((block) => (
@@ -76,9 +95,10 @@ function SectionCard({ sectionDef, blocks, intro }: { sectionDef: (typeof COMO_V
 /* ── Main component ── */
 interface PlaybookComoVenderTabProps {
   section: PlaybookSection | undefined;
+  onSaveSection?: (content: any) => Promise<void>;
 }
 
-export function PlaybookComoVenderTab({ section }: PlaybookComoVenderTabProps) {
+export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVenderTabProps) {
   const [activeSection, setActiveSection] = useState<SectionId>("visao_comercial");
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -112,7 +132,6 @@ export function PlaybookComoVenderTab({ section }: PlaybookComoVenderTabProps) {
   const sectionIntros: Record<string, string | undefined> = {};
   const sectionBlocks: Record<string, PlaybookBlock[]> = {};
 
-  // Content structure: section.content may have a `sections` map or flat blocks with `section` field
   const content = section?.content as any;
   const allBlocks: PlaybookBlock[] = content?.blocks || [];
 
@@ -129,8 +148,27 @@ export function PlaybookComoVenderTab({ section }: PlaybookComoVenderTabProps) {
 
   const globalIntro = content?.intro;
 
-  // Check if there's any content at all
   const hasAnyContent = globalIntro || allBlocks.length > 0 || Object.values(sectionIntros).some(Boolean);
+
+  // Save handler for individual sub-sections
+  const handleSaveSectionIntro = useCallback(
+    async (sectionId: string, html: string) => {
+      if (!onSaveSection) return;
+      const currentContent = section?.content || {};
+      const updatedContent = {
+        ...currentContent,
+        sections: {
+          ...(currentContent as any).sections,
+          [sectionId]: {
+            ...((currentContent as any).sections?.[sectionId] || {}),
+            intro: html,
+          },
+        },
+      };
+      await onSaveSection(updatedContent);
+    },
+    [onSaveSection, section]
+  );
 
   if (!section && !hasAnyContent) {
     return (
@@ -221,6 +259,7 @@ export function PlaybookComoVenderTab({ section }: PlaybookComoVenderTabProps) {
             sectionDef={s}
             blocks={sectionBlocks[s.id] || []}
             intro={sectionIntros[s.id]}
+            onSaveIntro={onSaveSection ? (html) => handleSaveSectionIntro(s.id, html) : undefined}
           />
         ))}
       </div>

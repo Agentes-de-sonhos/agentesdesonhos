@@ -1,8 +1,7 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, useCallback, lazy } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft,
@@ -28,11 +27,9 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 
-const PlaybookMindMap = lazy(() => import("./PlaybookMindMap"));
-import { usePlaybook } from "@/hooks/usePlaybook";
+import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
+import { useUserRole } from "@/hooks/useUserRole";
 import { PlaybookTabContent } from "./PlaybookTabContent";
-// PlaybookPDFViewer and PlaybookMindMapsViewer moved to TrailDetail
-// PlaybookMindMapsViewer moved to TrailDetail
 import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
 import { PLAYBOOK_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
@@ -46,7 +43,27 @@ export default function PlaybookViewer() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { destination, sections, isLoading } = usePlaybook(slug);
+  const { upsertSection } = usePlaybookAdmin();
+  const { isAdmin } = useUserRole();
   const [activeTab, setActiveTab] = useState<string>(PLAYBOOK_TABS[0].key);
+
+  const activeSection = sections.find((s) => s.tab_key === activeTab);
+  const activeTabData = PLAYBOOK_TABS.find((t) => t.key === activeTab)!;
+
+  // Save handler for inline editing - only used by admins
+  const handleSaveSection = useCallback(
+    async (content: any) => {
+      if (!destination || !isAdmin) return;
+      await upsertSection.mutateAsync({
+        destination_id: destination.id,
+        tab_key: activeTab,
+        title: activeTabData?.label || activeTab,
+        content,
+        order_index: PLAYBOOK_TABS.findIndex((t) => t.key === activeTab),
+      });
+    },
+    [destination, activeTab, activeTabData, isAdmin, upsertSection]
+  );
 
   if (isLoading) {
     return (
@@ -75,9 +92,6 @@ export default function PlaybookViewer() {
       </DashboardLayout>
     );
   }
-
-  const activeSection = sections.find((s) => s.tab_key === activeTab);
-  const activeTabData = PLAYBOOK_TABS.find((t) => t.key === activeTab)!;
 
   return (
     <DashboardLayout>
@@ -133,11 +147,15 @@ export default function PlaybookViewer() {
         {/* Tab Content */}
         <div className="min-h-[400px]">
           {activeTab === 'como_vender' ? (
-            <PlaybookComoVenderTab section={activeSection} />
+            <PlaybookComoVenderTab
+              section={activeSection}
+              onSaveSection={isAdmin ? handleSaveSection : undefined}
+            />
           ) : (
             <PlaybookTabContent
               section={activeSection}
               tabLabel={activeTabData.label}
+              onSaveSection={isAdmin ? handleSaveSection : undefined}
             />
           )}
         </div>

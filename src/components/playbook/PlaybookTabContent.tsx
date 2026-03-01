@@ -2,14 +2,39 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import type { PlaybookSection } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
+import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
+import { useCallback } from "react";
 
 interface PlaybookTabContentProps {
   section: PlaybookSection | undefined;
   tabLabel: string;
+  onSaveSection?: (content: any) => Promise<void>;
 }
 
-export function PlaybookTabContent({ section, tabLabel }: PlaybookTabContentProps) {
+export function PlaybookTabContent({ section, tabLabel, onSaveSection }: PlaybookTabContentProps) {
+  const handleSaveIntro = useCallback(
+    async (html: string) => {
+      if (!onSaveSection) return;
+      const currentContent = section?.content || {};
+      await onSaveSection({ ...currentContent, intro: html });
+    },
+    [onSaveSection, section]
+  );
+
   if (!section || (!section.content.intro && (!section.content.blocks || section.content.blocks.length === 0))) {
+    // Show empty state but still allow admin to add content via inline editor
+    if (onSaveSection) {
+      return (
+        <div className="space-y-4">
+          <PlaybookInlineEditor
+            content=""
+            onSave={handleSaveIntro}
+            placeholder={`Clique em "Editar" para adicionar conteúdo à aba ${tabLabel}.`}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="p-4 rounded-full bg-muted mb-4">
@@ -25,14 +50,30 @@ export function PlaybookTabContent({ section, tabLabel }: PlaybookTabContentProp
 
   return (
     <div className="space-y-4">
-      {section.content.intro && (
+      {onSaveSection ? (
         <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10">
           <CardContent className="pt-5 pb-4">
-            <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-line">
-              {section.content.intro}
-            </p>
+            <PlaybookInlineEditor
+              content={section.content.intro || ""}
+              onSave={handleSaveIntro}
+              placeholder="Adicione uma introdução para esta aba..."
+            />
           </CardContent>
         </Card>
+      ) : (
+        section.content.intro && (
+          <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardContent className="pt-5 pb-4">
+              <div
+                className="prose prose-sm max-w-none text-foreground/80 
+                  prose-headings:text-foreground prose-headings:font-bold
+                  prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+                  prose-p:leading-relaxed prose-a:text-primary"
+                dangerouslySetInnerHTML={{ __html: section.content.intro }}
+              />
+            </CardContent>
+          </Card>
+        )
       )}
 
       {section.content.blocks?.map((block) => (
