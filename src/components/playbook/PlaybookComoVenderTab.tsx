@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 /* ── Fixed section definitions ── */
 const COMO_VENDER_SECTIONS = [
   { id: "visao_comercial", label: "Visão Comercial", icon: Eye },
-  { id: "perfil_passageiro", label: "Perfil do Passageiro", icon: Users },
+  { id: "perfil_passageiro", label: "Psicologia do Passageiro", icon: Users },
   { id: "posicionamento", label: "Posicionamento na Venda", icon: Target },
   { id: "metodo_consultivo", label: "Venda Consultiva", icon: MessageSquare },
   { id: "roteiro_estrategico", label: "Roteiro Estratégico de Venda", icon: List },
