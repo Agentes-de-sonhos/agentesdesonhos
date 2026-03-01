@@ -26,6 +26,7 @@ export interface PlaybookContent {
   blocks?: PlaybookBlock[];
   pdf_url?: string;
   pdf_files?: PlaybookPDFFile[];
+  sections?: Record<string, { intro?: string }>;
 }
 
 export interface PlaybookPDFFile {
@@ -37,12 +38,48 @@ export interface PlaybookPDFFile {
   thumbnail_url?: string;
 }
 
+export type PlaybookBlockType =
+  | 'text'
+  | 'tip'
+  | 'alert'
+  | 'strategy'
+  | 'checklist'
+  | 'highlight'
+  | 'rich_text'
+  | 'image'
+  | 'image_gallery'
+  | 'video'
+  | 'file_download'
+  | 'separator'
+  | 'custom_button'
+  | 'table'
+  | 'accordion';
+
 export interface PlaybookBlock {
   id: string;
-  type: 'text' | 'tip' | 'alert' | 'strategy' | 'checklist' | 'highlight';
+  type: PlaybookBlockType;
   title?: string;
   content: string;
   items?: string[];
+  // Extended fields for new block types
+  section?: string;
+  image_url?: string;
+  image_urls?: string[];
+  video_url?: string;
+  file_url?: string;
+  file_name?: string;
+  button_text?: string;
+  button_url?: string;
+  table_headers?: string[];
+  table_rows?: string[][];
+  accordion_items?: AccordionBlockItem[];
+  alignment?: 'left' | 'center' | 'right';
+}
+
+export interface AccordionBlockItem {
+  id: string;
+  title: string;
+  content: string;
 }
 
 export const PLAYBOOK_TABS = [
@@ -61,3 +98,21 @@ export const PLAYBOOK_TABS = [
 ] as const;
 
 export type PlaybookTabKey = typeof PLAYBOOK_TABS[number]['key'];
+
+export const BLOCK_TYPE_OPTIONS: { type: PlaybookBlockType; label: string; icon: string }[] = [
+  { type: 'rich_text', label: 'Texto Rico', icon: 'Type' },
+  { type: 'text', label: 'Texto Simples', icon: 'AlignLeft' },
+  { type: 'image', label: 'Imagem', icon: 'Image' },
+  { type: 'image_gallery', label: 'Galeria', icon: 'LayoutGrid' },
+  { type: 'video', label: 'Vídeo', icon: 'Play' },
+  { type: 'file_download', label: 'Arquivo p/ Download', icon: 'Download' },
+  { type: 'separator', label: 'Separador', icon: 'Minus' },
+  { type: 'custom_button', label: 'Botão', icon: 'MousePointer' },
+  { type: 'table', label: 'Tabela', icon: 'Table' },
+  { type: 'accordion', label: 'Lista Expansível', icon: 'ChevronDown' },
+  { type: 'tip', label: 'Dica', icon: 'Lightbulb' },
+  { type: 'alert', label: 'Alerta', icon: 'AlertTriangle' },
+  { type: 'strategy', label: 'Estratégia', icon: 'Target' },
+  { type: 'checklist', label: 'Checklist', icon: 'CheckSquare' },
+  { type: 'highlight', label: 'Destaque', icon: 'Star' },
+];

@@ -2,12 +2,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Lightbulb,
-  AlertTriangle,
-  Target,
-  Zap,
   Eye,
   Users,
+  Target,
   MessageSquare,
   TrendingUp,
   ShieldCheck,
@@ -15,10 +12,9 @@ import {
   Handshake,
   CheckSquare,
   List,
-  ChevronRight,
-  Info,
 } from "lucide-react";
 import type { PlaybookSection, PlaybookBlock } from "@/types/playbook";
+import { BlockRenderer } from "./BlockRenderer";
 import { cn } from "@/lib/utils";
 
 /* ── Fixed section definitions ── */
@@ -37,75 +33,10 @@ const COMO_VENDER_SECTIONS = [
 
 type SectionId = (typeof COMO_VENDER_SECTIONS)[number]["id"];
 
-/* ── Block type config ── */
-const blockStyleMap: Record<string, { icon: typeof Lightbulb; label: string; border: string; bg: string; iconColor: string }> = {
-  tip: { icon: Lightbulb, label: "Dica", border: "border-l-amber-500", bg: "bg-amber-50 dark:bg-amber-950/30", iconColor: "text-amber-600" },
-  alert: { icon: AlertTriangle, label: "Atenção", border: "border-l-red-500", bg: "bg-red-50 dark:bg-red-950/30", iconColor: "text-red-600" },
-  strategy: { icon: Target, label: "Estratégia", border: "border-l-primary", bg: "bg-sky-50 dark:bg-sky-950/30", iconColor: "text-primary" },
-  insight: { icon: Zap, label: "Insight", border: "border-l-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30", iconColor: "text-violet-600" },
-  highlight: { icon: Zap, label: "Destaque", border: "border-l-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30", iconColor: "text-violet-600" },
-  checklist: { icon: CheckSquare, label: "Checklist", border: "border-l-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/30", iconColor: "text-emerald-600" },
-  text: { icon: Info, label: "Informação", border: "border-l-border", bg: "bg-card", iconColor: "text-muted-foreground" },
-};
-
 /* ── Helpers ── */
 function getSectionBlocks(blocks: PlaybookBlock[] | undefined, sectionId: string): PlaybookBlock[] {
   if (!blocks) return [];
   return blocks.filter((b) => (b as any).section === sectionId);
-}
-
-/* ── Inline block renderer ── */
-function ContentBlock({ block }: { block: PlaybookBlock }) {
-  const style = blockStyleMap[block.type] || blockStyleMap.text;
-  const Icon = style.icon;
-
-  if (block.type === "text") {
-    return (
-      <div className="space-y-2">
-        {block.title && <h4 className="font-semibold text-foreground">{block.title}</h4>}
-        <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{block.content}</p>
-        {block.items && block.items.length > 0 && (
-          <ul className="mt-2 space-y-1.5">
-            {block.items.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className={cn("rounded-xl border-l-4 p-4 space-y-2", style.border, style.bg)}>
-      <div className="flex items-center gap-2">
-        <div className={cn("p-1.5 rounded-lg bg-background/80 shadow-sm", style.iconColor)}>
-          <Icon className="h-4 w-4" />
-        </div>
-        <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-semibold">
-          {style.label}
-        </Badge>
-        {block.title && <span className="font-semibold text-sm text-foreground">{block.title}</span>}
-      </div>
-      <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-line">{block.content}</p>
-      {block.items && block.items.length > 0 && (
-        <ul className="space-y-1.5 pt-1">
-          {block.items.map((item, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-foreground/70">
-              {block.type === "checklist" ? (
-                <CheckSquare className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
-              ) : (
-                <ChevronRight className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
-              )}
-              {item}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
 }
 
 /* ── Section card ── */
@@ -134,7 +65,7 @@ function SectionCard({ sectionDef, blocks, intro }: { sectionDef: (typeof COMO_V
           )}
 
           {blocks.map((block) => (
-            <ContentBlock key={block.id} block={block} />
+            <BlockRenderer key={block.id} block={block} />
           ))}
         </CardContent>
       </Card>
