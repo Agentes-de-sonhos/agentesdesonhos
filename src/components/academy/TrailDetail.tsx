@@ -183,7 +183,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             <Play className="h-4 w-4" /> Vídeos
           </TabsTrigger>
           <TabsTrigger value="materiais" className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4" /> Materiais Complementares
+            <FolderOpen className="h-4 w-4" /> Materiais de Divulgação
           </TabsTrigger>
           <TabsTrigger value="exam" className="flex items-center gap-2">
             <ClipboardCheck className="h-4 w-4" /> Prova Final
@@ -401,7 +401,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
               <div className="p-5 rounded-2xl bg-muted mb-5">
                 <FolderOpen className="h-12 w-12 text-muted-foreground/40" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-1">Materiais Complementares</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Materiais de Divulgação</h3>
               <p className="text-sm text-muted-foreground max-w-md">
                 Lâminas, PDFs e vídeos para baixar e compartilhar com seus contatos. Em breve estarão disponíveis aqui.
               </p>
@@ -410,7 +410,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-2">
                 <FolderOpen className="h-5 w-5 text-primary" />
-                <h3 className="text-base font-semibold">Materiais Complementares</h3>
+                <h3 className="text-base font-semibold">Materiais de Divulgação</h3>
                 <p className="text-sm text-muted-foreground">— Baixe e compartilhe com seus contatos</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
