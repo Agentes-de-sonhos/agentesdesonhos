@@ -24,11 +24,11 @@ const COMO_VENDER_SECTIONS = [
   { id: "perfil_passageiro", label: "Perfil do Passageiro", icon: Users },
   { id: "posicionamento", label: "Posicionamento na Venda", icon: Target },
   { id: "metodo_consultivo", label: "Venda Consultiva", icon: MessageSquare },
-  { id: "sete_passos", label: "7 Passos da Venda", icon: List },
-  { id: "argumentos", label: "Argumentos Prontos", icon: TrendingUp },
+  { id: "roteiro_estrategico", label: "Roteiro Estratégico de Venda", icon: List },
+  { id: "argumentos", label: "Argumentos de Venda", icon: TrendingUp },
   { id: "objecoes", label: "Objeções e Respostas", icon: ShieldCheck },
+  { id: "upsell", label: "Estratégias de Upsell", icon: Handshake },
   { id: "erros", label: "Erros que Perdem Vendas", icon: XCircle },
-  { id: "fechamento", label: "Estratégias de Fechamento", icon: Handshake },
   { id: "checklist", label: "Checklist Rápido", icon: CheckSquare },
 ] as const;
 
