@@ -83,15 +83,12 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [userName, setUserName] = useState<string>("Agente de Viagens");
   const [playbookTab, setPlaybookTab] = useState<string>(PLAYBOOK_TABS[0].key);
 
-  // Find matching playbook for this trail's destination
-  // First load all destinations to find the matching slug, since trail.destination may not match the playbook slug directly
+  // Find matching playbook for this trail using the linked playbook_destination_id
   const { destinations: allPlaybookDestinations } = usePlaybook();
-  const matchedSlug = allPlaybookDestinations.find((d) =>
-    d.name.toLowerCase() === trail.destination.toLowerCase() ||
-    d.name.toLowerCase().includes(trail.destination.toLowerCase()) ||
-    trail.destination.toLowerCase().includes(d.name.toLowerCase())
-  )?.slug;
-  const { destination: playbookDestination, sections: playbookSections } = usePlaybook(matchedSlug);
+  const linkedSlug = trail.playbook_destination_id
+    ? allPlaybookDestinations.find((d) => d.id === trail.playbook_destination_id)?.slug
+    : undefined;
+  const { destination: playbookDestination, sections: playbookSections } = usePlaybook(linkedSlug);
   const { upsertSection } = usePlaybookAdmin();
 
   const { data: quizQuestions = [] } = useQuizQuestions(showQuiz);

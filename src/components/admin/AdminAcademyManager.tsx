@@ -29,6 +29,7 @@ import { useAcademy, useAcademyAdmin, useTrailMaterials, useTrailSpeakers } from
 import { TrailTrainingsManager } from "./TrailTrainingsManager";
 import { TrailExamManager } from "./TrailExamManager";
 import { POPULAR_DESTINATIONS, MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
+import { usePlaybook } from "@/hooks/usePlaybook";
 import { ImageGalleryPicker } from "./ImageGalleryPicker";
 import {
   AlertDialog,
@@ -43,6 +44,7 @@ import {
 
 export function AdminAcademyManager() {
   const { trails } = useAcademy();
+  const { destinations: playbookDestinations } = usePlaybook();
   const { createTrail, updateTrail, deleteTrail, saveTrailMaterial, updateTrailMaterial, reorderTrailMaterials, deleteTrailMaterial, saveTrailSpeaker, updateTrailSpeaker, deleteTrailSpeaker } = useAcademyAdmin();
   
   const [trailDialogOpen, setTrailDialogOpen] = useState(false);
@@ -78,6 +80,7 @@ export function AdminAcademyManager() {
     destination: "",
     image_url: "",
     overview_pdf_url: "",
+    playbook_destination_id: "" as string,
     order_index: 0,
     is_active: true,
   });
@@ -91,6 +94,7 @@ export function AdminAcademyManager() {
         destination: trail.destination,
         image_url: trail.image_url || "",
         overview_pdf_url: (trail as any).overview_pdf_url || "",
+        playbook_destination_id: (trail as any).playbook_destination_id || "",
         order_index: trail.order_index,
         is_active: trail.is_active,
       });
@@ -102,6 +106,7 @@ export function AdminAcademyManager() {
         destination: "",
         image_url: "",
         overview_pdf_url: "",
+        playbook_destination_id: "",
         order_index: trails.length,
         is_active: true,
       });
@@ -148,7 +153,7 @@ export function AdminAcademyManager() {
         imageUrl = urlData.publicUrl;
       }
 
-      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl };
+      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
       if (editingTrail) {
         await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
       } else {
@@ -369,6 +374,24 @@ export function AdminAcademyManager() {
             </label>
           )}
         </div>
+      </div>
+      <div>
+        <Label>Playbook Vinculado</Label>
+        <Select
+          value={trailForm.playbook_destination_id}
+          onValueChange={(v) => setTrailForm({ ...trailForm, playbook_destination_id: v === "none" ? "" : v })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Nenhum playbook vinculado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Nenhum</SelectItem>
+            {playbookDestinations.map((pd) => (
+              <SelectItem key={pd.id} value={pd.id}>{pd.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground mt-1">Selecione o playbook de destino que será exibido na aba Playbook desta trilha.</p>
       </div>
       <div className="flex items-center gap-2">
         <Switch
