@@ -4,15 +4,29 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
+import Link from '@tiptap/extension-link';
+import Highlight from '@tiptap/extension-highlight';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Heading3,
   List, ListOrdered, Quote, Minus,
+  Link as LinkIcon, Highlighter, Palette, Unlink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+const COLORS = [
+  '#000000', '#374151', '#6B7280', '#EF4444', '#F97316', '#EAB308',
+  '#22C55E', '#14B8A6', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899',
+];
+
+const HIGHLIGHT_COLORS = [
+  '#FEF08A', '#BBF7D0', '#BFDBFE', '#E9D5FF', '#FECDD3', '#FED7AA',
+];
 
 interface PlaybookRichTextEditorProps {
   content: string;
@@ -20,6 +34,8 @@ interface PlaybookRichTextEditorProps {
 }
 
 export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEditorProps) {
+  const [linkUrl, setLinkUrl] = useState('');
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -29,6 +45,8 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       TextStyle,
       Color,
+      Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary underline' } }),
+      Highlight.configure({ multicolor: true }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -36,7 +54,7 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none min-h-[120px] px-3 py-2 focus:outline-none text-foreground',
+        class: 'prose prose-sm max-w-none min-h-[200px] px-4 py-3 focus:outline-none text-foreground prose-headings:text-foreground prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-li:leading-relaxed prose-a:text-primary',
       },
     },
   });
@@ -54,7 +72,7 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
       type="button"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", active && "bg-accent text-accent-foreground")}
+      className={cn("h-8 w-8", active && "bg-accent text-accent-foreground")}
       onClick={onClick}
       title={title}
     >
@@ -62,20 +80,31 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
     </Button>
   );
 
+  const addLink = () => {
+    if (linkUrl) {
+      editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run();
+      setLinkUrl('');
+    }
+  };
+
   return (
-    <div className="border rounded-lg overflow-hidden bg-background">
+    <div className="border rounded-lg overflow-hidden bg-background shadow-sm">
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-0.5 p-1.5 border-b bg-muted/30">
-        <ToolBtn active={editor.isActive('heading', { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} title="H1">
+      <div className="flex flex-wrap items-center gap-0.5 p-2 border-b bg-muted/30">
+        {/* Headings */}
+        <ToolBtn active={editor.isActive('heading', { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} title="Título H1">
           <Heading1 className="h-4 w-4" />
         </ToolBtn>
-        <ToolBtn active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title="H2">
+        <ToolBtn active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title="Subtítulo H2">
           <Heading2 className="h-4 w-4" />
         </ToolBtn>
-        <ToolBtn active={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} title="H3">
+        <ToolBtn active={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} title="Subtítulo H3">
           <Heading3 className="h-4 w-4" />
         </ToolBtn>
-        <div className="w-px h-7 bg-border mx-1" />
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Text formatting */}
         <ToolBtn active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} title="Negrito">
           <Bold className="h-4 w-4" />
         </ToolBtn>
@@ -88,7 +117,62 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
         <ToolBtn active={editor.isActive('strike')} onClick={() => editor.chain().focus().toggleStrike().run()} title="Tachado">
           <Strikethrough className="h-4 w-4" />
         </ToolBtn>
-        <div className="w-px h-7 bg-border mx-1" />
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Text color */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Cor do texto">
+              <Palette className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2" align="start">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Cor do texto</p>
+            <div className="grid grid-cols-6 gap-1">
+              {COLORS.map((color) => (
+                <button
+                  key={color}
+                  className="h-6 w-6 rounded-md border border-border hover:scale-110 transition-transform"
+                  style={{ backgroundColor: color }}
+                  onClick={() => editor.chain().focus().setColor(color).run()}
+                />
+              ))}
+            </div>
+            <Button size="sm" variant="ghost" className="w-full mt-2 text-xs h-7" onClick={() => editor.chain().focus().unsetColor().run()}>
+              Remover cor
+            </Button>
+          </PopoverContent>
+        </Popover>
+
+        {/* Highlight */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="ghost" size="icon" className={cn("h-8 w-8", editor.isActive('highlight') && "bg-accent")} title="Destaque">
+              <Highlighter className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2" align="start">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Cor de destaque</p>
+            <div className="grid grid-cols-6 gap-1">
+              {HIGHLIGHT_COLORS.map((color) => (
+                <button
+                  key={color}
+                  className="h-6 w-6 rounded-md border border-border hover:scale-110 transition-transform"
+                  style={{ backgroundColor: color }}
+                  onClick={() => editor.chain().focus().toggleHighlight({ color }).run()}
+                />
+              ))}
+            </div>
+            <Button size="sm" variant="ghost" className="w-full mt-2 text-xs h-7" onClick={() => editor.chain().focus().unsetHighlight().run()}>
+              Remover destaque
+            </Button>
+          </PopoverContent>
+        </Popover>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Alignment */}
         <ToolBtn active={editor.isActive({ textAlign: 'left' })} onClick={() => editor.chain().focus().setTextAlign('left').run()} title="Alinhar à esquerda">
           <AlignLeft className="h-4 w-4" />
         </ToolBtn>
@@ -98,8 +182,11 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
         <ToolBtn active={editor.isActive({ textAlign: 'right' })} onClick={() => editor.chain().focus().setTextAlign('right').run()} title="Alinhar à direita">
           <AlignRight className="h-4 w-4" />
         </ToolBtn>
-        <div className="w-px h-7 bg-border mx-1" />
-        <ToolBtn active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} title="Lista">
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Lists */}
+        <ToolBtn active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} title="Lista com marcadores">
           <List className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} title="Lista numerada">
@@ -108,9 +195,39 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
         <ToolBtn active={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} title="Citação">
           <Quote className="h-4 w-4" />
         </ToolBtn>
-        <ToolBtn onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Linha horizontal">
+        <ToolBtn onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Linha divisória">
           <Minus className="h-4 w-4" />
         </ToolBtn>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Link */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="ghost" size="icon" className={cn("h-8 w-8", editor.isActive('link') && "bg-accent")} title="Inserir link">
+              <LinkIcon className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-3" align="start">
+            <p className="text-xs font-medium text-muted-foreground mb-2">URL do link</p>
+            <div className="flex gap-2">
+              <Input
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://..."
+                className="h-8 text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && addLink()}
+              />
+              <Button size="sm" className="h-8" onClick={addLink}>OK</Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {editor.isActive('link') && (
+          <ToolBtn onClick={() => editor.chain().focus().unsetLink().run()} title="Remover link">
+            <Unlink className="h-4 w-4" />
+          </ToolBtn>
+        )}
       </div>
       
       {/* Editor */}
