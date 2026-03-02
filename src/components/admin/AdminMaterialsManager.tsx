@@ -453,6 +453,85 @@ export function AdminMaterialsManager() {
     }
   };
 
+  // Mutation to update all materials in a gallery at once
+  const updateGalleryMutation = useMutation({
+    mutationFn: async ({ ids, payload }: { ids: string[]; payload: Record<string, any> }) => {
+      const { error } = await supabase
+        .from("materials")
+        .update(payload)
+        .in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
+      toast({ title: "Sucesso", description: "Galeria atualizada" });
+      setEditGalleryOpen(false);
+    },
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível atualizar a galeria", variant: "destructive" });
+    },
+  });
+
+  const [editGalleryOpen, setEditGalleryOpen] = useState(false);
+  const [galleryForm, setGalleryForm] = useState({
+    title: "",
+    destination: "",
+    caption: "",
+    category: "",
+    supplier_id: "",
+    supplier_name: "",
+    is_permanent: false,
+  });
+
+  const handleEditGallery = () => {
+    if (!openGallery) return;
+    const first = openGallery.materials[0];
+    setGalleryForm({
+      title: openGallery.title,
+      destination: openGallery.destination || "",
+      caption: first.caption || "",
+      category: openGallery.category,
+      supplier_id: openGallery.supplier_id || "",
+      supplier_name: openGallery.supplier_name || "",
+      is_permanent: openGallery.is_permanent,
+    });
+    setEditGalleryOpen(true);
+  };
+
+  const handleSaveGallery = () => {
+    if (!openGallery) return;
+    const ids = openGallery.materials.map((m: any) => m.id);
+    // Re-title each material with sequential numbering
+    const updates = ids.map((id: string, index: number) => {
+      const title = ids.length > 1
+        ? `${galleryForm.title} (${index + 1})`
+        : galleryForm.title;
+      return supabase
+        .from("materials")
+        .update({
+          title,
+          destination: galleryForm.destination || null,
+          caption: galleryForm.caption || null,
+          category: galleryForm.category,
+          supplier_id: galleryForm.supplier_id || null,
+          is_permanent: galleryForm.is_permanent,
+        })
+        .eq("id", id);
+    });
+    Promise.all(updates).then((results) => {
+      const hasError = results.some(r => r.error);
+      if (hasError) {
+        toast({ title: "Erro", description: "Não foi possível atualizar alguns materiais", variant: "destructive" });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
+        queryClient.invalidateQueries({ queryKey: ["materials"] });
+        toast({ title: "Sucesso", description: "Galeria atualizada" });
+      }
+      setEditGalleryOpen(false);
+    });
+  };
+
   // --- Render gallery detail view ---
   if (openGallery) {
     return (
@@ -469,24 +548,14 @@ export function AdminMaterialsManager() {
                 {openGallery.is_permanent && <Pin className="h-4 w-4 text-primary" />}
               </CardTitle>
               <CardDescription>
-                {openGallery.supplier_name || "Sem fornecedor"} • {openGallery.materials.length} arquivo{openGallery.materials.length > 1 ? "s" : ""}
+                {openGallery.supplier_name || "Sem fornecedor"} • {openGallery.category} • {openGallery.materials.length} arquivo{openGallery.materials.length > 1 ? "s" : ""}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={openGallery.is_permanent}
-                  onCheckedChange={(checked) => {
-                    const ids = openGallery.materials.map((m: any) => m.id);
-                    togglePermanentMutation.mutate({ ids, is_permanent: !!checked });
-                  }}
-                />
-                <Label className="text-sm cursor-pointer">Permanente</Label>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => setAddFilesOpen(true)}
-              >
+              <Button size="sm" variant="outline" onClick={handleEditGallery}>
+                <Pencil className="h-4 w-4 mr-1" /> Editar Galeria
+              </Button>
+              <Button size="sm" onClick={() => setAddFilesOpen(true)}>
                 <Plus className="h-4 w-4 mr-1" /> Adicionar
               </Button>
               <Button
@@ -498,12 +567,69 @@ export function AdminMaterialsManager() {
                   }
                 }}
               >
-                <Trash2 className="h-4 w-4 mr-1" /> Excluir Galeria
+                <Trash2 className="h-4 w-4 mr-1" /> Excluir
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
+          {/* Edit gallery dialog */}
+          <Dialog open={editGalleryOpen} onOpenChange={setEditGalleryOpen}>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Editar Galeria</DialogTitle>
+                <DialogDescription>Altere os dados da galeria. As mudanças serão aplicadas a todos os arquivos.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Título da Galeria *</Label>
+                  <Input value={galleryForm.title} onChange={(e) => setGalleryForm(prev => ({ ...prev, title: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Destino</Label>
+                  <Input value={galleryForm.destination} onChange={(e) => setGalleryForm(prev => ({ ...prev, destination: e.target.value }))} placeholder="Ex: Paris, Maldivas..." />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Fornecedor</Label>
+                    <SupplierCombobox
+                      suppliers={suppliers || []}
+                      value={galleryForm.supplier_id}
+                      onChange={(supplierId, supplierName) => setGalleryForm(prev => ({ ...prev, supplier_id: supplierId, supplier_name: supplierName }))}
+                      category={galleryForm.category}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Categoria *</Label>
+                    <Select value={galleryForm.category} onValueChange={(value) => setGalleryForm(prev => ({ ...prev, category: value }))}>
+                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Legenda (opcional)</Label>
+                  <Textarea
+                    value={galleryForm.caption}
+                    onChange={(e) => setGalleryForm(prev => ({ ...prev, caption: e.target.value }))}
+                    placeholder="Texto da legenda que aparecerá no feed social..."
+                    rows={4}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox checked={galleryForm.is_permanent} onCheckedChange={(checked) => setGalleryForm(prev => ({ ...prev, is_permanent: !!checked }))} />
+                  <Label className="cursor-pointer">Manter permanentemente (não excluir após 7 dias)</Label>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setEditGalleryOpen(false)}>Cancelar</Button>
+                <Button onClick={handleSaveGallery}>Salvar Galeria</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           {/* Add files dialog */}
           <Dialog open={addFilesOpen} onOpenChange={setAddFilesOpen}>
             <DialogContent className="max-w-lg">
@@ -575,8 +701,8 @@ export function AdminMaterialsManager() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Editar Material</DialogTitle>
-              <DialogDescription>Atualize as informações do material</DialogDescription>
+              <DialogTitle>Editar Arquivo</DialogTitle>
+              <DialogDescription>Atualize as informações deste arquivo individual</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -603,19 +729,6 @@ export function AdminMaterialsManager() {
                   <Input value={form.file_url} onChange={(e) => setForm((prev) => ({ ...prev, file_url: e.target.value }))} />
                 </div>
               )}
-              <div className="space-y-2">
-                <Label>Legenda (opcional)</Label>
-                <Textarea
-                  value={form.caption}
-                  onChange={(e) => setForm((prev) => ({ ...prev, caption: e.target.value }))}
-                  placeholder="Texto da legenda que aparecerá no feed social..."
-                  rows={3}
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox checked={form.is_permanent} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_permanent: !!checked }))} />
-                <Label className="cursor-pointer">Manter permanentemente (não excluir após 7 dias)</Label>
-              </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={handleClose}>Cancelar</Button>
                 <Button type="submit" disabled={isPending}>
