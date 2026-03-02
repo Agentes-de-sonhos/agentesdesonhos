@@ -1,0 +1,1 @@
+ALTER TABLE public.materials ADD COLUMN is_permanent boolean NOT NULL DEFAULT false;

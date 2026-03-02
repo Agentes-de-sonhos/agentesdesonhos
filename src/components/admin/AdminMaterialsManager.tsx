@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -28,6 +29,12 @@ import {
   Trash2,
   Loader2,
   FileText,
+  FolderOpen,
+  ArrowLeft,
+  Image,
+  Video,
+  FileIcon,
+  Pin,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -67,6 +74,7 @@ interface MaterialForm {
   video_url: string;
   thumbnail_url: string;
   is_active: boolean;
+  is_permanent: boolean;
   uploadedFiles: UploadedFile[];
 }
 
@@ -81,13 +89,47 @@ const initialForm: MaterialForm = {
   video_url: "",
   thumbnail_url: "",
   is_active: true,
+  is_permanent: false,
   uploadedFiles: [],
 };
+
+// Normalize title for grouping
+function normalizeTitle(title: string): string {
+  return title
+    .trim()
+    .replace(/\s*\(\d+\)\s*$/, '')
+    .replace(/\s*-\s*\d+\s*$/, '')
+    .replace(/\s+\d+\s*$/, '')
+    .trim()
+    .toLowerCase();
+}
+
+function getDisplayTitle(title: string): string {
+  return title
+    .trim()
+    .replace(/\s*\(\d+\)\s*$/, '')
+    .replace(/\s*-\s*\d+\s*$/, '')
+    .replace(/\s+\d+\s*$/, '')
+    .trim();
+}
+
+interface MaterialGalleryGroup {
+  key: string;
+  title: string;
+  supplier_name: string | null;
+  supplier_id: string | null;
+  category: string;
+  destination: string | null;
+  is_permanent: boolean;
+  materials: any[];
+  thumbnail: string | null;
+}
 
 export function AdminMaterialsManager() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MaterialForm>(initialForm);
+  const [openGalleryKey, setOpenGalleryKey] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -122,6 +164,46 @@ export function AdminMaterialsManager() {
     },
   });
 
+  // Group materials into galleries
+  const galleries = useMemo<MaterialGalleryGroup[]>(() => {
+    if (!materials) return [];
+    const map = new Map<string, any[]>();
+    materials.forEach((m) => {
+      const norm = normalizeTitle(m.title);
+      const key = `${norm}|${m.supplier_id || 'none'}|${(m.destination || '').trim().toLowerCase()}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(m);
+    });
+    return Array.from(map.entries()).map(([key, mats]) => {
+      const first = mats[0];
+      let thumb: string | null = null;
+      for (const m of mats) {
+        if (m.thumbnail_url) { thumb = m.thumbnail_url; break; }
+        if (m.material_type === "Imagem" && m.file_url) { thumb = m.file_url; break; }
+      }
+      return {
+        key,
+        title: getDisplayTitle(first.title),
+        supplier_name: first.trade_suppliers?.name || null,
+        supplier_id: first.supplier_id || null,
+        category: first.category,
+        destination: first.destination || null,
+        is_permanent: mats.some((m: any) => m.is_permanent),
+        materials: mats,
+        thumbnail: thumb,
+      };
+    }).sort((a, b) => {
+      const aDate = Math.max(...a.materials.map((m: any) => new Date(m.created_at).getTime()));
+      const bDate = Math.max(...b.materials.map((m: any) => new Date(m.created_at).getTime()));
+      return bDate - aDate;
+    });
+  }, [materials]);
+
+  const openGallery = useMemo(() => {
+    if (!openGalleryKey) return null;
+    return galleries.find(g => g.key === openGalleryKey) || null;
+  }, [openGalleryKey, galleries]);
+
   // Mutation for saving single material (edit mode)
   const saveSingleMutation = useMutation({
     mutationFn: async (data: MaterialForm) => {
@@ -135,6 +217,7 @@ export function AdminMaterialsManager() {
         video_url: data.video_url || null,
         thumbnail_url: data.thumbnail_url || null,
         is_active: data.is_active,
+        is_permanent: data.is_permanent,
       };
 
       if (editingId) {
@@ -148,23 +231,15 @@ export function AdminMaterialsManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
       queryClient.invalidateQueries({ queryKey: ["materials"] });
-      toast({
-        title: "Sucesso",
-        description: "Material atualizado",
-      });
+      toast({ title: "Sucesso", description: "Material atualizado" });
       handleClose();
     },
-    onError: (error) => {
-      console.error("Error saving material:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível salvar o material",
-        variant: "destructive",
-      });
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível salvar o material", variant: "destructive" });
     },
   });
 
-  // Mutation for creating multiple materials (new mode with multiple files)
+  // Mutation for creating multiple materials (new gallery)
   const saveMultipleMutation = useMutation({
     mutationFn: async (data: MaterialForm) => {
       const basePayload = {
@@ -172,9 +247,9 @@ export function AdminMaterialsManager() {
         category: data.category,
         destination: data.destination || null,
         is_active: data.is_active,
+        is_permanent: data.is_permanent,
       };
 
-      // For video type
       if (data.material_type === "Vídeo") {
         const { error } = await supabase.from("materials").insert({
           ...basePayload,
@@ -188,9 +263,7 @@ export function AdminMaterialsManager() {
         return 1;
       }
 
-      // For files
       if (data.uploadedFiles.length === 0) {
-        // Single URL input (legacy)
         const { error } = await supabase.from("materials").insert({
           ...basePayload,
           material_type: data.material_type,
@@ -203,19 +276,14 @@ export function AdminMaterialsManager() {
         return 1;
       }
 
-      // Multiple files - create one material per file
       const materialsToInsert = data.uploadedFiles.map((file, index) => {
-        // Determine material type based on file
         let materialType = data.material_type;
         if (!materialType || materialType === "") {
           materialType = file.type === "pdf" ? "PDF" : "Imagem";
         }
-
-        // Generate title for each file
         const title = data.uploadedFiles.length > 1
           ? `${data.title} (${index + 1})`
           : data.title;
-
         return {
           ...basePayload,
           material_type: materialType,
@@ -233,19 +301,43 @@ export function AdminMaterialsManager() {
     onSuccess: (count) => {
       queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
       queryClient.invalidateQueries({ queryKey: ["materials"] });
-      toast({
-        title: "Sucesso",
-        description: `${count} material${count > 1 ? "is" : ""} criado${count > 1 ? "s" : ""}`,
-      });
+      toast({ title: "Sucesso", description: `${count} material${count! > 1 ? "is" : ""} criado${count! > 1 ? "s" : ""}` });
       handleClose();
     },
-    onError: (error) => {
-      console.error("Error saving materials:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível salvar os materiais",
-        variant: "destructive",
-      });
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível salvar os materiais", variant: "destructive" });
+    },
+  });
+
+  // Add files to existing gallery
+  const addToGalleryMutation = useMutation({
+    mutationFn: async ({ gallery, files }: { gallery: MaterialGalleryGroup; files: UploadedFile[] }) => {
+      const first = gallery.materials[0];
+      const newMaterials = files.map((file, index) => ({
+        supplier_id: first.supplier_id || null,
+        category: first.category,
+        destination: first.destination || null,
+        is_active: first.is_active,
+        is_permanent: first.is_permanent,
+        material_type: file.type === "pdf" ? "PDF" : "Imagem",
+        title: `${gallery.title} (${gallery.materials.length + index + 1})`,
+        file_url: file.url,
+        video_url: null,
+        thumbnail_url: null,
+      }));
+      const { error } = await supabase.from("materials").insert(newMaterials);
+      if (error) throw error;
+      return newMaterials.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
+      toast({ title: "Sucesso", description: `${count} arquivo${count > 1 ? "s" : ""} adicionado${count > 1 ? "s" : ""}` });
+      setAddFilesOpen(false);
+      setAddFiles([]);
+    },
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível adicionar arquivos", variant: "destructive" });
     },
   });
 
@@ -257,17 +349,40 @@ export function AdminMaterialsManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
       queryClient.invalidateQueries({ queryKey: ["materials"] });
-      toast({
-        title: "Sucesso",
-        description: "Material excluído",
-      });
+      toast({ title: "Sucesso", description: "Material excluído" });
     },
     onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir o material",
-        variant: "destructive",
-      });
+      toast({ title: "Erro", description: "Não foi possível excluir o material", variant: "destructive" });
+    },
+  });
+
+  const deleteGalleryMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("materials").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
+      setOpenGalleryKey(null);
+      toast({ title: "Sucesso", description: "Galeria excluída" });
+    },
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível excluir a galeria", variant: "destructive" });
+    },
+  });
+
+  const togglePermanentMutation = useMutation({
+    mutationFn: async ({ ids, is_permanent }: { ids: string[]; is_permanent: boolean }) => {
+      const { error } = await supabase
+        .from("materials")
+        .update({ is_permanent })
+        .in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
     },
   });
 
@@ -285,6 +400,9 @@ export function AdminMaterialsManager() {
     },
   });
 
+  const [addFilesOpen, setAddFilesOpen] = useState(false);
+  const [addFiles, setAddFiles] = useState<UploadedFile[]>([]);
+
   const handleEdit = (material: any) => {
     setEditingId(material.id);
     setForm({
@@ -298,6 +416,7 @@ export function AdminMaterialsManager() {
       video_url: material.video_url || "",
       thumbnail_url: material.thumbnail_url || "",
       is_active: material.is_active,
+      is_permanent: material.is_permanent ?? false,
       uploadedFiles: [],
     });
     setIsOpen(true);
@@ -311,7 +430,6 @@ export function AdminMaterialsManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (editingId) {
       saveSingleMutation.mutate(form);
     } else {
@@ -321,6 +439,183 @@ export function AdminMaterialsManager() {
 
   const isPending = saveSingleMutation.isPending || saveMultipleMutation.isPending;
 
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "Imagem": return <Image className="h-4 w-4" />;
+      case "Vídeo": return <Video className="h-4 w-4" />;
+      default: return <FileIcon className="h-4 w-4" />;
+    }
+  };
+
+  // --- Render gallery detail view ---
+  if (openGallery) {
+    return (
+      <Card className="border-0 shadow-md">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setOpenGalleryKey(null)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex-1">
+              <CardTitle className="flex items-center gap-2">
+                <FolderOpen className="h-5 w-5" />
+                {openGallery.title}
+                {openGallery.is_permanent && <Pin className="h-4 w-4 text-primary" />}
+              </CardTitle>
+              <CardDescription>
+                {openGallery.supplier_name || "Sem fornecedor"} • {openGallery.materials.length} arquivo{openGallery.materials.length > 1 ? "s" : ""}
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={openGallery.is_permanent}
+                  onCheckedChange={(checked) => {
+                    const ids = openGallery.materials.map((m: any) => m.id);
+                    togglePermanentMutation.mutate({ ids, is_permanent: !!checked });
+                  }}
+                />
+                <Label className="text-sm cursor-pointer">Permanente</Label>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => setAddFilesOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Adicionar
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => {
+                  if (confirm("Excluir toda a galeria?")) {
+                    deleteGalleryMutation.mutate(openGallery.materials.map((m: any) => m.id));
+                  }
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-1" /> Excluir Galeria
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Add files dialog */}
+          <Dialog open={addFilesOpen} onOpenChange={setAddFilesOpen}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Adicionar Arquivos</DialogTitle>
+                <DialogDescription>Adicione mais arquivos a esta galeria</DialogDescription>
+              </DialogHeader>
+              <MultiFileUpload
+                files={addFiles}
+                onFilesChange={setAddFiles}
+                disabled={addToGalleryMutation.isPending}
+              />
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setAddFilesOpen(false); setAddFiles([]); }}>Cancelar</Button>
+                <Button
+                  disabled={addFiles.length === 0 || addToGalleryMutation.isPending}
+                  onClick={() => addToGalleryMutation.mutate({ gallery: openGallery, files: addFiles })}
+                >
+                  {addToGalleryMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Adicionar ({addFiles.length})
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Grid of files */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {openGallery.materials.map((material: any) => (
+              <div key={material.id} className="group relative rounded-lg border bg-card overflow-hidden">
+                <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
+                  {material.material_type === "Imagem" && material.file_url ? (
+                    <img src={material.file_url} alt={material.title} className="w-full h-full object-cover" />
+                  ) : material.thumbnail_url ? (
+                    <img src={material.thumbnail_url} alt={material.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                      {getTypeIcon(material.material_type)}
+                      <span className="text-xs">{material.material_type}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-2">
+                  <p className="text-xs truncate font-medium">{material.title}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <Badge variant="secondary" className="text-[10px] h-5">{material.material_type}</Badge>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEdit(material)}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => {
+                          if (confirm("Excluir este arquivo?")) deleteMutation.mutate(material.id);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+
+        {/* Edit single material dialog (reused) */}
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Editar Material</DialogTitle>
+              <DialogDescription>Atualize as informações do material</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Título *</Label>
+                <Input value={form.title} onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))} required />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo de Material *</Label>
+                <Select value={form.material_type} onValueChange={(value) => setForm((prev) => ({ ...prev, material_type: value }))}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {MATERIAL_TYPES.map((type) => (<SelectItem key={type} value={type}>{type}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {form.material_type === "Vídeo" ? (
+                <div className="space-y-2">
+                  <Label>Link do Vídeo</Label>
+                  <Input value={form.video_url} onChange={(e) => setForm((prev) => ({ ...prev, video_url: e.target.value }))} placeholder="https://youtube.com/..." />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label>URL do Arquivo</Label>
+                  <Input value={form.file_url} onChange={(e) => setForm((prev) => ({ ...prev, file_url: e.target.value }))} />
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Checkbox checked={form.is_permanent} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_permanent: !!checked }))} />
+                <Label className="cursor-pointer">Manter permanentemente (não excluir após 7 dias)</Label>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleClose}>Cancelar</Button>
+                <Button type="submit" disabled={isPending}>
+                  {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Salvar
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </Card>
+    );
+  }
+
+  // --- Render galleries list view ---
   return (
     <Card className="border-0 shadow-md">
       <CardHeader>
@@ -331,56 +626,44 @@ export function AdminMaterialsManager() {
               Gerenciar Materiais
             </CardTitle>
             <CardDescription>
-              Adicione e gerencie materiais de divulgação
+              Materiais organizados em galerias
             </CardDescription>
           </div>
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <Dialog open={isOpen && !editingId} onOpenChange={(open) => { if (!open) handleClose(); else { setForm(initialForm); setIsOpen(true); } }}>
             <DialogTrigger asChild>
-              <Button onClick={() => setForm(initialForm)}>
+              <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Novo Material
+                Nova Galeria
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>
-                  {editingId ? "Editar Material" : "Novo Material"}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingId 
-                    ? "Atualize as informações do material" 
-                    : "Preencha as informações e faça upload de um ou mais arquivos"}
-                </DialogDescription>
+                <DialogTitle>Nova Galeria</DialogTitle>
+                <DialogDescription>Crie uma galeria com um ou mais arquivos</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Título *</Label>
+                  <Label>Título da Galeria *</Label>
                   <Input
                     value={form.title}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, title: e.target.value }))
-                    }
-                    placeholder="Nome do material"
+                    onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                    placeholder="Nome da galeria"
                     required
                   />
-                  {!editingId && form.uploadedFiles.length > 1 && (
+                  {form.uploadedFiles.length > 1 && (
                     <p className="text-xs text-muted-foreground">
                       Cada arquivo terá o título com numeração sequencial
                     </p>
                   )}
                 </div>
-
                 <div className="space-y-2">
                   <Label>Destino</Label>
                   <Input
                     value={form.destination}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, destination: e.target.value }))
-                    }
+                    onChange={(e) => setForm((prev) => ({ ...prev, destination: e.target.value }))}
                     placeholder="Ex: Paris, Maldivas, Caribe..."
                   />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Fornecedor</Label>
@@ -388,104 +671,57 @@ export function AdminMaterialsManager() {
                       suppliers={suppliers || []}
                       value={form.supplier_id}
                       onChange={(supplierId, supplierName) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          supplier_id: supplierId,
-                          supplier_name: supplierName,
-                        }))
+                        setForm((prev) => ({ ...prev, supplier_id: supplierId, supplier_name: supplierName }))
                       }
                       category={form.category}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Categoria *</Label>
-                    <Select
-                      value={form.category}
-                      onValueChange={(value) =>
-                        setForm((prev) => ({ ...prev, category: value }))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
+                    <Select value={form.category} onValueChange={(value) => setForm((prev) => ({ ...prev, category: value }))}>
+                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                       <SelectContent>
-                        {CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
-                          </SelectItem>
-                        ))}
+                        {CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <Label>Tipo de Material *</Label>
-                  <Select
-                    value={form.material_type}
-                    onValueChange={(value) =>
-                      setForm((prev) => ({ ...prev, material_type: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
+                  <Select value={form.material_type} onValueChange={(value) => setForm((prev) => ({ ...prev, material_type: value }))}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
-                      {MATERIAL_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
+                      {MATERIAL_TYPES.map((type) => (<SelectItem key={type} value={type}>{type}</SelectItem>))}
                     </SelectContent>
                   </Select>
                 </div>
-
                 {form.material_type === "Vídeo" ? (
                   <div className="space-y-2">
                     <Label>Link do Vídeo</Label>
-                    <Input
-                      value={form.video_url}
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, video_url: e.target.value }))
-                      }
-                      placeholder="https://youtube.com/..."
-                    />
-                  </div>
-                ) : editingId ? (
-                  // Edit mode - single file URL
-                  <div className="space-y-2">
-                    <Label>URL do Arquivo</Label>
-                    <Input
-                      value={form.file_url}
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, file_url: e.target.value }))
-                      }
-                      placeholder="URL do arquivo"
-                    />
+                    <Input value={form.video_url} onChange={(e) => setForm((prev) => ({ ...prev, video_url: e.target.value }))} placeholder="https://youtube.com/..." />
                   </div>
                 ) : (
-                  // Create mode - multiple file upload
                   <div className="space-y-2">
                     <Label>Arquivos</Label>
                     <MultiFileUpload
                       files={form.uploadedFiles}
-                      onFilesChange={(files) =>
-                        setForm((prev) => ({ ...prev, uploadedFiles: files }))
-                      }
+                      onFilesChange={(files) => setForm((prev) => ({ ...prev, uploadedFiles: files }))}
                       disabled={isPending}
                     />
                   </div>
                 )}
-
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={form.is_permanent}
+                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_permanent: !!checked }))}
+                  />
+                  <Label className="cursor-pointer">Manter permanentemente (não excluir após 7 dias)</Label>
+                </div>
                 <DialogFooter className="gap-2 sm:gap-0">
-                  <Button type="button" variant="outline" onClick={handleClose}>
-                    Cancelar
-                  </Button>
+                  <Button type="button" variant="outline" onClick={handleClose}>Cancelar</Button>
                   <Button type="submit" disabled={isPending}>
-                    {isPending && (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    )}
-                    {editingId ? "Salvar" : `Criar${form.uploadedFiles.length > 1 ? ` (${form.uploadedFiles.length})` : ""}`}
+                    {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Criar{form.uploadedFiles.length > 1 ? ` (${form.uploadedFiles.length})` : ""}
                   </Button>
                 </DialogFooter>
               </form>
@@ -498,71 +734,35 @@ export function AdminMaterialsManager() {
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
-        ) : materials && materials.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                    Título
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                    Fornecedor
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                    Tipo
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">
-                    Status
-                  </th>
-                  <th className="text-right py-3 px-4 font-medium text-muted-foreground">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {materials.map((material) => (
-                  <tr key={material.id} className="border-b last:border-0">
-                    <td className="py-3 px-4 font-medium">{material.title}</td>
-                    <td className="py-3 px-4 text-muted-foreground">
-                      {material.trade_suppliers?.name || "-"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant="secondary">{material.material_type}</Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Switch
-                        checked={material.is_active}
-                        onCheckedChange={(checked) =>
-                          toggleActiveMutation.mutate({
-                            id: material.id,
-                            is_active: checked,
-                          })
-                        }
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(material)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteMutation.mutate(material.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        ) : galleries.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {galleries.map((gallery) => (
+              <button
+                key={gallery.key}
+                className="group text-left rounded-lg border bg-card overflow-hidden hover:ring-2 hover:ring-primary/50 transition-all"
+                onClick={() => setOpenGalleryKey(gallery.key)}
+              >
+                <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden relative">
+                  {gallery.thumbnail ? (
+                    <img src={gallery.thumbnail} alt={gallery.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <FolderOpen className="h-10 w-10 text-muted-foreground" />
+                  )}
+                  {gallery.is_permanent && (
+                    <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                      <Pin className="h-3 w-3" />
+                    </div>
+                  )}
+                  <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 text-xs font-medium">
+                    {gallery.materials.length}
+                  </div>
+                </div>
+                <div className="p-2">
+                  <p className="text-sm font-medium truncate">{gallery.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{gallery.supplier_name || gallery.category}</p>
+                </div>
+              </button>
+            ))}
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
