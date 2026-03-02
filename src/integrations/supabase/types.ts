@@ -879,6 +879,7 @@ export type Database = {
       }
       materials: {
         Row: {
+          caption: string | null
           category: string
           created_at: string
           destination: string | null
@@ -895,6 +896,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          caption?: string | null
           category: string
           created_at?: string
           destination?: string | null
@@ -911,6 +913,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          caption?: string | null
           category?: string
           created_at?: string
           destination?: string | null
