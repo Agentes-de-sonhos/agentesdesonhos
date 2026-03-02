@@ -16,8 +16,11 @@ import {
   FolderOpen,
   Sparkles,
   Calendar,
+  LayoutGrid,
+  Rows3,
 } from "lucide-react";
 import { GallerySection } from "@/components/materials/GallerySection";
+import { SocialFeedSection } from "@/components/materials/SocialFeedSection";
 import { GalleryModal } from "@/components/materials/GalleryModal";
 import { MaterialsFilterSheet } from "@/components/materials/MaterialsFilterSheet";
 import { useMaterials, type MaterialGallery } from "@/hooks/useMaterials";
@@ -45,6 +48,7 @@ export default function Materiais() {
   const [selectedSupplier, setSelectedSupplier] = useState("Todos");
   const [selectedGallery, setSelectedGallery] = useState<MaterialGallery | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"gallery" | "social">("social");
 
   const { 
     materials, 
@@ -103,6 +107,25 @@ export default function Materiais() {
             <p className="text-muted-foreground mt-1">
               Sua biblioteca de campanhas para vendas
             </p>
+            {/* View mode toggle */}
+            <div className="flex items-center gap-1 mt-2">
+              <Button
+                variant={viewMode === "social" ? "default" : "ghost"}
+                size="sm"
+                className="h-8 gap-1.5 text-xs"
+                onClick={() => setViewMode("social")}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" /> Feed Social
+              </Button>
+              <Button
+                variant={viewMode === "gallery" ? "default" : "ghost"}
+                size="sm"
+                className="h-8 gap-1.5 text-xs"
+                onClick={() => setViewMode("gallery")}
+              >
+                <Rows3 className="h-3.5 w-3.5" /> Galeria
+              </Button>
+            </div>
           </div>
 
           {/* Desktop Filters */}
@@ -224,25 +247,43 @@ export default function Materiais() {
           </div>
         ) : hasContent ? (
           <div className="space-y-8">
-            {/* Material de Hoje */}
-            {byPeriod.today.length > 0 && (
-              <GallerySection 
-                title="Material de Hoje" 
-                galleries={byPeriod.today} 
-                variant="large"
-                icon={<Sparkles className="h-5 w-5 text-primary" />}
-                onOpen={handleOpenGallery}
-              />
-            )}
-
-            {/* Materiais dos Últimos 7 Dias */}
-            {byPeriod.last7Days.length > 0 && (
-              <GallerySection 
-                title="Materiais dos Últimos 7 Dias" 
-                galleries={byPeriod.last7Days}
-                icon={<Calendar className="h-5 w-5 text-primary" />}
-                onOpen={handleOpenGallery}
-              />
+            {viewMode === "social" ? (
+              <>
+                {byPeriod.today.length > 0 && (
+                  <SocialFeedSection
+                    title="Material de Hoje"
+                    galleries={byPeriod.today}
+                    icon={<Sparkles className="h-5 w-5 text-primary" />}
+                  />
+                )}
+                {byPeriod.last7Days.length > 0 && (
+                  <SocialFeedSection
+                    title="Materiais dos Últimos 7 Dias"
+                    galleries={byPeriod.last7Days}
+                    icon={<Calendar className="h-5 w-5 text-primary" />}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                {byPeriod.today.length > 0 && (
+                  <GallerySection 
+                    title="Material de Hoje" 
+                    galleries={byPeriod.today} 
+                    variant="large"
+                    icon={<Sparkles className="h-5 w-5 text-primary" />}
+                    onOpen={handleOpenGallery}
+                  />
+                )}
+                {byPeriod.last7Days.length > 0 && (
+                  <GallerySection 
+                    title="Materiais dos Últimos 7 Dias" 
+                    galleries={byPeriod.last7Days}
+                    icon={<Calendar className="h-5 w-5 text-primary" />}
+                    onOpen={handleOpenGallery}
+                  />
+                )}
+              </>
             )}
           </div>
         ) : (
