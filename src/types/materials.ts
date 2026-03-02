@@ -8,6 +8,8 @@ export interface Material {
   video_url?: string | null;
   thumbnail_url?: string | null;
   published_at: string;
+  caption?: string | null;
+  is_permanent?: boolean;
   supplier_id?: string | null;
   is_active: boolean;
   trade_suppliers?: {

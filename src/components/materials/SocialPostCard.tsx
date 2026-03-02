@@ -11,6 +11,8 @@ import {
   VolumeX,
   Maximize2,
   Building2,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +75,8 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [captionExpanded, setCaptionExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const materials = gallery.materials;
@@ -444,17 +448,72 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
 
         {/* Caption */}
         <div className="px-4 pb-4">
-          <p className="text-sm text-foreground">
-            <span className="font-semibold">
-              {gallery.trade_suppliers?.name || "Divulgação"}
-            </span>{" "}
-            {gallery.title}
-          </p>
-          {gallery.destination && (
-            <p className="text-xs text-muted-foreground mt-1">
-              📍 {gallery.destination}
-            </p>
-          )}
+          {(() => {
+            const caption = gallery.materials.find((m: any) => m.caption)?.caption || "";
+            if (!caption) {
+              return (
+                <p className="text-sm text-foreground">
+                  <span className="font-semibold">
+                    {gallery.trade_suppliers?.name || "Divulgação"}
+                  </span>{" "}
+                  {gallery.title}
+                  {gallery.destination && (
+                    <span className="text-muted-foreground"> 📍 {gallery.destination}</span>
+                  )}
+                </p>
+              );
+            }
+            const lines = caption.split("\n");
+            const isLong = lines.length > 3 || caption.length > 150;
+            const displayText = !captionExpanded && isLong
+              ? lines.slice(0, 3).join("\n").substring(0, 150)
+              : caption;
+            return (
+              <div className="space-y-1">
+                <div className="flex items-start gap-1.5">
+                  <p className="text-sm text-foreground flex-1 whitespace-pre-line">
+                    <span className="font-semibold">
+                      {gallery.trade_suppliers?.name || "Divulgação"}
+                    </span>{" "}
+                    {displayText}
+                    {!captionExpanded && isLong && (
+                      <button
+                        onClick={() => setCaptionExpanded(true)}
+                        className="text-muted-foreground hover:text-foreground ml-1 text-sm"
+                      >
+                        ... mais
+                      </button>
+                    )}
+                  </p>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(caption);
+                      setCopied(true);
+                      toast.success("Legenda copiada!");
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="shrink-0 mt-0.5 h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    title="Copiar legenda"
+                  >
+                    {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+                  </button>
+                </div>
+                {captionExpanded && isLong && (
+                  <button
+                    onClick={() => setCaptionExpanded(false)}
+                    className="text-muted-foreground hover:text-foreground text-xs"
+                  >
+                    menos
+                  </button>
+                )}
+                {gallery.destination && (
+                  <p className="text-xs text-muted-foreground">
+                    📍 {gallery.destination}
+                  </p>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </article>
     </>

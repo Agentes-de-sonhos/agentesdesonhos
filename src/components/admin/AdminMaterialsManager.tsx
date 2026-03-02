@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -70,6 +71,7 @@ interface MaterialForm {
   material_type: string;
   title: string;
   destination: string;
+  caption: string;
   file_url: string;
   video_url: string;
   thumbnail_url: string;
@@ -85,6 +87,7 @@ const initialForm: MaterialForm = {
   material_type: "",
   title: "",
   destination: "",
+  caption: "",
   file_url: "",
   video_url: "",
   thumbnail_url: "",
@@ -218,6 +221,7 @@ export function AdminMaterialsManager() {
         thumbnail_url: data.thumbnail_url || null,
         is_active: data.is_active,
         is_permanent: data.is_permanent,
+        caption: data.caption || null,
       };
 
       if (editingId) {
@@ -248,6 +252,7 @@ export function AdminMaterialsManager() {
         destination: data.destination || null,
         is_active: data.is_active,
         is_permanent: data.is_permanent,
+        caption: data.caption || null,
       };
 
       if (data.material_type === "Vídeo") {
@@ -412,6 +417,7 @@ export function AdminMaterialsManager() {
       material_type: material.material_type,
       title: material.title,
       destination: material.destination || "",
+      caption: material.caption || "",
       file_url: material.file_url || "",
       video_url: material.video_url || "",
       thumbnail_url: material.thumbnail_url || "",
@@ -597,6 +603,15 @@ export function AdminMaterialsManager() {
                   <Input value={form.file_url} onChange={(e) => setForm((prev) => ({ ...prev, file_url: e.target.value }))} />
                 </div>
               )}
+              <div className="space-y-2">
+                <Label>Legenda (opcional)</Label>
+                <Textarea
+                  value={form.caption}
+                  onChange={(e) => setForm((prev) => ({ ...prev, caption: e.target.value }))}
+                  placeholder="Texto da legenda que aparecerá no feed social..."
+                  rows={3}
+                />
+              </div>
               <div className="flex items-center gap-2">
                 <Checkbox checked={form.is_permanent} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_permanent: !!checked }))} />
                 <Label className="cursor-pointer">Manter permanentemente (não excluir após 7 dias)</Label>
@@ -710,6 +725,15 @@ export function AdminMaterialsManager() {
                     />
                   </div>
                 )}
+                <div className="space-y-2">
+                  <Label>Legenda (opcional)</Label>
+                  <Textarea
+                    value={form.caption}
+                    onChange={(e) => setForm((prev) => ({ ...prev, caption: e.target.value }))}
+                    placeholder="Texto da legenda que aparecerá no feed social..."
+                    rows={3}
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     checked={form.is_permanent}
