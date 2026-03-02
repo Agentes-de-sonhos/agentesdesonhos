@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useAcademy, useAcademyAdmin, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
 import { TrailTrainingsManager } from "./TrailTrainingsManager";
+import { TrailLinkedMaterialsManager } from "./TrailLinkedMaterialsManager";
 import { TrailExamManager } from "./TrailExamManager";
 import { POPULAR_DESTINATIONS, MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
 import { usePlaybook } from "@/hooks/usePlaybook";
@@ -491,6 +492,10 @@ export function AdminAcademyManager() {
                   <Users className="h-4 w-4 mr-1" />
                   Palestrantes
                 </TabsTrigger>
+                <TabsTrigger value="divulgacao" className="flex-1">
+                  <ImageIcon className="h-4 w-4 mr-1" />
+                  Divulgação
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="dados">
                 <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-2">
@@ -764,6 +769,9 @@ export function AdminAcademyManager() {
                     </Button>
                   </div>
                 </div>
+              </TabsContent>
+              <TabsContent value="divulgacao">
+                <TrailLinkedMaterialsManager trailId={editingTrail.id} />
               </TabsContent>
             </Tabs>
           ) : (

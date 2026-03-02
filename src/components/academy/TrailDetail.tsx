@@ -51,6 +51,9 @@ import { PlaybookTabContent } from "@/components/playbook/PlaybookTabContent";
 import { PlaybookComoVenderTab } from "@/components/playbook/PlaybookComoVenderTab";
 import { PLAYBOOK_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { SocialPostCard } from "@/components/materials/SocialPostCard";
+import { useMaterials } from "@/hooks/useMaterials";
 import {
   Target,
   TrendingUp,
@@ -95,6 +98,22 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const { data: examQuestions = [] } = useExamQuestions(showExam ? trail.id : null);
   const { data: trailMaterials = [] } = useTrailMaterials(trail.id);
   const { data: trailSpeakers = [] } = useTrailSpeakers(trail.id);
+  const { groupIntoGalleries } = useMaterials();
+
+  // Fetch linked materials for this trail
+  const { data: linkedMaterials = [] } = useQuery({
+    queryKey: ["trail-linked-materials-full", trail.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trail_linked_materials")
+        .select("material_id, materials(*, trade_suppliers(id, name))")
+        .eq("trail_id", trail.id);
+      if (error) throw error;
+      return (data || []).map((r: any) => r.materials).filter(Boolean);
+    },
+  });
+
+  const linkedGalleries = groupIntoGalleries(linkedMaterials);
 
   const certificate = certificates.find((c) => c.trail_id === trail.id);
   const canTakeExam = trail.allQuizzesPassed && !trail.examPassed;
@@ -413,7 +432,25 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             title="Divulgação"
             description={"Nesta aba você encontra materiais prontos para divulgação do destino, como lâminas, carrosséis, reels, artes para redes sociais e WhatsApp.\nTambém há links editáveis no Canva para personalização das lâminas de pacotes, permitindo que os agentes adaptem os conteúdos conforme sua estratégia de vendas."}
           />
-          {complementaryMaterials.length === 0 ? (
+
+          {/* Social Posts from linked materials */}
+          {linkedGalleries.length > 0 && (
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-2 mb-2">
+                <FolderOpen className="h-5 w-5 text-primary" />
+                <h3 className="text-base font-semibold">Posts de Divulgação</h3>
+                <p className="text-sm text-muted-foreground">— Baixe e compartilhe nas redes sociais</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
+                {linkedGalleries.map((gallery) => (
+                  <SocialPostCard key={gallery.id} gallery={gallery} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Existing complementary materials */}
+          {complementaryMaterials.length === 0 && linkedGalleries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="p-5 rounded-2xl bg-muted mb-5">
                 <FolderOpen className="h-12 w-12 text-muted-foreground/40" />
@@ -423,11 +460,11 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
                 Lâminas, PDFs e vídeos para baixar e compartilhar com seus contatos. Em breve estarão disponíveis aqui.
               </p>
             </div>
-          ) : (
+          ) : complementaryMaterials.length > 0 ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-2">
                 <FolderOpen className="h-5 w-5 text-primary" />
-                <h3 className="text-base font-semibold">Materiais de Divulgação</h3>
+                <h3 className="text-base font-semibold">Materiais Complementares</h3>
                 <p className="text-sm text-muted-foreground">— Baixe e compartilhe com seus contatos</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -436,7 +473,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
         </TabsContent>
 
         {/* Palestrantes Tab */}

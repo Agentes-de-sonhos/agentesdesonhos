@@ -2657,6 +2657,42 @@ export type Database = {
           },
         ]
       }
+      trail_linked_materials: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          trail_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          trail_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          trail_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trail_linked_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trail_linked_materials_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trail_materials: {
         Row: {
           category: string
