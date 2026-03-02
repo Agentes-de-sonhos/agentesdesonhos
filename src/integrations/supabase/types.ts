@@ -885,6 +885,7 @@ export type Database = {
           file_url: string | null
           id: string
           is_active: boolean
+          is_permanent: boolean
           material_type: string
           published_at: string
           supplier_id: string | null
@@ -900,6 +901,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           is_active?: boolean
+          is_permanent?: boolean
           material_type: string
           published_at?: string
           supplier_id?: string | null
@@ -915,6 +917,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           is_active?: boolean
+          is_permanent?: boolean
           material_type?: string
           published_at?: string
           supplier_id?: string | null

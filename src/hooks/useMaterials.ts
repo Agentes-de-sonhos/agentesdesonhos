@@ -7,7 +7,7 @@ export function useMaterials() {
   const { data: materials, isLoading, error } = useQuery({
     queryKey: ["materials"],
     queryFn: async () => {
-      // Only fetch materials from the last 7 days
+      // Fetch materials from the last 7 days + all permanent materials
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const { data, error } = await supabase
@@ -20,7 +20,7 @@ export function useMaterials() {
           )
         `)
         .eq("is_active", true)
-        .gte("created_at", sevenDaysAgo.toISOString())
+        .or(`created_at.gte.${sevenDaysAgo.toISOString()},is_permanent.eq.true`)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Material[];

@@ -23,6 +23,7 @@ Deno.serve(async (req) => {
     const { data: expiredMaterials, error: fetchError } = await supabase
       .from("materials")
       .select("id, file_url, thumbnail_url")
+      .eq("is_permanent", false)
       .lt("created_at", cutoffDate.toISOString());
 
     if (fetchError) throw fetchError;
