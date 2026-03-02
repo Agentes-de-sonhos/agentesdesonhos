@@ -1,16 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Loader2, Link2, Unlink, Image, Video, File } from "lucide-react";
+import { Search, Loader2, Link2, Unlink, FolderOpen, Pin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface TrailLinkedMaterialsManagerProps {
   trailId: string;
+}
+
+// Same normalization as admin materials manager
+function normalizeTitle(title: string): string {
+  return title.trim().replace(/\s*\(\d+\)\s*$/, '').replace(/\s*-\s*\d+\s*$/, '').replace(/\s+\d+\s*$/, '').trim().toLowerCase();
+}
+function getDisplayTitle(title: string): string {
+  return title.trim().replace(/\s*\(\d+\)\s*$/, '').replace(/\s*-\s*\d+\s*$/, '').replace(/\s+\d+\s*$/, '').trim();
+}
+
+interface GalleryGroup {
+  key: string;
+  title: string;
+  supplier_name: string | null;
+  category: string;
+  destination: string | null;
+  thumbnail: string | null;
+  materialIds: string[];
+  count: number;
+  is_permanent: boolean;
 }
 
 export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsManagerProps) {
@@ -23,7 +42,7 @@ export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsMan
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, title, material_type, category, destination, thumbnail_url, file_url, supplier_id, trade_suppliers(id, name)")
+        .select("id, title, material_type, category, destination, thumbnail_url, file_url, supplier_id, is_permanent, trade_suppliers(id, name)")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(500);
@@ -45,60 +64,96 @@ export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsMan
     },
   });
 
-  const linkMutation = useMutation({
-    mutationFn: async (materialId: string) => {
-      const { error } = await supabase
-        .from("trail_linked_materials")
-        .insert({ trail_id: trailId, material_id: materialId });
+  // Group materials into galleries
+  const galleries = useMemo<GalleryGroup[]>(() => {
+    if (!allMaterials.length) return [];
+    const map = new Map<string, any[]>();
+    allMaterials.forEach((m: any) => {
+      const norm = normalizeTitle(m.title);
+      const key = `${norm}|${m.supplier_id || 'none'}|${(m.destination || '').trim().toLowerCase()}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(m);
+    });
+    return Array.from(map.entries()).map(([key, mats]) => {
+      const first = mats[0];
+      let thumb: string | null = null;
+      for (const m of mats) {
+        if (m.thumbnail_url) { thumb = m.thumbnail_url; break; }
+        if (m.material_type === "Imagem" && m.file_url) { thumb = m.file_url; break; }
+      }
+      return {
+        key,
+        title: getDisplayTitle(first.title),
+        supplier_name: first.trade_suppliers?.name || null,
+        category: first.category,
+        destination: first.destination || null,
+        thumbnail: thumb,
+        materialIds: mats.map((m: any) => m.id),
+        count: mats.length,
+        is_permanent: mats.some((m: any) => m.is_permanent),
+      };
+    });
+  }, [allMaterials]);
+
+  const linkedSet = new Set(linkedIds);
+
+  // Check if a gallery is fully linked (all its material IDs are linked)
+  const isGalleryLinked = (gallery: GalleryGroup) => gallery.materialIds.every(id => linkedSet.has(id));
+  const isGalleryPartial = (gallery: GalleryGroup) => gallery.materialIds.some(id => linkedSet.has(id)) && !isGalleryLinked(gallery);
+
+  // Link all materials of a gallery
+  const linkGalleryMutation = useMutation({
+    mutationFn: async (gallery: GalleryGroup) => {
+      const toLink = gallery.materialIds.filter(id => !linkedSet.has(id));
+      if (toLink.length === 0) return;
+      const rows = toLink.map(material_id => ({ trail_id: trailId, material_id }));
+      const { error } = await supabase.from("trail_linked_materials").insert(rows);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trail-linked-materials", trailId] });
-      toast.success("Material vinculado!");
+      toast.success("Galeria vinculada!");
     },
-    onError: () => toast.error("Erro ao vincular material"),
+    onError: () => toast.error("Erro ao vincular galeria"),
   });
 
-  const unlinkMutation = useMutation({
-    mutationFn: async (materialId: string) => {
+  // Unlink all materials of a gallery (delete from trail_linked_materials)
+  const unlinkGalleryMutation = useMutation({
+    mutationFn: async (gallery: GalleryGroup) => {
+      const toUnlink = gallery.materialIds.filter(id => linkedSet.has(id));
+      if (toUnlink.length === 0) return;
       const { error } = await supabase
         .from("trail_linked_materials")
         .delete()
         .eq("trail_id", trailId)
-        .eq("material_id", materialId);
+        .in("material_id", toUnlink);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trail-linked-materials", trailId] });
-      toast.success("Material desvinculado!");
+      toast.success("Galeria desvinculada da trilha!");
     },
     onError: () => toast.error("Erro ao desvincular"),
   });
 
-  const linkedSet = new Set(linkedIds);
-
-  const filtered = allMaterials.filter((m: any) => {
+  const filtered = galleries.filter((g) => {
     if (!search) return true;
     const s = search.toLowerCase();
     return (
-      m.title?.toLowerCase().includes(s) ||
-      m.destination?.toLowerCase().includes(s) ||
-      m.trade_suppliers?.name?.toLowerCase().includes(s)
+      g.title.toLowerCase().includes(s) ||
+      g.destination?.toLowerCase().includes(s) ||
+      g.supplier_name?.toLowerCase().includes(s)
     );
   });
 
   // Sort: linked first
-  const sorted = [...filtered].sort((a: any, b: any) => {
-    const aLinked = linkedSet.has(a.id) ? 0 : 1;
-    const bLinked = linkedSet.has(b.id) ? 0 : 1;
+  const sorted = [...filtered].sort((a, b) => {
+    const aLinked = isGalleryLinked(a) ? 0 : isGalleryPartial(a) ? 1 : 2;
+    const bLinked = isGalleryLinked(b) ? 0 : isGalleryPartial(b) ? 1 : 2;
     return aLinked - bLinked;
   });
 
-  const typeIcon = (type: string) => {
-    if (type === "Imagem") return <Image className="h-3.5 w-3.5" />;
-    if (type === "Vídeo") return <Video className="h-3.5 w-3.5" />;
-    return <File className="h-3.5 w-3.5" />;
-  };
+  const totalLinkedGalleries = galleries.filter(g => isGalleryLinked(g)).length;
 
   if (loadingMaterials || loadingLinked) {
     return (
@@ -111,7 +166,7 @@ export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsMan
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        Vincule materiais de divulgação do menu principal a esta trilha. Eles aparecerão como posts no estilo rede social na aba "Materiais de Divulgação" da trilha.
+        Vincule galerias de materiais de divulgação a esta trilha. Todas as imagens da galeria serão vinculadas de uma vez.
       </p>
 
       <div className="flex items-center gap-2">
@@ -124,48 +179,50 @@ export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsMan
             className="pl-9 h-9"
           />
         </div>
-        <Badge variant="secondary">{linkedIds.length} vinculados</Badge>
+        <Badge variant="secondary">{totalLinkedGalleries} galeria{totalLinkedGalleries !== 1 ? "s" : ""} vinculada{totalLinkedGalleries !== 1 ? "s" : ""}</Badge>
       </div>
 
       <ScrollArea className="h-[45vh] border rounded-lg">
         <div className="divide-y">
-          {sorted.map((m: any) => {
-            const isLinked = linkedSet.has(m.id);
+          {sorted.map((gallery) => {
+            const linked = isGalleryLinked(gallery);
+            const partial = isGalleryPartial(gallery);
             return (
               <div
-                key={m.id}
+                key={gallery.key}
                 className={`flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors ${
-                  isLinked ? "bg-primary/5" : ""
+                  linked ? "bg-primary/5" : partial ? "bg-primary/[0.02]" : ""
                 }`}
               >
                 {/* Thumbnail */}
-                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-                  {m.thumbnail_url || (m.material_type === "Imagem" && m.file_url) ? (
-                    <img
-                      src={m.thumbnail_url || m.file_url}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+                <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden relative">
+                  {gallery.thumbnail ? (
+                    <img src={gallery.thumbnail} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    typeIcon(m.material_type)
+                    <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                  )}
+                  {gallery.is_permanent && (
+                    <div className="absolute top-0.5 right-0.5 bg-primary text-primary-foreground rounded-full p-0.5">
+                      <Pin className="h-2 w-2" />
+                    </div>
                   )}
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{m.title}</p>
+                  <p className="text-sm font-medium truncate">{gallery.title}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{m.material_type}</span>
-                    {m.trade_suppliers?.name && (
+                    <span>{gallery.count} arquivo{gallery.count > 1 ? "s" : ""}</span>
+                    {gallery.supplier_name && (
                       <>
                         <span>•</span>
-                        <span className="truncate">{m.trade_suppliers.name}</span>
+                        <span className="truncate">{gallery.supplier_name}</span>
                       </>
                     )}
-                    {m.destination && (
+                    {gallery.destination && (
                       <>
                         <span>•</span>
-                        <span className="truncate">{m.destination}</span>
+                        <span className="truncate">{gallery.destination}</span>
                       </>
                     )}
                   </div>
@@ -173,17 +230,17 @@ export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsMan
 
                 {/* Toggle */}
                 <Button
-                  variant={isLinked ? "destructive" : "default"}
+                  variant={linked || partial ? "destructive" : "default"}
                   size="sm"
                   className="h-8 gap-1.5 text-xs shrink-0"
-                  disabled={linkMutation.isPending || unlinkMutation.isPending}
+                  disabled={linkGalleryMutation.isPending || unlinkGalleryMutation.isPending}
                   onClick={() =>
-                    isLinked
-                      ? unlinkMutation.mutate(m.id)
-                      : linkMutation.mutate(m.id)
+                    linked || partial
+                      ? unlinkGalleryMutation.mutate(gallery)
+                      : linkGalleryMutation.mutate(gallery)
                   }
                 >
-                  {isLinked ? (
+                  {linked || partial ? (
                     <>
                       <Unlink className="h-3.5 w-3.5" /> Desvincular
                     </>
@@ -198,7 +255,7 @@ export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsMan
           })}
           {sorted.length === 0 && (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              Nenhum material encontrado
+              Nenhuma galeria encontrada
             </div>
           )}
         </div>
