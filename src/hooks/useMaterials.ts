@@ -112,7 +112,7 @@ export function useMaterials() {
         destination: firstMaterial.destination,
         supplier_id: firstMaterial.supplier_id,
         trade_suppliers: firstMaterial.trade_suppliers,
-        materials: mats,
+        materials: [...mats].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
         published_at: sortedByDate[0].published_at,
         thumbnail_url: thumbnail,
         fileCount: mats.length,

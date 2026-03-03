@@ -12,6 +12,7 @@ export interface Material {
   is_permanent?: boolean;
   supplier_id?: string | null;
   is_active: boolean;
+  order_index?: number;
   trail_id?: string | null;
   trade_suppliers?: {
     id: string;
