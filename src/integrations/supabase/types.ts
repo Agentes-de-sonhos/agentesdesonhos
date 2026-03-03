@@ -879,6 +879,7 @@ export type Database = {
       }
       materials: {
         Row: {
+          canva_url: string | null
           caption: string | null
           category: string
           created_at: string
@@ -898,6 +899,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          canva_url?: string | null
           caption?: string | null
           category: string
           created_at?: string
@@ -917,6 +919,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          canva_url?: string | null
           caption?: string | null
           category?: string
           created_at?: string

@@ -74,6 +74,8 @@ export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMate
           hasVideos,
           hasImages,
           hasPDFs,
+          isCanvaTemplate: false,
+          canva_url: null,
         });
       });
 

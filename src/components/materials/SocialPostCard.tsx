@@ -13,6 +13,7 @@ import {
   Building2,
   Copy,
   Check,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -392,7 +393,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
           </div>
         )}
 
-        {/* Actions row - like & download */}
+        {/* Actions row */}
         <div className="flex items-center justify-between px-4 py-1.5">
           <button
             onClick={handleLike}
@@ -408,33 +409,47 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
           </button>
 
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-foreground hover:text-primary"
-              onClick={handleDownloadSingle}
-              disabled={isDownloading}
-            >
-              {isDownloading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Download className="h-5 w-5" />
-              )}
-            </Button>
-            {materials.length > 1 && (
+            {gallery.isCanvaTemplate && gallery.canva_url ? (
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 text-foreground hover:text-primary"
-                onClick={handleDownloadAll}
-                disabled={isDownloadingAll}
+                variant="default"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => window.open(gallery.canva_url!, "_blank")}
               >
-                {isDownloadingAll ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <FolderDown className="h-5 w-5" />
-                )}
+                <ExternalLink className="h-4 w-4" />
+                Editar no Canva
               </Button>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-foreground hover:text-primary"
+                  onClick={handleDownloadSingle}
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Download className="h-5 w-5" />
+                  )}
+                </Button>
+                {materials.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 text-foreground hover:text-primary"
+                    onClick={handleDownloadAll}
+                    disabled={isDownloadingAll}
+                  >
+                    {isDownloadingAll ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <FolderDown className="h-5 w-5" />
+                    )}
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -446,9 +461,19 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
           </p>
         </div>
 
-        {/* Caption */}
+        {/* Caption - hidden for Canva templates */}
         <div className="px-4 pb-4">
-          {(() => {
+          {gallery.isCanvaTemplate ? (
+            <p className="text-sm text-foreground">
+              <span className="font-semibold">
+                {gallery.trade_suppliers?.name || "Divulgação"}
+              </span>{" "}
+              {gallery.title}
+              {gallery.destination && (
+                <span className="text-muted-foreground"> 📍 {gallery.destination}</span>
+              )}
+            </p>
+          ) : (() => {
             const caption = gallery.materials.find((m: any) => m.caption)?.caption || "";
             if (!caption) {
               return (

@@ -80,6 +80,7 @@ interface MaterialForm {
   is_active: boolean;
   is_permanent: boolean;
   trail_id: string;
+  canva_url: string;
   uploadedFiles: UploadedFile[];
 }
 
@@ -97,6 +98,7 @@ const initialForm: MaterialForm = {
   is_active: true,
   is_permanent: false,
   trail_id: "",
+  canva_url: "",
   uploadedFiles: [],
 };
 
@@ -248,6 +250,7 @@ export function AdminMaterialsManager() {
         is_permanent: data.is_permanent,
         caption: data.caption || null,
         trail_id: data.trail_id || null,
+        canva_url: data.canva_url || null,
       };
 
       if (editingId) {
@@ -280,6 +283,7 @@ export function AdminMaterialsManager() {
         is_permanent: data.is_permanent,
         caption: data.caption || null,
         trail_id: data.trail_id || null,
+        canva_url: data.canva_url || null,
       };
 
       if (data.material_type === "Vídeo") {
@@ -501,6 +505,7 @@ export function AdminMaterialsManager() {
       is_active: material.is_active,
       is_permanent: material.is_permanent ?? false,
       trail_id: material.trail_id || "",
+      canva_url: material.canva_url || "",
       uploadedFiles: [],
     });
     setIsOpen(true);
@@ -561,6 +566,7 @@ export function AdminMaterialsManager() {
     supplier_name: "",
     is_permanent: false,
     trail_id: "",
+    canva_url: "",
   });
 
   const handleEditGallery = () => {
@@ -575,6 +581,7 @@ export function AdminMaterialsManager() {
       supplier_name: openGallery.supplier_name || "",
       is_permanent: openGallery.is_permanent,
       trail_id: openGallery.trail_id || "",
+      canva_url: first.canva_url || "",
     });
     setEditGalleryOpen(true);
   };
@@ -595,8 +602,9 @@ export function AdminMaterialsManager() {
           caption: galleryForm.caption || null,
           category: galleryForm.category,
           supplier_id: galleryForm.supplier_id || null,
-          is_permanent: galleryForm.is_permanent,
+           is_permanent: galleryForm.is_permanent,
           trail_id: galleryForm.trail_id || null,
+          canva_url: galleryForm.canva_url || null,
         })
         .eq("id", id);
     });
@@ -709,6 +717,15 @@ export function AdminMaterialsManager() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">Se vinculado a uma trilha, este material aparecerá apenas nela.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Link do Canva (opcional)</Label>
+                  <Input
+                    value={galleryForm.canva_url}
+                    onChange={(e) => setGalleryForm(prev => ({ ...prev, canva_url: e.target.value }))}
+                    placeholder="https://www.canva.com/design/..."
+                  />
+                  <p className="text-xs text-muted-foreground">Se preenchido, o material será tratado como modelo editável no Canva (sem download, sem copiar legenda).</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox checked={galleryForm.is_permanent} onCheckedChange={(checked) => setGalleryForm(prev => ({ ...prev, is_permanent: !!checked }))} />
@@ -971,6 +988,15 @@ export function AdminMaterialsManager() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">Se vinculado a uma trilha, este material aparecerá apenas nela e não na página de materiais.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Link do Canva (opcional)</Label>
+                  <Input
+                    value={form.canva_url}
+                    onChange={(e) => setForm((prev) => ({ ...prev, canva_url: e.target.value }))}
+                    placeholder="https://www.canva.com/design/..."
+                  />
+                  <p className="text-xs text-muted-foreground">Se preenchido, será um modelo editável no Canva (sem download).</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
