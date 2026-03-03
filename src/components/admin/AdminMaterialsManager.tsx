@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ import {
   FileIcon,
   Pin,
   GraduationCap,
+  GripVertical,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -216,7 +217,7 @@ export function AdminMaterialsManager() {
         is_permanent: mats.some((m: any) => m.is_permanent),
         trail_id: first.trail_id || null,
         trail_name: first.learning_trails?.name || null,
-        materials: mats,
+        materials: [...mats].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
         thumbnail: thumb,
       };
     }).sort((a, b) => {
@@ -433,6 +434,56 @@ export function AdminMaterialsManager() {
 
   const [addFilesOpen, setAddFilesOpen] = useState(false);
   const [addFiles, setAddFiles] = useState<UploadedFile[]>([]);
+
+  // Drag-and-drop reorder state
+  const dragItemRef = useRef<number | null>(null);
+  const dragOverItemRef = useRef<number | null>(null);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+
+  const reorderMutation = useMutation({
+    mutationFn: async (orderedMaterials: { id: string; order_index: number }[]) => {
+      const updates = orderedMaterials.map(({ id, order_index }) =>
+        supabase.from("materials").update({ order_index }).eq("id", id)
+      );
+      const results = await Promise.all(updates);
+      const hasError = results.some(r => r.error);
+      if (hasError) throw new Error("Failed to reorder");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
+    },
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível reordenar", variant: "destructive" });
+    },
+  });
+
+  const handleDragStart = (index: number) => {
+    dragItemRef.current = index;
+    setDragIdx(index);
+  };
+
+  const handleDragEnter = (index: number) => {
+    dragOverItemRef.current = index;
+  };
+
+  const handleDragEnd = () => {
+    if (!openGallery || dragItemRef.current === null || dragOverItemRef.current === null || dragItemRef.current === dragOverItemRef.current) {
+      setDragIdx(null);
+      return;
+    }
+    const items = [...openGallery.materials];
+    const dragItem = items[dragItemRef.current];
+    items.splice(dragItemRef.current, 1);
+    items.splice(dragOverItemRef.current, 0, dragItem);
+
+    const ordered = items.map((m, i) => ({ id: m.id, order_index: i }));
+    reorderMutation.mutate(ordered);
+
+    dragItemRef.current = null;
+    dragOverItemRef.current = null;
+    setDragIdx(null);
+  };
 
   const handleEdit = (material: any) => {
     setEditingId(material.id);
@@ -696,10 +747,32 @@ export function AdminMaterialsManager() {
             </DialogContent>
           </Dialog>
 
-          {/* Grid of files */}
+          {/* Grid of files - drag to reorder */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {openGallery.materials.map((material: any) => (
-              <div key={material.id} className="group relative rounded-lg border bg-card overflow-hidden">
+            {openGallery.materials.map((material: any, index: number) => (
+              <div
+                key={material.id}
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragEnter={() => handleDragEnter(index)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => e.preventDefault()}
+                className={`group relative rounded-lg border bg-card overflow-hidden cursor-grab active:cursor-grabbing transition-opacity ${
+                  dragIdx === index ? "opacity-50" : ""
+                }`}
+              >
+                {/* Drag handle indicator */}
+                <div className="absolute top-1 left-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="bg-black/60 rounded p-0.5">
+                    <GripVertical className="h-4 w-4 text-white" />
+                  </div>
+                </div>
+                {/* Order badge */}
+                <div className="absolute top-1 right-1 z-10">
+                  <Badge className="bg-black/60 text-white border-0 text-[10px] h-5 min-w-5 justify-center">
+                    {index + 1}
+                  </Badge>
+                </div>
                 <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
                   {material.material_type === "Imagem" && material.file_url ? (
                     <img src={material.file_url} alt={material.title} className="w-full h-full object-cover" />
