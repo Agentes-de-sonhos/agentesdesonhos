@@ -13,6 +13,7 @@ export interface Material {
   supplier_id?: string | null;
   is_active: boolean;
   order_index?: number;
+  canva_url?: string | null;
   trail_id?: string | null;
   trade_suppliers?: {
     id: string;
@@ -41,6 +42,8 @@ export interface MaterialGallery {
   hasVideos: boolean;
   hasImages: boolean;
   hasPDFs: boolean;
+  isCanvaTemplate: boolean;
+  canva_url?: string | null;
 }
 
 export interface MaterialsByPeriod<T> {

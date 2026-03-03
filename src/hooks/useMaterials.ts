@@ -119,6 +119,8 @@ export function useMaterials() {
         hasVideos,
         hasImages,
         hasPDFs,
+        isCanvaTemplate: mats.some(m => !!m.canva_url),
+        canva_url: mats.find(m => !!m.canva_url)?.canva_url || null,
       };
     }).sort((a, b) => 
       new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
