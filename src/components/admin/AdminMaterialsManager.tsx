@@ -57,13 +57,13 @@ const CATEGORIES = [
   "Guias",
 ];
 
-const MATERIAL_TYPES = ["Lâmina", "PDF", "Imagem", "Vídeo"];
+const MATERIAL_TYPES = ["Lâmina", "PDF", "Imagem", "Vídeo", "Reels"];
 
 interface UploadedFile {
   id: string;
   name: string;
   url: string;
-  type: "image" | "pdf" | "other";
+  type: "image" | "pdf" | "video" | "other";
 }
 
 interface MaterialForm {
@@ -294,6 +294,21 @@ export function AdminMaterialsManager() {
           video_url: data.video_url,
           file_url: null,
           thumbnail_url: data.thumbnail_url || null,
+        });
+        if (error) throw error;
+        return 1;
+      }
+
+      if (data.material_type === "Reels") {
+        if (data.uploadedFiles.length === 0) throw new Error("Nenhum vídeo enviado");
+        const file = data.uploadedFiles[0];
+        const { error } = await supabase.from("materials").insert({
+          ...basePayload,
+          material_type: "Reels",
+          title: data.title,
+          video_url: file.url,
+          file_url: null,
+          thumbnail_url: null,
         });
         if (error) throw error;
         return 1;
@@ -793,6 +808,8 @@ export function AdminMaterialsManager() {
                 <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
                   {material.material_type === "Imagem" && material.file_url ? (
                     <img src={material.file_url} alt={material.title} className="w-full h-full object-cover" />
+                  ) : material.material_type === "Reels" && material.video_url ? (
+                    <video src={material.video_url} className="w-full h-full object-cover" muted playsInline />
                   ) : material.thumbnail_url ? (
                     <img src={material.thumbnail_url} alt={material.title} className="w-full h-full object-cover" />
                   ) : (
@@ -958,6 +975,17 @@ export function AdminMaterialsManager() {
                   <div className="space-y-2">
                     <Label>Link do Vídeo</Label>
                     <Input value={form.video_url} onChange={(e) => setForm((prev) => ({ ...prev, video_url: e.target.value }))} placeholder="https://youtube.com/..." />
+                  </div>
+                ) : form.material_type === "Reels" ? (
+                  <div className="space-y-2">
+                    <Label>Vídeo do Reels</Label>
+                    <MultiFileUpload
+                      files={form.uploadedFiles}
+                      onFilesChange={(files) => setForm((prev) => ({ ...prev, uploadedFiles: files }))}
+                      disabled={isPending}
+                      accept=".mp4,.mov,.webm"
+                      acceptLabel="Vídeos verticais (MP4, MOV, WebM)"
+                    />
                   </div>
                 ) : (
                   <div className="space-y-2">

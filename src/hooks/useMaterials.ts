@@ -80,7 +80,7 @@ export function useMaterials() {
     // Convert map to array of galleries
     return Array.from(galleryMap.entries()).map(([key, mats]) => {
       const firstMaterial = mats[0];
-      const hasVideos = mats.some(m => m.material_type === "Vídeo");
+      const hasVideos = mats.some(m => m.material_type === "Vídeo" || m.material_type === "Reels");
       const hasImages = mats.some(m => m.material_type === "Imagem");
       const hasPDFs = mats.some(m => m.material_type === "PDF" || m.material_type === "Lâmina");
       
