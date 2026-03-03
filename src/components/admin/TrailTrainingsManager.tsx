@@ -27,12 +27,59 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, ClipboardCheck, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, ClipboardCheck, CheckCircle2, XCircle, Loader2, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAcademyAdmin } from "@/hooks/useAcademy";
 import { TRAINING_CATEGORIES, type Training } from "@/types/academy";
 import { toast as sonnerToast } from "sonner";
+
+interface ParsedQuestion {
+  question_text: string;
+  question_type: "single_choice" | "multiple_choice" | "true_false";
+  options: { option_text: string; is_correct: boolean; order_index: number }[];
+}
+
+function parseBulkText(text: string): ParsedQuestion[] {
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const questions: ParsedQuestion[] = [];
+  let currentQuestion: string | null = null;
+  let currentOptions: { option_text: string; is_correct: boolean; order_index: number }[] = [];
+
+  const optionRegex = /^([a-eA-E])\s*[).\-]\s*(.+)$/;
+  const correctMarkers = /\s*\(?\s*(correta|certa|Correta|Certa|CORRETA|CERTA|✓|✔|★|\*)\s*\)?\s*$/;
+
+  const flushQuestion = () => {
+    if (currentQuestion && currentOptions.length >= 2) {
+      const isTrueFalse = currentOptions.length === 2 &&
+        currentOptions.some(o => /^(verdadeiro|true|v)$/i.test(o.option_text)) &&
+        currentOptions.some(o => /^(falso|false|f)$/i.test(o.option_text));
+      const correctCount = currentOptions.filter(o => o.is_correct).length;
+      questions.push({
+        question_text: currentQuestion,
+        question_type: isTrueFalse ? "true_false" : correctCount > 1 ? "multiple_choice" : "single_choice",
+        options: currentOptions,
+      });
+    }
+    currentQuestion = null;
+    currentOptions = [];
+  };
+
+  for (const line of lines) {
+    const optMatch = line.match(optionRegex);
+    if (optMatch) {
+      let optText = optMatch[2].trim();
+      const isCorrect = correctMarkers.test(optText);
+      optText = optText.replace(correctMarkers, "").trim();
+      currentOptions.push({ option_text: optText, is_correct: isCorrect, order_index: currentOptions.length });
+    } else {
+      flushQuestion();
+      currentQuestion = line.replace(/^\d+\s*[).\-]\s*/, "").trim();
+    }
+  }
+  flushQuestion();
+  return questions;
+}
 
 interface QuestionOption {
   option_text: string;
@@ -69,6 +116,12 @@ export function TrailTrainingsManager({ trailId }: Props) {
     { option_text: "", is_correct: false, order_index: 1 },
   ]);
   const [deleteQuestionId, setDeleteQuestionId] = useState<string | null>(null);
+
+  // Bulk import state
+  const [bulkDialogTrainingId, setBulkDialogTrainingId] = useState<string | null>(null);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkPreview, setBulkPreview] = useState<ParsedQuestion[]>([]);
+  const [bulkImporting, setBulkImporting] = useState(false);
 
   const [trainingForm, setTrainingForm] = useState({
     title: "",
@@ -232,6 +285,28 @@ export function TrailTrainingsManager({ trailId }: Props) {
     setDeleteQuestionId(null);
   };
 
+  const handleBulkImport = async () => {
+    if (!bulkDialogTrainingId || bulkPreview.length === 0) return;
+    setBulkImporting(true);
+    try {
+      for (const q of bulkPreview) {
+        await saveQuizQuestion.mutateAsync({
+          trainingId: bulkDialogTrainingId,
+          question: { question_text: q.question_text, question_type: q.question_type, order_index: 0 },
+          options: q.options,
+        });
+      }
+      sonnerToast.success(`${bulkPreview.length} pergunta(s) importada(s) com sucesso!`);
+      setBulkDialogTrainingId(null);
+      setBulkText("");
+      setBulkPreview([]);
+    } catch (err: any) {
+      sonnerToast.error("Erro ao importar: " + err.message);
+    } finally {
+      setBulkImporting(false);
+    }
+  };
+
   return (
     <div className="space-y-3 max-h-[55vh] overflow-y-auto pr-2">
       {trailTrainings.length === 0 ? (
@@ -249,6 +324,7 @@ export function TrailTrainingsManager({ trailId }: Props) {
             onEdit={() => handleOpenTrainingDialog(tt.training)}
             onDelete={() => setDeleteConfirmId(tt.training_id)}
             onAddQuestion={() => { resetQuizForm(); setQuizDialogTrainingId(tt.training_id); }}
+            onBulkImport={() => { setBulkText(""); setBulkPreview([]); setBulkDialogTrainingId(tt.training_id); }}
             onDeleteQuestion={(id) => setDeleteQuestionId(id)}
           />
         ))
@@ -420,6 +496,74 @@ export function TrailTrainingsManager({ trailId }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk Import Dialog */}
+      <Dialog open={!!bulkDialogTrainingId} onOpenChange={() => setBulkDialogTrainingId(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Importar Perguntas por Texto</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+            <div>
+              <Label>Cole o texto com as perguntas e respostas</Label>
+              <Textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                placeholder={`Exemplo:\n\n1. Qual é o parque mais visitado de Orlando?\na) Magic Kingdom (correta)\nb) Epcot\nc) Hollywood Studios\nd) Animal Kingdom\n\n2. O Walt Disney World fica na Flórida?\na) Verdadeiro (correta)\nb) Falso`}
+                className="min-h-[200px] font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Formato: cada pergunta seguida das opções (a, b, c...). Marque a correta com <strong>(correta)</strong> ou <strong>(certa)</strong> ao lado.
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => setBulkPreview(parseBulkText(bulkText))} disabled={!bulkText.trim()} className="w-full">
+              Pré-visualizar Perguntas
+            </Button>
+
+            {bulkPreview.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium">{bulkPreview.length} pergunta(s) identificada(s):</p>
+                {bulkPreview.map((q, idx) => (
+                  <div key={idx} className="border rounded-lg p-3 space-y-1.5">
+                    <p className="font-medium text-sm">
+                      <span className="text-muted-foreground mr-2">{idx + 1}.</span>
+                      {q.question_text}
+                    </p>
+                    <Badge variant="outline" className="text-xs">
+                      {q.question_type === "single_choice" ? "Escolha Única" : q.question_type === "multiple_choice" ? "Múltipla Escolha" : "V/F"}
+                    </Badge>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1">
+                      {q.options.map((opt, oi) => (
+                        <div
+                          key={oi}
+                          className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded ${
+                            opt.is_correct
+                              ? "bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400"
+                              : "bg-muted/50"
+                          }`}
+                        >
+                          {opt.is_correct ? <CheckCircle2 className="h-3 w-3 shrink-0" /> : <XCircle className="h-3 w-3 shrink-0 opacity-30" />}
+                          {opt.option_text}
+                        </div>
+                      ))}
+                    </div>
+                    {!q.options.some(o => o.is_correct) && (
+                      <p className="text-xs text-destructive">⚠ Nenhuma resposta correta identificada.</p>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  onClick={handleBulkImport}
+                  className="w-full"
+                  disabled={bulkImporting || bulkPreview.some(q => !q.options.some(o => o.is_correct))}
+                >
+                  {bulkImporting ? "Importando..." : `Importar ${bulkPreview.length} Pergunta(s)`}
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -433,6 +577,7 @@ function TrainingItem({
   onEdit,
   onDelete,
   onAddQuestion,
+  onBulkImport,
   onDeleteQuestion,
 }: {
   training: Training;
@@ -442,6 +587,7 @@ function TrainingItem({
   onEdit: () => void;
   onDelete: () => void;
   onAddQuestion: () => void;
+  onBulkImport: () => void;
   onDeleteQuestion: (id: string) => void;
 }) {
   const { data: quizQuestions = [] } = useQuery({
@@ -538,9 +684,14 @@ function TrainingItem({
                 </div>
               ))
             )}
-            <Button variant="outline" size="sm" className="w-full" onClick={onAddQuestion}>
-              <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar Pergunta
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1" onClick={onBulkImport}>
+                <FileText className="h-3.5 w-3.5 mr-1" /> Importar Texto
+              </Button>
+              <Button variant="outline" size="sm" className="flex-1" onClick={onAddQuestion}>
+                <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar Pergunta
+              </Button>
+            </div>
           </div>
         </CollapsibleContent>
       </Collapsible>
