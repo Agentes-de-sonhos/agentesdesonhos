@@ -10,19 +10,22 @@ interface UploadedFile {
   id: string;
   name: string;
   url: string;
-  type: "image" | "pdf" | "other";
+  type: "image" | "pdf" | "video" | "other";
 }
 
 interface MultiFileUploadProps {
   files: UploadedFile[];
   onFilesChange: (files: UploadedFile[]) => void;
   disabled?: boolean;
+  accept?: string;
+  acceptLabel?: string;
 }
 
-const getFileType = (fileName: string): "image" | "pdf" | "other" => {
+const getFileType = (fileName: string): "image" | "pdf" | "video" | "other" => {
   const ext = fileName.split(".").pop()?.toLowerCase();
   if (["jpg", "jpeg", "png", "webp", "gif"].includes(ext || "")) return "image";
   if (ext === "pdf") return "pdf";
+  if (["mp4", "mov", "webm", "avi"].includes(ext || "")) return "video";
   return "other";
 };
 
@@ -30,6 +33,8 @@ export function MultiFileUpload({
   files,
   onFilesChange,
   disabled,
+  accept,
+  acceptLabel,
 }: MultiFileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -135,7 +140,7 @@ export function MultiFileUpload({
               Arraste arquivos ou clique para selecionar
             </p>
             <p className="text-xs text-muted-foreground">
-              Imagens (JPG, PNG, WebP) e PDFs
+              {acceptLabel || "Imagens (JPG, PNG, WebP) e PDFs"}
             </p>
           </div>
         )}
@@ -144,7 +149,7 @@ export function MultiFileUpload({
           type="file"
           className="hidden"
           multiple
-          accept=".pdf,.jpg,.jpeg,.png,.webp"
+          accept={accept || ".pdf,.jpg,.jpeg,.png,.webp"}
           onChange={(e) => handleFiles(e.target.files)}
           disabled={disabled || uploading}
         />

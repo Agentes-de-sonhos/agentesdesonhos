@@ -33,6 +33,7 @@ const getFileExtension = (url: string, materialType: string): string => {
     PDF: "pdf",
     Lâmina: "pdf",
     Vídeo: "mp4",
+    Reels: "mp4",
   };
   return typeExtensions[materialType] || "file";
 };
@@ -83,6 +84,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
   const materials = gallery.materials;
   const current = materials[currentIndex];
   const isVideo = current.material_type === "Vídeo";
+  const isReels = current.material_type === "Reels";
   const isImage = current.material_type === "Imagem";
   const url = current.video_url || current.file_url;
 
@@ -193,6 +195,20 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
 
   // Media renderer
   const renderMedia = () => {
+    // Reels - vertical video displayed with object-contain
+    if (isReels && current.video_url) {
+      return (
+        <video
+          src={current.video_url}
+          className="absolute inset-0 w-full h-full object-contain"
+          autoPlay
+          muted
+          loop
+          playsInline
+          controls={false}
+        />
+      );
+    }
     if (isVideo && current.video_url) {
       if (isExternalVideo(current.video_url)) {
         return (
@@ -266,6 +282,18 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
             className="max-w-full max-h-full object-contain"
             onClick={(e) => e.stopPropagation()}
           />
+        ) : isReels && current.video_url ? (
+          <div
+            className="h-full max-h-[90vh] aspect-[9/16]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <video
+              src={current.video_url}
+              className="w-full h-full object-contain"
+              controls
+              autoPlay
+            />
+          </div>
         ) : isVideo && current.video_url ? (
           <div
             className="w-full max-w-4xl aspect-video"
@@ -366,11 +394,11 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
             <Maximize2 className="h-4 w-4" />
           </button>
 
-          {/* Video indicator */}
-          {isVideo && (
+          {/* Video/Reels indicator */}
+          {(isVideo || isReels) && (
             <div className="absolute bottom-3 left-3 z-10">
               <span className="bg-black/60 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
-                <Play className="h-3 w-3 fill-white" /> Vídeo
+                <Play className="h-3 w-3 fill-white" /> {isReels ? "Reels" : "Vídeo"}
               </span>
             </div>
           )}
