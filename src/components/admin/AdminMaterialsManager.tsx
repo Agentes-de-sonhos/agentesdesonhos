@@ -36,6 +36,7 @@ import {
   Video,
   FileIcon,
   Pin,
+  GraduationCap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -77,6 +78,7 @@ interface MaterialForm {
   thumbnail_url: string;
   is_active: boolean;
   is_permanent: boolean;
+  trail_id: string;
   uploadedFiles: UploadedFile[];
 }
 
@@ -93,6 +95,7 @@ const initialForm: MaterialForm = {
   thumbnail_url: "",
   is_active: true,
   is_permanent: false,
+  trail_id: "",
   uploadedFiles: [],
 };
 
@@ -124,6 +127,8 @@ interface MaterialGalleryGroup {
   category: string;
   destination: string | null;
   is_permanent: boolean;
+  trail_id: string | null;
+  trail_name: string | null;
   materials: any[];
   thumbnail: string | null;
 }
@@ -146,6 +151,10 @@ export function AdminMaterialsManager() {
           trade_suppliers (
             id,
             name
+          ),
+          learning_trails (
+            id,
+            name
           )
         `)
         .order("created_at", { ascending: false });
@@ -160,6 +169,19 @@ export function AdminMaterialsManager() {
       const { data, error } = await supabase
         .from("trade_suppliers")
         .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: trails } = useQuery({
+    queryKey: ["learning-trails-for-materials"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("learning_trails")
+        .select("id, name, destination")
         .eq("is_active", true)
         .order("name");
       if (error) throw error;
@@ -192,6 +214,8 @@ export function AdminMaterialsManager() {
         category: first.category,
         destination: first.destination || null,
         is_permanent: mats.some((m: any) => m.is_permanent),
+        trail_id: first.trail_id || null,
+        trail_name: first.learning_trails?.name || null,
         materials: mats,
         thumbnail: thumb,
       };
@@ -222,6 +246,7 @@ export function AdminMaterialsManager() {
         is_active: data.is_active,
         is_permanent: data.is_permanent,
         caption: data.caption || null,
+        trail_id: data.trail_id || null,
       };
 
       if (editingId) {
@@ -253,6 +278,7 @@ export function AdminMaterialsManager() {
         is_active: data.is_active,
         is_permanent: data.is_permanent,
         caption: data.caption || null,
+        trail_id: data.trail_id || null,
       };
 
       if (data.material_type === "Vídeo") {
@@ -423,6 +449,7 @@ export function AdminMaterialsManager() {
       thumbnail_url: material.thumbnail_url || "",
       is_active: material.is_active,
       is_permanent: material.is_permanent ?? false,
+      trail_id: material.trail_id || "",
       uploadedFiles: [],
     });
     setIsOpen(true);
@@ -482,6 +509,7 @@ export function AdminMaterialsManager() {
     supplier_id: "",
     supplier_name: "",
     is_permanent: false,
+    trail_id: "",
   });
 
   const handleEditGallery = () => {
@@ -495,6 +523,7 @@ export function AdminMaterialsManager() {
       supplier_id: openGallery.supplier_id || "",
       supplier_name: openGallery.supplier_name || "",
       is_permanent: openGallery.is_permanent,
+      trail_id: openGallery.trail_id || "",
     });
     setEditGalleryOpen(true);
   };
@@ -516,6 +545,7 @@ export function AdminMaterialsManager() {
           category: galleryForm.category,
           supplier_id: galleryForm.supplier_id || null,
           is_permanent: galleryForm.is_permanent,
+          trail_id: galleryForm.trail_id || null,
         })
         .eq("id", id);
     });
@@ -617,6 +647,17 @@ export function AdminMaterialsManager() {
                     placeholder="Texto da legenda que aparecerá no feed social..."
                     rows={4}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Trilha exclusiva (opcional)</Label>
+                  <Select value={galleryForm.trail_id} onValueChange={(value) => setGalleryForm(prev => ({ ...prev, trail_id: value === "__none__" ? "" : value }))}>
+                    <SelectTrigger><SelectValue placeholder="Nenhuma (aparece na página geral)" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Nenhuma (aparece na página geral)</SelectItem>
+                      {(trails || []).map((trail) => (<SelectItem key={trail.id} value={trail.id}>{trail.name} — {trail.destination}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">Se vinculado a uma trilha, este material aparecerá apenas nela.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox checked={galleryForm.is_permanent} onCheckedChange={(checked) => setGalleryForm(prev => ({ ...prev, is_permanent: !!checked }))} />
@@ -847,6 +888,17 @@ export function AdminMaterialsManager() {
                     rows={3}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>Trilha exclusiva (opcional)</Label>
+                  <Select value={form.trail_id || "__none__"} onValueChange={(value) => setForm((prev) => ({ ...prev, trail_id: value === "__none__" ? "" : value }))}>
+                    <SelectTrigger><SelectValue placeholder="Nenhuma (aparece na página geral)" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Nenhuma (aparece na página geral)</SelectItem>
+                      {(trails || []).map((trail) => (<SelectItem key={trail.id} value={trail.id}>{trail.name} — {trail.destination}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">Se vinculado a uma trilha, este material aparecerá apenas nela e não na página de materiais.</p>
+                </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     checked={form.is_permanent}
@@ -888,6 +940,12 @@ export function AdminMaterialsManager() {
                   {gallery.is_permanent && (
                     <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
                       <Pin className="h-3 w-3" />
+                    </div>
+                  )}
+                  {gallery.trail_name && (
+                    <div className="absolute top-2 left-2 bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px] font-medium flex items-center gap-1">
+                      <GraduationCap className="h-3 w-3" />
+                      <span className="truncate max-w-[80px]">{gallery.trail_name}</span>
                     </div>
                   )}
                   <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 text-xs font-medium">

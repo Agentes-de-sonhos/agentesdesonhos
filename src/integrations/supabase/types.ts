@@ -892,6 +892,7 @@ export type Database = {
           supplier_id: string | null
           thumbnail_url: string | null
           title: string
+          trail_id: string | null
           updated_at: string
           video_url: string | null
         }
@@ -909,6 +910,7 @@ export type Database = {
           supplier_id?: string | null
           thumbnail_url?: string | null
           title: string
+          trail_id?: string | null
           updated_at?: string
           video_url?: string | null
         }
@@ -926,6 +928,7 @@ export type Database = {
           supplier_id?: string | null
           thumbnail_url?: string | null
           title?: string
+          trail_id?: string | null
           updated_at?: string
           video_url?: string | null
         }
@@ -935,6 +938,13 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "trade_suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_trail_id_fkey"
+            columns: ["trail_id"]
+            isOneToOne: false
+            referencedRelation: "learning_trails"
             referencedColumns: ["id"]
           },
         ]
