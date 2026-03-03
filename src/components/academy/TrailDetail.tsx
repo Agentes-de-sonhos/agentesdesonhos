@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,7 +100,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const { data: trailSpeakers = [] } = useTrailSpeakers(trail.id);
   const { groupIntoGalleries } = useMaterials();
 
-  // Fetch linked materials for this trail
+  // Fetch linked materials for this trail (junction table)
   const { data: linkedMaterials = [] } = useQuery({
     queryKey: ["trail-linked-materials-full", trail.id],
     queryFn: async () => {
@@ -113,7 +113,31 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     },
   });
 
-  const linkedGalleries = groupIntoGalleries(linkedMaterials);
+  // Fetch materials exclusively assigned to this trail (trail_id column)
+  const { data: exclusiveMaterials = [] } = useQuery({
+    queryKey: ["trail-exclusive-materials", trail.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materials")
+        .select("*, trade_suppliers(id, name)")
+        .eq("trail_id", trail.id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Combine both sources, deduplicating by id
+  const allTrailMaterialsCombined = useMemo(() => {
+    const map = new Map<string, any>();
+    [...exclusiveMaterials, ...linkedMaterials].forEach(m => {
+      if (!map.has(m.id)) map.set(m.id, m);
+    });
+    return Array.from(map.values());
+  }, [linkedMaterials, exclusiveMaterials]);
+
+  const linkedGalleries = groupIntoGalleries(allTrailMaterialsCombined);
 
   const certificate = certificates.find((c) => c.trail_id === trail.id);
   const canTakeExam = trail.allQuizzesPassed && !trail.examPassed;

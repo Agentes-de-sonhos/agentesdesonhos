@@ -7,7 +7,7 @@ export function useMaterials() {
   const { data: materials, isLoading, error } = useQuery({
     queryKey: ["materials"],
     queryFn: async () => {
-      // Fetch materials from the last 7 days + all permanent materials
+      // Fetch materials from the last 7 days + all permanent materials (exclude trail-specific)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const { data, error } = await supabase
@@ -20,6 +20,7 @@ export function useMaterials() {
           )
         `)
         .eq("is_active", true)
+        .is("trail_id", null)
         .or(`created_at.gte.${sevenDaysAgo.toISOString()},is_permanent.eq.true`)
         .order("created_at", { ascending: false });
       if (error) throw error;
