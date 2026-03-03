@@ -23,11 +23,62 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, CheckCircle2, XCircle, ClipboardCheck, GraduationCap } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, XCircle, ClipboardCheck, GraduationCap, FileText } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useAcademy, useAcademyAdmin } from "@/hooks/useAcademy";
 import type { Training, LearningTrail } from "@/types/academy";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface ParsedQuestion {
+  question_text: string;
+  question_type: "single_choice" | "multiple_choice" | "true_false";
+  options: { option_text: string; is_correct: boolean; order_index: number }[];
+}
+
+function parseBulkText(text: string): ParsedQuestion[] {
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const questions: ParsedQuestion[] = [];
+  let currentQuestion: string | null = null;
+  let currentOptions: { option_text: string; is_correct: boolean; order_index: number }[] = [];
+
+  const optionRegex = /^([a-eA-E])\s*[).\-]\s*(.+)$/;
+  const correctMarkers = /\s*\(?\s*(correta|certa|Correta|Certa|CORRETA|CERTA|✓|✔|★|\*)\s*\)?\s*$/;
+
+  const flushQuestion = () => {
+    if (currentQuestion && currentOptions.length >= 2) {
+      const isTrueFalse = currentOptions.length === 2 &&
+        currentOptions.some(o => /^(verdadeiro|true|v)$/i.test(o.option_text)) &&
+        currentOptions.some(o => /^(falso|false|f)$/i.test(o.option_text));
+      const correctCount = currentOptions.filter(o => o.is_correct).length;
+      questions.push({
+        question_text: currentQuestion,
+        question_type: isTrueFalse ? "true_false" : correctCount > 1 ? "multiple_choice" : "single_choice",
+        options: currentOptions,
+      });
+    }
+    currentQuestion = null;
+    currentOptions = [];
+  };
+
+  for (const line of lines) {
+    const optMatch = line.match(optionRegex);
+    if (optMatch) {
+      let text = optMatch[2].trim();
+      const isCorrect = correctMarkers.test(text);
+      text = text.replace(correctMarkers, "").trim();
+      currentOptions.push({ option_text: text, is_correct: isCorrect, order_index: currentOptions.length });
+    } else {
+      // It's a new question line
+      flushQuestion();
+      // Remove leading number like "1." or "1)" or "1 -"
+      currentQuestion = line.replace(/^\d+\s*[).\-]\s*/, "").trim();
+    }
+  }
+  flushQuestion();
+  return questions;
+}
 
 interface QuestionOption {
   option_text: string;
@@ -51,6 +102,10 @@ export function QuizManager() {
   const [selectedTrainingId, setSelectedTrainingId] = useState("");
   const [selectedTrailId, setSelectedTrailId] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkPreview, setBulkPreview] = useState<ParsedQuestion[]>([]);
+  const [bulkImporting, setBulkImporting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // New question form
@@ -207,6 +262,45 @@ export function QuizManager() {
     setDeleteConfirmId(null);
   };
 
+  const handleBulkPreview = () => {
+    const parsed = parseBulkText(bulkText);
+    setBulkPreview(parsed);
+  };
+
+  const handleBulkImport = async () => {
+    if (bulkPreview.length === 0) return;
+    setBulkImporting(true);
+    const currentQuestionsList = activeTab === "quiz" ? quizQuestions : examQuestions;
+    let startIndex = currentQuestionsList.length;
+    try {
+      for (const q of bulkPreview) {
+        if (activeTab === "quiz" && selectedTrainingId) {
+          await saveQuizQuestion.mutateAsync({
+            trainingId: selectedTrainingId,
+            question: { question_text: q.question_text, question_type: q.question_type, order_index: startIndex },
+            options: q.options,
+          });
+        } else if (activeTab === "exam" && selectedTrailId) {
+          await saveExamQuestion.mutateAsync({
+            trailId: selectedTrailId,
+            question: { question_text: q.question_text, question_type: q.question_type, order_index: startIndex },
+            options: q.options,
+          });
+        }
+        startIndex++;
+      }
+      toast.success(`${bulkPreview.length} pergunta(s) importada(s) com sucesso!`);
+      if (activeTab === "quiz") refetchQuiz(); else refetchExam();
+      setBulkDialogOpen(false);
+      setBulkText("");
+      setBulkPreview([]);
+    } catch (err) {
+      toast.error("Erro ao importar perguntas.");
+    } finally {
+      setBulkImporting(false);
+    }
+  };
+
   const selectedTraining = trainings.find((t) => t.id === selectedTrainingId);
   const selectedTrail = trails.find((t) => t.id === selectedTrailId);
   const currentQuestions = activeTab === "quiz" ? quizQuestions : examQuestions;
@@ -243,9 +337,14 @@ export function QuizManager() {
                   </SelectContent>
                 </Select>
                 {canAdd && (
-                  <Button size="sm" onClick={handleOpenAddDialog}>
-                    <Plus className="h-4 w-4 mr-1" /> Pergunta
-                  </Button>
+                  <>
+                    <Button size="sm" variant="outline" onClick={() => { setBulkText(""); setBulkPreview([]); setBulkDialogOpen(true); }}>
+                      <FileText className="h-4 w-4 mr-1" /> Importar Texto
+                    </Button>
+                    <Button size="sm" onClick={handleOpenAddDialog}>
+                      <Plus className="h-4 w-4 mr-1" /> Pergunta
+                    </Button>
+                  </>
                 )}
               </div>
             </CardHeader>
@@ -283,9 +382,14 @@ export function QuizManager() {
                   </SelectContent>
                 </Select>
                 {canAdd && (
-                  <Button size="sm" onClick={handleOpenAddDialog}>
-                    <Plus className="h-4 w-4 mr-1" /> Pergunta
-                  </Button>
+                  <>
+                    <Button size="sm" variant="outline" onClick={() => { setBulkText(""); setBulkPreview([]); setBulkDialogOpen(true); }}>
+                      <FileText className="h-4 w-4 mr-1" /> Importar Texto
+                    </Button>
+                    <Button size="sm" onClick={handleOpenAddDialog}>
+                      <Plus className="h-4 w-4 mr-1" /> Pergunta
+                    </Button>
+                  </>
                 )}
               </div>
             </CardHeader>
@@ -387,7 +491,74 @@ export function QuizManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
+      {/* Bulk Import Dialog */}
+      <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Importar Perguntas por Texto</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+            <div>
+              <Label>Cole o texto com as perguntas e respostas</Label>
+              <Textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                placeholder={`Exemplo:\n\n1. Qual é o parque mais visitado de Orlando?\na) Magic Kingdom (correta)\nb) Epcot\nc) Hollywood Studios\nd) Animal Kingdom\n\n2. O Walt Disney World fica na Flórida?\na) Verdadeiro (correta)\nb) Falso`}
+                className="min-h-[200px] font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Formato: cada pergunta seguida das opções (a, b, c...). Marque a correta com <strong>(correta)</strong> ou <strong>(certa)</strong> ao lado.
+              </p>
+            </div>
+            <Button variant="outline" onClick={handleBulkPreview} disabled={!bulkText.trim()} className="w-full">
+              Pré-visualizar Perguntas
+            </Button>
+
+            {bulkPreview.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium">{bulkPreview.length} pergunta(s) identificada(s):</p>
+                {bulkPreview.map((q, idx) => (
+                  <div key={idx} className="border rounded-lg p-3 space-y-1.5">
+                    <p className="font-medium text-sm">
+                      <span className="text-muted-foreground mr-2">{idx + 1}.</span>
+                      {q.question_text}
+                    </p>
+                    <Badge variant="outline" className="text-xs">
+                      {q.question_type === "single_choice" ? "Escolha Única" : q.question_type === "multiple_choice" ? "Múltipla Escolha" : "V/F"}
+                    </Badge>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1">
+                      {q.options.map((opt, oi) => (
+                        <div
+                          key={oi}
+                          className={`flex items-center gap-2 text-sm px-2 py-1 rounded-md ${
+                            opt.is_correct
+                              ? "bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400"
+                              : "bg-muted/50"
+                          }`}
+                        >
+                          {opt.is_correct ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> : <XCircle className="h-3.5 w-3.5 shrink-0 opacity-30" />}
+                          {opt.option_text}
+                        </div>
+                      ))}
+                    </div>
+                    {!q.options.some(o => o.is_correct) && (
+                      <p className="text-xs text-destructive">⚠ Nenhuma resposta correta identificada nesta pergunta.</p>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  onClick={handleBulkImport}
+                  className="w-full"
+                  disabled={bulkImporting || bulkPreview.some(q => !q.options.some(o => o.is_correct))}
+                >
+                  {bulkImporting ? "Importando..." : `Importar ${bulkPreview.length} Pergunta(s)`}
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
