@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -20,7 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, CheckCircle2, XCircle, GraduationCap } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, XCircle, GraduationCap, FileText } from "lucide-react";
+import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAcademyAdmin } from "@/hooks/useAcademy";
@@ -43,11 +45,56 @@ interface Props {
   trailId: string;
 }
 
+function parseBulkText(text: string) {
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const questions: { question_text: string; question_type: "single_choice" | "multiple_choice" | "true_false"; options: { option_text: string; is_correct: boolean; order_index: number }[] }[] = [];
+  let currentQuestion: string | null = null;
+  let currentOptions: { option_text: string; is_correct: boolean; order_index: number }[] = [];
+
+  const optionRegex = /^([a-eA-E])\s*[).\-]\s*(.+)$/;
+  const correctMarkers = /\s*\(?\s*(correta|certa|Correta|Certa|CORRETA|CERTA|✓|✔|★|\*)\s*\)?\s*$/;
+
+  const flushQuestion = () => {
+    if (currentQuestion && currentOptions.length >= 2) {
+      const isTrueFalse = currentOptions.length === 2 &&
+        currentOptions.some(o => /^(verdadeiro|true|v)$/i.test(o.option_text)) &&
+        currentOptions.some(o => /^(falso|false|f)$/i.test(o.option_text));
+      const correctCount = currentOptions.filter(o => o.is_correct).length;
+      questions.push({
+        question_text: currentQuestion,
+        question_type: isTrueFalse ? "true_false" : correctCount > 1 ? "multiple_choice" : "single_choice",
+        options: currentOptions,
+      });
+    }
+    currentQuestion = null;
+    currentOptions = [];
+  };
+
+  for (const line of lines) {
+    const optMatch = line.match(optionRegex);
+    if (optMatch) {
+      let optText = optMatch[2].trim();
+      const isCorrect = correctMarkers.test(optText);
+      optText = optText.replace(correctMarkers, "").trim();
+      currentOptions.push({ option_text: optText, is_correct: isCorrect, order_index: currentOptions.length });
+    } else {
+      flushQuestion();
+      currentQuestion = line.replace(/^\d+\s*[).\-]\s*/, "").trim();
+    }
+  }
+  flushQuestion();
+  return questions;
+}
+
 export function TrailExamManager({ trailId }: Props) {
   const { saveExamQuestion, deleteExamQuestion } = useAcademyAdmin();
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkPreview, setBulkPreview] = useState<ReturnType<typeof parseBulkText>>([]);
+  const [bulkImporting, setBulkImporting] = useState(false);
   const [questionText, setQuestionText] = useState("");
   const [questionType, setQuestionType] = useState<"single_choice" | "multiple_choice" | "true_false">("single_choice");
   const [options, setOptions] = useState<QuestionOption[]>([
@@ -142,9 +189,14 @@ export function TrailExamManager({ trailId }: Props) {
             <Badge variant="secondary" className="text-xs">{examQuestions.length} perguntas</Badge>
           )}
         </div>
-        <Button size="sm" onClick={() => { resetForm(); setAddDialogOpen(true); }}>
-          <Plus className="h-4 w-4 mr-1" /> Pergunta
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => { setBulkText(""); setBulkPreview([]); setBulkDialogOpen(true); }}>
+            <FileText className="h-4 w-4 mr-1" /> Importar Texto
+          </Button>
+          <Button size="sm" onClick={() => { resetForm(); setAddDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-1" /> Pergunta
+          </Button>
+        </div>
       </div>
 
       {examQuestions.length === 0 ? (
@@ -247,6 +299,84 @@ export function TrailExamManager({ trailId }: Props) {
             >
               Salvar Pergunta
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Import Dialog */}
+      <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Importar Perguntas da Prova Final via Texto</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div>
+              <Label>Cole o texto com as perguntas e respostas</Label>
+              <Textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                placeholder={`1. Qual é a capital da França?\na) Londres\nb) Paris (correta)\nc) Madrid\nd) Roma\n\n2. O Brasil é o maior país da América do Sul?\na) Verdadeiro (correta)\nb) Falso`}
+                className="min-h-[180px] font-mono text-xs"
+              />
+              <p className="text-muted-foreground text-xs mt-1">
+                Marque a resposta certa com <strong>(correta)</strong>, <strong>(certa)</strong> ou <strong>✓</strong>
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => setBulkPreview(parseBulkText(bulkText))} disabled={!bulkText.trim()} className="w-full">
+              Pré-visualizar Perguntas
+            </Button>
+            {bulkPreview.length > 0 && (
+              <div className="space-y-2">
+                <Label>{bulkPreview.length} pergunta(s) identificada(s):</Label>
+                {bulkPreview.map((q, i) => (
+                  <div key={i} className="border rounded p-2 space-y-1 bg-muted/20">
+                    <p className="text-sm font-medium"><span className="text-muted-foreground mr-1">{i + 1}.</span>{q.question_text}</p>
+                    <Badge variant="outline" className="text-xs">
+                      {q.question_type === "single_choice" ? "Escolha Única" : q.question_type === "multiple_choice" ? "Múltipla Escolha" : "V/F"}
+                    </Badge>
+                    <div className="grid grid-cols-1 gap-0.5">
+                      {q.options.map((o, j) => (
+                        <span key={j} className={`text-xs flex items-center gap-1 ${o.is_correct ? "text-green-600 font-semibold" : "text-muted-foreground"}`}>
+                          {o.is_correct ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3 opacity-30" />}
+                          {o.option_text}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <Button
+                  className="w-full"
+                  disabled={bulkImporting || bulkPreview.some(q => !q.options.some(o => o.is_correct))}
+                  onClick={async () => {
+                    setBulkImporting(true);
+                    try {
+                      for (const q of bulkPreview) {
+                        await saveExamQuestion.mutateAsync({
+                          trailId,
+                          question: {
+                            question_text: q.question_text,
+                            question_type: q.question_type,
+                            order_index: examQuestions.length,
+                          },
+                          options: q.options,
+                        });
+                      }
+                      sonnerToast.success(`${bulkPreview.length} perguntas importadas com sucesso!`);
+                      setBulkDialogOpen(false);
+                      setBulkText("");
+                      setBulkPreview([]);
+                      refetch();
+                    } catch {
+                      sonnerToast.error("Erro ao importar perguntas");
+                    } finally {
+                      setBulkImporting(false);
+                    }
+                  }}
+                >
+                  {bulkImporting ? "Importando..." : `Importar ${bulkPreview.length} Perguntas`}
+                </Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
