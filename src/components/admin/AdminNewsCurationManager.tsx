@@ -54,6 +54,9 @@ export function AdminNewsCurationManager() {
   const [editingItem, setEditingItem] = useState<NoticiasDashboard | null>(null);
   const [editForm, setEditForm] = useState({ titulo_curto: "", resumo: "", categoria: "", tipo_exibicao: "" });
   const [filterStatus, setFilterStatus] = useState<string>("pendente");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [filterCategoria, setFilterCategoria] = useState<string>("todas");
+  const [filterFonte, setFilterFonte] = useState<string>("todas");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
