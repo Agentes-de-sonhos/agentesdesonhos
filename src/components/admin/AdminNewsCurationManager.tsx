@@ -62,20 +62,39 @@ export function AdminNewsCurationManager() {
   const { user } = useAuth();
 
   const { data: noticias, isLoading } = useQuery({
-    queryKey: ["admin-noticias-curadas", filterStatus],
+    queryKey: ["admin-noticias-curadas", filterStatus, sortOrder, filterCategoria, filterFonte],
     queryFn: async () => {
       let query = supabase
         .from("noticias_dashboard")
         .select("*")
-        .order("relevancia_score", { ascending: false });
+        .order("data_publicacao", { ascending: sortOrder === "asc" });
 
       if (filterStatus !== "todos") {
         query = query.eq("status", filterStatus);
       }
+      if (filterCategoria !== "todas") {
+        query = query.eq("categoria", filterCategoria);
+      }
+      if (filterFonte !== "todas") {
+        query = query.eq("fonte", filterFonte);
+      }
 
-      const { data, error } = await query.limit(50);
+      const { data, error } = await query.limit(100);
       if (error) throw error;
       return data as NoticiasDashboard[];
+    },
+  });
+
+  // Extract unique sources for filter
+  const { data: fontes } = useQuery({
+    queryKey: ["admin-noticias-fontes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("noticias_dashboard")
+        .select("fonte");
+      if (error) throw error;
+      const unique = [...new Set(data.map((d) => d.fonte))].sort();
+      return unique;
     },
   });
 
