@@ -54,25 +54,47 @@ export function AdminNewsCurationManager() {
   const [editingItem, setEditingItem] = useState<NoticiasDashboard | null>(null);
   const [editForm, setEditForm] = useState({ titulo_curto: "", resumo: "", categoria: "", tipo_exibicao: "" });
   const [filterStatus, setFilterStatus] = useState<string>("pendente");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [filterCategoria, setFilterCategoria] = useState<string>("todas");
+  const [filterFonte, setFilterFonte] = useState<string>("todas");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const { data: noticias, isLoading } = useQuery({
-    queryKey: ["admin-noticias-curadas", filterStatus],
+    queryKey: ["admin-noticias-curadas", filterStatus, sortOrder, filterCategoria, filterFonte],
     queryFn: async () => {
       let query = supabase
         .from("noticias_dashboard")
         .select("*")
-        .order("relevancia_score", { ascending: false });
+        .order("data_publicacao", { ascending: sortOrder === "asc" });
 
       if (filterStatus !== "todos") {
         query = query.eq("status", filterStatus);
       }
+      if (filterCategoria !== "todas") {
+        query = query.eq("categoria", filterCategoria);
+      }
+      if (filterFonte !== "todas") {
+        query = query.eq("fonte", filterFonte);
+      }
 
-      const { data, error } = await query.limit(50);
+      const { data, error } = await query.limit(100);
       if (error) throw error;
       return data as NoticiasDashboard[];
+    },
+  });
+
+  // Extract unique sources for filter
+  const { data: fontes } = useQuery({
+    queryKey: ["admin-noticias-fontes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("noticias_dashboard")
+        .select("fonte");
+      if (error) throw error;
+      const unique = [...new Set(data.map((d) => d.fonte))].sort();
+      return unique;
     },
   });
 
@@ -164,23 +186,12 @@ export function AdminNewsCurationManager() {
 
   return (
     <Card className="border-0 shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-3">
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          Curadoria IA de Notícias
-        </CardTitle>
-        <div className="flex items-center gap-2">
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pendente">Pendentes</SelectItem>
-              <SelectItem value="aprovado">Aprovados</SelectItem>
-              <SelectItem value="rejeitado">Rejeitados</SelectItem>
-              <SelectItem value="todos">Todos</SelectItem>
-            </SelectContent>
-          </Select>
+      <CardHeader className="flex flex-col gap-3">
+        <div className="flex flex-row items-center justify-between flex-wrap gap-3">
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Curadoria IA de Notícias
+          </CardTitle>
           <Button
             size="sm"
             onClick={() => collectMutation.mutate()}
@@ -193,6 +204,50 @@ export function AdminNewsCurationManager() {
             )}
             Coletar Agora
           </Button>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pendente">Pendentes</SelectItem>
+              <SelectItem value="aprovado">Aprovados</SelectItem>
+              <SelectItem value="rejeitado">Rejeitados</SelectItem>
+              <SelectItem value="todos">Todos</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as "asc" | "desc")}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Mais recentes</SelectItem>
+              <SelectItem value="asc">Mais antigas</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterCategoria} onValueChange={setFilterCategoria}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas categorias</SelectItem>
+              {CATEGORIAS.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterFonte} onValueChange={setFilterFonte}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Fonte" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas fontes</SelectItem>
+              {fontes?.map((f) => (
+                <SelectItem key={f} value={f}>{f}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardHeader>
       <CardContent>
