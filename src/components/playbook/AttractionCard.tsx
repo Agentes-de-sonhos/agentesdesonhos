@@ -43,22 +43,24 @@ export function AttractionCard({ attraction }: AttractionCardProps) {
         {attraction.short_description}
       </p>
 
-      {/* Tags */}
-      {attraction.tags && attraction.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {attraction.tags.map((tag) => (
-            <span
-              key={tag}
-              className={cn(
-                "px-2 py-0.5 rounded-md text-[10px] font-semibold border",
-                TAG_STYLES[tag] || "bg-primary/10 text-primary border-primary/20"
-              )}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* Tags - fixed height area for consistency */}
+      <div className="min-h-[28px] mb-3">
+        {attraction.tags && attraction.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {attraction.tags.map((tag) => (
+              <span
+                key={tag}
+                className={cn(
+                  "px-2 py-0.5 rounded-md text-[10px] font-semibold border",
+                  TAG_STYLES[tag] || "bg-primary/10 text-primary border-primary/20"
+                )}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Price */}
       <div className="pt-2.5 border-t border-border/60 flex items-end justify-between">
