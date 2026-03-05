@@ -31,6 +31,7 @@ import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
 import { useUserRole } from "@/hooks/useUserRole";
 import { PlaybookTabContent } from "./PlaybookTabContent";
 import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
+import { PlaybookChecklistTab } from "./PlaybookChecklistTab";
 import { PLAYBOOK_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
 
@@ -149,6 +150,12 @@ export default function PlaybookViewer() {
           {activeTab === 'como_vender' ? (
             <PlaybookComoVenderTab
               section={activeSection}
+              onSaveSection={isAdmin ? handleSaveSection : undefined}
+            />
+          ) : activeTab === 'checklist_final' ? (
+            <PlaybookChecklistTab
+              section={activeSection}
+              destinationSlug={slug || ''}
               onSaveSection={isAdmin ? handleSaveSection : undefined}
             />
           ) : (
