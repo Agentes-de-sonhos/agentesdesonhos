@@ -1,4 +1,4 @@
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
@@ -6,6 +6,8 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import Link from '@tiptap/extension-link';
 import Highlight from '@tiptap/extension-highlight';
+import Image from '@tiptap/extension-image';
+import { IframeEmbed } from './tiptap-iframe-extension';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -15,6 +17,7 @@ import {
   Heading1, Heading2, Heading3,
   List, ListOrdered, Quote, Minus,
   Link as LinkIcon, Highlighter, Palette, Unlink,
+  ImageIcon, Video,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
@@ -35,6 +38,8 @@ interface PlaybookRichTextEditorProps {
 
 export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEditorProps) {
   const [linkUrl, setLinkUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
 
   const editor = useEditor({
     extensions: [
@@ -47,6 +52,13 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
       Color,
       Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary underline' } }),
       Highlight.configure({ multicolor: true }),
+      Image.configure({
+        inline: false,
+        HTMLAttributes: {
+          class: 'rounded-xl max-w-full h-auto shadow-sm mx-auto',
+        },
+      }),
+      IframeEmbed,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -84,6 +96,20 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
     if (linkUrl) {
       editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run();
       setLinkUrl('');
+    }
+  };
+
+  const addImage = () => {
+    if (imageUrl) {
+      editor.chain().focus().setImage({ src: imageUrl }).run();
+      setImageUrl('');
+    }
+  };
+
+  const addVideo = () => {
+    if (videoUrl) {
+      (editor.chain().focus() as any).setIframeEmbed({ src: videoUrl }).run();
+      setVideoUrl('');
     }
   };
 
@@ -228,6 +254,53 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
             <Unlink className="h-4 w-4" />
           </ToolBtn>
         )}
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Image */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Inserir imagem">
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-3" align="start">
+            <p className="text-xs font-medium text-muted-foreground mb-2">URL da imagem</p>
+            <div className="flex gap-2">
+              <Input
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://exemplo.com/foto.jpg"
+                className="h-8 text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && addImage()}
+              />
+              <Button size="sm" className="h-8" onClick={addImage}>Inserir</Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Video embed */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Inserir vídeo externo">
+              <Video className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-3" align="start">
+            <p className="text-xs font-medium text-muted-foreground mb-1">URL do vídeo</p>
+            <p className="text-[10px] text-muted-foreground mb-2">YouTube, Vimeo, Google Drive, Canva, Loom…</p>
+            <div className="flex gap-2">
+              <Input
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className="h-8 text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && addVideo()}
+              />
+              <Button size="sm" className="h-8" onClick={addVideo}>Inserir</Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
       
       {/* Editor */}
