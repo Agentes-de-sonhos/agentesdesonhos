@@ -32,6 +32,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { PlaybookTabContent } from "./PlaybookTabContent";
 import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
 import { PlaybookChecklistTab } from "./PlaybookChecklistTab";
+import { PlaybookPdfSection } from "./PlaybookPdfSection";
 import { PLAYBOOK_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
 
@@ -147,7 +148,23 @@ export default function PlaybookViewer() {
 
         {/* Tab Content */}
         <div className="min-h-[400px]">
-          {activeTab === 'como_vender' ? (
+          {activeTab === 'mapa' ? (
+            <PlaybookPdfSection
+              pdfUrl={activeSection?.content?.pdf_url}
+              onSavePdfUrl={isAdmin ? async (url) => {
+                if (!destination) return;
+                const currentContent = activeSection?.content || {};
+                await upsertSection.mutateAsync({
+                  destination_id: destination.id,
+                  tab_key: activeTab,
+                  title: activeTabData?.label || activeTab,
+                  content: { ...currentContent, pdf_url: url || undefined },
+                  order_index: PLAYBOOK_TABS.findIndex((t) => t.key === activeTab),
+                });
+              } : undefined}
+              tabLabel="Mapa da Cidade"
+            />
+          ) : activeTab === 'como_vender' ? (
             <PlaybookComoVenderTab
               section={activeSection}
               onSaveSection={isAdmin ? handleSaveSection : undefined}
