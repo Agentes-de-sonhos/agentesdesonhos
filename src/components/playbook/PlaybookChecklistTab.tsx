@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Info, CheckSquare, RotateCcw } from "lucide-react";
+import { Info, CheckSquare, RotateCcw, Sparkles, Quote, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { PlaybookSection } from "@/types/playbook";
@@ -372,12 +372,18 @@ function SectionedChecklistDisplay({
 
               {/* Section notes (Dica estratégica, Regra de ouro, etc.) */}
               {section.notes.length > 0 && (
-                <div className="mt-3 p-3 rounded-lg bg-accent/30 border border-border/50">
-                  {section.notes.map((note, nIdx) => (
-                    <p key={nIdx} className="text-xs text-foreground/70 italic leading-relaxed">
-                      {note}
-                    </p>
-                  ))}
+                <div className="mt-3 p-4 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-primary rounded-full" />
+                  <div className="flex items-start gap-2.5 pl-2">
+                    <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      {section.notes.map((note, nIdx) => (
+                        <p key={nIdx} className="text-sm text-foreground/80 font-medium italic leading-relaxed">
+                          {note}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -385,34 +391,49 @@ function SectionedChecklistDisplay({
         })}
       </div>
 
-      {/* Closing blocks */}
+      {/* Closing blocks — premium style */}
       {parsed.closingBlocks.length > 0 && (
-        <div className="space-y-4 mt-4">
+        <div className="space-y-5 mt-6">
           {parsed.closingBlocks.map((block, bIdx) => (
             <div
               key={bIdx}
               className={cn(
-                "rounded-xl border p-4",
+                "rounded-2xl border-2 p-6 relative overflow-hidden",
                 block.type === "quote"
-                  ? "bg-primary/5 border-primary/20"
-                  : "bg-accent/20 border-border"
+                  ? "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/25 shadow-lg shadow-primary/5"
+                  : "bg-gradient-to-br from-accent/40 via-accent/20 to-transparent border-primary/15 shadow-lg shadow-primary/5"
               )}
             >
+              {/* Decorative accent */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-primary/60 to-transparent" />
+
               {block.title && (
-                <h3 className="text-base font-bold text-foreground mb-2">{block.title}</h3>
+                <div className="flex items-center gap-2.5 mb-4">
+                  {block.type === "quote" ? (
+                    <Quote className="h-5 w-5 text-primary shrink-0" />
+                  ) : (
+                    <Trophy className="h-5 w-5 text-primary shrink-0" />
+                  )}
+                  <h3 className="text-lg font-bold text-foreground">{block.title}</h3>
+                </div>
               )}
+
               {block.type === "quote" ? (
-                block.content.map((c, i) => (
-                  <p key={i} className="text-sm text-foreground/80 italic leading-relaxed text-center">
-                    "{c}"
-                  </p>
-                ))
-              ) : (
-                <ul className="space-y-1.5">
+                <div className="pl-4 border-l-3 border-primary/30">
                   {block.content.map((c, i) => (
-                    <li key={i} className="text-sm text-foreground/80 leading-relaxed flex items-start gap-2">
-                      <span className="text-primary mt-0.5">•</span>
-                      {c}
+                    <p key={i} className="text-base text-foreground/85 italic leading-relaxed text-center font-medium">
+                      "{c}"
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <ul className="space-y-2.5">
+                  {block.content.map((c, i) => (
+                    <li key={i} className="text-sm text-foreground/85 leading-relaxed flex items-start gap-3">
+                      <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary/15 text-primary shrink-0 mt-0.5">
+                        <span className="text-xs font-bold">✓</span>
+                      </span>
+                      <span className="font-medium">{c}</span>
                     </li>
                   ))}
                 </ul>
