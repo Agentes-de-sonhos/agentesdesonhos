@@ -33,6 +33,7 @@ import { PlaybookTabContent } from "./PlaybookTabContent";
 import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
 import { PlaybookChecklistTab } from "./PlaybookChecklistTab";
 import { PlaybookPdfSection } from "./PlaybookPdfSection";
+import { AttractionsExplorer } from "./AttractionsExplorer";
 import { PLAYBOOK_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
 
@@ -163,6 +164,12 @@ export default function PlaybookViewer() {
                 });
               } : undefined}
               tabLabel="Mapa da Cidade"
+            />
+          ) : activeTab === 'atracoes' ? (
+            <AttractionsExplorer
+              section={activeSection}
+              destinationName={destination.name}
+              onSaveSection={isAdmin ? handleSaveSection : undefined}
             />
           ) : activeTab === 'como_vender' ? (
             <PlaybookComoVenderTab

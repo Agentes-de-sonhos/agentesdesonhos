@@ -27,6 +27,46 @@ export interface PlaybookContent {
   pdf_url?: string;
   pdf_files?: PlaybookPDFFile[];
   sections?: Record<string, { intro?: string }>;
+  attractions?: PlaybookAttraction[];
+}
+
+export const ATTRACTION_CATEGORIES = [
+  'Observatórios',
+  'Museus',
+  'Passeios de barco',
+  'Passeios aéreos',
+  'Visitas guiadas',
+  'Excursões de um dia',
+  'Espetáculos',
+  'Gastronomia',
+  'Experiências únicas',
+  'Transporte / serviços',
+] as const;
+
+export type AttractionCategory = typeof ATTRACTION_CATEGORIES[number];
+
+export const ATTRACTION_TAGS = [
+  'Imperdível',
+  'Mais vendido',
+  'Experiência premium',
+  'Para primeira viagem',
+] as const;
+
+export type AttractionTag = typeof ATTRACTION_TAGS[number];
+
+export interface PlaybookAttraction {
+  id: string;
+  name: string;
+  short_description: string;
+  category: AttractionCategory;
+  price_from: number;
+  rating: number;
+  image_url: string;
+  tags?: AttractionTag[];
+  // Future fields
+  duration_minutes?: number;
+  neighborhood?: string;
+  traveler_profile?: string;
 }
 
 export interface PlaybookPDFFile {
