@@ -46,7 +46,7 @@ export function AttractionsExplorer({ section, destinationName, onSaveSection }:
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<AttractionCategory | null>(null);
   const [sort, setSort] = useState<SortOption>('rating');
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
 
   // Admin state
   const [editDialog, setEditDialog] = useState(false);
