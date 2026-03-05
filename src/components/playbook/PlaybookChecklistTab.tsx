@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import type { PlaybookSection } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
 import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
+import { PlaybookPdfSection } from "./PlaybookPdfSection";
 import { cn } from "@/lib/utils";
 
 interface PlaybookChecklistTabProps {
@@ -158,6 +159,15 @@ export function PlaybookChecklistTab({
     [onSaveSection, section]
   );
 
+  const handleSavePdfUrl = useCallback(
+    async (url: string | null) => {
+      if (!onSaveSection) return;
+      const currentContent = section?.content || {};
+      await onSaveSection({ ...currentContent, pdf_url: url || undefined });
+    },
+    [onSaveSection, section]
+  );
+
   const intro = section?.content?.intro || "";
   const parsed = useMemo(() => parseChecklistSections(intro), [intro]);
 
@@ -250,6 +260,13 @@ export function PlaybookChecklistTab({
       {section?.content?.blocks?.map((block) => (
         <BlockRenderer key={block.id} block={block} />
       ))}
+
+      {/* Optional PDF section */}
+      <PlaybookPdfSection
+        pdfUrl={section?.content?.pdf_url}
+        onSavePdfUrl={onSaveSection ? handleSavePdfUrl : undefined}
+        tabLabel="Checklist Final"
+      />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
 import type { PlaybookSection, PlaybookBlock } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
 import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
+import { PlaybookPdfSection } from "./PlaybookPdfSection";
 import { cn } from "@/lib/utils";
 
 /* ── Fixed section definitions ── */
@@ -145,6 +146,15 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
     [onSaveSection, section]
   );
 
+  const handleSavePdfUrl = useCallback(
+    async (url: string | null) => {
+      if (!onSaveSection) return;
+      const currentContent = section?.content || {};
+      await onSaveSection({ ...currentContent, pdf_url: url || undefined });
+    },
+    [onSaveSection, section]
+  );
+
   if (!section && !hasAnyContent) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -220,13 +230,20 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
       </div>
 
       {/* ── Main content: only the active section ── */}
-      <div className="flex-1 min-w-0 pb-20 lg:pb-6">
+      <div className="flex-1 min-w-0 pb-20 lg:pb-6 space-y-4">
         <SectionCard
           key={activeSection}
           sectionDef={activeDef}
           blocks={sectionBlocks[activeSection] || []}
           intro={sectionIntros[activeSection]}
           onSaveIntro={onSaveSection ? (html) => handleSaveSectionIntro(activeSection, html) : undefined}
+        />
+
+        {/* Optional PDF section */}
+        <PlaybookPdfSection
+          pdfUrl={content?.pdf_url}
+          onSavePdfUrl={onSaveSection ? handleSavePdfUrl : undefined}
+          tabLabel="Como Vender"
         />
       </div>
     </div>
