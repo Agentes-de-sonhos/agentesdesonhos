@@ -19,121 +19,126 @@ interface PlaybookChecklistTabProps {
 interface ChecklistSection {
   title: string;
   items: string[];
+  notes: string[]; // "Dica estratégica", "Regra de ouro", etc.
 }
 
 interface ParsedChecklist {
+  introTitle: string | null;
+  introText: string | null;
   sections: ChecklistSection[];
-  footer: string | null;
+  closingBlocks: ClosingBlock[];
+}
+
+interface ClosingBlock {
+  type: "quote" | "list" | "text";
+  title?: string;
+  content: string[];
 }
 
 /* ── Parsing ── */
-
-/** Detect if a line is a section header like "1. Title", "2. Title", etc. */
-function isSectionHeader(text: string): boolean {
-  return /^\s*\d+[\.\)\-]\s+/.test(text);
-}
-
-/** Detect closing/motivational phrases that should NOT be checklist items */
-function isFooterPhrase(text: string): boolean {
-  const lower = text.toLowerCase();
-  return (
-    lower.includes("resultado de um checklist") ||
-    lower.includes("profissional que segue") ||
-    lower.includes("checklist bem aplicado") ||
-    lower.includes("bom trabalho") ||
-    lower.includes("sucesso nas vendas") ||
-    (text.startsWith("✅") && text.length > 60) ||
-    (text.startsWith("🎯") && text.length > 60) ||
-    (text.startsWith("💡") && text.length > 60)
-  );
-}
-
 function stripTags(html: string): string {
   return html.replace(/<[^>]*>/g, "").trim();
 }
 
 function parseChecklistSections(html: string | undefined): ParsedChecklist {
-  if (!html) return { sections: [], footer: null };
+  if (!html) return { introTitle: null, introText: null, sections: [], closingBlocks: [] };
 
-  // Convert HTML to lines
-  const raw = html
-    .replace(/<\/?(ul|ol)[^>]*>/gi, "")
-    .replace(/<\/li>/gi, "\n")
-    .replace(/<li[^>]*>/gi, "\n")
-    .replace(/<\/p>/gi, "\n")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/h[1-6]>/gi, "\n")
-    .replace(/<h[1-6][^>]*>/gi, "\n");
+  // Split by <hr> to get major blocks
+  const blocks = html.split(/<hr\s*\/?>/i).map((b) => b.trim()).filter(Boolean);
 
-  const lines = raw
-    .split("\n")
-    .map((l) => l.replace(/<[^>]*>/g, "").trim())
-    .filter((l) => l.length > 0);
-
-  if (lines.length === 0) return { sections: [], footer: null };
-
+  let introTitle: string | null = null;
+  let introText: string | null = null;
   const sections: ChecklistSection[] = [];
-  let currentSection: ChecklistSection | null = null;
-  let footer: string | null = null;
+  const closingBlocks: ClosingBlock[] = [];
+  let pastNumberedSections = false;
 
-  for (const line of lines) {
-    // Check if it's a footer/closing phrase
-    if (isFooterPhrase(line)) {
-      footer = line;
-      continue;
-    }
+  for (const block of blocks) {
+    // Extract h1/h2/h3 title from this block
+    const headingMatch = block.match(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/i);
+    const title = headingMatch ? stripTags(headingMatch[1]) : null;
 
-    // Check if it's a section header
-    if (isSectionHeader(line)) {
-      if (currentSection) {
-        sections.push(currentSection);
-      }
-      currentSection = {
-        title: line,
-        items: [],
-      };
-      continue;
-    }
+    // Check if this is a numbered section (e.g., "1. Diagnóstico do Cliente")
+    const isNumbered = title && /^\d+[\.\)\-]\s+/.test(title);
 
-    // It's a regular item
-    if (currentSection) {
-      // Clean leading bullets/dashes
-      const cleaned = line.replace(/^[\-•●◦▪︎▸►→☐☑✓✔\*]\s*/, "").trim();
-      if (cleaned.length > 0) {
-        currentSection.items.push(cleaned);
-      }
+    if (isNumbered && !pastNumberedSections) {
+      // Extract <li> items
+      const liMatches = block.match(/<li[^>]*>([\s\S]*?)<\/li>/gi);
+      const items = liMatches
+        ? liMatches.map((li) => stripTags(li)).filter((t) => t.length > 0)
+        : [];
+
+      // Extract notes (paragraphs outside lists that aren't headings)
+      const withoutHeadingsAndLists = block
+        .replace(/<h[1-3][^>]*>[\s\S]*?<\/h[1-3]>/gi, "")
+        .replace(/<ul[^>]*>[\s\S]*?<\/ul>/gi, "")
+        .replace(/<ol[^>]*>[\s\S]*?<\/ol>/gi, "");
+      const noteLines = stripTags(withoutHeadingsAndLists)
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+
+      sections.push({ title: title!, items, notes: noteLines });
+    } else if (!title && sections.length === 0 && !introTitle) {
+      // Possible intro without heading — skip
+    } else if (title && !isNumbered && sections.length === 0) {
+      // Intro heading + text
+      introTitle = title;
+      const rest = block.replace(/<h[1-3][^>]*>[\s\S]*?<\/h[1-3]>/gi, "");
+      introText = stripTags(rest) || null;
     } else {
-      // No section yet — create a default one
-      currentSection = { title: "", items: [] };
-      const cleaned = line.replace(/^[\-•●◦▪︎▸►→☐☑✓✔\*]\s*/, "").trim();
-      if (cleaned.length > 0) {
-        currentSection.items.push(cleaned);
+      // Post-numbered-sections content (closing blocks)
+      pastNumberedSections = true;
+
+      const hasQuote = /<blockquote/i.test(block);
+      const liMatches = block.match(/<li[^>]*>([\s\S]*?)<\/li>/gi);
+
+      if (hasQuote) {
+        const quoteMatch = block.match(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/i);
+        closingBlocks.push({
+          type: "quote",
+          title: title || undefined,
+          content: quoteMatch ? [stripTags(quoteMatch[1])] : [],
+        });
+      } else if (liMatches && liMatches.length > 0) {
+        const items = liMatches.map((li) => stripTags(li)).filter(Boolean);
+        // Also get trailing paragraph
+        const afterList = block
+          .replace(/<h[1-3][^>]*>[\s\S]*?<\/h[1-3]>/gi, "")
+          .replace(/<ul[^>]*>[\s\S]*?<\/ul>/gi, "")
+          .replace(/<ol[^>]*>[\s\S]*?<\/ol>/gi, "");
+        const trailing = stripTags(afterList);
+        const allContent = [...items];
+        if (trailing) allContent.push(trailing);
+        closingBlocks.push({
+          type: "list",
+          title: title || undefined,
+          content: allContent,
+        });
+      } else if (title) {
+        const rest = block.replace(/<h[1-3][^>]*>[\s\S]*?<\/h[1-3]>/gi, "");
+        closingBlocks.push({
+          type: "text",
+          title,
+          content: stripTags(rest) ? [stripTags(rest)] : [],
+        });
       }
     }
   }
 
-  if (currentSection) {
-    sections.push(currentSection);
-  }
-
-  return { sections, footer };
+  return { introTitle, introText, sections, closingBlocks };
 }
 
 function getStorageKey(slug: string) {
   return `playbook-checklist-${slug}`;
 }
 
-/** Get total item count across all sections */
 function getTotalItems(sections: ChecklistSection[]): number {
   return sections.reduce((sum, s) => sum + s.items.length, 0);
 }
 
-/** Build a global index for an item within a section */
 function getGlobalIndex(sections: ChecklistSection[], sectionIdx: number, itemIdx: number): number {
   let idx = 0;
-  for (let s = 0; s < sectionIdx; s++) {
-    idx += sections[s].items.length;
-  }
+  for (let s = 0; s < sectionIdx; s++) idx += sections[s].items.length;
   return idx + itemIdx;
 }
 
@@ -156,7 +161,6 @@ export function PlaybookChecklistTab({
   const intro = section?.content?.intro || "";
   const parsed = useMemo(() => parseChecklistSections(intro), [intro]);
 
-  // Load checked state from localStorage
   const [checked, setChecked] = useState<Record<number, boolean>>(() => {
     try {
       const saved = localStorage.getItem(storageKey);
@@ -166,31 +170,23 @@ export function PlaybookChecklistTab({
     }
   });
 
-  // Persist to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify(checked));
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, [checked, storageKey]);
 
   const toggleItem = (globalIdx: number) => {
     setChecked((prev) => ({ ...prev, [globalIdx]: !prev[globalIdx] }));
   };
-
   const resetAll = () => setChecked({});
 
   const totalItems = getTotalItems(parsed.sections);
-  const checkedCount = Array.from({ length: totalItems }, (_, i) => i).filter(
-    (i) => checked[i]
-  ).length;
+  const checkedCount = Array.from({ length: totalItems }, (_, i) => i).filter((i) => checked[i]).length;
   const progress = totalItems > 0 ? (checkedCount / totalItems) * 100 : 0;
 
-  const hasContent =
-    intro || (section?.content?.blocks && section.content.blocks.length > 0);
+  const hasContent = intro || (section?.content?.blocks && section.content.blocks.length > 0);
 
-  // Empty state
   if (!section || !hasContent) {
     if (onSaveSection) {
       return (
@@ -198,12 +194,11 @@ export function PlaybookChecklistTab({
           <PlaybookInlineEditor
             content=""
             onSave={handleSaveIntro}
-            placeholder="Cole seu checklist aqui. Seções numeradas (1. Título) serão mantidas como cabeçalhos e os itens abaixo viram checkboxes."
+            placeholder="Cole seu checklist aqui. Seções com H1 numeradas serão mantidas como cabeçalhos."
           />
         </div>
       );
     }
-
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="p-4 rounded-full bg-muted mb-4">
@@ -217,57 +212,41 @@ export function PlaybookChecklistTab({
     );
   }
 
+  const checklistContent = (
+    <SectionedChecklistDisplay
+      parsed={parsed}
+      checked={checked}
+      onToggle={toggleItem}
+      onReset={resetAll}
+      progress={progress}
+      checkedCount={checkedCount}
+      totalItems={totalItems}
+      getGlobalIndex={(sIdx, iIdx) => getGlobalIndex(parsed.sections, sIdx, iIdx)}
+    />
+  );
+
   return (
     <div className="space-y-4">
-      {/* Admin inline editor */}
       {onSaveSection && (
         <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10">
           <CardContent className="pt-5 pb-4">
             <PlaybookInlineEditor
               content={intro}
               onSave={handleSaveIntro}
-              placeholder="Cole o checklist aqui. Seções numeradas serão mantidas como cabeçalhos."
+              placeholder="Cole o checklist aqui."
             >
-              {parsed.sections.length > 0 && (
-                <SectionedChecklistDisplay
-                  parsed={parsed}
-                  checked={checked}
-                  onToggle={toggleItem}
-                  onReset={resetAll}
-                  progress={progress}
-                  checkedCount={checkedCount}
-                  totalItems={totalItems}
-                  getGlobalIndex={(sIdx, iIdx) =>
-                    getGlobalIndex(parsed.sections, sIdx, iIdx)
-                  }
-                />
-              )}
+              {parsed.sections.length > 0 && checklistContent}
             </PlaybookInlineEditor>
           </CardContent>
         </Card>
       )}
 
-      {/* Agent view: interactive checklist */}
       {!onSaveSection && parsed.sections.length > 0 && (
         <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10">
-          <CardContent className="pt-5 pb-4">
-            <SectionedChecklistDisplay
-              parsed={parsed}
-              checked={checked}
-              onToggle={toggleItem}
-              onReset={resetAll}
-              progress={progress}
-              checkedCount={checkedCount}
-              totalItems={totalItems}
-              getGlobalIndex={(sIdx, iIdx) =>
-                getGlobalIndex(parsed.sections, sIdx, iIdx)
-              }
-            />
-          </CardContent>
+          <CardContent className="pt-5 pb-4">{checklistContent}</CardContent>
         </Card>
       )}
 
-      {/* Render remaining blocks */}
       {section?.content?.blocks?.map((block) => (
         <BlockRenderer key={block.id} block={block} />
       ))}
@@ -296,83 +275,149 @@ function SectionedChecklistDisplay({
   getGlobalIndex: (sectionIdx: number, itemIdx: number) => number;
 }) {
   return (
-    <div className="space-y-5">
-      {/* Progress header */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <CheckSquare className="h-5 w-5 text-primary shrink-0" />
-          <span className="text-sm font-semibold text-foreground">
-            {checkedCount} de {totalItems} concluídos
-          </span>
+    <div className="space-y-6">
+      {/* Intro */}
+      {parsed.introTitle && (
+        <div className="text-center mb-2">
+          <h2 className="text-xl font-bold text-foreground mb-1">{parsed.introTitle}</h2>
+          {parsed.introText && (
+            <p className="text-sm text-muted-foreground">{parsed.introText}</p>
+          )}
         </div>
-        {checkedCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs text-muted-foreground gap-1"
-            onClick={onReset}
-          >
-            <RotateCcw className="h-3 w-3" />
-            Resetar
-          </Button>
-        )}
-      </div>
-      <Progress value={progress} className="h-2" />
+      )}
 
-      {/* Sections */}
-      <div className="space-y-6">
-        {parsed.sections.map((section, sIdx) => (
-          <div key={sIdx} className="space-y-1">
-            {/* Section header */}
-            {section.title && (
-              <h3 className="text-base font-bold text-foreground mb-2 mt-1">
-                {section.title}
-              </h3>
-            )}
-
-            {/* Items */}
-            <ul className="space-y-1">
-              {section.items.map((item, iIdx) => {
-                const globalIdx = getGlobalIndex(sIdx, iIdx);
-                const isChecked = !!checked[globalIdx];
-                return (
-                  <li
-                    key={iIdx}
-                    className={cn(
-                      "flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-accent/50",
-                      isChecked && "bg-primary/5"
-                    )}
-                    onClick={() => onToggle(globalIdx)}
-                  >
-                    <Checkbox
-                      checked={isChecked}
-                      onCheckedChange={() => onToggle(globalIdx)}
-                      className="mt-0.5 shrink-0"
-                    />
-                    <span
-                      className={cn(
-                        "text-sm leading-relaxed transition-all duration-200",
-                        isChecked
-                          ? "line-through text-muted-foreground"
-                          : "text-foreground"
-                      )}
-                    >
-                      {item}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+      {/* Progress header */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <CheckSquare className="h-5 w-5 text-primary shrink-0" />
+            <span className="text-sm font-semibold text-foreground">
+              {checkedCount} de {totalItems} concluídos
+            </span>
           </div>
-        ))}
+          {checkedCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-muted-foreground gap-1"
+              onClick={onReset}
+            >
+              <RotateCcw className="h-3 w-3" />
+              Resetar
+            </Button>
+          )}
+        </div>
+        <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Footer phrase */}
-      {parsed.footer && (
-        <div className="mt-4 p-4 rounded-lg bg-accent/30 border border-border">
-          <p className="text-sm text-foreground/80 italic text-center leading-relaxed">
-            {parsed.footer}
-          </p>
+      {/* Numbered sections */}
+      <div className="space-y-6">
+        {parsed.sections.map((section, sIdx) => {
+          const sectionTotal = section.items.length;
+          const sectionChecked = section.items.filter(
+            (_, iIdx) => !!checked[getGlobalIndex(sIdx, iIdx)]
+          ).length;
+          const sectionDone = sectionTotal > 0 && sectionChecked === sectionTotal;
+
+          return (
+            <div
+              key={sIdx}
+              className={cn(
+                "rounded-xl border p-4 transition-all duration-300",
+                sectionDone
+                  ? "border-primary/30 bg-primary/5"
+                  : "border-border bg-card"
+              )}
+            >
+              {/* Section header */}
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-bold text-foreground">{section.title}</h3>
+                <span className="text-xs text-muted-foreground font-medium">
+                  {sectionChecked}/{sectionTotal}
+                </span>
+              </div>
+
+              {/* Checklist items */}
+              <ul className="space-y-1 mb-1">
+                {section.items.map((item, iIdx) => {
+                  const globalIdx = getGlobalIndex(sIdx, iIdx);
+                  const isChecked = !!checked[globalIdx];
+                  return (
+                    <li
+                      key={iIdx}
+                      className={cn(
+                        "flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-all duration-200 hover:bg-accent/50",
+                        isChecked && "bg-primary/5"
+                      )}
+                      onClick={() => onToggle(globalIdx)}
+                    >
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() => onToggle(globalIdx)}
+                        className="mt-0.5 shrink-0"
+                      />
+                      <span
+                        className={cn(
+                          "text-sm leading-relaxed transition-all duration-200",
+                          isChecked ? "line-through text-muted-foreground" : "text-foreground"
+                        )}
+                      >
+                        {item}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {/* Section notes (Dica estratégica, Regra de ouro, etc.) */}
+              {section.notes.length > 0 && (
+                <div className="mt-3 p-3 rounded-lg bg-accent/30 border border-border/50">
+                  {section.notes.map((note, nIdx) => (
+                    <p key={nIdx} className="text-xs text-foreground/70 italic leading-relaxed">
+                      {note}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Closing blocks */}
+      {parsed.closingBlocks.length > 0 && (
+        <div className="space-y-4 mt-4">
+          {parsed.closingBlocks.map((block, bIdx) => (
+            <div
+              key={bIdx}
+              className={cn(
+                "rounded-xl border p-4",
+                block.type === "quote"
+                  ? "bg-primary/5 border-primary/20"
+                  : "bg-accent/20 border-border"
+              )}
+            >
+              {block.title && (
+                <h3 className="text-base font-bold text-foreground mb-2">{block.title}</h3>
+              )}
+              {block.type === "quote" ? (
+                block.content.map((c, i) => (
+                  <p key={i} className="text-sm text-foreground/80 italic leading-relaxed text-center">
+                    "{c}"
+                  </p>
+                ))
+              ) : (
+                <ul className="space-y-1.5">
+                  {block.content.map((c, i) => (
+                    <li key={i} className="text-sm text-foreground/80 leading-relaxed flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
