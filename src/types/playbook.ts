@@ -94,6 +94,7 @@ export const PLAYBOOK_TABS = [
   { key: 'viagens_combinadas', label: 'Viagens Combinadas', icon: 'Route' },
   { key: 'segredos_destino', label: 'Segredos do Destino', icon: 'Lightbulb' },
   { key: 'alertas_golpes', label: 'Alertas e Golpes', icon: 'AlertTriangle' },
+  { key: 'mapa', label: 'Mapa', icon: 'MapPin' },
   { key: 'checklist_final', label: 'Checklist Final', icon: 'CheckSquare' },
 ] as const;
 
