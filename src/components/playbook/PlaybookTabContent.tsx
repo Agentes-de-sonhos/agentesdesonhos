@@ -3,6 +3,7 @@ import { Info } from "lucide-react";
 import type { PlaybookSection } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
 import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
+import { PlaybookPdfSection } from "./PlaybookPdfSection";
 import { useCallback } from "react";
 
 interface PlaybookTabContentProps {
@@ -21,8 +22,19 @@ export function PlaybookTabContent({ section, tabLabel, onSaveSection }: Playboo
     [onSaveSection, section]
   );
 
-  if (!section || (!section.content.intro && (!section.content.blocks || section.content.blocks.length === 0))) {
-    // Show empty state but still allow admin to add content via inline editor
+  const handleSavePdfUrl = useCallback(
+    async (url: string | null) => {
+      if (!onSaveSection) return;
+      const currentContent = section?.content || {};
+      await onSaveSection({ ...currentContent, pdf_url: url || undefined });
+    },
+    [onSaveSection, section]
+  );
+
+  const pdfUrl = section?.content?.pdf_url;
+  const hasTextContent = section?.content?.intro || (section?.content?.blocks && section.content.blocks.length > 0);
+
+  if (!section || (!hasTextContent && !pdfUrl)) {
     if (onSaveSection) {
       return (
         <div className="space-y-4">
@@ -30,6 +42,11 @@ export function PlaybookTabContent({ section, tabLabel, onSaveSection }: Playboo
             content=""
             onSave={handleSaveIntro}
             placeholder={`Clique em "Editar" para adicionar conteúdo à aba ${tabLabel}.`}
+          />
+          <PlaybookPdfSection
+            pdfUrl={undefined}
+            onSavePdfUrl={handleSavePdfUrl}
+            tabLabel={tabLabel}
           />
         </div>
       );
@@ -79,6 +96,13 @@ export function PlaybookTabContent({ section, tabLabel, onSaveSection }: Playboo
       {section.content.blocks?.map((block) => (
         <BlockRenderer key={block.id} block={block} />
       ))}
+
+      {/* Optional PDF section */}
+      <PlaybookPdfSection
+        pdfUrl={pdfUrl}
+        onSavePdfUrl={onSaveSection ? handleSavePdfUrl : undefined}
+        tabLabel={tabLabel}
+      />
     </div>
   );
 }
