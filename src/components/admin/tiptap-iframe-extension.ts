@@ -7,29 +7,33 @@ import { Node, mergeAttributes } from '@tiptap/react';
 
 function normalizeVideoUrl(url: string): string {
   if (!url) return '';
+  const trimmed = url.trim();
   // YouTube
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  const ytMatch = trimmed.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
   // Vimeo
-  const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+  const vimeoMatch = trimmed.match(/(?:vimeo\.com\/)(\d+)/);
   if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
   // Google Drive
-  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const driveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (driveMatch) return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
-  // Canva – if it's already an embed or a design link, try to make it embeddable
-  if (url.includes('canva.com')) {
-    // If it's already /watch or /embed, keep as-is
-    if (url.includes('/watch') || url.includes('/embed')) return url;
-    // Convert /design/ links to /watch
-    const canvaDesign = url.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)/);
-    if (canvaDesign) return url.replace('/design/', '/design/').replace(/\?.*$/, '') + '/watch';
-    return url;
+  // Canva – convert /watch or /design links to embeddable format
+  if (trimmed.includes('canva.com')) {
+    // Extract the design ID
+    const designMatch = trimmed.match(/canva\.com\/design\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)/);
+    if (designMatch) {
+      // Use the Canva embed URL format
+      return `https://www.canva.com/design/${designMatch[1]}/${designMatch[2]}/view?embed`;
+    }
+    // Already an embed URL
+    if (trimmed.includes('/embed') || trimmed.includes('?embed')) return trimmed;
+    return trimmed;
   }
   // Loom
-  if (url.includes('loom.com/share/')) {
-    return url.replace('/share/', '/embed/');
+  if (trimmed.includes('loom.com/share/')) {
+    return trimmed.replace('/share/', '/embed/');
   }
-  return url;
+  return trimmed;
 }
 
 export const IframeEmbed = Node.create({
@@ -50,6 +54,13 @@ export const IframeEmbed = Node.create({
     return [
       {
         tag: 'div[data-iframe-embed]',
+        getAttrs: (node: HTMLElement) => {
+          const iframe = node.querySelector('iframe');
+          return {
+            src: iframe?.getAttribute('src') || null,
+            title: iframe?.getAttribute('title') || 'Vídeo incorporado',
+          };
+        },
       },
     ];
   },
