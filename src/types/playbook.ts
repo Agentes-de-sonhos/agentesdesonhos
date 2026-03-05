@@ -88,6 +88,7 @@ export const PLAYBOOK_TABS = [
   { key: 'pacote_ideal', label: 'Pacote Ideal', icon: 'Package' },
   { key: 'documentacao', label: 'Documentação', icon: 'FileText' },
   { key: 'logistica_aerea', label: 'Logística Aérea', icon: 'Plane' },
+  { key: 'logistica_terrestre', label: 'Logística Terrestre', icon: 'Car' },
   { key: 'hospedagem', label: 'Hospedagem', icon: 'Hotel' },
   { key: 'atracoes', label: 'Atrações', icon: 'Camera' },
   { key: 'gastronomia', label: 'Gastronomia', icon: 'UtensilsCrossed' },
