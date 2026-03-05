@@ -354,6 +354,7 @@ function SectionedChecklistDisplay({
                       <Checkbox
                         checked={isChecked}
                         onCheckedChange={() => onToggle(globalIdx)}
+                        onClick={(e) => e.stopPropagation()}
                         className="mt-0.5 shrink-0"
                       />
                       <span
