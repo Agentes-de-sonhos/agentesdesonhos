@@ -152,6 +152,12 @@ export default function PlaybookViewer() {
               section={activeSection}
               onSaveSection={isAdmin ? handleSaveSection : undefined}
             />
+          ) : activeTab === 'checklist_final' ? (
+            <PlaybookChecklistTab
+              section={activeSection}
+              destinationSlug={slug || ''}
+              onSaveSection={isAdmin ? handleSaveSection : undefined}
+            />
           ) : (
             <PlaybookTabContent
               section={activeSection}
