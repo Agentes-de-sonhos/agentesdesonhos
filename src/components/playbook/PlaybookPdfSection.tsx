@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FileText, Plus, Trash2 } from "lucide-react";
+import { FileText, Plus, Trash2, Upload, Loader2 } from "lucide-react";
 import { PlaybookPDFViewer } from "./PlaybookPDFViewer";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PlaybookPdfSectionProps {
   pdfUrl: string | undefined;
@@ -11,106 +11,132 @@ interface PlaybookPdfSectionProps {
   tabLabel?: string;
 }
 
-/**
- * Optional PDF section for any playbook tab.
- * Admin: shows input to add/remove PDF URL.
- * Agent: shows the PDF viewer if a URL exists.
- */
-export function PlaybookPdfSection({ pdfUrl, onSavePdfUrl, tabLabel }: PlaybookPdfSectionProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [urlInput, setUrlInput] = useState(pdfUrl || "");
-  const [saving, setSaving] = useState(false);
+function sanitizeFileName(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
+}
 
-  const handleSave = useCallback(async () => {
+export function PlaybookPdfSection({ pdfUrl, onSavePdfUrl, tabLabel }: PlaybookPdfSectionProps) {
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = useCallback(async (file: File) => {
     if (!onSavePdfUrl) return;
-    setSaving(true);
-    try {
-      await onSavePdfUrl(urlInput.trim() || null);
-      setIsEditing(false);
-    } finally {
-      setSaving(false);
+    if (!file.type.includes("pdf")) {
+      toast.error("Por favor, selecione um arquivo PDF.");
+      return;
     }
-  }, [onSavePdfUrl, urlInput]);
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("O arquivo deve ter no máximo 20MB.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const safeName = sanitizeFileName(file.name);
+      const path = `pdfs/${Date.now()}_${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("playbook-files")
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("playbook-files")
+        .getPublicUrl(path);
+
+      await onSavePdfUrl(urlData.publicUrl);
+      toast.success("PDF enviado com sucesso!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erro ao enviar PDF: " + (err.message || "Tente novamente."));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [onSavePdfUrl]);
 
   const handleRemove = useCallback(async () => {
     if (!onSavePdfUrl) return;
     setSaving(true);
     try {
       await onSavePdfUrl(null);
-      setUrlInput("");
-      setIsEditing(false);
     } finally {
       setSaving(false);
     }
   }, [onSavePdfUrl]);
 
+  const hiddenInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept=".pdf,application/pdf"
+      className="hidden"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) handleUpload(file);
+      }}
+    />
+  );
+
   // Admin mode
   if (onSavePdfUrl) {
-    if (!pdfUrl && !isEditing) {
+    if (!pdfUrl) {
       return (
-        <Button
-          variant="outline"
-          className="w-full border-dashed border-2 h-14 text-muted-foreground hover:text-foreground hover:border-primary/40 gap-2"
-          onClick={() => setIsEditing(true)}
-        >
-          <Plus className="h-4 w-4" />
-          <FileText className="h-4 w-4" />
-          Adicionar PDF a esta aba
-        </Button>
+        <>
+          {hiddenInput}
+          <Button
+            variant="outline"
+            className="w-full border-dashed border-2 h-14 text-muted-foreground hover:text-foreground hover:border-primary/40 gap-2"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Enviando PDF...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                <FileText className="h-4 w-4" />
+                Adicionar PDF a esta aba
+              </>
+            )}
+          </Button>
+        </>
       );
     }
 
-    if (isEditing || (!pdfUrl && isEditing)) {
-      return (
-        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-          <Label className="text-sm font-medium">URL do PDF</Label>
-          <div className="flex gap-2">
-            <Input
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="https://exemplo.com/documento.pdf"
-              className="flex-1"
-            />
-            <Button onClick={handleSave} disabled={saving} size="sm">
-              {saving ? "Salvando..." : "Salvar"}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setIsEditing(false);
-                setUrlInput(pdfUrl || "");
-              }}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
-    // Has PDF — show viewer with edit/remove controls
+    // Has PDF — show viewer with replace/remove controls
     return (
       <div className="space-y-2">
+        {hiddenInput}
         <div className="flex items-center justify-end gap-2">
           <Button
             variant="outline"
             size="sm"
             className="h-7 text-xs gap-1"
-            onClick={() => {
-              setUrlInput(pdfUrl || "");
-              setIsEditing(true);
-            }}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
           >
-            <FileText className="h-3 w-3" />
-            Alterar PDF
+            {uploading ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Upload className="h-3 w-3" />
+            )}
+            {uploading ? "Enviando..." : "Substituir PDF"}
           </Button>
           <Button
             variant="ghost"
             size="sm"
             className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
             onClick={handleRemove}
-            disabled={saving}
+            disabled={saving || uploading}
           >
             <Trash2 className="h-3 w-3" />
             Remover
@@ -125,7 +151,7 @@ export function PlaybookPdfSection({ pdfUrl, onSavePdfUrl, tabLabel }: PlaybookP
     );
   }
 
-  // Agent mode — only show viewer if there's a PDF
+  // Agent mode
   if (!pdfUrl) return null;
 
   return (
