@@ -136,6 +136,27 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // 0. Cleanup: delete news older than 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    
+    const { data: deletedDashboard, error: delDashErr } = await supabase
+      .from("noticias_dashboard")
+      .delete()
+      .lt("data_publicacao", twentyFourHoursAgo)
+      .select("id");
+    
+    if (delDashErr) console.error("Error cleaning dashboard news:", delDashErr);
+    else console.log(`Cleaned ${deletedDashboard?.length || 0} old dashboard news`);
+
+    const { data: deletedBrutas, error: delBrutErr } = await supabase
+      .from("noticias_brutas")
+      .delete()
+      .lt("data_coleta", twentyFourHoursAgo)
+      .select("id");
+    
+    if (delBrutErr) console.error("Error cleaning raw news:", delBrutErr);
+    else console.log(`Cleaned ${deletedBrutas?.length || 0} old raw news`);
+
     // 1. Fetch RSS feeds
     const allNews: RawNewsItem[] = [];
     for (const source of RSS_SOURCES) {
