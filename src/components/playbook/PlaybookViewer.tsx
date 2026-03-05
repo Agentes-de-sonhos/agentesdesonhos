@@ -33,6 +33,7 @@ import { PlaybookTabContent } from "./PlaybookTabContent";
 import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
 import { PlaybookChecklistTab } from "./PlaybookChecklistTab";
 import { PlaybookPdfSection } from "./PlaybookPdfSection";
+import { AttractionsExplorer } from "./AttractionsExplorer";
 import { PLAYBOOK_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
 
