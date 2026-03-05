@@ -18,7 +18,7 @@ export function AttractionCard({ attraction }: AttractionCardProps) {
   const hasPrice = attraction.price_from > 0;
 
   return (
-    <div className="group relative rounded-xl border border-border bg-card p-4 hover:border-primary/30 hover:shadow-md transition-all duration-200">
+    <div className="group relative rounded-xl border border-border bg-card p-4 hover:border-primary/30 hover:shadow-md transition-all duration-200 h-full flex flex-col">
       {/* Top row: Category + Rating */}
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -39,7 +39,7 @@ export function AttractionCard({ attraction }: AttractionCardProps) {
       </h3>
 
       {/* Description */}
-      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3">
+      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3 flex-1">
         {attraction.short_description}
       </p>
 
