@@ -137,7 +137,7 @@ function parseRow(row: Record<string, any>, headerMap: Record<string, string>): 
     }
   }
 
-  if (!mapped.name || !mapped.destination) return null;
+  if (!mapped.name) return null;
   if (!mapped.country) mapped.country = "";
   return mapped;
 }
@@ -145,6 +145,7 @@ function parseRow(row: Record<string, any>, headerMap: Record<string, string>): 
 export function AdminHotelsManager() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; failed: number } | null>(null);
+  const [importDestination, setImportDestination] = useState("");
   const queryClient = useQueryClient();
 
   const { data: hotels, isLoading } = useQuery({
