@@ -50,8 +50,7 @@ export function HotelCard({ hotel }: HotelCardProps) {
 
   const activeAmenities = AMENITY_KEYS.filter((a) => hotel[a.key as keyof Hotel] === true);
   const tags = [
-    hotel.favorite_brazilians && { label: "Favorito dos Brasileiros", icon: "⭐", color: "bg-warning/10 text-warning border-warning/20" },
-    hotel.most_booked_brazilians && { label: "Mais reservado", icon: "🔥", color: "bg-destructive/10 text-destructive border-destructive/20" },
+    hotel.favorite_brazilians && { label: "Mais Procurado por Brasileiros", icon: "⭐", color: "bg-warning/10 text-warning border-warning/20" },
     hotel.iconic_hotel && { label: "Hotel Icônico", icon: "🏆", color: "bg-primary/10 text-primary border-primary/20" },
   ].filter(Boolean) as { label: string; icon: string; color: string }[];
 
