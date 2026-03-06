@@ -21,6 +21,7 @@ import {
   Calculator,
   Heart,
   Kanban,
+  Target,
   StickyNote,
   Wrench,
   Briefcase,
