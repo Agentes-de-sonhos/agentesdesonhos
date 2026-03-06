@@ -16,6 +16,7 @@ import {
   Megaphone,
   BookOpen,
   Sparkles,
+  Building2,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -30,6 +31,7 @@ import { AdminUserManager } from "@/components/admin/AdminUserManager";
 import { AdminPopupsManager } from "@/components/admin/AdminPopupsManager";
 import { AdminPlaybookManager } from "@/components/admin/AdminPlaybookManager";
 import { AdminNewsCurationManager } from "@/components/admin/AdminNewsCurationManager";
+import { AdminHotelsManager } from "@/components/admin/AdminHotelsManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -161,6 +163,10 @@ export default function Admin() {
               <Newspaper className="h-4 w-4" />
               <span className="hidden sm:inline">Notícias</span>
             </TabsTrigger>
+            <TabsTrigger value="hotels" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Hotéis</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -210,6 +216,10 @@ export default function Admin() {
 
           <TabsContent value="curadoria">
             <AdminNewsCurationManager />
+          </TabsContent>
+
+          <TabsContent value="hotels">
+            <AdminHotelsManager />
           </TabsContent>
         </Tabs>
       </div>
