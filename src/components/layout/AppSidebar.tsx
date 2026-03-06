@@ -170,8 +170,6 @@ function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = f
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
-  const [toolsOpen, setToolsOpen] = useState(false);
-  const [clientsOpen, setClientsOpen] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -180,9 +178,7 @@ export function AppSidebar() {
   const { hasFeature, plan } = useSubscription();
 
   // Auto-open sections if current route is inside them
-  const isInTools = toolsItems.some((i) => location.pathname === i.url);
-  const isInClients = clientManagementItems.some((i) => location.pathname.startsWith(i.url));
-  const isInPremium = premiumMenuItems.some((i) => location.pathname === i.url);
+  const isInPremium = premiumMenuItems.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
 
   const handleMenuClick = useCallback((item: MenuItem, e: React.MouseEvent) => {
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
