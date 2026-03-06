@@ -318,6 +318,16 @@ export function AdminHotelsManager() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Destino (usado se a planilha não tiver coluna "Destination")</label>
+            <input
+              type="text"
+              placeholder="Ex: New York, Paris, Orlando..."
+              value={importDestination}
+              onChange={(e) => setImportDestination(e.target.value)}
+              className="flex h-10 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
           <div className="flex flex-wrap gap-3">
             <label>
               <input
