@@ -63,21 +63,13 @@ const mainMenuItems: MenuItem[] = [
   { title: "Notícias", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
 ];
 
-// Ferramentas - collapsible
-const toolsItems: MenuItem[] = [
+// Recursos Premium - collapsible (all tools, client management, and premium items)
+const premiumMenuItems: MenuItem[] = [
   { title: "Minha Agenda", url: "/agenda", icon: Calendar, requiredFeature: "agenda" },
   { title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote },
-];
-
-// Gestão de Clientes - collapsible
-const clientManagementItems: MenuItem[] = [
   { title: "Cadastrar Cliente", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
   { title: "Oportunidades", url: "/gestao-clientes/funil", icon: Kanban, requiredFeature: "crm_basic" },
   { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Target, requiredFeature: "crm_basic" },
-];
-
-// Recursos Premium - collapsible (includes Mentorias)
-const premiumMenuItems: MenuItem[] = [
   { title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
   { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
   { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools" },
@@ -178,8 +170,6 @@ function CollapsibleSection({ title, icon: Icon, items, collapsed, isPremium = f
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
-  const [toolsOpen, setToolsOpen] = useState(false);
-  const [clientsOpen, setClientsOpen] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -188,9 +178,7 @@ export function AppSidebar() {
   const { hasFeature, plan } = useSubscription();
 
   // Auto-open sections if current route is inside them
-  const isInTools = toolsItems.some((i) => location.pathname === i.url);
-  const isInClients = clientManagementItems.some((i) => location.pathname.startsWith(i.url));
-  const isInPremium = premiumMenuItems.some((i) => location.pathname === i.url);
+  const isInPremium = premiumMenuItems.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
 
   const handleMenuClick = useCallback((item: MenuItem, e: React.MouseEvent) => {
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
@@ -375,34 +363,6 @@ export function AppSidebar() {
           <div className="px-3 py-2">
             <Separator className="bg-sidebar-border" />
           </div>
-
-          {/* Ferramentas - collapsible */}
-          <CollapsibleSection
-            title="Ferramentas"
-            icon={Wrench}
-            items={toolsItems}
-            collapsed={collapsed}
-            colorScheme="tools"
-            renderMenuItem={renderMenuItem}
-            renderPopoverMenuItem={renderPopoverMenuItem}
-            isOpen={toolsOpen || isInTools}
-            onToggle={() => setToolsOpen(!toolsOpen)}
-            isActiveSection={isInTools}
-          />
-
-          {/* Gestão de Clientes - collapsible */}
-          <CollapsibleSection
-            title="Gestão de Clientes"
-            icon={Briefcase}
-            items={clientManagementItems}
-            collapsed={collapsed}
-            colorScheme="clients"
-            renderMenuItem={renderMenuItem}
-            renderPopoverMenuItem={renderPopoverMenuItem}
-            isOpen={clientsOpen || isInClients}
-            onToggle={() => setClientsOpen(!clientsOpen)}
-            isActiveSection={isInClients}
-          />
 
           {/* Recursos Premium - collapsible */}
           <CollapsibleSection
