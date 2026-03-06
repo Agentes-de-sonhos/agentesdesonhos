@@ -148,57 +148,10 @@ export function HotelCard({ hotel }: HotelCardProps) {
                 )}
               </div>
 
-              {/* Recommendation actions */}
-              <div className="flex items-center gap-2 pt-1 flex-wrap">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={alreadyRecommended ? "secondary" : "outline"}
-                      size="sm"
-                      className="h-7 text-xs gap-1.5"
-                      disabled={alreadyRecommended}
-                      onClick={() => { setRecDialogType("recommend"); setRecDialogOpen(true); }}
-                    >
-                      <ThumbsUp className="h-3.5 w-3.5" />
-                      {alreadyRecommended ? "Recomendado" : "Recomendar"}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {alreadyRecommended ? "Você já recomendou este hotel" : "Recomendar este hotel"}
-                  </TooltipContent>
-                </Tooltip>
-
-                {(recCount ?? 0) > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs gap-1.5 text-primary"
-                    onClick={() => setViewRecsOpen(true)}
-                  >
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    {recCount} {recCount === 1 ? "recomendação" : "recomendações"}
-                  </Button>
-                )}
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs gap-1.5 text-destructive/70 hover:text-destructive"
-                      onClick={() => { setRecDialogType("remove"); setRecDialogOpen(true); }}
-                    >
-                      <ThumbsDown className="h-3.5 w-3.5" />
-                      Sugerir remoção
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Solicitar remoção deste hotel</TooltipContent>
-                </Tooltip>
-              </div>
             </div>
 
-            {/* Price */}
-            <div className="sm:text-right sm:min-w-[120px] flex sm:flex-col items-center sm:items-end gap-1">
+            {/* Price + Actions */}
+            <div className="sm:text-right sm:min-w-[120px] flex sm:flex-col items-center sm:items-end gap-2">
               {hotel.price_from != null && (
                 <>
                   <span className="text-xs text-muted-foreground">a partir de</span>
@@ -207,6 +160,48 @@ export function HotelCard({ hotel }: HotelCardProps) {
                   </span>
                 </>
               )}
+              <div className="flex items-center gap-1.5 mt-1">
+                {(recCount ?? 0) > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-primary"
+                    onClick={() => setViewRecsOpen(true)}
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                  </Button>
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-7 w-7 ${alreadyRecommended ? 'text-success/50' : 'text-success hover:text-success hover:bg-success/10'}`}
+                      disabled={alreadyRecommended}
+                      onClick={() => { setRecDialogType("recommend"); setRecDialogOpen(true); }}
+                    >
+                      <ThumbsUp className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {alreadyRecommended ? "Você já recomendou" : "Recomendar"}
+                    {(recCount ?? 0) > 0 && ` (${recCount})`}
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive/60 hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => { setRecDialogType("remove"); setRecDialogOpen(true); }}
+                    >
+                      <ThumbsDown className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Sugerir remoção</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
         </CardContent>
