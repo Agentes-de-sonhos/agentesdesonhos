@@ -63,21 +63,13 @@ const mainMenuItems: MenuItem[] = [
   { title: "Notícias", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
 ];
 
-// Ferramentas - collapsible
-const toolsItems: MenuItem[] = [
+// Recursos Premium - collapsible (all tools, client management, and premium items)
+const premiumMenuItems: MenuItem[] = [
   { title: "Minha Agenda", url: "/agenda", icon: Calendar, requiredFeature: "agenda" },
   { title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote },
-];
-
-// Gestão de Clientes - collapsible
-const clientManagementItems: MenuItem[] = [
   { title: "Cadastrar Cliente", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
   { title: "Oportunidades", url: "/gestao-clientes/funil", icon: Kanban, requiredFeature: "crm_basic" },
   { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Target, requiredFeature: "crm_basic" },
-];
-
-// Recursos Premium - collapsible (includes Mentorias)
-const premiumMenuItems: MenuItem[] = [
   { title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
   { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
   { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools" },
