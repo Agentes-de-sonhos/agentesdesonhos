@@ -201,10 +201,19 @@ export function AdminHotelsManager() {
           }
         }
 
-        const parsed = rows.map((r) => parseRow(r, headerMap)).filter(Boolean) as Record<string, any>[];
+        const parsed = rows.map((r) => {
+          const row = parseRow(r, headerMap);
+          if (!row) return null;
+          // Fill destination from input if not in spreadsheet
+          if (!row.destination && importDestination.trim()) {
+            row.destination = importDestination.trim();
+          }
+          if (!row.destination) return null;
+          return row;
+        }).filter(Boolean) as Record<string, any>[];
 
         if (parsed.length === 0) {
-          toast.error("Nenhuma linha válida encontrada. Verifique os cabeçalhos da planilha.");
+          toast.error("Nenhuma linha válida encontrada. Verifique os cabeçalhos e o destino.");
           setImporting(false);
           return;
         }
