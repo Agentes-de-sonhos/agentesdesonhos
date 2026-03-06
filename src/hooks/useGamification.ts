@@ -11,6 +11,33 @@ export interface RankingEntry {
   total_points: number;
 }
 
+// Points configuration
+export const POINTS_CONFIG = {
+  daily_login: 1,
+  ask_question: 2,
+  answer_question: 5,
+  menu_visit: 0.25,
+  earn_certificate: 10,
+} as const;
+
+// Menu sections that earn points
+export const TRACKABLE_SECTIONS: Record<string, string> = {
+  "/mapa-turismo": "Mapa do Turismo",
+  "/educa-academy": "EducaTravel Academy",
+  "/bloqueios-aereos": "Bloqueios Aéreos",
+  "/materiais": "Materiais",
+  "/noticias": "Notícias",
+  "/agenda": "Agenda",
+  "/bloco-notas": "Bloco de Notas",
+  "/gestao-clientes": "Gestão de Clientes",
+  "/ferramentas-ia": "Ferramentas IA",
+  "/comunidade": "Comunidade",
+  "/mentorias": "Mentorias",
+  "/perguntas-respostas": "Perguntas e Respostas",
+  "/financeiro": "Financeiro",
+  "/calculadora": "Calculadora",
+};
+
 export function useGamification() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -33,7 +60,6 @@ export function useGamification() {
     if (!user) return;
     const today = new Date().toISOString().split("T")[0];
 
-    // Check if already logged today
     const { data: existing } = await supabase
       .from("gamification_daily_login")
       .select("id")
@@ -45,9 +71,45 @@ export function useGamification() {
       await supabase
         .from("gamification_daily_login")
         .insert({ user_id: user.id, login_date: today });
-      await awardPoints(1, "daily_login");
+      await awardPoints(POINTS_CONFIG.daily_login, "daily_login");
     }
   }, [user, awardPoints]);
+
+  const trackSectionVisit = useCallback(
+    async (sectionKey: string) => {
+      if (!user) return;
+      // Normalize: match the base path
+      const baseKey = Object.keys(TRACKABLE_SECTIONS).find((k) =>
+        sectionKey.startsWith(k)
+      );
+      if (!baseKey) return;
+
+      const today = new Date().toISOString().split("T")[0];
+
+      // Try insert (unique constraint will prevent duplicates)
+      const { error } = await supabase
+        .from("gamification_daily_visits" as any)
+        .insert({
+          user_id: user.id,
+          visit_date: today,
+          section_key: baseKey,
+        });
+
+      // If no error (not a duplicate), award points
+      if (!error) {
+        await awardPoints(POINTS_CONFIG.menu_visit, "menu_visit", undefined);
+      }
+    },
+    [user, awardPoints]
+  );
+
+  const awardCertificatePoints = useCallback(
+    async (trailId: string) => {
+      if (!user) return;
+      await awardPoints(POINTS_CONFIG.earn_certificate, "earn_certificate", trailId);
+    },
+    [user, awardPoints]
+  );
 
   const myPointsQuery = useQuery({
     queryKey: ["gamification", "my-points", user?.id],
@@ -75,11 +137,44 @@ export function useGamification() {
     enabled: !!user,
   });
 
+  // Latest 5 Q&A questions for dashboard
+  const latestQuestionsQuery = useQuery({
+    queryKey: ["gamification", "latest-questions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("qa_questions")
+        .select("id, title, category, answers_count, is_resolved, created_at, user_id")
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+
+      // Get author names
+      if (!data || data.length === 0) return [];
+      const userIds = [...new Set(data.map((q) => q.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name")
+        .in("user_id", userIds);
+
+      const profileMap = new Map(profiles?.map((p) => [p.user_id, p.name]) || []);
+      return data.map((q) => ({
+        ...q,
+        author_name: profileMap.get(q.user_id) || "Agente",
+      }));
+    },
+    enabled: !!user,
+  });
+
   return {
     awardPoints,
     registerDailyLogin,
+    trackSectionVisit,
+    awardCertificatePoints,
     myPoints: myPointsQuery.data || 0,
     ranking: rankingQuery.data || [],
     isLoadingRanking: rankingQuery.isLoading,
+    latestQuestions: latestQuestionsQuery.data || [],
+    isLoadingQuestions: latestQuestionsQuery.isLoading,
+    POINTS_CONFIG,
   };
 }
