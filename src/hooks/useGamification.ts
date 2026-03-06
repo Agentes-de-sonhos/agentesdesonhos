@@ -36,6 +36,7 @@ export const TRACKABLE_SECTIONS: Record<string, string> = {
   "/perguntas-respostas": "Perguntas e Respostas",
   "/financeiro": "Financeiro",
   "/calculadora": "Calculadora",
+  "/hotel-advisor": "Hotel Advisor",
 };
 
 export function useGamification() {

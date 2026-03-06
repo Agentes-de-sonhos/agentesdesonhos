@@ -16,7 +16,6 @@ import {
   Megaphone,
   BookOpen,
   Sparkles,
-  Building2,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
