@@ -83,7 +83,7 @@ const premiumMenuItems: MenuItem[] = [
   { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools" },
   { title: "Comunidade", url: "/comunidade", icon: Heart, requiredFeature: "community" },
   { title: "Mentorias", url: "/mentorias", icon: GraduationCap },
-  { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: Megaphone, requiredFeature: "qa_forum" },
+  { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
 ];
 
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
