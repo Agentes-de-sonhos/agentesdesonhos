@@ -66,7 +66,7 @@ export const AMENITY_KEYS = [
   { key: "family_friendly", label: "Família", icon: "👨‍👩‍👧‍👦" },
 ] as const;
 
-export const CATEGORY_OPTIONS = ["BBB", "BBB+", "Moderado", "Luxo"];
+export const CATEGORY_OPTIONS = ["Excelente Custo-Benefício", "Bom Custo-Benefício", "Moderado", "Luxo"];
 export const PROPERTY_TYPE_OPTIONS = ["Hotel", "Boutique Hotel", "Resort", "Apartment Hotel", "Luxury Hotel"];
 export const TAG_OPTIONS = [
   { key: "favorite_brazilians", label: "Favorito dos Brasileiros", icon: "⭐" },
