@@ -35,7 +35,8 @@ export type Feature =
   | 'ranking'
   | 'premium_group'
   | 'fam_tours'
-  | 'community';
+  | 'community'
+  | 'qa_forum';
 
 export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   essencial: [
@@ -81,6 +82,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'premium_group',
     'fam_tours',
     'community',
+    'qa_forum',
   ],
 };
 
@@ -122,6 +124,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   ranking: 'Ranking de Engajamento',
   premium_group: 'Grupo Premium',
   fam_tours: 'Fam Tours Exclusivos',
+  qa_forum: 'Perguntas e Respostas',
 };
 
 export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
@@ -144,4 +147,5 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   premium_group: 'premium',
   fam_tours: 'premium',
   community: 'premium',
+  qa_forum: 'premium',
 };

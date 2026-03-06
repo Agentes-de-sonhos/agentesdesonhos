@@ -37,6 +37,7 @@ import Community from "./pages/Community";
 import Mentorias from "./pages/Mentorias";
 import MentoriaDetail from "./pages/MentoriaDetail";
 import PlaybookViewer from "./components/playbook/PlaybookViewer";
+import PerguntasRespostas from "./pages/PerguntasRespostas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -308,6 +309,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PlaybookViewer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/perguntas-respostas"
+              element={
+                <ProtectedRoute>
+                  <PerguntasRespostas />
                 </ProtectedRoute>
               }
             />
