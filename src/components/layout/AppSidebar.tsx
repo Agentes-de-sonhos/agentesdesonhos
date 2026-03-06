@@ -198,12 +198,79 @@ export function AppSidebar() {
   }, [hasFeature]);
 
   const renderMenuItem = (item: MenuItem, isPremiumSection: boolean = false, colorScheme: SidebarColor = 'default') => {
-    const isActive = location.pathname === item.url || 
-      (item.url === "/dashboard" && location.pathname === "/");
+    const isActive = item.subItems 
+      ? item.subItems.some(sub => location.pathname.startsWith(sub.url))
+      : (location.pathname === item.url || (item.url === "/dashboard" && location.pathname === "/"));
     const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
     const showPremiumLock = isPremiumSection && isLocked;
     const cssVar = sidebarColorVar[colorScheme];
     const hoverBg = `hsl(var(${cssVar}))`;
+
+    // If item has subItems, render with hover popover
+    if (item.subItems && !isLocked) {
+      const trigger = (
+        <button
+          key={item.url}
+          className={cn(
+            "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300 w-full",
+            !isActive && "text-sidebar-foreground hover:text-white"
+          )}
+          style={isActive ? { backgroundColor: hoverBg, color: 'white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' } : undefined}
+          onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = hoverBg; }}
+          onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'; }}
+        >
+          <item.icon className={cn("h-5 w-5 flex-shrink-0 transition-all duration-300", !isActive && "group-hover:scale-110 group-hover:text-white", isActive && "text-white")} />
+          {!collapsed && (
+            <>
+              <span className={cn("animate-fade-in truncate transition-colors duration-300", !isActive && "group-hover:text-white", isActive && "text-white")}>
+                {item.title}
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 ml-auto text-muted-foreground/50 flex-shrink-0" />
+            </>
+          )}
+        </button>
+      );
+
+      return (
+        <Popover key={item.url}>
+          <PopoverTrigger asChild>
+            {collapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+                <TooltipContent side="right" style={{ backgroundColor: hoverBg }} className="text-white border-none shadow-lg px-3 py-2">
+                  <p className="text-sm font-medium">{item.title}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : trigger}
+          </PopoverTrigger>
+          <PopoverContent side="right" align="start" className="w-52 p-2" sideOffset={8}>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 px-2 py-1.5">{item.title}</p>
+            <nav className="flex flex-col gap-0.5">
+              {item.subItems.map((sub) => {
+                const subActive = location.pathname.startsWith(sub.url);
+                return (
+                  <Link
+                    key={sub.url}
+                    to={sub.url}
+                    onClick={(e) => { handleMenuClick(sub, e); }}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
+                      subActive ? "text-white" : "text-foreground hover:text-white"
+                    )}
+                    style={subActive ? { backgroundColor: hoverBg, color: 'white' } : undefined}
+                    onMouseEnter={(e) => { if (!subActive) { e.currentTarget.style.backgroundColor = hoverBg; e.currentTarget.style.color = 'white'; } }}
+                    onMouseLeave={(e) => { if (!subActive) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = ''; } }}
+                  >
+                    <sub.icon className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{sub.title}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </PopoverContent>
+        </Popover>
+      );
+    }
 
     const menuLink = (
       <Link
