@@ -38,6 +38,7 @@ import Mentorias from "./pages/Mentorias";
 import MentoriaDetail from "./pages/MentoriaDetail";
 import PlaybookViewer from "./components/playbook/PlaybookViewer";
 import PerguntasRespostas from "./pages/PerguntasRespostas";
+import HotelAdvisor from "./pages/HotelAdvisor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -317,6 +318,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PerguntasRespostas />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hotel-advisor"
+              element={
+                <ProtectedRoute>
+                  <HotelAdvisor />
                 </ProtectedRoute>
               }
             />

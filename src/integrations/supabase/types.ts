@@ -674,6 +674,126 @@ export type Database = {
           },
         ]
       }
+      hotels: {
+        Row: {
+          accessible: boolean
+          address: string | null
+          air_conditioning: boolean
+          bar: boolean
+          brand: string | null
+          breakfast_included: boolean
+          category: string | null
+          city: string | null
+          country: string
+          created_at: string
+          destination: string
+          family_friendly: boolean
+          favorite_brazilians: boolean
+          free_cancellation: boolean
+          free_wifi: boolean
+          google_maps_link: string | null
+          gym: boolean
+          iconic_hotel: boolean
+          id: string
+          is_active: boolean
+          most_booked_brazilians: boolean
+          name: string
+          neighborhood: string | null
+          parking: boolean
+          pet_friendly: boolean
+          pool: boolean
+          price_from: number | null
+          property_type: string | null
+          region: string | null
+          restaurant: boolean
+          review_score: number | null
+          spa: boolean
+          special_offers: boolean
+          star_rating: number | null
+          state: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          accessible?: boolean
+          address?: string | null
+          air_conditioning?: boolean
+          bar?: boolean
+          brand?: string | null
+          breakfast_included?: boolean
+          category?: string | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          destination: string
+          family_friendly?: boolean
+          favorite_brazilians?: boolean
+          free_cancellation?: boolean
+          free_wifi?: boolean
+          google_maps_link?: string | null
+          gym?: boolean
+          iconic_hotel?: boolean
+          id?: string
+          is_active?: boolean
+          most_booked_brazilians?: boolean
+          name: string
+          neighborhood?: string | null
+          parking?: boolean
+          pet_friendly?: boolean
+          pool?: boolean
+          price_from?: number | null
+          property_type?: string | null
+          region?: string | null
+          restaurant?: boolean
+          review_score?: number | null
+          spa?: boolean
+          special_offers?: boolean
+          star_rating?: number | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          accessible?: boolean
+          address?: string | null
+          air_conditioning?: boolean
+          bar?: boolean
+          brand?: string | null
+          breakfast_included?: boolean
+          category?: string | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          destination?: string
+          family_friendly?: boolean
+          favorite_brazilians?: boolean
+          free_cancellation?: boolean
+          free_wifi?: boolean
+          google_maps_link?: string | null
+          gym?: boolean
+          iconic_hotel?: boolean
+          id?: string
+          is_active?: boolean
+          most_booked_brazilians?: boolean
+          name?: string
+          neighborhood?: string | null
+          parking?: boolean
+          pet_friendly?: boolean
+          pool?: boolean
+          price_from?: number | null
+          property_type?: string | null
+          region?: string | null
+          restaurant?: boolean
+          review_score?: number | null
+          spa?: boolean
+          special_offers?: boolean
+          star_rating?: number | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       in_person_events: {
         Row: {
           city: string

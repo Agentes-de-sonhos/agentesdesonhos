@@ -26,6 +26,7 @@ import {
   Wrench,
   Briefcase,
   MessageCircleQuestion,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamification } from "@/hooks/useGamification";
@@ -52,6 +53,7 @@ interface MenuItem {
 
 const mainMenuItems: MenuItem[] = [
   { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
+  { title: "Hotel Advisor", url: "/hotel-advisor", icon: Building2 },
   { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
   { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
   { title: "Materiais de Divulgação", url: "/materiais", icon: FileText, requiredFeature: "materials" },
