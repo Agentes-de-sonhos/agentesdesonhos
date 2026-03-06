@@ -43,6 +43,9 @@ import { CertificatePDF } from "./CertificatePDF";
 import { MATERIAL_CATEGORIES } from "@/types/academy";
 import { PlaybookPDFViewer } from "@/components/playbook/PlaybookPDFViewer";
 import { PlaybookMindMapsViewer } from "@/components/playbook/PlaybookMindMapsViewer";
+import { PlaybookPdfSection } from "@/components/playbook/PlaybookPdfSection";
+import { AttractionsExplorer } from "@/components/playbook/AttractionsExplorer";
+import { PlaybookChecklistTab } from "@/components/playbook/PlaybookChecklistTab";
 import { SpeakersTab } from "./SpeakersTab";
 import { TabIntroBlock } from "./TabIntroBlock";
 import type { PlaybookPDFFile } from "@/types/playbook";
@@ -647,9 +650,37 @@ function PlaybookEmbedded({
 
       {/* Playbook Tab Content */}
       <div className="min-h-[300px]">
-        {activeTab === 'como_vender' ? (
+        {activeTab === 'mapa' ? (
+          <PlaybookPdfSection
+            pdfUrl={activeSection?.content?.pdf_url}
+            onSavePdfUrl={isAdmin ? async (url: string | null) => {
+              if (!destination) return;
+              const currentContent = activeSection?.content || {};
+              await upsertSection.mutateAsync({
+                destination_id: destination.id,
+                tab_key: activeTab,
+                title: activeTabData?.label || activeTab,
+                content: { ...currentContent, pdf_url: url || undefined },
+                order_index: PLAYBOOK_TABS.findIndex((t) => t.key === activeTab),
+              });
+            } : undefined}
+            tabLabel="Mapa da Cidade"
+          />
+        ) : activeTab === 'atracoes' ? (
+          <AttractionsExplorer
+            section={activeSection}
+            destinationName={destination?.name}
+            onSaveSection={isAdmin ? handleSaveSection : undefined}
+          />
+        ) : activeTab === 'como_vender' ? (
           <PlaybookComoVenderTab
             section={activeSection}
+            onSaveSection={isAdmin ? handleSaveSection : undefined}
+          />
+        ) : activeTab === 'checklist_final' ? (
+          <PlaybookChecklistTab
+            section={activeSection}
+            destinationSlug={destination?.slug || ''}
             onSaveSection={isAdmin ? handleSaveSection : undefined}
           />
         ) : (
