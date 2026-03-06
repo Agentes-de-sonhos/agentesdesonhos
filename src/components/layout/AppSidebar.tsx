@@ -72,6 +72,7 @@ const toolsItems: MenuItem[] = [
 const clientManagementItems: MenuItem[] = [
   { title: "Cadastrar Cliente", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
   { title: "Oportunidades", url: "/gestao-clientes/funil", icon: Kanban, requiredFeature: "crm_basic" },
+  { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Target, requiredFeature: "crm_basic" },
 ];
 
 // Recursos Premium - collapsible (includes Mentorias)
