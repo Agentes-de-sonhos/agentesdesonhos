@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useGamification } from "@/hooks/useGamification";
 import type {
   LearningTrail,
   Training,
@@ -259,11 +260,13 @@ export function useAcademy() {
         certificate_number: certificateNumber,
       });
       if (error) throw error;
-      return certificateNumber;
+      return { certificateNumber, trailId };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["user-certificates"] });
       toast({ title: "Certificado gerado com sucesso! 🏆" });
+      // Award gamification points for earning a certificate
+      awardCertificatePoints(result.trailId);
     },
   });
 
