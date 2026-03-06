@@ -184,8 +184,11 @@ export function AppSidebar() {
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
 
-  // Auto-open sections if current route is inside them
-  const isInPremium = premiumMenuItems.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
+  const isInPremium = premiumMenuItems.some((i) => 
+    i.subItems 
+      ? i.subItems.some(sub => location.pathname.startsWith(sub.url))
+      : (location.pathname === i.url || location.pathname.startsWith(i.url))
+  );
 
   const handleMenuClick = useCallback((item: MenuItem, e: React.MouseEvent) => {
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
