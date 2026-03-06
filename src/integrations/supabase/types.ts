@@ -483,6 +483,54 @@ export type Database = {
         }
         Relationships: []
       }
+      gamification_daily_login: {
+        Row: {
+          created_at: string
+          id: string
+          login_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          login_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          login_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gamification_points: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          points: number
+          reference_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          points?: number
+          reference_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          points?: number
+          reference_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       generated_content: {
         Row: {
           content_type: string
@@ -1999,6 +2047,80 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_answers: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_best_answer: boolean
+          question_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_best_answer?: boolean
+          question_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_best_answer?: boolean
+          question_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "qa_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qa_questions: {
+        Row: {
+          answers_count: number
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_resolved: boolean
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers_count?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_resolved?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers_count?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_resolved?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       quiz_options: {
         Row: {
           created_at: string
@@ -3344,6 +3466,16 @@ export type Database = {
         Returns: string
       }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
+      get_gamification_ranking: {
+        Args: { limit_count?: number }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          total_points: number
+          user_id: string
+          user_name: string
+        }[]
+      }
       get_monthly_sales_ranking: {
         Args: { target_month: number; target_year: number }
         Returns: {
