@@ -7,6 +7,7 @@ import {
   User,
   ChevronLeft,
   ChevronDown,
+  ChevronRight,
   Cloud,
   LogOut,
   Shield,
