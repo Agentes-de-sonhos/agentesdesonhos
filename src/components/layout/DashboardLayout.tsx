@@ -21,8 +21,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <GlobalPopupModal />
       
       {/* Main content area - accounts for mobile sidebar width */}
-      <main className="transition-all duration-300 pl-14 lg:pl-64 flex-1 flex flex-col w-full">
-        <div className="container py-4 px-3 sm:py-6 sm:px-4 lg:px-8 flex-1">
+      <main className="transition-all duration-300 pl-14 lg:pl-16 flex-1 flex flex-col w-full">
+        <div className="py-4 px-3 sm:py-6 sm:px-4 lg:px-6 flex-1">
           {children}
         </div>
         <Footer />
