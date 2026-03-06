@@ -218,7 +218,8 @@ export default function Admin() {
             <AdminNewsCurationManager />
           </TabsContent>
 
-          <TabsContent value="hotels">
+          <TabsContent value="hotels" className="space-y-6">
+            <AdminHotelRecommendationsManager />
             <AdminHotelsManager />
           </TabsContent>
         </Tabs>
