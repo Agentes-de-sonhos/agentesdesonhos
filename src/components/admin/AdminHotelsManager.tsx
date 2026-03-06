@@ -12,43 +12,96 @@ import * as XLSX from "xlsx";
 const FIELD_MAP: Record<string, string> = {
   "hotel name": "name",
   "name": "name",
+  "hotel": "name",
+  "nome": "name",
+  "nome do hotel": "name",
   "destination": "destination",
+  "destino": "destination",
   "country": "country",
+  "pais": "country",
+  "país": "country",
   "region": "region",
+  "regiao": "region",
+  "região": "region",
+  "regiao nyc": "region",
+  "regiao_nyc": "region",
   "neighborhood": "neighborhood",
+  "bairro": "neighborhood",
+  "bairro area": "neighborhood",
+  "bairro_area": "neighborhood",
   "category": "category",
+  "categoria": "category",
   "star rating": "star_rating",
   "stars": "star_rating",
+  "estrelas": "star_rating",
+  "classificacao": "star_rating",
   "price from": "price_from",
   "price": "price_from",
+  "preco": "price_from",
+  "preco a partir": "price_from",
   "review score": "review_score",
   "review": "review_score",
+  "nota": "review_score",
+  "avaliacao": "review_score",
   "breakfast included": "breakfast_included",
   "breakfast": "breakfast_included",
+  "cafe da manha": "breakfast_included",
+  "café da manhã": "breakfast_included",
   "free wifi": "free_wifi",
   "wifi": "free_wifi",
   "parking": "parking",
+  "estacionamento": "parking",
   "air conditioning": "air_conditioning",
+  "ar condicionado": "air_conditioning",
   "pet friendly": "pet_friendly",
+  "aceita pets": "pet_friendly",
   "gym": "gym",
+  "academia": "gym",
   "spa": "spa",
   "bar": "bar",
   "restaurant": "restaurant",
+  "restaurante": "restaurant",
   "pool": "pool",
+  "piscina": "pool",
   "accessible": "accessible",
+  "acessivel": "accessible",
+  "acessível": "accessible",
   "family friendly": "family_friendly",
+  "familiar": "family_friendly",
   "brand": "brand",
+  "marca": "brand",
   "property type": "property_type",
+  "tipo": "property_type",
+  "tipo de propriedade": "property_type",
   "free cancellation": "free_cancellation",
+  "cancelamento gratuito": "free_cancellation",
   "special offers": "special_offers",
+  "ofertas especiais": "special_offers",
   "favorite brazilians": "favorite_brazilians",
+  "favorito brasileiros": "favorite_brazilians",
+  "favorito_brasileiros": "favorite_brazilians",
   "most booked brazilians": "most_booked_brazilians",
+  "mais vendido brasileiros": "most_booked_brazilians",
+  "mais_vendido_brasileiros": "most_booked_brazilians",
   "iconic hotel": "iconic_hotel",
+  "hotel iconico": "iconic_hotel",
+  "hotel_iconico": "iconic_hotel",
   "address": "address",
+  "endereco": "address",
+  "endereço": "address",
+  "rua": "address",
+  "rua endereco": "address",
+  "rua_endereco": "address",
   "city": "city",
+  "cidade": "city",
   "state": "state",
+  "estado": "state",
   "zip code": "zip_code",
+  "zip_code": "zip_code",
+  "cep": "zip_code",
   "google maps link": "google_maps_link",
+  "google_maps_link": "google_maps_link",
+  "link google maps": "google_maps_link",
 };
 
 const BOOLEAN_FIELDS = [
@@ -84,7 +137,7 @@ function parseRow(row: Record<string, any>, headerMap: Record<string, string>): 
     }
   }
 
-  if (!mapped.name || !mapped.destination) return null;
+  if (!mapped.name) return null;
   if (!mapped.country) mapped.country = "";
   return mapped;
 }
@@ -92,6 +145,7 @@ function parseRow(row: Record<string, any>, headerMap: Record<string, string>): 
 export function AdminHotelsManager() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; failed: number } | null>(null);
+  const [importDestination, setImportDestination] = useState("");
   const queryClient = useQueryClient();
 
   const { data: hotels, isLoading } = useQuery({
@@ -147,10 +201,19 @@ export function AdminHotelsManager() {
           }
         }
 
-        const parsed = rows.map((r) => parseRow(r, headerMap)).filter(Boolean) as Record<string, any>[];
+        const parsed = rows.map((r) => {
+          const row = parseRow(r, headerMap);
+          if (!row) return null;
+          // Fill destination from input if not in spreadsheet
+          if (!row.destination && importDestination.trim()) {
+            row.destination = importDestination.trim();
+          }
+          if (!row.destination) return null;
+          return row;
+        }).filter(Boolean) as Record<string, any>[];
 
         if (parsed.length === 0) {
-          toast.error("Nenhuma linha válida encontrada. Verifique os cabeçalhos da planilha.");
+          toast.error("Nenhuma linha válida encontrada. Verifique os cabeçalhos e o destino.");
           setImporting(false);
           return;
         }
@@ -255,6 +318,16 @@ export function AdminHotelsManager() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Destino (usado se a planilha não tiver coluna "Destination")</label>
+            <input
+              type="text"
+              placeholder="Ex: New York, Paris, Orlando..."
+              value={importDestination}
+              onChange={(e) => setImportDestination(e.target.value)}
+              className="flex h-10 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
           <div className="flex flex-wrap gap-3">
             <label>
               <input
