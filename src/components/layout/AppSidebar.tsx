@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
+import { useGamification } from "@/hooks/useGamification";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Feature } from "@/types/subscription";
@@ -185,6 +186,7 @@ export function AppSidebar() {
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
+  const { trackSectionVisit } = useGamification();
 
   const isInPremium = premiumMenuItems.some((i) => 
     i.subItems 
@@ -198,9 +200,11 @@ export function AppSidebar() {
       setUpgradeFeature(item.requiredFeature);
       return;
     }
+    // Track section visit for gamification
+    trackSectionVisit(item.url);
     // Auto-collapse after navigation
     setCollapsed(true);
-  }, [hasFeature]);
+  }, [hasFeature, trackSectionVisit]);
 
   const renderMenuItem = (item: MenuItem, isPremiumSection: boolean = false, colorScheme: SidebarColor = 'default') => {
     const isActive = item.subItems 

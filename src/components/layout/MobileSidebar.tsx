@@ -28,6 +28,7 @@ import {
   MessageCircleQuestion,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useGamification } from "@/hooks/useGamification";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
@@ -91,6 +92,7 @@ export function MobileSidebar() {
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
+  const { trackSectionVisit } = useGamification();
 
   const isInTools = toolsItems.some((i) => location.pathname === i.url);
   const isInClients = clientManagementItems.some((i) => location.pathname.startsWith(i.url));
@@ -102,6 +104,7 @@ export function MobileSidebar() {
       setUpgradeFeature(item.requiredFeature);
       return;
     }
+    trackSectionVisit(item.url);
     setExpanded(false);
     navigate(item.url);
   };

@@ -31,6 +31,7 @@ import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategorie
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
+import { GamificationCard } from "@/components/dashboard/GamificationCard";
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
 import { TripRemindersCard } from "@/components/dashboard/TripRemindersCard";
@@ -196,6 +197,12 @@ export default function Dashboard() {
                 <SectionHeader title="Próximas Viagens" color="reminders" />
                 <div className="flex-1 [&>*]:h-full"><TripRemindersCard /></div>
               </div>
+            </section>
+
+            {/* 4. Gamificação & Q&A */}
+            <section className="order-4">
+              <SectionHeader title="Engajamento & Perguntas" color="events" />
+              <GamificationCard />
             </section>
 
           </>

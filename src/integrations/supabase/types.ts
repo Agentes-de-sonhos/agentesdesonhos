@@ -504,6 +504,30 @@ export type Database = {
         }
         Relationships: []
       }
+      gamification_daily_visits: {
+        Row: {
+          created_at: string
+          id: string
+          section_key: string
+          user_id: string
+          visit_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          section_key: string
+          user_id: string
+          visit_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          section_key?: string
+          user_id?: string
+          visit_date?: string
+        }
+        Relationships: []
+      }
       gamification_points: {
         Row: {
           action: string
