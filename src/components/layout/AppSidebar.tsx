@@ -350,10 +350,41 @@ export function AppSidebar() {
 
   // Render menu items for popover (when collapsed, inside section popover)
   const renderPopoverMenuItem = (item: MenuItem, isPremiumSection: boolean = false, colorScheme: SidebarColor = 'default') => {
-    const isActive = location.pathname === item.url;
+    const isActive = item.subItems
+      ? item.subItems.some(sub => location.pathname.startsWith(sub.url))
+      : location.pathname === item.url;
     const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
     const cssVar = sidebarColorVar[colorScheme];
     const hoverBg = `hsl(var(${cssVar}))`;
+
+    // If has subItems, render them inline as a group
+    if (item.subItems && !isLocked) {
+      return (
+        <div key={item.url}>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 px-2 pt-2 pb-1">{item.title}</p>
+          {item.subItems.map((sub) => {
+            const subActive = location.pathname.startsWith(sub.url);
+            return (
+              <Link
+                key={sub.url}
+                to={sub.url}
+                onClick={(e) => handleMenuClick(sub, e)}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
+                  subActive ? "text-white" : "text-foreground hover:text-white"
+                )}
+                style={subActive ? { backgroundColor: hoverBg, color: 'white' } : undefined}
+                onMouseEnter={(e) => { if (!subActive) { e.currentTarget.style.backgroundColor = hoverBg; e.currentTarget.style.color = 'white'; } }}
+                onMouseLeave={(e) => { if (!subActive) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = ''; } }}
+              >
+                <sub.icon className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{sub.title}</span>
+              </Link>
+            );
+          })}
+        </div>
+      );
+    }
 
     return (
       <Link
