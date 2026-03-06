@@ -52,6 +52,7 @@ interface MenuItem {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   requiredFeature?: Feature;
+  subItems?: MenuItem[];
 }
 
 // Main menu items - flat
@@ -63,13 +64,18 @@ const mainMenuItems: MenuItem[] = [
   { title: "Notícias", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
 ];
 
-// Recursos Premium - collapsible (all tools, client management, and premium items)
-const premiumMenuItems: MenuItem[] = [
-  { title: "Minha Agenda", url: "/agenda", icon: Calendar, requiredFeature: "agenda" },
-  { title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote },
+// Sub-items for Gestão de Clientes
+const clientSubItems: MenuItem[] = [
   { title: "Cadastrar Cliente", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
   { title: "Oportunidades", url: "/gestao-clientes/funil", icon: Kanban, requiredFeature: "crm_basic" },
   { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Target, requiredFeature: "crm_basic" },
+];
+
+// Recursos Premium - collapsible
+const premiumMenuItems: MenuItem[] = [
+  { title: "Minha Agenda", url: "/agenda", icon: Calendar, requiredFeature: "agenda" },
+  { title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote },
+  { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Briefcase, requiredFeature: "crm_basic", subItems: clientSubItems },
   { title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
   { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
   { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools" },
