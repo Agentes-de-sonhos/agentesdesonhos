@@ -4,16 +4,25 @@ import { Users, Kanban, Target } from "lucide-react";
 import { ClientsModule } from "@/components/crm/ClientsModule";
 import { KanbanBoard } from "@/components/crm/KanbanBoard";
 import { SalesGoalsModule } from "@/components/crm/SalesGoalsModule";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function GestaoClientes() {
   const location = useLocation();
+  const navigate = useNavigate();
   
-  // Determine default tab based on URL
-  const getDefaultTab = () => {
+  const getCurrentTab = () => {
     if (location.pathname.includes('/funil')) return 'funil';
     if (location.pathname.includes('/metas')) return 'metas';
     return 'clientes';
+  };
+
+  const handleTabChange = (value: string) => {
+    const routes: Record<string, string> = {
+      clientes: '/gestao-clientes/clientes',
+      funil: '/gestao-clientes/funil',
+      metas: '/gestao-clientes/metas',
+    };
+    navigate(routes[value] || '/gestao-clientes');
   };
 
   return (
@@ -26,7 +35,7 @@ export default function GestaoClientes() {
           </p>
         </div>
 
-        <Tabs defaultValue={getDefaultTab()} className="w-full">
+        <Tabs value={getCurrentTab()} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-lg">
             <TabsTrigger value="clientes" className="gap-2">
               <Users className="h-4 w-4" />
