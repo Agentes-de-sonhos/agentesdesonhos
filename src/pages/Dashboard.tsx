@@ -1,5 +1,7 @@
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useGamification } from "@/hooks/useGamification";
 import {
   Route,
   FileText,
@@ -57,6 +59,12 @@ const iconMap: Record<string, LucideIcon> = {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+
+  // Register daily login for gamification
+  const { registerDailyLogin } = useGamification();
+  React.useEffect(() => {
+    registerDailyLogin();
+  }, [registerDailyLogin]);
 
   const handleLogout = async () => {
     await signOut();
