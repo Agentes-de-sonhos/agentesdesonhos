@@ -34,7 +34,7 @@ export default function GestaoClientes() {
             </TabsTrigger>
             <TabsTrigger value="funil" className="gap-2">
               <Kanban className="h-4 w-4" />
-              Funil de Vendas
+              Oportunidades
             </TabsTrigger>
             <TabsTrigger value="metas" className="gap-2">
               <Target className="h-4 w-4" />
