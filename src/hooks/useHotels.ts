@@ -69,8 +69,7 @@ export const AMENITY_KEYS = [
 export const CATEGORY_OPTIONS = ["Excelente Custo-Benefício", "Bom Custo-Benefício", "Moderado", "Luxo"];
 export const PROPERTY_TYPE_OPTIONS = ["Hotel", "Boutique Hotel", "Resort", "Apartment Hotel", "Luxury Hotel"];
 export const TAG_OPTIONS = [
-  { key: "favorite_brazilians", label: "Favorito dos Brasileiros", icon: "⭐" },
-  { key: "most_booked_brazilians", label: "Mais reservado por Brasileiros", icon: "🔥" },
+  { key: "favorite_brazilians", label: "Mais Procurado por Brasileiros", icon: "⭐" },
   { key: "iconic_hotel", label: "Hotel Icônico", icon: "🏆" },
 ];
 export const CONDITION_OPTIONS = [
