@@ -70,7 +70,7 @@ const toolsItems: MenuItem[] = [
 
 // Gestão de Clientes - collapsible
 const clientManagementItems: MenuItem[] = [
-  { title: "Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
+  { title: "Cadastrar Cliente", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
   { title: "Funil de Vendas", url: "/gestao-clientes/funil", icon: Kanban, requiredFeature: "crm_basic" },
 ];
 
