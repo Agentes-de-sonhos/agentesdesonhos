@@ -364,34 +364,6 @@ export function AppSidebar() {
             <Separator className="bg-sidebar-border" />
           </div>
 
-          {/* Ferramentas - collapsible */}
-          <CollapsibleSection
-            title="Ferramentas"
-            icon={Wrench}
-            items={toolsItems}
-            collapsed={collapsed}
-            colorScheme="tools"
-            renderMenuItem={renderMenuItem}
-            renderPopoverMenuItem={renderPopoverMenuItem}
-            isOpen={toolsOpen || isInTools}
-            onToggle={() => setToolsOpen(!toolsOpen)}
-            isActiveSection={isInTools}
-          />
-
-          {/* Gestão de Clientes - collapsible */}
-          <CollapsibleSection
-            title="Gestão de Clientes"
-            icon={Briefcase}
-            items={clientManagementItems}
-            collapsed={collapsed}
-            colorScheme="clients"
-            renderMenuItem={renderMenuItem}
-            renderPopoverMenuItem={renderPopoverMenuItem}
-            isOpen={clientsOpen || isInClients}
-            onToggle={() => setClientsOpen(!clientsOpen)}
-            isActiveSection={isInClients}
-          />
-
           {/* Recursos Premium - collapsible */}
           <CollapsibleSection
             title="Recursos Premium"
