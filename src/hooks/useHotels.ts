@@ -82,51 +82,54 @@ export function useHotels(filters: HotelFilters) {
   return useQuery({
     queryKey: ["hotels", filters],
     queryFn: async () => {
-      let query = supabase.from("hotels").select("*").eq("is_active", true);
+      const { data, error } = await supabase.from("hotels").select("*").eq("is_active", true);
+      if (error) throw error;
+      
+      let results = (data || []) as Hotel[];
 
       if (filters.search) {
-        const s = `%${filters.search}%`;
-        query = query.or(`destination.ilike.${s},city.ilike.${s},country.ilike.${s},name.ilike.${s}`);
+        const s = filters.search.toLowerCase();
+        results = results.filter(h =>
+          h.destination.toLowerCase().includes(s) ||
+          (h.city || "").toLowerCase().includes(s) ||
+          h.country.toLowerCase().includes(s) ||
+          h.name.toLowerCase().includes(s)
+        );
       }
 
       if (filters.regions.length > 0) {
-        query = query.in("region", filters.regions);
+        results = results.filter(h => h.region && filters.regions.includes(h.region));
       }
       if (filters.categories.length > 0) {
-        query = query.in("category", filters.categories);
+        results = results.filter(h => h.category && filters.categories.includes(h.category));
       }
       if (filters.starRatings.length > 0) {
-        query = query.in("star_rating", filters.starRatings);
+        results = results.filter(h => h.star_rating != null && filters.starRatings.includes(h.star_rating));
       }
       if (filters.brands.length > 0) {
-        query = query.in("brand", filters.brands);
+        results = results.filter(h => h.brand && filters.brands.includes(h.brand));
       }
       if (filters.propertyTypes.length > 0) {
-        query = query.in("property_type", filters.propertyTypes);
+        results = results.filter(h => h.property_type && filters.propertyTypes.includes(h.property_type));
       }
 
-      // Amenities
       for (const amenity of filters.amenities) {
-        query = query.eq(amenity as any, true);
+        results = results.filter(h => (h as any)[amenity] === true);
       }
-      // Tags
       for (const tag of filters.tags) {
-        query = query.eq(tag as any, true);
+        results = results.filter(h => (h as any)[tag] === true);
       }
-      // Conditions
       for (const condition of filters.conditions) {
-        query = query.eq(condition as any, true);
+        results = results.filter(h => (h as any)[condition] === true);
       }
 
       if (filters.priceRange) {
-        query = query.gte("price_from", filters.priceRange[0]).lte("price_from", filters.priceRange[1]);
+        results = results.filter(h => h.price_from != null && h.price_from >= filters.priceRange![0] && h.price_from <= filters.priceRange![1]);
       }
 
-      query = query.order("review_score", { ascending: false, nullsFirst: false });
+      results.sort((a, b) => (b.review_score || 0) - (a.review_score || 0));
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return (data || []) as Hotel[];
+      return results;
     },
   });
 }
