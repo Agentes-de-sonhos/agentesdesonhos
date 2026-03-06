@@ -66,7 +66,6 @@ const mainMenuItems: MenuItem[] = [
 const toolsItems: MenuItem[] = [
   { title: "Minha Agenda", url: "/agenda", icon: Calendar, requiredFeature: "agenda" },
   { title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote },
-  { title: "Calculadora", url: "/calculadora", icon: Calculator },
 ];
 
 // Gestão de Clientes - collapsible
