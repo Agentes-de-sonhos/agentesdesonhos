@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 // Other advisors
 import { AdvisorCard } from "@/components/advisor/AdvisorCard";
 import { DestinationSelector } from "@/components/advisor/DestinationSelector";
+import { SuggestAdvisorDialog } from "@/components/advisor/SuggestAdvisorDialog";
 import { AdvisorFiltersPanel } from "@/components/advisor/AdvisorFiltersPanel";
 
 import { useDining, useDiningFilterOptions, DiningFilters, CUISINE_TYPE_OPTIONS, PRICE_RANGE_OPTIONS, DINING_HIGHLIGHT_OPTIONS } from "@/hooks/useDining";
@@ -74,6 +75,7 @@ function HotelTab() {
 
 function DiningTab() {
   const [filters, setFilters] = useState(defaultDiningFilters);
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const { data: items, isLoading } = useDining(filters);
   const { data: filterOptions } = useDiningFilterOptions();
 
@@ -86,8 +88,11 @@ function DiningTab() {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-4">
         <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
+        <Button variant="outline" className="gap-2 rounded-2xl px-5 py-3.5 h-auto text-sm font-semibold border-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary transition-all" onClick={() => setSuggestOpen(true)}>
+          <PlusCircle className="h-5 w-5" /> Sugerir restaurante
+        </Button>
       </div>
       <AdvisorContent
         filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
@@ -110,12 +115,14 @@ function DiningTab() {
           );
         }}
       />
+      <SuggestAdvisorDialog open={suggestOpen} onOpenChange={setSuggestOpen} advisorType="dining" />
     </>
   );
 }
 
 function AttractionTab() {
   const [filters, setFilters] = useState(defaultAttractionFilters);
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const { data: items, isLoading } = useAttractions(filters);
   const { data: filterOptions } = useAttractionFilterOptions();
 
@@ -128,8 +135,11 @@ function AttractionTab() {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-4">
         <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
+        <Button variant="outline" className="gap-2 rounded-2xl px-5 py-3.5 h-auto text-sm font-semibold border-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary transition-all" onClick={() => setSuggestOpen(true)}>
+          <PlusCircle className="h-5 w-5" /> Sugerir atração
+        </Button>
       </div>
       <AdvisorContent
         filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
@@ -146,12 +156,14 @@ function AttractionTab() {
           );
         }}
       />
+      <SuggestAdvisorDialog open={suggestOpen} onOpenChange={setSuggestOpen} advisorType="attraction" />
     </>
   );
 }
 
 function ShoppingTab() {
   const [filters, setFilters] = useState(defaultShoppingFilters);
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const { data: items, isLoading } = useShopping(filters);
   const { data: filterOptions } = useShoppingFilterOptions();
 
@@ -164,8 +176,11 @@ function ShoppingTab() {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-4">
         <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
+        <Button variant="outline" className="gap-2 rounded-2xl px-5 py-3.5 h-auto text-sm font-semibold border-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary transition-all" onClick={() => setSuggestOpen(true)}>
+          <PlusCircle className="h-5 w-5" /> Sugerir compras
+        </Button>
       </div>
       <AdvisorContent
         filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
@@ -185,12 +200,13 @@ function ShoppingTab() {
           );
         }}
       />
+      <SuggestAdvisorDialog open={suggestOpen} onOpenChange={setSuggestOpen} advisorType="shopping" />
     </>
   );
 }
-
 function ExperienceTab() {
   const [filters, setFilters] = useState(defaultExperienceFilters);
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const { data: items, isLoading } = useExperiences(filters);
   const { data: filterOptions } = useExperienceFilterOptions();
 
@@ -204,8 +220,11 @@ function ExperienceTab() {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-4">
         <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
+        <Button variant="outline" className="gap-2 rounded-2xl px-5 py-3.5 h-auto text-sm font-semibold border-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary transition-all" onClick={() => setSuggestOpen(true)}>
+          <PlusCircle className="h-5 w-5" /> Sugerir experiência
+        </Button>
       </div>
       <AdvisorContent
         filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
@@ -226,10 +245,10 @@ function ExperienceTab() {
           );
         }}
       />
+      <SuggestAdvisorDialog open={suggestOpen} onOpenChange={setSuggestOpen} advisorType="experience" />
     </>
   );
 }
-
 // ─── Shared content layout with filters + results ──
 
 function AdvisorContent({ filters, isLoading, count, items, renderCard, emptySearch, emptyIcon }: {
