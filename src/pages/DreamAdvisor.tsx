@@ -52,13 +52,11 @@ function HotelTab() {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto space-y-4">
+      <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-4">
         <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
-        <div className="flex justify-center">
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => setSuggestOpen(true)}>
-            <PlusCircle className="h-4 w-4" /> Sugerir novo hotel
-          </Button>
-        </div>
+        <Button variant="outline" className="gap-2 rounded-2xl px-5 py-3.5 h-auto text-sm font-semibold border-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary transition-all" onClick={() => setSuggestOpen(true)}>
+          <PlusCircle className="h-5 w-5" /> Sugerir novo hotel
+        </Button>
       </div>
       <AdvisorContent
         filters={<HotelFiltersPanel filters={filters} onChange={setFilters} regions={filterOptions?.regions || []} brands={filterOptions?.brands || []} />}
