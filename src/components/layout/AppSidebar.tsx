@@ -28,11 +28,7 @@ import {
   Briefcase,
   Crown,
   MessageCircleQuestion,
-  Building2,
-  UtensilsCrossed,
-  Landmark,
-  ShoppingBag,
-  Compass,
+  Globe,
   Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
