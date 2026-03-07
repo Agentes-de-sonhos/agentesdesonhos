@@ -38,11 +38,7 @@ import Mentorias from "./pages/Mentorias";
 import MentoriaDetail from "./pages/MentoriaDetail";
 import PlaybookViewer from "./components/playbook/PlaybookViewer";
 import PerguntasRespostas from "./pages/PerguntasRespostas";
-import HotelAdvisor from "./pages/HotelAdvisor";
-import DiningAdvisor from "./pages/DiningAdvisor";
-import AttractionAdvisor from "./pages/AttractionAdvisor";
-import ShoppingAdvisor from "./pages/ShoppingAdvisor";
-import ExperienceAdvisor from "./pages/ExperienceAdvisor";
+import DreamAdvisor from "./pages/DreamAdvisor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -326,42 +322,10 @@ const App = () => (
               }
             />
             <Route
-              path="/hotel-advisor"
+              path="/dream-advisor"
               element={
                 <ProtectedRoute>
-                  <HotelAdvisor />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dining-advisor"
-              element={
-                <ProtectedRoute>
-                  <DiningAdvisor />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/attraction-advisor"
-              element={
-                <ProtectedRoute>
-                  <AttractionAdvisor />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/shopping-advisor"
-              element={
-                <ProtectedRoute>
-                  <ShoppingAdvisor />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/experience-advisor"
-              element={
-                <ProtectedRoute>
-                  <ExperienceAdvisor />
+                  <DreamAdvisor />
                 </ProtectedRoute>
               }
             />
