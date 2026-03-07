@@ -668,9 +668,7 @@ function PlaybookEmbedded({
           />
         ) : activeTab === 'atracoes' ? (
           <AttractionsExplorer
-            section={activeSection}
             destinationName={destination?.name}
-            onSaveSection={isAdmin ? handleSaveSection : undefined}
           />
         ) : activeTab === 'como_vender' ? (
           <PlaybookComoVenderTab

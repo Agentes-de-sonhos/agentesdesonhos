@@ -167,9 +167,7 @@ export default function PlaybookViewer() {
             />
           ) : activeTab === 'atracoes' ? (
             <AttractionsExplorer
-              section={activeSection}
               destinationName={destination.name}
-              onSaveSection={isAdmin ? handleSaveSection : undefined}
             />
           ) : activeTab === 'como_vender' ? (
             <PlaybookComoVenderTab
