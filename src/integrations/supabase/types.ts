@@ -128,6 +128,78 @@ export type Database = {
         }
         Relationships: []
       }
+      attractions: {
+        Row: {
+          address: string | null
+          average_visit_time: string | null
+          category: string | null
+          city: string
+          country: string
+          created_at: string
+          destination: string
+          expert_tip: string | null
+          full_description: string | null
+          gallery_urls: string[] | null
+          google_maps_link: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          must_visit: boolean
+          name: string
+          neighborhood: string | null
+          review_score: number | null
+          short_description: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          average_visit_time?: string | null
+          category?: string | null
+          city: string
+          country?: string
+          created_at?: string
+          destination: string
+          expert_tip?: string | null
+          full_description?: string | null
+          gallery_urls?: string[] | null
+          google_maps_link?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          must_visit?: boolean
+          name: string
+          neighborhood?: string | null
+          review_score?: number | null
+          short_description?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          average_visit_time?: string | null
+          category?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          destination?: string
+          expert_tip?: string | null
+          full_description?: string | null
+          gallery_urls?: string[] | null
+          google_maps_link?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          must_visit?: boolean
+          name?: string
+          neighborhood?: string | null
+          review_score?: number | null
+          short_description?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           city: string | null
@@ -318,6 +390,90 @@ export type Database = {
           },
         ]
       }
+      dining_places: {
+        Row: {
+          address: string | null
+          city: string
+          country: string
+          created_at: string
+          cuisine_type: string | null
+          destination: string
+          expert_tip: string | null
+          full_description: string | null
+          gallery_urls: string[] | null
+          google_maps_link: string | null
+          has_view: boolean
+          id: string
+          image_url: string | null
+          is_active: boolean
+          local_favorite: boolean
+          michelin: boolean
+          must_visit: boolean
+          name: string
+          neighborhood: string | null
+          price_range: string | null
+          review_score: number | null
+          rooftop: boolean
+          short_description: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          country?: string
+          created_at?: string
+          cuisine_type?: string | null
+          destination: string
+          expert_tip?: string | null
+          full_description?: string | null
+          gallery_urls?: string[] | null
+          google_maps_link?: string | null
+          has_view?: boolean
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          local_favorite?: boolean
+          michelin?: boolean
+          must_visit?: boolean
+          name: string
+          neighborhood?: string | null
+          price_range?: string | null
+          review_score?: number | null
+          rooftop?: boolean
+          short_description?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          cuisine_type?: string | null
+          destination?: string
+          expert_tip?: string | null
+          full_description?: string | null
+          gallery_urls?: string[] | null
+          google_maps_link?: string | null
+          has_view?: boolean
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          local_favorite?: boolean
+          michelin?: boolean
+          must_visit?: boolean
+          name?: string
+          neighborhood?: string | null
+          price_range?: string | null
+          review_score?: number | null
+          rooftop?: boolean
+          short_description?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
@@ -399,6 +555,81 @@ export type Database = {
           notes?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      experiences: {
+        Row: {
+          address: string | null
+          average_duration: string | null
+          average_price: number | null
+          booking_url: string | null
+          category: string | null
+          city: string
+          country: string
+          created_at: string
+          destination: string
+          expert_tip: string | null
+          full_description: string | null
+          gallery_urls: string[] | null
+          google_maps_link: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          must_visit: boolean
+          name: string
+          neighborhood: string | null
+          review_score: number | null
+          short_description: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          average_duration?: string | null
+          average_price?: number | null
+          booking_url?: string | null
+          category?: string | null
+          city: string
+          country?: string
+          created_at?: string
+          destination: string
+          expert_tip?: string | null
+          full_description?: string | null
+          gallery_urls?: string[] | null
+          google_maps_link?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          must_visit?: boolean
+          name: string
+          neighborhood?: string | null
+          review_score?: number | null
+          short_description?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          average_duration?: string | null
+          average_price?: number | null
+          booking_url?: string | null
+          category?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          destination?: string
+          expert_tip?: string | null
+          full_description?: string | null
+          gallery_urls?: string[] | null
+          google_maps_link?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          must_visit?: boolean
+          name?: string
+          neighborhood?: string | null
+          review_score?: number | null
+          short_description?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2614,6 +2845,81 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           year?: number
+        }
+        Relationships: []
+      }
+      shopping_places: {
+        Row: {
+          address: string | null
+          city: string
+          country: string
+          created_at: string
+          destination: string
+          expert_tip: string | null
+          full_description: string | null
+          gallery_urls: string[] | null
+          google_maps_link: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_outlet: boolean
+          must_visit: boolean
+          name: string
+          neighborhood: string | null
+          price_range: string | null
+          review_score: number | null
+          shopping_type: string | null
+          short_description: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          country?: string
+          created_at?: string
+          destination: string
+          expert_tip?: string | null
+          full_description?: string | null
+          gallery_urls?: string[] | null
+          google_maps_link?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_outlet?: boolean
+          must_visit?: boolean
+          name: string
+          neighborhood?: string | null
+          price_range?: string | null
+          review_score?: number | null
+          shopping_type?: string | null
+          short_description?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          destination?: string
+          expert_tip?: string | null
+          full_description?: string | null
+          gallery_urls?: string[] | null
+          google_maps_link?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_outlet?: boolean
+          must_visit?: boolean
+          name?: string
+          neighborhood?: string | null
+          price_range?: string | null
+          review_score?: number | null
+          shopping_type?: string | null
+          short_description?: string | null
+          updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
