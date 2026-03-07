@@ -64,19 +64,12 @@ interface MenuItem {
   subItems?: MenuItem[];
 }
 
-// Dream Advisor sub-items
-const dreamAdvisorSubItems: MenuItem[] = [
-  { title: "Hotel Advisor", url: "/hotel-advisor", icon: Building2 },
-  { title: "Dining Advisor", url: "/dining-advisor", icon: UtensilsCrossed },
-  { title: "Attraction Advisor", url: "/attraction-advisor", icon: Landmark },
-  { title: "Shopping Advisor", url: "/shopping-advisor", icon: ShoppingBag },
-  { title: "Experience Advisor", url: "/experience-advisor", icon: Compass },
-];
+// Dream Advisor - single page now
 
 // Main menu items - flat
 const mainMenuItems: MenuItem[] = [
   { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-  { title: "Dream Advisor", url: "/hotel-advisor", icon: Globe, subItems: dreamAdvisorSubItems },
+  { title: "Dream Advisor", url: "/dream-advisor", icon: Globe },
   { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
   { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
   { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
