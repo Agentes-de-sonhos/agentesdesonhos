@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 // Hotel
-import { HotelSearchBar } from "@/components/hotels/HotelSearchBar";
 import { HotelFiltersPanel } from "@/components/hotels/HotelFiltersPanel";
 import { HotelCard } from "@/components/hotels/HotelCard";
 import { useHotels, useHotelFilterOptions, HotelFilters } from "@/hooks/useHotels";
@@ -18,7 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Other advisors
 import { AdvisorCard } from "@/components/advisor/AdvisorCard";
-import { AdvisorSearchBar } from "@/components/advisor/AdvisorSearchBar";
+import { DestinationSelector } from "@/components/advisor/DestinationSelector";
 import { AdvisorFiltersPanel } from "@/components/advisor/AdvisorFiltersPanel";
 
 import { useDining, useDiningFilterOptions, DiningFilters, CUISINE_TYPE_OPTIONS, PRICE_RANGE_OPTIONS, DINING_HIGHLIGHT_OPTIONS } from "@/hooks/useDining";
@@ -53,8 +52,8 @@ function HotelTab() {
 
   return (
     <>
-      <div className="max-w-2xl mx-auto space-y-3">
-        <HotelSearchBar value={filters.search} onChange={(s) => setFilters((f) => ({ ...f, search: s }))} destinations={filterOptions?.destinations || []} />
+      <div className="max-w-3xl mx-auto space-y-4">
+        <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
         <div className="flex justify-center">
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setSuggestOpen(true)}>
             <PlusCircle className="h-4 w-4" /> Sugerir novo hotel
@@ -89,8 +88,8 @@ function DiningTab() {
 
   return (
     <>
-      <div className="max-w-2xl mx-auto">
-        <AdvisorSearchBar value={filters.search} onChange={(s) => setFilters((f) => ({ ...f, search: s }))} destinations={filterOptions?.destinations || []} icon={<UtensilsCrossed className="h-5 w-5 text-primary shrink-0" />} placeholder="Buscar restaurante, cidade ou destino..." />
+      <div className="max-w-3xl mx-auto">
+        <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
       </div>
       <AdvisorContent
         filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
@@ -131,8 +130,8 @@ function AttractionTab() {
 
   return (
     <>
-      <div className="max-w-2xl mx-auto">
-        <AdvisorSearchBar value={filters.search} onChange={(s) => setFilters((f) => ({ ...f, search: s }))} destinations={filterOptions?.destinations || []} icon={<Landmark className="h-5 w-5 text-primary shrink-0" />} placeholder="Buscar atração, cidade ou destino..." />
+      <div className="max-w-3xl mx-auto">
+        <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
       </div>
       <AdvisorContent
         filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
@@ -167,8 +166,8 @@ function ShoppingTab() {
 
   return (
     <>
-      <div className="max-w-2xl mx-auto">
-        <AdvisorSearchBar value={filters.search} onChange={(s) => setFilters((f) => ({ ...f, search: s }))} destinations={filterOptions?.destinations || []} icon={<ShoppingBag className="h-5 w-5 text-primary shrink-0" />} placeholder="Buscar loja, shopping ou destino..." />
+      <div className="max-w-3xl mx-auto">
+        <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
       </div>
       <AdvisorContent
         filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
@@ -207,8 +206,8 @@ function ExperienceTab() {
 
   return (
     <>
-      <div className="max-w-2xl mx-auto">
-        <AdvisorSearchBar value={filters.search} onChange={(s) => setFilters((f) => ({ ...f, search: s }))} destinations={filterOptions?.destinations || []} icon={<Compass className="h-5 w-5 text-primary shrink-0" />} placeholder="Buscar experiência, cidade ou destino..." />
+      <div className="max-w-3xl mx-auto">
+        <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
       </div>
       <AdvisorContent
         filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
