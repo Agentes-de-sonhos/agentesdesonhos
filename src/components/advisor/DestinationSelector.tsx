@@ -5,10 +5,11 @@ interface DestinationSelectorProps {
   destinations: string[];
   selected: string;
   onSelect: (destination: string) => void;
+  fallbackDestinations?: string[];
 }
 
-export function DestinationSelector({ destinations, selected, onSelect }: DestinationSelectorProps) {
-  const allDestinations = destinations.length > 0 ? destinations : [];
+export function DestinationSelector({ destinations, selected, onSelect, fallbackDestinations = ["New York"] }: DestinationSelectorProps) {
+  const allDestinations = destinations.length > 0 ? destinations : fallbackDestinations;
 
   if (allDestinations.length === 0) return null;
 
