@@ -44,6 +44,60 @@ export type Database = {
         }
         Relationships: []
       }
+      advisor_suggestions: {
+        Row: {
+          advisor_type: string
+          category: string | null
+          city: string | null
+          created_at: string
+          destination: string
+          extra_data: Json | null
+          id: string
+          name: string
+          neighborhood: string | null
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          advisor_type: string
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          destination: string
+          extra_data?: Json | null
+          id?: string
+          name: string
+          neighborhood?: string | null
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          advisor_type?: string
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          destination?: string
+          extra_data?: Json | null
+          id?: string
+          name?: string
+          neighborhood?: string | null
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agency_events: {
         Row: {
           client_id: string | null
