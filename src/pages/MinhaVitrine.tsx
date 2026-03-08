@@ -487,7 +487,6 @@ export default function MinhaVitrine() {
           </div>
         </DialogContent>
       </Dialog>
-      </div>
     </DashboardLayout>
   );
 }
