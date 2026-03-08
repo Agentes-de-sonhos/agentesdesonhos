@@ -299,20 +299,31 @@ export default function MinhaVitrine() {
 
   return (
     <DashboardLayout>
-      {/* URL + Actions Bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2 flex-1 min-w-0">
-          <Link2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <span className="text-sm truncate">{publicUrl}</span>
-          <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Link copiado!"); }}>
-            <Copy className="h-3.5 w-3.5" />
-          </Button>
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Store className="h-6 w-6 text-primary" /> Minha Vitrine Virtual
+            </h1>
+            <p className="text-sm text-muted-foreground">Gerencie a sua vitrine virtual.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Link copiado!"); }}>
+              <Copy className="h-4 w-4 mr-1" /> Copiar link
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={`/${showcase.slug}/ofertas`} target="_blank" rel="noopener noreferrer">
+                <Eye className="h-4 w-4 mr-1" /> Visualizar
+              </a>
+            </Button>
+          </div>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <a href={`/${showcase.slug}`} target="_blank" rel="noopener noreferrer">
-            <Eye className="h-4 w-4 mr-1" /> Visualizar
-          </a>
-        </Button>
+
+        <div className="text-sm text-muted-foreground bg-muted/50 rounded-md p-3 flex items-center gap-2 flex-wrap">
+          <ExternalLink className="h-4 w-4" />
+          <span className="font-medium">{publicUrl}</span>
+        </div>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" onClick={resetForm}>
