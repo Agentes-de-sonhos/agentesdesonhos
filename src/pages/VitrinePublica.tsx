@@ -1,10 +1,20 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { usePublicShowcase, type ShowcaseItem } from "@/hooks/useShowcase";
+import { usePublicShowcase, type ShowcaseItem, getFeaturedLabel } from "@/hooks/useShowcase";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Phone, MessageCircle, X, ExternalLink } from "lucide-react";
+
+function FeaturedBadge({ label }: { label: string | null }) {
+  const info = getFeaturedLabel(label);
+  if (!info) return null;
+  return (
+    <span className="absolute top-3 left-3 z-10 bg-amber-500 text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
+      <span className="text-base">{info.emoji}</span> {info.text}
+    </span>
+  );
+}
 
 export default function VitrinePublica() {
   const { slug } = useParams<{ slug: string }>();
@@ -15,7 +25,6 @@ export default function VitrinePublica() {
   const [contactOpen, setContactOpen] = useState(false);
   const [tracked, setTracked] = useState(false);
 
-  // Track page view once
   useEffect(() => {
     if (showcase && !tracked) {
       trackEvent(showcase.id, "page_view");
@@ -23,20 +32,22 @@ export default function VitrinePublica() {
     }
   }, [showcase, tracked]);
 
-  // Extract unique categories and subcategories
   const categories = [...new Set(items.map(i => i.category))];
   const subcategories = [...new Set(
-    items
-      .filter(i => selectedCategory === "todas" || i.category === selectedCategory)
-      .map(i => i.subcategory)
-      .filter(Boolean) as string[]
+    items.filter(i => selectedCategory === "todas" || i.category === selectedCategory)
+      .map(i => i.subcategory).filter(Boolean) as string[]
   )];
 
-  const filteredItems = items.filter(i => {
+  const applyFilters = (list: ShowcaseItem[]) => list.filter(i => {
     if (selectedCategory !== "todas" && i.category !== selectedCategory) return false;
     if (selectedSubcategory !== "todas" && i.subcategory !== selectedSubcategory) return false;
     return true;
   });
+
+  const featuredItems = applyFilters(
+    items.filter(i => i.is_featured).sort((a, b) => a.featured_order - b.featured_order)
+  );
+  const regularItems = applyFilters(items.filter(i => !i.is_featured));
 
   const getItemImageUrl = (item: ShowcaseItem): string | null => {
     if (item.image_url) return item.image_url;
@@ -60,19 +71,11 @@ export default function VitrinePublica() {
     }
   };
 
-  const whatsappUrl = profile?.phone
-    ? `https://wa.me/55${profile.phone.replace(/\D/g, "")}`
-    : "#";
-  const phoneUrl = profile?.phone
-    ? `tel:+55${profile.phone.replace(/\D/g, "")}`
-    : "#";
+  const whatsappUrl = profile?.phone ? `https://wa.me/55${profile.phone.replace(/\D/g, "")}` : "#";
+  const phoneUrl = profile?.phone ? `tel:+55${profile.phone.replace(/\D/g, "")}` : "#";
 
   if (loadingShowcase) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
   }
 
   if (!showcase) {
@@ -85,6 +88,39 @@ export default function VitrinePublica() {
       </div>
     );
   }
+
+  const renderItem = (item: ShowcaseItem, isFeatured: boolean) => {
+    const imgUrl = getItemImageUrl(item);
+    if (!imgUrl) return null;
+    return (
+      <div
+        key={item.id}
+        className={`relative rounded-2xl overflow-hidden cursor-pointer group transition-shadow ${
+          isFeatured ? "shadow-lg ring-2 ring-amber-400/40" : "shadow-md"
+        }`}
+        onClick={() => handleItemClick(item)}
+      >
+        {isFeatured && <FeaturedBadge label={item.featured_label} />}
+        <img src={imgUrl} alt="" className="w-full block" loading="lazy" />
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <Button
+            size="sm"
+            className="bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white shadow-lg"
+            onClick={e => { e.stopPropagation(); handleAction(item); }}
+          >
+            {item.action_type === "whatsapp" ? (
+              <><MessageCircle className="h-4 w-4 mr-1" /> Falar no WhatsApp</>
+            ) : (
+              <><ExternalLink className="h-4 w-4 mr-1" /> Saiba mais</>
+            )}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  const hasResults = featuredItems.length > 0 || regularItems.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -103,12 +139,9 @@ export default function VitrinePublica() {
             {profile?.city && <p className="text-xs text-muted-foreground">{profile.city}{profile.state ? `, ${profile.state}` : ""}</p>}
           </div>
         </div>
-        {/* Filters */}
         <div className="max-w-lg mx-auto px-4 pb-3 flex gap-2">
           <Select value={selectedCategory} onValueChange={v => { setSelectedCategory(v); setSelectedSubcategory("todas"); }}>
-            <SelectTrigger className="h-8 text-xs flex-1">
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
+            <SelectTrigger className="h-8 text-xs flex-1"><SelectValue placeholder="Categoria" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas as ofertas</SelectItem>
               {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -116,9 +149,7 @@ export default function VitrinePublica() {
           </Select>
           {subcategories.length > 0 && (
             <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
-              <SelectTrigger className="h-8 text-xs flex-1">
-                <SelectValue placeholder="Subcategoria" />
-              </SelectTrigger>
+              <SelectTrigger className="h-8 text-xs flex-1"><SelectValue placeholder="Subcategoria" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todas">Todas</SelectItem>
                 {subcategories.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -130,38 +161,29 @@ export default function VitrinePublica() {
 
       {/* Items */}
       <main className="max-w-lg mx-auto px-4 py-4 space-y-3 pb-24">
-        {filteredItems.length === 0 ? (
+        {!hasResults ? (
           <div className="text-center py-16">
             <p className="text-muted-foreground">Nenhuma oferta disponível no momento.</p>
           </div>
         ) : (
-          filteredItems.map(item => {
-            const imgUrl = getItemImageUrl(item);
-            if (!imgUrl) return null;
-            return (
-              <div
-                key={item.id}
-                className="relative rounded-2xl overflow-hidden shadow-md cursor-pointer group"
-                onClick={() => handleItemClick(item)}
-              >
-                <img src={imgUrl} alt="" className="w-full block" loading="lazy" />
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Button
-                    size="sm"
-                    className="bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white shadow-lg"
-                    onClick={e => { e.stopPropagation(); handleAction(item); }}
-                  >
-                    {item.action_type === "whatsapp" ? (
-                      <><MessageCircle className="h-4 w-4 mr-1" /> Falar no WhatsApp</>
-                    ) : (
-                      <><ExternalLink className="h-4 w-4 mr-1" /> Saiba mais</>
-                    )}
-                  </Button>
-                </div>
+          <>
+            {/* Featured */}
+            {featuredItems.length > 0 && (
+              <div className="space-y-3">
+                {featuredItems.map(item => renderItem(item, true))}
               </div>
-            );
-          })
+            )}
+            {/* Divider */}
+            {featuredItems.length > 0 && regularItems.length > 0 && (
+              <div className="flex items-center gap-3 py-2">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-muted-foreground font-medium">Mais ofertas</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+            )}
+            {/* Regular */}
+            {regularItems.map(item => renderItem(item, false))}
+          </>
         )}
       </main>
 
@@ -171,21 +193,17 @@ export default function VitrinePublica() {
           {contactOpen && (
             <div className="mb-3 flex flex-col gap-2 animate-fade-in">
               <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-[hsl(142,70%,45%)] text-white px-4 py-2.5 rounded-full shadow-lg hover:bg-[hsl(142,70%,40%)] transition-colors text-sm font-medium"
-              >
+                className="flex items-center gap-2 bg-[hsl(142,70%,45%)] text-white px-4 py-2.5 rounded-full shadow-lg hover:bg-[hsl(142,70%,40%)] transition-colors text-sm font-medium">
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>
               <a href={phoneUrl}
-                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-full shadow-lg hover:bg-primary/90 transition-colors text-sm font-medium"
-              >
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-full shadow-lg hover:bg-primary/90 transition-colors text-sm font-medium">
                 <Phone className="h-4 w-4" /> Ligar
               </a>
             </div>
           )}
-          <button
-            onClick={() => setContactOpen(!contactOpen)}
-            className="h-14 w-14 rounded-full bg-[hsl(142,70%,45%)] text-white shadow-xl flex items-center justify-center hover:bg-[hsl(142,70%,40%)] transition-all"
-          >
+          <button onClick={() => setContactOpen(!contactOpen)}
+            className="h-14 w-14 rounded-full bg-[hsl(142,70%,45%)] text-white shadow-xl flex items-center justify-center hover:bg-[hsl(142,70%,40%)] transition-all">
             {contactOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
           </button>
         </div>
@@ -199,16 +217,10 @@ export default function VitrinePublica() {
               <button onClick={() => setLightboxItem(null)} className="absolute top-3 right-3 z-10 h-8 w-8 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80">
                 <X className="h-4 w-4" />
               </button>
-              <img
-                src={getItemImageUrl(lightboxItem) || "/placeholder.svg"}
-                alt=""
-                className="w-full max-h-[80vh] object-contain"
-              />
+              {lightboxItem.is_featured && <FeaturedBadge label={lightboxItem.featured_label} />}
+              <img src={getItemImageUrl(lightboxItem) || "/placeholder.svg"} alt="" className="w-full max-h-[80vh] object-contain" />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                <Button
-                  className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white"
-                  onClick={() => handleAction(lightboxItem)}
-                >
+                <Button className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white" onClick={() => handleAction(lightboxItem)}>
                   {lightboxItem.action_type === "whatsapp" ? (
                     <><MessageCircle className="h-4 w-4 mr-2" /> Falar no WhatsApp</>
                   ) : (

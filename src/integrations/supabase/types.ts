@@ -3011,9 +3011,12 @@ export type Database = {
           category: string
           created_at: string
           expires_at: string | null
+          featured_label: string | null
+          featured_order: number
           id: string
           image_url: string | null
           is_active: boolean
+          is_featured: boolean
           material_id: string | null
           order_index: number
           showcase_id: string
@@ -3027,9 +3030,12 @@ export type Database = {
           category?: string
           created_at?: string
           expires_at?: string | null
+          featured_label?: string | null
+          featured_order?: number
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_featured?: boolean
           material_id?: string | null
           order_index?: number
           showcase_id: string
@@ -3043,9 +3049,12 @@ export type Database = {
           category?: string
           created_at?: string
           expires_at?: string | null
+          featured_label?: string | null
+          featured_order?: number
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_featured?: boolean
           material_id?: string | null
           order_index?: number
           showcase_id?: string
