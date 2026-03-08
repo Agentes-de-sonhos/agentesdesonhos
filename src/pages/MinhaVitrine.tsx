@@ -43,7 +43,7 @@ export default function MinhaVitrine() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const PUBLIC_DOMAIN = "https://agentesdesonhos.com.br";
+  const PUBLIC_DOMAIN = "https://vitrine.tur.br";
   const publicUrl = showcase ? `${PUBLIC_DOMAIN}/${showcase.slug}` : "";
   const featuredCount = items.filter(i => i.is_featured).length;
 
@@ -190,20 +190,18 @@ export default function MinhaVitrine() {
   if (!showcase) {
     return (
       <DashboardLayout>
-        <div className="max-w-lg mx-auto mt-12">
+        <div className="max-w-xl mx-auto space-y-6 p-4">
+          <div className="text-center space-y-2">
+            <Store className="h-12 w-12 mx-auto text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">Criar Vitrine Virtual</h1>
+            <p className="text-muted-foreground">Crie sua vitrine virtual profissional.</p>
+          </div>
           <Card>
-            <CardHeader className="text-center">
-              <Store className="h-12 w-12 mx-auto text-primary mb-2" />
-              <CardTitle className="text-xl">Criar Vitrine da Agência</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Sua vitrine será acessível publicamente em uma URL personalizada.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="pt-6 space-y-4">
               <div>
-                <Label>Slug da vitrine (URL)</Label>
+                <Label>URL da sua vitrine</Label>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">agentesdesonhos.com.br/</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">vitrine.tur.br/</span>
                   <Input placeholder="minha-agencia" value={slug} onChange={e => setSlug(e.target.value)} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Use letras minúsculas, números e hífens.</p>
@@ -301,20 +299,31 @@ export default function MinhaVitrine() {
 
   return (
     <DashboardLayout>
-      {/* URL + Actions Bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2 flex-1 min-w-0">
-          <Link2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <span className="text-sm truncate">{publicUrl}</span>
-          <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Link copiado!"); }}>
-            <Copy className="h-3.5 w-3.5" />
-          </Button>
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Store className="h-6 w-6 text-primary" /> Minha Vitrine Virtual
+            </h1>
+            <p className="text-sm text-muted-foreground">Gerencie a sua vitrine virtual.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Link copiado!"); }}>
+              <Copy className="h-4 w-4 mr-1" /> Copiar link
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={`/${showcase.slug}/ofertas`} target="_blank" rel="noopener noreferrer">
+                <Eye className="h-4 w-4 mr-1" /> Visualizar
+              </a>
+            </Button>
+          </div>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <a href={`/${showcase.slug}`} target="_blank" rel="noopener noreferrer">
-            <Eye className="h-4 w-4 mr-1" /> Visualizar
-          </a>
-        </Button>
+
+        <div className="text-sm text-muted-foreground bg-muted/50 rounded-md p-3 flex items-center gap-2 flex-wrap">
+          <ExternalLink className="h-4 w-4" />
+          <span className="font-medium">{publicUrl}</span>
+        </div>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" onClick={resetForm}>
@@ -395,7 +404,6 @@ export default function MinhaVitrine() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
 
       {/* Items List */}
       {items.length === 0 ? (
@@ -478,6 +486,7 @@ export default function MinhaVitrine() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </DashboardLayout>
   );
 }
