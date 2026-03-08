@@ -12,7 +12,7 @@ import {
   Instagram, Facebook, Linkedin, Twitter, Youtube, GripVertical,
 } from "lucide-react";
 
-const PUBLIC_DOMAIN = "https://agentesdesonhos.com.br";
+const PUBLIC_DOMAIN = "https://contato.turo.br";
 const MAX_BUTTONS = 6;
 
 const SOCIAL_ICONS: { key: keyof SocialLinks; label: string; icon: React.ComponentType<any> }[] = [
