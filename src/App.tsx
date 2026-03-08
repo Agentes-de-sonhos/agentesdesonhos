@@ -351,7 +351,7 @@ const App = () => (
               }
             />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
-            <Route path="/:slug" element={<CartaoPublico />} />
+            <Route path="/:slug" element={<SlugResolver />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
