@@ -155,7 +155,7 @@ export default function MinhaVitrine() {
 
   if (loadingShowcase) {
     return (
-      <DashboardLayout title="Minha Vitrine" subtitle="Gerencie sua vitrine de ofertas">
+      <DashboardLayout>
         <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
       </DashboardLayout>
     );
