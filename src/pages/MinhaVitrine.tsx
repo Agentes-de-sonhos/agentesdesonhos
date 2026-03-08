@@ -203,7 +203,7 @@ export default function MinhaVitrine() {
               <div>
                 <Label>Slug da vitrine (URL)</Label>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">{window.location.origin}/</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">agentesdesonhos.com.br/</span>
                   <Input placeholder="minha-agencia" value={slug} onChange={e => setSlug(e.target.value)} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Use letras minúsculas, números e hífens.</p>
