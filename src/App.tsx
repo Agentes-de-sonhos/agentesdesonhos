@@ -43,6 +43,7 @@ import MinhaVitrine from "./pages/MinhaVitrine";
 import MeuCartao from "./pages/MeuCartao";
 import VitrinePublica from "./pages/VitrinePublica";
 import CartaoPublico from "./pages/CartaoPublico";
+import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
