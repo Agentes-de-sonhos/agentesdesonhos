@@ -43,6 +43,7 @@ import MinhaVitrine from "./pages/MinhaVitrine";
 import MeuCartao from "./pages/MeuCartao";
 import VitrinePublica from "./pages/VitrinePublica";
 import CartaoPublico from "./pages/CartaoPublico";
+import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -350,7 +351,7 @@ const App = () => (
               }
             />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
-            <Route path="/:slug" element={<CartaoPublico />} />
+            <Route path="/:slug" element={<SlugResolver />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
