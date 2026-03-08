@@ -30,6 +30,7 @@ import {
   MessageCircleQuestion,
   Globe,
   Store,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ const mainMenuItems: MenuItem[] = [
   { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
   { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
   { title: "Minha Vitrine", url: "/minha-vitrine", icon: Store },
+  { title: "Meu Cartão", url: "/meu-cartao", icon: CreditCard },
   { title: "Notícias", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
 ];
 

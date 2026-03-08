@@ -281,6 +281,107 @@ export type Database = {
         }
         Relationships: []
       }
+      business_card_stats: {
+        Row: {
+          card_id: string
+          created_at: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_card_stats_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "business_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_cards: {
+        Row: {
+          agency_name: string | null
+          buttons: Json | null
+          cover_url: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          logos: Json | null
+          name: string
+          phone: string | null
+          photo_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string
+          social_links: Json | null
+          title: string | null
+          updated_at: string | null
+          user_id: string
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          agency_name?: string | null
+          buttons?: Json | null
+          cover_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          logos?: Json | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug: string
+          social_links?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          agency_name?: string | null
+          buttons?: Json | null
+          cover_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          logos?: Json | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string
+          social_links?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           city: string | null
