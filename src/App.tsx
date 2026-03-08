@@ -40,7 +40,9 @@ import PlaybookViewer from "./components/playbook/PlaybookViewer";
 import PerguntasRespostas from "./pages/PerguntasRespostas";
 import DreamAdvisor from "./pages/DreamAdvisor";
 import MinhaVitrine from "./pages/MinhaVitrine";
+import MeuCartao from "./pages/MeuCartao";
 import VitrinePublica from "./pages/VitrinePublica";
+import CartaoPublico from "./pages/CartaoPublico";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
