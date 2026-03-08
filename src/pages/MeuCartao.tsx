@@ -125,7 +125,7 @@ export default function MeuCartao() {
               <div>
                 <Label>URL do seu cartão</Label>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">agentesdesonhos.com.br/</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">contato.turo.br/</span>
                   <Input
                     placeholder="sua-agencia"
                     value={slug}
