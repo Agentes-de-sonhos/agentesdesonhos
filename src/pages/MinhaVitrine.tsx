@@ -404,7 +404,6 @@ export default function MinhaVitrine() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
 
       {/* Items List */}
       {items.length === 0 ? (
