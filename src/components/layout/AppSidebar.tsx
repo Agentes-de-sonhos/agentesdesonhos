@@ -69,6 +69,7 @@ const mainMenuItems: MenuItem[] = [
   { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
   { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
   { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
+  { title: "Minha Vitrine", url: "/minha-vitrine", icon: Store },
   { title: "Notícias", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
 ];
 
