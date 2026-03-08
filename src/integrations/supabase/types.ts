@@ -158,6 +158,33 @@ export type Database = {
           },
         ]
       }
+      agency_showcases: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agenda_filter_preferences: {
         Row: {
           created_at: string
@@ -2976,6 +3003,111 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      showcase_items: {
+        Row: {
+          action_type: string
+          action_url: string | null
+          category: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          material_id: string | null
+          order_index: number
+          showcase_id: string
+          subcategory: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_type?: string
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          material_id?: string | null
+          order_index?: number
+          showcase_id: string
+          subcategory?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          material_id?: string | null
+          order_index?: number
+          showcase_id?: string
+          subcategory?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcase_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "showcase_items_showcase_id_fkey"
+            columns: ["showcase_id"]
+            isOneToOne: false
+            referencedRelation: "agency_showcases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      showcase_stats: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          item_id: string | null
+          showcase_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          item_id?: string | null
+          showcase_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          item_id?: string | null
+          showcase_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcase_stats_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "showcase_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "showcase_stats_showcase_id_fkey"
+            columns: ["showcase_id"]
+            isOneToOne: false
+            referencedRelation: "agency_showcases"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       specialties: {
         Row: {

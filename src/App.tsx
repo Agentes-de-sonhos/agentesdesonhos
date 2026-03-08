@@ -39,6 +39,8 @@ import MentoriaDetail from "./pages/MentoriaDetail";
 import PlaybookViewer from "./components/playbook/PlaybookViewer";
 import PerguntasRespostas from "./pages/PerguntasRespostas";
 import DreamAdvisor from "./pages/DreamAdvisor";
+import MinhaVitrine from "./pages/MinhaVitrine";
+import VitrinePublica from "./pages/VitrinePublica";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -329,6 +331,15 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/minha-vitrine"
+              element={
+                <ProtectedRoute>
+                  <MinhaVitrine />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/:slug" element={<VitrinePublica />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
