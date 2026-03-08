@@ -164,7 +164,7 @@ export default function MinhaVitrine() {
   // Setup screen if no showcase exists
   if (!showcase) {
     return (
-      <DashboardLayout title="Minha Vitrine" subtitle="Crie sua vitrine pública de ofertas">
+      <DashboardLayout>
         <div className="max-w-lg mx-auto mt-12">
           <Card>
             <CardHeader className="text-center">
