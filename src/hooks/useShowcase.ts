@@ -3,6 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
+export const FEATURED_LABELS = [
+  { value: "oferta_especial", emoji: "🔥", text: "Oferta Especial" },
+  { value: "mais_vendido", emoji: "⭐", text: "Mais Vendido" },
+  { value: "ultimas_vagas", emoji: "⏳", text: "Últimas Vagas" },
+  { value: "melhor_preco", emoji: "💰", text: "Melhor Preço" },
+  { value: "recomendado", emoji: "🌟", text: "Recomendado" },
+] as const;
+
+export const MAX_FEATURED = 3;
+
+export function getFeaturedLabel(value: string | null) {
+  return FEATURED_LABELS.find(l => l.value === value) || null;
+}
+
 export interface ShowcaseItem {
   id: string;
   showcase_id: string;
@@ -16,6 +30,9 @@ export interface ShowcaseItem {
   order_index: number;
   expires_at: string | null;
   is_active: boolean;
+  is_featured: boolean;
+  featured_order: number;
+  featured_label: string | null;
   created_at: string;
   updated_at: string;
   // Joined material data
