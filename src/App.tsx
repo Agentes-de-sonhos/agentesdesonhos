@@ -331,6 +331,15 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/minha-vitrine"
+              element={
+                <ProtectedRoute>
+                  <MinhaVitrine />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/:slug" element={<VitrinePublica />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
