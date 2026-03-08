@@ -1,0 +1,337 @@
+import { useState, useEffect } from "react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { useBusinessCard, CardButton, SocialLinks } from "@/hooks/useBusinessCard";
+import { toast } from "sonner";
+import {
+  CreditCard, Plus, Trash2, Copy, ExternalLink, Upload, Save, Eye,
+  Instagram, Facebook, Linkedin, Twitter, Youtube, GripVertical,
+} from "lucide-react";
+
+const PUBLIC_DOMAIN = "https://agentesdesonhos.com.br";
+const MAX_BUTTONS = 6;
+
+const SOCIAL_ICONS: { key: keyof SocialLinks; label: string; icon: React.ComponentType<any> }[] = [
+  { key: "instagram", label: "Instagram", icon: Instagram },
+  { key: "facebook", label: "Facebook", icon: Facebook },
+  { key: "linkedin", label: "LinkedIn", icon: Linkedin },
+  { key: "twitter", label: "X (Twitter)", icon: Twitter },
+  { key: "youtube", label: "YouTube", icon: Youtube },
+  { key: "tiktok", label: "TikTok", icon: Youtube },
+];
+
+export default function MeuCartao() {
+  const { card, isLoading, createCard, updateCard, uploadImage } = useBusinessCard();
+  const [slug, setSlug] = useState("");
+  const [form, setForm] = useState({
+    name: "", title: "", agency_name: "", phone: "", whatsapp: "", email: "", website: "",
+    primary_color: "#0284c7", secondary_color: "#f97316",
+  });
+  const [buttons, setButtons] = useState<CardButton[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
+
+  useEffect(() => {
+    if (card) {
+      setForm({
+        name: card.name, title: card.title, agency_name: card.agency_name,
+        phone: card.phone, whatsapp: card.whatsapp, email: card.email,
+        website: card.website, primary_color: card.primary_color,
+        secondary_color: card.secondary_color,
+      });
+      setButtons(card.buttons);
+      setSocialLinks(card.social_links);
+    }
+  }, [card]);
+
+  const handleCreate = () => {
+    const clean = slug.toLowerCase().replace(/[^a-z0-9-]/g, "").trim();
+    if (!clean || clean.length < 3) {
+      toast.error("O slug deve ter pelo menos 3 caracteres.");
+      return;
+    }
+    createCard.mutate(clean);
+  };
+
+  const handleSave = () => {
+    updateCard.mutate({ ...form, buttons, social_links: socialLinks } as any);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const url = await uploadImage(file, "photo");
+      if (url) updateCard.mutate({ photo_url: url } as any);
+    } catch { toast.error("Erro ao enviar imagem."); }
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const url = await uploadImage(file, "cover");
+      if (url) updateCard.mutate({ cover_url: url } as any);
+    } catch { toast.error("Erro ao enviar capa."); }
+  };
+
+  const addButton = () => {
+    if (buttons.length >= MAX_BUTTONS) {
+      toast.error(`Máximo de ${MAX_BUTTONS} botões.`);
+      return;
+    }
+    setButtons([...buttons, { text: "", url: "" }]);
+  };
+
+  const removeButton = (i: number) => setButtons(buttons.filter((_, idx) => idx !== i));
+
+  const updateButton = (i: number, field: keyof CardButton, value: string) => {
+    const updated = [...buttons];
+    updated[i] = { ...updated[i], [field]: value };
+    setButtons(updated);
+  };
+
+  const copyLink = () => {
+    if (card) {
+      navigator.clipboard.writeText(`${PUBLIC_DOMAIN}/${card.slug}`);
+      toast.success("Link copiado!");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!card) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-xl mx-auto space-y-6 p-4">
+          <div className="text-center space-y-2">
+            <CreditCard className="h-12 w-12 mx-auto text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">Criar Cartão Virtual</h1>
+            <p className="text-muted-foreground">Crie seu cartão de visita digital profissional.</p>
+          </div>
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div>
+                <Label>URL do seu cartão</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">agentesdesonhos.com.br/</span>
+                  <Input
+                    placeholder="sua-agencia"
+                    value={slug}
+                    onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                  />
+                </div>
+              </div>
+              <Button onClick={handleCreate} disabled={createCard.isPending} className="w-full">
+                {createCard.isPending ? "Criando..." : "Criar Cartão"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const publicUrl = `${PUBLIC_DOMAIN}/${card.slug}`;
+
+  return (
+    <DashboardLayout>
+      <div className="max-w-3xl mx-auto space-y-6 p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <CreditCard className="h-6 w-6 text-primary" /> Meu Cartão Virtual
+            </h1>
+            <p className="text-sm text-muted-foreground">Gerencie seu cartão de visita digital.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={copyLink}>
+              <Copy className="h-4 w-4 mr-1" /> Copiar link
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={`/${card.slug}`} target="_blank" rel="noopener noreferrer">
+                <Eye className="h-4 w-4 mr-1" /> Visualizar
+              </a>
+            </Button>
+          </div>
+        </div>
+
+        <div className="text-sm text-muted-foreground bg-muted/50 rounded-md p-3 flex items-center gap-2 flex-wrap">
+          <ExternalLink className="h-4 w-4" />
+          <span className="font-medium">{publicUrl}</span>
+        </div>
+
+        {/* Photo & Cover */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Imagens</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>Foto do agente / Logo</Label>
+                <div className="mt-2 flex items-center gap-3">
+                  {card.photo_url && (
+                    <img src={card.photo_url} alt="Foto" className="h-16 w-16 rounded-full object-cover border" />
+                  )}
+                  <label className="cursor-pointer">
+                    <div className="flex items-center gap-2 text-sm text-primary hover:underline">
+                      <Upload className="h-4 w-4" /> Enviar foto
+                    </div>
+                    <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                  </label>
+                </div>
+              </div>
+              <div>
+                <Label>Imagem de capa</Label>
+                <div className="mt-2 flex items-center gap-3">
+                  {card.cover_url && (
+                    <img src={card.cover_url} alt="Capa" className="h-16 w-28 rounded object-cover border" />
+                  )}
+                  <label className="cursor-pointer">
+                    <div className="flex items-center gap-2 text-sm text-primary hover:underline">
+                      <Upload className="h-4 w-4" /> Enviar capa
+                    </div>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Info */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Informações</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { label: "Nome", key: "name" },
+                { label: "Cargo / Título", key: "title" },
+                { label: "Nome da agência", key: "agency_name" },
+                { label: "Telefone", key: "phone" },
+                { label: "WhatsApp", key: "whatsapp" },
+                { label: "E-mail", key: "email" },
+                { label: "Site", key: "website" },
+              ].map(f => (
+                <div key={f.key}>
+                  <Label>{f.label}</Label>
+                  <Input
+                    className="mt-1"
+                    value={(form as any)[f.key]}
+                    onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                  />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Colors */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Cores</CardTitle></CardHeader>
+          <CardContent>
+            <div className="flex gap-6 flex-wrap">
+              <div>
+                <Label>Cor principal</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="color"
+                    value={form.primary_color}
+                    onChange={e => setForm({ ...form, primary_color: e.target.value })}
+                    className="h-10 w-10 rounded cursor-pointer border-0"
+                  />
+                  <span className="text-sm text-muted-foreground">{form.primary_color}</span>
+                </div>
+              </div>
+              <div>
+                <Label>Cor secundária</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="color"
+                    value={form.secondary_color}
+                    onChange={e => setForm({ ...form, secondary_color: e.target.value })}
+                    className="h-10 w-10 rounded cursor-pointer border-0"
+                  />
+                  <span className="text-sm text-muted-foreground">{form.secondary_color}</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Buttons */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Botões de ação</CardTitle>
+              <Button variant="outline" size="sm" onClick={addButton}>
+                <Plus className="h-4 w-4 mr-1" /> Adicionar
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {buttons.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum botão adicionado.</p>
+            )}
+            {buttons.map((btn, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <GripVertical className="h-5 w-5 text-muted-foreground mt-2.5 shrink-0" />
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Input
+                    placeholder="Texto do botão"
+                    value={btn.text}
+                    onChange={e => updateButton(i, "text", e.target.value)}
+                  />
+                  <Input
+                    placeholder="https://..."
+                    value={btn.url}
+                    onChange={e => updateButton(i, "url", e.target.value)}
+                  />
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => removeButton(i)} className="shrink-0 mt-0.5">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Social Links */}
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Redes Sociais</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {SOCIAL_ICONS.map(({ key, label, icon: Icon }) => (
+              <div key={key} className="flex items-center gap-3">
+                <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                <Input
+                  placeholder={`URL do ${label}`}
+                  value={socialLinks[key] || ""}
+                  onChange={e => setSocialLinks({ ...socialLinks, [key]: e.target.value })}
+                />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Save */}
+        <div className="flex justify-end">
+          <Button onClick={handleSave} disabled={updateCard.isPending} size="lg">
+            <Save className="h-4 w-4 mr-2" />
+            {updateCard.isPending ? "Salvando..." : "Salvar alterações"}
+          </Button>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
