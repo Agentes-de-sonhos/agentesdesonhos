@@ -43,7 +43,7 @@ export default function MinhaVitrine() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const PUBLIC_DOMAIN = "https://agentesdesonhos.com.br";
+  const PUBLIC_DOMAIN = "https://vitrine.tur.br";
   const publicUrl = showcase ? `${PUBLIC_DOMAIN}/${showcase.slug}` : "";
   const featuredCount = items.filter(i => i.is_featured).length;
 
