@@ -12,7 +12,7 @@ import {
   Instagram, Facebook, Linkedin, Twitter, Youtube, GripVertical,
 } from "lucide-react";
 
-const PUBLIC_DOMAIN = "https://contato.turo.br";
+const PUBLIC_DOMAIN = "https://contato.tur.br";
 const MAX_BUTTONS = 6;
 
 const SOCIAL_ICONS: { key: keyof SocialLinks; label: string; icon: React.ComponentType<any> }[] = [
@@ -125,7 +125,7 @@ export default function MeuCartao() {
               <div>
                 <Label>URL do seu cartão</Label>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">contato.turo.br/</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">contato.tur.br/</span>
                   <Input
                     placeholder="sua-agencia"
                     value={slug}
