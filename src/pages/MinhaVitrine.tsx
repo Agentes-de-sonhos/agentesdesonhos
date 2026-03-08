@@ -205,7 +205,7 @@ export default function MinhaVitrine() {
   }
 
   return (
-    <DashboardLayout title="Minha Vitrine" subtitle="Gerencie suas ofertas na vitrine pública">
+    <DashboardLayout>
       {/* URL + Actions Bar */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2 flex-1 min-w-0">
