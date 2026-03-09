@@ -25,6 +25,7 @@ import {
   Home,
   BookOpen,
   ShoppingBag,
+  Compass,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamification } from "@/hooks/useGamification";
