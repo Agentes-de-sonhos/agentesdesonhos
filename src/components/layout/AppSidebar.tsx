@@ -441,6 +441,10 @@ export function AppSidebar() {
         onOpenChange={(open) => !open && setUpgradeFeature(null)}
         requiredFeature={upgradeFeature || undefined}
       />
+      <ComingSoonDialog
+        open={showComingSoon}
+        onOpenChange={setShowComingSoon}
+      />
     </TooltipProvider>
   );
 }
