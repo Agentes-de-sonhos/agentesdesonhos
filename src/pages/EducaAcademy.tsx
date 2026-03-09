@@ -299,7 +299,12 @@ export default function EducaAcademy() {
           </TabsContent>
 
           {isAdmin && (
-            <TabsContent value="admin"><AdminAcademyManager /></TabsContent>
+            <TabsContent value="admin">
+              <div className="space-y-6">
+                <AcademyHeroBannerManager />
+                <AdminAcademyManager />
+              </div>
+            </TabsContent>
           )}
         </Tabs>
 
