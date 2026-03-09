@@ -152,12 +152,11 @@ export function AdminAcademyManager() {
         overviewUrl = urlData.publicUrl;
       }
 
-      if (coverImageFile) {
-        const sanitized = sanitizeFileName(coverImageFile.name);
-        const path = `covers/${Date.now()}_${sanitized}`;
+      if (coverImageBlob) {
+        const path = `covers/${Date.now()}_cover.jpg`;
         const { error: uploadError } = await supabase.storage
           .from("academy-files")
-          .upload(path, coverImageFile);
+          .upload(path, coverImageBlob, { contentType: "image/jpeg" });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage
           .from("academy-files")
@@ -165,12 +164,11 @@ export function AdminAcademyManager() {
         imageUrl = urlData.publicUrl;
       }
 
-      if (bannerImageFile) {
-        const sanitized = sanitizeFileName(bannerImageFile.name);
-        const path = `banners/${Date.now()}_${sanitized}`;
+      if (bannerImageBlob) {
+        const path = `banners/${Date.now()}_banner.jpg`;
         const { error: uploadError } = await supabase.storage
           .from("academy-files")
-          .upload(path, bannerImageFile);
+          .upload(path, bannerImageBlob, { contentType: "image/jpeg" });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage
           .from("academy-files")
@@ -186,8 +184,10 @@ export function AdminAcademyManager() {
       }
       setTrailDialogOpen(false);
       setOverviewPdfFile(null);
-      setCoverImageFile(null);
-      setBannerImageFile(null);
+      setCoverImageBlob(null);
+      setCoverImagePreview(null);
+      setBannerImageBlob(null);
+      setBannerImagePreview(null);
     } catch (err: any) {
       sonnerToast.error("Erro ao salvar trilha: " + err.message);
     } finally {
