@@ -61,25 +61,36 @@ export function AdminPlaybookManager() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setCropSrc(reader.result as string);
+    reader.onload = () => { setCropSrc(reader.result as string); setCropTarget("cover"); };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { setCropSrc(reader.result as string); setCropTarget("banner"); };
     reader.readAsDataURL(file);
     e.target.value = "";
   };
 
   const handleCropConfirm = async (blob: Blob) => {
     setCropSrc(null);
-    setUploadingCover(true);
+    const isBanner = cropTarget === "banner";
+    if (isBanner) setUploadingBanner(true); else setUploadingCover(true);
     try {
-      const path = `playbook-covers/${Date.now()}_cover.jpg`;
+      const prefix = isBanner ? "playbook-banners" : "playbook-covers";
+      const path = `${prefix}/${Date.now()}_${isBanner ? "banner" : "cover"}.jpg`;
       const { error } = await supabase.storage.from("playbook-files").upload(path, blob, { contentType: "image/jpeg", upsert: true });
       if (error) throw error;
       const { data } = supabase.storage.from("playbook-files").getPublicUrl(path);
-      setImageUrl(data.publicUrl);
+      if (isBanner) setBannerUrl(data.publicUrl); else setImageUrl(data.publicUrl);
       toast({ title: "Imagem enviada!" });
     } catch (err: any) {
       toast({ title: "Erro ao enviar imagem", description: err.message, variant: "destructive" });
     } finally {
-      setUploadingCover(false);
+      if (isBanner) setUploadingBanner(false); else setUploadingCover(false);
     }
   };
 
