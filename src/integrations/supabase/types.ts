@@ -4096,6 +4096,7 @@ export type Database = {
         Row: {
           agent_name: string
           certificate_number: string
+          certificate_pdf_url: string | null
           created_at: string
           id: string
           issued_at: string
@@ -4105,6 +4106,7 @@ export type Database = {
         Insert: {
           agent_name: string
           certificate_number: string
+          certificate_pdf_url?: string | null
           created_at?: string
           id?: string
           issued_at?: string
@@ -4114,6 +4116,7 @@ export type Database = {
         Update: {
           agent_name?: string
           certificate_number?: string
+          certificate_pdf_url?: string | null
           created_at?: string
           id?: string
           issued_at?: string
@@ -4305,6 +4308,7 @@ export type Database = {
         Returns: boolean
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
+      generate_certificate_number: { Args: never; Returns: string }
       generate_secure_share_token: { Args: never; Returns: string }
       generate_trip_short_code: { Args: never; Returns: string }
       generate_trip_slug: {
