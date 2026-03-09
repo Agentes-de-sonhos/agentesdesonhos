@@ -93,7 +93,7 @@ const venderItemsMap: Record<string, MenuItem> = {
   "cartao-digital": { key: "cartao-digital", title: "Meu Cartão", url: "/meu-cartao", icon: CreditCard, isPremium: true },
   "bloqueios-aereos": { key: "bloqueios-aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
   "mapa-turismo": { key: "mapa-turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-  "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine Digital", url: "/minha-vitrine", icon: Store, isPremium: true },
+  "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine", url: "/minha-vitrine", icon: Store, isPremium: true },
 };
 
 const defaultVenderOrder = ["materiais", "gerar-orcamento", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "mapa-turismo", "minha-vitrine"];
