@@ -380,23 +380,32 @@ export function AdminAcademyManager() {
       <div>
         <Label>Imagem de Capa</Label>
         <div className="mt-1">
-          {trailForm.image_url && !coverImageFile && (
+          {trailForm.image_url && !coverImageBlob && (
             <div className="flex items-center gap-2 mb-2">
               <img src={trailForm.image_url} alt="Capa atual" className="h-16 w-24 object-cover rounded border" />
               <span className="text-xs text-muted-foreground">Imagem atual</span>
             </div>
           )}
-          {coverImageFile ? (
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-              <FileText className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium flex-1 truncate">{coverImageFile.name}</span>
-              <Button variant="ghost" size="sm" onClick={() => setCoverImageFile(null)}>Remover</Button>
+          {coverImagePreview ? (
+            <div className="space-y-2">
+              <img src={coverImagePreview} alt="Capa recortada" className="h-24 w-36 object-cover rounded border" />
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => { setCoverImageBlob(null); setCoverImagePreview(null); }}>Remover</Button>
+              </div>
             </div>
           ) : (
             <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
               <Upload className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Clique para enviar imagem de capa</span>
-              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) setCoverImageFile(file); }} className="sr-only" />
+              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => { setCropSrc(reader.result as string); setCropTarget("cover"); setCropAspect(3 / 2); };
+                  reader.readAsDataURL(file);
+                  e.target.value = "";
+                }
+              }} className="sr-only" />
             </label>
           )}
         </div>
@@ -405,23 +414,32 @@ export function AdminAcademyManager() {
         <Label>Banner da Trilha (imagem de destaque interna)</Label>
         <p className="text-xs text-muted-foreground mb-1">Imagem panorâmica exibida no topo ao abrir a trilha (recomendado: 1920×512px)</p>
         <div className="mt-1">
-          {trailForm.banner_url && !bannerImageFile && (
+          {trailForm.banner_url && !bannerImageBlob && (
             <div className="flex items-center gap-2 mb-2">
               <img src={trailForm.banner_url} alt="Banner atual" className="h-16 w-40 object-cover rounded border" />
               <span className="text-xs text-muted-foreground">Banner atual</span>
             </div>
           )}
-          {bannerImageFile ? (
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-              <ImageIcon className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium flex-1 truncate">{bannerImageFile.name}</span>
-              <Button variant="ghost" size="sm" onClick={() => setBannerImageFile(null)}>Remover</Button>
+          {bannerImagePreview ? (
+            <div className="space-y-2">
+              <img src={bannerImagePreview} alt="Banner recortado" className="h-16 w-40 object-cover rounded border" />
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => { setBannerImageBlob(null); setBannerImagePreview(null); }}>Remover</Button>
+              </div>
             </div>
           ) : (
             <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
               <ImageIcon className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Clique para enviar banner da trilha</span>
-              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) setBannerImageFile(file); }} className="sr-only" />
+              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => { setCropSrc(reader.result as string); setCropTarget("banner"); setCropAspect(1920 / 512); };
+                  reader.readAsDataURL(file);
+                  e.target.value = "";
+                }
+              }} className="sr-only" />
             </label>
           )}
         </div>
