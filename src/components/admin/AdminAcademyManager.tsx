@@ -862,6 +862,26 @@ export function AdminAcademyManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ImageCropDialog
+        open={!!cropSrc}
+        imageSrc={cropSrc || ""}
+        aspect={cropAspect}
+        title={cropTarget === "cover" ? "Posicionar capa da trilha" : "Posicionar banner da trilha"}
+        onClose={() => { setCropSrc(null); setCropTarget(null); }}
+        onConfirm={(blob) => {
+          const url = URL.createObjectURL(blob);
+          if (cropTarget === "cover") {
+            setCoverImageBlob(blob);
+            setCoverImagePreview(url);
+          } else {
+            setBannerImageBlob(blob);
+            setBannerImagePreview(url);
+          }
+          setCropSrc(null);
+          setCropTarget(null);
+        }}
+      />
     </div>
   );
 }
