@@ -101,7 +101,7 @@ export function AdminPlaybookManager() {
   };
 
   const handleSave = () => {
-    const data = { name, slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''), description: description || null, image_url: imageUrl || null };
+    const data = { name, slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''), description: description || null, image_url: imageUrl || null, banner_url: bannerUrl || null };
     if (editingDest) updateDestination.mutate({ id: editingDest.id, ...data });
     else createDestination.mutate(data);
     resetForm();

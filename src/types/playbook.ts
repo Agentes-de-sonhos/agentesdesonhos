@@ -3,6 +3,7 @@ export interface PlaybookDestination {
   name: string;
   slug: string;
   image_url: string | null;
+  banner_url: string | null;
   description: string | null;
   is_active: boolean;
   order_index: number;
