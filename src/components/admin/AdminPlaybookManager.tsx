@@ -48,46 +48,60 @@ export function AdminPlaybookManager() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<"cover" | "banner">("cover");
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const { toast } = useToast();
 
-  const resetForm = () => { setName(""); setSlug(""); setDescription(""); setImageUrl(""); setEditingDest(null); setShowForm(false); };
+  const resetForm = () => { setName(""); setSlug(""); setDescription(""); setImageUrl(""); setBannerUrl(""); setEditingDest(null); setShowForm(false); };
 
   const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setCropSrc(reader.result as string);
+    reader.onload = () => { setCropSrc(reader.result as string); setCropTarget("cover"); };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { setCropSrc(reader.result as string); setCropTarget("banner"); };
     reader.readAsDataURL(file);
     e.target.value = "";
   };
 
   const handleCropConfirm = async (blob: Blob) => {
     setCropSrc(null);
-    setUploadingCover(true);
+    const isBanner = cropTarget === "banner";
+    if (isBanner) setUploadingBanner(true); else setUploadingCover(true);
     try {
-      const path = `playbook-covers/${Date.now()}_cover.jpg`;
+      const prefix = isBanner ? "playbook-banners" : "playbook-covers";
+      const path = `${prefix}/${Date.now()}_${isBanner ? "banner" : "cover"}.jpg`;
       const { error } = await supabase.storage.from("playbook-files").upload(path, blob, { contentType: "image/jpeg", upsert: true });
       if (error) throw error;
       const { data } = supabase.storage.from("playbook-files").getPublicUrl(path);
-      setImageUrl(data.publicUrl);
+      if (isBanner) setBannerUrl(data.publicUrl); else setImageUrl(data.publicUrl);
       toast({ title: "Imagem enviada!" });
     } catch (err: any) {
       toast({ title: "Erro ao enviar imagem", description: err.message, variant: "destructive" });
     } finally {
-      setUploadingCover(false);
+      if (isBanner) setUploadingBanner(false); else setUploadingCover(false);
     }
   };
 
   const handleEdit = (dest: any) => {
     setEditingDest(dest);
-    setName(dest.name); setSlug(dest.slug); setDescription(dest.description || ""); setImageUrl(dest.image_url || "");
+    setName(dest.name); setSlug(dest.slug); setDescription(dest.description || ""); setImageUrl(dest.image_url || ""); setBannerUrl(dest.banner_url || "");
     setShowForm(true);
   };
 
   const handleSave = () => {
-    const data = { name, slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''), description: description || null, image_url: imageUrl || null };
+    const data = { name, slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''), description: description || null, image_url: imageUrl || null, banner_url: bannerUrl || null };
     if (editingDest) updateDestination.mutate({ id: editingDest.id, ...data });
     else createDestination.mutate(data);
     resetForm();
@@ -114,7 +128,8 @@ export function AdminPlaybookManager() {
             </div>
             <div><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Breve descrição..." rows={2} /></div>
             <div>
-              <Label>Imagem de Capa</Label>
+              <Label>Imagem de Capa (listagem)</Label>
+              <p className="text-xs text-muted-foreground mb-1">Aparece no card da listagem de playbooks</p>
               {imageUrl && (
                 <div className="mb-2 relative rounded-lg overflow-hidden" style={{ aspectRatio: "3/2", maxWidth: 280 }}>
                   <img src={imageUrl} alt="Capa" className="w-full h-full object-cover" />
@@ -130,15 +145,34 @@ export function AdminPlaybookManager() {
                 </Button>
                 {imageUrl && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setImageUrl("")}><Trash2 className="h-3 w-3 mr-1" /> Remover</Button>}
               </div>
-              <ImageCropDialog
-                open={!!cropSrc}
-                imageSrc={cropSrc || ""}
-                aspect={3 / 2}
-                title="Posicionar capa do Playbook"
-                onClose={() => setCropSrc(null)}
-                onConfirm={handleCropConfirm}
-              />
             </div>
+            <div>
+              <Label>Banner da Página (widescreen)</Label>
+              <p className="text-xs text-muted-foreground mb-1">Aparece no topo da página do playbook — use imagem em alta resolução</p>
+              {bannerUrl && (
+                <div className="mb-2 relative rounded-lg overflow-hidden" style={{ aspectRatio: "16/5", maxWidth: 500 }}>
+                  <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" disabled={uploadingBanner} asChild>
+                  <label className="cursor-pointer">
+                    {uploadingBanner ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-2" />}
+                    {uploadingBanner ? "Enviando..." : bannerUrl ? "Trocar banner" : "Enviar banner"}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleBannerFileChange} />
+                  </label>
+                </Button>
+                {bannerUrl && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setBannerUrl("")}><Trash2 className="h-3 w-3 mr-1" /> Remover</Button>}
+              </div>
+            </div>
+            <ImageCropDialog
+              open={!!cropSrc}
+              imageSrc={cropSrc || ""}
+              aspect={cropTarget === "banner" ? 16 / 5 : 3 / 2}
+              title={cropTarget === "banner" ? "Posicionar banner do Playbook" : "Posicionar capa do Playbook"}
+              onClose={() => setCropSrc(null)}
+              onConfirm={handleCropConfirm}
+            />
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={!name.trim()}><Save className="h-4 w-4 mr-2" /> Salvar</Button>
               <Button variant="outline" onClick={resetForm}><X className="h-4 w-4 mr-2" /> Cancelar</Button>
