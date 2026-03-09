@@ -84,6 +84,7 @@ const clientesSection: MenuSection = {
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", isPremium: true },
     { title: "Criar Carteira", url: "/ferramentas-ia/trip-wallet", icon: Wallet, isPremium: true },
+    { title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true, isPremium: true },
   ],
 };
 
@@ -98,7 +99,6 @@ const comunidadeSection: MenuSection = {
 // Vender items with keys for dynamic ordering
 const venderItemsMap: Record<string, MenuItem> = {
   "materiais": { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-  "gerar-orcamento": { key: "gerar-orcamento", title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true, isPremium: true },
   "dream-advisor": { key: "dream-advisor", title: "Dream Advisor", url: "/dream-advisor", icon: Compass, isPremium: true },
   "ferramentas-ia": { key: "ferramentas-ia", title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools", isPremium: true },
   "mentorias": { key: "mentorias", title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
@@ -107,7 +107,7 @@ const venderItemsMap: Record<string, MenuItem> = {
   "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine", url: "/minha-vitrine", icon: Store, isPremium: true },
 };
 
-const defaultVenderOrder = ["materiais", "gerar-orcamento", "dream-advisor", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "minha-vitrine"];
+const defaultVenderOrder = ["materiais", "dream-advisor", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "minha-vitrine"];
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
