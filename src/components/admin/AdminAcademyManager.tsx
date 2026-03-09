@@ -53,6 +53,7 @@ export function AdminAcademyManager() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
   const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
+  const [certificateTemplateFile, setCertificateTemplateFile] = useState<File | null>(null);
   const [coverImageBlob, setCoverImageBlob] = useState<Blob | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [bannerImageBlob, setBannerImageBlob] = useState<Blob | null>(null);
