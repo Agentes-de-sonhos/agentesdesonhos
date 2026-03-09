@@ -1478,6 +1478,7 @@ export type Database = {
       }
       learning_trails: {
         Row: {
+          banner_url: string | null
           certificate_template_url: string | null
           created_at: string
           description: string | null
@@ -1493,6 +1494,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          banner_url?: string | null
           certificate_template_url?: string | null
           created_at?: string
           description?: string | null
@@ -1508,6 +1510,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          banner_url?: string | null
           certificate_template_url?: string | null
           created_at?: string
           description?: string | null
