@@ -284,10 +284,14 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <TabsTrigger value="palestrantes" className="flex items-center gap-2">
             <Users className="h-4 w-4" /> Palestrantes
           </TabsTrigger>
-          {playbookDestination && (
-            <TabsTrigger value="playbook" className="flex items-center gap-2">
+          {playbookDestination && linkedSlug && (
+            <button
+              type="button"
+              onClick={() => navigate(`/playbook/${linkedSlug}`)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
               <BookOpen className="h-4 w-4" /> Playbook
-            </TabsTrigger>
+            </button>
           )}
         </TabsList>
 
