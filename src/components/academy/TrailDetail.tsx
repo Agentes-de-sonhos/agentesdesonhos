@@ -225,6 +225,26 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
         )}
       </div>
 
+      {/* Banner Image */}
+      {(trail as any).banner_url && (
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
+          <img
+            src={(trail as any).banner_url}
+            alt={trail.name}
+            className="w-full h-40 sm:h-52 md:h-64 object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+          <div className="absolute bottom-4 left-6 right-6">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
+              {trail.name}
+            </h3>
+            <p className="text-sm sm:text-base text-white/80 drop-shadow-md mt-1">
+              {trail.destination}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Progress Card */}
       <Card>
         <CardContent className="py-4">
