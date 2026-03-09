@@ -539,24 +539,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <SpeakersTab speakers={trailSpeakers} />
         </TabsContent>
 
-        {/* Playbook Tab */}
-        {playbookDestination && (
-          <TabsContent value="playbook">
-            <TabIntroBlock
-              icon={BookOpen}
-              title={`Playbook de Vendas — ${playbookDestination.name}`}
-              description="Acesse o playbook completo do destino com estratégias de vendas, perfis de clientes, dicas de hospedagem, atrações e muito mais. Um guia prático e completo para vender este destino com confiança."
-            />
-            <PlaybookEmbedded
-              destination={playbookDestination}
-              sections={playbookSections}
-              isAdmin={isAdmin}
-              upsertSection={upsertSection}
-              activeTab={playbookTab}
-              setActiveTab={setPlaybookTab}
-            />
-          </TabsContent>
-        )}
       </Tabs>
 
       {/* Training Player Dialog */}
