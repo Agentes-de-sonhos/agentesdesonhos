@@ -45,6 +45,7 @@ import VitrinePublica from "./pages/VitrinePublica";
 import CartaoPublico from "./pages/CartaoPublico";
 import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
+import CertificateTest from "./pages/CertificateTest";
 
 const queryClient = new QueryClient();
 
