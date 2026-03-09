@@ -586,6 +586,17 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           {certificate && <CertificatePDF certificate={certificate} trail={trail} />}
         </DialogContent>
       </Dialog>
+
+      {/* Name Confirmation Dialog */}
+      <CertificateNameConfirmDialog
+        open={showNameConfirm}
+        onOpenChange={setShowNameConfirm}
+        defaultName={userName}
+        onConfirm={async (name) => {
+          await generateCertificate.mutateAsync({ trailId: trail.id, agentName: name });
+          setShowNameConfirm(false);
+        }}
+      />
     </div>
   );
 }
