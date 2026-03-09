@@ -83,6 +83,7 @@ const clientesSection: MenuSection = {
   icon: Users,
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", isPremium: true },
+    { title: "Criar Carteira", url: "/ferramentas-ia/trip-wallet", icon: Wallet, isPremium: true },
   ],
 };
 
