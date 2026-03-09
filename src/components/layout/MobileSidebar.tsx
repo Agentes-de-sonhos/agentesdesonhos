@@ -169,7 +169,9 @@ export function MobileSidebar() {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
-    const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
+    const isLocked = isLockedByPlan || isLockedByEducaPass;
 
     const iconElement = (
       <div className="relative flex-shrink-0">
