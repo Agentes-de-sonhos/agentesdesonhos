@@ -96,7 +96,7 @@ export function AdminPlaybookManager() {
 
   const handleEdit = (dest: any) => {
     setEditingDest(dest);
-    setName(dest.name); setSlug(dest.slug); setDescription(dest.description || ""); setImageUrl(dest.image_url || "");
+    setName(dest.name); setSlug(dest.slug); setDescription(dest.description || ""); setImageUrl(dest.image_url || ""); setBannerUrl(dest.banner_url || "");
     setShowForm(true);
   };
 
