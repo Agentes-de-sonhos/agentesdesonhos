@@ -45,6 +45,7 @@ import VitrinePublica from "./pages/VitrinePublica";
 import CartaoPublico from "./pages/CartaoPublico";
 import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
+import CertificateTest from "./pages/CertificateTest";
 
 const queryClient = new QueryClient();
 
@@ -350,6 +351,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:slug" element={<SlugResolver />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
