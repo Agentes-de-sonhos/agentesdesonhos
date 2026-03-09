@@ -16,6 +16,7 @@ import {
   Megaphone,
   BookOpen,
   Sparkles,
+  Menu,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -32,6 +33,7 @@ import { AdminPlaybookManager } from "@/components/admin/AdminPlaybookManager";
 import { AdminNewsCurationManager } from "@/components/admin/AdminNewsCurationManager";
 import { AdminHotelsManager } from "@/components/admin/AdminHotelsManager";
 import { AdminHotelRecommendationsManager } from "@/components/admin/AdminHotelRecommendationsManager";
+import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
