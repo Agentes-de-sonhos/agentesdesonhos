@@ -67,6 +67,7 @@ const aprenderSection: MenuSection = {
   items: [
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum", isPremium: true },
   ],
 };
