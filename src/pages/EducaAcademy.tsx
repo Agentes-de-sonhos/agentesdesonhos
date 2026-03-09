@@ -106,7 +106,7 @@ export default function EducaAcademy() {
         {/* Hero Banner */}
         <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
           <img
-            src={academyHeroBanner}
+            src={heroBannerUrl || academyHeroBanner}
             alt="EducaTravel Academy"
             className="w-full h-40 sm:h-52 md:h-64 object-cover"
           />
