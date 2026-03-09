@@ -109,6 +109,7 @@ export function AdminAcademyManager() {
         description: "",
         destination: "",
         image_url: "",
+        banner_url: "",
         overview_pdf_url: "",
         playbook_destination_id: "",
         order_index: trails.length,
