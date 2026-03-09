@@ -96,6 +96,7 @@ export function AdminAcademyManager() {
         description: trail.description || "",
         destination: trail.destination,
         image_url: trail.image_url || "",
+        banner_url: (trail as any).banner_url || "",
         overview_pdf_url: (trail as any).overview_pdf_url || "",
         playbook_destination_id: (trail as any).playbook_destination_id || "",
         order_index: trail.order_index,
