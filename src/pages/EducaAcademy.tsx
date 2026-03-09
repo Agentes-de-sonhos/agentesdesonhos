@@ -76,6 +76,8 @@ export default function EducaAcademy() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Countdown Banner for Educa Pass users */}
+        {isEducaPass && <LaunchCountdownBanner />}
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
