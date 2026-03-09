@@ -68,10 +68,21 @@ export function MyCertificates({ onViewCertificate }: MyCertificatesProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onViewCertificate(cert.id)}
+                      onClick={() => {
+                        const pdfUrl = (cert as any).certificate_pdf_url;
+                        if (pdfUrl) {
+                          const a = document.createElement("a");
+                          a.href = pdfUrl;
+                          a.download = `Certificado_${cert.certificate_number}.pdf`;
+                          a.target = "_blank";
+                          a.click();
+                        } else {
+                          onViewCertificate(cert.id);
+                        }
+                      }}
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      Ver
+                      Baixar
                     </Button>
                   </div>
                 );
