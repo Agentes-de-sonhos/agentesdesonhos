@@ -30,7 +30,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Educa Pass users can only access /educa-academy and /perfil
   if (plan === "educa_pass") {
-    const allowedPaths = ["/educa-academy", "/perfil"];
+    const allowedPaths = ["/educa-academy", "/perfil", "/playbook"];
     const isAllowed = allowedPaths.some(
       (p) => location.pathname === p || location.pathname.startsWith(p + "/")
     );
