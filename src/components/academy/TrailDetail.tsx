@@ -218,8 +218,19 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           </Button>
         )}
         {certificate && (
-          <Button variant="outline" onClick={() => setShowCertificate(true)}>
-            <Download className="h-4 w-4 mr-2" /> Ver Certificado
+          <Button variant="outline" onClick={() => {
+            const pdfUrl = (certificate as any).certificate_pdf_url;
+            if (pdfUrl) {
+              const a = document.createElement("a");
+              a.href = pdfUrl;
+              a.download = `Certificado_${certificate.certificate_number}.pdf`;
+              a.target = "_blank";
+              a.click();
+            } else {
+              setShowCertificate(true);
+            }
+          }}>
+            <Download className="h-4 w-4 mr-2" /> Baixar Certificado
           </Button>
         )}
       </div>
