@@ -142,6 +142,7 @@ export function AdminAcademyManager() {
       let overviewUrl = trailForm.overview_pdf_url;
       let imageUrl = trailForm.image_url;
       let bannerUrl = trailForm.banner_url;
+      let certTemplateUrl = trailForm.certificate_template_url;
 
       if (overviewPdfFile) {
         const sanitized = sanitizeFileName(overviewPdfFile.name);
