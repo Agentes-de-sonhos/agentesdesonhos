@@ -1,0 +1,1 @@
+ALTER TABLE public.playbook_destinations ADD COLUMN IF NOT EXISTS banner_url TEXT;
