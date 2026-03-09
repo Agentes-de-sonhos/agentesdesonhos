@@ -90,6 +90,24 @@ export default function EducaAcademy() {
           </p>
         </div>
 
+        {/* Hero Banner */}
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
+          <img
+            src={academyHeroBanner}
+            alt="EducaTravel Academy"
+            className="w-full h-40 sm:h-52 md:h-64 object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+          <div className="absolute bottom-4 left-6 right-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
+              EducaTravel Academy
+            </h2>
+            <p className="text-sm sm:text-base text-white/80 drop-shadow-md mt-1">
+              Trilhas de aprendizado · Certificação · Materiais Premium
+            </p>
+          </div>
+        </div>
+
         <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList className="flex-wrap">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
