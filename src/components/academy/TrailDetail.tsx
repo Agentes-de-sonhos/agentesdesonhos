@@ -50,10 +50,7 @@ import { PlaybookChecklistTab } from "@/components/playbook/PlaybookChecklistTab
 import { SpeakersTab } from "./SpeakersTab";
 import { TabIntroBlock } from "./TabIntroBlock";
 import type { PlaybookPDFFile } from "@/types/playbook";
-import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
-import { PlaybookTabContent } from "@/components/playbook/PlaybookTabContent";
-import { PlaybookComoVenderTab } from "@/components/playbook/PlaybookComoVenderTab";
-import { PLAYBOOK_TABS } from "@/types/playbook";
+import { usePlaybook } from "@/hooks/usePlaybook";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { SocialPostCard } from "@/components/materials/SocialPostCard";
