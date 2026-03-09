@@ -213,7 +213,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           </div>
         </div>
         {canGenerateCertificate && (
-          <Button onClick={() => generateCertificate.mutateAsync({ trailId: trail.id, agentName: userName }).then(() => setShowCertificate(true))}>
+          <Button onClick={() => setShowNameConfirm(true)}>
             <Award className="h-4 w-4 mr-2" /> Gerar Certificado
           </Button>
         )}
