@@ -187,9 +187,11 @@ export function AppSidebar() {
           "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
           isActive && !isLocked
             ? "bg-primary text-primary-foreground shadow-md"
-            : isLocked
+            : (isLocked && !isLockedByEducaPass)
               ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
-              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+              : isLockedByEducaPass
+                ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
           item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
         )}
       >
@@ -199,16 +201,16 @@ export function AppSidebar() {
               "h-5 w-5 transition-all duration-300",
               isActive && !isLocked && "text-primary-foreground",
               !isActive && !isLocked && "group-hover:scale-110",
-              isLocked && "text-muted-foreground"
+              isLocked && !isLockedByEducaPass && "text-muted-foreground"
             )}
           />
-          {isLocked && (
+          {isLocked && !isLockedByEducaPass && (
             <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />
           )}
         </div>
         {!collapsed && (
           <>
-            <span className={cn("truncate flex-1", isLocked && "text-muted-foreground")}>
+            <span className={cn("truncate flex-1", isLocked && !isLockedByEducaPass && "text-muted-foreground")}>
               {item.title}
             </span>
             {item.isPremium && (

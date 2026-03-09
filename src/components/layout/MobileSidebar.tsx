@@ -222,14 +222,16 @@ export function MobileSidebar() {
           "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left",
           isActive && !isLocked
             ? "bg-primary text-primary-foreground shadow-md"
-            : isLocked
+            : (isLocked && !isLockedByEducaPass)
               ? "opacity-60"
-              : "text-sidebar-foreground hover:bg-sidebar-accent",
+              : isLockedByEducaPass
+                ? "text-sidebar-foreground hover:bg-sidebar-accent"
+                : "text-sidebar-foreground hover:bg-sidebar-accent",
           item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
         )}
       >
         {iconElement}
-        <span className={cn("truncate flex-1", isLocked && "text-muted-foreground")}>
+        <span className={cn("truncate flex-1", isLocked && !isLockedByEducaPass && "text-muted-foreground")}>
           {item.title}
         </span>
         {item.isPremium && (
