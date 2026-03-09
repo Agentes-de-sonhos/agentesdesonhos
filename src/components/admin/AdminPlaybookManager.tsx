@@ -15,8 +15,9 @@ import {
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Plus, Pencil, Trash2, BookOpen, Save, X, Upload, FileText, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Save, X, Upload, FileText, Loader2, ImageIcon } from "lucide-react";
 import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
+import { ImageCropDialog } from "./ImageCropDialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   PLAYBOOK_TABS, BLOCK_TYPE_OPTIONS,
@@ -47,8 +48,37 @@ export function AdminPlaybookManager() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const { toast } = useToast();
 
   const resetForm = () => { setName(""); setSlug(""); setDescription(""); setImageUrl(""); setEditingDest(null); setShowForm(false); };
+
+  const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    setCropSrc(null);
+    setUploadingCover(true);
+    try {
+      const path = `playbook-covers/${Date.now()}_cover.jpg`;
+      const { error } = await supabase.storage.from("playbook-files").upload(path, blob, { contentType: "image/jpeg", upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from("playbook-files").getPublicUrl(path);
+      setImageUrl(data.publicUrl);
+      toast({ title: "Imagem enviada!" });
+    } catch (err: any) {
+      toast({ title: "Erro ao enviar imagem", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingCover(false);
+    }
+  };
 
   const handleEdit = (dest: any) => {
     setEditingDest(dest);
@@ -83,7 +113,32 @@ export function AdminPlaybookManager() {
               <div><Label>Slug (URL)</Label><Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="nova-york" /></div>
             </div>
             <div><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Breve descrição..." rows={2} /></div>
-            <div><Label>URL da Imagem de Capa</Label><Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." /></div>
+            <div>
+              <Label>Imagem de Capa</Label>
+              {imageUrl && (
+                <div className="mb-2 relative rounded-lg overflow-hidden" style={{ aspectRatio: "3/2", maxWidth: 280 }}>
+                  <img src={imageUrl} alt="Capa" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" disabled={uploadingCover} asChild>
+                  <label className="cursor-pointer">
+                    {uploadingCover ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-2" />}
+                    {uploadingCover ? "Enviando..." : imageUrl ? "Trocar imagem" : "Enviar imagem"}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleCoverFileChange} />
+                  </label>
+                </Button>
+                {imageUrl && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setImageUrl("")}><Trash2 className="h-3 w-3 mr-1" /> Remover</Button>}
+              </div>
+              <ImageCropDialog
+                open={!!cropSrc}
+                imageSrc={cropSrc || ""}
+                aspect={3 / 2}
+                title="Posicionar capa do Playbook"
+                onClose={() => setCropSrc(null)}
+                onConfirm={handleCropConfirm}
+              />
+            </div>
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={!name.trim()}><Save className="h-4 w-4 mr-2" /> Salvar</Button>
               <Button variant="outline" onClick={resetForm}><X className="h-4 w-4 mr-2" /> Cancelar</Button>
