@@ -39,7 +39,8 @@ import type { TrailWithProgress, UserCertificate, LearningTrail } from "@/types/
 export default function EducaAcademy() {
   const { trailsWithProgress, certificates, isLoading, userAchievements } = useAcademy();
   const { isAdmin } = useUserRole();
-  const { hasFeature } = useSubscription();
+  const { hasFeature, plan } = useSubscription();
+  const isEducaPass = plan === "educa_pass";
   const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
   const [selectedCertificate, setSelectedCertificate] = useState<{
     certificate: UserCertificate;
