@@ -65,24 +65,24 @@ export async function generateCertificatePdf(data: CertificateData): Promise<Blo
   // Overlay text — positioned in the lower-center area of the certificate
   const centerX = pdfWidth / 2;
 
-  // Agent name — large, centered, positioned at ~45% from top
+  // Agent name — large, centered, positioned at ~40% from top (above template description text)
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(28);
+  pdf.setFontSize(26);
   pdf.setTextColor(30, 30, 30);
-  pdf.text(agentName, centerX, pdfHeight * 0.48, { align: "center" });
+  pdf.text(agentName, centerX, pdfHeight * 0.415, { align: "center" });
 
-  // Completion date — smaller, below name (~60% from top)
+  // Completion date — positioned to match template's date area (~62% from top)
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(12);
-  pdf.setTextColor(80, 80, 80);
-  pdf.text(`Data de conclusão: ${completionDate}`, centerX, pdfHeight * 0.58, {
+  pdf.setFontSize(11);
+  pdf.setTextColor(100, 100, 100);
+  pdf.text(`Data de conclusão: ${completionDate}`, centerX, pdfHeight * 0.605, {
     align: "center",
   });
 
-  // Certificate ID — bottom area (~88% from top)
+  // Certificate ID — bottom-left area (~90% from top)
   pdf.setFontSize(9);
   pdf.setTextColor(120, 120, 120);
-  pdf.text(`Certificado Nº ${certificateNumber}`, centerX, pdfHeight * 0.88, {
+  pdf.text(`Certificado Nº ${certificateNumber}`, centerX, pdfHeight * 0.905, {
     align: "center",
   });
 
