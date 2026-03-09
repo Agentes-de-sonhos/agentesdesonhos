@@ -585,10 +585,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   );
 }
 
-const playbookIconMap: Record<string, typeof Target> = {
-  LayoutDashboard, Target, TrendingUp, FileText, Plane, MapPin, Hotel, Car, Camera,
-  UtensilsCrossed, Package, Shield, Users, Route, AlertTriangle, Lightbulb, CheckSquare, GitBranch,
-};
 
 function MaterialDownloadCard({ material }: { material: TrailMaterial }) {
   const icons: Record<string, typeof FileText> = {
