@@ -75,7 +75,7 @@ export async function generateCertificatePdf(data: CertificateData): Promise<Blo
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(11);
   pdf.setTextColor(100, 100, 100);
-  pdf.text(`Data de conclusão: ${completionDate}`, centerX, pdfHeight * 0.605, {
+  pdf.text(`Data de conclusão: ${completionDate}`, centerX, pdfHeight * 0.56, {
     align: "center",
   });
 
