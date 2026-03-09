@@ -83,19 +83,25 @@ export default function Auth() {
   useEffect(() => {
     if (!user) return;
     
-    // Wait for role to load before deciding destination
-    if (roleLoading) return;
+    // Wait for role and subscription to load before deciding destination
+    if (roleLoading || subLoading) return;
     
-    // Check if user should complete onboarding
-    if (isNewUser) {
+    // Check if user should complete onboarding (skip for educa_pass)
+    if (isNewUser && plan !== "educa_pass") {
       navigate("/onboarding", { replace: true });
+      return;
+    }
+    
+    // Educa Pass users go directly to Academy
+    if (plan === "educa_pass") {
+      navigate("/educa-academy", { replace: true });
       return;
     }
     
     // Navigate based on role (default to dashboard if role not set)
     const destination = role === "admin" ? "/admin" : "/dashboard";
     navigate(destination, { replace: true });
-  }, [user, role, roleLoading, isNewUser, navigate]);
+  }, [user, role, roleLoading, isNewUser, navigate, plan, subLoading]);
 
   // Show loading while checking auth state
   if (authLoading) {
