@@ -9,7 +9,7 @@ export default function CertificateTest() {
   const [error, setError] = useState<string | null>(null);
 
   const templateUrl =
-    "https://mlwwpckahhfsixplxwif.supabase.co/storage/v1/object/public/academy-files/certificate-templates/1773094076439_Certificado_de_Especialista__5_.png";
+    "https://mlwwpckahhfsixplxwif.supabase.co/storage/v1/object/public/academy-files/certificate-templates/1773094853829_Certificado_de_Especialista__6_.png";
 
   const handleGenerate = async () => {
     setGenerating(true);
