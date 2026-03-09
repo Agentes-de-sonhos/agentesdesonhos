@@ -99,24 +99,62 @@ export default function PlaybookViewer() {
   return (
     <DashboardLayout>
       <div className="space-y-5">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/educa-academy")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <BookOpen className="h-5 w-5 text-primary shrink-0" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-                Playbook de Vendas
-              </span>
+        {/* Hero Banner */}
+        {destination.image_url && (
+          <div className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden -mt-2">
+            <img
+              src={destination.image_url}
+              alt={destination.name}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 left-4 bg-background/60 backdrop-blur-sm hover:bg-background/80"
+                onClick={() => navigate("/educa-academy")}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center gap-2 mb-1">
+                <BookOpen className="h-4 w-4 text-primary-foreground drop-shadow shrink-0" />
+                <span className="text-xs font-semibold uppercase tracking-widest text-primary-foreground drop-shadow">
+                  Playbook de Vendas
+                </span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-primary-foreground drop-shadow truncate">
+                {destination.name}
+              </h1>
+              {destination.description && (
+                <p className="text-sm text-primary-foreground/80 drop-shadow mt-0.5 line-clamp-1">
+                  {destination.description}
+                </p>
+              )}
             </div>
-            <h1 className="text-2xl font-bold text-foreground truncate">{destination.name}</h1>
-            {destination.description && (
-              <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{destination.description}</p>
-            )}
           </div>
-        </div>
+        )}
+
+        {/* Fallback header when no image */}
+        {!destination.image_url && (
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/educa-academy")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <BookOpen className="h-5 w-5 text-primary shrink-0" />
+                <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+                  Playbook de Vendas
+                </span>
+              </div>
+              <h1 className="text-2xl font-bold text-foreground truncate">{destination.name}</h1>
+              {destination.description && (
+                <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{destination.description}</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-2 -mx-1 px-1">
