@@ -90,6 +90,7 @@ export function AdminAcademyManager() {
     image_url: "",
     banner_url: "",
     overview_pdf_url: "",
+    certificate_template_url: "",
     playbook_destination_id: "" as string,
     order_index: 0,
     is_active: true,
