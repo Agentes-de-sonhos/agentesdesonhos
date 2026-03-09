@@ -67,7 +67,7 @@ const aprenderSection: MenuSection = {
   items: [
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
-    { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
+    { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum", isPremium: true },
   ],
 };
 
@@ -75,7 +75,7 @@ const clientesSection: MenuSection = {
   title: "Clientes",
   icon: Users,
   items: [
-    { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
+    { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", isPremium: true },
   ],
 };
 
@@ -83,7 +83,7 @@ const comunidadeSection: MenuSection = {
   title: "Comunidade",
   icon: Heart,
   items: [
-    { title: "Comunidade de Agentes", url: "/comunidade", icon: Heart, requiredFeature: "community" },
+    { title: "Comunidade de Agentes", url: "/comunidade", icon: Heart, requiredFeature: "community", isPremium: true },
   ],
 };
 
