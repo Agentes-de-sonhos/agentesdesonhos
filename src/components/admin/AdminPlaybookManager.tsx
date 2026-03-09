@@ -128,7 +128,8 @@ export function AdminPlaybookManager() {
             </div>
             <div><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Breve descrição..." rows={2} /></div>
             <div>
-              <Label>Imagem de Capa</Label>
+              <Label>Imagem de Capa (listagem)</Label>
+              <p className="text-xs text-muted-foreground mb-1">Aparece no card da listagem de playbooks</p>
               {imageUrl && (
                 <div className="mb-2 relative rounded-lg overflow-hidden" style={{ aspectRatio: "3/2", maxWidth: 280 }}>
                   <img src={imageUrl} alt="Capa" className="w-full h-full object-cover" />
@@ -144,15 +145,34 @@ export function AdminPlaybookManager() {
                 </Button>
                 {imageUrl && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setImageUrl("")}><Trash2 className="h-3 w-3 mr-1" /> Remover</Button>}
               </div>
-              <ImageCropDialog
-                open={!!cropSrc}
-                imageSrc={cropSrc || ""}
-                aspect={3 / 2}
-                title="Posicionar capa do Playbook"
-                onClose={() => setCropSrc(null)}
-                onConfirm={handleCropConfirm}
-              />
             </div>
+            <div>
+              <Label>Banner da Página (widescreen)</Label>
+              <p className="text-xs text-muted-foreground mb-1">Aparece no topo da página do playbook — use imagem em alta resolução</p>
+              {bannerUrl && (
+                <div className="mb-2 relative rounded-lg overflow-hidden" style={{ aspectRatio: "16/5", maxWidth: 500 }}>
+                  <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" disabled={uploadingBanner} asChild>
+                  <label className="cursor-pointer">
+                    {uploadingBanner ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-2" />}
+                    {uploadingBanner ? "Enviando..." : bannerUrl ? "Trocar banner" : "Enviar banner"}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleBannerFileChange} />
+                  </label>
+                </Button>
+                {bannerUrl && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setBannerUrl("")}><Trash2 className="h-3 w-3 mr-1" /> Remover</Button>}
+              </div>
+            </div>
+            <ImageCropDialog
+              open={!!cropSrc}
+              imageSrc={cropSrc || ""}
+              aspect={cropTarget === "banner" ? 16 / 5 : 3 / 2}
+              title={cropTarget === "banner" ? "Posicionar banner do Playbook" : "Posicionar capa do Playbook"}
+              onClose={() => setCropSrc(null)}
+              onConfirm={handleCropConfirm}
+            />
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={!name.trim()}><Save className="h-4 w-4 mr-2" /> Salvar</Button>
               <Button variant="outline" onClick={resetForm}><X className="h-4 w-4 mr-2" /> Cancelar</Button>
