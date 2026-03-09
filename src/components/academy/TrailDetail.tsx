@@ -86,6 +86,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [showQuiz, setShowQuiz] = useState<string | null>(null);
   const [showExam, setShowExam] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [showNameConfirm, setShowNameConfirm] = useState(false);
   const [userName, setUserName] = useState<string>("Agente de Viagens");
 
   // Find matching playbook for this trail using the linked playbook_destination_id
