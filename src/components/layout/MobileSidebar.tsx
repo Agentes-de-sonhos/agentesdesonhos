@@ -198,7 +198,7 @@ export function MobileSidebar() {
                 "w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200",
                 isActive && !isLocked
                   ? "bg-primary text-primary-foreground shadow-md"
-                  : isLocked
+                  : (isLocked && !isLockedByEducaPass)
                     ? "opacity-50"
                     : "text-sidebar-foreground hover:bg-sidebar-accent"
               )}
