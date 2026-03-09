@@ -113,7 +113,32 @@ export function AdminPlaybookManager() {
               <div><Label>Slug (URL)</Label><Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="nova-york" /></div>
             </div>
             <div><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Breve descrição..." rows={2} /></div>
-            <div><Label>URL da Imagem de Capa</Label><Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." /></div>
+            <div>
+              <Label>Imagem de Capa</Label>
+              {imageUrl && (
+                <div className="mb-2 relative rounded-lg overflow-hidden" style={{ aspectRatio: "3/2", maxWidth: 280 }}>
+                  <img src={imageUrl} alt="Capa" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" disabled={uploadingCover} asChild>
+                  <label className="cursor-pointer">
+                    {uploadingCover ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-2" />}
+                    {uploadingCover ? "Enviando..." : imageUrl ? "Trocar imagem" : "Enviar imagem"}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleCoverFileChange} />
+                  </label>
+                </Button>
+                {imageUrl && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setImageUrl("")}><Trash2 className="h-3 w-3 mr-1" /> Remover</Button>}
+              </div>
+              <ImageCropDialog
+                open={!!cropSrc}
+                imageSrc={cropSrc || ""}
+                aspect={3 / 2}
+                title="Posicionar capa do Playbook"
+                onClose={() => setCropSrc(null)}
+                onConfirm={handleCropConfirm}
+              />
+            </div>
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={!name.trim()}><Save className="h-4 w-4 mr-2" /> Salvar</Button>
               <Button variant="outline" onClick={resetForm}><X className="h-4 w-4 mr-2" /> Cancelar</Button>
