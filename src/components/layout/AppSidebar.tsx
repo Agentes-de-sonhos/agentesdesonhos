@@ -153,6 +153,12 @@ export function AppSidebar() {
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
+      // Educa Pass: only allow EducaTravel Academy
+      if (isEducaPass && item.url !== "/educa-academy") {
+        e.preventDefault();
+        setShowComingSoon(true);
+        return;
+      }
       if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
         e.preventDefault();
         setUpgradeFeature(item.requiredFeature);
@@ -161,7 +167,7 @@ export function AppSidebar() {
       trackSectionVisit(item.url);
       setCollapsed(true);
     },
-    [hasFeature, trackSectionVisit]
+    [hasFeature, trackSectionVisit, isEducaPass]
   );
 
   const renderSingleItem = (item: MenuItem) => {
