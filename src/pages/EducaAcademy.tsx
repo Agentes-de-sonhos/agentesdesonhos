@@ -93,16 +93,8 @@ export default function EducaAcademy() {
       <div className="space-y-6">
         {/* Countdown Banner for Educa Pass users */}
         {isEducaPass && <LaunchCountdownBanner />}
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            Educatravel Academy
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos
-          </p>
-        </div>
+
+
 
         {/* Hero Banner */}
         <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
