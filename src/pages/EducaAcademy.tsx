@@ -96,7 +96,7 @@ export default function EducaAcademy() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <GraduationCap className="h-8 w-8 text-primary" />
-            Educatravel Academy
+            EducaTravel Academy
           </h1>
           <p className="text-muted-foreground mt-1">
             Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos
