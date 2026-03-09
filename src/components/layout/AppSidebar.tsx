@@ -73,6 +73,7 @@ const aprenderSection: MenuSection = {
   items: [
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum", isPremium: true },
   ],
 };
@@ -103,11 +104,10 @@ const venderItemsMap: Record<string, MenuItem> = {
   "mentorias": { key: "mentorias", title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
   "cartao-digital": { key: "cartao-digital", title: "Meu Cartão", url: "/meu-cartao", icon: CreditCard, isPremium: true },
   "bloqueios-aereos": { key: "bloqueios-aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
-  "mapa-turismo": { key: "mapa-turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
   "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine", url: "/minha-vitrine", icon: Store, isPremium: true },
 };
 
-const defaultVenderOrder = ["materiais", "gerar-orcamento", "criar-carteira", "dream-advisor", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "mapa-turismo", "minha-vitrine"];
+const defaultVenderOrder = ["materiais", "gerar-orcamento", "criar-carteira", "dream-advisor", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "minha-vitrine"];
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
