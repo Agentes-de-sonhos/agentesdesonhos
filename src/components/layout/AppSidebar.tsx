@@ -97,7 +97,7 @@ const comunidadeSection: MenuSection = {
 const venderItemsMap: Record<string, MenuItem> = {
   "materiais": { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
   "gerar-orcamento": { key: "gerar-orcamento", title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
-  "criar-carteira": { key: "criar-carteira", title: "Criar Carteira", url: "/carteira-digital", icon: Wallet },
+  "criar-carteira": { key: "criar-carteira", title: "Criar Carteira", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
   "dream-advisor": { key: "dream-advisor", title: "Dream Advisor", url: "/dream-advisor", icon: Compass },
   "ferramentas-ia": { key: "ferramentas-ia", title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools", isPremium: true },
   "mentorias": { key: "mentorias", title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
