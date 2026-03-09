@@ -1,4 +1,5 @@
 import { useState } from "react";
+import academyHeroBanner from "@/assets/academy-hero-banner.jpg";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { LaunchCountdownBanner } from "@/components/subscription/LaunchCountdownBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
