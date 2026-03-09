@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import academyHeroBanner from "@/assets/academy-hero-banner.jpg";
+import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { LaunchCountdownBanner } from "@/components/subscription/LaunchCountdownBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +34,7 @@ import { RankingBoard } from "@/components/academy/RankingBoard";
 import { MyCertificates } from "@/components/academy/MyCertificates";
 import { CertificatePDF } from "@/components/academy/CertificatePDF";
 import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
+import { AcademyHeroBannerManager } from "@/components/admin/AcademyHeroBannerManager";
 import { FeatureGate } from "@/components/subscription/FeatureGate";
 import { PlaybookList } from "@/components/playbook/PlaybookList";
 import type { TrailWithProgress, UserCertificate, LearningTrail } from "@/types/academy";
@@ -47,6 +49,18 @@ export default function EducaAcademy() {
     certificate: UserCertificate;
     trail: LearningTrail;
   } | null>(null);
+  const [heroBannerUrl, setHeroBannerUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("academy_settings")
+      .select("value")
+      .eq("key", "hero_banner_url")
+      .single()
+      .then(({ data }) => {
+        if (data?.value) setHeroBannerUrl(data.value);
+      });
+  }, []);
 
   const totalProgress = trailsWithProgress.length > 0
     ? Math.round(trailsWithProgress.reduce((sum, t) => sum + t.progressPercent, 0) / trailsWithProgress.length)
@@ -93,7 +107,7 @@ export default function EducaAcademy() {
         {/* Hero Banner */}
         <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
           <img
-            src={academyHeroBanner}
+            src={heroBannerUrl || academyHeroBanner}
             alt="EducaTravel Academy"
             className="w-full h-40 sm:h-52 md:h-64 object-cover"
           />
@@ -286,7 +300,12 @@ export default function EducaAcademy() {
           </TabsContent>
 
           {isAdmin && (
-            <TabsContent value="admin"><AdminAcademyManager /></TabsContent>
+            <TabsContent value="admin">
+              <div className="space-y-6">
+                <AcademyHeroBannerManager />
+                <AdminAcademyManager />
+              </div>
+            </TabsContent>
           )}
         </Tabs>
 
