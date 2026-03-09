@@ -4,6 +4,7 @@ export interface LearningTrail {
   description: string | null;
   destination: string;
   image_url: string | null;
+  banner_url: string | null;
   order_index: number;
   is_active: boolean;
   total_hours: number;

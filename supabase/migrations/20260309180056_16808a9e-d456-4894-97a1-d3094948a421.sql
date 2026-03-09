@@ -1,0 +1,1 @@
+ALTER TABLE public.learning_trails ADD COLUMN IF NOT EXISTS banner_url text;

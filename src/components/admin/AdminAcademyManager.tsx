@@ -53,6 +53,7 @@ export function AdminAcademyManager() {
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
   const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
   const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'material' | 'speaker'; id: string } | null>(null);
@@ -80,6 +81,7 @@ export function AdminAcademyManager() {
     description: "",
     destination: "",
     image_url: "",
+    banner_url: "",
     overview_pdf_url: "",
     playbook_destination_id: "" as string,
     order_index: 0,
@@ -94,6 +96,7 @@ export function AdminAcademyManager() {
         description: trail.description || "",
         destination: trail.destination,
         image_url: trail.image_url || "",
+        banner_url: (trail as any).banner_url || "",
         overview_pdf_url: (trail as any).overview_pdf_url || "",
         playbook_destination_id: (trail as any).playbook_destination_id || "",
         order_index: trail.order_index,
@@ -106,6 +109,7 @@ export function AdminAcademyManager() {
         description: "",
         destination: "",
         image_url: "",
+        banner_url: "",
         overview_pdf_url: "",
         playbook_destination_id: "",
         order_index: trails.length,
@@ -127,6 +131,7 @@ export function AdminAcademyManager() {
     try {
       let overviewUrl = trailForm.overview_pdf_url;
       let imageUrl = trailForm.image_url;
+      let bannerUrl = trailForm.banner_url;
 
       if (overviewPdfFile) {
         const sanitized = sanitizeFileName(overviewPdfFile.name);
@@ -154,7 +159,20 @@ export function AdminAcademyManager() {
         imageUrl = urlData.publicUrl;
       }
 
-      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
+      if (bannerImageFile) {
+        const sanitized = sanitizeFileName(bannerImageFile.name);
+        const path = `banners/${Date.now()}_${sanitized}`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, bannerImageFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        bannerUrl = urlData.publicUrl;
+      }
+
+      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, banner_url: bannerUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
       if (editingTrail) {
         await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
       } else {
@@ -163,6 +181,7 @@ export function AdminAcademyManager() {
       setTrailDialogOpen(false);
       setOverviewPdfFile(null);
       setCoverImageFile(null);
+      setBannerImageFile(null);
     } catch (err: any) {
       sonnerToast.error("Erro ao salvar trilha: " + err.message);
     } finally {
@@ -377,7 +396,29 @@ export function AdminAcademyManager() {
         </div>
       </div>
       <div>
-        <Label>Playbook Vinculado</Label>
+        <Label>Banner da Trilha (imagem de destaque interna)</Label>
+        <p className="text-xs text-muted-foreground mb-1">Imagem panorâmica exibida no topo ao abrir a trilha (recomendado: 1920×512px)</p>
+        <div className="mt-1">
+          {trailForm.banner_url && !bannerImageFile && (
+            <div className="flex items-center gap-2 mb-2">
+              <img src={trailForm.banner_url} alt="Banner atual" className="h-16 w-40 object-cover rounded border" />
+              <span className="text-xs text-muted-foreground">Banner atual</span>
+            </div>
+          )}
+          {bannerImageFile ? (
+            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+              <ImageIcon className="h-5 w-5 text-primary" />
+              <span className="text-sm font-medium flex-1 truncate">{bannerImageFile.name}</span>
+              <Button variant="ghost" size="sm" onClick={() => setBannerImageFile(null)}>Remover</Button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+              <ImageIcon className="h-6 w-6 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Clique para enviar banner da trilha</span>
+              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) setBannerImageFile(file); }} className="sr-only" />
+            </label>
+          )}
+        </div>
         <Select
           value={trailForm.playbook_destination_id}
           onValueChange={(v) => setTrailForm({ ...trailForm, playbook_destination_id: v === "none" ? "" : v })}
