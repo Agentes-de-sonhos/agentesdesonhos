@@ -233,7 +233,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             alt={trail.name}
             className="w-full h-40 sm:h-52 md:h-64 object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
           <div className="absolute bottom-4 left-6 right-6">
             <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
               {trail.name}
