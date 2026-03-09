@@ -55,7 +55,7 @@ export function AdminPlaybookManager() {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const { toast } = useToast();
 
-  const resetForm = () => { setName(""); setSlug(""); setDescription(""); setImageUrl(""); setEditingDest(null); setShowForm(false); };
+  const resetForm = () => { setName(""); setSlug(""); setDescription(""); setImageUrl(""); setBannerUrl(""); setEditingDest(null); setShowForm(false); };
 
   const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
