@@ -92,9 +92,16 @@ export default function EducaAcademy() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Countdown Banner for Educa Pass users */}
-        {isEducaPass && <LaunchCountdownBanner />}
-
-
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <GraduationCap className="h-8 w-8 text-primary" />
+            Educatravel Academy
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos
+          </p>
+        </div>
 
         {/* Hero Banner */}
         <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
@@ -104,14 +111,6 @@ export default function EducaAcademy() {
             className="w-full h-40 sm:h-52 md:h-64 object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
-          <div className="absolute bottom-4 left-6 right-6">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
-              EducaTravel Academy
-            </h2>
-            <p className="text-sm sm:text-base text-white/80 drop-shadow-md mt-1">
-              Trilhas de aprendizado · Certificação · Materiais Premium
-            </p>
-          </div>
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
