@@ -385,6 +385,7 @@ export function AdminUserManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="educa_pass">Educa Travel Pass</SelectItem>
                     <SelectItem value="essencial">Essencial</SelectItem>
                     <SelectItem value="profissional">Profissional</SelectItem>
                     <SelectItem value="premium">Premium</SelectItem>
