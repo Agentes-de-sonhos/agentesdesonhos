@@ -89,15 +89,13 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [showExam, setShowExam] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [userName, setUserName] = useState<string>("Agente de Viagens");
-  const [playbookTab, setPlaybookTab] = useState<string>(PLAYBOOK_TABS[0].key);
 
   // Find matching playbook for this trail using the linked playbook_destination_id
   const { destinations: allPlaybookDestinations } = usePlaybook();
   const linkedSlug = trail.playbook_destination_id
     ? allPlaybookDestinations.find((d) => d.id === trail.playbook_destination_id)?.slug
     : undefined;
-  const { destination: playbookDestination, sections: playbookSections } = usePlaybook(linkedSlug);
-  const { upsertSection } = usePlaybookAdmin();
+  const { destination: playbookDestination } = usePlaybook(linkedSlug);
 
   const { data: quizQuestions = [] } = useQuizQuestions(showQuiz);
   const { data: examQuestions = [] } = useExamQuestions(showExam ? trail.id : null);
