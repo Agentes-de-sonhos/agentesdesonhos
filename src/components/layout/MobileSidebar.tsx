@@ -144,6 +144,12 @@ export function MobileSidebar() {
     section.items.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
 
   const handleMenuClick = (item: MenuItem, e: React.MouseEvent) => {
+    // Educa Pass: only allow EducaTravel Academy
+    if (isEducaPass && item.url !== "/educa-academy") {
+      e.preventDefault();
+      setShowComingSoon(true);
+      return;
+    }
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
       e.preventDefault();
       setUpgradeFeature(item.requiredFeature);
