@@ -22,7 +22,6 @@ const VENDER_ITEMS: MenuItemDisplay[] = [
   { key: "mentorias", label: "Mentorias", isPremium: true },
   { key: "cartao-digital", label: "Meu Cartão", isPremium: true },
   { key: "bloqueios-aereos", label: "Bloqueios Aéreos" },
-  { key: "mapa-turismo", label: "Mapa do Turismo" },
   { key: "minha-vitrine", label: "Minha Vitrine", isPremium: true },
 ];
 
