@@ -53,6 +53,7 @@ export function AdminAcademyManager() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
   const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
+  const [certificateTemplateFile, setCertificateTemplateFile] = useState<File | null>(null);
   const [coverImageBlob, setCoverImageBlob] = useState<Blob | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [bannerImageBlob, setBannerImageBlob] = useState<Blob | null>(null);
@@ -89,6 +90,7 @@ export function AdminAcademyManager() {
     image_url: "",
     banner_url: "",
     overview_pdf_url: "",
+    certificate_template_url: "",
     playbook_destination_id: "" as string,
     order_index: 0,
     is_active: true,
@@ -104,6 +106,7 @@ export function AdminAcademyManager() {
         image_url: trail.image_url || "",
         banner_url: (trail as any).banner_url || "",
         overview_pdf_url: (trail as any).overview_pdf_url || "",
+        certificate_template_url: trail.certificate_template_url || "",
         playbook_destination_id: (trail as any).playbook_destination_id || "",
         order_index: trail.order_index,
         is_active: trail.is_active,
@@ -117,6 +120,7 @@ export function AdminAcademyManager() {
         image_url: "",
         banner_url: "",
         overview_pdf_url: "",
+        certificate_template_url: "",
         playbook_destination_id: "",
         order_index: trails.length,
         is_active: true,
@@ -138,6 +142,7 @@ export function AdminAcademyManager() {
       let overviewUrl = trailForm.overview_pdf_url;
       let imageUrl = trailForm.image_url;
       let bannerUrl = trailForm.banner_url;
+      let certTemplateUrl = trailForm.certificate_template_url;
 
       if (overviewPdfFile) {
         const sanitized = sanitizeFileName(overviewPdfFile.name);
@@ -176,7 +181,20 @@ export function AdminAcademyManager() {
         bannerUrl = urlData.publicUrl;
       }
 
-      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, banner_url: bannerUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
+      if (certificateTemplateFile) {
+        const sanitized = sanitizeFileName(certificateTemplateFile.name);
+        const path = `certificate-templates/${Date.now()}_${sanitized}`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, certificateTemplateFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        certTemplateUrl = urlData.publicUrl;
+      }
+
+      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, banner_url: bannerUrl, certificate_template_url: certTemplateUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
       if (editingTrail) {
         await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
       } else {
@@ -188,6 +206,7 @@ export function AdminAcademyManager() {
       setCoverImagePreview(null);
       setBannerImageBlob(null);
       setBannerImagePreview(null);
+      setCertificateTemplateFile(null);
     } catch (err: any) {
       sonnerToast.error("Erro ao salvar trilha: " + err.message);
     } finally {
@@ -458,6 +477,38 @@ export function AdminAcademyManager() {
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground mt-1">Selecione o playbook de destino que será exibido na aba Playbook desta trilha.</p>
+      </div>
+      <div>
+        <Label>Modelo de Certificado (imagem PNG/JPG)</Label>
+        <p className="text-xs text-muted-foreground mb-1">Template base usado para gerar os certificados desta trilha. O nome, data e ID serão inseridos automaticamente.</p>
+        <div className="mt-1">
+          {trailForm.certificate_template_url && !certificateTemplateFile && (
+            <div className="flex items-center gap-2 mb-2">
+              <img src={trailForm.certificate_template_url} alt="Template atual" className="h-16 w-28 object-cover rounded border" />
+              <span className="text-xs text-muted-foreground">Template atual</span>
+              <Button variant="ghost" size="sm" onClick={() => setTrailForm({ ...trailForm, certificate_template_url: "" })}>Remover</Button>
+            </div>
+          )}
+          {certificateTemplateFile ? (
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <span className="text-sm">{certificateTemplateFile.name}</span>
+              <Button variant="ghost" size="sm" onClick={() => setCertificateTemplateFile(null)}>Remover</Button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+              <GraduationCap className="h-6 w-6 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Clique para enviar o modelo de certificado</span>
+              <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setCertificateTemplateFile(file);
+                  e.target.value = "";
+                }
+              }} className="sr-only" />
+            </label>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <Switch

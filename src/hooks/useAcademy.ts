@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useGamification } from "@/hooks/useGamification";
+import { generateCertificatePdf } from "@/lib/generateCertificatePdf";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import type {
   LearningTrail,
   Training,
@@ -253,20 +256,67 @@ export function useAcademy() {
   const generateCertificate = useMutation({
     mutationFn: async ({ trailId, agentName }: { trailId: string; agentName: string }) => {
       if (!user) throw new Error("User not authenticated");
-      const certificateNumber = `CERT-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+      // Get the trail to check for template
+      const trail = trails.find((t) => t.id === trailId);
+      if (!trail) throw new Error("Trilha não encontrada");
+
+      // Generate certificate number via DB function
+      const { data: certNumData, error: certNumError } = await supabase.rpc("generate_certificate_number");
+      if (certNumError) throw certNumError;
+      const certificateNumber = certNumData as string;
+
+      const completionDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+
+      let pdfUrl: string | null = null;
+
+      // Generate PDF if template exists
+      if (trail.certificate_template_url) {
+        const pdfBlob = await generateCertificatePdf({
+          templateUrl: trail.certificate_template_url,
+          agentName,
+          completionDate,
+          certificateNumber,
+        });
+
+        // Upload PDF to storage
+        const sanitizedName = agentName
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-zA-Z0-9]/g, "_");
+        const path = `certificates/${user.id}/${certificateNumber}_${sanitizedName}.pdf`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, pdfBlob, { contentType: "application/pdf" });
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        pdfUrl = urlData.publicUrl;
+
+        // Auto-download
+        const downloadUrl = URL.createObjectURL(pdfBlob);
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = `Certificado_${certificateNumber}.pdf`;
+        a.click();
+        URL.revokeObjectURL(downloadUrl);
+      }
+
       const { error } = await supabase.from("user_certificates").insert({
         user_id: user.id,
         trail_id: trailId,
         agent_name: agentName,
         certificate_number: certificateNumber,
-      });
+        certificate_pdf_url: pdfUrl,
+      } as any);
       if (error) throw error;
-      return { certificateNumber, trailId };
+      return { certificateNumber, trailId, pdfUrl };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["user-certificates"] });
       toast({ title: "Certificado gerado com sucesso! 🏆" });
-      // Award gamification points for earning a certificate
       awardCertificatePoints(result.trailId);
     },
   });

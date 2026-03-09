@@ -41,6 +41,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TrainingPlayer } from "./TrainingPlayer";
 import { QuizPlayer } from "./QuizPlayer";
 import { CertificatePDF } from "./CertificatePDF";
+import { CertificateNameConfirmDialog } from "./CertificateNameConfirmDialog";
 import { MATERIAL_CATEGORIES } from "@/types/academy";
 import { PlaybookPDFViewer } from "@/components/playbook/PlaybookPDFViewer";
 import { PlaybookMindMapsViewer } from "@/components/playbook/PlaybookMindMapsViewer";
@@ -85,6 +86,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [showQuiz, setShowQuiz] = useState<string | null>(null);
   const [showExam, setShowExam] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [showNameConfirm, setShowNameConfirm] = useState(false);
   const [userName, setUserName] = useState<string>("Agente de Viagens");
 
   // Find matching playbook for this trail using the linked playbook_destination_id
@@ -211,13 +213,24 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           </div>
         </div>
         {canGenerateCertificate && (
-          <Button onClick={() => generateCertificate.mutateAsync({ trailId: trail.id, agentName: userName }).then(() => setShowCertificate(true))}>
+          <Button onClick={() => setShowNameConfirm(true)}>
             <Award className="h-4 w-4 mr-2" /> Gerar Certificado
           </Button>
         )}
         {certificate && (
-          <Button variant="outline" onClick={() => setShowCertificate(true)}>
-            <Download className="h-4 w-4 mr-2" /> Ver Certificado
+          <Button variant="outline" onClick={() => {
+            const pdfUrl = (certificate as any).certificate_pdf_url;
+            if (pdfUrl) {
+              const a = document.createElement("a");
+              a.href = pdfUrl;
+              a.download = `Certificado_${certificate.certificate_number}.pdf`;
+              a.target = "_blank";
+              a.click();
+            } else {
+              setShowCertificate(true);
+            }
+          }}>
+            <Download className="h-4 w-4 mr-2" /> Baixar Certificado
           </Button>
         )}
       </div>
@@ -573,6 +586,17 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           {certificate && <CertificatePDF certificate={certificate} trail={trail} />}
         </DialogContent>
       </Dialog>
+
+      {/* Name Confirmation Dialog */}
+      <CertificateNameConfirmDialog
+        open={showNameConfirm}
+        onOpenChange={setShowNameConfirm}
+        defaultName={userName}
+        onConfirm={async (name) => {
+          await generateCertificate.mutateAsync({ trailId: trail.id, agentName: name });
+          setShowNameConfirm(false);
+        }}
+      />
     </div>
   );
 }
