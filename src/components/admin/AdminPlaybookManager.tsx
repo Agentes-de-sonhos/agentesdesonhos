@@ -48,8 +48,11 @@ export function AdminPlaybookManager() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<"cover" | "banner">("cover");
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const { toast } = useToast();
 
   const resetForm = () => { setName(""); setSlug(""); setDescription(""); setImageUrl(""); setEditingDest(null); setShowForm(false); };
