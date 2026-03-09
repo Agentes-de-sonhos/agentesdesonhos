@@ -181,7 +181,20 @@ export function AdminAcademyManager() {
         bannerUrl = urlData.publicUrl;
       }
 
-      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, banner_url: bannerUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
+      if (certificateTemplateFile) {
+        const sanitized = sanitizeFileName(certificateTemplateFile.name);
+        const path = `certificate-templates/${Date.now()}_${sanitized}`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, certificateTemplateFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        certTemplateUrl = urlData.publicUrl;
+      }
+
+      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, banner_url: bannerUrl, certificate_template_url: certTemplateUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
       if (editingTrail) {
         await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
       } else {
