@@ -16,9 +16,10 @@ interface MenuItemDisplay {
 const VENDER_ITEMS: MenuItemDisplay[] = [
   { key: "materiais", label: "Materiais de Divulgação" },
   { key: "gerar-orcamento", label: "Gerar Orçamento", isHighlighted: true },
+  { key: "criar-carteira", label: "Criar Carteira" },
   { key: "ferramentas-ia", label: "Ferramentas IA", isPremium: true },
   { key: "mentorias", label: "Mentorias", isPremium: true },
-  { key: "cartao-digital", label: "Cartão Digital", isPremium: true },
+  { key: "cartao-digital", label: "Meu Cartão", isPremium: true },
   { key: "bloqueios-aereos", label: "Bloqueios Aéreos" },
   { key: "mapa-turismo", label: "Mapa do Turismo" },
   { key: "minha-vitrine", label: "Minha Vitrine", isPremium: true },
