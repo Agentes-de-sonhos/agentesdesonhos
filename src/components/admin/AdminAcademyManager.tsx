@@ -120,6 +120,7 @@ export function AdminAcademyManager() {
         image_url: "",
         banner_url: "",
         overview_pdf_url: "",
+        certificate_template_url: "",
         playbook_destination_id: "",
         order_index: trails.length,
         is_active: true,
