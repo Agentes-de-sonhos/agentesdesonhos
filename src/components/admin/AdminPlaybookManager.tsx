@@ -15,8 +15,9 @@ import {
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Plus, Pencil, Trash2, BookOpen, Save, X, Upload, FileText, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Save, X, Upload, FileText, Loader2, ImageIcon } from "lucide-react";
 import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
+import { ImageCropDialog } from "./ImageCropDialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   PLAYBOOK_TABS, BLOCK_TYPE_OPTIONS,
