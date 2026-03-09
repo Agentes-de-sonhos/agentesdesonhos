@@ -53,8 +53,13 @@ export function AdminAcademyManager() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
   const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
-  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
-  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
+  const [coverImageBlob, setCoverImageBlob] = useState<Blob | null>(null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
+  const [bannerImageBlob, setBannerImageBlob] = useState<Blob | null>(null);
+  const [bannerImagePreview, setBannerImagePreview] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<"cover" | "banner" | null>(null);
+  const [cropAspect, setCropAspect] = useState(16 / 9);
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
   const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'material' | 'speaker'; id: string } | null>(null);
