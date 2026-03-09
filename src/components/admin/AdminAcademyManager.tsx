@@ -53,6 +53,7 @@ export function AdminAcademyManager() {
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
   const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
   const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'material' | 'speaker'; id: string } | null>(null);
