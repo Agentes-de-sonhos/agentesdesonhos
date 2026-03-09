@@ -41,6 +41,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TrainingPlayer } from "./TrainingPlayer";
 import { QuizPlayer } from "./QuizPlayer";
 import { CertificatePDF } from "./CertificatePDF";
+import { CertificateNameConfirmDialog } from "./CertificateNameConfirmDialog";
 import { MATERIAL_CATEGORIES } from "@/types/academy";
 import { PlaybookPDFViewer } from "@/components/playbook/PlaybookPDFViewer";
 import { PlaybookMindMapsViewer } from "@/components/playbook/PlaybookMindMapsViewer";
