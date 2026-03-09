@@ -206,6 +206,7 @@ export function AdminAcademyManager() {
       setCoverImagePreview(null);
       setBannerImageBlob(null);
       setBannerImagePreview(null);
+      setCertificateTemplateFile(null);
     } catch (err: any) {
       sonnerToast.error("Erro ao salvar trilha: " + err.message);
     } finally {
