@@ -182,7 +182,7 @@ export function MobileSidebar() {
             isLocked ? "text-muted-foreground" : ""
           )}
         />
-        {item.isPremium && isLocked && (
+        {isLocked && (
           <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />
         )}
       </div>
