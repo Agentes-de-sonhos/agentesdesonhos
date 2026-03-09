@@ -32,6 +32,7 @@ import { TrailExamManager } from "./TrailExamManager";
 import { POPULAR_DESTINATIONS, MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
 import { usePlaybook } from "@/hooks/usePlaybook";
 import { ImageGalleryPicker } from "./ImageGalleryPicker";
+import { ImageCropDialog } from "./ImageCropDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,8 +53,13 @@ export function AdminAcademyManager() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
   const [overviewPdfFile, setOverviewPdfFile] = useState<File | null>(null);
-  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
-  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
+  const [coverImageBlob, setCoverImageBlob] = useState<Blob | null>(null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
+  const [bannerImageBlob, setBannerImageBlob] = useState<Blob | null>(null);
+  const [bannerImagePreview, setBannerImagePreview] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<"cover" | "banner" | null>(null);
+  const [cropAspect, setCropAspect] = useState(16 / 9);
   
   const [editingTrail, setEditingTrail] = useState<LearningTrail | null>(null);
   const [itemToDelete, setItemToDelete] = useState<{ type: 'trail' | 'material' | 'speaker'; id: string } | null>(null);
@@ -146,12 +152,11 @@ export function AdminAcademyManager() {
         overviewUrl = urlData.publicUrl;
       }
 
-      if (coverImageFile) {
-        const sanitized = sanitizeFileName(coverImageFile.name);
-        const path = `covers/${Date.now()}_${sanitized}`;
+      if (coverImageBlob) {
+        const path = `covers/${Date.now()}_cover.jpg`;
         const { error: uploadError } = await supabase.storage
           .from("academy-files")
-          .upload(path, coverImageFile);
+          .upload(path, coverImageBlob, { contentType: "image/jpeg" });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage
           .from("academy-files")
@@ -159,12 +164,11 @@ export function AdminAcademyManager() {
         imageUrl = urlData.publicUrl;
       }
 
-      if (bannerImageFile) {
-        const sanitized = sanitizeFileName(bannerImageFile.name);
-        const path = `banners/${Date.now()}_${sanitized}`;
+      if (bannerImageBlob) {
+        const path = `banners/${Date.now()}_banner.jpg`;
         const { error: uploadError } = await supabase.storage
           .from("academy-files")
-          .upload(path, bannerImageFile);
+          .upload(path, bannerImageBlob, { contentType: "image/jpeg" });
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage
           .from("academy-files")
@@ -180,8 +184,10 @@ export function AdminAcademyManager() {
       }
       setTrailDialogOpen(false);
       setOverviewPdfFile(null);
-      setCoverImageFile(null);
-      setBannerImageFile(null);
+      setCoverImageBlob(null);
+      setCoverImagePreview(null);
+      setBannerImageBlob(null);
+      setBannerImagePreview(null);
     } catch (err: any) {
       sonnerToast.error("Erro ao salvar trilha: " + err.message);
     } finally {
@@ -374,23 +380,32 @@ export function AdminAcademyManager() {
       <div>
         <Label>Imagem de Capa</Label>
         <div className="mt-1">
-          {trailForm.image_url && !coverImageFile && (
+          {trailForm.image_url && !coverImageBlob && (
             <div className="flex items-center gap-2 mb-2">
               <img src={trailForm.image_url} alt="Capa atual" className="h-16 w-24 object-cover rounded border" />
               <span className="text-xs text-muted-foreground">Imagem atual</span>
             </div>
           )}
-          {coverImageFile ? (
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-              <FileText className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium flex-1 truncate">{coverImageFile.name}</span>
-              <Button variant="ghost" size="sm" onClick={() => setCoverImageFile(null)}>Remover</Button>
+          {coverImagePreview ? (
+            <div className="space-y-2">
+              <img src={coverImagePreview} alt="Capa recortada" className="h-24 w-36 object-cover rounded border" />
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => { setCoverImageBlob(null); setCoverImagePreview(null); }}>Remover</Button>
+              </div>
             </div>
           ) : (
             <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
               <Upload className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Clique para enviar imagem de capa</span>
-              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) setCoverImageFile(file); }} className="sr-only" />
+              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => { setCropSrc(reader.result as string); setCropTarget("cover"); setCropAspect(3 / 2); };
+                  reader.readAsDataURL(file);
+                  e.target.value = "";
+                }
+              }} className="sr-only" />
             </label>
           )}
         </div>
@@ -399,23 +414,32 @@ export function AdminAcademyManager() {
         <Label>Banner da Trilha (imagem de destaque interna)</Label>
         <p className="text-xs text-muted-foreground mb-1">Imagem panorâmica exibida no topo ao abrir a trilha (recomendado: 1920×512px)</p>
         <div className="mt-1">
-          {trailForm.banner_url && !bannerImageFile && (
+          {trailForm.banner_url && !bannerImageBlob && (
             <div className="flex items-center gap-2 mb-2">
               <img src={trailForm.banner_url} alt="Banner atual" className="h-16 w-40 object-cover rounded border" />
               <span className="text-xs text-muted-foreground">Banner atual</span>
             </div>
           )}
-          {bannerImageFile ? (
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-              <ImageIcon className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium flex-1 truncate">{bannerImageFile.name}</span>
-              <Button variant="ghost" size="sm" onClick={() => setBannerImageFile(null)}>Remover</Button>
+          {bannerImagePreview ? (
+            <div className="space-y-2">
+              <img src={bannerImagePreview} alt="Banner recortado" className="h-16 w-40 object-cover rounded border" />
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => { setBannerImageBlob(null); setBannerImagePreview(null); }}>Remover</Button>
+              </div>
             </div>
           ) : (
             <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
               <ImageIcon className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Clique para enviar banner da trilha</span>
-              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) setBannerImageFile(file); }} className="sr-only" />
+              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => { setCropSrc(reader.result as string); setCropTarget("banner"); setCropAspect(1920 / 512); };
+                  reader.readAsDataURL(file);
+                  e.target.value = "";
+                }
+              }} className="sr-only" />
             </label>
           )}
         </div>
@@ -838,6 +862,26 @@ export function AdminAcademyManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ImageCropDialog
+        open={!!cropSrc}
+        imageSrc={cropSrc || ""}
+        aspect={cropAspect}
+        title={cropTarget === "cover" ? "Posicionar capa da trilha" : "Posicionar banner da trilha"}
+        onClose={() => { setCropSrc(null); setCropTarget(null); }}
+        onConfirm={(blob) => {
+          const url = URL.createObjectURL(blob);
+          if (cropTarget === "cover") {
+            setCoverImageBlob(blob);
+            setCoverImagePreview(url);
+          } else {
+            setBannerImageBlob(blob);
+            setBannerImagePreview(url);
+          }
+          setCropSrc(null);
+          setCropTarget(null);
+        }}
+      />
     </div>
   );
 }
