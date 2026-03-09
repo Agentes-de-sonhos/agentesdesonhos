@@ -81,6 +81,7 @@ export function AdminAcademyManager() {
     description: "",
     destination: "",
     image_url: "",
+    banner_url: "",
     overview_pdf_url: "",
     playbook_destination_id: "" as string,
     order_index: 0,
