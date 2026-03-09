@@ -110,14 +110,17 @@ const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon:
 export function MobileSidebar() {
   const [expanded, setExpanded] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
-  const { hasFeature } = useSubscription();
+  const { hasFeature, plan } = useSubscription();
   const { trackSectionVisit } = useGamification();
   const { menuOrder } = useMenuOrder("vender");
+
+  const isEducaPass = plan === "educa_pass";
 
   const venderSection: MenuSection = useMemo(() => {
     let orderedKeys = defaultVenderOrder;
