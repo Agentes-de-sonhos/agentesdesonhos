@@ -179,10 +179,10 @@ export function MobileSidebar() {
           className={cn(
             "h-5 w-5 transition-colors",
             isActive && !isLocked ? "text-primary-foreground" : "",
-            isLocked ? "text-muted-foreground" : ""
+            isLocked && !isLockedByEducaPass ? "text-muted-foreground" : ""
           )}
         />
-        {isLocked && (
+        {isLocked && !isLockedByEducaPass && (
           <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />
         )}
       </div>
