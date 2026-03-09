@@ -7,6 +7,7 @@ import { Loader2, Eye, EyeOff, Mail, KeyRound, Lock } from "lucide-react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MultiStepSignup } from "@/components/auth/MultiStepSignup";
