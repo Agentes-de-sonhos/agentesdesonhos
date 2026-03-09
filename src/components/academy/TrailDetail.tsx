@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,10 +50,7 @@ import { PlaybookChecklistTab } from "@/components/playbook/PlaybookChecklistTab
 import { SpeakersTab } from "./SpeakersTab";
 import { TabIntroBlock } from "./TabIntroBlock";
 import type { PlaybookPDFFile } from "@/types/playbook";
-import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
-import { PlaybookTabContent } from "@/components/playbook/PlaybookTabContent";
-import { PlaybookComoVenderTab } from "@/components/playbook/PlaybookComoVenderTab";
-import { PLAYBOOK_TABS } from "@/types/playbook";
+import { usePlaybook } from "@/hooks/usePlaybook";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { SocialPostCard } from "@/components/materials/SocialPostCard";
@@ -79,6 +77,7 @@ interface TrailDetailProps {
 }
 
 export function TrailDetail({ trail, onBack }: TrailDetailProps) {
+  const navigate = useNavigate();
   const { hasPassedQuiz, hasPassedExam, bestExamScore, submitQuiz, submitExam, generateCertificate, hasCertificate, certificates } = useAcademy();
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
@@ -87,15 +86,13 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [showExam, setShowExam] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [userName, setUserName] = useState<string>("Agente de Viagens");
-  const [playbookTab, setPlaybookTab] = useState<string>(PLAYBOOK_TABS[0].key);
 
   // Find matching playbook for this trail using the linked playbook_destination_id
   const { destinations: allPlaybookDestinations } = usePlaybook();
   const linkedSlug = trail.playbook_destination_id
     ? allPlaybookDestinations.find((d) => d.id === trail.playbook_destination_id)?.slug
     : undefined;
-  const { destination: playbookDestination, sections: playbookSections } = usePlaybook(linkedSlug);
-  const { upsertSection } = usePlaybookAdmin();
+  const { destination: playbookDestination } = usePlaybook(linkedSlug);
 
   const { data: quizQuestions = [] } = useQuizQuestions(showQuiz);
   const { data: examQuestions = [] } = useExamQuestions(showExam ? trail.id : null);
@@ -282,10 +279,14 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <TabsTrigger value="palestrantes" className="flex items-center gap-2">
             <Users className="h-4 w-4" /> Palestrantes
           </TabsTrigger>
-          {playbookDestination && (
-            <TabsTrigger value="playbook" className="flex items-center gap-2">
+          {playbookDestination && linkedSlug && (
+            <button
+              type="button"
+              onClick={() => navigate(`/playbook/${linkedSlug}`)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
               <BookOpen className="h-4 w-4" /> Playbook
-            </TabsTrigger>
+            </button>
           )}
         </TabsList>
 
@@ -533,24 +534,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <SpeakersTab speakers={trailSpeakers} />
         </TabsContent>
 
-        {/* Playbook Tab */}
-        {playbookDestination && (
-          <TabsContent value="playbook">
-            <TabIntroBlock
-              icon={BookOpen}
-              title={`Playbook de Vendas — ${playbookDestination.name}`}
-              description="Acesse o playbook completo do destino com estratégias de vendas, perfis de clientes, dicas de hospedagem, atrações e muito mais. Um guia prático e completo para vender este destino com confiança."
-            />
-            <PlaybookEmbedded
-              destination={playbookDestination}
-              sections={playbookSections}
-              isAdmin={isAdmin}
-              upsertSection={upsertSection}
-              activeTab={playbookTab}
-              setActiveTab={setPlaybookTab}
-            />
-          </TabsContent>
-        )}
       </Tabs>
 
       {/* Training Player Dialog */}
@@ -602,116 +585,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   );
 }
 
-const playbookIconMap: Record<string, typeof Target> = {
-  LayoutDashboard, Target, TrendingUp, FileText, Plane, MapPin, Hotel, Car, Camera,
-  UtensilsCrossed, Package, Shield, Users, Route, AlertTriangle, Lightbulb, CheckSquare, GitBranch,
-};
-
-function PlaybookEmbedded({
-  destination,
-  sections,
-  isAdmin,
-  upsertSection,
-  activeTab,
-  setActiveTab,
-}: {
-  destination: any;
-  sections: any[];
-  isAdmin: boolean;
-  upsertSection: any;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}) {
-  const activeSection = sections.find((s: any) => s.tab_key === activeTab);
-  const activeTabData = PLAYBOOK_TABS.find((t) => t.key === activeTab)!;
-
-  const handleSaveSection = useCallback(
-    async (content: any) => {
-      if (!destination || !isAdmin) return;
-      await upsertSection.mutateAsync({
-        destination_id: destination.id,
-        tab_key: activeTab,
-        title: activeTabData?.label || activeTab,
-        content,
-        order_index: PLAYBOOK_TABS.findIndex((t) => t.key === activeTab),
-      });
-    },
-    [destination, activeTab, activeTabData, isAdmin, upsertSection]
-  );
-
-  return (
-    <div className="space-y-4 mt-4">
-      {/* Playbook Tab Navigation */}
-      <div className="flex flex-wrap gap-1.5">
-        {PLAYBOOK_TABS.map((tab) => {
-          const Icon = playbookIconMap[tab.icon] || Target;
-          const isActive = activeTab === tab.key;
-          const hasContent = sections.some((s: any) => s.tab_key === tab.key);
-
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 border",
-                isActive
-                  ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
-                  : hasContent
-                  ? "bg-card text-foreground border-border hover:border-primary/40 hover:bg-primary/5"
-                  : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted"
-              )}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Playbook Tab Content */}
-      <div className="min-h-[300px]">
-        {activeTab === 'mapa' ? (
-          <PlaybookPdfSection
-            pdfUrl={activeSection?.content?.pdf_url}
-            onSavePdfUrl={isAdmin ? async (url: string | null) => {
-              if (!destination) return;
-              const currentContent = activeSection?.content || {};
-              await upsertSection.mutateAsync({
-                destination_id: destination.id,
-                tab_key: activeTab,
-                title: activeTabData?.label || activeTab,
-                content: { ...currentContent, pdf_url: url || undefined },
-                order_index: PLAYBOOK_TABS.findIndex((t) => t.key === activeTab),
-              });
-            } : undefined}
-            tabLabel="Mapa da Cidade"
-          />
-        ) : activeTab === 'atracoes' ? (
-          <AttractionsExplorer
-            destinationName={destination?.name}
-          />
-        ) : activeTab === 'como_vender' ? (
-          <PlaybookComoVenderTab
-            section={activeSection}
-            onSaveSection={isAdmin ? handleSaveSection : undefined}
-          />
-        ) : activeTab === 'checklist_final' ? (
-          <PlaybookChecklistTab
-            section={activeSection}
-            destinationSlug={destination?.slug || ''}
-            onSaveSection={isAdmin ? handleSaveSection : undefined}
-          />
-        ) : (
-          <PlaybookTabContent
-            section={activeSection}
-            tabLabel={activeTabData.label}
-            onSaveSection={isAdmin ? handleSaveSection : undefined}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
 
 function MaterialDownloadCard({ material }: { material: TrailMaterial }) {
   const icons: Record<string, typeof FileText> = {
