@@ -80,6 +80,7 @@ interface TrailDetailProps {
 }
 
 export function TrailDetail({ trail, onBack }: TrailDetailProps) {
+  const navigate = useNavigate();
   const { hasPassedQuiz, hasPassedExam, bestExamScore, submitQuiz, submitExam, generateCertificate, hasCertificate, certificates } = useAcademy();
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
