@@ -21,6 +21,7 @@ import {
   MessageCircleQuestion,
   Store,
   CreditCard,
+  Wallet,
   Home,
   BookOpen,
   ShoppingBag,
@@ -88,6 +89,7 @@ const comunidadeSection: MenuSection = {
 const venderItemsMap: Record<string, MenuItem> = {
   "materiais": { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
   "gerar-orcamento": { key: "gerar-orcamento", title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
+  "criar-carteira": { key: "criar-carteira", title: "Criar Carteira", url: "/carteira-digital", icon: Wallet },
   "ferramentas-ia": { key: "ferramentas-ia", title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools", isPremium: true },
   "mentorias": { key: "mentorias", title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
   "cartao-digital": { key: "cartao-digital", title: "Meu Cartão", url: "/meu-cartao", icon: CreditCard, isPremium: true },
@@ -96,7 +98,7 @@ const venderItemsMap: Record<string, MenuItem> = {
   "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine", url: "/minha-vitrine", icon: Store, isPremium: true },
 };
 
-const defaultVenderOrder = ["materiais", "gerar-orcamento", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "mapa-turismo", "minha-vitrine"];
+const defaultVenderOrder = ["materiais", "gerar-orcamento", "criar-carteira", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "mapa-turismo", "minha-vitrine"];
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
