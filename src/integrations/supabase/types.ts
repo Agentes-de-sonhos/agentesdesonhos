@@ -1872,6 +1872,33 @@ export type Database = {
         }
         Relationships: []
       }
+      menu_order: {
+        Row: {
+          created_at: string
+          id: string
+          item_key: string
+          order_index: number
+          section: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_key: string
+          order_index?: number
+          section?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_key?: string
+          order_index?: number
+          section?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       monthly_prizes: {
         Row: {
           created_at: string
