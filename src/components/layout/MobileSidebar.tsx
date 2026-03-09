@@ -90,10 +90,10 @@ const venderItemsMap: Record<string, MenuItem> = {
   "gerar-orcamento": { key: "gerar-orcamento", title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
   "ferramentas-ia": { key: "ferramentas-ia", title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools", isPremium: true },
   "mentorias": { key: "mentorias", title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
-  "cartao-digital": { key: "cartao-digital", title: "Meu Cartão Digital", url: "/meu-cartao", icon: CreditCard, isPremium: true },
+  "cartao-digital": { key: "cartao-digital", title: "Meu Cartão", url: "/meu-cartao", icon: CreditCard, isPremium: true },
   "bloqueios-aereos": { key: "bloqueios-aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
   "mapa-turismo": { key: "mapa-turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-  "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine Digital", url: "/minha-vitrine", icon: Store, isPremium: true },
+  "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine", url: "/minha-vitrine", icon: Store, isPremium: true },
 };
 
 const defaultVenderOrder = ["materiais", "gerar-orcamento", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "mapa-turismo", "minha-vitrine"];
