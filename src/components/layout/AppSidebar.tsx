@@ -96,9 +96,9 @@ const comunidadeSection: MenuSection = {
 // Vender items with keys for dynamic ordering
 const venderItemsMap: Record<string, MenuItem> = {
   "materiais": { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-  "gerar-orcamento": { key: "gerar-orcamento", title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
-  "criar-carteira": { key: "criar-carteira", title: "Criar Carteira", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
-  "dream-advisor": { key: "dream-advisor", title: "Dream Advisor", url: "/dream-advisor", icon: Compass },
+  "gerar-orcamento": { key: "gerar-orcamento", title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true, isPremium: true },
+  "criar-carteira": { key: "criar-carteira", title: "Criar Carteira", url: "/ferramentas-ia/trip-wallet", icon: Wallet, isPremium: true },
+  "dream-advisor": { key: "dream-advisor", title: "Dream Advisor", url: "/dream-advisor", icon: Compass, isPremium: true },
   "ferramentas-ia": { key: "ferramentas-ia", title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools", isPremium: true },
   "mentorias": { key: "mentorias", title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
   "cartao-digital": { key: "cartao-digital", title: "Meu Cartão", url: "/meu-cartao", icon: CreditCard, isPremium: true },
