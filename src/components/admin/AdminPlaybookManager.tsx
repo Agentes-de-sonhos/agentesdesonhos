@@ -48,8 +48,37 @@ export function AdminPlaybookManager() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const { toast } = useToast();
 
   const resetForm = () => { setName(""); setSlug(""); setDescription(""); setImageUrl(""); setEditingDest(null); setShowForm(false); };
+
+  const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    setCropSrc(null);
+    setUploadingCover(true);
+    try {
+      const path = `playbook-covers/${Date.now()}_cover.jpg`;
+      const { error } = await supabase.storage.from("playbook-files").upload(path, blob, { contentType: "image/jpeg", upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from("playbook-files").getPublicUrl(path);
+      setImageUrl(data.publicUrl);
+      toast({ title: "Imagem enviada!" });
+    } catch (err: any) {
+      toast({ title: "Erro ao enviar imagem", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingCover(false);
+    }
+  };
 
   const handleEdit = (dest: any) => {
     setEditingDest(dest);
