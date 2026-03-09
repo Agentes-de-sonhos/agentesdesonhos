@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sparkles,
@@ -7,7 +7,6 @@ import {
   User,
   ChevronLeft,
   ChevronDown,
-  ChevronRight,
   Cloud,
   LogOut,
   Shield,
@@ -18,14 +17,12 @@ import {
   Lock,
   Calculator,
   Heart,
-  Crown,
   MessageCircleQuestion,
   Store,
   CreditCard,
   Home,
   BookOpen,
   ShoppingBag,
-  UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -35,6 +32,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGamification } from "@/hooks/useGamification";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useMenuOrder } from "@/hooks/useMenuOrder";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import {
@@ -56,6 +54,7 @@ interface MenuItem {
   requiredFeature?: Feature;
   isPremium?: boolean;
   isHighlighted?: boolean;
+  key?: string;
 }
 
 interface MenuSection {
@@ -64,7 +63,7 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-// ── Section definitions ──
+// ── Static sections ──
 
 const aprenderSection: MenuSection = {
   title: "Aprender",
@@ -73,21 +72,6 @@ const aprenderSection: MenuSection = {
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
-  ],
-};
-
-const venderSection: MenuSection = {
-  title: "Vender",
-  icon: ShoppingBag,
-  items: [
-    { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
-    { title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools", isPremium: true },
-    { title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
-    { title: "Cartão Digital", url: "/meu-cartao", icon: CreditCard, isPremium: true },
-    { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
-    { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { title: "Minha Vitrine", url: "/minha-vitrine", icon: Store, isPremium: true },
   ],
 };
 
@@ -107,7 +91,19 @@ const comunidadeSection: MenuSection = {
   ],
 };
 
-const allSections: MenuSection[] = [aprenderSection, venderSection, clientesSection, comunidadeSection];
+// Vender items with keys for dynamic ordering
+const venderItemsMap: Record<string, MenuItem> = {
+  "materiais": { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
+  "gerar-orcamento": { key: "gerar-orcamento", title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
+  "ferramentas-ia": { key: "ferramentas-ia", title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools", isPremium: true },
+  "mentorias": { key: "mentorias", title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
+  "cartao-digital": { key: "cartao-digital", title: "Cartão Digital", url: "/meu-cartao", icon: CreditCard, isPremium: true },
+  "bloqueios-aereos": { key: "bloqueios-aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
+  "mapa-turismo": { key: "mapa-turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
+  "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine", url: "/minha-vitrine", icon: Store, isPremium: true },
+};
+
+const defaultVenderOrder = ["materiais", "gerar-orcamento", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "mapa-turismo", "minha-vitrine"];
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
@@ -121,8 +117,24 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
-  const { hasFeature, plan } = useSubscription();
+  const { hasFeature } = useSubscription();
   const { trackSectionVisit } = useGamification();
+  const { menuOrder } = useMenuOrder("vender");
+
+  // Build vender section with dynamic order
+  const venderSection: MenuSection = useMemo(() => {
+    let orderedKeys = defaultVenderOrder;
+    if (menuOrder && menuOrder.length > 0) {
+      orderedKeys = [...menuOrder].sort((a, b) => a.order_index - b.order_index).map((m) => m.item_key);
+    }
+    const items = orderedKeys.map((key) => venderItemsMap[key]).filter(Boolean);
+    return { title: "Vender", icon: ShoppingBag, items };
+  }, [menuOrder]);
+
+  const allSections: MenuSection[] = useMemo(
+    () => [aprenderSection, venderSection, clientesSection, comunidadeSection],
+    [venderSection]
+  );
 
   const toggleSection = (title: string) => {
     setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -217,7 +229,6 @@ export function AppSidebar() {
     const Icon = section.icon;
 
     if (collapsed) {
-      // Collapsed: popover with section items
       return (
         <nav key={section.title} className="flex flex-col gap-0.5 px-3">
           <Popover>
@@ -276,7 +287,6 @@ export function AppSidebar() {
       );
     }
 
-    // Expanded: collapsible section
     return (
       <div key={section.title} className="px-3">
         <button
@@ -367,13 +377,9 @@ export function AppSidebar() {
             </p>
           )}
 
-          {/* Admin */}
           {isAdmin && renderSingleItem(adminMenuItem)}
-
-          {/* Profile */}
           {renderSingleItem(profileMenuItem)}
 
-          {/* Logout */}
           {collapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -401,7 +407,6 @@ export function AppSidebar() {
             </Button>
           )}
 
-          {/* Footer */}
           {!collapsed ? (
             <div className="text-center pt-2">
               <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>

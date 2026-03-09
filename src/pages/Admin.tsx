@@ -16,6 +16,7 @@ import {
   Megaphone,
   BookOpen,
   Sparkles,
+  Menu,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -32,6 +33,7 @@ import { AdminPlaybookManager } from "@/components/admin/AdminPlaybookManager";
 import { AdminNewsCurationManager } from "@/components/admin/AdminNewsCurationManager";
 import { AdminHotelsManager } from "@/components/admin/AdminHotelsManager";
 import { AdminHotelRecommendationsManager } from "@/components/admin/AdminHotelRecommendationsManager";
+import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -114,10 +116,14 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-13">
+          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-14">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Usuários</span>
+            </TabsTrigger>
+            <TabsTrigger value="menu-order" className="flex items-center gap-2">
+              <Menu className="h-4 w-4" />
+              <span className="hidden sm:inline">Menu</span>
             </TabsTrigger>
             <TabsTrigger value="popups" className="flex items-center gap-2">
               <Megaphone className="h-4 w-4" />
@@ -171,6 +177,10 @@ export default function Admin() {
 
           <TabsContent value="users">
             <AdminUserManager />
+          </TabsContent>
+
+          <TabsContent value="menu-order">
+            <AdminMenuOrderManager />
           </TabsContent>
 
           <TabsContent value="popups">
