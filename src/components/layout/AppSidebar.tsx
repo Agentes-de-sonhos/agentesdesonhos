@@ -20,6 +20,7 @@ import {
   MessageCircleQuestion,
   Store,
   CreditCard,
+  Wallet,
   Home,
   BookOpen,
   ShoppingBag,
