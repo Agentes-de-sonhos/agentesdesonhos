@@ -131,6 +131,7 @@ export function AdminAcademyManager() {
     try {
       let overviewUrl = trailForm.overview_pdf_url;
       let imageUrl = trailForm.image_url;
+      let bannerUrl = trailForm.banner_url;
 
       if (overviewPdfFile) {
         const sanitized = sanitizeFileName(overviewPdfFile.name);
@@ -158,7 +159,20 @@ export function AdminAcademyManager() {
         imageUrl = urlData.publicUrl;
       }
 
-      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
+      if (bannerImageFile) {
+        const sanitized = sanitizeFileName(bannerImageFile.name);
+        const path = `banners/${Date.now()}_${sanitized}`;
+        const { error: uploadError } = await supabase.storage
+          .from("academy-files")
+          .upload(path, bannerImageFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage
+          .from("academy-files")
+          .getPublicUrl(path);
+        bannerUrl = urlData.publicUrl;
+      }
+
+      const payload = { ...trailForm, overview_pdf_url: overviewUrl, image_url: imageUrl, banner_url: bannerUrl, playbook_destination_id: trailForm.playbook_destination_id || null };
       if (editingTrail) {
         await updateTrail.mutateAsync({ id: editingTrail.id, ...payload });
       } else {
@@ -167,6 +181,7 @@ export function AdminAcademyManager() {
       setTrailDialogOpen(false);
       setOverviewPdfFile(null);
       setCoverImageFile(null);
+      setBannerImageFile(null);
     } catch (err: any) {
       sonnerToast.error("Erro ao salvar trilha: " + err.message);
     } finally {
