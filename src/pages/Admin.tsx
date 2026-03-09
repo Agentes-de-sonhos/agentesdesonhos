@@ -179,6 +179,10 @@ export default function Admin() {
             <AdminUserManager />
           </TabsContent>
 
+          <TabsContent value="menu-order">
+            <AdminMenuOrderManager />
+          </TabsContent>
+
           <TabsContent value="popups">
             <AdminPopupsManager />
           </TabsContent>
