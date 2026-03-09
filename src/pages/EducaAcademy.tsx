@@ -34,6 +34,7 @@ import { RankingBoard } from "@/components/academy/RankingBoard";
 import { MyCertificates } from "@/components/academy/MyCertificates";
 import { CertificatePDF } from "@/components/academy/CertificatePDF";
 import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
+import { AcademyHeroBannerManager } from "@/components/admin/AcademyHeroBannerManager";
 import { FeatureGate } from "@/components/subscription/FeatureGate";
 import { PlaybookList } from "@/components/playbook/PlaybookList";
 import type { TrailWithProgress, UserCertificate, LearningTrail } from "@/types/academy";
