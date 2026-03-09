@@ -37,6 +37,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useMenuOrder } from "@/hooks/useMenuOrder";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
+import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import {
   Tooltip,
   TooltipContent,
@@ -116,14 +117,17 @@ const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon:
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
-  const { hasFeature } = useSubscription();
+  const { hasFeature, plan } = useSubscription();
   const { trackSectionVisit } = useGamification();
   const { menuOrder } = useMenuOrder("vender");
+
+  const isEducaPass = plan === "educa_pass";
 
   // Build vender section with dynamic order
   const venderSection: MenuSection = useMemo(() => {
@@ -149,6 +153,12 @@ export function AppSidebar() {
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
+      // Educa Pass: only allow EducaTravel Academy
+      if (isEducaPass && item.url !== "/educa-academy") {
+        e.preventDefault();
+        setShowComingSoon(true);
+        return;
+      }
       if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
         e.preventDefault();
         setUpgradeFeature(item.requiredFeature);
@@ -157,14 +167,16 @@ export function AppSidebar() {
       trackSectionVisit(item.url);
       setCollapsed(true);
     },
-    [hasFeature, trackSectionVisit]
+    [hasFeature, trackSectionVisit, isEducaPass]
   );
 
   const renderSingleItem = (item: MenuItem) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
-    const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
+    const isLocked = isLockedByPlan || isLockedByEducaPass;
 
     const menuLink = (
       <Link
@@ -190,7 +202,7 @@ export function AppSidebar() {
               isLocked && "text-muted-foreground"
             )}
           />
-          {item.isPremium && isLocked && (
+          {isLocked && (
             <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />
           )}
         </div>
@@ -428,6 +440,10 @@ export function AppSidebar() {
         open={upgradeFeature !== null}
         onOpenChange={(open) => !open && setUpgradeFeature(null)}
         requiredFeature={upgradeFeature || undefined}
+      />
+      <ComingSoonDialog
+        open={showComingSoon}
+        onOpenChange={setShowComingSoon}
       />
     </TooltipProvider>
   );

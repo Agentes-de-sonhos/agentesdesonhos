@@ -4349,7 +4349,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "agente" | "promotor"
-      subscription_plan: "essencial" | "profissional" | "premium"
+      subscription_plan: "essencial" | "profissional" | "premium" | "educa_pass"
       workshop_category:
         | "contabilidade"
         | "tributaria"
@@ -4484,7 +4484,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "agente", "promotor"],
-      subscription_plan: ["essencial", "profissional", "premium"],
+      subscription_plan: ["essencial", "profissional", "premium", "educa_pass"],
       workshop_category: [
         "contabilidade",
         "tributaria",

@@ -38,6 +38,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useMenuOrder } from "@/hooks/useMenuOrder";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
+import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import {
   Tooltip,
   TooltipContent,
@@ -109,14 +110,17 @@ const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon:
 export function MobileSidebar() {
   const [expanded, setExpanded] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
-  const { hasFeature } = useSubscription();
+  const { hasFeature, plan } = useSubscription();
   const { trackSectionVisit } = useGamification();
   const { menuOrder } = useMenuOrder("vender");
+
+  const isEducaPass = plan === "educa_pass";
 
   const venderSection: MenuSection = useMemo(() => {
     let orderedKeys = defaultVenderOrder;
@@ -140,6 +144,12 @@ export function MobileSidebar() {
     section.items.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
 
   const handleMenuClick = (item: MenuItem, e: React.MouseEvent) => {
+    // Educa Pass: only allow EducaTravel Academy
+    if (isEducaPass && item.url !== "/educa-academy") {
+      e.preventDefault();
+      setShowComingSoon(true);
+      return;
+    }
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
       e.preventDefault();
       setUpgradeFeature(item.requiredFeature);
@@ -159,7 +169,9 @@ export function MobileSidebar() {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
-    const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
+    const isLocked = isLockedByPlan || isLockedByEducaPass;
 
     const iconElement = (
       <div className="relative flex-shrink-0">
@@ -170,7 +182,7 @@ export function MobileSidebar() {
             isLocked ? "text-muted-foreground" : ""
           )}
         />
-        {item.isPremium && isLocked && (
+        {isLocked && (
           <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />
         )}
       </div>
@@ -401,6 +413,10 @@ export function MobileSidebar() {
         open={upgradeFeature !== null}
         onOpenChange={(open) => !open && setUpgradeFeature(null)}
         requiredFeature={upgradeFeature || undefined}
+      />
+      <ComingSoonDialog
+        open={showComingSoon}
+        onOpenChange={setShowComingSoon}
       />
     </TooltipProvider>
   );

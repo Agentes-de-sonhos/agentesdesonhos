@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { LaunchCountdownBanner } from "@/components/subscription/LaunchCountdownBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,7 +39,8 @@ import type { TrailWithProgress, UserCertificate, LearningTrail } from "@/types/
 export default function EducaAcademy() {
   const { trailsWithProgress, certificates, isLoading, userAchievements } = useAcademy();
   const { isAdmin } = useUserRole();
-  const { hasFeature } = useSubscription();
+  const { hasFeature, plan } = useSubscription();
+  const isEducaPass = plan === "educa_pass";
   const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
   const [selectedCertificate, setSelectedCertificate] = useState<{
     certificate: UserCertificate;
@@ -74,6 +76,8 @@ export default function EducaAcademy() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Countdown Banner for Educa Pass users */}
+        {isEducaPass && <LaunchCountdownBanner />}
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
