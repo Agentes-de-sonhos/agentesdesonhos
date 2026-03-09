@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'essencial' | 'profissional' | 'premium';
+export type SubscriptionPlan = 'educa_pass' | 'essencial' | 'profissional' | 'premium';
 
 export interface Subscription {
   id: string;
@@ -39,6 +39,9 @@ export type Feature =
   | 'qa_forum';
 
 export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
+  educa_pass: [
+    'trainings_recorded',
+  ],
   essencial: [
     'news',
     'tourism_map',
@@ -87,18 +90,21 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
 };
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
+  educa_pass: 'EducaTravel Pass',
   essencial: 'Essencial',
   profissional: 'Profissional',
   premium: 'Premium',
 };
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
+  educa_pass: 'Acesso gratuito à EducaTravel Academy',
   essencial: 'Acesso básico às notícias, mapa do turismo, materiais e CRM',
   profissional: 'Ferramentas IA, orçamentos, Carteira Digital e financeiro incluídos',
   premium: 'Acesso completo com trilhas premium, certificados e benefícios exclusivos',
 };
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
+  educa_pass: 0,
   essencial: 0,
   profissional: 20,
   premium: 1000,
@@ -133,7 +139,7 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   materials: 'essencial',
   agenda: 'essencial',
   crm_basic: 'essencial',
-  trainings_recorded: 'essencial',
+  trainings_recorded: 'educa_pass',
   financial: 'essencial',
   ai_tools: 'profissional',
   quote_generator: 'profissional',
@@ -149,3 +155,6 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   community: 'premium',
   qa_forum: 'premium',
 };
+
+// Launch date for countdown
+export const LAUNCH_DATE = new Date('2026-03-16T00:00:00-03:00');
