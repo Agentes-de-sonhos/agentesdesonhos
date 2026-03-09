@@ -32,6 +32,7 @@ import { TrailExamManager } from "./TrailExamManager";
 import { POPULAR_DESTINATIONS, MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
 import { usePlaybook } from "@/hooks/usePlaybook";
 import { ImageGalleryPicker } from "./ImageGalleryPicker";
+import { ImageCropDialog } from "./ImageCropDialog";
 import {
   AlertDialog,
   AlertDialogAction,
