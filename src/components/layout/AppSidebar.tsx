@@ -174,7 +174,9 @@ export function AppSidebar() {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
-    const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
+    const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
+    const isLocked = isLockedByPlan || isLockedByEducaPass;
 
     const menuLink = (
       <Link
