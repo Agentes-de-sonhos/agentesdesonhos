@@ -396,7 +396,29 @@ export function AdminAcademyManager() {
         </div>
       </div>
       <div>
-        <Label>Playbook Vinculado</Label>
+        <Label>Banner da Trilha (imagem de destaque interna)</Label>
+        <p className="text-xs text-muted-foreground mb-1">Imagem panorâmica exibida no topo ao abrir a trilha (recomendado: 1920×512px)</p>
+        <div className="mt-1">
+          {trailForm.banner_url && !bannerImageFile && (
+            <div className="flex items-center gap-2 mb-2">
+              <img src={trailForm.banner_url} alt="Banner atual" className="h-16 w-40 object-cover rounded border" />
+              <span className="text-xs text-muted-foreground">Banner atual</span>
+            </div>
+          )}
+          {bannerImageFile ? (
+            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+              <ImageIcon className="h-5 w-5 text-primary" />
+              <span className="text-sm font-medium flex-1 truncate">{bannerImageFile.name}</span>
+              <Button variant="ghost" size="sm" onClick={() => setBannerImageFile(null)}>Remover</Button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+              <ImageIcon className="h-6 w-6 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Clique para enviar banner da trilha</span>
+              <input type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) setBannerImageFile(file); }} className="sr-only" />
+            </label>
+          )}
+        </div>
         <Select
           value={trailForm.playbook_destination_id}
           onValueChange={(v) => setTrailForm({ ...trailForm, playbook_destination_id: v === "none" ? "" : v })}
