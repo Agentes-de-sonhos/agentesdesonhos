@@ -65,6 +65,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const { sendOtp, signIn, user, loading: authLoading, isNewUser } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
+  const { plan, loading: subLoading } = useSubscription();
   const { toast } = useToast();
 
   // All useForm hooks MUST be called before any early returns
