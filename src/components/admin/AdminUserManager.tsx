@@ -187,6 +187,7 @@ export function AdminUserManager() {
   };
 
   const planColors: Record<string, string> = {
+    educa_pass: "bg-blue-500",
     essencial: "bg-muted-foreground",
     profissional: "bg-primary",
     premium: "bg-accent",
@@ -384,6 +385,7 @@ export function AdminUserManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="educa_pass">Educa Travel Pass</SelectItem>
                     <SelectItem value="essencial">Essencial</SelectItem>
                     <SelectItem value="profissional">Profissional</SelectItem>
                     <SelectItem value="premium">Premium</SelectItem>
