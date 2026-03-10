@@ -153,23 +153,12 @@ export function AppSidebar() {
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
   const { trackSectionVisit } = useGamification();
-  const { menuOrder } = useMenuOrder("vender");
 
   const isEducaPass = plan === "educa_pass";
 
-  // Build vender section with dynamic order
-  const venderSection: MenuSection = useMemo(() => {
-    let orderedKeys = defaultVenderOrder;
-    if (menuOrder && menuOrder.length > 0) {
-      orderedKeys = [...menuOrder].sort((a, b) => a.order_index - b.order_index).map((m) => m.item_key);
-    }
-    const items = orderedKeys.map((key) => venderItemsMap[key]).filter(Boolean);
-    return { title: "Vender", icon: ShoppingBag, items };
-  }, [menuOrder]);
-
   const allSections: MenuSection[] = useMemo(
-    () => [aprenderSection, venderSection, clientesSection, comunidadeSection],
-    [venderSection]
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    []
   );
 
   const toggleSection = (title: string) => {
