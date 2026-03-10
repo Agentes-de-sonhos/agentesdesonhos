@@ -241,7 +241,7 @@ export function MobileSidebar() {
         <item.icon
           className={cn(
             "h-5 w-5 transition-colors",
-            isActive && !isLocked ? "text-primary-foreground" : "",
+            isActive && !isLocked && !sectionBgColor ? "text-primary-foreground" : "",
             isLocked && !isLockedByEducaPass ? "text-muted-foreground" : ""
           )}
         />
