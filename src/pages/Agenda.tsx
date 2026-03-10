@@ -248,6 +248,9 @@ export default function Agenda() {
         onUpdate={handleUpdateEvent}
         onDelete={handleDeleteEvent}
         onHide={handleHidePresetEvent}
+        onHighlight={highlightEvent}
+        onUnhighlight={unhighlightEvent}
+        highlightedEventIds={highlightedEventIds}
         onCreateCustomType={handleCreateCustomType}
         isLoading={isCreating || isUpdating || isDeleting}
         isCreatingCustomType={isCreatingCustomType}
