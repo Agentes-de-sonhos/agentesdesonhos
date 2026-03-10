@@ -9,7 +9,8 @@
    | "ai" 
    | "events" 
    | "flights"
-   | "tools";
+   | "tools"
+   | "community";
 
  interface SectionHeaderProps {
    title: string;
