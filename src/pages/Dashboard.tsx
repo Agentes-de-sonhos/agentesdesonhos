@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useGamification } from "@/hooks/useGamification";
+import { GamificationPill } from "@/components/layout/GamificationPill";
 import {
   Route,
   FileText,
