@@ -365,6 +365,12 @@ export function MobileSidebar() {
 
           {/* All sections */}
           {allSections.map((section) => renderSection(section))}
+
+          {/* Standalone items */}
+          <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
+            {renderMenuItem(comunidadeItem)}
+            {renderMenuItem(mentoriasItem)}
+          </nav>
         </div>
 
         {/* Bottom Section - Conta */}

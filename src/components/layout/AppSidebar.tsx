@@ -391,6 +391,12 @@ export function AppSidebar() {
 
           {/* All sections */}
           {allSections.map((section) => renderSection(section))}
+
+          {/* Standalone items */}
+          <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
+            {renderSingleItem(comunidadeItem)}
+            {renderSingleItem(mentoriasItem)}
+          </nav>
         </div>
 
         {/* Bottom Section - Conta */}
