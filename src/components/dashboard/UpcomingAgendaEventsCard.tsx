@@ -79,7 +79,7 @@ export function UpcomingAgendaEventsCard() {
               return (
                 <div
                   key={event.id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-[hsl(var(--section-events))]/10 transition-colors cursor-pointer"
                   onClick={() => navigate("/agenda")}
                 >
                   <div
