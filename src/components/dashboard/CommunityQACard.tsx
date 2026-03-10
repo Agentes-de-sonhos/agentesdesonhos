@@ -40,7 +40,7 @@ export function CommunityQACard() {
   const [showAskForm, setShowAskForm] = useState(false);
   const [askTitle, setAskTitle] = useState("");
   const [askDescription, setAskDescription] = useState("");
-  const [askCategory, setAskCategory] = useState("geral");
+  const [askCategory, setAskCategory] = useState("");
   const [askLink, setAskLink] = useState("");
   const [showAskLink, setShowAskLink] = useState(false);
 
