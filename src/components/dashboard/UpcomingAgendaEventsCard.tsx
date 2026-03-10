@@ -15,15 +15,18 @@ export function UpcomingAgendaEventsCard() {
   const now = new Date();
   const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   
-  // Filter: only user-created events (not preset) OR highlighted events, current month
+  // Filter: user-created events (current month) + ALL highlighted events (any date)
   const upcomingEvents = getUpcomingEvents(50)
     .filter((event) => {
+      const isHighlighted = highlightedEventIds.has(event.id);
+      // Highlighted events always show, regardless of month
+      if (isHighlighted) return true;
+      // User-created events: only current month
       const [y, m, d] = event.event_date.split('-').map(Number);
       const evDate = new Date(y, m - 1, d);
       const isCurrentMonth = isSameMonth(evDate, todayLocal);
       const isUserEvent = !event.isPreset;
-      const isHighlighted = highlightedEventIds.has(event.id);
-      return isCurrentMonth && (isUserEvent || isHighlighted);
+      return isCurrentMonth && isUserEvent;
     })
     .slice(0, 10);
 
