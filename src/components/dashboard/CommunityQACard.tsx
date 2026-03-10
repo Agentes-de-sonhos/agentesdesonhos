@@ -58,7 +58,7 @@ export function CommunityQACard() {
         .from("qa_questions")
         .select("id, title, category, answers_count, is_resolved, created_at, user_id, description")
         .order("created_at", { ascending: false })
-        .limit(6);
+        .limit(5);
       if (error) throw error;
       if (!data || data.length === 0) return [];
 
