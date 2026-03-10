@@ -111,7 +111,9 @@ const guiasSection: MenuSection = {
 const recursosVendasSection: MenuSection = {
   title: "Recursos de Vendas",
   icon: ShoppingCart,
-  hoverColor: "hover:bg-orange-50 hover:text-orange-700",
+  hoverColor: "hover:bg-orange-600 hover:text-white",
+  headerBg: "bg-orange-600 text-white",
+  headerHoverBg: "hover:bg-orange-700",
   bgColor: "bg-orange-50",
   textColor: "text-orange-700",
   items: [
