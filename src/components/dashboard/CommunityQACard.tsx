@@ -300,7 +300,7 @@ export function CommunityQACard() {
             />
             <Select value={askCategory} onValueChange={setAskCategory}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Categoria" />
+                <SelectValue placeholder="Selecione o tema" />
               </SelectTrigger>
               <SelectContent>
                 {QA_CATEGORIES.map((cat) => (
