@@ -9,32 +9,21 @@ import { cn } from "@/lib/utils";
 
 export function UpcomingAgendaEventsCard() {
   const navigate = useNavigate();
-  const { getUpcomingEvents, isLoading } = useAgenda();
+  const { getUpcomingEvents, highlightedEventIds, isLoading } = useAgenda();
 
   // Use local date components to avoid UTC shift
   const now = new Date();
   const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   
-  // Event types to show on dashboard
-  const allowedEventTypes = [
-    'compromisso',
-    'trade',
-    'reuniao',
-    'aniversario',
-    'treinamento',
-    'comemorativo',
-  ];
-  
-  // Filter events to only show current month events with allowed types (max 10)
-  // Also includes custom event types (those not in the default list)
+  // Filter: only user-created events (not preset) OR highlighted events, current month
   const upcomingEvents = getUpcomingEvents(50)
     .filter((event) => {
       const [y, m, d] = event.event_date.split('-').map(Number);
       const evDate = new Date(y, m - 1, d);
       const isCurrentMonth = isSameMonth(evDate, todayLocal);
-      const isAllowedType = allowedEventTypes.includes(event.event_type);
-      const isCustomType = !['compromisso', 'trade', 'venda', 'lembrete', 'reuniao', 'viagem', 'aniversario', 'feriado', 'comemorativo', 'treinamento'].includes(event.event_type);
-      return isCurrentMonth && (isAllowedType || isCustomType);
+      const isUserEvent = !event.isPreset;
+      const isHighlighted = highlightedEventIds.has(event.id);
+      return isCurrentMonth && (isUserEvent || isHighlighted);
     })
     .slice(0, 10);
 
