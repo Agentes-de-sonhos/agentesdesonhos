@@ -80,7 +80,9 @@ interface MenuSection {
 const conhecimentoSection: MenuSection = {
   title: "Conhecimento",
   icon: BookOpen,
-  hoverColor: "hover:bg-blue-50 hover:text-blue-700",
+  hoverColor: "hover:bg-blue-600 hover:text-white",
+  headerBg: "bg-blue-600 text-white",
+  headerHoverBg: "hover:bg-blue-700",
   bgColor: "bg-blue-50",
   textColor: "text-blue-700",
   items: [
