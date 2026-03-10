@@ -208,21 +208,29 @@ function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending }: {
 
 /* ── Compact List Card (for sidebar sections) ────────────── */
 function CompactNewsItem({ item, index }: { item: NoticiaHub; index: number }) {
+  const isFirst = index === 0;
   return (
     <a
       href={item.url_original}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors"
+      className={`group flex items-start gap-3 rounded-lg transition-colors ${
+        isFirst ? "p-3 bg-primary/5 border border-primary/10" : "p-2.5 hover:bg-muted/50"
+      }`}
     >
-      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center mt-0.5">
+      <span className={`flex-shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center mt-0.5 ${
+        isFirst ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+      }`}>
         {index + 1}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-relaxed">
+        <p className={`font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-relaxed ${
+          isFirst ? "text-sm" : "text-xs"
+        }`}>
           {item.titulo_curto}
         </p>
         <div className="flex items-center gap-1.5 mt-1">
+          <CategoryBadge categoria={item.categoria} />
           <span className="text-[10px] text-muted-foreground">{item.fonte}</span>
           <span className="text-[10px] text-muted-foreground">•</span>
           <span className="text-[10px] text-muted-foreground">{formatDate(item.data_publicacao)}</span>
