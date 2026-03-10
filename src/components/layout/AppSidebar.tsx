@@ -68,6 +68,7 @@ interface MenuSection {
   title: string;
   icon: React.ComponentType<{ className?: string }>;
   items: MenuItem[];
+  hoverColor: string;
 }
 
 // ── Static sections ──
@@ -75,6 +76,7 @@ interface MenuSection {
 const conhecimentoSection: MenuSection = {
   title: "Conhecimento",
   icon: BookOpen,
+  hoverColor: "hover:bg-blue-50 hover:text-blue-700",
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
@@ -85,6 +87,7 @@ const conhecimentoSection: MenuSection = {
 const guiasSection: MenuSection = {
   title: "Guias e Referências",
   icon: BookMarked,
+  hoverColor: "hover:bg-emerald-50 hover:text-emerald-700",
   items: [
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
@@ -96,6 +99,7 @@ const guiasSection: MenuSection = {
 const recursosVendasSection: MenuSection = {
   title: "Recursos de Vendas",
   icon: ShoppingCart,
+  hoverColor: "hover:bg-orange-50 hover:text-orange-700",
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
@@ -105,6 +109,7 @@ const recursosVendasSection: MenuSection = {
 const criarSection: MenuSection = {
   title: "Criar",
   icon: PlusCircle,
+  hoverColor: "hover:bg-violet-50 hover:text-violet-700",
   items: [
     { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
     { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "ai_tools" },
@@ -115,6 +120,7 @@ const criarSection: MenuSection = {
 const clientesSection: MenuSection = {
   title: "Clientes",
   icon: Users,
+  hoverColor: "hover:bg-cyan-50 hover:text-cyan-700",
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
     { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
@@ -124,6 +130,7 @@ const clientesSection: MenuSection = {
 const marketingSection: MenuSection = {
   title: "Marketing",
   icon: Megaphone,
+  hoverColor: "hover:bg-pink-50 hover:text-pink-700",
   items: [
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
     { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store },
@@ -157,7 +164,15 @@ export function AppSidebar() {
   );
 
   const toggleSection = (title: string) => {
-    setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
+    setOpenSections((prev) => {
+      const isCurrentlyOpen = prev[title];
+      // Close all, then toggle the clicked one
+      const allClosed: Record<string, boolean> = {};
+      if (!isCurrentlyOpen) {
+        allClosed[title] = true;
+      }
+      return allClosed;
+    });
   };
 
   const isSectionActive = (section: MenuSection) =>
@@ -315,10 +330,13 @@ export function AppSidebar() {
       <div key={section.title} className="px-3">
         <button
           onClick={() => toggleSection(section.title)}
-          className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
+          className={cn(
+            "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sidebar-foreground transition-all duration-200",
+            section.hoverColor
+          )}
         >
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 flex-1 text-left">
+          <Icon className="h-4 w-4" />
+          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left">
             {section.title}
           </span>
           <ChevronDown
