@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageCircle, CheckCircle2, Filter, Clock, ThumbsUp, Eye, ArrowUpDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { MessageCircle, CheckCircle2, Filter, Clock, ThumbsUp, Eye, ArrowUpDown, ChevronDown, Sparkles, Send } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { QAQuestionDetail } from "./QAQuestionDetail";
@@ -20,7 +21,7 @@ interface QAFeedProps {
   onCloseNewQuestion?: () => void;
 }
 
-type SortMode = "recent" | "most_answered" | "unanswered" | "useful";
+type SortMode = "recent" | "most_answered" | "unanswered";
 
 export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onCloseNewQuestion }: QAFeedProps) {
   const { questions, isLoading, selectedCategory, setSelectedCategory, createQuestion } = useQA();
@@ -30,8 +31,8 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
   const [newDescription, setNewDescription] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("recent");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Sync external dialog trigger
   useEffect(() => {
     if (showNewQuestionDialog) setShowNewQuestion(true);
   }, [showNewQuestionDialog]);
@@ -57,11 +58,8 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
   const getCategoryLabel = (value: string) =>
     QA_CATEGORIES.find((c) => c.value === value)?.label || value;
 
-  // Filter and sort
   const filteredQuestions = useMemo(() => {
     let result = [...questions];
-
-    // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -70,8 +68,6 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
           (item.description && item.description.toLowerCase().includes(q))
       );
     }
-
-    // Sort
     switch (sortMode) {
       case "most_answered":
         result.sort((a, b) => b.answers_count - a.answers_count);
@@ -79,14 +75,9 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
       case "unanswered":
         result = result.filter((q) => q.answers_count === 0);
         break;
-      case "useful":
-        result.sort((a, b) => b.answers_count - a.answers_count);
-        break;
       default:
-        // already sorted by recent from API
         break;
     }
-
     return result;
   }, [questions, searchQuery, sortMode]);
 
@@ -99,12 +90,13 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
     );
   }
 
+  const activeFilterCount = (selectedCategory ? 1 : 0) + (sortMode !== "recent" ? 1 : 0);
+
   return (
     <div className="space-y-4">
-      {/* Sort & Category Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Sort buttons */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
+      {/* Sort bar + Collapsible filters */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5">
           <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
           {(
             [
@@ -117,7 +109,7 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
               key={s.key}
               variant={sortMode === s.key ? "default" : "ghost"}
               size="sm"
-              className="h-8 text-xs"
+              className="h-8 text-xs rounded-lg"
               onClick={() => setSortMode(s.key)}
             >
               {s.label}
@@ -126,35 +118,52 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
         </div>
       </div>
 
-      {/* Category chips */}
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          variant={selectedCategory === null ? "default" : "outline"}
-          size="sm"
-          className="h-7 text-xs rounded-full px-3"
-          onClick={() => setSelectedCategory(null)}
-        >
-          <Filter className="h-3 w-3 mr-1" />
-          Todas
-        </Button>
-        {QA_CATEGORIES.map((cat) => (
-          <Button
-            key={cat.value}
-            variant={selectedCategory === cat.value ? "default" : "outline"}
-            size="sm"
-            className="h-7 text-xs rounded-full px-3"
-            onClick={() => setSelectedCategory(selectedCategory === cat.value ? null : cat.value)}
-          >
-            {cat.label}
+      {/* Collapsible category filters */}
+      <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" size="sm" className="gap-2 h-8 text-xs rounded-lg">
+            <Filter className="h-3.5 w-3.5" />
+            Filtros
+            {activeFilterCount > 0 && (
+              <Badge variant="default" className="h-4 w-4 p-0 flex items-center justify-center text-[9px] rounded-full">
+                {activeFilterCount}
+              </Badge>
+            )}
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${filtersOpen ? "rotate-180" : ""}`} />
           </Button>
-        ))}
-      </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-3">
+          <div className="flex gap-2 flex-wrap p-3 bg-muted/30 rounded-xl border border-border/50">
+            <Button
+              variant={selectedCategory === null ? "default" : "outline"}
+              size="sm"
+              className="h-7 text-xs rounded-full px-3"
+              onClick={() => setSelectedCategory(null)}
+            >
+              Todas
+            </Button>
+            {QA_CATEGORIES.map((cat) => (
+              <Button
+                key={cat.value}
+                variant={selectedCategory === cat.value ? "default" : "outline"}
+                size="sm"
+                className={`h-7 text-xs rounded-full px-3 ${
+                  selectedCategory === cat.value ? "" : "bg-background"
+                }`}
+                onClick={() => setSelectedCategory(selectedCategory === cat.value ? null : cat.value)}
+              >
+                {cat.label}
+              </Button>
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Questions list */}
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i}>
+            <Card key={i} className="rounded-xl">
               <CardContent className="py-4">
                 <Skeleton className="h-5 w-3/4 mb-2" />
                 <Skeleton className="h-4 w-1/2" />
@@ -163,7 +172,7 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
           ))}
         </div>
       ) : filteredQuestions.length === 0 ? (
-        <Card>
+        <Card className="rounded-xl">
           <CardContent className="py-12 text-center">
             <MessageCircle className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
             <p className="text-muted-foreground">Nenhuma pergunta encontrada.</p>
@@ -177,7 +186,7 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
           {filteredQuestions.map((q) => (
             <Card
               key={q.id}
-              className="cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30"
+              className="cursor-pointer rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 group"
               onClick={() => setSelectedQuestion(q.id)}
             >
               <CardContent className="py-4">
@@ -190,7 +199,9 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-sm line-clamp-2 text-foreground">{q.title}</h3>
+                      <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+                        {q.title}
+                      </h3>
                       {q.is_resolved && (
                         <Badge variant="default" className="bg-success text-success-foreground gap-1 text-[10px] h-5">
                           <CheckCircle2 className="h-3 w-3" />
@@ -214,7 +225,6 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
                         })}
                       </span>
                     </div>
-                    {/* Stats row */}
                     <div className="flex items-center gap-4 mt-2.5">
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <MessageCircle className="h-3.5 w-3.5" />
@@ -237,17 +247,27 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
         </div>
       )}
 
-      {/* New Question Dialog */}
+      {/* New Question Dialog - Premium style */}
       <Dialog open={showNewQuestion} onOpenChange={handleCloseDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Fazer uma Pergunta</DialogTitle>
+            <div className="flex items-center gap-2">
+              <div className="h-9 w-9 rounded-xl bg-primary/15 flex items-center justify-center">
+                <Sparkles className="h-4.5 w-4.5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg">Fazer uma Pergunta</DialogTitle>
+                <DialogDescription className="text-xs">
+                  Compartilhe sua dúvida com a comunidade e ganhe +0.25 pontos
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 mt-2">
             <div>
-              <label className="text-sm font-medium mb-1 block">Categoria *</label>
+              <label className="text-sm font-medium mb-1.5 block">Tema da pergunta *</label>
               <Select value={newCategory} onValueChange={setNewCategory}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder="Selecione o tema" />
                 </SelectTrigger>
                 <SelectContent>
@@ -260,30 +280,33 @@ export function QAFeed({ searchQuery = "", showNewQuestionDialog = false, onClos
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">Pergunta *</label>
+              <label className="text-sm font-medium mb-1.5 block">Sua pergunta *</label>
               <Input
                 placeholder="Qual é a sua dúvida?"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 maxLength={200}
+                className="rounded-xl"
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">Detalhes (opcional)</label>
+              <label className="text-sm font-medium mb-1.5 block">Detalhes (opcional)</label>
               <Textarea
                 placeholder="Adicione mais contexto à sua pergunta..."
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
                 maxLength={1000}
                 rows={4}
+                className="rounded-xl"
               />
             </div>
             <Button
               onClick={handleSubmit}
               disabled={!newTitle.trim() || !newCategory || createQuestion.isPending}
-              className="w-full"
+              className="w-full rounded-xl h-11 gap-2 shadow-lg shadow-primary/20"
             >
-              {createQuestion.isPending ? "Publicando..." : "Publicar Pergunta (+0.25 pts)"}
+              <Send className="h-4 w-4" />
+              {createQuestion.isPending ? "Publicando..." : "Publicar Pergunta"}
             </Button>
           </div>
         </DialogContent>
