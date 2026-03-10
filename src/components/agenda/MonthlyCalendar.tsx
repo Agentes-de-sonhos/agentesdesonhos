@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 interface MonthlyCalendarProps {
   currentDate: Date;
   events: CalendarEvent[];
+  highlightedEventIds?: Set<string>;
   onDayClick: (date: string) => void;
   onEventClick: (event: CalendarEvent) => void;
   onNavigate: (direction: 'prev' | 'next') => void;
