@@ -67,6 +67,8 @@ interface MenuSection {
   hoverColor: string;
   bgColor: string;
   textColor: string;
+  headerBg: string;
+  headerHoverBg: string;
 }
 
 const conhecimentoSection: MenuSection = {
