@@ -238,6 +238,10 @@ export default function Admin() {
             <AdminHotelRecommendationsManager />
             <AdminHotelsManager />
           </TabsContent>
+
+          <TabsContent value="page-banners">
+            <AdminPageBannersManager />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
