@@ -166,8 +166,28 @@ export function AdminUserManager() {
       toast({ title: "Erro ao atualizar status", variant: "destructive" });
     },
   });
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: typeof newUser) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await supabase.functions.invoke("admin-create-user", {
+        body: userData,
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao criar usuário");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
+      toast({ title: "Usuário criado com sucesso!" });
+      setShowCreateDialog(false);
+      setNewUser({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao criar usuário", description: err.message, variant: "destructive" });
+    },
+  });
 
-  const filteredUsers = useMemo(() => {
+
     return users.filter((user) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
