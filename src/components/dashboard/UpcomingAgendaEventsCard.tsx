@@ -119,6 +119,7 @@ export function UpcomingAgendaEventsCard() {
               </Button>
             </div>
           </div>
+        )}
       </CardContent>
     </Card>
   );
