@@ -32,7 +32,7 @@ import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategorie
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
-import { HighlightedEventsCard } from "@/components/dashboard/HighlightedEventsCard";
+
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
