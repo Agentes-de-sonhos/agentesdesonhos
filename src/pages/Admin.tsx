@@ -175,6 +175,10 @@ export default function Admin() {
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Hotéis</span>
             </TabsTrigger>
+            <TabsTrigger value="page-banners" className="flex items-center gap-2">
+              <Image className="h-4 w-4" />
+              <span className="hidden sm:inline">Capas</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
