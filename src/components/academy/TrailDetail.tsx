@@ -32,6 +32,11 @@ import {
   Video,
   Share2,
   Users,
+  Sparkles,
+  GraduationCap,
+  Trophy,
+  Zap,
+  ChevronRight,
 } from "lucide-react";
 import type { TrailWithProgress, Training, TrailMaterial } from "@/types/academy";
 import { useAcademy, useQuizQuestions, useExamQuestions, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
@@ -89,7 +94,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [showNameConfirm, setShowNameConfirm] = useState(false);
   const [userName, setUserName] = useState<string>("Agente de Viagens");
 
-  // Find matching playbook for this trail using the linked playbook_destination_id
   const { destinations: allPlaybookDestinations } = usePlaybook();
   const linkedSlug = trail.playbook_destination_id
     ? allPlaybookDestinations.find((d) => d.id === trail.playbook_destination_id)?.slug
@@ -102,7 +106,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const { data: trailSpeakers = [] } = useTrailSpeakers(trail.id);
   const { groupIntoGalleries } = useMaterials();
 
-  // Fetch linked materials for this trail (junction table)
   const { data: linkedMaterials = [] } = useQuery({
     queryKey: ["trail-linked-materials-full", trail.id],
     queryFn: async () => {
@@ -115,7 +118,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     },
   });
 
-  // Fetch materials exclusively assigned to this trail (trail_id column)
   const { data: exclusiveMaterials = [] } = useQuery({
     queryKey: ["trail-exclusive-materials", trail.id],
     queryFn: async () => {
@@ -130,7 +132,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     },
   });
 
-  // Combine both sources, deduplicating by id
   const allTrailMaterialsCombined = useMemo(() => {
     const map = new Map<string, any>();
     [...exclusiveMaterials, ...linkedMaterials].forEach(m => {
@@ -168,6 +169,16 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     return true;
   };
 
+  // Find next module to continue
+  const nextModuleIndex = trail.trainings.findIndex((tt) => !hasPassedQuiz(tt.training?.id));
+  const nextModule = nextModuleIndex >= 0 ? trail.trainings[nextModuleIndex]?.training : null;
+
+  // Total estimated time remaining
+  const totalMinutes = trail.trainings.reduce((sum, tt) => sum + (tt.training?.duration_minutes || 0), 0);
+  const remainingMinutes = trail.trainings
+    .filter((tt) => !hasPassedQuiz(tt.training?.id))
+    .reduce((sum, tt) => sum + (tt.training?.duration_minutes || 0), 0);
+
   // Categorize materials
   const mindMapMaterials = trailMaterials.filter((m) => m.category === 'mapas_mentais');
   const presentationMaterials = trailMaterials.filter((m) => m.category === 'apresentacoes');
@@ -193,47 +204,10 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start gap-4">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-2xl font-bold">{trail.name}</h2>
-            {isCertified && (
-              <Badge className="bg-green-500 text-white">
-                <Award className="h-3 w-3 mr-1" /> Certificada
-              </Badge>
-            )}
-          </div>
-          <div className="flex items-center gap-3 text-muted-foreground text-sm">
-            <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{trail.destination}</span>
-            {trail.total_hours > 0 && <span className="flex items-center gap-1"><Clock className="h-4 w-4" />{trail.total_hours}h de carga horária</span>}
-          </div>
-        </div>
-        {canGenerateCertificate && (
-          <Button onClick={() => setShowNameConfirm(true)}>
-            <Award className="h-4 w-4 mr-2" /> Gerar Certificado
-          </Button>
-        )}
-        {certificate && (
-          <Button variant="outline" onClick={() => {
-            const pdfUrl = (certificate as any).certificate_pdf_url;
-            if (pdfUrl) {
-              const a = document.createElement("a");
-              a.href = pdfUrl;
-              a.download = `Certificado_${certificate.certificate_number}.pdf`;
-              a.target = "_blank";
-              a.click();
-            } else {
-              setShowCertificate(true);
-            }
-          }}>
-            <Download className="h-4 w-4 mr-2" /> Baixar Certificado
-          </Button>
-        )}
-      </div>
+      {/* Back Button */}
+      <Button variant="ghost" size="sm" onClick={onBack} className="gap-2 -mb-2">
+        <ArrowLeft className="h-4 w-4" /> Voltar
+      </Button>
 
       {/* Banner Image */}
       {(trail as any).banner_url && (
@@ -241,28 +215,197 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           <img
             src={(trail as any).banner_url}
             alt={trail.name}
-            className="w-full h-40 sm:h-52 md:h-64 object-cover"
+            className="w-full h-40 sm:h-52 md:h-56 object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-background/10 to-transparent" />
+          {/* Overlay info on banner */}
+          <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
+            <div className="flex items-center gap-2 mb-1">
+              {isCertified && (
+                <Badge className="bg-success text-success-foreground gap-1 shadow-lg">
+                  <Award className="h-3 w-3" /> Certificada
+                </Badge>
+              )}
+              {trail.progressPercent > 0 && !isCertified && (
+                <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm shadow-sm">
+                  ▶ Em andamento
+                </Badge>
+              )}
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground drop-shadow-sm">{trail.name}</h2>
+            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
+              <MapPin className="h-3.5 w-3.5" /> {trail.destination}
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Progress Card */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <span className="font-medium">Progresso da Trilha</span>
-            </div>
-            <span className="text-lg font-bold text-primary">{trail.progressPercent}%</span>
+      {/* Header if no banner */}
+      {!(trail as any).banner_url && (
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-2xl md:text-3xl font-bold">{trail.name}</h2>
+            {isCertified && (
+              <Badge className="bg-success text-success-foreground gap-1">
+                <Award className="h-3 w-3" /> Certificada
+              </Badge>
+            )}
           </div>
-          <Progress value={trail.progressPercent} className="h-3" />
-          <p className="text-sm text-muted-foreground mt-2">
-            {trail.completedCount} de {trail.totalCount} módulos concluídos (quiz aprovado)
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <MapPin className="h-3.5 w-3.5" /> {trail.destination}
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      )}
+
+      {/* Quick Stats Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-card border">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="h-4.5 w-4.5 text-primary" />
+          </div>
+          <div>
+            <p className="text-lg font-bold text-foreground leading-tight">{trail.totalCount}</p>
+            <p className="text-[10px] text-muted-foreground font-medium">módulos</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-card border">
+          <div className="h-9 w-9 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+            <Clock className="h-4.5 w-4.5 text-accent" />
+          </div>
+          <div>
+            <p className="text-lg font-bold text-foreground leading-tight">{totalMinutes} min</p>
+            <p className="text-[10px] text-muted-foreground font-medium">de conteúdo</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-card border">
+          <div className="h-9 w-9 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
+            <GraduationCap className="h-4.5 w-4.5 text-success" />
+          </div>
+          <div>
+            <p className="text-lg font-bold text-foreground leading-tight">{isCertified ? "Sim" : "Disponível"}</p>
+            <p className="text-[10px] text-muted-foreground font-medium">certificado</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-card border">
+          <div className="h-9 w-9 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+            <Zap className="h-4.5 w-4.5 text-warning" />
+          </div>
+          <div>
+            <p className="text-lg font-bold text-foreground leading-tight">{trail.progressPercent}%</p>
+            <p className="text-[10px] text-muted-foreground font-medium">concluído</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress + Continue Learning */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* Progress Card */}
+        <Card className="lg:col-span-3 rounded-xl">
+          <CardContent className="py-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <span className="font-semibold text-sm">Progresso da Trilha</span>
+              </div>
+              <span className="text-2xl font-bold text-primary">{trail.progressPercent}%</span>
+            </div>
+            <Progress value={trail.progressPercent} className="h-3 rounded-full" />
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-sm text-muted-foreground">
+                {trail.completedCount} de {trail.totalCount} módulos concluídos
+              </p>
+              {remainingMinutes > 0 && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {remainingMinutes} min restantes
+                </p>
+              )}
+            </div>
+            {!trail.allQuizzesPassed && trail.totalCount > 0 && (
+              <div className="mt-3 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
+                <p className="text-xs text-primary font-medium flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {trail.totalCount - trail.completedCount === 1
+                    ? "Falta 1 módulo para desbloquear a prova final!"
+                    : `Faltam ${trail.totalCount - trail.completedCount} módulos para desbloquear a prova final.`
+                  }
+                </p>
+              </div>
+            )}
+            {/* Certificate actions */}
+            <div className="flex items-center gap-2 mt-3">
+              {canGenerateCertificate && (
+                <Button onClick={() => setShowNameConfirm(true)} className="gap-2">
+                  <Award className="h-4 w-4" /> Gerar Certificado
+                </Button>
+              )}
+              {certificate && (
+                <Button variant="outline" className="gap-2" onClick={() => {
+                  const pdfUrl = (certificate as any).certificate_pdf_url;
+                  if (pdfUrl) {
+                    const a = document.createElement("a");
+                    a.href = pdfUrl;
+                    a.download = `Certificado_${certificate.certificate_number}.pdf`;
+                    a.target = "_blank";
+                    a.click();
+                  } else {
+                    setShowCertificate(true);
+                  }
+                }}>
+                  <Download className="h-4 w-4" /> Baixar Certificado
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Continue Learning */}
+        {nextModule && (
+          <Card className="lg:col-span-2 rounded-xl border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 overflow-hidden">
+            <CardContent className="py-5 h-full flex flex-col">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-7 w-7 rounded-lg bg-primary/15 flex items-center justify-center">
+                  <Play className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-primary">Continue sua jornada</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-[11px] text-muted-foreground mb-1">Próximo módulo:</p>
+                <h4 className="font-semibold text-foreground leading-snug line-clamp-2">{nextModule.title}</h4>
+                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> {nextModule.duration_minutes} min
+                  </span>
+                  <Badge variant="outline" className="text-[10px] h-5">{nextModule.category}</Badge>
+                </div>
+              </div>
+              <Button
+                className="w-full mt-4 gap-2 shadow-lg shadow-primary/20 rounded-xl"
+                onClick={() => setSelectedTraining(nextModule)}
+              >
+                <Play className="h-4 w-4" /> Assistir agora
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Certified state replacement */}
+        {!nextModule && isCertified && (
+          <Card className="lg:col-span-2 rounded-xl border-success/20 bg-gradient-to-br from-success/5 to-success/10 overflow-hidden">
+            <CardContent className="py-5 h-full flex flex-col items-center justify-center text-center">
+              <div className="h-14 w-14 rounded-2xl bg-success/15 flex items-center justify-center mb-3">
+                <Trophy className="h-7 w-7 text-success" />
+              </div>
+              <h4 className="font-bold text-foreground">Trilha Concluída!</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                Você é Especialista em {trail.destination}
+              </p>
+              <Badge className="bg-success text-success-foreground mt-3 gap-1">
+                <GraduationCap className="h-3 w-3" /> Certificado emitido
+              </Badge>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       <Tabs defaultValue="videos" className="space-y-4">
         <TabsList className="flex-wrap">
@@ -369,91 +512,169 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             title="Módulos"
             description={"Aqui você acessa o conteúdo principal da trilha, organizado por empresas e parceiros do destino.\nApós assistir ao conteúdo e responder o quiz de cada módulo, o próximo será liberado automaticamente, permitindo que você avance de forma estruturada na trilha."}
           />
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Módulos da Trilha</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[450px] pr-4">
-                <div className="space-y-3">
-                  {trail.trainings.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">Nenhum módulo cadastrado nesta trilha.</p>
-                  ) : (
-                    trail.trainings.map((tt, index) => {
-                      const training = tt.training;
-                      const quizPassed = hasPassedQuiz(training.id);
-                      const unlocked = isModuleUnlocked(index);
 
-                      return (
-                        <div
-                          key={tt.id}
-                          className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
-                            quizPassed ? "bg-green-50 dark:bg-green-950/20 border-green-200" :
-                            !unlocked ? "opacity-50 bg-muted/50" : "cursor-pointer hover:border-primary/50"
-                          }`}
-                          onClick={() => unlocked && setSelectedTraining(training)}
-                        >
-                          <div className="relative flex items-center justify-center w-10 h-10">
-                            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                              quizPassed ? "bg-green-500/15 border-2 border-green-500" : !unlocked ? "bg-muted border-2 border-muted-foreground/20" : "bg-primary/10 border-2 border-primary/30"
-                            }`}>
-                              <span className={`font-bold text-sm ${quizPassed ? "text-green-600" : !unlocked ? "text-muted-foreground" : "text-primary"}`}>{index + 1}</span>
-                            </div>
-                            {quizPassed && <CheckCircle2 className="absolute -top-1 -right-1 h-4 w-4 text-green-500 bg-background rounded-full" />}
-                            {!unlocked && <Lock className="absolute -top-1 -right-1 h-4 w-4 text-muted-foreground bg-background rounded-full" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium truncate">{training.title}</h4>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                              <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{training.duration_minutes} min</span>
-                              <Badge variant="outline" className="text-xs">{training.category}</Badge>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
+          {/* Module Cards */}
+          <div className="space-y-3">
+            {trail.trainings.length === 0 ? (
+              <Card className="rounded-xl">
+                <CardContent className="py-12">
+                  <p className="text-center text-muted-foreground">Nenhum módulo cadastrado nesta trilha.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              trail.trainings.map((tt, index) => {
+                const training = tt.training;
+                const quizPassed = hasPassedQuiz(training.id);
+                const unlocked = isModuleUnlocked(index);
+                const isNext = nextModuleIndex === index;
+
+                return (
+                  <Card
+                    key={tt.id}
+                    className={cn(
+                      "rounded-xl transition-all duration-200",
+                      quizPassed
+                        ? "border-success/30 bg-success/5"
+                        : !unlocked
+                        ? "opacity-60"
+                        : isNext
+                        ? "border-primary/40 shadow-md shadow-primary/10 ring-1 ring-primary/20"
+                        : "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 cursor-pointer"
+                    )}
+                    onClick={() => unlocked && !quizPassed && setSelectedTraining(training)}
+                  >
+                    <CardContent className="py-4">
+                      <div className="flex items-start gap-4">
+                        {/* Module Number */}
+                        <div className="relative flex-shrink-0">
+                          <div className={cn(
+                            "flex items-center justify-center w-12 h-12 rounded-xl font-bold text-sm",
+                            quizPassed
+                              ? "bg-success/15 text-success border-2 border-success/30"
+                              : !unlocked
+                              ? "bg-muted text-muted-foreground border-2 border-muted-foreground/20"
+                              : isNext
+                              ? "bg-primary/15 text-primary border-2 border-primary/40"
+                              : "bg-primary/10 text-primary border-2 border-primary/20"
+                          )}>
                             {quizPassed ? (
-                              <Badge className="bg-green-100 text-green-700">✓ Aprovado</Badge>
-                            ) : unlocked ? (
-                              <>
-                                <Button variant="default" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedTraining(training); }}>
-                                  <Play className="h-4 w-4 mr-1" /> Assistir
-                                </Button>
-                                <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setShowQuiz(training.id); }}>
-                                  <ClipboardCheck className="h-4 w-4 mr-1" /> Quiz
-                                </Button>
-                              </>
+                              <CheckCircle2 className="h-5 w-5" />
+                            ) : !unlocked ? (
+                              <Lock className="h-4 w-4" />
                             ) : (
-                              <Badge variant="secondary"><Lock className="h-3 w-3 mr-1" /> Bloqueado</Badge>
+                              index + 1
                             )}
                           </div>
                         </div>
-                      );
-                    })
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+
+                        {/* Module Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              Módulo {index + 1}
+                            </p>
+                            {isNext && !quizPassed && (
+                              <Badge className="bg-primary text-primary-foreground text-[10px] h-5 gap-1">
+                                <Sparkles className="h-3 w-3" /> Módulo atual
+                              </Badge>
+                            )}
+                            {quizPassed && (
+                              <Badge className="bg-success/15 text-success border-success/30 text-[10px] h-5 gap-1">
+                                <CheckCircle2 className="h-3 w-3" /> Concluído
+                              </Badge>
+                            )}
+                          </div>
+                          <h4 className="font-semibold text-foreground mt-0.5 line-clamp-1">{training.title}</h4>
+                          <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> {training.duration_minutes} min
+                            </span>
+                            <Badge variant="outline" className="text-[10px] h-5 rounded-full">{training.category}</Badge>
+                          </div>
+
+                          {/* Locked message */}
+                          {!unlocked && (
+                            <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
+                              <Lock className="h-3 w-3" /> Disponível após concluir o módulo anterior
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {quizPassed ? (
+                            <Button variant="ghost" size="sm" className="text-success gap-1 text-xs pointer-events-none">
+                              <CheckCircle2 className="h-4 w-4" /> Aprovado
+                            </Button>
+                          ) : unlocked ? (
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" className="gap-1.5 rounded-lg" onClick={(e) => { e.stopPropagation(); setSelectedTraining(training); }}>
+                                <Play className="h-3.5 w-3.5" /> Assistir aula
+                              </Button>
+                              <Button variant="outline" size="sm" className="gap-1.5 rounded-lg" onClick={(e) => { e.stopPropagation(); setShowQuiz(training.id); }}>
+                                <ClipboardCheck className="h-3.5 w-3.5" /> Fazer quiz
+                              </Button>
+                            </div>
+                          ) : (
+                            <Badge variant="secondary" className="gap-1">
+                              <Lock className="h-3 w-3" /> Bloqueado
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
+          </div>
 
           {/* Prova Final - inline after modules */}
-          <div className="mt-6">
-            <Card>
-              <CardHeader>
+          <div className="mt-8">
+            <Card className={cn(
+              "rounded-xl overflow-hidden",
+              trail.allQuizzesPassed && !trail.examPassed
+                ? "border-warning/30 ring-1 ring-warning/20"
+                : trail.examPassed
+                ? "border-success/30"
+                : ""
+            )}>
+              <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <ClipboardCheck className="h-5 w-5 text-primary" /> Prova Final
+                  <GraduationCap className="h-5 w-5 text-primary" /> Prova Final
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {!trail.allQuizzesPassed ? (
                   <div className="text-center py-8">
-                    <Lock className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-                    <p className="text-lg font-medium">Prova Final Bloqueada</p>
-                    <p className="text-muted-foreground">Complete todos os módulos (quizzes) para desbloquear a prova final.</p>
+                    <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                      <Lock className="h-8 w-8 text-muted-foreground/40" />
+                    </div>
+                    <p className="text-base font-semibold text-foreground">Prova Final Bloqueada</p>
+                    <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
+                      Complete todos os {trail.totalCount} módulos para desbloquear a certificação.
+                    </p>
+                    <div className="mt-4 max-w-xs mx-auto">
+                      <Progress value={trail.progressPercent} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        {trail.completedCount} de {trail.totalCount} módulos concluídos
+                      </p>
+                    </div>
                   </div>
                 ) : trail.examPassed ? (
                   <div className="text-center py-8">
-                    <CheckCircle2 className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                    <p className="text-lg font-medium">Prova Final Aprovada! 🎉</p>
-                    <p className="text-muted-foreground">Sua melhor nota: <span className="font-bold text-primary">{bestExamScore(trail.id)}%</span></p>
+                    <div className="h-16 w-16 rounded-2xl bg-success/15 flex items-center justify-center mx-auto mb-4">
+                      <Trophy className="h-8 w-8 text-success" />
+                    </div>
+                    <p className="text-base font-semibold text-foreground">Prova Final Aprovada! 🎉</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Sua melhor nota: <span className="font-bold text-primary">{bestExamScore(trail.id)}%</span>
+                    </p>
+                    {canGenerateCertificate && (
+                      <Button className="mt-4 gap-2" onClick={() => setShowNameConfirm(true)}>
+                        <Award className="h-4 w-4" /> Gerar Certificado
+                      </Button>
+                    )}
                   </div>
                 ) : showExam ? (
                   <QuizPlayer
@@ -467,10 +688,16 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
                   />
                 ) : (
                   <div className="text-center py-8">
-                    <ClipboardCheck className="h-16 w-16 mx-auto text-primary/50 mb-4" />
-                    <p className="text-lg font-medium">Prova Final Disponível</p>
-                    <p className="text-muted-foreground mb-4">Nota mínima para aprovação: 75%</p>
-                    <Button onClick={() => setShowExam(true)}>Iniciar Prova Final</Button>
+                    <div className="h-16 w-16 rounded-2xl bg-warning/15 flex items-center justify-center mx-auto mb-4">
+                      <Unlock className="h-8 w-8 text-warning" />
+                    </div>
+                    <p className="text-base font-semibold text-foreground">🏆 Prova Final Liberada!</p>
+                    <p className="text-sm text-muted-foreground mt-1.5 mb-4 max-w-sm mx-auto">
+                      Nota mínima para aprovação: 75%. Boa sorte!
+                    </p>
+                    <Button onClick={() => setShowExam(true)} className="gap-2 shadow-lg shadow-primary/20">
+                      <ClipboardCheck className="h-4 w-4" /> Iniciar Prova Final
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -486,7 +713,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             description={"Nesta aba você encontra materiais prontos para divulgação do destino, como lâminas, carrosséis, reels, artes para redes sociais e WhatsApp.\nTambém há links editáveis no Canva para personalização das lâminas de pacotes, permitindo que os agentes adaptem os conteúdos conforme sua estratégia de vendas."}
           />
 
-          {/* Social Posts from linked materials */}
           {linkedGalleries.length > 0 && (
             <div className="space-y-4 mb-8">
               <div className="flex items-center gap-2 mb-2">
@@ -502,7 +728,6 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             </div>
           )}
 
-          {/* Existing complementary materials */}
           {complementaryMaterials.length === 0 && linkedGalleries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="p-5 rounded-2xl bg-muted mb-5">
@@ -640,7 +865,7 @@ function MaterialDownloadCard({ material }: { material: TrailMaterial }) {
   };
 
   return (
-    <Card className="hover:border-primary/40 hover:shadow-md transition-all duration-200">
+    <Card className="hover:border-primary/40 hover:shadow-md transition-all duration-200 rounded-xl">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="p-2.5 rounded-xl bg-primary/10 shrink-0">
