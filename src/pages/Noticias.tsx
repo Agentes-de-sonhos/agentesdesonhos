@@ -108,7 +108,7 @@ function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave }: {
             <h2 className="font-display text-xl md:text-2xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
               {item.titulo_curto}
             </h2>
-            <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-3xl line-clamp-3">
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-3xl">
               {item.resumo}
             </p>
             <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border/50">
@@ -208,21 +208,29 @@ function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending }: {
 
 /* ── Compact List Card (for sidebar sections) ────────────── */
 function CompactNewsItem({ item, index }: { item: NoticiaHub; index: number }) {
+  const isFirst = index === 0;
   return (
     <a
       href={item.url_original}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors"
+      className={`group flex items-start gap-3 rounded-lg transition-colors ${
+        isFirst ? "p-3 bg-primary/5 border border-primary/10" : "p-2.5 hover:bg-muted/50"
+      }`}
     >
-      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center mt-0.5">
+      <span className={`flex-shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center mt-0.5 ${
+        isFirst ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+      }`}>
         {index + 1}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-relaxed">
+        <p className={`font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-relaxed ${
+          isFirst ? "text-sm" : "text-xs"
+        }`}>
           {item.titulo_curto}
         </p>
         <div className="flex items-center gap-1.5 mt-1">
+          <CategoryBadge categoria={item.categoria} />
           <span className="text-[10px] text-muted-foreground">{item.fonte}</span>
           <span className="text-[10px] text-muted-foreground">•</span>
           <span className="text-[10px] text-muted-foreground">{formatDate(item.data_publicacao)}</span>
@@ -524,9 +532,9 @@ export default function Noticias() {
             {showSections && (
               <>
                 {/* ── Hero + Top 5 side by side, same height ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
                   {/* Hero - 2/3 */}
-                  <div className="lg:col-span-2 flex">
+                  <div className="lg:col-span-3 flex">
                     {hero && (
                       <div className="w-full flex">
                         <HeroNewsCard
@@ -541,14 +549,16 @@ export default function Noticias() {
                   </div>
 
                   {/* Top 5 - 1/3 */}
-                  <div className="lg:col-span-1 flex">
-                    <Card className="border-0 shadow-sm w-full flex flex-col">
+                  <div className="lg:col-span-2 flex">
+                    <Card className="border-0 shadow-md w-full flex flex-col bg-gradient-to-b from-card to-muted/20">
                       <CardContent className="p-4 flex flex-col flex-1">
                         <div className="flex items-center gap-2 mb-3">
-                          <Zap className="h-4 w-4 text-warning" />
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/15">
+                            <Zap className="h-4 w-4 text-warning" />
+                          </div>
                           <h3 className="text-sm font-bold text-foreground">Top 5</h3>
                         </div>
-                        <div className="space-y-0.5 flex-1">
+                        <div className="flex-1 flex flex-col justify-between">
                           {topHeadlines.map((item, i) => (
                             <CompactNewsItem key={item.id} item={item} index={i} />
                           ))}
