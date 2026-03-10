@@ -89,7 +89,9 @@ const conhecimentoSection: MenuSection = {
 const guiasSection: MenuSection = {
   title: "Guias e Referências",
   icon: BookMarked,
-  hoverColor: "hover:bg-emerald-50 hover:text-emerald-700",
+  hoverColor: "hover:bg-emerald-600 hover:text-white",
+  headerBg: "bg-emerald-600 text-white",
+  headerHoverBg: "hover:bg-emerald-700",
   bgColor: "bg-emerald-50",
   textColor: "text-emerald-700",
   items: [
