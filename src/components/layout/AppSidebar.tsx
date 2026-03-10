@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Sparkles,
   Map,
   Newspaper,
   User,
@@ -16,15 +15,21 @@ import {
   GraduationCap,
   Lock,
   Calculator,
-  Heart,
   MessageCircleQuestion,
   Store,
   CreditCard,
   Wallet,
   Home,
   BookOpen,
-  ShoppingBag,
   Compass,
+  CalendarDays,
+  BookMarked,
+  Tag,
+  ShoppingCart,
+  PlusCircle,
+  FileText,
+  Route,
+  Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
