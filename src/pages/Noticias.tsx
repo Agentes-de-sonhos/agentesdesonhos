@@ -232,6 +232,123 @@ function CompactNewsItem({ item, index }: { item: NoticiaHub; index: number }) {
   );
 }
 
+/* ── Destaques Full-width Carousel with auto-advance ─────── */
+function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, trendingSet }: {
+  items: NoticiaHub[]; isAdmin: boolean; onDelete: (id: string) => void;
+  savedIds: Set<string>; onToggleSave: (id: string) => void; trendingSet: Set<string>;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % items.length);
+    }, 10000);
+  }, [items.length]);
+
+  useEffect(() => {
+    resetTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [resetTimer]);
+
+  const goTo = (dir: "prev" | "next") => {
+    setActiveIndex((prev) => dir === "next" ? (prev + 1) % items.length : (prev - 1 + items.length) % items.length);
+    resetTimer();
+  };
+
+  const current = items[activeIndex];
+  if (!current) return null;
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
+            <Star className="h-4 w-4 text-white" />
+          </div>
+          <h2 className="text-base font-bold text-foreground">Destaques do Trade</h2>
+          <span className="text-xs text-muted-foreground">{activeIndex + 1} / {items.length}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => goTo("prev")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => goTo("next")}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Full-width single slide */}
+      <div className="relative">
+        <a href={current.url_original} target="_blank" rel="noopener noreferrer" className="block group">
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-orange-50/50 to-card ring-1 ring-orange-200/30">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+                  <Star className="h-3 w-3" /> Destaque do Trade
+                </span>
+                <CategoryBadge categoria={current.categoria} />
+                {trendingSet.has(current.id) && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold">
+                    <Flame className="h-3 w-3" /> Em alta
+                  </span>
+                )}
+              </div>
+              <h3 className="text-lg font-bold text-foreground group-hover:text-orange-600 transition-colors leading-snug">
+                {current.titulo_curto}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+                {current.resumo}
+              </p>
+              <div className="flex items-center gap-2 mt-4 pt-3 border-t border-orange-100">
+                <span className="text-xs font-semibold text-foreground/70">{current.fonte}</span>
+                <span className="text-xs text-muted-foreground">•</span>
+                <span className="text-xs text-muted-foreground">{formatDate(current.data_publicacao)}</span>
+                <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 group-hover:underline">
+                  Ler matéria <ExternalLink className="h-3.5 w-3.5" />
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </a>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-3 right-3 h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(current.id); }}
+        >
+          {savedIds.has(current.id) ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4 text-muted-foreground" />}
+        </Button>
+        {isAdmin && (
+          <Button
+            variant="destructive"
+            size="icon"
+            className="absolute top-3 right-12 h-8 w-8 opacity-0 hover:opacity-100 transition-opacity shadow-lg"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(current.id); }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Progress dots */}
+      <div className="flex items-center justify-center gap-1.5">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setActiveIndex(i); resetTimer(); }}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === activeIndex ? "w-6 bg-orange-500" : "w-1.5 bg-muted-foreground/20 hover:bg-muted-foreground/40"
+            }`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ── Main Page ───────────────────────────────────────────── */
 export default function Noticias() {
   const [activeFilter, setActiveFilter] = useState("Todas");
