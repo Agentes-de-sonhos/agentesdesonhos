@@ -317,7 +317,7 @@ export function CommunityQACard() {
               <Button
                 size="sm"
                 onClick={() => createQuestion.mutate()}
-                disabled={!askTitle.trim() || createQuestion.isPending}
+                disabled={!askTitle.trim() || !askCategory || createQuestion.isPending}
                 className="bg-[hsl(var(--section-community))] hover:bg-[hsl(var(--section-community))]/90 text-white"
               >
                 {createQuestion.isPending ? "Enviando..." : "Publicar"}
