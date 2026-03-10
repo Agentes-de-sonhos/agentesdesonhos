@@ -27,7 +27,7 @@ import {
 } from "@/types/agenda";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, EyeOff, Loader2, Plus } from "lucide-react";
+import { Trash2, EyeOff, Loader2, Plus, Star, CalendarPlus } from "lucide-react";
 import { CreateCustomTypeDialog } from "./CreateCustomTypeDialog";
 
 interface EventModalProps {
@@ -47,9 +47,30 @@ interface EventModalProps {
   onUpdate?: (id: string, event: Partial<CalendarEvent>) => void;
   onDelete?: (id: string) => void;
   onHide?: (id: string) => void;
+  onHighlight?: (eventId: string, source: string) => void;
+  onUnhighlight?: (eventId: string) => void;
+  highlightedEventIds?: Set<string>;
   onCreateCustomType?: (name: string, color: string) => void;
   isLoading?: boolean;
   isCreatingCustomType?: boolean;
+}
+
+function generateGoogleCalendarUrl(event: CalendarEvent): string {
+  const title = encodeURIComponent(event.title);
+  const details = encodeURIComponent(event.description || "");
+  
+  // Format date for Google Calendar (YYYYMMDD or YYYYMMDDTHHmmSS)
+  const dateStr = event.event_date.replace(/-/g, "");
+  let dates: string;
+  if (event.event_time) {
+    const time = event.event_time.replace(/:/g, "").slice(0, 4) + "00";
+    dates = `${dateStr}T${time}/${dateStr}T${time}`;
+  } else {
+    // All-day event
+    dates = `${dateStr}/${dateStr}`;
+  }
+  
+  return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}`;
 }
 
 export function EventModal({
@@ -62,6 +83,9 @@ export function EventModal({
   onUpdate,
   onDelete,
   onHide,
+  onHighlight,
+  onUnhighlight,
+  highlightedEventIds = new Set(),
   onCreateCustomType,
   isLoading,
   isCreatingCustomType,
@@ -75,6 +99,7 @@ export function EventModal({
 
   const isEditing = !!event;
   const isPresetEvent = event?.isPreset;
+  const isHighlighted = event ? highlightedEventIds.has(event.id) : false;
 
   useEffect(() => {
     if (event) {
@@ -95,13 +120,11 @@ export function EventModal({
   const handleSave = () => {
     if (!title.trim() || !selectedDate) return;
 
-    // Determine color based on event type
     let color = customColor;
     if (!color) {
       if (eventTypeColors[eventType]) {
         color = eventTypeColors[eventType];
       } else {
-        // Check if it's a custom type
         const customType = customEventTypes.find(t => t.id === eventType);
         color = customType?.color || '#6b7280';
       }
@@ -139,6 +162,21 @@ export function EventModal({
     }
   };
 
+  const handleToggleHighlight = () => {
+    if (!event) return;
+    if (isHighlighted) {
+      onUnhighlight?.(event.id);
+    } else {
+      onHighlight?.(event.id, event.isPreset ? "preset" : "agency");
+    }
+  };
+
+  const handleGoogleCalendar = () => {
+    if (!event) return;
+    const url = generateGoogleCalendarUrl(event);
+    window.open(url, "_blank");
+  };
+
   const handleCreateCustomType = (name: string, color: string) => {
     if (onCreateCustomType) {
       onCreateCustomType(name, color);
@@ -150,7 +188,6 @@ export function EventModal({
     ? format(parseISO(selectedDate), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })
     : "";
 
-  // Build complete list of event types (default + custom)
   const allEventTypes = [
     ...defaultAgencyEventTypes.map(type => ({
       id: type,
@@ -193,10 +230,22 @@ export function EventModal({
               {event?.description && (
                 <p className="text-sm text-muted-foreground">{event.description}</p>
               )}
-              <div className="flex justify-end">
-                <Button variant="outline" onClick={handleHide}>
+              <div className="flex flex-wrap gap-2 justify-end">
+                <Button variant="outline" size="sm" onClick={handleGoogleCalendar}>
+                  <CalendarPlus className="h-4 w-4 mr-2" />
+                  Google Calendar
+                </Button>
+                <Button
+                  variant={isHighlighted ? "secondary" : "outline"}
+                  size="sm"
+                  onClick={handleToggleHighlight}
+                >
+                  <Star className={`h-4 w-4 mr-2 ${isHighlighted ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                  {isHighlighted ? "Destacado" : "Destacar no Dashboard"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleHide}>
                   <EyeOff className="h-4 w-4 mr-2" />
-                  Ocultar este evento
+                  Ocultar
                 </Button>
               </div>
             </div>
@@ -265,6 +314,24 @@ export function EventModal({
                   rows={3}
                 />
               </div>
+
+              {/* Actions for user events */}
+              {isEditing && event && (
+                <div className="flex flex-wrap gap-2 pt-2 border-t">
+                  <Button variant="outline" size="sm" onClick={handleGoogleCalendar}>
+                    <CalendarPlus className="h-4 w-4 mr-2" />
+                    Google Calendar
+                  </Button>
+                  <Button
+                    variant={isHighlighted ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={handleToggleHighlight}
+                  >
+                    <Star className={`h-4 w-4 mr-2 ${isHighlighted ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                    {isHighlighted ? "Destacado" : "Destacar no Dashboard"}
+                  </Button>
+                </div>
+              )}
 
               <div className="flex justify-between pt-4">
                 {isEditing ? (

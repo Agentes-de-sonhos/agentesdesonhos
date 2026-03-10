@@ -1108,6 +1108,30 @@ export type Database = {
           },
         ]
       }
+      highlighted_events: {
+        Row: {
+          created_at: string
+          event_id: string
+          event_source: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          event_source?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          event_source?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hotel_recommendations: {
         Row: {
           created_at: string

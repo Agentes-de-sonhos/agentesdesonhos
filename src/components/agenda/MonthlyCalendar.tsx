@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 interface MonthlyCalendarProps {
   currentDate: Date;
   events: CalendarEvent[];
+  highlightedEventIds?: Set<string>;
   onDayClick: (date: string) => void;
   onEventClick: (event: CalendarEvent) => void;
   onNavigate: (direction: 'prev' | 'next') => void;
@@ -31,6 +32,7 @@ const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 export function MonthlyCalendar({
   currentDate,
   events,
+  highlightedEventIds = new Set(),
   onDayClick,
   onEventClick,
   onNavigate,
@@ -126,6 +128,7 @@ export function MonthlyCalendar({
                       key={event.id}
                       event={event}
                       onClick={() => onEventClick(event)}
+                      isHighlighted={highlightedEventIds.has(event.id)}
                     />
                   ))}
                   {dayEvents.length > 3 && (

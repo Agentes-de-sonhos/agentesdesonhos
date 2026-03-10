@@ -9,7 +9,7 @@ import { MonthlyCalendar } from "@/components/agenda/MonthlyCalendar";
 import { WeeklyCalendar } from "@/components/agenda/WeeklyCalendar";
 import { DailyCalendar } from "@/components/agenda/DailyCalendar";
 import { EventModal } from "@/components/agenda/EventModal";
-import { CalendarLegend } from "@/components/agenda/CalendarLegend";
+
 import { EventTypeFilter } from "@/components/agenda/EventTypeFilter";
 import { CalendarEvent, ViewMode, AgencyEventType } from "@/types/agenda";
 import { addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, format } from "date-fns";
@@ -42,6 +42,9 @@ export default function Agenda() {
     hidePresetEvent,
     createCustomType,
     toggleEventTypeVisibility,
+    highlightEvent,
+    unhighlightEvent,
+    highlightedEventIds,
     isCreating,
     isUpdating,
     isDeleting,
@@ -188,6 +191,7 @@ export default function Agenda() {
                   <MonthlyCalendar
                     currentDate={currentDate}
                     events={allEvents}
+                    highlightedEventIds={highlightedEventIds}
                     onDayClick={handleDayClick}
                     onEventClick={handleEventClick}
                     onNavigate={navigateMonth}
@@ -219,8 +223,6 @@ export default function Agenda() {
           </CardContent>
         </Card>
 
-        {/* Legend */}
-        <CalendarLegend />
 
         {/* Quick Add Button (FAB) */}
         <Button
@@ -247,6 +249,9 @@ export default function Agenda() {
         onUpdate={handleUpdateEvent}
         onDelete={handleDeleteEvent}
         onHide={handleHidePresetEvent}
+        onHighlight={highlightEvent}
+        onUnhighlight={unhighlightEvent}
+        highlightedEventIds={highlightedEventIds}
         onCreateCustomType={handleCreateCustomType}
         isLoading={isCreating || isUpdating || isDeleting}
         isCreatingCustomType={isCreatingCustomType}

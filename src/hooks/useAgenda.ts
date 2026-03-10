@@ -86,6 +86,21 @@ export function useAgenda(year?: number) {
     enabled: !!user?.id,
   });
 
+  // Fetch highlighted events for the user
+  const { data: highlightedEvents = [], isLoading: highlightedLoading } = useQuery({
+    queryKey: ["highlighted-events", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("highlighted_events" as any)
+        .select("*")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data as any[];
+    },
+    enabled: !!user?.id,
+  });
+
   // Fetch custom event types for the user
   const { data: customEventTypes = [], isLoading: customTypesLoading } = useQuery({
     queryKey: ["custom-event-types", user?.id],
@@ -369,6 +384,42 @@ export function useAgenda(year?: number) {
     updateFilterPreferencesMutation.mutate(newHiddenTypes);
   };
 
+  // Highlight event
+  const highlightEventMutation = useMutation({
+    mutationFn: async ({ eventId, source }: { eventId: string; source: string }) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+      const { error } = await supabase
+        .from("highlighted_events" as any)
+        .insert({ user_id: user.id, event_id: eventId, event_source: source });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["highlighted-events"] });
+      toast.success("Evento destacado no Dashboard!");
+    },
+    onError: () => toast.error("Erro ao destacar evento"),
+  });
+
+  // Unhighlight event
+  const unhighlightEventMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+      const { error } = await supabase
+        .from("highlighted_events" as any)
+        .delete()
+        .eq("user_id", user.id)
+        .eq("event_id", eventId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["highlighted-events"] });
+      toast.success("Destaque removido!");
+    },
+    onError: () => toast.error("Erro ao remover destaque"),
+  });
+
+  const highlightedEventIds = new Set(highlightedEvents.map((h: any) => h.event_id));
+
   // Combine all events into a unified format
   const hiddenIds = new Set(hiddenPresetEvents.map(h => h.preset_event_id));
   
@@ -437,7 +488,7 @@ export function useAgenda(year?: number) {
     customEventTypes,
     allEventTypes,
     hiddenTypes,
-    isLoading: agencyLoading || presetLoading || hiddenLoading || customTypesLoading || filterLoading,
+    isLoading: agencyLoading || presetLoading || hiddenLoading || customTypesLoading || filterLoading || highlightedLoading,
     getEventsForDate,
     getUpcomingEvents,
     createEvent: createEventMutation.mutate,
@@ -447,6 +498,9 @@ export function useAgenda(year?: number) {
     unhidePresetEvent: unhidePresetEventMutation.mutate,
     createCustomType: createCustomTypeMutation.mutate,
     toggleEventTypeVisibility,
+    highlightEvent: (eventId: string, source: string) => highlightEventMutation.mutate({ eventId, source }),
+    unhighlightEvent: (eventId: string) => unhighlightEventMutation.mutate(eventId),
+    highlightedEventIds,
     isCreating: createEventMutation.isPending,
     isUpdating: updateEventMutation.isPending,
     isDeleting: deleteEventMutation.isPending,

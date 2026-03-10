@@ -5,9 +5,10 @@ interface EventTagProps {
   event: CalendarEvent;
   onClick?: (e?: React.MouseEvent) => void;
   compact?: boolean;
+  isHighlighted?: boolean;
 }
 
-export function EventTag({ event, onClick, compact = false }: EventTagProps) {
+export function EventTag({ event, onClick, compact = false, isHighlighted = false }: EventTagProps) {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onClick?.(e);
@@ -28,6 +29,7 @@ export function EventTag({ event, onClick, compact = false }: EventTagProps) {
         <span className="opacity-80 mr-1">{event.event_time.slice(0, 5)}</span>
       )}
       {event.title}
+      {isHighlighted && " ⭐"}
     </button>
   );
 }
