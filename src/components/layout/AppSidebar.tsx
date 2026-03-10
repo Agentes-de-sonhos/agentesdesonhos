@@ -116,8 +116,8 @@ const clientesSection: MenuSection = {
   title: "Clientes",
   icon: Users,
   items: [
-    { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", isPremium: true },
-    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, isPremium: true },
+    { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
+    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
   ],
 };
 
