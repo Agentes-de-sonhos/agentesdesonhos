@@ -262,7 +262,10 @@ export function CommunityQACard() {
       queryClient.invalidateQueries({ queryKey: ["community-qa-answers", expandedQuestionId] });
       queryClient.invalidateQueries({ queryKey: ["community-qa-dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["gamification"] });
-      toast.success("Melhor resposta marcada! +10 pontos ao autor");
+      toast.success("🎉 Melhor resposta marcada! O autor ganhou +10 pontos!", {
+        duration: 4000,
+        icon: "⭐",
+      });
     },
   });
 
