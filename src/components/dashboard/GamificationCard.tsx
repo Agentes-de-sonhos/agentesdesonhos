@@ -89,6 +89,8 @@ export function GamificationCard() {
               <span>🔑 Login diário: <strong>+{POINTS_CONFIG.daily_login}</strong></span>
               <span>❓ Fazer pergunta: <strong>+{POINTS_CONFIG.ask_question}</strong></span>
               <span>💬 Responder: <strong>+{POINTS_CONFIG.answer_question}</strong></span>
+              <span>👍 Voto útil: <strong>+{POINTS_CONFIG.useful_vote_received}</strong></span>
+              <span>⭐ Melhor resposta: <strong>+{POINTS_CONFIG.best_answer}</strong></span>
               <span>📂 Navegar menu: <strong>+{POINTS_CONFIG.menu_visit}</strong></span>
               <span>🏆 Certificado: <strong>+{POINTS_CONFIG.earn_certificate}</strong></span>
             </div>
