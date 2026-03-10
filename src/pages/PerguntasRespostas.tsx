@@ -33,16 +33,8 @@ export default function PerguntasRespostas() {
               </div>
             </div>
 
-            {/* Quick stats */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-background/60 backdrop-blur-sm rounded-xl border border-border/40 px-3.5 py-2">
-                <Sparkles className="h-4 w-4 text-warning" />
-                <div>
-                  <p className="text-base font-bold text-foreground leading-none">{myPoints}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">pontos</p>
-                </div>
-              </div>
-            </div>
+            {/* spacer */}
+            <div />
           </div>
         </div>
 
