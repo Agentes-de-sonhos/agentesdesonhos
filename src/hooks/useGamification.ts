@@ -14,8 +14,10 @@ export interface RankingEntry {
 // Points configuration
 export const POINTS_CONFIG = {
   daily_login: 1,
-  ask_question: 2,
-  answer_question: 5,
+  ask_question: 0.25,
+  answer_question: 4,
+  useful_vote_received: 5,
+  best_answer: 10,
   menu_visit: 0.25,
   earn_certificate: 10,
 } as const;
