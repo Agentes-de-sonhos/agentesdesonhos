@@ -47,6 +47,7 @@ import CartaoPublico from "./pages/CartaoPublico";
 import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
 import CertificateTest from "./pages/CertificateTest";
+import Gamificacao from "./pages/Gamificacao";
 
 const queryClient = new QueryClient();
 
