@@ -146,25 +146,12 @@ export default function EducaAcademy() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            EducaTravel Academy
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos
-          </p>
-        </div>
-
-        {/* Hero Banner - reduced height */}
-        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
-          <img
-            src={heroBannerUrl || academyHeroBanner}
-            alt="EducaTravel Academy"
-            className="w-full h-36 sm:h-44 md:h-52 object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
-        </div>
+        <PageHeader
+          pageKey="educa-academy"
+          title="EducaTravel Academy"
+          subtitle="Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos"
+          icon={GraduationCap}
+        />
 
         <Tabs defaultValue="dashboard" className="space-y-6">
           {/* Pill-style tabs */}
