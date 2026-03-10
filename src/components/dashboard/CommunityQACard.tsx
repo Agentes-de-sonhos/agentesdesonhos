@@ -298,13 +298,6 @@ export function CommunityQACard() {
               className="font-medium"
               autoFocus
             />
-            <Textarea
-              placeholder="Adicione mais detalhes (opcional)..."
-              value={askDescription}
-              onChange={(e) => setAskDescription(e.target.value)}
-              maxLength={1000}
-              rows={2}
-            />
             <Select value={askCategory} onValueChange={setAskCategory}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Categoria" />
@@ -317,39 +310,18 @@ export function CommunityQACard() {
                 ))}
               </SelectContent>
             </Select>
-            {showAskLink && (
-              <Input
-                placeholder="Cole um link (opcional)"
-                value={askLink}
-                onChange={(e) => setAskLink(e.target.value)}
-                maxLength={500}
-              />
-            )}
-            <div className="flex items-center justify-between">
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setShowAskLink(!showAskLink)}
-                  title="Adicionar link"
-                >
-                  <Link2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => setShowAskForm(false)}>
-                  Cancelar
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => createQuestion.mutate()}
-                  disabled={!askTitle.trim() || createQuestion.isPending}
-                  className="bg-[hsl(var(--section-community))] hover:bg-[hsl(var(--section-community))]/90 text-white"
-                >
-                  {createQuestion.isPending ? "Enviando..." : "Publicar"}
-                </Button>
-              </div>
+            <div className="flex items-center justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setShowAskForm(false)}>
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => createQuestion.mutate()}
+                disabled={!askTitle.trim() || createQuestion.isPending}
+                className="bg-[hsl(var(--section-community))] hover:bg-[hsl(var(--section-community))]/90 text-white"
+              >
+                {createQuestion.isPending ? "Enviando..." : "Publicar"}
+              </Button>
             </div>
           </div>
         )}
