@@ -112,6 +112,8 @@ const criarSection: MenuSection = {
   title: "Criar",
   icon: PlusCircle,
   hoverColor: "hover:bg-violet-50 hover:text-violet-700",
+  bgColor: "bg-violet-50",
+  textColor: "text-violet-700",
   items: [
     { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
     { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "ai_tools" },
