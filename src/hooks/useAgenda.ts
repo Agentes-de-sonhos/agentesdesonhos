@@ -86,6 +86,21 @@ export function useAgenda(year?: number) {
     enabled: !!user?.id,
   });
 
+  // Fetch highlighted events for the user
+  const { data: highlightedEvents = [], isLoading: highlightedLoading } = useQuery({
+    queryKey: ["highlighted-events", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("highlighted_events" as any)
+        .select("*")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data as any[];
+    },
+    enabled: !!user?.id,
+  });
+
   // Fetch custom event types for the user
   const { data: customEventTypes = [], isLoading: customTypesLoading } = useQuery({
     queryKey: ["custom-event-types", user?.id],
