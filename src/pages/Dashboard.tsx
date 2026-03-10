@@ -202,6 +202,12 @@ export default function Dashboard() {
               </div>
             </section>
 
+            {/* 4. Eventos Importantes */}
+            <section className="order-4">
+              <SectionHeader title="Eventos Importantes" color="events" />
+              <HighlightedEventsCard />
+            </section>
+
 
           </>
         )}
