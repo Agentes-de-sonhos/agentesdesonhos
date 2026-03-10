@@ -17,8 +17,6 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
-  Link2,
-  ImagePlus,
   Loader2,
   Star,
 } from "lucide-react";
@@ -168,10 +166,11 @@ export function CommunityQACard() {
       setAskTitle("");
       setAskDescription("");
       setAskCategory("");
-      setAskLink("");
-      setShowAskLink(false);
       setShowAskForm(false);
-      toast.success("Pergunta publicada! +0.25 pontos");
+      toast.success("🎉 Pergunta publicada! Você ganhou +0.25 pontos!", {
+        duration: 4000,
+        icon: "⭐",
+      });
     },
     onError: () => toast.error("Erro ao publicar pergunta"),
   });
@@ -180,15 +179,12 @@ export function CommunityQACard() {
   const createAnswer = useMutation({
     mutationFn: async () => {
       if (!user || !expandedQuestionId || !replyContent.trim()) throw new Error("Dados inválidos");
-      const content = [replyContent.trim(), replyLink.trim() ? `🔗 ${replyLink.trim()}` : ""]
-        .filter(Boolean)
-        .join("\n\n");
 
       const { data, error } = await supabase
         .from("qa_answers")
         .insert({
           question_id: expandedQuestionId,
-          content,
+          content: replyContent.trim(),
           user_id: user.id,
         })
         .select()
@@ -203,9 +199,10 @@ export function CommunityQACard() {
       queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
       queryClient.invalidateQueries({ queryKey: ["gamification"] });
       setReplyContent("");
-      setReplyLink("");
-      setShowReplyLink(false);
-      toast.success("Resposta publicada! +4 pontos");
+      toast.success("🎉 Resposta publicada! Você ganhou +4 pontos!", {
+        duration: 4000,
+        icon: "⭐",
+      });
     },
     onError: () => toast.error("Erro ao publicar resposta"),
   });
@@ -263,7 +260,10 @@ export function CommunityQACard() {
       queryClient.invalidateQueries({ queryKey: ["community-qa-answers", expandedQuestionId] });
       queryClient.invalidateQueries({ queryKey: ["community-qa-dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["gamification"] });
-      toast.success("Melhor resposta marcada! +10 pontos ao autor");
+      toast.success("🎉 Melhor resposta marcada! O autor ganhou +10 pontos!", {
+        duration: 4000,
+        icon: "⭐",
+      });
     },
   });
 
@@ -469,7 +469,7 @@ export function CommunityQACard() {
                       )}
 
                       {/* Reply form */}
-                      <div className="pt-1 space-y-2">
+                      <div className="pt-1">
                         <div className="flex gap-2">
                           <Input
                             placeholder="Escreva sua resposta..."
@@ -487,25 +487,6 @@ export function CommunityQACard() {
                             <Send className="h-3.5 w-3.5" />
                           </Button>
                         </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-[10px] text-muted-foreground"
-                            onClick={() => setShowReplyLink(!showReplyLink)}
-                          >
-                            <Link2 className="h-3 w-3 mr-1" /> Link
-                          </Button>
-                        </div>
-                        {showReplyLink && (
-                          <Input
-                            placeholder="Cole um link..."
-                            value={replyLink}
-                            onChange={(e) => setReplyLink(e.target.value)}
-                            className="text-xs h-7"
-                            maxLength={500}
-                          />
-                        )}
                       </div>
                     </div>
                   )}
