@@ -211,7 +211,7 @@ export function AppSidebar() {
     [hasFeature, trackSectionVisit, isEducaPass]
   );
 
-  const renderSingleItem = (item: MenuItem, sectionHoverColor?: string) => {
+  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
@@ -232,8 +232,8 @@ export function AppSidebar() {
               ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
               : isLockedByEducaPass
                 ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                : sectionHoverColor
-                  ? cn("text-sidebar-foreground", sectionHoverColor)
+                : sectionBgColor
+                  ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
           item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
         )}
@@ -243,7 +243,6 @@ export function AppSidebar() {
             className={cn(
               "h-5 w-5 transition-all duration-300",
               isActive && !isLocked && "text-primary-foreground",
-              !isActive && !isLocked && "group-hover:scale-110",
               isLocked && !isLockedByEducaPass && "text-muted-foreground"
             )}
           />
