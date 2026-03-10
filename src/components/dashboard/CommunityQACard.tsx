@@ -167,7 +167,7 @@ export function CommunityQACard() {
       queryClient.invalidateQueries({ queryKey: ["gamification"] });
       setAskTitle("");
       setAskDescription("");
-      setAskCategory("geral");
+      setAskCategory("");
       setAskLink("");
       setShowAskLink(false);
       setShowAskForm(false);
