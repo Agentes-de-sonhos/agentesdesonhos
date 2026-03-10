@@ -1,6 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Eye,
   Users,
@@ -12,12 +14,19 @@ import {
   Handshake,
   CheckSquare,
   List,
+  Clock,
+  Zap,
+  Check,
+  ChevronRight,
+  Circle,
+  Copy,
 } from "lucide-react";
 import type { PlaybookSection, PlaybookBlock } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
 import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
 import { PlaybookPdfSection } from "./PlaybookPdfSection";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 /* ── Fixed section definitions ── */
 const COMO_VENDER_SECTIONS = [
@@ -41,55 +50,111 @@ function getSectionBlocks(blocks: PlaybookBlock[] | undefined, sectionId: string
   return blocks.filter((b) => (b as any).section === sectionId);
 }
 
+function estimateReadingTime(intro?: string, blocks?: PlaybookBlock[]): number {
+  let wordCount = 0;
+  if (intro) {
+    wordCount += intro.replace(/<[^>]+>/g, "").split(/\s+/).length;
+  }
+  if (blocks) {
+    blocks.forEach((b) => {
+      wordCount += (b.content || "").replace(/<[^>]+>/g, "").split(/\s+/).length;
+      if (b.items) b.items.forEach((item) => (wordCount += item.split(/\s+/).length));
+    });
+  }
+  return Math.max(1, Math.ceil(wordCount / 200));
+}
+
+/* ── Resumo Rápido block ── */
+function ResumoRapido({ points }: { points: string[] }) {
+  if (!points || points.length === 0) return null;
+
+  return (
+    <Card className="rounded-2xl border-primary/20 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2.5 px-5 pt-4 pb-2">
+        <div className="h-8 w-8 rounded-lg bg-primary/15 flex items-center justify-center">
+          <Zap className="h-4 w-4 text-primary" />
+        </div>
+        <h3 className="text-sm font-bold text-foreground tracking-tight">Resumo Rápido</h3>
+      </div>
+      <CardContent className="pt-1 pb-4 px-5">
+        <ul className="space-y-2">
+          {points.map((point, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/85 leading-relaxed">
+              <span className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
+              {point}
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
 /* ── Section card with inline editing ── */
 function SectionCard({
   sectionDef,
   blocks,
   intro,
+  readingTime,
   onSaveIntro,
 }: {
   sectionDef: (typeof COMO_VENDER_SECTIONS)[number];
   blocks: PlaybookBlock[];
   intro?: string;
+  readingTime: number;
   onSaveIntro?: (html: string) => Promise<void>;
 }) {
   const Icon = sectionDef.icon;
 
   return (
     <section id={`cv-${sectionDef.id}`} className="scroll-mt-28">
-      <Card className="border-0 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-border/40 shadow-sm overflow-hidden">
         {/* Section header bar */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
-          <div className="p-2 rounded-lg bg-primary/10 text-primary">
-            <Icon className="h-5 w-5" />
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+              <Icon className="h-5 w-5" />
+            </div>
+            <h3 className="text-base font-bold text-foreground">{sectionDef.label}</h3>
           </div>
-          <h3 className="text-base font-bold text-foreground">{sectionDef.label}</h3>
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Clock className="h-3.5 w-3.5" />
+            <span className="text-[11px] font-medium">{readingTime} min de leitura</span>
+          </div>
         </div>
 
-        <CardContent className="pt-5 pb-6 space-y-4">
-          {onSaveIntro ? (
-            <PlaybookInlineEditor
-              content={intro || ""}
-              onSave={onSaveIntro}
-              placeholder="Conteúdo em breve para esta seção."
-            />
-          ) : (
-            <>
-              {!intro && blocks.length === 0 && (
-                <p className="text-sm text-muted-foreground italic">Conteúdo em breve para esta seção.</p>
-              )}
-              {intro && (
-                <div
-                  className="playbook-content max-w-none text-foreground/85"
-                  dangerouslySetInnerHTML={{ __html: intro }}
-                />
-              )}
-            </>
-          )}
+        <CardContent className="pt-6 pb-8 space-y-5">
+          <div className="max-w-prose">
+            {onSaveIntro ? (
+              <PlaybookInlineEditor
+                content={intro || ""}
+                onSave={onSaveIntro}
+                placeholder="Conteúdo em breve para esta seção."
+              />
+            ) : (
+              <>
+                {!intro && blocks.length === 0 && (
+                  <p className="text-sm text-muted-foreground italic">Conteúdo em breve para esta seção.</p>
+                )}
+                {intro && (
+                  <div
+                    className="playbook-content max-w-none text-foreground/85 leading-relaxed
+                      [&>p]:mb-4 [&>h2]:mt-8 [&>h2]:mb-3 [&>h3]:mt-6 [&>h3]:mb-2
+                      [&>ul]:space-y-1.5 [&>ol]:space-y-1.5"
+                    dangerouslySetInnerHTML={{ __html: intro }}
+                  />
+                )}
+              </>
+            )}
+          </div>
 
-          {blocks.map((block) => (
-            <BlockRenderer key={block.id} block={block} />
-          ))}
+          {blocks.length > 0 && (
+            <div className="space-y-4 max-w-prose">
+              {blocks.map((block) => (
+                <BlockRenderer key={block.id} block={block} />
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </section>
@@ -104,6 +169,7 @@ interface PlaybookComoVenderTabProps {
 
 export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVenderTabProps) {
   const [activeSection, setActiveSection] = useState<SectionId>("visao_comercial");
+  const [visitedSections, setVisitedSections] = useState<Set<SectionId>>(new Set(["visao_comercial"]));
 
   // Parse section intros keyed by section id
   const sectionIntros: Record<string, string | undefined> = {};
@@ -111,6 +177,7 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
 
   const content = section?.content as any;
   const allBlocks: PlaybookBlock[] = content?.blocks || [];
+  const summaryPoints: string[] = content?.summary_points || [];
 
   COMO_VENDER_SECTIONS.forEach((s) => {
     sectionIntros[s.id] = content?.sections?.[s.id]?.intro;
@@ -125,6 +192,21 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
 
   const globalIntro = content?.intro;
   const hasAnyContent = globalIntro || allBlocks.length > 0 || Object.values(sectionIntros).some(Boolean);
+
+  // Reading time per section
+  const readingTimes = useMemo(() => {
+    const times: Record<string, number> = {};
+    COMO_VENDER_SECTIONS.forEach((s) => {
+      times[s.id] = estimateReadingTime(sectionIntros[s.id], sectionBlocks[s.id]);
+    });
+    return times;
+  }, [section]);
+
+  // Handle section navigation with progress tracking
+  const handleSetActiveSection = useCallback((sectionId: SectionId) => {
+    setActiveSection(sectionId);
+    setVisitedSections((prev) => new Set([...prev, sectionId]));
+  }, []);
 
   // Save handler for individual sub-sections
   const handleSaveSectionIntro = useCallback(
@@ -171,33 +253,67 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
 
   // Find active section definition
   const activeDef = COMO_VENDER_SECTIONS.find((s) => s.id === activeSection)!;
+  const activeIdx = COMO_VENDER_SECTIONS.findIndex((s) => s.id === activeSection);
+
+  // Total reading time
+  const totalReadingTime = Object.values(readingTimes).reduce((a, b) => a + b, 0);
 
   return (
     <div className="flex gap-6">
       {/* ── Sidebar / Table of Contents ── */}
-      <nav className="hidden lg:block w-56 shrink-0">
+      <nav className="hidden lg:block w-60 shrink-0">
         <div className="sticky top-24 space-y-1">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3 px-2">
-            Índice
-          </p>
-          {COMO_VENDER_SECTIONS.map((s) => {
+          {/* Progress summary */}
+          <div className="px-3 pb-3 mb-2 border-b border-border/40">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+              Índice do Capítulo
+            </p>
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              <span>{totalReadingTime} min de leitura total</span>
+            </div>
+            <div className="mt-2 h-1 w-full bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${(visitedSections.size / COMO_VENDER_SECTIONS.length) * 100}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {visitedSections.size} de {COMO_VENDER_SECTIONS.length} seções visitadas
+            </p>
+          </div>
+
+          {COMO_VENDER_SECTIONS.map((s, idx) => {
             const Icon = s.icon;
             const isActive = activeSection === s.id;
+            const isVisited = visitedSections.has(s.id) && !isActive;
             const hasContent = sectionBlocks[s.id]?.length > 0 || sectionIntros[s.id];
 
             return (
               <button
                 key={s.id}
-                onClick={() => setActiveSection(s.id)}
+                onClick={() => handleSetActiveSection(s.id)}
                 className={cn(
-                  "flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-left",
+                  "flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 text-left group",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : hasContent
+                    : isVisited
                     ? "text-foreground hover:bg-accent"
-                    : "text-muted-foreground hover:bg-muted/50"
+                    : hasContent
+                    ? "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    : "text-muted-foreground/60 hover:bg-muted/50"
                 )}
               >
+                {/* Progress indicator */}
+                <div className="w-4 flex items-center justify-center shrink-0">
+                  {isActive ? (
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  ) : isVisited ? (
+                    <Check className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <Circle className="h-2.5 w-2.5 text-muted-foreground/40" />
+                  )}
+                </div>
                 <Icon className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">{s.label}</span>
               </button>
@@ -211,17 +327,21 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
         <div className="flex gap-1.5 min-w-max">
           {COMO_VENDER_SECTIONS.map((s) => {
             const isActive = activeSection === s.id;
+            const isVisited = visitedSections.has(s.id) && !isActive;
             return (
               <button
                 key={s.id}
-                onClick={() => setActiveSection(s.id)}
+                onClick={() => handleSetActiveSection(s.id)}
                 className={cn(
-                  "px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-all",
+                  "px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
+                    : isVisited
+                    ? "bg-primary/10 text-primary"
                     : "bg-muted/60 text-muted-foreground"
                 )}
               >
+                {isVisited && <Check className="h-3 w-3" />}
                 {s.label}
               </button>
             );
@@ -230,14 +350,44 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
       </div>
 
       {/* ── Main content: only the active section ── */}
-      <div className="flex-1 min-w-0 pb-20 lg:pb-6 space-y-4">
+      <div className="flex-1 min-w-0 pb-20 lg:pb-6 space-y-5">
+        {/* Resumo Rápido - only on first section */}
+        {activeSection === "visao_comercial" && (
+          <ResumoRapido points={summaryPoints} />
+        )}
+
         <SectionCard
           key={activeSection}
           sectionDef={activeDef}
           blocks={sectionBlocks[activeSection] || []}
           intro={sectionIntros[activeSection]}
+          readingTime={readingTimes[activeSection] || 1}
           onSaveIntro={onSaveSection ? (html) => handleSaveSectionIntro(activeSection, html) : undefined}
         />
+
+        {/* Section navigation */}
+        <div className="flex items-center justify-between pt-2">
+          {activeIdx > 0 ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => handleSetActiveSection(COMO_VENDER_SECTIONS[activeIdx - 1].id)}
+            >
+              ← {COMO_VENDER_SECTIONS[activeIdx - 1].label}
+            </Button>
+          ) : <div />}
+          {activeIdx < COMO_VENDER_SECTIONS.length - 1 ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs"
+              onClick={() => handleSetActiveSection(COMO_VENDER_SECTIONS[activeIdx + 1].id)}
+            >
+              {COMO_VENDER_SECTIONS[activeIdx + 1].label} →
+            </Button>
+          ) : <div />}
+        </div>
 
         {/* Optional PDF section */}
         <PlaybookPdfSection

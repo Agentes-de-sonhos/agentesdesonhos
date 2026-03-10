@@ -1,15 +1,27 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Info } from "lucide-react";
+import { Clock, Info } from "lucide-react";
 import type { PlaybookSection } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
 import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
 import { PlaybookPdfSection } from "./PlaybookPdfSection";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 interface PlaybookTabContentProps {
   section: PlaybookSection | undefined;
   tabLabel: string;
   onSaveSection?: (content: any) => Promise<void>;
+}
+
+function estimateReadingTime(intro?: string, blocks?: any[]): number {
+  let wordCount = 0;
+  if (intro) wordCount += intro.replace(/<[^>]+>/g, "").split(/\s+/).length;
+  if (blocks) {
+    blocks.forEach((b: any) => {
+      wordCount += (b.content || "").replace(/<[^>]+>/g, "").split(/\s+/).length;
+      if (b.items) b.items.forEach((item: string) => (wordCount += item.split(/\s+/).length));
+    });
+  }
+  return Math.max(1, Math.ceil(wordCount / 200));
 }
 
 export function PlaybookTabContent({ section, tabLabel, onSaveSection }: PlaybookTabContentProps) {
@@ -33,6 +45,11 @@ export function PlaybookTabContent({ section, tabLabel, onSaveSection }: Playboo
 
   const pdfUrl = section?.content?.pdf_url;
   const hasTextContent = section?.content?.intro || (section?.content?.blocks && section.content.blocks.length > 0);
+
+  const readingTime = useMemo(
+    () => estimateReadingTime(section?.content?.intro, section?.content?.blocks),
+    [section]
+  );
 
   if (!section || (!hasTextContent && !pdfUrl)) {
     if (onSaveSection) {
@@ -66,9 +83,17 @@ export function PlaybookTabContent({ section, tabLabel, onSaveSection }: Playboo
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Reading time indicator */}
+      {hasTextContent && (
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <Clock className="h-3.5 w-3.5" />
+          <span className="text-[11px] font-medium">{readingTime} min de leitura</span>
+        </div>
+      )}
+
       {onSaveSection ? (
-        <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10">
+        <Card className="rounded-2xl border-border/40 shadow-sm bg-gradient-to-br from-primary/5 to-primary/10">
           <CardContent className="pt-5 pb-4">
             <PlaybookInlineEditor
               content={section.content.intro || ""}
@@ -79,13 +104,15 @@ export function PlaybookTabContent({ section, tabLabel, onSaveSection }: Playboo
         </Card>
       ) : (
         section.content.intro && (
-          <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10">
+          <Card className="rounded-2xl border-border/40 shadow-sm bg-gradient-to-br from-primary/5 to-primary/10">
             <CardContent className="pt-5 pb-4">
               <div
-                className="prose prose-sm max-w-none text-foreground/80 
+                className="prose prose-sm max-w-prose text-foreground/80 leading-relaxed
                   prose-headings:text-foreground prose-headings:font-bold
                   prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
-                  prose-p:leading-relaxed prose-a:text-primary"
+                  prose-p:leading-relaxed prose-p:mb-4 prose-a:text-primary
+                  [&>h2]:mt-8 [&>h2]:mb-3 [&>h3]:mt-6 [&>h3]:mb-2
+                  [&>ul]:space-y-1.5 [&>ol]:space-y-1.5"
                 dangerouslySetInnerHTML={{ __html: section.content.intro }}
               />
             </CardContent>
@@ -93,9 +120,11 @@ export function PlaybookTabContent({ section, tabLabel, onSaveSection }: Playboo
         )
       )}
 
-      {section.content.blocks?.map((block) => (
-        <BlockRenderer key={block.id} block={block} />
-      ))}
+      <div className="space-y-4 max-w-prose">
+        {section.content.blocks?.map((block) => (
+          <BlockRenderer key={block.id} block={block} />
+        ))}
+      </div>
 
       {/* Optional PDF section */}
       <PlaybookPdfSection
