@@ -197,7 +197,7 @@ export function AppSidebar() {
     [hasFeature, trackSectionVisit, isEducaPass]
   );
 
-  const renderSingleItem = (item: MenuItem) => {
+  const renderSingleItem = (item: MenuItem, sectionHoverColor?: string) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
