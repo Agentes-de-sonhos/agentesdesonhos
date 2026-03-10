@@ -82,11 +82,11 @@ export function GlobalPopupModal() {
 
         {/* Image */}
         {currentPopup.image_url && (
-          <div className="w-full aspect-video relative overflow-hidden">
+          <div className="w-full relative overflow-hidden bg-muted">
             <img
               src={currentPopup.image_url}
               alt={currentPopup.title}
-              className="w-full h-full object-cover"
+              className="w-full max-h-[60vh] object-contain"
             />
           </div>
         )}
