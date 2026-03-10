@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Sparkles,
   Map,
   Newspaper,
   User,
@@ -24,8 +23,14 @@ import {
   Wallet,
   Home,
   BookOpen,
-  ShoppingBag,
   Compass,
+  CalendarDays,
+  BookMarked,
+  Tag,
+  ShoppingCart,
+  PlusCircle,
+  FileText,
+  Route,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamification } from "@/hooks/useGamification";
@@ -35,7 +40,6 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useMenuOrder } from "@/hooks/useMenuOrder";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
@@ -62,14 +66,43 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-const aprenderSection: MenuSection = {
-  title: "Aprender",
+const conhecimentoSection: MenuSection = {
+  title: "Conhecimento",
   icon: BookOpen,
   items: [
-    { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
+    { title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
+    { title: "Pergunte e Responda", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum", isPremium: true },
+  ],
+};
+
+const guiasSection: MenuSection = {
+  title: "Guias e Referências",
+  icon: BookMarked,
+  items: [
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum", isPremium: true },
+    { title: "Travel Advisor", url: "/dream-advisor", icon: Compass, isPremium: true },
+    { title: "Benefícios e Descontos", url: "/comunidade", icon: Tag, requiredFeature: "community", isPremium: true },
+  ],
+};
+
+const recursosVendasSection: MenuSection = {
+  title: "Recursos de Vendas",
+  icon: ShoppingCart,
+  items: [
+    { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
+    { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
+  ],
+};
+
+const criarSection: MenuSection = {
+  title: "Criar",
+  icon: PlusCircle,
+  items: [
+    { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true, isPremium: true },
+    { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "ai_tools", isPremium: true },
+    { title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "ai_tools", isPremium: true },
   ],
 };
 
@@ -78,8 +111,16 @@ const clientesSection: MenuSection = {
   icon: Users,
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", isPremium: true },
-    { title: "Criar Carteira", url: "/ferramentas-ia/trip-wallet", icon: Wallet, isPremium: true },
-    { title: "Gerar Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true, isPremium: true },
+    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, isPremium: true },
+  ],
+};
+
+const marketingSection: MenuSection = {
+  title: "Marketing",
+  icon: Megaphone,
+  items: [
+    { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard, isPremium: true },
+    { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store, isPremium: true },
   ],
 };
 
@@ -87,21 +128,9 @@ const comunidadeSection: MenuSection = {
   title: "Comunidade",
   icon: Heart,
   items: [
-    { title: "Comunidade de Agentes", url: "/comunidade", icon: Heart, requiredFeature: "community", isPremium: true },
+    { title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
   ],
 };
-
-const venderItemsMap: Record<string, MenuItem> = {
-  "materiais": { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-  "dream-advisor": { key: "dream-advisor", title: "Dream Advisor", url: "/dream-advisor", icon: Compass, isPremium: true },
-  "ferramentas-ia": { key: "ferramentas-ia", title: "Ferramentas IA", url: "/ferramentas-ia", icon: Sparkles, requiredFeature: "ai_tools", isPremium: true },
-  "mentorias": { key: "mentorias", title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
-  "cartao-digital": { key: "cartao-digital", title: "Meu Cartão", url: "/meu-cartao", icon: CreditCard, isPremium: true },
-  "bloqueios-aereos": { key: "bloqueios-aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
-  "minha-vitrine": { key: "minha-vitrine", title: "Minha Vitrine", url: "/minha-vitrine", icon: Store, isPremium: true },
-};
-
-const defaultVenderOrder = ["materiais", "dream-advisor", "ferramentas-ia", "mentorias", "cartao-digital", "bloqueios-aereos", "minha-vitrine"];
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
@@ -118,22 +147,12 @@ export function MobileSidebar() {
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
   const { trackSectionVisit } = useGamification();
-  const { menuOrder } = useMenuOrder("vender");
 
   const isEducaPass = plan === "educa_pass";
 
-  const venderSection: MenuSection = useMemo(() => {
-    let orderedKeys = defaultVenderOrder;
-    if (menuOrder && menuOrder.length > 0) {
-      orderedKeys = [...menuOrder].sort((a, b) => a.order_index - b.order_index).map((m) => m.item_key);
-    }
-    const items = orderedKeys.map((key) => venderItemsMap[key]).filter(Boolean);
-    return { title: "Vender", icon: ShoppingBag, items };
-  }, [menuOrder]);
-
   const allSections: MenuSection[] = useMemo(
-    () => [aprenderSection, venderSection, clientesSection, comunidadeSection],
-    [venderSection]
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    []
   );
 
   const toggleSection = (title: string) => {
