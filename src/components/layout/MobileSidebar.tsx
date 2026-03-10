@@ -124,13 +124,8 @@ const marketingSection: MenuSection = {
   ],
 };
 
-const comunidadeSection: MenuSection = {
-  title: "Comunidade",
-  icon: Heart,
-  items: [
-    { title: "Mentorias", url: "/mentorias", icon: GraduationCap },
-  ],
-};
+const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart };
+const mentoriasItem: MenuItem = { title: "Mentorias", url: "/mentorias", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
@@ -151,7 +146,7 @@ export function MobileSidebar() {
   const isEducaPass = plan === "educa_pass";
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection],
     []
   );
 
@@ -370,6 +365,12 @@ export function MobileSidebar() {
 
           {/* All sections */}
           {allSections.map((section) => renderSection(section))}
+
+          {/* Standalone items */}
+          <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
+            {renderMenuItem(comunidadeItem)}
+            {renderMenuItem(mentoriasItem)}
+          </nav>
         </div>
 
         {/* Bottom Section - Conta */}
