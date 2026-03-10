@@ -467,7 +467,7 @@ export function CommunityQACard() {
                       )}
 
                       {/* Reply form */}
-                      <div className="pt-1 space-y-2">
+                      <div className="pt-1">
                         <div className="flex gap-2">
                           <Input
                             placeholder="Escreva sua resposta..."
@@ -485,25 +485,6 @@ export function CommunityQACard() {
                             <Send className="h-3.5 w-3.5" />
                           </Button>
                         </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-[10px] text-muted-foreground"
-                            onClick={() => setShowReplyLink(!showReplyLink)}
-                          >
-                            <Link2 className="h-3 w-3 mr-1" /> Link
-                          </Button>
-                        </div>
-                        {showReplyLink && (
-                          <Input
-                            placeholder="Cole um link..."
-                            value={replyLink}
-                            onChange={(e) => setReplyLink(e.target.value)}
-                            className="text-xs h-7"
-                            maxLength={500}
-                          />
-                        )}
                       </div>
                     </div>
                   )}
