@@ -392,6 +392,15 @@ export function AdminUserManager() {
                           {user.role === "admin" ? "→ Agente" : "→ Admin"}
                         </Button>
                         <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Resetar senha"
+                          onClick={() => resetPasswordMutation.mutate(user.user_id)}
+                          disabled={resetPasswordMutation.isPending}
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
+                        <Button
                           variant="outline"
                           size="icon"
                           onClick={() => {
