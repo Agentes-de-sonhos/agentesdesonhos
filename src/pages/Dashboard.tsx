@@ -32,7 +32,7 @@ import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategorie
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
-import { HighlightedEventsCard } from "@/components/dashboard/HighlightedEventsCard";
+
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
@@ -200,12 +200,6 @@ export default function Dashboard() {
                 <SectionHeader title="Próximas Viagens" color="reminders" />
                 <div className="flex-1 [&>*]:h-full"><TripRemindersCard /></div>
               </div>
-            </section>
-
-            {/* 4. Eventos Importantes */}
-            <section className="order-4">
-              <SectionHeader title="Eventos Importantes" color="events" />
-              <HighlightedEventsCard />
             </section>
 
 
