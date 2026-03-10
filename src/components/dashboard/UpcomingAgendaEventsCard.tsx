@@ -28,7 +28,7 @@ export function UpcomingAgendaEventsCard() {
       const isUserEvent = !event.isPreset;
       return isCurrentMonth && isUserEvent;
     })
-    .slice(0, 10);
+    .slice(0, 6);
 
   if (isLoading) {
     return (
