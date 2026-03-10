@@ -159,6 +159,7 @@ const marketingSection: MenuSection = {
   headerHoverBg: "hover:bg-pink-700",
   bgColor: "bg-pink-50",
   textColor: "text-pink-700",
+  borderColor: "border-pink-600",
   items: [
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
     { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store },
