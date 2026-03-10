@@ -119,6 +119,7 @@ const recursosVendasSection: MenuSection = {
   headerHoverBg: "hover:bg-orange-700",
   bgColor: "bg-orange-50",
   textColor: "text-orange-700",
+  borderColor: "border-orange-600",
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
