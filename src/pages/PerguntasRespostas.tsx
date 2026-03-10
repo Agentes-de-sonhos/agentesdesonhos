@@ -1,8 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QAFeed } from "@/components/qa/QAFeed";
 import { QARankingSidebar } from "@/components/qa/QARankingSidebar";
-import { MessageCircleQuestion, Users, Sparkles, TrendingUp } from "lucide-react";
-import { useGamification } from "@/hooks/useGamification";
+import { MessageCircleQuestion } from "lucide-react";
 
 export default function PerguntasRespostas() {
   const { myPoints } = useGamification();
