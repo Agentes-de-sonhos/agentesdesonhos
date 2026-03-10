@@ -228,7 +228,7 @@ export function MobileSidebar() {
     signOut();
   };
 
-  const renderMenuItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string) => {
+  const renderMenuItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
