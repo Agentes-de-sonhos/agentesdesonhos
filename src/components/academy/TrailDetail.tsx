@@ -209,6 +209,24 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
         <ArrowLeft className="h-4 w-4" /> Voltar
       </Button>
 
+      {/* Title - always above banner */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <h2 className="text-2xl md:text-3xl font-bold">{trail.name}</h2>
+          {isCertified && (
+            <Badge className="bg-success text-success-foreground gap-1">
+              <Award className="h-3 w-3" /> Certificada
+            </Badge>
+          )}
+          {trail.progressPercent > 0 && !isCertified && (
+            <Badge variant="secondary">▶ Em andamento</Badge>
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground flex items-center gap-1">
+          <MapPin className="h-3.5 w-3.5" /> {trail.destination}
+        </p>
+      </div>
+
       {/* Banner Image */}
       {(trail as any).banner_url && (
         <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
@@ -217,43 +235,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             alt={trail.name}
             className="w-full h-40 sm:h-52 md:h-56 object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-background/10 to-transparent" />
-          {/* Overlay info on banner */}
-          <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
-            <div className="flex items-center gap-2 mb-1">
-              {isCertified && (
-                <Badge className="bg-success text-success-foreground gap-1 shadow-lg">
-                  <Award className="h-3 w-3" /> Certificada
-                </Badge>
-              )}
-              {trail.progressPercent > 0 && !isCertified && (
-                <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm shadow-sm">
-                  ▶ Em andamento
-                </Badge>
-              )}
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground drop-shadow-sm">{trail.name}</h2>
-            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
-              <MapPin className="h-3.5 w-3.5" /> {trail.destination}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Header if no banner */}
-      {!(trail as any).banner_url && (
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-2xl md:text-3xl font-bold">{trail.name}</h2>
-            {isCertified && (
-              <Badge className="bg-success text-success-foreground gap-1">
-                <Award className="h-3 w-3" /> Certificada
-              </Badge>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" /> {trail.destination}
-          </p>
+          <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
         </div>
       )}
 
@@ -507,11 +489,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Vídeos (Módulos) Tab */}
         <TabsContent value="videos">
-          <TabIntroBlock
-            icon={Video}
-            title="Módulos"
-            description={"Aqui você acessa o conteúdo principal da trilha, organizado por empresas e parceiros do destino.\nApós assistir ao conteúdo e responder o quiz de cada módulo, o próximo será liberado automaticamente, permitindo que você avance de forma estruturada na trilha."}
-          />
+          {/* TabIntroBlock for Módulos hidden by request */}
 
           {/* Module Cards */}
           <div className="space-y-3">
