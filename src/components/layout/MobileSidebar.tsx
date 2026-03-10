@@ -119,8 +119,8 @@ const marketingSection: MenuSection = {
   title: "Marketing",
   icon: Megaphone,
   items: [
-    { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard, isPremium: true },
-    { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store, isPremium: true },
+    { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
+    { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store },
   ],
 };
 
