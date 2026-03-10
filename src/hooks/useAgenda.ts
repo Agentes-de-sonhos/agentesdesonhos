@@ -452,8 +452,11 @@ export function useAgenda(year?: number) {
       })),
   ];
 
-  // Filter events by hidden types
+  // Filter events by hidden types (but always keep highlighted events)
   const filteredEvents = allEvents.filter(event => {
+    // Highlighted events always pass through
+    if (highlightedEventIds.has(event.id)) return true;
+    
     // Check if this event type is hidden in filters
     const isTypeHidden = hiddenTypes.includes(event.event_type);
     
