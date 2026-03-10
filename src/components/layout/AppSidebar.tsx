@@ -363,7 +363,7 @@ export function AppSidebar() {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.map((item) => renderSingleItem(item, section.hoverColor))}
+            {section.items.map((item) => renderSingleItem(item, section.bgColor, section.textColor))}
           </nav>
         )}
       </div>
