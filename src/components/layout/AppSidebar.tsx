@@ -284,7 +284,7 @@ export function AppSidebar() {
                       onClick={(e) => handleMenuClick(item, e)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
-                        itemActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent",
+                        itemActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted hover:text-foreground",
                         isLocked && "opacity-60"
                       )}
                     >
