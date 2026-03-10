@@ -232,7 +232,7 @@ export function AppSidebar() {
     [hasFeature, trackSectionVisit, isEducaPass]
   );
 
-  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string) => {
+  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
@@ -247,16 +247,17 @@ export function AppSidebar() {
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
           "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
-          isActive && !isLocked
-            ? "bg-primary text-primary-foreground shadow-md"
-            : (isLocked && !isLockedByEducaPass)
-              ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
-              : isLockedByEducaPass
-                ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                : sectionBgColor
-                  ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
-          item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
+          isActive && !isLocked && sectionBgColor
+            ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
+            : isActive && !isLocked
+              ? "bg-primary text-primary-foreground shadow-md"
+              : (isLocked && !isLockedByEducaPass)
+                ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
+                : isLockedByEducaPass
+                  ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  : sectionBgColor
+                    ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
         )}
       >
         <div className="relative flex-shrink-0">
