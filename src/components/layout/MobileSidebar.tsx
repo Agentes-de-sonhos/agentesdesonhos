@@ -80,6 +80,7 @@ const conhecimentoSection: MenuSection = {
   headerHoverBg: "hover:bg-blue-700",
   bgColor: "bg-blue-50",
   textColor: "text-blue-700",
+  borderColor: "border-blue-600",
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
