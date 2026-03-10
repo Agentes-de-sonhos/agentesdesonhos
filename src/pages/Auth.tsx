@@ -158,7 +158,7 @@ export default function Auth() {
     setIsLoading(false);
 
     if (error) {
-      setError(error.message);
+      setError(translateAuthError(error.message));
       return;
     }
 
