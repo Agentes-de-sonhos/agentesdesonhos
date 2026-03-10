@@ -68,9 +68,11 @@ interface MenuSection {
   title: string;
   icon: React.ComponentType<{ className?: string }>;
   items: MenuItem[];
-  hoverColor: string;  // hover on section header
-  bgColor: string;     // permanent bg for open items
-  textColor: string;   // text color for items in this section
+  hoverColor: string;
+  bgColor: string;
+  textColor: string;
+  headerBg: string;       // dark bg for header on hover/open
+  headerHoverBg: string;  // hover variant for header
 }
 
 // ── Static sections ──
@@ -78,7 +80,9 @@ interface MenuSection {
 const conhecimentoSection: MenuSection = {
   title: "Conhecimento",
   icon: BookOpen,
-  hoverColor: "hover:bg-blue-50 hover:text-blue-700",
+  hoverColor: "hover:bg-blue-600 hover:text-white",
+  headerBg: "bg-blue-600 text-white",
+  headerHoverBg: "hover:bg-blue-700",
   bgColor: "bg-blue-50",
   textColor: "text-blue-700",
   items: [
@@ -91,7 +95,9 @@ const conhecimentoSection: MenuSection = {
 const guiasSection: MenuSection = {
   title: "Guias e Referências",
   icon: BookMarked,
-  hoverColor: "hover:bg-emerald-50 hover:text-emerald-700",
+  hoverColor: "hover:bg-emerald-600 hover:text-white",
+  headerBg: "bg-emerald-600 text-white",
+  headerHoverBg: "hover:bg-emerald-700",
   bgColor: "bg-emerald-50",
   textColor: "text-emerald-700",
   items: [
@@ -105,7 +111,9 @@ const guiasSection: MenuSection = {
 const recursosVendasSection: MenuSection = {
   title: "Recursos de Vendas",
   icon: ShoppingCart,
-  hoverColor: "hover:bg-orange-50 hover:text-orange-700",
+  hoverColor: "hover:bg-orange-600 hover:text-white",
+  headerBg: "bg-orange-600 text-white",
+  headerHoverBg: "hover:bg-orange-700",
   bgColor: "bg-orange-50",
   textColor: "text-orange-700",
   items: [
@@ -117,7 +125,9 @@ const recursosVendasSection: MenuSection = {
 const criarSection: MenuSection = {
   title: "Criar",
   icon: PlusCircle,
-  hoverColor: "hover:bg-violet-50 hover:text-violet-700",
+  hoverColor: "hover:bg-violet-600 hover:text-white",
+  headerBg: "bg-violet-600 text-white",
+  headerHoverBg: "hover:bg-violet-700",
   bgColor: "bg-violet-50",
   textColor: "text-violet-700",
   items: [
@@ -130,7 +140,9 @@ const criarSection: MenuSection = {
 const clientesSection: MenuSection = {
   title: "Clientes",
   icon: Users,
-  hoverColor: "hover:bg-cyan-50 hover:text-cyan-700",
+  hoverColor: "hover:bg-cyan-600 hover:text-white",
+  headerBg: "bg-cyan-600 text-white",
+  headerHoverBg: "hover:bg-cyan-700",
   bgColor: "bg-cyan-50",
   textColor: "text-cyan-700",
   items: [
@@ -142,7 +154,9 @@ const clientesSection: MenuSection = {
 const marketingSection: MenuSection = {
   title: "Marketing",
   icon: Megaphone,
-  hoverColor: "hover:bg-pink-50 hover:text-pink-700",
+  hoverColor: "hover:bg-pink-600 hover:text-white",
+  headerBg: "bg-pink-600 text-white",
+  headerHoverBg: "hover:bg-pink-700",
   bgColor: "bg-pink-50",
   textColor: "text-pink-700",
   items: [
@@ -348,7 +362,7 @@ export function AppSidebar() {
           className={cn(
             "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
             isOpen
-              ? cn(section.bgColor, section.textColor)
+              ? cn(section.headerBg, section.headerHoverBg)
               : cn("text-sidebar-foreground", section.hoverColor)
           )}
         >
@@ -358,8 +372,8 @@ export function AppSidebar() {
           </span>
           <ChevronDown
             className={cn(
-              "h-3.5 w-3.5 text-muted-foreground/50 transition-transform duration-200",
-              isOpen && "rotate-180"
+              "h-3.5 w-3.5 transition-transform duration-200",
+              isOpen ? "rotate-180 text-white/70" : "text-muted-foreground/50"
             )}
           />
         </button>
