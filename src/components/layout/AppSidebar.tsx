@@ -134,6 +134,7 @@ const criarSection: MenuSection = {
   headerHoverBg: "hover:bg-violet-700",
   bgColor: "bg-violet-50",
   textColor: "text-violet-700",
+  borderColor: "border-violet-600",
   items: [
     { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
     { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "ai_tools" },
