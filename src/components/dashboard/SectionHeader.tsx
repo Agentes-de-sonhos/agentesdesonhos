@@ -41,6 +41,7 @@
    events: "text-[hsl(var(--section-events))]",
    flights: "text-[hsl(var(--section-flights))]",
    tools: "text-[hsl(var(--section-tools))]",
+   community: "text-[hsl(var(--section-community))]",
  };
 
  export function SectionHeader({ title, color, className }: SectionHeaderProps) {
