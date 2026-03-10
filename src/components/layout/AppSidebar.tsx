@@ -76,6 +76,7 @@ interface MenuSection {
 const conhecimentoSection: MenuSection = {
   title: "Conhecimento",
   icon: BookOpen,
+  hoverColor: "hover:bg-blue-50 hover:text-blue-700",
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
@@ -86,6 +87,7 @@ const conhecimentoSection: MenuSection = {
 const guiasSection: MenuSection = {
   title: "Guias e Referências",
   icon: BookMarked,
+  hoverColor: "hover:bg-emerald-50 hover:text-emerald-700",
   items: [
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
@@ -97,6 +99,7 @@ const guiasSection: MenuSection = {
 const recursosVendasSection: MenuSection = {
   title: "Recursos de Vendas",
   icon: ShoppingCart,
+  hoverColor: "hover:bg-orange-50 hover:text-orange-700",
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
@@ -106,6 +109,7 @@ const recursosVendasSection: MenuSection = {
 const criarSection: MenuSection = {
   title: "Criar",
   icon: PlusCircle,
+  hoverColor: "hover:bg-violet-50 hover:text-violet-700",
   items: [
     { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
     { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "ai_tools" },
@@ -116,6 +120,7 @@ const criarSection: MenuSection = {
 const clientesSection: MenuSection = {
   title: "Clientes",
   icon: Users,
+  hoverColor: "hover:bg-cyan-50 hover:text-cyan-700",
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
     { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
@@ -125,6 +130,7 @@ const clientesSection: MenuSection = {
 const marketingSection: MenuSection = {
   title: "Marketing",
   icon: Megaphone,
+  hoverColor: "hover:bg-pink-50 hover:text-pink-700",
   items: [
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
     { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store },
