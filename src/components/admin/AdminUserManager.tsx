@@ -34,8 +34,8 @@ import {
   Shield,
   UserCheck,
   Loader2,
-  Settings,
   CreditCard,
+  UserPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -62,6 +62,8 @@ export function AdminUserManager() {
   const [planFilter, setPlanFilter] = useState<string>("all");
   const [editingUser, setEditingUser] = useState<UserWithDetails | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -163,6 +165,26 @@ export function AdminUserManager() {
       toast({ title: "Erro ao atualizar status", variant: "destructive" });
     },
   });
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: typeof newUser) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await supabase.functions.invoke("admin-create-user", {
+        body: userData,
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao criar usuário");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
+      toast({ title: "Usuário criado com sucesso!" });
+      setShowCreateDialog(false);
+      setNewUser({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao criar usuário", description: err.message, variant: "destructive" });
+    },
+  });
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -196,13 +218,21 @@ export function AdminUserManager() {
   return (
     <Card className="border-0 shadow-md">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Gerenciar Usuários
-        </CardTitle>
-        <CardDescription>
-          Visualize, filtre e gerencie os usuários da plataforma
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Gerenciar Usuários
+            </CardTitle>
+            <CardDescription>
+              Visualize, filtre e gerencie os usuários da plataforma
+            </CardDescription>
+          </div>
+          <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            Adicionar Usuário
+          </Button>
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
@@ -410,6 +440,96 @@ export function AdminUserManager() {
               >
                 {updatePlanMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Salvar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create User Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Adicionar Novo Usuário</DialogTitle>
+              <DialogDescription>
+                Crie uma conta para um novo usuário. Ele poderá acessar via magic link.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Nome *</Label>
+                <Input
+                  value={newUser.name}
+                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                  placeholder="Nome completo"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>E-mail *</Label>
+                <Input
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  placeholder="email@exemplo.com"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Telefone</Label>
+                <Input
+                  value={newUser.phone}
+                  onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                  placeholder="(11) 99999-9999"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Agência</Label>
+                <Input
+                  value={newUser.agency_name}
+                  onChange={(e) => setNewUser({ ...newUser, agency_name: e.target.value })}
+                  placeholder="Nome da agência"
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Permissão</Label>
+                  <Select value={newUser.role} onValueChange={(v) => setNewUser({ ...newUser, role: v })}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="agente">Agente</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Plano</Label>
+                  <Select value={newUser.plan} onValueChange={(v) => setNewUser({ ...newUser, plan: v })}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="essencial">Essencial</SelectItem>
+                      <SelectItem value="profissional">Profissional</SelectItem>
+                      <SelectItem value="premium">Premium</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => createUserMutation.mutate(newUser)}
+                disabled={createUserMutation.isPending || !newUser.name || !newUser.email}
+              >
+                {createUserMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Criar Usuário
               </Button>
             </DialogFooter>
           </DialogContent>
