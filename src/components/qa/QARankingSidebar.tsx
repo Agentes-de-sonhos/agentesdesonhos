@@ -43,7 +43,7 @@ export function QARankingSidebar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-[11px] text-primary h-7 rounded-full px-2.5 hover:bg-primary/10"
+                className="text-[11px] text-primary h-7 rounded-full px-2.5 hover:bg-primary/10 hover:text-primary"
                 onClick={() => setShowRules(true)}
               >
                 <HelpCircle className="h-3 w-3 mr-1" />
