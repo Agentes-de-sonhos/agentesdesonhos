@@ -50,18 +50,8 @@ export default function EducaAcademy() {
     certificate: UserCertificate;
     trail: LearningTrail;
   } | null>(null);
-  const [heroBannerUrl, setHeroBannerUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase
-      .from("academy_settings")
-      .select("value")
-      .eq("key", "hero_banner_url")
-      .single()
-      .then(({ data }) => {
-        if (data?.value) setHeroBannerUrl(data.value);
-      });
-  }, []);
+
 
   const totalProgress = trailsWithProgress.length > 0
     ? Math.round(trailsWithProgress.reduce((sum, t) => sum + t.progressPercent, 0) / trailsWithProgress.length)
