@@ -252,8 +252,8 @@ export function MobileSidebar() {
             ? "bg-primary text-primary-foreground shadow-md"
             : (isLocked && !isLockedByEducaPass)
               ? "opacity-60"
-              : isLockedByEducaPass
-                ? "text-sidebar-foreground hover:bg-sidebar-accent"
+              : sectionHoverColor
+                ? cn("text-sidebar-foreground", sectionHoverColor)
                 : "text-sidebar-foreground hover:bg-sidebar-accent",
           item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
         )}
