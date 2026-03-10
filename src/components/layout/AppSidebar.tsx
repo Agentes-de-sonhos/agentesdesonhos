@@ -330,10 +330,13 @@ export function AppSidebar() {
       <div key={section.title} className="px-3">
         <button
           onClick={() => toggleSection(section.title)}
-          className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
+          className={cn(
+            "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sidebar-foreground transition-all duration-200",
+            section.hoverColor
+          )}
         >
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 flex-1 text-left">
+          <Icon className="h-4 w-4" />
+          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left">
             {section.title}
           </span>
           <ChevronDown
