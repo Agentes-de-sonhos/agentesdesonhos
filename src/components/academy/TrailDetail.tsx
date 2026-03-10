@@ -507,11 +507,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
         {/* Vídeos (Módulos) Tab */}
         <TabsContent value="videos">
-          <TabIntroBlock
-            icon={Video}
-            title="Módulos"
-            description={"Aqui você acessa o conteúdo principal da trilha, organizado por empresas e parceiros do destino.\nApós assistir ao conteúdo e responder o quiz de cada módulo, o próximo será liberado automaticamente, permitindo que você avance de forma estruturada na trilha."}
-          />
+          {/* TabIntroBlock for Módulos hidden by request */}
 
           {/* Module Cards */}
           <div className="space-y-3">
