@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
 import { FamTripsSection } from "@/components/community/FamTripsSection";
 import { OnlineMeetingsSection } from "@/components/community/OnlineMeetingsSection";

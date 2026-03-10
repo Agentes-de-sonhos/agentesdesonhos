@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { QAFeed } from "@/components/qa/QAFeed";
 import { QARankingSidebar } from "@/components/qa/QARankingSidebar";
 import { MessageCircleQuestion } from "lucide-react";

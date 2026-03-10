@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancialDashboard } from "@/components/financial/FinancialDashboard";
 import { SalesManager } from "@/components/financial/SalesManager";

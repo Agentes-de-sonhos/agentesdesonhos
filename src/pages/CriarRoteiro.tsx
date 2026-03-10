@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
 import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";

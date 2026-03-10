@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   Newspaper, ExternalLink, Loader2, Star, ChevronLeft, ChevronRight,
   TrendingUp, Trash2, FileText, Flame, Zap, Bookmark, BookmarkCheck,
