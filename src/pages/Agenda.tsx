@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Calendar, CalendarDays, CalendarRange, Clock, Plus } from "lucide-react";
@@ -114,17 +115,13 @@ export default function Agenda() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-              <Calendar className="h-8 w-8 text-primary" />
-              Minha Agenda
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Planeje e gerencie todos os seus eventos do ano
-            </p>
-          </div>
+          <PageHeader
+            pageKey="agenda"
+            title="Minha Agenda"
+            subtitle="Planeje e gerencie todos os seus eventos do ano"
+            icon={Calendar}
+          />
 
           <div className="flex items-center gap-2">
             <Button

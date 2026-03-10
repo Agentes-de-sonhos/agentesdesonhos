@@ -2308,6 +2308,30 @@ export type Database = {
           },
         ]
       }
+      page_banners: {
+        Row: {
+          banner_url: string | null
+          created_at: string
+          id: string
+          page_key: string
+          updated_at: string
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string
+          id?: string
+          page_key: string
+          updated_at?: string
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string
+          id?: string
+          page_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       paid_trainings: {
         Row: {
           apply_url: string | null

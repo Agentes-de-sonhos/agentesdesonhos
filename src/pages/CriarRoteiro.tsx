@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
 import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
@@ -223,21 +224,12 @@ export default function CriarRoteiro() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-primary">
-              <Wand2 className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="font-display text-3xl font-bold text-foreground">
-                Criar Roteiro
-              </h1>
-              <p className="text-muted-foreground">
-                Gere roteiros personalizados com inteligência artificial
-              </p>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          pageKey="criar-roteiro"
+          title="Criar Roteiro"
+          subtitle="Gere roteiros personalizados com inteligência artificial"
+          icon={Wand2}
+        />
 
         {!currentItinerary ? (
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list")}>

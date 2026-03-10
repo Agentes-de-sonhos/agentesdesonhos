@@ -17,6 +17,7 @@ import {
   BookOpen,
   Sparkles,
   Menu,
+  Image,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -34,6 +35,7 @@ import { AdminNewsCurationManager } from "@/components/admin/AdminNewsCurationMa
 import { AdminHotelsManager } from "@/components/admin/AdminHotelsManager";
 import { AdminHotelRecommendationsManager } from "@/components/admin/AdminHotelRecommendationsManager";
 import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager";
+import { AdminPageBannersManager } from "@/components/admin/AdminPageBannersManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -116,7 +118,7 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-14">
+          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-15">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Usuários</span>
@@ -172,6 +174,10 @@ export default function Admin() {
             <TabsTrigger value="hotels" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Hotéis</span>
+            </TabsTrigger>
+            <TabsTrigger value="page-banners" className="flex items-center gap-2">
+              <Image className="h-4 w-4" />
+              <span className="hidden sm:inline">Capas</span>
             </TabsTrigger>
           </TabsList>
 
@@ -231,6 +237,10 @@ export default function Admin() {
           <TabsContent value="hotels" className="space-y-6">
             <AdminHotelRecommendationsManager />
             <AdminHotelsManager />
+          </TabsContent>
+
+          <TabsContent value="page-banners">
+            <AdminPageBannersManager />
           </TabsContent>
         </Tabs>
       </div>

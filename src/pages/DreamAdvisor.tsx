@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Building2, UtensilsCrossed, Landmark, ShoppingBag, Compass, Globe } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -315,18 +316,12 @@ export default function DreamAdvisor() {
     <DashboardLayout>
       <TooltipProvider>
         <div className="space-y-6">
-          {/* Header */}
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <div className="bg-primary/10 p-2.5 rounded-xl">
-                <Globe className="h-6 w-6 text-primary" />
-              </div>
-              <h1 className="text-3xl font-display font-bold text-foreground">Dream Advisor</h1>
-            </div>
-            <p className="text-muted-foreground">
-              Encontre hotéis, restaurantes, atrações, compras e experiências para recomendar aos seus clientes
-            </p>
-          </div>
+          <PageHeader
+            pageKey="dream-advisor"
+            title="Travel Advisor"
+            subtitle="Encontre hotéis, restaurantes, atrações, compras e experiências para recomendar aos seus clientes"
+            icon={Globe}
+          />
 
           {/* Tab navigation */}
           <div className="flex justify-center">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,20 +34,12 @@ export default function Mentorias() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Mentorias</h1>
-            <Badge variant="secondary" className="ml-2">
-              <Clock className="h-3 w-3 mr-1" />
-              Em breve
-            </Badge>
-          </div>
-          <p className="text-muted-foreground">
-            Programas de mentoria exclusivos para acelerar seu crescimento profissional
-          </p>
-        </div>
+        <PageHeader
+          pageKey="mentorias"
+          title="Mentorias"
+          subtitle="Programas de mentoria exclusivos para acelerar seu crescimento profissional"
+          icon={GraduationCap}
+        />
 
         {/* Mentorships Grid */}
         {loadingMentorships ? (

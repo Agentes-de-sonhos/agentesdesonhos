@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
 import { FamTripsSection } from "@/components/community/FamTripsSection";
 import { WorkshopsSection } from "@/components/community/WorkshopsSection";
@@ -33,15 +34,12 @@ export default function Beneficios() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Tag className="h-8 w-8 text-primary" />
-            Benefícios e Descontos
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Aproveite oportunidades exclusivas, workshops e treinamentos com condições especiais
-          </p>
-        </div>
+        <PageHeader
+          pageKey="beneficios"
+          title="Benefícios e Descontos"
+          subtitle="Aproveite oportunidades exclusivas, workshops e treinamentos com condições especiais"
+          icon={Tag}
+        />
 
         <FamTripsSection trips={famTrips} />
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import academyHeroBanner from "@/assets/academy-hero-banner.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,18 +50,8 @@ export default function EducaAcademy() {
     certificate: UserCertificate;
     trail: LearningTrail;
   } | null>(null);
-  const [heroBannerUrl, setHeroBannerUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase
-      .from("academy_settings")
-      .select("value")
-      .eq("key", "hero_banner_url")
-      .single()
-      .then(({ data }) => {
-        if (data?.value) setHeroBannerUrl(data.value);
-      });
-  }, []);
+
 
   const totalProgress = trailsWithProgress.length > 0
     ? Math.round(trailsWithProgress.reduce((sum, t) => sum + t.progressPercent, 0) / trailsWithProgress.length)
@@ -146,25 +136,12 @@ export default function EducaAcademy() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            EducaTravel Academy
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos
-          </p>
-        </div>
-
-        {/* Hero Banner - reduced height */}
-        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
-          <img
-            src={heroBannerUrl || academyHeroBanner}
-            alt="EducaTravel Academy"
-            className="w-full h-36 sm:h-44 md:h-52 object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
-        </div>
+        <PageHeader
+          pageKey="educa-academy"
+          title="EducaTravel Academy"
+          subtitle="Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos"
+          icon={GraduationCap}
+        />
 
         <Tabs defaultValue="dashboard" className="space-y-6">
           {/* Pill-style tabs */}

@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   Newspaper, ExternalLink, Loader2, Star, ChevronLeft, ChevronRight,
   TrendingUp, Trash2, FileText, Flame, Zap, Bookmark, BookmarkCheck,
@@ -486,20 +487,12 @@ export default function Noticias() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        {/* ── Compact Header ── */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/25">
-            <Newspaper className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">
-              Notícias do Trade
-            </h1>
-            <p className="text-muted-foreground text-xs">
-              Curadoria inteligente das últimas 24 horas
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          pageKey="noticias"
+          title="Notícias do Trade"
+          subtitle="Curadoria inteligente das últimas 24 horas"
+          icon={Newspaper}
+        />
 
         {/* ── Filter Bar with Icons ── */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
