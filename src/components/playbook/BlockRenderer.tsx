@@ -20,9 +20,14 @@ import {
   Play,
   FileText,
   Zap,
+  Copy,
+  Check,
+  TrendingUp,
+  MessageSquareQuote,
 } from "lucide-react";
 import type { PlaybookBlock } from "@/types/playbook";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 /* ── Block style config for styled blocks ── */
 const blockConfig: Record<string, { icon: typeof Lightbulb; color: string; label: string; border: string; bg: string }> = {
@@ -31,30 +36,38 @@ const blockConfig: Record<string, { icon: typeof Lightbulb; color: string; label
   strategy: { icon: Target, color: "text-primary", label: "Estratégia", border: "border-l-primary", bg: "bg-sky-50 dark:bg-sky-950/30" },
   checklist: { icon: CheckSquare, color: "text-emerald-600", label: "Checklist", border: "border-l-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
   highlight: { icon: Star, color: "text-violet-600", label: "Destaque", border: "border-l-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30" },
-  insight: { icon: Zap, color: "text-violet-600", label: "Insight", border: "border-l-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30" },
+  insight: { icon: Zap, color: "text-amber-600", label: "Insight de Venda", border: "border-l-amber-500", bg: "bg-gradient-to-r from-amber-50 to-orange-50/50 dark:from-amber-950/30 dark:to-orange-950/20" },
+  sales_argument: { icon: MessageSquareQuote, color: "text-primary", label: "Argumento de Venda", border: "border-l-primary", bg: "bg-gradient-to-r from-primary/5 to-primary/3 dark:from-primary/10 dark:to-primary/5" },
   text: { icon: Info, color: "text-muted-foreground", label: "Informação", border: "border-l-border", bg: "bg-card" },
 };
 
 /* ── Normalize video URL to embed format ── */
 function getEmbedUrl(url: string): string {
   if (!url) return "";
-  // YouTube
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  // Vimeo
   const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
   if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
   return url;
 }
 
+/* ── Copy helper ── */
+function copyToClipboard(text: string) {
+  navigator.clipboard.writeText(text).then(() => {
+    toast.success("Texto copiado!");
+  });
+}
+
 /* ── Rich Text Block ── */
 function RichTextBlock({ block }: { block: PlaybookBlock }) {
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="rounded-xl border-border/40 shadow-sm">
       <CardContent className="pt-5 pb-4">
         {block.title && <h4 className="font-semibold text-foreground mb-3 text-lg">{block.title}</h4>}
         <div
-          className="playbook-content max-w-none text-foreground/85"
+          className="playbook-content max-w-none text-foreground/85 leading-relaxed
+            [&>p]:mb-4 [&>h2]:mt-8 [&>h2]:mb-3 [&>h3]:mt-6 [&>h3]:mb-2
+            [&>ul]:space-y-1.5 [&>ol]:space-y-1.5"
           dangerouslySetInnerHTML={{ __html: block.content }}
         />
       </CardContent>
@@ -65,7 +78,7 @@ function RichTextBlock({ block }: { block: PlaybookBlock }) {
 /* ── Text Block ── */
 function TextBlock({ block }: { block: PlaybookBlock }) {
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="rounded-xl border-border/40 shadow-sm">
       <CardContent className="pt-5 pb-4">
         {block.title && <h4 className="font-semibold text-foreground mb-2">{block.title}</h4>}
         <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{block.content}</div>
@@ -81,6 +94,64 @@ function TextBlock({ block }: { block: PlaybookBlock }) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/* ── Insight de Venda Block ── */
+function InsightBlock({ block }: { block: PlaybookBlock }) {
+  return (
+    <div className="rounded-2xl border border-amber-200/60 dark:border-amber-800/40 bg-gradient-to-r from-amber-50 to-orange-50/50 dark:from-amber-950/30 dark:to-orange-950/20 p-5 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-amber-300/10 rounded-full blur-2xl" />
+      <div className="relative flex items-start gap-3">
+        <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/40 shrink-0 mt-0.5">
+          <Zap className="h-4 w-4 text-amber-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Insight de Venda</p>
+          {block.title && <p className="font-semibold text-foreground text-sm mb-1.5">{block.title}</p>}
+          <p className="text-sm text-foreground/80 leading-relaxed">{block.content}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Argumento de Venda Block ── */
+function SalesArgumentBlock({ block }: { block: PlaybookBlock }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    const text = block.content.replace(/<[^>]+>/g, "");
+    copyToClipboard(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/3 dark:from-primary/10 dark:to-primary/5 p-5 relative overflow-hidden group">
+      <div className="absolute top-0 left-0 w-1 h-full bg-primary rounded-full" />
+      <div className="pl-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <MessageSquareQuote className="h-4 w-4 text-primary" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Argumento de Venda</p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-[10px] gap-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+            onClick={handleCopy}
+          >
+            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            {copied ? "Copiado" : "Copiar"}
+          </Button>
+        </div>
+        {block.title && <p className="font-semibold text-foreground text-sm mb-1.5">{block.title}</p>}
+        <blockquote className="text-sm text-foreground/85 leading-relaxed italic">
+          "{block.content}"
+        </blockquote>
+      </div>
+    </div>
   );
 }
 
@@ -166,15 +237,18 @@ function ImageGalleryBlock({ block }: { block: PlaybookBlock }) {
   );
 }
 
-/* ── Video Block ── */
+/* ── Video Block (compact) ── */
 function VideoBlock({ block }: { block: PlaybookBlock }) {
   const embedUrl = getEmbedUrl(block.video_url || "");
 
   return (
-    <div className="space-y-2">
-      {block.title && <h4 className="font-semibold text-foreground">{block.title}</h4>}
+    <Card className="rounded-xl border-border/40 shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2.5 px-4 py-3 border-b bg-muted/30">
+        <Play className="h-4 w-4 text-primary" />
+        <p className="text-xs font-bold text-foreground">{block.title || "Vídeo de Visão Estratégica"}</p>
+      </div>
       {embedUrl ? (
-        <div className="aspect-video rounded-xl overflow-hidden shadow-sm border">
+        <div className="aspect-video max-h-[360px]">
           <iframe
             src={embedUrl}
             className="w-full h-full"
@@ -184,19 +258,23 @@ function VideoBlock({ block }: { block: PlaybookBlock }) {
           />
         </div>
       ) : (
-        <div className="aspect-video rounded-xl bg-muted flex items-center justify-center">
+        <div className="aspect-video max-h-[360px] bg-muted flex items-center justify-center">
           <Play className="h-10 w-10 text-muted-foreground/40" />
         </div>
       )}
-      {block.content && <p className="text-sm text-muted-foreground">{block.content}</p>}
-    </div>
+      {block.content && (
+        <div className="px-4 py-2.5 border-t bg-muted/20">
+          <p className="text-xs text-muted-foreground">{block.content}</p>
+        </div>
+      )}
+    </Card>
   );
 }
 
 /* ── File Download Block ── */
 function FileDownloadBlock({ block }: { block: PlaybookBlock }) {
   return (
-    <Card className="border shadow-sm">
+    <Card className="rounded-xl border shadow-sm">
       <CardContent className="py-4 flex items-center gap-4">
         <div className="p-3 rounded-xl bg-primary/10 shrink-0">
           <FileText className="h-6 w-6 text-primary" />
@@ -327,6 +405,10 @@ export function BlockRenderer({ block }: { block: PlaybookBlock }) {
       return <RichTextBlock block={block} />;
     case 'text':
       return <TextBlock block={block} />;
+    case 'insight':
+      return <InsightBlock block={block} />;
+    case 'sales_argument':
+      return <SalesArgumentBlock block={block} />;
     case 'image':
       return <ImageBlock block={block} />;
     case 'image_gallery':
