@@ -304,7 +304,7 @@ export function MobileSidebar() {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.map((item) => renderMenuItem(item))}
+            {section.items.map((item) => renderMenuItem(item, section.hoverColor))}
           </nav>
         )}
       </div>
