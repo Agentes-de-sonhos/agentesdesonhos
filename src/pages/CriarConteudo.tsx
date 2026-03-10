@@ -115,20 +115,12 @@ export default function CriarConteudo() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl gradient-primary">
-            <Image className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="font-display text-3xl font-bold text-foreground">
-              Criar Conteúdo
-            </h1>
-            <p className="text-muted-foreground">
-              Transforme lâminas em textos persuasivos para suas redes
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          pageKey="criar-conteudo"
+          title="Criar Conteúdo"
+          subtitle="Transforme lâminas em textos persuasivos para suas redes"
+          icon={Image}
+        />
 
         <Tabs defaultValue="create" className="space-y-6">
           <TabsList>

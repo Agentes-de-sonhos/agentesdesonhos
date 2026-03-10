@@ -16,14 +16,12 @@ export default function Financeiro() {
     <SubscriptionGuard feature="financial">
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-foreground">
-              Financeiro
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Gerencie vendas, produtos, custos e fluxo de caixa
-            </p>
-          </div>
+          <PageHeader
+            pageKey="financeiro"
+            title="Financeiro"
+            subtitle="Gerencie vendas, produtos, custos e fluxo de caixa"
+            icon={Loader2}
+          />
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">

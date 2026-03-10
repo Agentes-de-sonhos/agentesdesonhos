@@ -47,9 +47,12 @@ export default function Gamificacao() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-        <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-          Gamificação
-        </h1>
+        <PageHeader
+          pageKey="gamificacao"
+          title="Gamificação"
+          subtitle="Acompanhe seus pontos, ranking e conquistas"
+          icon={Trophy}
+        />
 
         {/* Points + Rank summary */}
         <div className="grid gap-4 sm:grid-cols-2">

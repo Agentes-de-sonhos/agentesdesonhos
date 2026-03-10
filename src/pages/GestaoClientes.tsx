@@ -29,12 +29,12 @@ export default function GestaoClientes() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Gestão de Clientes</h1>
-          <p className="text-muted-foreground">
-            Gerencie clientes, oportunidades e metas de vendas
-          </p>
-        </div>
+        <PageHeader
+          pageKey="gestao-clientes"
+          title="Gestão de Clientes"
+          subtitle="Gerencie clientes, oportunidades e metas de vendas"
+          icon={Users}
+        />
 
         <Tabs value={getCurrentTab()} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-lg">

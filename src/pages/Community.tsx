@@ -54,16 +54,12 @@ export default function Community() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Users className="h-8 w-8 text-primary" />
-            Comunidade
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Conecte-se, aprenda e cresça com a nossa comunidade de agentes de viagem
-          </p>
-        </div>
+        <PageHeader
+          pageKey="comunidade"
+          title="Travel Experts"
+          subtitle="Conecte-se, aprenda e cresça com a nossa comunidade de agentes de viagem"
+          icon={Users}
+        />
 
         {/* 1. Fam Trips & Exclusive Opportunities */}
         <FamTripsSection trips={famTrips} />

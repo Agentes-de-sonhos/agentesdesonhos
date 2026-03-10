@@ -99,15 +99,14 @@ export default function Materiais() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
+        <PageHeader
+          pageKey="materiais"
+          title="Materiais de Divulgação"
+          subtitle="Sua biblioteca de campanhas para vendas"
+          icon={FolderOpen}
+        />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
-              Materiais de Divulgação
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Sua biblioteca de campanhas para vendas
-            </p>
             {/* View mode toggle */}
             <div className="flex items-center gap-1 mt-2">
               <Button
