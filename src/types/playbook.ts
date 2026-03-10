@@ -86,6 +86,8 @@ export type PlaybookBlockType =
   | 'strategy'
   | 'checklist'
   | 'highlight'
+  | 'insight'
+  | 'sales_argument'
   | 'rich_text'
   | 'image'
   | 'image_gallery'
