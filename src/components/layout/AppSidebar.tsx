@@ -218,7 +218,9 @@ export function AppSidebar() {
               ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
               : isLockedByEducaPass
                 ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                : sectionHoverColor
+                  ? cn("text-sidebar-foreground", sectionHoverColor)
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
           item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
         )}
       >
