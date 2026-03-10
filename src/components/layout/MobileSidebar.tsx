@@ -67,6 +67,7 @@ interface MenuSection {
   hoverColor: string;
   bgColor: string;
   textColor: string;
+  borderColor: string;
   headerBg: string;
   headerHoverBg: string;
 }
