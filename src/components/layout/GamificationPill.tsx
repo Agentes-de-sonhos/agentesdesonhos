@@ -27,7 +27,7 @@ export function GamificationPill() {
         <TooltipTrigger asChild>
           <button
             onClick={() => navigate("/gamificacao")}
-            className="flex items-center gap-2 bg-foreground/90 rounded-full px-3 py-1.5 text-xs cursor-pointer hover:bg-foreground transition-colors"
+            className="flex items-center gap-2 bg-purple-600 rounded-full px-3 py-1.5 text-xs cursor-pointer hover:bg-purple-700 transition-colors"
           >
             <span className="flex items-center gap-1">
               <Star className="h-3.5 w-3.5 text-yellow-400" />

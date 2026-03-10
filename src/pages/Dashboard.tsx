@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useGamification } from "@/hooks/useGamification";
+import { GamificationPill } from "@/components/layout/GamificationPill";
 import {
   Route,
   FileText,
@@ -130,6 +131,7 @@ export default function Dashboard() {
           
           {/* Top bar with all header elements */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <GamificationPill />
             <ExchangeRateCard />
             <div className="h-6 w-px bg-border hidden sm:block" />
             <NotificationsDropdown />
