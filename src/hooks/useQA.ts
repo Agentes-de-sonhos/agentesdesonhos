@@ -146,8 +146,8 @@ export function useQA() {
         .select()
         .single();
       if (error) throw error;
-      // Award 5 points for answering
-      await awardPoints(5, "answer_question", result.id);
+      // Award 4 points for answering
+      await awardPoints(4, "answer_question", result.id);
       return result;
     },
     onSuccess: (_, vars) => {
