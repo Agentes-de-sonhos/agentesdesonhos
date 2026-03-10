@@ -126,8 +126,8 @@ export function useQA() {
         .select()
         .single();
       if (error) throw error;
-      // Award 2 points for asking a question
-      await awardPoints(2, "ask_question", result.id);
+      // Award 0.25 points for asking a question
+      await awardPoints(0.25, "ask_question", result.id);
       return result;
     },
     onSuccess: () => {
