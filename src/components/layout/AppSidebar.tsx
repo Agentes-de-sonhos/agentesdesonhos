@@ -154,7 +154,9 @@ const clientesSection: MenuSection = {
 const marketingSection: MenuSection = {
   title: "Marketing",
   icon: Megaphone,
-  hoverColor: "hover:bg-pink-50 hover:text-pink-700",
+  hoverColor: "hover:bg-pink-600 hover:text-white",
+  headerBg: "bg-pink-600 text-white",
+  headerHoverBg: "hover:bg-pink-700",
   bgColor: "bg-pink-50",
   textColor: "text-pink-700",
   items: [
