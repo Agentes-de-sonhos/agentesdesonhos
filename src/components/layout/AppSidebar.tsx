@@ -150,6 +150,7 @@ const clientesSection: MenuSection = {
   headerHoverBg: "hover:bg-cyan-700",
   bgColor: "bg-cyan-50",
   textColor: "text-cyan-700",
+  borderColor: "border-cyan-600",
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
     { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
