@@ -166,6 +166,23 @@ export function AdminUserManager() {
       toast({ title: "Erro ao atualizar status", variant: "destructive" });
     },
   });
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const resp = await supabase.functions.invoke("admin-reset-password", {
+        body: { user_id: userId },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao resetar senha");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
+    },
+    onSuccess: (data) => {
+      toast({ title: "E-mail de redefinição enviado!", description: `Enviado para ${data.email}` });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao enviar e-mail", description: err.message, variant: "destructive" });
+    },
+  });
+
   const createUserMutation = useMutation({
     mutationFn: async (userData: typeof newUser) => {
       const { data: { session } } = await supabase.auth.getSession();
