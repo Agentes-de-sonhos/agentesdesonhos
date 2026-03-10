@@ -132,7 +132,7 @@ export function useQA() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
-      toast.success("Pergunta publicada! +2 pontos");
+      toast.success("Pergunta publicada! +0.25 pontos");
     },
     onError: () => toast.error("Erro ao publicar pergunta"),
   });
