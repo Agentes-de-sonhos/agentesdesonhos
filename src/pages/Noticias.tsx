@@ -406,30 +406,32 @@ export default function Noticias() {
           <>
             {showSections && (
               <>
-                {/* ── Hero + Resumo Rápido side by side ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                {/* ── Hero + Top 5 side by side, same height ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
                   {/* Hero - 2/3 */}
-                  <div className="lg:col-span-2">
+                  <div className="lg:col-span-2 flex">
                     {hero && (
-                      <HeroNewsCard
-                        item={hero}
-                        isAdmin={isAdmin}
-                        onDelete={handleDelete}
-                        saved={savedIds.has(hero.id)}
-                        onToggleSave={toggleSave}
-                      />
+                      <div className="w-full flex">
+                        <HeroNewsCard
+                          item={hero}
+                          isAdmin={isAdmin}
+                          onDelete={handleDelete}
+                          saved={savedIds.has(hero.id)}
+                          onToggleSave={toggleSave}
+                        />
+                      </div>
                     )}
                   </div>
 
-                  {/* Resumo Rápido - 1/3 */}
-                  <div className="lg:col-span-1">
-                    <Card className="border-0 shadow-sm h-full">
-                      <CardContent className="p-4">
+                  {/* Top 5 - 1/3 */}
+                  <div className="lg:col-span-1 flex">
+                    <Card className="border-0 shadow-sm w-full flex flex-col">
+                      <CardContent className="p-4 flex flex-col flex-1">
                         <div className="flex items-center gap-2 mb-3">
                           <Zap className="h-4 w-4 text-warning" />
-                          <h3 className="text-sm font-bold text-foreground">Resumo do Trade</h3>
+                          <h3 className="text-sm font-bold text-foreground">Top 5</h3>
                         </div>
-                        <div className="space-y-0.5">
+                        <div className="space-y-0.5 flex-1">
                           {topHeadlines.map((item, i) => (
                             <CompactNewsItem key={item.id} item={item} index={i} />
                           ))}
