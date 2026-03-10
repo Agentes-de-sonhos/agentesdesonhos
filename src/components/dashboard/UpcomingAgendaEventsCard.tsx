@@ -28,7 +28,7 @@ export function UpcomingAgendaEventsCard() {
       const isUserEvent = !event.isPreset;
       return isCurrentMonth && isUserEvent;
     })
-    .slice(0, 10);
+    .slice(0, 6);
 
   if (isLoading) {
     return (
@@ -43,20 +43,9 @@ export function UpcomingAgendaEventsCard() {
   return (
     <Card className="border-0 shadow-card">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            <span className="text-base font-semibold">Minha Agenda</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/agenda")}
-            className="text-xs text-muted-foreground hover:text-primary"
-          >
-            Ver todos
-            <ArrowRight className="h-3 w-3 ml-1" />
-          </Button>
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-primary" />
+          <span className="text-base font-semibold">Minha Agenda</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -118,6 +107,17 @@ export function UpcomingAgendaEventsCard() {
                 </div>
               );
             })}
+
+            <div className="pt-3 border-t">
+              <Button
+                variant="ghost"
+                className="w-full text-[hsl(var(--section-events))] hover:text-[hsl(var(--section-events))] hover:bg-[hsl(var(--section-events))]/5"
+                onClick={() => navigate("/agenda")}
+              >
+                Ver todos
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>
