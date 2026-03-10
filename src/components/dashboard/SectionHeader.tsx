@@ -28,6 +28,7 @@
    events: "bg-[hsl(var(--section-events))]",
    flights: "bg-[hsl(var(--section-flights))]",
    tools: "bg-[hsl(var(--section-tools))]",
+   community: "bg-[hsl(var(--section-community))]",
  };
 
  const iconColorStyles: Record<SectionColor, string> = {
