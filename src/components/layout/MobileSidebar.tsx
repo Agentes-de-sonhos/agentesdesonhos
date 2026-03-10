@@ -227,7 +227,7 @@ export function MobileSidebar() {
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={8}>
             <p className="text-sm font-medium">{item.title}</p>
-            {item.isPremium && <p className="text-xs text-warning">Premium</p>}
+            <p className="text-sm font-medium">{item.title}</p>
           </TooltipContent>
         </Tooltip>
       );
