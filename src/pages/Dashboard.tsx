@@ -199,11 +199,6 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* 4. Gamificação & Q&A */}
-            <section className="order-4">
-              <SectionHeader title="Engajamento & Perguntas" color="events" />
-              <GamificationCard />
-            </section>
 
           </>
         )}
