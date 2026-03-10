@@ -17,8 +17,6 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
-  Link2,
-  ImagePlus,
   Loader2,
   Star,
 } from "lucide-react";
