@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { MobileSidebar } from "./MobileSidebar";
 import { Footer } from "./Footer";
 import { GlobalPopupModal } from "@/components/popup/GlobalPopupModal";
+import { GamificationPill } from "./GamificationPill";
 
 interface DashboardLayoutProps {
   children: ReactNode;
