@@ -158,7 +158,14 @@ export function MobileSidebar() {
   );
 
   const toggleSection = (title: string) => {
-    setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
+    setOpenSections((prev) => {
+      const isCurrentlyOpen = prev[title];
+      const allClosed: Record<string, boolean> = {};
+      if (!isCurrentlyOpen) {
+        allClosed[title] = true;
+      }
+      return allClosed;
+    });
   };
 
   const isSectionActive = (section: MenuSection) =>
