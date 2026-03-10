@@ -90,7 +90,21 @@ const conhecimentoSection: MenuSection = {
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
+  ],
+};
+
+const comunidadeSection: MenuSection = {
+  title: "Comunidade",
+  icon: Heart,
+  hoverColor: "hover:bg-red-600 hover:text-white",
+  headerBg: "bg-red-600 text-white",
+  headerHoverBg: "hover:bg-red-700",
+  bgColor: "bg-red-50",
+  textColor: "text-red-700",
+  borderColor: "border-red-600",
+  items: [
     { title: "Pergunte e Responda", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
+    { title: "Travel Experts", url: "/comunidade", icon: Users },
   ],
 };
 
@@ -172,7 +186,6 @@ const marketingSection: MenuSection = {
   ],
 };
 
-const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart };
 const mentoriasItem: MenuItem = { title: "Mentorias", url: "/mentorias", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
@@ -194,7 +207,7 @@ export function AppSidebar() {
   const isEducaPass = plan === "educa_pass";
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
     []
   );
 
@@ -451,7 +464,6 @@ export function AppSidebar() {
 
           {/* Standalone items */}
           <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
-            {renderSingleItem(comunidadeItem)}
             {renderSingleItem(mentoriasItem)}
           </nav>
         </div>
