@@ -65,6 +65,8 @@ interface MenuSection {
   icon: React.ComponentType<{ className?: string }>;
   items: MenuItem[];
   hoverColor: string;
+  bgColor: string;
+  textColor: string;
 }
 
 const conhecimentoSection: MenuSection = {
