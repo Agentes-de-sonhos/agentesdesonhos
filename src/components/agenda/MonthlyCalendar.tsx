@@ -128,6 +128,7 @@ export function MonthlyCalendar({
                       key={event.id}
                       event={event}
                       onClick={() => onEventClick(event)}
+                      isHighlighted={highlightedEventIds.has(event.id)}
                     />
                   ))}
                   {dayEvents.length > 3 && (
