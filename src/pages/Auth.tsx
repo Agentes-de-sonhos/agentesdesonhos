@@ -192,7 +192,7 @@ export default function Auth() {
       } else if (error.message.includes("Email not confirmed")) {
         setError("Por favor, confirme seu email antes de fazer login");
       } else {
-        setError(error.message);
+        setError(translateAuthError(error.message));
       }
       return;
     }
