@@ -78,7 +78,7 @@ const conhecimentoSection: MenuSection = {
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
-    { title: "Pergunte e Responda", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum", isPremium: true },
+    { title: "Pergunte e Responda", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
   ],
 };
 
@@ -87,8 +87,8 @@ const guiasSection: MenuSection = {
   icon: BookMarked,
   items: [
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { title: "Travel Advisor", url: "/dream-advisor", icon: Compass, isPremium: true },
-    { title: "Benefícios e Descontos", url: "/comunidade", icon: Tag, requiredFeature: "community", isPremium: true },
+    { title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
+    { title: "Benefícios e Descontos", url: "/comunidade", icon: Tag, requiredFeature: "community" },
     { title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
@@ -106,9 +106,9 @@ const criarSection: MenuSection = {
   title: "Criar",
   icon: PlusCircle,
   items: [
-    { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true, isPremium: true },
-    { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "ai_tools", isPremium: true },
-    { title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "ai_tools", isPremium: true },
+    { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator", isHighlighted: true },
+    { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "ai_tools" },
+    { title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "ai_tools" },
   ],
 };
 
@@ -116,8 +116,8 @@ const clientesSection: MenuSection = {
   title: "Clientes",
   icon: Users,
   items: [
-    { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", isPremium: true },
-    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, isPremium: true },
+    { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
+    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
   ],
 };
 
@@ -125,8 +125,8 @@ const marketingSection: MenuSection = {
   title: "Marketing",
   icon: Megaphone,
   items: [
-    { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard, isPremium: true },
-    { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store, isPremium: true },
+    { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
+    { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store },
   ],
 };
 
@@ -134,7 +134,7 @@ const comunidadeSection: MenuSection = {
   title: "Comunidade",
   icon: Heart,
   items: [
-    { title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
+    { title: "Mentorias", url: "/mentorias", icon: GraduationCap },
   ],
 };
 
@@ -230,11 +230,6 @@ export function AppSidebar() {
             <span className={cn("truncate flex-1", isLocked && !isLockedByEducaPass && "text-muted-foreground")}>
               {item.title}
             </span>
-            {item.isPremium && (
-              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-warning/50 text-warning font-semibold flex-shrink-0">
-                PRO
-              </Badge>
-            )}
             {item.isHighlighted && !isActive && !isLocked && (
               <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 animate-pulse" />
             )}
@@ -249,7 +244,6 @@ export function AppSidebar() {
           <TooltipTrigger asChild>{menuLink}</TooltipTrigger>
           <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
             <p className="text-sm font-medium">{item.title}</p>
-            {item.isPremium && <p className="text-xs text-warning">Premium</p>}
           </TooltipContent>
         </Tooltip>
       );
