@@ -200,9 +200,10 @@ export function CommunityQACard() {
       queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
       queryClient.invalidateQueries({ queryKey: ["gamification"] });
       setReplyContent("");
-      setReplyLink("");
-      setShowReplyLink(false);
-      toast.success("Resposta publicada! +4 pontos");
+      toast.success("🎉 Resposta publicada! Você ganhou +4 pontos!", {
+        duration: 4000,
+        icon: "⭐",
+      });
     },
     onError: () => toast.error("Erro ao publicar resposta"),
   });
