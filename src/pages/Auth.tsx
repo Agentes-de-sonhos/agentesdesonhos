@@ -1,4 +1,15 @@
 import { useState, useEffect } from "react";
+
+const translateAuthError = (msg: string): string => {
+  if (/rate.limit/i.test(msg)) return "Muitas tentativas seguidas. Aguarde alguns minutos antes de tentar novamente.";
+  if (/invalid.login/i.test(msg)) return "E-mail ou senha incorretos.";
+  if (/user.not.found/i.test(msg)) return "Usuário não encontrado.";
+  if (/email.not.confirmed/i.test(msg)) return "Por favor, confirme seu e-mail antes de fazer login.";
+  if (/already.registered/i.test(msg)) return "Este e-mail já está cadastrado.";
+  if (/weak.password/i.test(msg)) return "A senha deve ter pelo menos 6 caracteres.";
+  if (/network/i.test(msg)) return "Erro de conexão. Verifique sua internet.";
+  return msg;
+};
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
