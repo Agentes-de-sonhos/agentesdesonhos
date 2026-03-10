@@ -193,7 +193,7 @@ export function MobileSidebar() {
     signOut();
   };
 
-  const renderMenuItem = (item: MenuItem) => {
+  const renderMenuItem = (item: MenuItem, sectionHoverColor?: string) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
@@ -252,8 +252,8 @@ export function MobileSidebar() {
             ? "bg-primary text-primary-foreground shadow-md"
             : (isLocked && !isLockedByEducaPass)
               ? "opacity-60"
-              : isLockedByEducaPass
-                ? "text-sidebar-foreground hover:bg-sidebar-accent"
+              : sectionHoverColor
+                ? cn("text-sidebar-foreground", sectionHoverColor)
                 : "text-sidebar-foreground hover:bg-sidebar-accent",
           item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
         )}
@@ -304,7 +304,7 @@ export function MobileSidebar() {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.map((item) => renderMenuItem(item))}
+            {section.items.map((item) => renderMenuItem(item, section.hoverColor))}
           </nav>
         )}
       </div>

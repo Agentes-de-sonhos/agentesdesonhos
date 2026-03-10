@@ -197,7 +197,7 @@ export function AppSidebar() {
     [hasFeature, trackSectionVisit, isEducaPass]
   );
 
-  const renderSingleItem = (item: MenuItem) => {
+  const renderSingleItem = (item: MenuItem, sectionHoverColor?: string) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
@@ -218,7 +218,9 @@ export function AppSidebar() {
               ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
               : isLockedByEducaPass
                 ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                : sectionHoverColor
+                  ? cn("text-sidebar-foreground", sectionHoverColor)
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
           item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
         )}
       >
@@ -348,7 +350,7 @@ export function AppSidebar() {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.map((item) => renderSingleItem(item))}
+            {section.items.map((item) => renderSingleItem(item, section.hoverColor))}
           </nav>
         )}
       </div>
