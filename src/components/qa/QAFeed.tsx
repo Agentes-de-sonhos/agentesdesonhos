@@ -337,7 +337,7 @@ function QuestionCard({
   getAnswersQuery,
 }: QuestionCardProps) {
   const answersQuery = useQuery({ ...getAnswersQuery(q.id), enabled: isExpanded });
-  const answers = answersQuery.data || [];
+  const answers = (answersQuery.data || []) as any[];
 
   return (
     <Card className="rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20 group">
