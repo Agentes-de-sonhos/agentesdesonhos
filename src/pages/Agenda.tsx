@@ -219,8 +219,6 @@ export default function Agenda() {
           </CardContent>
         </Card>
 
-        {/* Legend */}
-        <CalendarLegend />
 
         {/* Quick Add Button (FAB) */}
         <Button
