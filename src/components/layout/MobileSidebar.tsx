@@ -128,7 +128,7 @@ const comunidadeSection: MenuSection = {
   title: "Comunidade",
   icon: Heart,
   items: [
-    { title: "Mentorias", url: "/mentorias", icon: GraduationCap, isPremium: true },
+    { title: "Mentorias", url: "/mentorias", icon: GraduationCap },
   ],
 };
 
