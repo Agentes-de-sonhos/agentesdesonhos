@@ -68,7 +68,9 @@ interface MenuSection {
   title: string;
   icon: React.ComponentType<{ className?: string }>;
   items: MenuItem[];
-  hoverColor: string;
+  hoverColor: string;  // hover on section header
+  bgColor: string;     // permanent bg for open items
+  textColor: string;   // text color for items in this section
 }
 
 // ── Static sections ──
