@@ -168,10 +168,11 @@ export function CommunityQACard() {
       setAskTitle("");
       setAskDescription("");
       setAskCategory("");
-      setAskLink("");
-      setShowAskLink(false);
       setShowAskForm(false);
-      toast.success("Pergunta publicada! +0.25 pontos");
+      toast.success("🎉 Pergunta publicada! Você ganhou +0.25 pontos!", {
+        duration: 4000,
+        icon: "⭐",
+      });
     },
     onError: () => toast.error("Erro ao publicar pergunta"),
   });
