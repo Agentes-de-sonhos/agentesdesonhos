@@ -32,6 +32,7 @@ const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 export function MonthlyCalendar({
   currentDate,
   events,
+  highlightedEventIds = new Set(),
   onDayClick,
   onEventClick,
   onNavigate,
