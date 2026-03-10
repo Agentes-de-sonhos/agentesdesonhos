@@ -13,6 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   MessageCircle, CheckCircle2, Filter, Clock, ThumbsUp, Eye,
   ArrowUpDown, ChevronDown, Send, Search, ChevronUp, MessageSquarePlus,
+  AlertCircle,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -97,28 +98,28 @@ export function QAFeed() {
 
   return (
     <div className="space-y-4">
-      {/* Inline compose box */}
-      <Card className="rounded-xl border-border/60 shadow-sm">
-        <CardContent className="p-4">
+      {/* ── Compose Box ── */}
+      <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
           {!composeExpanded ? (
             <button
               onClick={() => setComposeExpanded(true)}
-              className="w-full flex items-center gap-3 text-left"
+              className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/30 transition-colors"
             >
-              <Avatar className="h-9 w-9 flex-shrink-0">
+              <Avatar className="h-9 w-9 flex-shrink-0 ring-2 ring-primary/10">
                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                   {user?.email?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 h-10 rounded-xl bg-muted/50 border border-border/50 flex items-center px-4 text-sm text-muted-foreground hover:bg-muted/80 transition-colors cursor-text">
-                <MessageSquarePlus className="h-4 w-4 mr-2 text-muted-foreground/60" />
+              <div className="flex-1 h-10 rounded-full bg-muted/40 border border-border/40 flex items-center px-4 text-sm text-muted-foreground">
+                <MessageSquarePlus className="h-4 w-4 mr-2.5 text-primary/50" />
                 Faça uma pergunta para a comunidade...
               </div>
             </button>
           ) : (
-            <div className="space-y-3">
+            <div className="p-4 space-y-3 bg-muted/10">
               <div className="flex items-start gap-3">
-                <Avatar className="h-9 w-9 flex-shrink-0 mt-0.5">
+                <Avatar className="h-9 w-9 flex-shrink-0 mt-0.5 ring-2 ring-primary/10">
                   <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                     {user?.email?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
@@ -129,7 +130,7 @@ export function QAFeed() {
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     maxLength={200}
-                    className="rounded-xl border-border/60 h-10 text-sm"
+                    className="rounded-xl border-border/50 h-10 text-sm font-medium bg-background"
                     autoFocus
                   />
                   <Textarea
@@ -138,12 +139,12 @@ export function QAFeed() {
                     onChange={(e) => setNewDescription(e.target.value)}
                     maxLength={1000}
                     rows={3}
-                    className="rounded-xl border-border/60 text-sm resize-none"
+                    className="rounded-xl border-border/50 text-sm resize-none bg-background"
                   />
                   <div className="flex items-center justify-between gap-3">
                     <Select value={newCategory} onValueChange={setNewCategory}>
-                      <SelectTrigger className="rounded-xl w-48 h-9 text-xs">
-                        <SelectValue placeholder="Categoria *" />
+                      <SelectTrigger className="rounded-full w-48 h-9 text-xs bg-background border-border/50">
+                        <SelectValue placeholder="Selecione a categoria *" />
                       </SelectTrigger>
                       <SelectContent>
                         {QA_CATEGORIES.map((cat) => (
@@ -157,7 +158,7 @@ export function QAFeed() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs h-9"
+                        className="text-xs h-9 rounded-full"
                         onClick={() => {
                           setComposeExpanded(false);
                           setNewTitle("");
@@ -171,7 +172,7 @@ export function QAFeed() {
                         onClick={handleSubmit}
                         disabled={!newTitle.trim() || !newCategory || createQuestion.isPending}
                         size="sm"
-                        className="rounded-xl h-9 gap-1.5 px-4 shadow-sm"
+                        className="rounded-full h-9 gap-1.5 px-5 shadow-sm shadow-primary/20"
                       >
                         <Send className="h-3.5 w-3.5" />
                         {createQuestion.isPending ? "Publicando..." : "Publicar"}
@@ -185,106 +186,111 @@ export function QAFeed() {
         </CardContent>
       </Card>
 
-      {/* Search bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar perguntas na comunidade..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 h-10 rounded-xl bg-background border-border/60 text-sm"
-        />
-      </div>
-
-      {/* Sort bar + Collapsible filters */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
-          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-          {(
-            [
-              { key: "recent", label: "Recentes" },
-              { key: "most_answered", label: "Mais respondidas" },
-              { key: "unanswered", label: "Sem resposta" },
-            ] as { key: SortMode; label: string }[]
-          ).map((s) => (
-            <Button
-              key={s.key}
-              variant={sortMode === s.key ? "default" : "ghost"}
-              size="sm"
-              className="h-8 text-xs rounded-lg"
-              onClick={() => setSortMode(s.key)}
-            >
-              {s.label}
-            </Button>
-          ))}
+      {/* ── Search + Sort + Filters toolbar ── */}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+          <Input
+            placeholder="Buscar perguntas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 h-9 rounded-full bg-muted/30 border-border/40 text-sm placeholder:text-muted-foreground/50"
+          />
         </div>
-        <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs rounded-lg">
-              <Filter className="h-3.5 w-3.5" />
-              Filtros
-              {activeFilterCount > 0 && (
-                <Badge variant="default" className="h-4 w-4 p-0 flex items-center justify-center text-[9px] rounded-full">
-                  {activeFilterCount}
-                </Badge>
-              )}
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${filtersOpen ? "rotate-180" : ""}`} />
-            </Button>
-          </CollapsibleTrigger>
-        </Collapsible>
-      </div>
 
-      {/* Category filter chips (collapsible) */}
-      <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-        <CollapsibleContent>
-          <div className="flex gap-2 flex-wrap p-3 bg-muted/30 rounded-xl border border-border/50">
-            <Button
-              variant={selectedCategory === null ? "default" : "outline"}
-              size="sm"
-              className="h-7 text-xs rounded-full px-3"
-              onClick={() => setSelectedCategory(null)}
-            >
-              Todas
-            </Button>
-            {QA_CATEGORIES.map((cat) => (
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1">
+            {(
+              [
+                { key: "recent", label: "Recentes" },
+                { key: "most_answered", label: "Mais respondidas" },
+                { key: "unanswered", label: "Sem resposta" },
+              ] as { key: SortMode; label: string }[]
+            ).map((s) => (
               <Button
-                key={cat.value}
-                variant={selectedCategory === cat.value ? "default" : "outline"}
+                key={s.key}
+                variant={sortMode === s.key ? "secondary" : "ghost"}
                 size="sm"
-                className={`h-7 text-xs rounded-full px-3 ${selectedCategory === cat.value ? "" : "bg-background"}`}
-                onClick={() => setSelectedCategory(selectedCategory === cat.value ? null : cat.value)}
+                className={`h-7 text-[11px] rounded-full px-3 ${
+                  sortMode === s.key ? "font-semibold shadow-sm" : "text-muted-foreground"
+                }`}
+                onClick={() => setSortMode(s.key)}
               >
-                {cat.label}
+                {s.label}
               </Button>
             ))}
           </div>
-        </CollapsibleContent>
-      </Collapsible>
+          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5 h-7 text-[11px] rounded-full text-muted-foreground">
+                <Filter className="h-3 w-3" />
+                Categorias
+                {activeFilterCount > 0 && (
+                  <span className="h-4 w-4 rounded-full bg-primary text-primary-foreground text-[9px] flex items-center justify-center font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${filtersOpen ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+          </Collapsible>
+        </div>
 
-      {/* Questions list */}
+        <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <CollapsibleContent>
+            <div className="flex gap-1.5 flex-wrap p-3 bg-muted/20 rounded-xl border border-border/30">
+              <Button
+                variant={selectedCategory === null ? "default" : "ghost"}
+                size="sm"
+                className="h-7 text-[11px] rounded-full px-3"
+                onClick={() => setSelectedCategory(null)}
+              >
+                Todas
+              </Button>
+              {QA_CATEGORIES.map((cat) => (
+                <Button
+                  key={cat.value}
+                  variant={selectedCategory === cat.value ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 text-[11px] rounded-full px-3"
+                  onClick={() => setSelectedCategory(selectedCategory === cat.value ? null : cat.value)}
+                >
+                  {cat.label}
+                </Button>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+
+      {/* ── Questions list ── */}
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="rounded-xl">
-              <CardContent className="py-4">
-                <Skeleton className="h-5 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardContent>
-            </Card>
+            <div key={i} className="rounded-2xl border border-border/40 p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1">
+                  <Skeleton className="h-4 w-3/4 mb-1.5" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              </div>
+              <Skeleton className="h-3 w-full" />
+            </div>
           ))}
         </div>
       ) : filteredQuestions.length === 0 ? (
-        <Card className="rounded-xl">
-          <CardContent className="py-12 text-center">
-            <MessageCircle className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-muted-foreground">Nenhuma pergunta encontrada.</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">
-              Seja o primeiro a perguntar!
-            </p>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-dashed border-border/60 py-16 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+            <MessageCircle className="h-7 w-7 text-muted-foreground/40" />
+          </div>
+          <p className="text-sm font-medium text-muted-foreground">Nenhuma pergunta encontrada</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            Seja o primeiro a perguntar!
+          </p>
+        </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {filteredQuestions.map((q) => (
             <QuestionCard
               key={q.id}
@@ -309,7 +315,7 @@ export function QAFeed() {
   );
 }
 
-/* ── Individual Question Card with inline reply ── */
+/* ── Question Card ── */
 
 interface QuestionCardProps {
   question: any;
@@ -340,77 +346,79 @@ function QuestionCard({
   const answers = (answersQuery.data || []) as any[];
 
   return (
-    <Card className="rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20 group">
-      <CardContent className="py-4">
-        {/* Question header - clickable to detail */}
-        <div
-          className="flex items-start gap-3 cursor-pointer"
-          onClick={onSelect}
-        >
-          <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-background">
+    <Card className={`rounded-2xl border-border/40 transition-all duration-200 hover:shadow-md hover:border-border/60 group ${
+      isExpanded ? "shadow-md border-primary/20 bg-card" : ""
+    }`}>
+      <CardContent className="p-4">
+        {/* Question header */}
+        <div className="flex items-start gap-3 cursor-pointer" onClick={onSelect}>
+          <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-background shadow-sm">
             <AvatarImage src={q.author_avatar || undefined} />
-            <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
+            <AvatarFallback className="text-xs bg-primary/10 text-primary font-bold">
               {(q.author_name || "U").charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
-                {q.title}
-              </h3>
-              {q.is_resolved && (
-                <Badge variant="default" className="bg-success text-success-foreground gap-1 text-[10px] h-5">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Resolvida
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className="text-xs font-medium text-foreground/80">
+            {/* Author + time row */}
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold text-foreground">
                 {q.author_name}
               </span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                <Clock className="h-3 w-3" />
+              <span className="text-[10px] text-muted-foreground/60">•</span>
+              <span className="text-[10px] text-muted-foreground/60 flex items-center gap-0.5">
+                <Clock className="h-2.5 w-2.5" />
                 {formatDistanceToNow(new Date(q.created_at), {
                   addSuffix: true,
                   locale: ptBR,
                 })}
               </span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <Badge variant="secondary" className="text-[10px] rounded-full font-medium h-5">
+              <Badge variant="secondary" className="text-[9px] rounded-full font-medium h-[18px] px-2 ml-auto">
                 {getCategoryLabel(q.category)}
               </Badge>
+              {q.is_resolved && (
+                <Badge className="bg-success/15 text-success border-success/20 gap-0.5 text-[9px] h-[18px] px-2">
+                  <CheckCircle2 className="h-2.5 w-2.5" />
+                  Resolvida
+                </Badge>
+              )}
             </div>
+            {/* Title */}
+            <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors leading-snug line-clamp-2">
+              {q.title}
+            </h3>
+            {/* Description preview */}
+            {q.description && (
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{q.description}</p>
+            )}
           </div>
         </div>
 
-        {/* Stats + actions row */}
-        <div className="flex items-center justify-between mt-3 ml-[52px]">
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
+        {/* Stats + actions */}
+        <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-border/30 ml-[52px]">
+          <div className="flex items-center gap-3.5">
+            <button className="text-[11px] text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors">
               <MessageCircle className="h-3.5 w-3.5" />
-              {q.answers_count} {q.answers_count === 1 ? "resposta" : "respostas"}
-            </span>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              {q.answers_count}
+            </button>
+            <button className="text-[11px] text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">
               <ThumbsUp className="h-3.5 w-3.5" />
-              {(q as any).useful_count || 0} úteis
-            </span>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              {(q as any).useful_count || 0}
+            </button>
+            <span className="text-[11px] text-muted-foreground/50 flex items-center gap-1">
               <Eye className="h-3.5 w-3.5" />
               {(q as any).views_count || 0}
             </span>
           </div>
           <Button
-            variant="ghost"
+            variant={isExpanded ? "secondary" : "ghost"}
             size="sm"
-            className="h-8 text-xs gap-1.5 text-primary hover:text-primary rounded-lg"
+            className="h-7 text-[11px] gap-1.5 rounded-full px-3"
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand();
             }}
           >
-            <MessageCircle className="h-3.5 w-3.5" />
+            <MessageCircle className="h-3 w-3" />
             Responder
             {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
           </Button>
@@ -418,61 +426,63 @@ function QuestionCard({
 
         {/* No answers nudge */}
         {q.answers_count === 0 && !isExpanded && (
-          <p className="text-xs text-muted-foreground/70 mt-2 ml-[52px] italic">
-            Sem respostas ainda. Seja o primeiro a ajudar!
-          </p>
+          <div className="mt-2.5 ml-[52px] flex items-center gap-1.5 text-[11px] text-muted-foreground/50">
+            <AlertCircle className="h-3 w-3" />
+            Sem respostas ainda — seja o primeiro a ajudar!
+          </div>
         )}
 
         {/* Expanded: inline answers + reply */}
         {isExpanded && (
-          <div className="mt-4 ml-[52px] space-y-3 border-t border-border/50 pt-4">
-            {/* Existing answers */}
+          <div className="mt-3 ml-[52px] space-y-3 border-t border-border/30 pt-3">
             {answersQuery.isLoading ? (
               <div className="space-y-2">
-                <Skeleton className="h-16 w-full rounded-lg" />
+                <Skeleton className="h-14 w-full rounded-xl" />
               </div>
             ) : answers.length > 0 ? (
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {answers.slice(0, 3).map((a: any) => (
-                  <div key={a.id} className={`flex items-start gap-2.5 p-3 rounded-lg ${a.is_best_answer ? "bg-success/10 border border-success/20" : "bg-muted/30"}`}>
+                  <div key={a.id} className={`flex items-start gap-2.5 p-3 rounded-xl ${
+                    a.is_best_answer ? "bg-success/8 ring-1 ring-success/20" : "bg-muted/20"
+                  }`}>
                     <Avatar className="h-7 w-7 flex-shrink-0">
                       <AvatarImage src={a.author_avatar || undefined} />
-                      <AvatarFallback className="text-[10px]">
+                      <AvatarFallback className="text-[10px] bg-muted font-medium">
                         {(a.author_name || "U").charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium">{a.author_name}</span>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-[11px] font-semibold text-foreground">{a.author_name}</span>
+                        <span className="text-[10px] text-muted-foreground/50">
                           {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: ptBR })}
                         </span>
                         {a.is_best_answer && (
-                          <Badge className="bg-success text-success-foreground text-[9px] h-4 gap-0.5">
+                          <Badge className="bg-success/15 text-success border-success/20 text-[8px] h-4 gap-0.5 px-1.5">
                             <CheckCircle2 className="h-2.5 w-2.5" /> Melhor
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-foreground/90 mt-1 whitespace-pre-wrap line-clamp-3">{a.content}</p>
+                      <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap line-clamp-3 leading-relaxed">{a.content}</p>
                     </div>
                   </div>
                 ))}
                 {answers.length > 3 && (
-                  <Button variant="link" size="sm" className="text-xs h-auto p-0" onClick={onSelect}>
+                  <Button variant="link" size="sm" className="text-[11px] h-auto p-0 text-primary" onClick={onSelect}>
                     Ver todas as {answers.length} respostas →
                   </Button>
                 )}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground/70 italic">
+              <p className="text-[11px] text-muted-foreground/50 italic py-1">
                 Sem respostas ainda. Seja o primeiro a ajudar!
               </p>
             )}
 
-            {/* Inline reply field */}
-            <div className="flex items-start gap-2.5 pt-1">
+            {/* Inline reply */}
+            <div className="flex items-start gap-2.5">
               <Avatar className="h-7 w-7 flex-shrink-0 mt-0.5">
-                <AvatarFallback className="text-[10px] bg-primary/10 text-primary">U</AvatarFallback>
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-medium">U</AvatarFallback>
               </Avatar>
               <div className="flex-1 flex gap-2">
                 <Textarea
@@ -481,12 +491,12 @@ function QuestionCard({
                   onChange={(e) => onInlineAnswerChange(e.target.value)}
                   maxLength={2000}
                   rows={2}
-                  className="rounded-xl text-xs resize-none border-border/60 flex-1 min-h-[60px]"
+                  className="rounded-xl text-xs resize-none border-border/40 flex-1 min-h-[56px] bg-background"
                   onClick={(e) => e.stopPropagation()}
                 />
                 <Button
                   size="icon"
-                  className="h-9 w-9 rounded-xl flex-shrink-0 mt-auto shadow-sm"
+                  className="h-8 w-8 rounded-full flex-shrink-0 mt-auto shadow-sm shadow-primary/20"
                   disabled={!inlineAnswer.trim() || isSubmitting}
                   onClick={(e) => {
                     e.stopPropagation();
