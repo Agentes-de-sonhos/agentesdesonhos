@@ -1,17 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
-  Newspaper,
-  ExternalLink,
-  Loader2,
-  Sparkles,
-  Star,
-  ChevronLeft,
-  ChevronRight,
-  TrendingUp,
-  Trash2,
-  FileText,
+  Newspaper, ExternalLink, Loader2, Star, ChevronLeft, ChevronRight,
+  TrendingUp, Trash2, FileText, Flame, Zap, Bookmark, BookmarkCheck,
+  Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, ChevronDown,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +27,16 @@ interface NoticiaHub {
   alerta_trade: boolean;
   nivel_alerta: string;
 }
+
+const CATEGORIA_ICONS: Record<string, React.ReactNode> = {
+  "Aéreo": <Plane className="h-3.5 w-3.5" />,
+  "Cruzeiros": <Ship className="h-3.5 w-3.5" />,
+  "Hotel": <Hotel className="h-3.5 w-3.5" />,
+  "Destinos": <Globe className="h-3.5 w-3.5" />,
+  "Mercado": <BarChart3 className="h-3.5 w-3.5" />,
+  "Eventos": <Mic className="h-3.5 w-3.5" />,
+  "Turismo": <Palmtree className="h-3.5 w-3.5" />,
+};
 
 const CATEGORIAS_FILTER = [
   "Todas",
@@ -72,116 +75,68 @@ function formatDate(dateString: string): string {
 
 function CategoryBadge({ categoria }: { categoria: string }) {
   const colorClass = CATEGORIA_COLORS[categoria] || "bg-muted text-muted-foreground border-border";
+  const icon = CATEGORIA_ICONS[categoria];
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${colorClass}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${colorClass}`}>
+      {icon}
       {categoria}
     </span>
   );
 }
 
-function StatusBadge({ item }: { item: NoticiaHub }) {
-  if (item.alerta_trade) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-        <Star className="h-3 w-3" />
-        Destaque do Trade
-      </span>
-    );
-  }
-  if (item.tipo_exibicao === "destaque") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-        <Star className="h-3 w-3" />
-        Destaque
-      </span>
-    );
-  }
-  if (item.status === "sugerido_ia") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 text-violet-700 border border-violet-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-        <Sparkles className="h-3 w-3" />
-        Curadoria da IA
-      </span>
-    );
-  }
-  return null;
-}
-
-/* ── Hero Card (top feature) ─────────────────────────────── */
-function HeroNewsCard({ item, isAdmin, onDelete }: { item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void }) {
+/* ── Hero Card (Notícia do Dia) ─────────────────────────── */
+function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave }: {
+  item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void;
+  saved: boolean; onToggleSave: (id: string) => void;
+}) {
   return (
     <div className="relative group/card">
       <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
-        <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/5 via-card to-card">
-          <CardContent className="p-8 md:p-10">
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
-              <StatusBadge item={item} />
+        <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/8 via-card to-card">
+          <CardContent className="p-6 md:p-8">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                <Flame className="h-3.5 w-3.5" />
+                Notícia do Dia
+              </span>
               <CategoryBadge categoria={item.categoria} />
               <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
                 <TrendingUp className="h-3.5 w-3.5" />
                 Score {item.relevancia_score}/10
               </span>
             </div>
-            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
+            <h2 className="font-display text-xl md:text-2xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
               {item.titulo_curto}
             </h2>
-            <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-3xl">
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-3xl line-clamp-3">
               {item.resumo}
             </p>
-            <div className="flex items-center gap-3 mt-5 pt-4 border-t border-border/50">
-              <span className="text-sm font-semibold text-foreground/70">{item.fonte}</span>
-              <span className="text-sm text-muted-foreground">•</span>
-              <span className="text-sm text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-              <ExternalLink className="h-4 w-4 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </CardContent>
-        </Card>
-      </a>
-      {isAdmin && onDelete && (
-        <Button
-          variant="destructive"
-          size="icon"
-          className="absolute top-3 right-3 h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-opacity shadow-lg"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(item.id); }}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      )}
-    </div>
-  );
-}
-
-/* ── Alert Card (horizontal, premium) ────────────────────── */
-function AlertNewsCard({ item, isAdmin, onDelete }: { item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void }) {
-  return (
-    <div className="relative group/card">
-      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
-        <Card className="border-0 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 bg-gradient-to-r from-orange-50 to-card ring-1 ring-orange-200/50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <StatusBadge item={item} />
-              <CategoryBadge categoria={item.categoria} />
-            </div>
-            <h3 className="font-display text-lg font-bold text-foreground group-hover:text-orange-600 transition-colors leading-snug">
-              {item.titulo_curto}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-              {item.resumo}
-            </p>
-            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-orange-100">
+            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border/50">
               <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
               <span className="text-xs text-muted-foreground">•</span>
               <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-              <ExternalLink className="h-3.5 w-3.5 ml-auto text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="ml-auto flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary group-hover:underline">
+                  Ler matéria <ExternalLink className="h-3.5 w-3.5" />
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
       </a>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-3 right-3 h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(item.id); }}
+      >
+        {saved ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4 text-muted-foreground" />}
+      </Button>
       {isAdmin && onDelete && (
         <Button
           variant="destructive"
           size="icon"
-          className="absolute top-3 right-3 h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-opacity shadow-lg"
+          className="absolute top-3 right-12 h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-opacity shadow-lg"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(item.id); }}
         >
           <Trash2 className="h-4 w-4" />
@@ -191,55 +146,89 @@ function AlertNewsCard({ item, isAdmin, onDelete }: { item: NoticiaHub; isAdmin:
   );
 }
 
-/* ── Standard Magazine Card ──────────────────────────────── */
-function MagazineNewsCard({ item, isAdmin, onDelete }: { item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void }) {
+/* ── Standard News Card ──────────────────────────────────── */
+function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending }: {
+  item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void;
+  saved: boolean; onToggleSave: (id: string) => void; trending?: boolean;
+}) {
   return (
     <div className="relative group/card h-full">
       <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group h-full">
-        <Card className="border-0 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full">
-          <CardContent className="p-6 flex flex-col h-full">
-            <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <StatusBadge item={item} />
+        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full">
+          <CardContent className="p-5 flex flex-col h-full">
+            <div className="flex items-center gap-1.5 mb-2.5 flex-wrap">
               <CategoryBadge categoria={item.categoria} />
+              {trending && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold">
+                  <Flame className="h-3 w-3" /> Em alta
+                </span>
+              )}
+              {item.alerta_trade && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2 py-0.5 text-[10px] font-bold">
+                  <Star className="h-3 w-3" /> Destaque
+                </span>
+              )}
             </div>
-            <h3 className="font-display text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-snug flex-grow">
+            <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors leading-snug flex-grow line-clamp-2">
               {item.titulo_curto}
             </h3>
-            <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
               {item.resumo}
             </p>
-            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/50">
-              <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-              <ExternalLink className="h-3.5 w-3.5 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-border/40">
+              <span className="text-[11px] font-semibold text-foreground/70">{item.fonte}</span>
+              <span className="text-[11px] text-muted-foreground">•</span>
+              <span className="text-[11px] text-muted-foreground">{formatDate(item.data_publicacao)}</span>
+              <ExternalLink className="h-3 w-3 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </CardContent>
         </Card>
       </a>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-2.5 right-2.5 h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm opacity-0 group-hover/card:opacity-100 transition-opacity"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(item.id); }}
+      >
+        {saved ? <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> : <Bookmark className="h-3.5 w-3.5 text-muted-foreground" />}
+      </Button>
       {isAdmin && onDelete && (
         <Button
           variant="destructive"
           size="icon"
-          className="absolute top-3 right-3 h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-opacity shadow-lg"
+          className="absolute top-2.5 right-10 h-7 w-7 opacity-0 group-hover/card:opacity-100 transition-opacity shadow-lg"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(item.id); }}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-3.5 w-3.5" />
         </Button>
       )}
     </div>
   );
 }
 
-/* ── Section Header ──────────────────────────────────────── */
-function SectionTitle({ icon: Icon, title, color }: { icon: React.ElementType; title: string; color: string }) {
+/* ── Compact List Card (for sidebar sections) ────────────── */
+function CompactNewsItem({ item, index }: { item: NoticiaHub; index: number }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${color}`}>
-        <Icon className="h-4.5 w-4.5 text-white" />
+    <a
+      href={item.url_original}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors"
+    >
+      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center mt-0.5">
+        {index + 1}
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-relaxed">
+          {item.titulo_curto}
+        </p>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-[10px] text-muted-foreground">{item.fonte}</span>
+          <span className="text-[10px] text-muted-foreground">•</span>
+          <span className="text-[10px] text-muted-foreground">{formatDate(item.data_publicacao)}</span>
+        </div>
       </div>
-      <h2 className="font-display text-xl font-bold text-foreground">{title}</h2>
-    </div>
+    </a>
   );
 }
 
@@ -247,9 +236,11 @@ function SectionTitle({ icon: Icon, title, color }: { icon: React.ElementType; t
 export default function Noticias() {
   const [activeFilter, setActiveFilter] = useState("Todas");
   const [page, setPage] = useState(1);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const { isAdmin } = useUserRole();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const { data: allNews, isLoading } = useQuery({
     queryKey: ["noticias-hub"],
@@ -289,12 +280,31 @@ export default function Noticias() {
     }
   };
 
-  // ── Deduplicated sections ──
+  const toggleSave = (id: string) => {
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+        toast({ title: "Notícia removida dos salvos" });
+      } else {
+        next.add(id);
+        toast({ title: "Notícia salva!" });
+      }
+      return next;
+    });
+  };
+
+  const scrollCarousel = (direction: "left" | "right") => {
+    if (!carouselRef.current) return;
+    const amount = 320;
+    carouselRef.current.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
+  };
+
+  // ── Sections ──
   const alertas = useMemo(
-    () => (allNews || []).filter((n) => n.alerta_trade).slice(0, 3),
+    () => (allNews || []).filter((n) => n.alerta_trade).slice(0, 6),
     [allNews]
   );
-
   const alertaIds = useMemo(() => new Set(alertas.map((n) => n.id)), [alertas]);
 
   const hero = useMemo(
@@ -312,6 +322,19 @@ export default function Noticias() {
     () => (allNews || []).filter((n) => !heroAndAlertIds.has(n.id)),
     [allNews, heroAndAlertIds]
   );
+
+  // Top 5 by score for "Resumo rápido"
+  const topHeadlines = useMemo(
+    () => [...(allNews || [])].sort((a, b) => b.relevancia_score - a.relevancia_score).slice(0, 5),
+    [allNews]
+  );
+
+  // "Mais lidas" = highest score items different from headlines
+  const trending = useMemo(
+    () => [...(allNews || [])].sort((a, b) => b.relevancia_score - a.relevancia_score).slice(0, 3).map((n) => n.id),
+    [allNews]
+  );
+  const trendingSet = useMemo(() => new Set(trending), [trending]);
 
   const filteredNews = useMemo(() => {
     if (!allNews) return [];
@@ -337,39 +360,41 @@ export default function Noticias() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 animate-fade-in">
-        {/* ── Hero Header ── */}
-        <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 md:p-10">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-              <Newspaper className="h-7 w-7 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-                Notícias do Trade
-              </h1>
-              <p className="text-muted-foreground text-base mt-0.5">
-                Curadoria inteligente — notícias aprovadas
-              </p>
-            </div>
+      <div className="space-y-6 animate-fade-in">
+        {/* ── Compact Header ── */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/25">
+            <Newspaper className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              Notícias do Trade
+            </h1>
+            <p className="text-muted-foreground text-xs">
+              Curadoria inteligente das últimas 24 horas
+            </p>
           </div>
         </div>
 
-        {/* ── Filter Bar ── */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mt-2">
-          {CATEGORIAS_FILTER.map((cat) => (
-            <Button
-              key={cat}
-              variant={activeFilter === cat ? "default" : "outline"}
-              size="sm"
-              className={`whitespace-nowrap text-xs rounded-full px-4 ${
-                activeFilter === cat ? "shadow-md shadow-primary/20" : ""
-              }`}
-              onClick={() => handleFilterChange(cat)}
-            >
-              {cat}
-            </Button>
-          ))}
+        {/* ── Filter Bar with Icons ── */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {CATEGORIAS_FILTER.map((cat) => {
+            const icon = CATEGORIA_ICONS[cat];
+            return (
+              <Button
+                key={cat}
+                variant={activeFilter === cat ? "default" : "outline"}
+                size="sm"
+                className={`whitespace-nowrap text-xs rounded-full px-3.5 gap-1.5 ${
+                  activeFilter === cat ? "shadow-md shadow-primary/20" : ""
+                }`}
+                onClick={() => handleFilterChange(cat)}
+              >
+                {icon}
+                {cat}
+              </Button>
+            );
+          })}
         </div>
 
         {isLoading ? (
@@ -381,29 +406,98 @@ export default function Noticias() {
           <>
             {showSections && (
               <>
-                {hero && (
-                  <section>
-                    <HeroNewsCard item={hero} isAdmin={isAdmin} onDelete={handleDelete} />
-                  </section>
-                )}
+                {/* ── Hero + Resumo Rápido side by side ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  {/* Hero - 2/3 */}
+                  <div className="lg:col-span-2">
+                    {hero && (
+                      <HeroNewsCard
+                        item={hero}
+                        isAdmin={isAdmin}
+                        onDelete={handleDelete}
+                        saved={savedIds.has(hero.id)}
+                        onToggleSave={toggleSave}
+                      />
+                    )}
+                  </div>
 
+                  {/* Resumo Rápido - 1/3 */}
+                  <div className="lg:col-span-1">
+                    <Card className="border-0 shadow-sm h-full">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Zap className="h-4 w-4 text-warning" />
+                          <h3 className="text-sm font-bold text-foreground">Resumo do Trade</h3>
+                        </div>
+                        <div className="space-y-0.5">
+                          {topHeadlines.map((item, i) => (
+                            <CompactNewsItem key={item.id} item={item} index={i} />
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                {/* ── Destaques Carousel ── */}
                 {alertas.length > 0 && (
-                  <section className="space-y-4">
-                    <SectionTitle icon={Star} title="Destaques do Trade" color="bg-orange-500" />
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <section className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
+                          <Star className="h-4 w-4 text-white" />
+                        </div>
+                        <h2 className="text-base font-bold text-foreground">Destaques do Trade</h2>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => scrollCarousel("left")}>
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => scrollCarousel("right")}>
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div
+                      ref={carouselRef}
+                      className="flex gap-4 overflow-x-auto scrollbar-none scroll-smooth pb-1 -mx-1 px-1"
+                    >
                       {alertas.map((item) => (
-                        <AlertNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
+                        <div key={item.id} className="flex-shrink-0 w-[280px] sm:w-[300px]">
+                          <NewsCard
+                            item={item}
+                            isAdmin={isAdmin}
+                            onDelete={handleDelete}
+                            saved={savedIds.has(item.id)}
+                            onToggleSave={toggleSave}
+                            trending={trendingSet.has(item.id)}
+                          />
+                        </div>
                       ))}
                     </div>
                   </section>
                 )}
 
+                {/* ── Outras Notícias ── */}
                 {curadoria.length > 0 && (
-                  <section className="space-y-4">
-                    <SectionTitle icon={FileText} title="Outras Notícias do Dia" color="bg-violet-500" />
-                    <div className="grid gap-4 sm:grid-cols-2">
+                  <section className="space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500">
+                        <FileText className="h-4 w-4 text-white" />
+                      </div>
+                      <h2 className="text-base font-bold text-foreground">Outras Notícias</h2>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {curadoria.map((item) => (
-                        <MagazineNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
+                        <NewsCard
+                          key={item.id}
+                          item={item}
+                          isAdmin={isAdmin}
+                          onDelete={handleDelete}
+                          saved={savedIds.has(item.id)}
+                          onToggleSave={toggleSave}
+                          trending={trendingSet.has(item.id)}
+                        />
                       ))}
                     </div>
                   </section>
@@ -413,19 +507,23 @@ export default function Noticias() {
 
             {!showSections && paginatedNews.length > 0 && (
               <section className="space-y-4">
-                <h2 className="font-display text-xl font-bold text-foreground">{activeFilter}</h2>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {paginatedNews.map((item) =>
-                    item.alerta_trade ? (
-                      <AlertNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
-                    ) : (
-                      <MagazineNewsCard key={item.id} item={item} isAdmin={isAdmin} onDelete={handleDelete} />
-                    )
-                  )}
+                <h2 className="text-base font-bold text-foreground">{activeFilter}</h2>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {paginatedNews.map((item) => (
+                    <NewsCard
+                      key={item.id}
+                      item={item}
+                      isAdmin={isAdmin}
+                      onDelete={handleDelete}
+                      saved={savedIds.has(item.id)}
+                      onToggleSave={toggleSave}
+                      trending={trendingSet.has(item.id)}
+                    />
+                  ))}
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-3 pt-6">
+                  <div className="flex items-center justify-center gap-3 pt-4">
                     <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="rounded-full">
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
