@@ -250,7 +250,7 @@ export function AppSidebar() {
           isActive && !isLocked && sectionBgColor
             ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
             : isActive && !isLocked
-              ? "bg-primary text-primary-foreground shadow-md"
+              ? "bg-muted text-foreground font-semibold shadow-sm"
               : (isLocked && !isLockedByEducaPass)
                 ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
                 : isLockedByEducaPass
@@ -264,7 +264,7 @@ export function AppSidebar() {
           <item.icon
             className={cn(
               "h-5 w-5 transition-all duration-300",
-              isActive && !isLocked && !sectionBgColor && "text-primary-foreground",
+              isActive && !isLocked && !sectionBgColor && "text-foreground",
               isLocked && !isLockedByEducaPass && "text-muted-foreground"
             )}
           />
