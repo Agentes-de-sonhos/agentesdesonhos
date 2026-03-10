@@ -92,6 +92,8 @@ const guiasSection: MenuSection = {
   title: "Guias e Referências",
   icon: BookMarked,
   hoverColor: "hover:bg-emerald-50 hover:text-emerald-700",
+  bgColor: "bg-emerald-50",
+  textColor: "text-emerald-700",
   items: [
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
