@@ -110,7 +110,7 @@ export function QAFeed() {
                   disabled={!newTitle.trim() || createQuestion.isPending}
                   className="w-full"
                 >
-                  {createQuestion.isPending ? "Publicando..." : "Publicar Pergunta (+2 pts)"}
+                  {createQuestion.isPending ? "Publicando..." : "Publicar Pergunta (+0.25 pts)"}
                 </Button>
               </div>
             </DialogContent>

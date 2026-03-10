@@ -200,7 +200,7 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
       {/* New answer form */}
       <Card>
         <CardContent className="py-4">
-          <h4 className="text-sm font-medium mb-2">Sua Resposta (+5 pontos)</h4>
+          <h4 className="text-sm font-medium mb-2">Sua Resposta (+4 pontos)</h4>
           <Textarea
             placeholder="Escreva sua resposta para ajudar o colega..."
             value={newAnswer}
