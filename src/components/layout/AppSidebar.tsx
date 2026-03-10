@@ -103,7 +103,7 @@ const comunidadeSection: MenuSection = {
   textColor: "text-red-700",
   borderColor: "border-red-600",
   items: [
-    { title: "Pergunte e Responda", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
+    { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
     { title: "Travel Experts", url: "/comunidade", icon: Users },
   ],
 };
