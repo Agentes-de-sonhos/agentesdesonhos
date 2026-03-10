@@ -140,7 +140,9 @@ const criarSection: MenuSection = {
 const clientesSection: MenuSection = {
   title: "Clientes",
   icon: Users,
-  hoverColor: "hover:bg-cyan-50 hover:text-cyan-700",
+  hoverColor: "hover:bg-cyan-600 hover:text-white",
+  headerBg: "bg-cyan-600 text-white",
+  headerHoverBg: "hover:bg-cyan-700",
   bgColor: "bg-cyan-50",
   textColor: "text-cyan-700",
   items: [
