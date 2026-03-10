@@ -31,6 +31,7 @@ import { CuratedNewsFeed } from "@/components/dashboard/CuratedNewsFeed";
 import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
+import { CommunityQACard } from "@/components/dashboard/CommunityQACard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 
 
