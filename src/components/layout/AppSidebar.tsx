@@ -315,8 +315,8 @@ export function AppSidebar() {
                     className={cn(
                       "group flex items-center justify-center rounded-xl px-3 py-2.5 transition-all duration-300 w-full",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent"
+                        ? cn(section.headerBg)
+                        : cn("text-sidebar-foreground", section.hoverColor)
                     )}
                   >
                     <Icon className="h-5 w-5 flex-shrink-0 transition-all duration-300 group-hover:scale-110" />
@@ -328,10 +328,13 @@ export function AppSidebar() {
               </TooltipContent>
             </Tooltip>
             <PopoverContent side="right" align="start" className="w-56 p-2" sideOffset={8}>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 px-2 py-1.5">
+              <p className={cn(
+                "text-[11px] font-bold uppercase tracking-wider px-2 py-1.5 rounded-lg",
+                section.headerBg
+              )}>
                 {section.title}
               </p>
-              <nav className="flex flex-col gap-0.5">
+              <nav className="flex flex-col gap-0.5 mt-1">
                 {section.items.map((item) => {
                   const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
                   const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
@@ -342,17 +345,14 @@ export function AppSidebar() {
                       onClick={(e) => handleMenuClick(item, e)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
-                        itemActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted hover:text-foreground",
+                        itemActive && !isLocked
+                          ? cn(section.bgColor, section.textColor, "border-l-[3px]", section.borderColor, "font-semibold")
+                          : cn(section.bgColor, section.textColor, "hover:scale-[1.02] hover:font-semibold"),
                         isLocked && "opacity-60"
                       )}
                     >
                       <item.icon className="h-4 w-4 flex-shrink-0" />
                       <span className="truncate flex-1">{item.title}</span>
-                      {item.isPremium && (
-                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-warning/50 text-warning font-semibold">
-                          PRO
-                        </Badge>
-                      )}
                     </Link>
                   );
                 })}
