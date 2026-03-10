@@ -4,7 +4,6 @@ import { QARankingSidebar } from "@/components/qa/QARankingSidebar";
 import { MessageCircleQuestion } from "lucide-react";
 
 export default function PerguntasRespostas() {
-  const { myPoints } = useGamification();
 
   return (
     <DashboardLayout>
