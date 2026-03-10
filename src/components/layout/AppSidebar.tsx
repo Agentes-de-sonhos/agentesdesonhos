@@ -164,7 +164,15 @@ export function AppSidebar() {
   );
 
   const toggleSection = (title: string) => {
-    setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
+    setOpenSections((prev) => {
+      const isCurrentlyOpen = prev[title];
+      // Close all, then toggle the clicked one
+      const allClosed: Record<string, boolean> = {};
+      if (!isCurrentlyOpen) {
+        allClosed[title] = true;
+      }
+      return allClosed;
+    });
   };
 
   const isSectionActive = (section: MenuSection) =>
