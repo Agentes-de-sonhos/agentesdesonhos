@@ -106,6 +106,8 @@ const recursosVendasSection: MenuSection = {
   title: "Recursos de Vendas",
   icon: ShoppingCart,
   hoverColor: "hover:bg-orange-50 hover:text-orange-700",
+  bgColor: "bg-orange-50",
+  textColor: "text-orange-700",
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
