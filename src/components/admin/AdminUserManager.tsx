@@ -63,6 +63,8 @@ export function AdminUserManager() {
   const [planFilter, setPlanFilter] = useState<string>("all");
   const [editingUser, setEditingUser] = useState<UserWithDetails | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
