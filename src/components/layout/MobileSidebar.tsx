@@ -253,11 +253,6 @@ export function MobileSidebar() {
         <span className={cn("truncate flex-1", isLocked && !isLockedByEducaPass && "text-muted-foreground")}>
           {item.title}
         </span>
-        {item.isPremium && (
-          <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-warning/50 text-warning font-semibold flex-shrink-0">
-            PRO
-          </Badge>
-        )}
         {item.isHighlighted && !isActive && !isLocked && (
           <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 animate-pulse" />
         )}

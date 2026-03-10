@@ -244,7 +244,6 @@ export function AppSidebar() {
           <TooltipTrigger asChild>{menuLink}</TooltipTrigger>
           <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
             <p className="text-sm font-medium">{item.title}</p>
-            {item.isPremium && <p className="text-xs text-warning">Premium</p>}
           </TooltipContent>
         </Tooltip>
       );
