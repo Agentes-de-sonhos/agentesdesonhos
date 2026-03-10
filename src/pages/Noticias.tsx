@@ -441,43 +441,16 @@ export default function Noticias() {
                   </div>
                 </div>
 
-                {/* ── Destaques Carousel ── */}
+                {/* ── Destaques Carousel (full-width slides, auto-advance 10s) ── */}
                 {alertas.length > 0 && (
-                  <section className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
-                          <Star className="h-4 w-4 text-white" />
-                        </div>
-                        <h2 className="text-base font-bold text-foreground">Destaques do Trade</h2>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => scrollCarousel("left")}>
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => scrollCarousel("right")}>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div
-                      ref={carouselRef}
-                      className="flex gap-4 overflow-x-auto scrollbar-none scroll-smooth pb-1 -mx-1 px-1"
-                    >
-                      {alertas.map((item) => (
-                        <div key={item.id} className="flex-shrink-0 w-[280px] sm:w-[300px]">
-                          <NewsCard
-                            item={item}
-                            isAdmin={isAdmin}
-                            onDelete={handleDelete}
-                            saved={savedIds.has(item.id)}
-                            onToggleSave={toggleSave}
-                            trending={trendingSet.has(item.id)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
+                  <DestaquesCarousel
+                    items={alertas}
+                    isAdmin={isAdmin}
+                    onDelete={handleDelete}
+                    savedIds={savedIds}
+                    onToggleSave={toggleSave}
+                    trendingSet={trendingSet}
+                  />
                 )}
 
                 {/* ── Outras Notícias ── */}
