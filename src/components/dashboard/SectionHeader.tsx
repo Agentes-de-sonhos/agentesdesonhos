@@ -9,7 +9,8 @@
    | "ai" 
    | "events" 
    | "flights"
-   | "tools";
+   | "tools"
+   | "community";
 
  interface SectionHeaderProps {
    title: string;
@@ -27,6 +28,7 @@
    events: "bg-[hsl(var(--section-events))]",
    flights: "bg-[hsl(var(--section-flights))]",
    tools: "bg-[hsl(var(--section-tools))]",
+   community: "bg-[hsl(var(--section-community))]",
  };
 
  const iconColorStyles: Record<SectionColor, string> = {
@@ -39,6 +41,7 @@
    events: "text-[hsl(var(--section-events))]",
    flights: "text-[hsl(var(--section-flights))]",
    tools: "text-[hsl(var(--section-tools))]",
+   community: "text-[hsl(var(--section-community))]",
  };
 
  export function SectionHeader({ title, color, className }: SectionHeaderProps) {

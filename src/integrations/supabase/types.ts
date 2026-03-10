@@ -2732,6 +2732,35 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_answer_votes: {
+        Row: {
+          answer_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_answer_votes_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "qa_answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       qa_answers: {
         Row: {
           content: string
@@ -2740,6 +2769,7 @@ export type Database = {
           is_best_answer: boolean
           question_id: string
           updated_at: string
+          useful_count: number
           user_id: string
         }
         Insert: {
@@ -2749,6 +2779,7 @@ export type Database = {
           is_best_answer?: boolean
           question_id: string
           updated_at?: string
+          useful_count?: number
           user_id: string
         }
         Update: {
@@ -2758,6 +2789,7 @@ export type Database = {
           is_best_answer?: boolean
           question_id?: string
           updated_at?: string
+          useful_count?: number
           user_id?: string
         }
         Relationships: [

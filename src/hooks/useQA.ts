@@ -126,13 +126,13 @@ export function useQA() {
         .select()
         .single();
       if (error) throw error;
-      // Award 2 points for asking a question
-      await awardPoints(2, "ask_question", result.id);
+      // Award 0.25 points for asking a question
+      await awardPoints(0.25, "ask_question", result.id);
       return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
-      toast.success("Pergunta publicada! +2 pontos");
+      toast.success("Pergunta publicada! +0.25 pontos");
     },
     onError: () => toast.error("Erro ao publicar pergunta"),
   });
@@ -146,14 +146,14 @@ export function useQA() {
         .select()
         .single();
       if (error) throw error;
-      // Award 5 points for answering
-      await awardPoints(5, "answer_question", result.id);
+      // Award 4 points for answering
+      await awardPoints(4, "answer_question", result.id);
       return result;
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["qa-answers", vars.question_id] });
       queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
-      toast.success("Resposta publicada! +5 pontos");
+      toast.success("Resposta publicada! +4 pontos");
     },
     onError: () => toast.error("Erro ao publicar resposta"),
   });
