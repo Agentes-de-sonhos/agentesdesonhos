@@ -107,8 +107,18 @@ export function UpcomingAgendaEventsCard() {
                 </div>
               );
             })}
+
+            <div className="pt-3 border-t">
+              <Button
+                variant="ghost"
+                className="w-full text-[hsl(var(--section-events))] hover:text-[hsl(var(--section-events))] hover:bg-[hsl(var(--section-events))]/5"
+                onClick={() => navigate("/agenda")}
+              >
+                Ver todos
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
           </div>
-        )}
       </CardContent>
     </Card>
   );
