@@ -180,15 +180,12 @@ export function CommunityQACard() {
   const createAnswer = useMutation({
     mutationFn: async () => {
       if (!user || !expandedQuestionId || !replyContent.trim()) throw new Error("Dados inválidos");
-      const content = [replyContent.trim(), replyLink.trim() ? `🔗 ${replyLink.trim()}` : ""]
-        .filter(Boolean)
-        .join("\n\n");
 
       const { data, error } = await supabase
         .from("qa_answers")
         .insert({
           question_id: expandedQuestionId,
-          content,
+          content: replyContent.trim(),
           user_id: user.id,
         })
         .select()
