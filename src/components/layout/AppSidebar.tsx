@@ -143,6 +143,8 @@ const marketingSection: MenuSection = {
   title: "Marketing",
   icon: Megaphone,
   hoverColor: "hover:bg-pink-50 hover:text-pink-700",
+  bgColor: "bg-pink-50",
+  textColor: "text-pink-700",
   items: [
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
     { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store },
