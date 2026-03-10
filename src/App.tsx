@@ -34,6 +34,7 @@ import Financeiro from "./pages/Financeiro";
 import GestaoClientes from "./pages/GestaoClientes";
 import EducaAcademy from "./pages/EducaAcademy";
 import Community from "./pages/Community";
+import Beneficios from "./pages/Beneficios";
 import Mentorias from "./pages/Mentorias";
 import MentoriaDetail from "./pages/MentoriaDetail";
 import PlaybookViewer from "./components/playbook/PlaybookViewer";
@@ -292,6 +293,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Community />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/beneficios"
+              element={
+                <ProtectedRoute>
+                  <Beneficios />
                 </ProtectedRoute>
               }
             />
