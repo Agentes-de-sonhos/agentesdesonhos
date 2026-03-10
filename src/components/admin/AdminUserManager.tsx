@@ -219,13 +219,21 @@ export function AdminUserManager() {
   return (
     <Card className="border-0 shadow-md">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Gerenciar Usuários
-        </CardTitle>
-        <CardDescription>
-          Visualize, filtre e gerencie os usuários da plataforma
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Gerenciar Usuários
+            </CardTitle>
+            <CardDescription>
+              Visualize, filtre e gerencie os usuários da plataforma
+            </CardDescription>
+          </div>
+          <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            Adicionar Usuário
+          </Button>
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
