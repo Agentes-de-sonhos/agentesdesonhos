@@ -154,13 +154,12 @@ export default function MapaTurismo() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        {/* Header - same style as Dashboard sections */}
-        <div>
-          <SectionHeader title="Mapa do Turismo" color="map" />
-          <p className="text-muted-foreground text-sm -mt-2">
-            Encontre parceiros do trade turístico
-          </p>
-        </div>
+        <PageHeader
+          pageKey="mapa-turismo"
+          title="Mapa do Turismo"
+          subtitle="Encontre parceiros do trade turístico"
+          icon={Globe}
+        />
 
         {/* Category Icon Buttons - same as Dashboard */}
         <div className="grid grid-cols-5 gap-3 sm:grid-cols-5 lg:grid-cols-10">

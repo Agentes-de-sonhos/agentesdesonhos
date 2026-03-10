@@ -79,15 +79,12 @@ export default function BloqueiosAereos() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">
-            Bloqueios Aéreos
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Consulte bloqueios de passagens aéreas disponíveis
-          </p>
-        </div>
+        <PageHeader
+          pageKey="bloqueios-aereos"
+          title="Bloqueios Aéreos"
+          subtitle="Consulte bloqueios de passagens aéreas disponíveis"
+          icon={Plane}
+        />
 
         {/* Filters */}
         <Card className="border-0 shadow-md">

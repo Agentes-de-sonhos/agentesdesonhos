@@ -486,18 +486,13 @@ export default function Noticias() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        {/* ── Compact Header ── */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/25">
-            <Newspaper className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">
-              Notícias do Trade
-            </h1>
-            <p className="text-muted-foreground text-xs">
-              Curadoria inteligente das últimas 24 horas
-            </p>
+        {/* ── Header ── */}
+        <PageHeader
+          pageKey="noticias"
+          title="Notícias do Trade"
+          subtitle="Curadoria inteligente das últimas 24 horas"
+          icon={Newspaper}
+        />
           </div>
         </div>
 
