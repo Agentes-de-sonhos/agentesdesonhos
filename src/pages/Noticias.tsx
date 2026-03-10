@@ -90,9 +90,9 @@ function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave }: {
   saved: boolean; onToggleSave: (id: string) => void;
 }) {
   return (
-    <div className="relative group/card">
-      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
-        <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/8 via-card to-card">
+    <div className="relative group/card h-full">
+      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group h-full">
+        <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/8 via-card to-card h-full">
           <CardContent className="p-6 md:p-8">
             <div className="flex items-center gap-2 mb-3 flex-wrap">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-3 py-1 text-xs font-bold uppercase tracking-wider">
