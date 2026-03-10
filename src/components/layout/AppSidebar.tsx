@@ -90,7 +90,21 @@ const conhecimentoSection: MenuSection = {
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
+  ],
+};
+
+const comunidadeSection: MenuSection = {
+  title: "Comunidade",
+  icon: Heart,
+  hoverColor: "hover:bg-red-600 hover:text-white",
+  headerBg: "bg-red-600 text-white",
+  headerHoverBg: "hover:bg-red-700",
+  bgColor: "bg-red-50",
+  textColor: "text-red-700",
+  borderColor: "border-red-600",
+  items: [
     { title: "Pergunte e Responda", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
+    { title: "Travel Experts", url: "/comunidade", icon: Users },
   ],
 };
 
