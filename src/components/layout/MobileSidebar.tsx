@@ -119,7 +119,9 @@ const recursosVendasSection: MenuSection = {
 const criarSection: MenuSection = {
   title: "Criar",
   icon: PlusCircle,
-  hoverColor: "hover:bg-violet-50 hover:text-violet-700",
+  hoverColor: "hover:bg-violet-600 hover:text-white",
+  headerBg: "bg-violet-600 text-white",
+  headerHoverBg: "hover:bg-violet-700",
   bgColor: "bg-violet-50",
   textColor: "text-violet-700",
   items: [
