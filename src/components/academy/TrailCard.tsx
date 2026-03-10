@@ -1,8 +1,8 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, BookOpen, Award, ChevronRight, Clock, Lock } from "lucide-react";
+import { MapPin, BookOpen, Award, Play, Clock, ChevronRight, Globe } from "lucide-react";
 import type { TrailWithProgress } from "@/types/academy";
 
 interface TrailCardProps {
@@ -13,12 +13,19 @@ interface TrailCardProps {
 export function TrailCard({ trail, onSelect }: TrailCardProps) {
   const isCertified = trail.hasCertificate;
   const isCompleted = trail.progressPercent === 100;
+  const isInProgress = trail.progressPercent > 0 && trail.progressPercent < 100;
+
+  const totalMinutes = trail.trainings?.reduce(
+    (sum, tt) => sum + (tt.training?.duration_minutes || 0),
+    0
+  ) || 0;
 
   return (
     <Card 
-      className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50 overflow-hidden"
+      className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/50 overflow-hidden h-full flex flex-col"
       onClick={() => onSelect(trail)}
     >
+      {/* Image */}
       <div className="relative h-36 bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
         {trail.image_url ? (
           <img 
@@ -32,54 +39,80 @@ export function TrailCard({ trail, onSelect }: TrailCardProps) {
             <MapPin className="h-12 w-12 text-primary/40" />
           </div>
         )}
-        {isCertified && (
-          <div className="absolute top-2 left-2">
+        {/* Badges */}
+        <div className="absolute top-2 left-2 flex gap-1.5">
+          {isCertified && (
             <Badge className="bg-yellow-500 text-white shadow-md">
               <Award className="h-3 w-3 mr-1" /> Certificado
             </Badge>
-          </div>
-        )}
-        {isCompleted && !isCertified && (
-          <div className="absolute top-2 right-2">
-            <Badge className="bg-green-500 text-white">Módulos Concluídos</Badge>
-          </div>
-        )}
+          )}
+          {isCompleted && !isCertified && (
+            <Badge className="bg-green-500 text-white shadow-md">✔ Concluído</Badge>
+          )}
+          {isInProgress && (
+            <Badge className="bg-primary text-primary-foreground shadow-md text-[10px]">
+              ▶ Em andamento
+            </Badge>
+          )}
+        </div>
       </div>
       
-      <CardHeader className="pb-2">
-        <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
+      {/* Content */}
+      <CardContent className="pt-4 pb-3 flex-1 flex flex-col">
+        <h3 className="font-semibold text-lg group-hover:text-primary transition-colors leading-tight">
           {trail.name}
         </h3>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{trail.destination}</span>
-          {trail.total_hours > 0 && <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{trail.total_hours}h</span>}
-        </div>
-      </CardHeader>
-
-      <CardContent className="pb-3">
-        {trail.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{trail.description}</p>
-        )}
         
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <BookOpen className="h-4 w-4" />
-          <span>{trail.totalCount} módulos</span>
+        {/* Destination info - avoids redundancy */}
+        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1.5">
+          <span className="flex items-center gap-1">
+            <Globe className="h-3.5 w-3.5" />
+            {trail.destination}
+          </span>
         </div>
 
-        <div className="space-y-1">
+        {trail.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-2">{trail.description}</p>
+        )}
+
+        {/* Meta info */}
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-3">
+          <span className="flex items-center gap-1.5">
+            <BookOpen className="h-4 w-4" />
+            {trail.totalCount} módulos
+          </span>
+          {(trail.total_hours > 0 || totalMinutes > 0) && (
+            <span className="flex items-center gap-1.5">
+              <Clock className="h-4 w-4" />
+              {trail.total_hours > 0 ? `${trail.total_hours}h` : `${totalMinutes} min`}
+            </span>
+          )}
+        </div>
+
+        {/* Progress */}
+        <div className="mt-auto pt-3 space-y-1.5">
           <div className="flex justify-between text-xs">
-            <span className="text-muted-foreground">Progresso</span>
-            <span className="font-medium">{trail.progressPercent}%</span>
+            <span className="text-muted-foreground">
+              {trail.completedCount} de {trail.totalCount} módulos
+            </span>
+            <span className="font-semibold text-foreground">{trail.progressPercent}%</span>
           </div>
           <Progress value={trail.progressPercent} className="h-2" />
         </div>
       </CardContent>
 
-      <CardFooter className="pt-0">
-        <Button variant="ghost" className="w-full group-hover:bg-primary/10">
-          {trail.progressPercent > 0 && trail.progressPercent < 100 ? "Continuar" : "Ver trilha"}
-          <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-        </Button>
+      <CardFooter className="pt-0 pb-4">
+        {isInProgress ? (
+          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm group-hover:shadow-md transition-all">
+            <Play className="h-4 w-4 mr-2" />
+            Continuar curso
+          </Button>
+        ) : (
+          <Button variant="ghost" className="w-full group-hover:bg-primary/10">
+            {isCompleted ? "Ver trilha" : "Iniciar trilha"}
+            <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

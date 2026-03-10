@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import academyHeroBanner from "@/assets/academy-hero-banner.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { LaunchCountdownBanner } from "@/components/subscription/LaunchCountdownBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,8 @@ import {
   Lock,
   Medal,
   LayoutDashboard,
+  Play,
+  Clock,
 } from "lucide-react";
 import { useAcademy } from "@/hooks/useAcademy";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -43,7 +45,6 @@ export default function EducaAcademy() {
   const { trailsWithProgress, certificates, isLoading, userAchievements } = useAcademy();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
-  const isEducaPass = plan === "educa_pass";
   const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
   const [selectedCertificate, setSelectedCertificate] = useState<{
     certificate: UserCertificate;
@@ -79,7 +80,6 @@ export default function EducaAcademy() {
   const canAccessCertificates = hasFeature("certificates");
   const canAccessRanking = hasFeature("ranking");
 
-  // If a trail is selected, show its detail view
   if (selectedTrail) {
     return (
       <DashboardLayout>
@@ -88,10 +88,63 @@ export default function EducaAcademy() {
     );
   }
 
+  // Find the next incomplete module for a trail
+  const getNextModule = (trail: TrailWithProgress) => {
+    if (!trail.trainings || trail.trainings.length === 0) return null;
+    const sorted = [...trail.trainings].sort((a, b) => a.order_index - b.order_index);
+    // Find first training not yet completed (no passed quiz)
+    for (const tt of sorted) {
+      if (tt.training) {
+        // We check if it's NOT passed via completedCount logic
+        // Simple heuristic: the (completedCount + 1)th item
+        const idx = sorted.indexOf(tt);
+        if (idx >= trail.completedCount) return tt.training;
+      }
+    }
+    return sorted[sorted.length - 1]?.training || null;
+  };
+
+  // Circular progress component
+  const CircularProgress = ({ value, size = 72 }: { value: number; size?: number }) => {
+    const strokeWidth = 6;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (value / 100) * circumference;
+    
+    return (
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="-rotate-90">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="hsl(var(--muted))"
+            strokeWidth={strokeWidth}
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="hsl(var(--primary))"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className="transition-all duration-700 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-lg font-bold">{value}%</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Countdown Banner for Educa Pass users */}
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -103,34 +156,50 @@ export default function EducaAcademy() {
           </p>
         </div>
 
-        {/* Hero Banner */}
+        {/* Hero Banner - reduced height */}
         <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
           <img
             src={heroBannerUrl || academyHeroBanner}
             alt="EducaTravel Academy"
-            className="w-full h-40 sm:h-52 md:h-64 object-cover"
+            className="w-full h-36 sm:h-44 md:h-52 object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="flex-wrap">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+          {/* Pill-style tabs */}
+          <TabsList className="flex-wrap bg-muted/50 p-1 rounded-xl gap-1">
+            <TabsTrigger
+              value="dashboard"
+              className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+            >
               <LayoutDashboard className="h-4 w-4" /> Meu Painel
             </TabsTrigger>
-            <TabsTrigger value="playbooks" className="flex items-center gap-2">
+            <TabsTrigger
+              value="playbooks"
+              className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+            >
               <BookOpen className="h-4 w-4" /> Playbooks
             </TabsTrigger>
-            <TabsTrigger value="ranking" className="flex items-center gap-2">
+            <TabsTrigger
+              value="ranking"
+              className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+            >
               <Trophy className="h-4 w-4" /> Ranking
               {!canAccessRanking && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
-            <TabsTrigger value="certificates" className="flex items-center gap-2">
+            <TabsTrigger
+              value="certificates"
+              className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+            >
               <Award className="h-4 w-4" /> Certificados
               {!canAccessCertificates && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="admin" className="flex items-center gap-2">
+              <TabsTrigger
+                value="admin"
+                className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+              >
                 <BookOpen className="h-4 w-4" /> Gerenciar
               </TabsTrigger>
             )}
@@ -139,87 +208,130 @@ export default function EducaAcademy() {
           {/* Dashboard Tab */}
           <TabsContent value="dashboard">
             <div className="space-y-6">
-              {/* Stats */}
+              {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10"><MapPin className="h-5 w-5 text-primary" /></div>
+                {/* Trilhas Disponíveis */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-6 pb-5">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-primary/10">
+                        <BookOpen className="h-6 w-6 text-primary" />
+                      </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Trilhas Disponíveis</p>
-                        <p className="text-xl font-bold">{trailsWithProgress.length}</p>
+                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Trilhas Disponíveis</p>
+                        <p className="text-2xl font-bold mt-0.5">{trailsWithProgress.length}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10"><TrendingUp className="h-5 w-5 text-primary" /></div>
+
+                {/* Progresso Geral - with circular indicator */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-6 pb-5">
+                    <div className="flex items-center gap-4">
+                      <CircularProgress value={totalProgress} />
                       <div>
-                        <p className="text-xs text-muted-foreground">Progresso Geral</p>
-                        <p className="text-xl font-bold">{totalProgress}%</p>
+                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Progresso Geral</p>
+                        <p className="text-sm font-medium text-foreground mt-0.5">{totalProgress}% concluído</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-yellow-500/10"><Award className="h-5 w-5 text-yellow-500" /></div>
+
+                {/* Certificados */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-6 pb-5">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-yellow-500/10">
+                        <Trophy className="h-6 w-6 text-yellow-500" />
+                      </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Certificados</p>
-                        <p className="text-xl font-bold">{certificates.length}</p>
+                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Certificados</p>
+                        <p className="text-2xl font-bold mt-0.5">{certificates.length}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-                {userAchievements.length > 0 && (
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-accent/10"><Medal className="h-5 w-5 text-accent" /></div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Medalhas</p>
-                          <p className="text-xl font-bold">{userAchievements.length}</p>
-                        </div>
+
+                {/* Medalhas */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-6 pb-5">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-accent/10">
+                        <Medal className="h-6 w-6 text-accent" />
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      <div>
+                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Medalhas</p>
+                        <p className="text-2xl font-bold mt-0.5">{userAchievements.length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
-              {/* In Progress Trails */}
+              {/* Continue Learning - Enhanced */}
               {inProgressTrails.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Continuar Aprendendo</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                <Card className="border-primary/20 bg-gradient-to-r from-primary/[0.03] to-transparent">
+                  <CardContent className="pt-6 pb-5">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                      <Play className="h-5 w-5 text-primary" />
+                      Continuar Aprendendo
+                    </h3>
                     <div className="space-y-3">
-                      {inProgressTrails.map((trail) => (
-                        <div
-                          key={trail.id}
-                          className="flex items-center gap-4 p-3 rounded-lg border cursor-pointer hover:border-primary/50 transition-colors"
-                          onClick={() => setSelectedTrail(trail)}
-                        >
-                          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-                            {trail.image_url ? (
-                              <img src={trail.image_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <MapPin className="h-5 w-5 text-primary" />
-                            )}
+                      {inProgressTrails.map((trail) => {
+                        const nextModule = getNextModule(trail);
+                        const totalMinutes = trail.trainings.reduce(
+                          (sum, tt) => sum + (tt.training?.duration_minutes || 0),
+                          0
+                        );
+
+                        return (
+                          <div
+                            key={trail.id}
+                            className="flex items-center gap-4 p-4 rounded-xl border bg-card cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
+                            onClick={() => setSelectedTrail(trail)}
+                          >
+                            <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                              {trail.image_url ? (
+                                <img src={trail.image_url} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <MapPin className="h-6 w-6 text-primary" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold truncate">{trail.name}</p>
+                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary shrink-0">
+                                  ▶ Em andamento
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {trail.completedCount} de {trail.totalCount} módulos concluídos
+                                {totalMinutes > 0 && (
+                                  <span className="inline-flex items-center gap-1 ml-2">
+                                    <Clock className="h-3 w-3" /> {totalMinutes} min
+                                  </span>
+                                )}
+                              </p>
+                              {nextModule && (
+                                <p className="text-xs text-muted-foreground/80 mt-0.5 truncate">
+                                  Próximo: <span className="font-medium text-foreground/70">{nextModule.title}</span>
+                                </p>
+                              )}
+                              <div className="mt-2">
+                                <Progress value={trail.progressPercent} className="h-2" />
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm group-hover:shadow-md transition-all shrink-0"
+                            >
+                              <Play className="h-3.5 w-3.5 mr-1.5" />
+                              Continuar curso
+                            </Button>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{trail.name}</p>
-                            <p className="text-xs text-muted-foreground">{trail.completedCount}/{trail.totalCount} módulos</p>
-                          </div>
-                          <div className="w-24">
-                            <Progress value={trail.progressPercent} className="h-2" />
-                            <p className="text-xs text-right text-muted-foreground mt-1">{trail.progressPercent}%</p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </CardContent>
                 </Card>
@@ -228,10 +340,10 @@ export default function EducaAcademy() {
               {/* Achievements */}
               {userAchievements.length > 0 && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2"><Medal className="h-5 w-5 text-yellow-500" /> Medalhas Conquistadas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-6">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                      <Medal className="h-5 w-5 text-yellow-500" /> Medalhas Conquistadas
+                    </h3>
                     <div className="flex flex-wrap gap-3">
                       {userAchievements.map((ua) => (
                         <Badge key={ua.id} variant="secondary" className="px-3 py-2 text-sm bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400">
@@ -254,8 +366,11 @@ export default function EducaAcademy() {
                     {[1, 2, 3].map((i) => (
                       <Card key={i}>
                         <Skeleton className="h-36 rounded-t-lg" />
-                        <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
-                        <CardContent><Skeleton className="h-2 w-full" /></CardContent>
+                        <CardContent className="pt-4 space-y-2">
+                          <Skeleton className="h-6 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-2 w-full" />
+                        </CardContent>
                       </Card>
                     ))}
                   </div>
