@@ -24,7 +24,7 @@ export default function PerguntasRespostas() {
                 </div>
                 <div>
                   <h1 className="text-lg md:text-xl font-bold text-foreground leading-tight">
-                    Comunidade de Agentes
+                    Perguntas e Respostas
                   </h1>
                   <p className="text-xs text-muted-foreground">
                     Pergunte, compartilhe e ganhe pontos
