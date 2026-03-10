@@ -32,18 +32,18 @@ export interface QAAnswer {
 }
 
 export const QA_CATEGORIES = [
-  { value: "destino", label: "Destino" },
-  { value: "hotel", label: "Hotel" },
-  { value: "operadora", label: "Operadora" },
-  { value: "guia", label: "Guia de Turismo" },
-  { value: "consolidadora", label: "Consolidadora" },
   { value: "companhia_aerea", label: "Companhia Aérea" },
-  { value: "locadora_carro", label: "Locadora de Carro" },
-  { value: "seguro_viagem", label: "Seguro Viagem" },
+  { value: "consolidadora", label: "Consolidadora" },
   { value: "cruzeiro", label: "Cruzeiro" },
-  { value: "receptivo", label: "Receptivo" },
-  { value: "transfer", label: "Transfer" },
+  { value: "destino", label: "Destino" },
   { value: "geral", label: "Geral" },
+  { value: "guia", label: "Guia de Turismo" },
+  { value: "hotel", label: "Hotel" },
+  { value: "locadora_carro", label: "Locadora de Carro" },
+  { value: "operadora", label: "Operadora" },
+  { value: "receptivo", label: "Receptivo" },
+  { value: "seguro_viagem", label: "Seguro Viagem" },
+  { value: "transfer", label: "Transfer" },
 ];
 
 export function useQA() {

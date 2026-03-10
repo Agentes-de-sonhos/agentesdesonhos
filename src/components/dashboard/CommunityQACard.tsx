@@ -40,7 +40,7 @@ export function CommunityQACard() {
   const [showAskForm, setShowAskForm] = useState(false);
   const [askTitle, setAskTitle] = useState("");
   const [askDescription, setAskDescription] = useState("");
-  const [askCategory, setAskCategory] = useState("geral");
+  const [askCategory, setAskCategory] = useState("");
   const [askLink, setAskLink] = useState("");
   const [showAskLink, setShowAskLink] = useState(false);
 
@@ -58,7 +58,7 @@ export function CommunityQACard() {
         .from("qa_questions")
         .select("id, title, category, answers_count, is_resolved, created_at, user_id, description")
         .order("created_at", { ascending: false })
-        .limit(6);
+        .limit(5);
       if (error) throw error;
       if (!data || data.length === 0) return [];
 
@@ -167,7 +167,7 @@ export function CommunityQACard() {
       queryClient.invalidateQueries({ queryKey: ["gamification"] });
       setAskTitle("");
       setAskDescription("");
-      setAskCategory("geral");
+      setAskCategory("");
       setAskLink("");
       setShowAskLink(false);
       setShowAskForm(false);
@@ -300,7 +300,7 @@ export function CommunityQACard() {
             />
             <Select value={askCategory} onValueChange={setAskCategory}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Categoria" />
+                <SelectValue placeholder="Selecione o tema" />
               </SelectTrigger>
               <SelectContent>
                 {QA_CATEGORIES.map((cat) => (
@@ -317,7 +317,7 @@ export function CommunityQACard() {
               <Button
                 size="sm"
                 onClick={() => createQuestion.mutate()}
-                disabled={!askTitle.trim() || createQuestion.isPending}
+                disabled={!askTitle.trim() || !askCategory || createQuestion.isPending}
                 className="bg-[hsl(var(--section-community))] hover:bg-[hsl(var(--section-community))]/90 text-white"
               >
                 {createQuestion.isPending ? "Enviando..." : "Publicar"}
