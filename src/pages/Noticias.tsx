@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
@@ -90,9 +90,9 @@ function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave }: {
   saved: boolean; onToggleSave: (id: string) => void;
 }) {
   return (
-    <div className="relative group/card">
-      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group">
-        <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/8 via-card to-card">
+    <div className="relative group/card h-full">
+      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group h-full">
+        <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/8 via-card to-card h-full">
           <CardContent className="p-6 md:p-8">
             <div className="flex items-center gap-2 mb-3 flex-wrap">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-3 py-1 text-xs font-bold uppercase tracking-wider">
@@ -229,6 +229,123 @@ function CompactNewsItem({ item, index }: { item: NoticiaHub; index: number }) {
         </div>
       </div>
     </a>
+  );
+}
+
+/* ── Destaques Full-width Carousel with auto-advance ─────── */
+function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, trendingSet }: {
+  items: NoticiaHub[]; isAdmin: boolean; onDelete: (id: string) => void;
+  savedIds: Set<string>; onToggleSave: (id: string) => void; trendingSet: Set<string>;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % items.length);
+    }, 10000);
+  }, [items.length]);
+
+  useEffect(() => {
+    resetTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [resetTimer]);
+
+  const goTo = (dir: "prev" | "next") => {
+    setActiveIndex((prev) => dir === "next" ? (prev + 1) % items.length : (prev - 1 + items.length) % items.length);
+    resetTimer();
+  };
+
+  const current = items[activeIndex];
+  if (!current) return null;
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
+            <Star className="h-4 w-4 text-white" />
+          </div>
+          <h2 className="text-base font-bold text-foreground">Destaques do Trade</h2>
+          <span className="text-xs text-muted-foreground">{activeIndex + 1} / {items.length}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => goTo("prev")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => goTo("next")}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Full-width single slide */}
+      <div className="relative">
+        <a href={current.url_original} target="_blank" rel="noopener noreferrer" className="block group">
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-orange-50/50 to-card ring-1 ring-orange-200/30">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+                  <Star className="h-3 w-3" /> Destaque do Trade
+                </span>
+                <CategoryBadge categoria={current.categoria} />
+                {trendingSet.has(current.id) && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold">
+                    <Flame className="h-3 w-3" /> Em alta
+                  </span>
+                )}
+              </div>
+              <h3 className="text-lg font-bold text-foreground group-hover:text-orange-600 transition-colors leading-snug">
+                {current.titulo_curto}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+                {current.resumo}
+              </p>
+              <div className="flex items-center gap-2 mt-4 pt-3 border-t border-orange-100">
+                <span className="text-xs font-semibold text-foreground/70">{current.fonte}</span>
+                <span className="text-xs text-muted-foreground">•</span>
+                <span className="text-xs text-muted-foreground">{formatDate(current.data_publicacao)}</span>
+                <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 group-hover:underline">
+                  Ler matéria <ExternalLink className="h-3.5 w-3.5" />
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </a>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-3 right-3 h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(current.id); }}
+        >
+          {savedIds.has(current.id) ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4 text-muted-foreground" />}
+        </Button>
+        {isAdmin && (
+          <Button
+            variant="destructive"
+            size="icon"
+            className="absolute top-3 right-12 h-8 w-8 opacity-0 hover:opacity-100 transition-opacity shadow-lg"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(current.id); }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Progress dots */}
+      <div className="flex items-center justify-center gap-1.5">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setActiveIndex(i); resetTimer(); }}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === activeIndex ? "w-6 bg-orange-500" : "w-1.5 bg-muted-foreground/20 hover:bg-muted-foreground/40"
+            }`}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -406,30 +523,32 @@ export default function Noticias() {
           <>
             {showSections && (
               <>
-                {/* ── Hero + Resumo Rápido side by side ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                {/* ── Hero + Top 5 side by side, same height ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
                   {/* Hero - 2/3 */}
-                  <div className="lg:col-span-2">
+                  <div className="lg:col-span-2 flex">
                     {hero && (
-                      <HeroNewsCard
-                        item={hero}
-                        isAdmin={isAdmin}
-                        onDelete={handleDelete}
-                        saved={savedIds.has(hero.id)}
-                        onToggleSave={toggleSave}
-                      />
+                      <div className="w-full flex">
+                        <HeroNewsCard
+                          item={hero}
+                          isAdmin={isAdmin}
+                          onDelete={handleDelete}
+                          saved={savedIds.has(hero.id)}
+                          onToggleSave={toggleSave}
+                        />
+                      </div>
                     )}
                   </div>
 
-                  {/* Resumo Rápido - 1/3 */}
-                  <div className="lg:col-span-1">
-                    <Card className="border-0 shadow-sm h-full">
-                      <CardContent className="p-4">
+                  {/* Top 5 - 1/3 */}
+                  <div className="lg:col-span-1 flex">
+                    <Card className="border-0 shadow-sm w-full flex flex-col">
+                      <CardContent className="p-4 flex flex-col flex-1">
                         <div className="flex items-center gap-2 mb-3">
                           <Zap className="h-4 w-4 text-warning" />
-                          <h3 className="text-sm font-bold text-foreground">Resumo do Trade</h3>
+                          <h3 className="text-sm font-bold text-foreground">Top 5</h3>
                         </div>
-                        <div className="space-y-0.5">
+                        <div className="space-y-0.5 flex-1">
                           {topHeadlines.map((item, i) => (
                             <CompactNewsItem key={item.id} item={item} index={i} />
                           ))}
@@ -439,43 +558,16 @@ export default function Noticias() {
                   </div>
                 </div>
 
-                {/* ── Destaques Carousel ── */}
+                {/* ── Destaques Carousel (full-width slides, auto-advance 10s) ── */}
                 {alertas.length > 0 && (
-                  <section className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
-                          <Star className="h-4 w-4 text-white" />
-                        </div>
-                        <h2 className="text-base font-bold text-foreground">Destaques do Trade</h2>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => scrollCarousel("left")}>
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => scrollCarousel("right")}>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div
-                      ref={carouselRef}
-                      className="flex gap-4 overflow-x-auto scrollbar-none scroll-smooth pb-1 -mx-1 px-1"
-                    >
-                      {alertas.map((item) => (
-                        <div key={item.id} className="flex-shrink-0 w-[280px] sm:w-[300px]">
-                          <NewsCard
-                            item={item}
-                            isAdmin={isAdmin}
-                            onDelete={handleDelete}
-                            saved={savedIds.has(item.id)}
-                            onToggleSave={toggleSave}
-                            trending={trendingSet.has(item.id)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
+                  <DestaquesCarousel
+                    items={alertas}
+                    isAdmin={isAdmin}
+                    onDelete={handleDelete}
+                    savedIds={savedIds}
+                    onToggleSave={toggleSave}
+                    trendingSet={trendingSet}
+                  />
                 )}
 
                 {/* ── Outras Notícias ── */}
