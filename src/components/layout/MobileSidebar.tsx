@@ -72,7 +72,6 @@ const conhecimentoSection: MenuSection = {
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
-    { title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
     { title: "Pergunte e Responda", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum", isPremium: true },
   ],
 };
@@ -84,6 +83,7 @@ const guiasSection: MenuSection = {
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Travel Advisor", url: "/dream-advisor", icon: Compass, isPremium: true },
     { title: "Benefícios e Descontos", url: "/comunidade", icon: Tag, requiredFeature: "community", isPremium: true },
+    { title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
 
