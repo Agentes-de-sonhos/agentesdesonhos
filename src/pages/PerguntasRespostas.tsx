@@ -5,7 +5,6 @@ import { QARankingSidebar } from "@/components/qa/QARankingSidebar";
 import { MessageCircleQuestion } from "lucide-react";
 
 export default function PerguntasRespostas() {
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -15,15 +14,7 @@ export default function PerguntasRespostas() {
           subtitle="Pergunte, compartilhe e ganhe pontos"
           icon={MessageCircleQuestion}
         />
-              </div>
-            </div>
 
-            {/* spacer */}
-            <div />
-          </div>
-        </div>
-
-        {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <QAFeed />
