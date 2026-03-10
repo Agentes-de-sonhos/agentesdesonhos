@@ -96,6 +96,7 @@ const guiasSection: MenuSection = {
   headerHoverBg: "hover:bg-emerald-700",
   bgColor: "bg-emerald-50",
   textColor: "text-emerald-700",
+  borderColor: "border-emerald-600",
   items: [
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
