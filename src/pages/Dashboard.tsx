@@ -203,6 +203,12 @@ export default function Dashboard() {
               </div>
             </section>
 
+            {/* 4. Perguntas da Comunidade */}
+            <section className="order-4">
+              <SectionHeader title="Perguntas da Comunidade" color="community" />
+              <CommunityQACard />
+            </section>
+
 
           </>
         )}
