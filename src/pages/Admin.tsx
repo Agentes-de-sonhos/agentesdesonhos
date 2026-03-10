@@ -35,6 +35,7 @@ import { AdminNewsCurationManager } from "@/components/admin/AdminNewsCurationMa
 import { AdminHotelsManager } from "@/components/admin/AdminHotelsManager";
 import { AdminHotelRecommendationsManager } from "@/components/admin/AdminHotelRecommendationsManager";
 import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager";
+import { AdminPageBannersManager } from "@/components/admin/AdminPageBannersManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
