@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Sparkles,
   Map,
   Newspaper,
   User,
@@ -24,8 +23,14 @@ import {
   Wallet,
   Home,
   BookOpen,
-  ShoppingBag,
   Compass,
+  CalendarDays,
+  BookMarked,
+  Tag,
+  ShoppingCart,
+  PlusCircle,
+  FileText,
+  Route,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamification } from "@/hooks/useGamification";
