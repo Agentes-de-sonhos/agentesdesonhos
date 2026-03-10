@@ -362,7 +362,7 @@ export function AppSidebar() {
           className={cn(
             "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
             isOpen
-              ? cn(section.bgColor, section.textColor)
+              ? cn(section.headerBg, section.headerHoverBg)
               : cn("text-sidebar-foreground", section.hoverColor)
           )}
         >
@@ -372,8 +372,8 @@ export function AppSidebar() {
           </span>
           <ChevronDown
             className={cn(
-              "h-3.5 w-3.5 text-muted-foreground/50 transition-transform duration-200",
-              isOpen && "rotate-180"
+              "h-3.5 w-3.5 transition-transform duration-200",
+              isOpen ? "rotate-180 text-white/70" : "text-muted-foreground/50"
             )}
           />
         </button>
