@@ -191,6 +191,7 @@ export default function Agenda() {
                   <MonthlyCalendar
                     currentDate={currentDate}
                     events={allEvents}
+                    highlightedEventIds={highlightedEventIds}
                     onDayClick={handleDayClick}
                     onEventClick={handleEventClick}
                     onNavigate={navigateMonth}
