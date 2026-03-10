@@ -71,8 +71,9 @@ interface MenuSection {
   hoverColor: string;
   bgColor: string;
   textColor: string;
-  headerBg: string;       // dark bg for header on hover/open
-  headerHoverBg: string;  // hover variant for header
+  borderColor: string;
+  headerBg: string;
+  headerHoverBg: string;
 }
 
 // ── Static sections ──
@@ -85,6 +86,7 @@ const conhecimentoSection: MenuSection = {
   headerHoverBg: "hover:bg-blue-700",
   bgColor: "bg-blue-50",
   textColor: "text-blue-700",
+  borderColor: "border-blue-600",
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
@@ -100,6 +102,7 @@ const guiasSection: MenuSection = {
   headerHoverBg: "hover:bg-emerald-700",
   bgColor: "bg-emerald-50",
   textColor: "text-emerald-700",
+  borderColor: "border-emerald-600",
   items: [
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
@@ -116,6 +119,7 @@ const recursosVendasSection: MenuSection = {
   headerHoverBg: "hover:bg-orange-700",
   bgColor: "bg-orange-50",
   textColor: "text-orange-700",
+  borderColor: "border-orange-600",
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
@@ -130,6 +134,7 @@ const criarSection: MenuSection = {
   headerHoverBg: "hover:bg-violet-700",
   bgColor: "bg-violet-50",
   textColor: "text-violet-700",
+  borderColor: "border-violet-600",
   items: [
     { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
     { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "ai_tools" },
@@ -145,6 +150,7 @@ const clientesSection: MenuSection = {
   headerHoverBg: "hover:bg-cyan-700",
   bgColor: "bg-cyan-50",
   textColor: "text-cyan-700",
+  borderColor: "border-cyan-600",
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
     { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
@@ -159,6 +165,7 @@ const marketingSection: MenuSection = {
   headerHoverBg: "hover:bg-pink-700",
   bgColor: "bg-pink-50",
   textColor: "text-pink-700",
+  borderColor: "border-pink-600",
   items: [
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
     { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store },
@@ -225,7 +232,7 @@ export function AppSidebar() {
     [hasFeature, trackSectionVisit, isEducaPass]
   );
 
-  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string) => {
+  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
@@ -240,16 +247,17 @@ export function AppSidebar() {
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
           "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
-          isActive && !isLocked
-            ? "bg-primary text-primary-foreground shadow-md"
-            : (isLocked && !isLockedByEducaPass)
-              ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
-              : isLockedByEducaPass
-                ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                : sectionBgColor
-                  ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
-          item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
+          isActive && !isLocked && sectionBgColor
+            ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
+            : isActive && !isLocked
+              ? "bg-primary text-primary-foreground shadow-md"
+              : (isLocked && !isLockedByEducaPass)
+                ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
+                : isLockedByEducaPass
+                  ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  : sectionBgColor
+                    ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
         )}
       >
         <div className="relative flex-shrink-0">
@@ -379,7 +387,7 @@ export function AppSidebar() {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.map((item) => renderSingleItem(item, section.bgColor, section.textColor))}
+            {section.items.map((item) => renderSingleItem(item, section.bgColor, section.textColor, section.borderColor))}
           </nav>
         )}
       </div>
