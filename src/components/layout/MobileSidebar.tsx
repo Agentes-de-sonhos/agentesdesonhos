@@ -124,13 +124,8 @@ const marketingSection: MenuSection = {
   ],
 };
 
-const comunidadeSection: MenuSection = {
-  title: "Comunidade",
-  icon: Heart,
-  items: [
-    { title: "Mentorias", url: "/mentorias", icon: GraduationCap },
-  ],
-};
+const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart };
+const mentoriasItem: MenuItem = { title: "Mentorias", url: "/mentorias", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
