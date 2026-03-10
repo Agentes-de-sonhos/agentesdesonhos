@@ -43,20 +43,9 @@ export function UpcomingAgendaEventsCard() {
   return (
     <Card className="border-0 shadow-card">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            <span className="text-base font-semibold">Minha Agenda</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/agenda")}
-            className="text-xs text-muted-foreground hover:text-primary"
-          >
-            Ver todos
-            <ArrowRight className="h-3 w-3 ml-1" />
-          </Button>
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-primary" />
+          <span className="text-base font-semibold">Minha Agenda</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
