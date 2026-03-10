@@ -17,6 +17,7 @@ import {
   BookOpen,
   Sparkles,
   Menu,
+  Image,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
