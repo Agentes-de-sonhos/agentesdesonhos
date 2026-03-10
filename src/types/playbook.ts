@@ -160,4 +160,6 @@ export const BLOCK_TYPE_OPTIONS: { type: PlaybookBlockType; label: string; icon:
   { type: 'strategy', label: 'Estratégia', icon: 'Target' },
   { type: 'checklist', label: 'Checklist', icon: 'CheckSquare' },
   { type: 'highlight', label: 'Destaque', icon: 'Star' },
+  { type: 'insight', label: 'Insight de Venda', icon: 'Zap' },
+  { type: 'sales_argument', label: 'Argumento de Venda', icon: 'MessageSquareQuote' },
 ];
