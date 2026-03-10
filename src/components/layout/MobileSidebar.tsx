@@ -146,7 +146,7 @@ export function MobileSidebar() {
   const isEducaPass = plan === "educa_pass";
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection],
     []
   );
 
