@@ -34,13 +34,14 @@ import {
   Shield,
   UserCheck,
   Loader2,
-  Settings,
   CreditCard,
+  UserPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface UserWithDetails {
   id: string;
