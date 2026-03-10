@@ -549,14 +549,16 @@ export default function Noticias() {
                   </div>
 
                   {/* Top 5 - 1/3 */}
-                  <div className="lg:col-span-1 flex">
-                    <Card className="border-0 shadow-sm w-full flex flex-col">
+                  <div className="lg:col-span-2 flex">
+                    <Card className="border-0 shadow-md w-full flex flex-col bg-gradient-to-b from-card to-muted/20">
                       <CardContent className="p-4 flex flex-col flex-1">
                         <div className="flex items-center gap-2 mb-3">
-                          <Zap className="h-4 w-4 text-warning" />
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/15">
+                            <Zap className="h-4 w-4 text-warning" />
+                          </div>
                           <h3 className="text-sm font-bold text-foreground">Top 5</h3>
                         </div>
-                        <div className="space-y-0.5 flex-1">
+                        <div className="flex-1 flex flex-col justify-between">
                           {topHeadlines.map((item, i) => (
                             <CompactNewsItem key={item.id} item={item} index={i} />
                           ))}
