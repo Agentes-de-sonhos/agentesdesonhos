@@ -71,8 +71,9 @@ interface MenuSection {
   hoverColor: string;
   bgColor: string;
   textColor: string;
-  headerBg: string;       // dark bg for header on hover/open
-  headerHoverBg: string;  // hover variant for header
+  borderColor: string;
+  headerBg: string;
+  headerHoverBg: string;
 }
 
 // ── Static sections ──
