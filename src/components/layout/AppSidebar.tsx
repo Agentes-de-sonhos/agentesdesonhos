@@ -89,6 +89,7 @@ const guiasSection: MenuSection = {
     { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { title: "Travel Advisor", url: "/dream-advisor", icon: Compass, isPremium: true },
     { title: "Benefícios e Descontos", url: "/comunidade", icon: Tag, requiredFeature: "community", isPremium: true },
+    { title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
 
