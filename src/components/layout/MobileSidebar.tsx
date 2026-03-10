@@ -283,14 +283,15 @@ export function MobileSidebar() {
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
           "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left",
-          isActive && !isLocked
-            ? "bg-primary text-primary-foreground shadow-md"
-            : (isLocked && !isLockedByEducaPass)
-              ? "opacity-60"
-              : sectionBgColor
-                ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
-                : "text-sidebar-foreground hover:bg-sidebar-accent",
-          item.isHighlighted && !isActive && !isLocked && "ring-1 ring-primary/40 bg-primary/5"
+          isActive && !isLocked && sectionBgColor
+            ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
+            : isActive && !isLocked
+              ? "bg-primary text-primary-foreground shadow-md"
+              : (isLocked && !isLockedByEducaPass)
+                ? "opacity-60"
+                : sectionBgColor
+                  ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
+                  : "text-sidebar-foreground hover:bg-sidebar-accent",
         )}
       >
         {iconElement}
