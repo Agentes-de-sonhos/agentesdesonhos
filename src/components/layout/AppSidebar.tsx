@@ -346,8 +346,10 @@ export function AppSidebar() {
         <button
           onClick={() => toggleSection(section.title)}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-sidebar-foreground transition-all duration-200",
-            section.hoverColor
+            "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+            isOpen
+              ? cn(section.bgColor, section.textColor)
+              : cn("text-sidebar-foreground", section.hoverColor)
           )}
         >
           <Icon className="h-4 w-4" />
