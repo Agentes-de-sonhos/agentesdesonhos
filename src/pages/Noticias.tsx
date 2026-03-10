@@ -486,15 +486,12 @@ export default function Noticias() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        {/* ── Header ── */}
         <PageHeader
           pageKey="noticias"
           title="Notícias do Trade"
           subtitle="Curadoria inteligente das últimas 24 horas"
           icon={Newspaper}
         />
-          </div>
-        </div>
 
         {/* ── Filter Bar with Icons ── */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
