@@ -237,6 +237,33 @@ export default function CriarCartao() {
           </CardContent>
         </Card>
 
+        {/* Logo */}
+        <Card>
+          <CardHeader><CardTitle className="text-base">Logotipo da empresa</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-4">
+              {logoUrl ? (
+                <div className="relative">
+                  <img src={logoUrl} alt="Logo" className="h-20 object-contain border rounded p-1" />
+                  <button
+                    type="button"
+                    onClick={() => setLogoUrl(null)}
+                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : null}
+              <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition-colors flex-1">
+                <Upload className="h-5 w-5 text-gray-400" />
+                <span className="text-sm text-gray-500">{uploadingLogo ? "Enviando..." : logoUrl ? "Trocar logo" : "Enviar logotipo"}</span>
+                <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploadingLogo} />
+              </label>
+            </div>
+            <p className="text-xs text-gray-400">PNG com fundo transparente, máx 400×400px. Será exibido abaixo do seu nome no cartão.</p>
+          </CardContent>
+        </Card>
+
         {/* Colors */}
         <Card>
           <CardHeader><CardTitle className="text-base">Cores do tema</CardTitle></CardHeader>
