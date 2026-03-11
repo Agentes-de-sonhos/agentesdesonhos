@@ -18,6 +18,7 @@ import {
   Sparkles,
   Menu,
   Image,
+  MessageCircle,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
