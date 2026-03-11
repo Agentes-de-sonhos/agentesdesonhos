@@ -120,7 +120,12 @@ export default function CartaoPublico() {
           <div className="flex justify-center gap-3">
             {card.whatsapp && (
               <a
-                href={`https://wa.me/${card.whatsapp.replace(/\D/g, "")}`}
+                href={`https://wa.me/${(() => {
+                  const digits = card.whatsapp.replace(/\D/g, "");
+                  if (digits.startsWith("55") && digits.length >= 12) return digits;
+                  if (digits.length === 10 || digits.length === 11) return `55${digits}`;
+                  return digits;
+                })()}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackClick("whatsapp_click")}
