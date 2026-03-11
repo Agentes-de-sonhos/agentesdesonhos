@@ -82,10 +82,11 @@ export default function CriarCartao() {
       } as any);
 
       if (error) {
+        console.error("Business card creation error:", error);
         if (error.message?.includes("duplicate") || error.message?.includes("unique")) {
           toast.error("Esse slug já está em uso. Escolha outro.");
         } else {
-          toast.error("Erro ao criar cartão.");
+          toast.error("Erro ao criar cartão: " + error.message);
         }
         return;
       }
