@@ -95,7 +95,16 @@ export default function MeuCartao() {
   };
 
   const handleSave = () => {
-    updateCard.mutate({ ...form, buttons, social_links: socialLinks } as any);
+    // Build full URLs from usernames for social links
+    const fullSocialLinks: SocialLinks = {};
+    for (const { key, prefix } of SOCIAL_CONFIG) {
+      const username = socialLinks[key];
+      if (username && username.trim()) {
+        const clean = extractUsername(username, prefix);
+        fullSocialLinks[key] = clean ? `${prefix}${clean}` : "";
+      }
+    }
+    updateCard.mutate({ ...form, buttons, social_links: fullSocialLinks } as any);
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
