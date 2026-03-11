@@ -241,7 +241,8 @@ export function MobileSidebar() {
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
-    const isLocked = isLockedByPlan || isLockedByEducaPass;
+    const isLockedByCartaoDigital = isCartaoDigital && item.url !== "/meu-cartao";
+    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
 
     const iconElement = (
       <div className="relative flex-shrink-0">
