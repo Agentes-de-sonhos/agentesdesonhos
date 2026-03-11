@@ -217,7 +217,35 @@ export default function MeuCartao() {
                       <DialogHeader>
                         <DialogTitle>Escolha uma imagem de capa</DialogTitle>
                       </DialogHeader>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto p-1">
+                      <p className="text-sm text-muted-foreground">
+                        Tamanho recomendado: <strong>1200 × 400 px</strong> (proporção 3:1). Formatos aceitos: JPG ou PNG.
+                      </p>
+                      {/* Upload custom cover */}
+                      <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors">
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Enviar sua própria imagem</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const url = await uploadImage(file, "cover");
+                              if (url) {
+                                updateCard.mutate({ cover_url: url } as any);
+                                setCoverDialogOpen(false);
+                              }
+                            } catch {
+                              toast.error("Erro ao enviar imagem de capa.");
+                            }
+                          }}
+                        />
+                      </label>
+                      <Separator />
+                      <p className="text-sm font-medium text-foreground">Ou escolha uma das opções abaixo:</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto p-1">
                         {COVER_OPTIONS.map((url) => (
                           <button
                             key={url}
