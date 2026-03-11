@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useBusinessCard, CardButton, SocialLinks } from "@/hooks/useBusinessCard";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   CreditCard, Plus, Trash2, Copy, ExternalLink, Upload, Save, Eye,
   Instagram, Facebook, Linkedin, Twitter, Youtube, GripVertical,
