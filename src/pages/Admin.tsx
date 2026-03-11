@@ -248,6 +248,10 @@ export default function Admin() {
           <TabsContent value="page-banners">
             <AdminPageBannersManager />
           </TabsContent>
+
+          <TabsContent value="surveys">
+            <AdminSurveyManager />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
