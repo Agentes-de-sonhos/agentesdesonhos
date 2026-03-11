@@ -42,6 +42,9 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   educa_pass: [
     'trainings_recorded',
   ],
+  cartao_digital: [
+    'business_card',
+  ],
   essencial: [
     'news',
     'tourism_map',
