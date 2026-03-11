@@ -205,6 +205,8 @@ export function AppSidebar() {
   const { trackSectionVisit } = useGamification();
 
   const isEducaPass = plan === "educa_pass";
+  const isCartaoDigital = plan === "cartao_digital";
+  const isRestrictedPlan = isEducaPass || isCartaoDigital;
 
   const allSections: MenuSection[] = useMemo(
     () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
@@ -234,6 +236,12 @@ export function AppSidebar() {
         setShowComingSoon(true);
         return;
       }
+      // Cartão Digital Pass: only allow Meu Cartão
+      if (isCartaoDigital && item.url !== "/meu-cartao") {
+        e.preventDefault();
+        setShowComingSoon(true);
+        return;
+      }
       if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
         e.preventDefault();
         setUpgradeFeature(item.requiredFeature);
@@ -242,7 +250,7 @@ export function AppSidebar() {
       trackSectionVisit(item.url);
       setCollapsed(true);
     },
-    [hasFeature, trackSectionVisit, isEducaPass]
+    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital]
   );
 
   const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
@@ -251,7 +259,8 @@ export function AppSidebar() {
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
-    const isLocked = isLockedByPlan || isLockedByEducaPass;
+    const isLockedByCartaoDigital = isCartaoDigital && item.url !== "/meu-cartao";
+    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
 
     const menuLink = (
       <Link

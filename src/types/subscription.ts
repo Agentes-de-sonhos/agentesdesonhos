@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'educa_pass' | 'essencial' | 'profissional' | 'premium';
+export type SubscriptionPlan = 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium';
 
 export interface Subscription {
   id: string;
@@ -22,6 +22,8 @@ export type Feature =
   | 'crm_basic'
   | 'trainings_recorded'
   | 'financial'
+  // Cartão Digital Pass feature
+  | 'business_card'
   // Profissional features
   | 'ai_tools'
   | 'quote_generator'
@@ -41,6 +43,9 @@ export type Feature =
 export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   educa_pass: [
     'trainings_recorded',
+  ],
+  cartao_digital: [
+    'business_card',
   ],
   essencial: [
     'news',
@@ -91,6 +96,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   educa_pass: 'EducaTravel Pass',
+  cartao_digital: 'Cartão Digital Pass',
   essencial: 'Essencial',
   profissional: 'Profissional',
   premium: 'Premium',
@@ -98,6 +104,7 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   educa_pass: 'Acesso gratuito à EducaTravel Academy',
+  cartao_digital: 'Acesso exclusivo ao Cartão de Visita Digital',
   essencial: 'Acesso básico às notícias, mapa do turismo, materiais e CRM',
   profissional: 'Ferramentas IA, orçamentos, Carteira Digital e financeiro incluídos',
   premium: 'Acesso completo com trilhas premium, certificados e benefícios exclusivos',
@@ -105,6 +112,7 @@ export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   educa_pass: 0,
+  cartao_digital: 0,
   essencial: 0,
   profissional: 20,
   premium: 1000,
@@ -117,6 +125,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   agenda: 'Agenda',
   crm_basic: 'CRM Básico',
   trainings_recorded: 'Treinamentos Gravados',
+  business_card: 'Cartão de Visita Digital',
   ai_tools: 'Ferramentas IA',
   quote_generator: 'Gerador de Orçamentos',
   trip_wallet: 'Carteira Digital',
@@ -140,6 +149,7 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   agenda: 'essencial',
   crm_basic: 'essencial',
   trainings_recorded: 'educa_pass',
+  business_card: 'cartao_digital',
   financial: 'essencial',
   ai_tools: 'profissional',
   quote_generator: 'profissional',

@@ -97,7 +97,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, [plan]);
 
   const canUseAI = useCallback((): boolean => {
-    if (plan === "educa_pass" || plan === "essencial") return false;
+    if (plan === "educa_pass" || plan === "cartao_digital" || plan === "essencial") return false;
     if (plan === "premium") return true;
     return aiUsageCount < aiLimit;
   }, [plan, aiUsageCount, aiLimit]);
