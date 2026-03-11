@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { usePublicBusinessCard, generateVCard, SocialLinks } from "@/hooks/useBusinessCard";
 import { supabase } from "@/integrations/supabase/client";
