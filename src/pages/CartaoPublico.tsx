@@ -237,9 +237,6 @@ export default function CartaoPublico() {
             </div>
           </div>
 
-          {/* Footer */}
-          {card.logos.length === 0 && <span />}
-          <p className="text-xs text-gray-300 pt-2">Agentes de Sonhos</p>
         </div>
       </div>
     </div>
