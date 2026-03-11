@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { CreditCard, Check, ExternalLink, Instagram, Facebook, Linkedin, Twitter, Youtube, Plus, Trash2 } from "lucide-react";
+import { CreditCard, Check, ExternalLink, Instagram, Facebook, Linkedin, Twitter, Youtube, Plus, Trash2, Upload } from "lucide-react";
 import logoImg from "@/assets/logo-agentes-de-sonhos.png";
 
 const PUBLIC_DOMAIN = "https://contato.tur.br";
@@ -51,6 +51,26 @@ export default function CriarCartao() {
 
   const [buttons, setButtons] = useState<{ text: string; url: string }[]>([]);
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Selecione uma imagem."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB."); return; }
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `public-cards/logo_${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+      setLogoUrl(urlData.publicUrl);
+      toast.success("Logo enviado!");
+    } catch { toast.error("Erro ao enviar logo."); }
+    finally { setUploadingLogo(false); }
+  };
 
   const handleSubmit = async () => {
     const slug = form.slug.toLowerCase().replace(/[^a-z0-9-]/g, "").trim();
@@ -79,6 +99,7 @@ export default function CriarCartao() {
         cover_url: form.cover_url || null,
         buttons: buttons.filter((b) => b.text && b.url) as any,
         social_links: socialLinks as any,
+        logos: logoUrl ? [logoUrl] as any : [],
       } as any);
 
       if (error) {
@@ -213,6 +234,33 @@ export default function CriarCartao() {
                 </button>
               ))}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Logo */}
+        <Card>
+          <CardHeader><CardTitle className="text-base">Logotipo da empresa</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-4">
+              {logoUrl ? (
+                <div className="relative">
+                  <img src={logoUrl} alt="Logo" className="h-20 object-contain border rounded p-1" />
+                  <button
+                    type="button"
+                    onClick={() => setLogoUrl(null)}
+                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : null}
+              <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition-colors flex-1">
+                <Upload className="h-5 w-5 text-gray-400" />
+                <span className="text-sm text-gray-500">{uploadingLogo ? "Enviando..." : logoUrl ? "Trocar logo" : "Enviar logotipo"}</span>
+                <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploadingLogo} />
+              </label>
+            </div>
+            <p className="text-xs text-gray-400">PNG com fundo transparente, máx 400×400px. Será exibido abaixo do seu nome no cartão.</p>
           </CardContent>
         </Card>
 
