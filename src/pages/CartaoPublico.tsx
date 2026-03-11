@@ -23,6 +23,10 @@ export default function CartaoPublico() {
   const { slug } = useParams<{ slug: string }>();
   const { data: card, isLoading } = usePublicBusinessCard(slug);
 
+  useEffect(() => {
+    document.title = "Cartão Virtual";
+  }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
