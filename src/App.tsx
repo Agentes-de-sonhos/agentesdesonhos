@@ -42,6 +42,7 @@ import PerguntasRespostas from "./pages/PerguntasRespostas";
 import DreamAdvisor from "./pages/DreamAdvisor";
 import MinhaVitrine from "./pages/MinhaVitrine";
 import MeuCartao from "./pages/MeuCartao";
+import CriarCartao from "./pages/CriarCartao";
 import VitrinePublica from "./pages/VitrinePublica";
 import CartaoPublico from "./pages/CartaoPublico";
 import SlugResolver from "./components/routing/SlugResolver";
