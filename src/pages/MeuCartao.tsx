@@ -207,12 +207,36 @@ export default function MeuCartao() {
                   {card.cover_url && (
                     <img src={card.cover_url} alt="Capa" className="h-16 w-28 rounded object-cover border" />
                   )}
-                  <label className="cursor-pointer">
-                    <div className="flex items-center gap-2 text-sm text-primary hover:underline">
-                      <Upload className="h-4 w-4" /> Enviar capa
-                    </div>
-                    <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
-                  </label>
+                  <Dialog open={coverDialogOpen} onOpenChange={setCoverDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <ImageIcon className="h-4 w-4 mr-1" /> Escolher capa
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Escolha uma imagem de capa</DialogTitle>
+                      </DialogHeader>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto p-1">
+                        {COVER_OPTIONS.map((url) => (
+                          <button
+                            key={url}
+                            onClick={() => handleSelectCover(url)}
+                            className={`relative rounded-lg overflow-hidden border-2 transition-all hover:ring-2 hover:ring-primary ${
+                              card.cover_url === url ? "border-primary ring-2 ring-primary" : "border-border"
+                            }`}
+                          >
+                            <img src={url} alt="Opção de capa" className="w-full h-24 sm:h-28 object-cover" />
+                            {card.cover_url === url && (
+                              <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                <Check className="h-8 w-8 text-primary-foreground drop-shadow-lg" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </div>
