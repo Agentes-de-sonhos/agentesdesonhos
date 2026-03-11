@@ -81,13 +81,11 @@ export default function MeuCartao() {
     } catch { toast.error("Erro ao enviar imagem."); }
   };
 
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const url = await uploadImage(file, "cover");
-      if (url) updateCard.mutate({ cover_url: url } as any);
-    } catch { toast.error("Erro ao enviar capa."); }
+  const [coverDialogOpen, setCoverDialogOpen] = useState(false);
+
+  const handleSelectCover = (url: string) => {
+    updateCard.mutate({ cover_url: url } as any);
+    setCoverDialogOpen(false);
   };
 
   const addButton = () => {
