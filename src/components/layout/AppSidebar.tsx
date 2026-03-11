@@ -236,6 +236,12 @@ export function AppSidebar() {
         setShowComingSoon(true);
         return;
       }
+      // Cartão Digital Pass: only allow Meu Cartão
+      if (isCartaoDigital && item.url !== "/meu-cartao") {
+        e.preventDefault();
+        setShowComingSoon(true);
+        return;
+      }
       if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
         e.preventDefault();
         setUpgradeFeature(item.requiredFeature);
