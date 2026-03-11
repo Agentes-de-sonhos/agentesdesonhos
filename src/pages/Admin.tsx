@@ -187,6 +187,10 @@ export default function Admin() {
               <MessageCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Pesquisas</span>
             </TabsTrigger>
+            <TabsTrigger value="business-cards" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden sm:inline">Cartões</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
