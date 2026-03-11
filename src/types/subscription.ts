@@ -149,6 +149,7 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   agenda: 'essencial',
   crm_basic: 'essencial',
   trainings_recorded: 'educa_pass',
+  business_card: 'cartao_digital',
   financial: 'essencial',
   ai_tools: 'profissional',
   quote_generator: 'profissional',
