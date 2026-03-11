@@ -104,6 +104,7 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   educa_pass: 'Acesso gratuito à EducaTravel Academy',
+  cartao_digital: 'Acesso exclusivo ao Cartão de Visita Digital',
   essencial: 'Acesso básico às notícias, mapa do turismo, materiais e CRM',
   profissional: 'Ferramentas IA, orçamentos, Carteira Digital e financeiro incluídos',
   premium: 'Acesso completo com trilhas premium, certificados e benefícios exclusivos',
