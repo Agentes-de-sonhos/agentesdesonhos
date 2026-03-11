@@ -79,6 +79,10 @@ export function CuratedNewsFeed() {
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardContent className="pt-6 space-y-1">
+        <div className="mb-3">
+          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Principais Notícias</h2>
+          <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-news))]" />
+        </div>
         {news.map((item) => (
           <a
             key={item.id}

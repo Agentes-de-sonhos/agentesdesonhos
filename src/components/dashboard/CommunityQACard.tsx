@@ -272,6 +272,10 @@ export function CommunityQACard() {
   return (
     <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/5 to-[hsl(var(--section-community))]/[0.02]">
       <CardContent className="pt-5 pb-4 space-y-4">
+        <div>
+          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Perguntas da Comunidade</h2>
+          <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-community))]" />
+        </div>
         {/* Quick Ask Bar */}
         {!showAskForm ? (
           <div
