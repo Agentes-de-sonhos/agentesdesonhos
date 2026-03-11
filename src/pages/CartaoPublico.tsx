@@ -226,7 +226,7 @@ export default function CartaoPublico() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-gray-300">Agentes de Sonhos</p>
+                <span />
               )}
             </div>
             <div className="flex flex-col items-center gap-1">
