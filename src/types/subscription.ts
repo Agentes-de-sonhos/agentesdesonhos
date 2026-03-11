@@ -125,6 +125,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   agenda: 'Agenda',
   crm_basic: 'CRM Básico',
   trainings_recorded: 'Treinamentos Gravados',
+  business_card: 'Cartão de Visita Digital',
   ai_tools: 'Ferramentas IA',
   quote_generator: 'Gerador de Orçamentos',
   trip_wallet: 'Carteira Digital',
