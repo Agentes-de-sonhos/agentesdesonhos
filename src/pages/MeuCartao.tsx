@@ -5,13 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useBusinessCard, CardButton, SocialLinks } from "@/hooks/useBusinessCard";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader";
 import {
   CreditCard, Plus, Trash2, Copy, ExternalLink, Upload, Save, Eye,
-  Instagram, Facebook, Linkedin, Twitter, Youtube, GripVertical,
+  Instagram, Facebook, Linkedin, Twitter, Youtube, GripVertical, ImageIcon, Check,
 } from "lucide-react";
+
+const COVER_OPTIONS = [
+  "/images/card-covers/cover-1.png",
+  "/images/card-covers/cover-2.png",
+  "/images/card-covers/cover-3.png",
+  "/images/card-covers/cover-4.png",
+  "/images/card-covers/cover-5.png",
+  "/images/card-covers/cover-6.png",
+  "/images/card-covers/cover-7.png",
+];
 
 const PUBLIC_DOMAIN = "https://contato.tur.br";
 const MAX_BUTTONS = 6;
