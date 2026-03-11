@@ -370,6 +370,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:slug" element={<SlugResolver />} />
