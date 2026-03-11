@@ -205,6 +205,8 @@ export function AppSidebar() {
   const { trackSectionVisit } = useGamification();
 
   const isEducaPass = plan === "educa_pass";
+  const isCartaoDigital = plan === "cartao_digital";
+  const isRestrictedPlan = isEducaPass || isCartaoDigital;
 
   const allSections: MenuSection[] = useMemo(
     () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
