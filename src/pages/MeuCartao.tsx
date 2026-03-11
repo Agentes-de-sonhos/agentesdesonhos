@@ -443,17 +443,35 @@ export default function MeuCartao() {
         {/* Social Links */}
         <Card>
           <CardHeader><CardTitle className="text-lg">Redes Sociais</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {SOCIAL_ICONS.map(({ key, label, icon: Icon }) => (
-              <div key={key} className="flex items-center gap-3">
-                <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
-                <Input
-                  placeholder={`URL do ${label}`}
-                  value={socialLinks[key] || ""}
-                  onChange={e => setSocialLinks({ ...socialLinks, [key]: e.target.value })}
-                />
-              </div>
-            ))}
+          <CardContent className="space-y-4">
+            {SOCIAL_CONFIG.map(({ key, label, icon: Icon, prefix }) => {
+              // Extract username from stored full URL for display
+              const storedValue = socialLinks[key] || "";
+              const displayValue = extractUsername(storedValue, prefix);
+              return (
+                <div key={key} className="space-y-1">
+                  <Label className="flex items-center gap-2 text-sm font-medium">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                    {label}
+                  </Label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-xs select-none whitespace-nowrap">
+                      {prefix}
+                    </span>
+                    <Input
+                      className="rounded-l-none"
+                      placeholder="seu-usuario"
+                      value={displayValue}
+                      onChange={e => {
+                        const raw = e.target.value;
+                        const cleaned = extractUsername(raw, prefix);
+                        setSocialLinks({ ...socialLinks, [key]: cleaned });
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
 
