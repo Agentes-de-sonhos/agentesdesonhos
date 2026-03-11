@@ -27,14 +27,40 @@ const COVER_OPTIONS = [
 const PUBLIC_DOMAIN = "https://contato.tur.br";
 const MAX_BUTTONS = 6;
 
-const SOCIAL_ICONS: { key: keyof SocialLinks; label: string; icon: React.ComponentType<any> }[] = [
-  { key: "instagram", label: "Instagram", icon: Instagram },
-  { key: "facebook", label: "Facebook", icon: Facebook },
-  { key: "linkedin", label: "LinkedIn", icon: Linkedin },
-  { key: "twitter", label: "X (Twitter)", icon: Twitter },
-  { key: "youtube", label: "YouTube", icon: Youtube },
-  { key: "tiktok", label: "TikTok", icon: Youtube },
+const SOCIAL_CONFIG: { key: keyof SocialLinks; label: string; icon: React.ComponentType<any>; prefix: string }[] = [
+  { key: "instagram", label: "Instagram", icon: Instagram, prefix: "https://instagram.com/" },
+  { key: "facebook", label: "Facebook", icon: Facebook, prefix: "https://facebook.com/" },
+  { key: "linkedin", label: "LinkedIn", icon: Linkedin, prefix: "https://linkedin.com/in/" },
+  { key: "twitter", label: "X (Twitter)", icon: Twitter, prefix: "https://x.com/" },
+  { key: "youtube", label: "YouTube", icon: Youtube, prefix: "https://youtube.com/@" },
+  { key: "tiktok", label: "TikTok", icon: Youtube, prefix: "https://tiktok.com/@" },
 ];
+
+/** Extract username/slug from a full URL or @handle */
+function extractUsername(value: string, prefix: string): string {
+  let v = value.trim();
+  if (!v) return "";
+  // Remove @ prefix
+  if (v.startsWith("@")) v = v.substring(1);
+  // Try to extract from full URL variants
+  const patterns = [
+    prefix,
+    prefix.replace("https://", "http://"),
+    prefix.replace("https://", "https://www."),
+    prefix.replace("https://", "http://www."),
+    prefix.replace("https://", ""),
+    prefix.replace("https://", "www."),
+  ];
+  for (const p of patterns) {
+    if (v.toLowerCase().startsWith(p.toLowerCase())) {
+      v = v.substring(p.length);
+      break;
+    }
+  }
+  // Remove trailing slashes and query params
+  v = v.split("?")[0].split("#")[0].replace(/\/+$/, "");
+  return v;
+}
 
 export default function MeuCartao() {
   const { card, isLoading, createCard, updateCard, uploadImage } = useBusinessCard();
