@@ -51,6 +51,26 @@ export default function CriarCartao() {
 
   const [buttons, setButtons] = useState<{ text: string; url: string }[]>([]);
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Selecione uma imagem."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB."); return; }
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `public-cards/logo_${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+      setLogoUrl(urlData.publicUrl);
+      toast.success("Logo enviado!");
+    } catch { toast.error("Erro ao enviar logo."); }
+    finally { setUploadingLogo(false); }
+  };
 
   const handleSubmit = async () => {
     const slug = form.slug.toLowerCase().replace(/[^a-z0-9-]/g, "").trim();

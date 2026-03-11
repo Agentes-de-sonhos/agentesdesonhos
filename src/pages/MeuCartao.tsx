@@ -186,9 +186,9 @@ export default function MeuCartao() {
         <Card>
           <CardHeader><CardTitle className="text-lg">Imagens</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <Label>Foto do agente / Logo</Label>
+                <Label>Foto do agente</Label>
                 <div className="mt-2 flex items-center gap-3">
                   {card.photo_url && (
                     <img src={card.photo_url} alt="Foto" className="h-16 w-16 rounded-full object-cover border" />
@@ -199,6 +199,43 @@ export default function MeuCartao() {
                     </div>
                     <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                   </label>
+                </div>
+              </div>
+              <div>
+                <Label>Logotipo da empresa</Label>
+                <div className="mt-2 flex items-center gap-3">
+                  {card.logos.length > 0 && (
+                    <img src={card.logos[0]} alt="Logo" className="h-16 object-contain border rounded p-1" />
+                  )}
+                  <div className="space-y-1">
+                    <label className="cursor-pointer">
+                      <div className="flex items-center gap-2 text-sm text-primary hover:underline">
+                        <Upload className="h-4 w-4" /> {card.logos.length > 0 ? "Trocar logo" : "Enviar logo"}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const url = await uploadImage(file, "logo");
+                            if (url) updateCard.mutate({ logos: [url] } as any);
+                          } catch { toast.error("Erro ao enviar logotipo."); }
+                        }}
+                      />
+                    </label>
+                    {card.logos.length > 0 && (
+                      <button
+                        onClick={() => updateCard.mutate({ logos: [] } as any)}
+                        className="flex items-center gap-1 text-xs text-destructive hover:underline"
+                      >
+                        <Trash2 className="h-3 w-3" /> Remover
+                      </button>
+                    )}
+                    <p className="text-xs text-muted-foreground">PNG transparente, máx 400×400px</p>
+                  </div>
                 </div>
               </div>
               <div>
