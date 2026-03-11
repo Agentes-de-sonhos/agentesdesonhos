@@ -48,6 +48,7 @@ import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
 import CertificateTest from "./pages/CertificateTest";
 import Gamificacao from "./pages/Gamificacao";
+import Pesquisa from "./pages/Pesquisa";
 
 const queryClient = new QueryClient();
 
