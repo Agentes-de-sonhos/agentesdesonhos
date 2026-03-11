@@ -148,7 +148,7 @@ export default function MeuCartao() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6 p-4">
+      <div className="space-y-6">
         {/* Header */}
         <PageHeader
           pageKey="meu-cartao"
