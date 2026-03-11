@@ -110,14 +110,6 @@ export default function CartaoPublico() {
             )}
           </div>
 
-          {/* Logos */}
-          {card.logos.length > 0 && (
-            <div className="flex items-center justify-center gap-4 flex-wrap">
-              {card.logos.map((url, i) => (
-                <img key={i} src={url} alt="Logo" className="h-24 object-contain" />
-              ))}
-            </div>
-          )}
 
           {/* Quick contact */}
           <div className="flex justify-center gap-3">
@@ -224,16 +216,30 @@ export default function CartaoPublico() {
             </div>
           )}
 
-          {/* QR Code */}
-          <div className="pt-4 flex flex-col items-center gap-2">
-            <p className="text-xs text-gray-400 uppercase tracking-wider">Escaneie para salvar</p>
-            <div className="bg-white p-3 rounded-xl shadow-inner border">
-              <QRCodeSVG value={publicUrl} size={120} fgColor={primaryColor} />
+          {/* Logo + QR Code side by side */}
+          <div className="pt-4 flex items-center justify-between gap-4">
+            <div className="flex-1 flex items-center justify-center">
+              {card.logos.length > 0 ? (
+                <div className="flex flex-col items-center gap-2">
+                  {card.logos.map((url, i) => (
+                    <img key={i} src={url} alt="Logo" className="max-h-20 max-w-[140px] object-contain" />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-300">Agentes de Sonhos</p>
+              )}
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-xs text-gray-400 uppercase tracking-wider">Escaneie para salvar</p>
+              <div className="bg-white p-3 rounded-xl shadow-inner border">
+                <QRCodeSVG value={publicUrl} size={120} fgColor={primaryColor} />
+              </div>
             </div>
           </div>
 
           {/* Footer */}
-          <p className="text-xs text-gray-300 pt-4">Agentes de Sonhos</p>
+          {card.logos.length === 0 && <span />}
+          <p className="text-xs text-gray-300 pt-2">Agentes de Sonhos</p>
         </div>
       </div>
     </div>
