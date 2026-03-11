@@ -43,10 +43,10 @@ export function UpcomingAgendaEventsCard() {
   return (
     <Card className="border-0 shadow-card">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          <span className="text-base font-semibold">Minha Agenda</span>
-        </CardTitle>
+        <div>
+          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Minha Agenda</h2>
+          <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-events))]" />
+        </div>
       </CardHeader>
       <CardContent>
         {upcomingEvents.length === 0 ? (

@@ -44,10 +44,10 @@ export function ClientsManagementCard() {
   return (
     <Card className="border-0 shadow-card">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            <span className="text-base font-semibold">Gestão de Clientes</span>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Minha Meta</h2>
+            <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-financial))]" />
           </div>
           <Button
             variant="ghost"
@@ -58,7 +58,7 @@ export function ClientsManagementCard() {
             Ver detalhes
             <ArrowRight className="h-3 w-3 ml-1" />
           </Button>
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {targetAmount === 0 ? (
