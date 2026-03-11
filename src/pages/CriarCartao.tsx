@@ -79,7 +79,7 @@ export default function CriarCartao() {
         cover_url: form.cover_url || null,
         buttons: buttons.filter((b) => b.text && b.url) as any,
         social_links: socialLinks as any,
-      });
+      } as any);
 
       if (error) {
         if (error.message?.includes("duplicate") || error.message?.includes("unique")) {
