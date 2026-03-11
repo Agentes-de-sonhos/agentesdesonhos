@@ -228,6 +228,7 @@ export function AdminUserManager() {
 
   const planColors: Record<string, string> = {
     educa_pass: "bg-blue-500",
+    cartao_digital: "bg-teal-500",
     essencial: "bg-muted-foreground",
     profissional: "bg-primary",
     premium: "bg-accent",
