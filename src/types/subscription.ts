@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'educa_pass' | 'essencial' | 'profissional' | 'premium';
+export type SubscriptionPlan = 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium';
 
 export interface Subscription {
   id: string;
