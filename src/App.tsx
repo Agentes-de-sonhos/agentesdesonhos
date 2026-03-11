@@ -42,6 +42,7 @@ import PerguntasRespostas from "./pages/PerguntasRespostas";
 import DreamAdvisor from "./pages/DreamAdvisor";
 import MinhaVitrine from "./pages/MinhaVitrine";
 import MeuCartao from "./pages/MeuCartao";
+import CriarCartao from "./pages/CriarCartao";
 import VitrinePublica from "./pages/VitrinePublica";
 import CartaoPublico from "./pages/CartaoPublico";
 import SlugResolver from "./components/routing/SlugResolver";
@@ -371,6 +372,7 @@ const App = () => (
               }
             />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
+            <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:slug" element={<SlugResolver />} />

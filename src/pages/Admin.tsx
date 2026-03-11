@@ -19,6 +19,7 @@ import {
   Menu,
   Image,
   MessageCircle,
+  CreditCard,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -38,6 +39,7 @@ import { AdminHotelRecommendationsManager } from "@/components/admin/AdminHotelR
 import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager";
 import { AdminPageBannersManager } from "@/components/admin/AdminPageBannersManager";
 import { AdminSurveyManager } from "@/components/admin/AdminSurveyManager";
+import { AdminBusinessCardsManager } from "@/components/admin/AdminBusinessCardsManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -185,6 +187,10 @@ export default function Admin() {
               <MessageCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Pesquisas</span>
             </TabsTrigger>
+            <TabsTrigger value="business-cards" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden sm:inline">Cartões</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -251,6 +257,10 @@ export default function Admin() {
 
           <TabsContent value="surveys">
             <AdminSurveyManager />
+          </TabsContent>
+
+          <TabsContent value="business-cards">
+            <AdminBusinessCardsManager />
           </TabsContent>
         </Tabs>
       </div>
