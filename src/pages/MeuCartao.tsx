@@ -150,23 +150,22 @@ export default function MeuCartao() {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-6 p-4">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <CreditCard className="h-6 w-6 text-primary" /> Meu Cartão Virtual
-            </h1>
-            <p className="text-sm text-muted-foreground">Gerencie seu cartão de visita digital.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={copyLink}>
-              <Copy className="h-4 w-4 mr-1" /> Copiar link
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a href={`/${card.slug}`} target="_blank" rel="noopener noreferrer">
-                <Eye className="h-4 w-4 mr-1" /> Visualizar
-              </a>
-            </Button>
-          </div>
+        <PageHeader
+          pageKey="meu-cartao"
+          title="Cartão de Visita Virtual"
+          subtitle="Gerencie seu cartão de visita digital profissional."
+          icon={CreditCard}
+        />
+
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" size="sm" onClick={copyLink}>
+            <Copy className="h-4 w-4 mr-1" /> Copiar link
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <a href={`/${card.slug}`} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-4 w-4 mr-1" /> Visualizar
+            </a>
+          </Button>
         </div>
 
         <div className="text-sm text-muted-foreground bg-muted/50 rounded-md p-3 flex items-center gap-2 flex-wrap">
