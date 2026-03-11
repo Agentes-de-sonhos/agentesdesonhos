@@ -114,7 +114,7 @@ export default function CartaoPublico() {
           {card.logos.length > 0 && (
             <div className="flex items-center justify-center gap-4 flex-wrap">
               {card.logos.map((url, i) => (
-                <img key={i} src={url} alt="Logo" className="h-16 object-contain" />
+                <img key={i} src={url} alt="Logo" className="h-24 object-contain" />
               ))}
             </div>
           )}
