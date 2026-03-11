@@ -353,7 +353,7 @@ export type Database = {
           social_links: Json | null
           title: string | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
           website: string | null
           whatsapp: string | null
         }
@@ -375,7 +375,7 @@ export type Database = {
           social_links?: Json | null
           title?: string | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
           website?: string | null
           whatsapp?: string | null
         }
@@ -397,7 +397,7 @@ export type Database = {
           social_links?: Json | null
           title?: string | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
           website?: string | null
           whatsapp?: string | null
         }
