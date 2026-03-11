@@ -258,6 +258,10 @@ export default function Admin() {
           <TabsContent value="surveys">
             <AdminSurveyManager />
           </TabsContent>
+
+          <TabsContent value="business-cards">
+            <AdminBusinessCardsManager />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
