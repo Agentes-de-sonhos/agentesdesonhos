@@ -96,6 +96,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   educa_pass: 'EducaTravel Pass',
+  cartao_digital: 'Cartão Digital Pass',
   essencial: 'Essencial',
   profissional: 'Profissional',
   premium: 'Premium',
