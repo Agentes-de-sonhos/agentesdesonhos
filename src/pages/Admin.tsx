@@ -19,6 +19,7 @@ import {
   Menu,
   Image,
   MessageCircle,
+  CreditCard,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
