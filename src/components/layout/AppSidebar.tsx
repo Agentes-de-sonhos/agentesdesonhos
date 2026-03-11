@@ -250,7 +250,7 @@ export function AppSidebar() {
       trackSectionVisit(item.url);
       setCollapsed(true);
     },
-    [hasFeature, trackSectionVisit, isEducaPass]
+    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital]
   );
 
   const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
