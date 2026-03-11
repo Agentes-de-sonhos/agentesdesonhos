@@ -22,6 +22,8 @@ export type Feature =
   | 'crm_basic'
   | 'trainings_recorded'
   | 'financial'
+  // Cartão Digital Pass feature
+  | 'business_card'
   // Profissional features
   | 'ai_tools'
   | 'quote_generator'
