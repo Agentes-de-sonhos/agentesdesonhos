@@ -83,6 +83,10 @@ export function TripRemindersCard() {
     return (
       <Card className="border-0 shadow-md">
         <CardContent className="pt-6">
+          <div className="mb-4">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Próximas Viagens</h2>
+            <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-reminders))]" />
+          </div>
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>Nenhum lembrete pendente</p>
