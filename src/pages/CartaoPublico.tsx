@@ -7,7 +7,7 @@ import {
   Instagram, Facebook, Linkedin, Twitter, Youtube,
 } from "lucide-react";
 
-const PUBLIC_DOMAIN = "https://contato.tur.br";
+const PUBLIC_DOMAIN = window.location.origin;
 
 const SOCIAL_META: Record<keyof SocialLinks, { icon: React.ComponentType<any>; label: string }> = {
   instagram: { icon: Instagram, label: "Instagram" },
