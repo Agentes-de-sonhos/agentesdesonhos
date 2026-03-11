@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { CreditCard, Check, ExternalLink, Instagram, Facebook, Linkedin, Twitter, Youtube, Plus, Trash2 } from "lucide-react";
+import { CreditCard, Check, ExternalLink, Instagram, Facebook, Linkedin, Twitter, Youtube, Plus, Trash2, Upload } from "lucide-react";
 import logoImg from "@/assets/logo-agentes-de-sonhos.png";
 
 const PUBLIC_DOMAIN = "https://contato.tur.br";
