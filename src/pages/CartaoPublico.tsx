@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { usePublicBusinessCard, generateVCard, SocialLinks } from "@/hooks/useBusinessCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +22,10 @@ const SOCIAL_META: Record<keyof SocialLinks, { icon: React.ComponentType<any>; l
 export default function CartaoPublico() {
   const { slug } = useParams<{ slug: string }>();
   const { data: card, isLoading } = usePublicBusinessCard(slug);
+
+  useEffect(() => {
+    document.title = "Cartão Virtual";
+  }, []);
 
   if (isLoading) {
     return (
