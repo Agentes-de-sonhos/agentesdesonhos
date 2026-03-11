@@ -18,6 +18,7 @@ import {
   Sparkles,
   Menu,
   Image,
+  MessageCircle,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -36,6 +37,7 @@ import { AdminHotelsManager } from "@/components/admin/AdminHotelsManager";
 import { AdminHotelRecommendationsManager } from "@/components/admin/AdminHotelRecommendationsManager";
 import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager";
 import { AdminPageBannersManager } from "@/components/admin/AdminPageBannersManager";
+import { AdminSurveyManager } from "@/components/admin/AdminSurveyManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -118,7 +120,7 @@ export default function Admin() {
 
         {/* Tabs for Content Management */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-15">
+          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-16">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Usuários</span>
@@ -178,6 +180,10 @@ export default function Admin() {
             <TabsTrigger value="page-banners" className="flex items-center gap-2">
               <Image className="h-4 w-4" />
               <span className="hidden sm:inline">Capas</span>
+            </TabsTrigger>
+            <TabsTrigger value="surveys" className="flex items-center gap-2">
+              <MessageCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Pesquisas</span>
             </TabsTrigger>
           </TabsList>
 
@@ -241,6 +247,10 @@ export default function Admin() {
 
           <TabsContent value="page-banners">
             <AdminPageBannersManager />
+          </TabsContent>
+
+          <TabsContent value="surveys">
+            <AdminSurveyManager />
           </TabsContent>
         </Tabs>
       </div>

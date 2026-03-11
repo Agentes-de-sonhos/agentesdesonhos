@@ -48,6 +48,7 @@ import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
 import CertificateTest from "./pages/CertificateTest";
 import Gamificacao from "./pages/Gamificacao";
+import Pesquisa from "./pages/Pesquisa";
 
 const queryClient = new QueryClient();
 
@@ -369,6 +370,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:slug" element={<SlugResolver />} />

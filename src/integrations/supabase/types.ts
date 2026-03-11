@@ -3580,6 +3580,148 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_questions: {
+        Row: {
+          audio_url: string | null
+          created_at: string
+          id: string
+          options: Json
+          order_index: number
+          question_text: string | null
+          question_type: string
+          survey_id: string
+          updated_at: string
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string
+          id?: string
+          options?: Json
+          order_index?: number
+          question_text?: string | null
+          question_type?: string
+          survey_id: string
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string
+          id?: string
+          options?: Json
+          order_index?: number
+          question_text?: string | null
+          question_type?: string
+          survey_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_questions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_responses: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          contact_info: string | null
+          contact_name: string | null
+          created_at: string
+          id: string
+          session_id: string
+          survey_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          contact_info?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          session_id: string
+          survey_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          contact_info?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          session_id?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          description: string | null
+          empathy_after_question: number | null
+          empathy_message: string | null
+          final_message: string | null
+          gift_file_name: string | null
+          gift_message: string | null
+          gift_type: string | null
+          gift_url: string | null
+          id: string
+          is_active: boolean
+          sender_name: string
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          description?: string | null
+          empathy_after_question?: number | null
+          empathy_message?: string | null
+          final_message?: string | null
+          gift_file_name?: string | null
+          gift_message?: string | null
+          gift_type?: string | null
+          gift_url?: string | null
+          id?: string
+          is_active?: boolean
+          sender_name?: string
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          description?: string | null
+          empathy_after_question?: number | null
+          empathy_message?: string | null
+          final_message?: string | null
+          gift_file_name?: string | null
+          gift_message?: string | null
+          gift_type?: string | null
+          gift_url?: string | null
+          id?: string
+          is_active?: boolean
+          sender_name?: string
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trade_suppliers: {
         Row: {
           category: string
