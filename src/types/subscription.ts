@@ -112,6 +112,7 @@ export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   educa_pass: 0,
+  cartao_digital: 0,
   essencial: 0,
   profissional: 20,
   premium: 1000,
