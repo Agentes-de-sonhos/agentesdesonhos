@@ -97,8 +97,8 @@ export default function Auth() {
     // Wait for role and subscription to load before deciding destination
     if (roleLoading || subLoading) return;
     
-    // Check if user should complete onboarding (skip for educa_pass)
-    if (isNewUser && plan !== "educa_pass") {
+    // Check if user should complete onboarding (skip for educa_pass and cartao_digital)
+    if (isNewUser && plan !== "educa_pass" && plan !== "cartao_digital") {
       navigate("/onboarding", { replace: true });
       return;
     }
@@ -106,6 +106,12 @@ export default function Auth() {
     // Educa Pass users go directly to Academy
     if (plan === "educa_pass") {
       navigate("/educa-academy", { replace: true });
+      return;
+    }
+
+    // Cartão Digital Pass users go directly to card editor
+    if (plan === "cartao_digital") {
+      navigate("/meu-cartao", { replace: true });
       return;
     }
     

@@ -39,5 +39,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
   }
 
+  // Cartão Digital Pass users can only access /meu-cartao and /perfil
+  if (plan === "cartao_digital") {
+    const allowedPaths = ["/meu-cartao", "/perfil"];
+    const isAllowed = allowedPaths.some(
+      (p) => location.pathname === p || location.pathname.startsWith(p + "/")
+    );
+    if (!isAllowed) {
+      return <Navigate to="/meu-cartao" replace />;
+    }
+  }
+
   return <>{children}</>;
 }
