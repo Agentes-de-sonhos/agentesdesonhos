@@ -27,14 +27,40 @@ const COVER_OPTIONS = [
 const PUBLIC_DOMAIN = "https://contato.tur.br";
 const MAX_BUTTONS = 6;
 
-const SOCIAL_ICONS: { key: keyof SocialLinks; label: string; icon: React.ComponentType<any> }[] = [
-  { key: "instagram", label: "Instagram", icon: Instagram },
-  { key: "facebook", label: "Facebook", icon: Facebook },
-  { key: "linkedin", label: "LinkedIn", icon: Linkedin },
-  { key: "twitter", label: "X (Twitter)", icon: Twitter },
-  { key: "youtube", label: "YouTube", icon: Youtube },
-  { key: "tiktok", label: "TikTok", icon: Youtube },
+const SOCIAL_CONFIG: { key: keyof SocialLinks; label: string; icon: React.ComponentType<any>; prefix: string }[] = [
+  { key: "instagram", label: "Instagram", icon: Instagram, prefix: "https://instagram.com/" },
+  { key: "facebook", label: "Facebook", icon: Facebook, prefix: "https://facebook.com/" },
+  { key: "linkedin", label: "LinkedIn", icon: Linkedin, prefix: "https://linkedin.com/in/" },
+  { key: "twitter", label: "X (Twitter)", icon: Twitter, prefix: "https://x.com/" },
+  { key: "youtube", label: "YouTube", icon: Youtube, prefix: "https://youtube.com/@" },
+  { key: "tiktok", label: "TikTok", icon: Youtube, prefix: "https://tiktok.com/@" },
 ];
+
+/** Extract username/slug from a full URL or @handle */
+function extractUsername(value: string, prefix: string): string {
+  let v = value.trim();
+  if (!v) return "";
+  // Remove @ prefix
+  if (v.startsWith("@")) v = v.substring(1);
+  // Try to extract from full URL variants
+  const patterns = [
+    prefix,
+    prefix.replace("https://", "http://"),
+    prefix.replace("https://", "https://www."),
+    prefix.replace("https://", "http://www."),
+    prefix.replace("https://", ""),
+    prefix.replace("https://", "www."),
+  ];
+  for (const p of patterns) {
+    if (v.toLowerCase().startsWith(p.toLowerCase())) {
+      v = v.substring(p.length);
+      break;
+    }
+  }
+  // Remove trailing slashes and query params
+  v = v.split("?")[0].split("#")[0].replace(/\/+$/, "");
+  return v;
+}
 
 export default function MeuCartao() {
   const { card, isLoading, createCard, updateCard, uploadImage } = useBusinessCard();
@@ -69,7 +95,16 @@ export default function MeuCartao() {
   };
 
   const handleSave = () => {
-    updateCard.mutate({ ...form, buttons, social_links: socialLinks } as any);
+    // Build full URLs from usernames for social links
+    const fullSocialLinks: SocialLinks = {};
+    for (const { key, prefix } of SOCIAL_CONFIG) {
+      const username = socialLinks[key];
+      if (username && username.trim()) {
+        const clean = extractUsername(username, prefix);
+        fullSocialLinks[key] = clean ? `${prefix}${clean}` : "";
+      }
+    }
+    updateCard.mutate({ ...form, buttons, social_links: fullSocialLinks } as any);
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -408,17 +443,35 @@ export default function MeuCartao() {
         {/* Social Links */}
         <Card>
           <CardHeader><CardTitle className="text-lg">Redes Sociais</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {SOCIAL_ICONS.map(({ key, label, icon: Icon }) => (
-              <div key={key} className="flex items-center gap-3">
-                <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
-                <Input
-                  placeholder={`URL do ${label}`}
-                  value={socialLinks[key] || ""}
-                  onChange={e => setSocialLinks({ ...socialLinks, [key]: e.target.value })}
-                />
-              </div>
-            ))}
+          <CardContent className="space-y-4">
+            {SOCIAL_CONFIG.map(({ key, label, icon: Icon, prefix }) => {
+              // Extract username from stored full URL for display
+              const storedValue = socialLinks[key] || "";
+              const displayValue = extractUsername(storedValue, prefix);
+              return (
+                <div key={key} className="space-y-1">
+                  <Label className="flex items-center gap-2 text-sm font-medium">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                    {label}
+                  </Label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-xs select-none whitespace-nowrap">
+                      {prefix}
+                    </span>
+                    <Input
+                      className="rounded-l-none"
+                      placeholder="seu-usuario"
+                      value={displayValue}
+                      onChange={e => {
+                        const raw = e.target.value;
+                        const cleaned = extractUsername(raw, prefix);
+                        setSocialLinks({ ...socialLinks, [key]: cleaned });
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
 
