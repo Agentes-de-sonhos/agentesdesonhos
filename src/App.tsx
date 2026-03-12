@@ -373,6 +373,7 @@ const App = () => (
               }
             />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
+            <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
