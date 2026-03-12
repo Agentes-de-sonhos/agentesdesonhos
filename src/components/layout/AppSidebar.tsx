@@ -358,7 +358,10 @@ export function AppSidebar() {
               <nav className="flex flex-col gap-0.5 mt-1">
                 {section.items.map((item) => {
                   const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
-                  const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
+                  const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
+                  const isLockedByCartao = isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil";
+                  const isLockedByEduca = isEducaPass && item.url !== "/educa-academy";
+                  const isLocked = isLockedByFeature || isLockedByCartao || isLockedByEduca;
                   return (
                     <Link
                       key={item.url}
@@ -368,11 +371,17 @@ export function AppSidebar() {
                         "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
                         itemActive && !isLocked
                           ? cn(section.bgColor, section.textColor, "border-l-[3px]", section.borderColor, "font-semibold")
-                          : cn(section.bgColor, section.textColor, "hover:scale-[1.02] hover:font-semibold"),
-                        isLocked && "opacity-60"
+                          : isLocked
+                            ? "opacity-60 cursor-pointer hover:opacity-70"
+                            : cn(section.bgColor, section.textColor, "hover:scale-[1.02] hover:font-semibold"),
                       )}
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <div className="relative flex-shrink-0">
+                        <item.icon className="h-4 w-4" />
+                        {isLocked && (
+                          <Lock className="h-2 w-2 absolute -top-0.5 -right-0.5 text-warning" />
+                        )}
+                      </div>
                       <span className="truncate flex-1">{item.title}</span>
                     </Link>
                   );
