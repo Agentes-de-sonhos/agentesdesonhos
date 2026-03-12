@@ -129,17 +129,14 @@ export default function AtivarCartao() {
             <div className="space-y-2">
               <CardTitle className="text-xl font-semibold">Cadastro realizado!</CardTitle>
               <CardDescription className="text-base leading-relaxed">
-                Enviamos um email de confirmação para você. Clique no link do email para ativar sua conta e começar a usar seu Cartão Digital.
+                Sua conta foi criada com sucesso. Faça login no app para acessar e configurar seu Cartão Digital.
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="px-8 pb-10">
             <Button
               onClick={() => {
-                const mainDomain = window.location.hostname.startsWith("ativar-cartao")
-                  ? window.location.origin.replace("ativar-cartao.", "")
-                  : window.location.origin;
-                window.location.href = `${mainDomain}/auth`;
+                window.location.href = APP_LOGIN_URL;
               }}
               className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20"
             >
