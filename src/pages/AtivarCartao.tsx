@@ -23,9 +23,10 @@ import { useToast } from "@/hooks/use-toast";
 import { formatPhone } from "@/lib/validators";
 
 const translateAuthError = (msg: string): string => {
-  if (/rate.limit/i.test(msg)) return "Muitas tentativas seguidas. Aguarde alguns minutos.";
+  if (/limite de 5 tentativas/i.test(msg)) return msg;
+  if (/already.registered|já está cadastrado/i.test(msg)) return "Este e-mail já está cadastrado. Faça login no app.";
+  if (/rate.limit|too many requests|email rate limit exceeded/i.test(msg)) return "Muitas tentativas seguidas. Aguarde alguns minutos.";
   if (/invalid.login/i.test(msg)) return "E-mail ou senha incorretos.";
-  if (/already.registered/i.test(msg)) return "Este e-mail já está cadastrado. Faça login na página principal.";
   if (/weak.password/i.test(msg)) return "A senha deve ter pelo menos 6 caracteres.";
   if (/network/i.test(msg)) return "Erro de conexão. Verifique sua internet.";
   return msg;
@@ -43,6 +44,8 @@ const signupSchema = z.object({
 });
 
 type SignupData = z.infer<typeof signupSchema>;
+
+const APP_LOGIN_URL = "https://app.agentesdesonhos.com.br/auth";
 
 export default function AtivarCartao() {
   const [error, setError] = useState<string | null>(null);
