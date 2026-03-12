@@ -325,10 +325,7 @@ export default function AtivarCartao() {
             <button
               type="button"
               onClick={() => {
-                const mainDomain = window.location.hostname.startsWith("ativar-cartao")
-                  ? window.location.origin.replace("ativar-cartao.", "")
-                  : window.location.origin;
-                window.location.href = `${mainDomain}/auth`;
+                window.location.href = APP_LOGIN_URL;
               }}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
