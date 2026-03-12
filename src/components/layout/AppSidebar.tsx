@@ -253,15 +253,17 @@ export function AppSidebar() {
     [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital]
   );
 
-  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
+  const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
+
+  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string, forceShowLock?: boolean) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
-    const isLockedByCartaoDigital = isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil";
+    const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
     const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
-    const showLockIcon = isLocked;
+    const showLockIcon = isLocked || forceShowLock;
 
     const menuLink = (
       <Link
