@@ -236,8 +236,8 @@ export function AppSidebar() {
         setShowComingSoon(true);
         return;
       }
-      // Cartão Digital Pass: only allow Meu Cartão
-      if (isCartaoDigital && item.url !== "/meu-cartao") {
+      // Cartão Digital Pass: only allow Meu Cartão and Perfil
+      if (isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil") {
         e.preventDefault();
         setShowComingSoon(true);
         return;
@@ -259,8 +259,9 @@ export function AppSidebar() {
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
-    const isLockedByCartaoDigital = isCartaoDigital && item.url !== "/meu-cartao";
+    const isLockedByCartaoDigital = isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil";
     const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
+    const showLockIcon = isLocked;
 
     const menuLink = (
       <Link
@@ -273,13 +274,11 @@ export function AppSidebar() {
             ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
             : isActive && !isLocked
               ? "bg-muted text-foreground font-semibold shadow-sm"
-              : (isLocked && !isLockedByEducaPass)
+              : isLocked
                 ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
-                : isLockedByEducaPass
-                  ? "cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                  : sectionBgColor
-                    ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                : sectionBgColor
+                  ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
         )}
       >
         <div className="relative flex-shrink-0">
@@ -287,16 +286,16 @@ export function AppSidebar() {
             className={cn(
               "h-5 w-5 transition-all duration-300",
               isActive && !isLocked && !sectionBgColor && "text-foreground",
-              isLocked && !isLockedByEducaPass && "text-muted-foreground"
+              isLocked && "text-muted-foreground"
             )}
           />
-          {isLocked && !isLockedByEducaPass && (
+          {showLockIcon && (
             <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />
           )}
         </div>
         {!collapsed && (
           <>
-            <span className={cn("truncate flex-1", isLocked && !isLockedByEducaPass && "text-muted-foreground")}>
+            <span className={cn("truncate flex-1", isLocked && "text-muted-foreground")}>
               {item.title}
             </span>
             {item.isHighlighted && !isActive && !isLocked && (
@@ -359,7 +358,10 @@ export function AppSidebar() {
               <nav className="flex flex-col gap-0.5 mt-1">
                 {section.items.map((item) => {
                   const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
-                  const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
+                  const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
+                  const isLockedByCartao = isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil";
+                  const isLockedByEduca = isEducaPass && item.url !== "/educa-academy";
+                  const isLocked = isLockedByFeature || isLockedByCartao || isLockedByEduca;
                   return (
                     <Link
                       key={item.url}
@@ -369,11 +371,17 @@ export function AppSidebar() {
                         "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
                         itemActive && !isLocked
                           ? cn(section.bgColor, section.textColor, "border-l-[3px]", section.borderColor, "font-semibold")
-                          : cn(section.bgColor, section.textColor, "hover:scale-[1.02] hover:font-semibold"),
-                        isLocked && "opacity-60"
+                          : isLocked
+                            ? "opacity-60 cursor-pointer hover:opacity-70"
+                            : cn(section.bgColor, section.textColor, "hover:scale-[1.02] hover:font-semibold"),
                       )}
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <div className="relative flex-shrink-0">
+                        <item.icon className="h-4 w-4" />
+                        {isLocked && (
+                          <Lock className="h-2 w-2 absolute -top-0.5 -right-0.5 text-warning" />
+                        )}
+                      </div>
                       <span className="truncate flex-1">{item.title}</span>
                     </Link>
                   );
