@@ -236,7 +236,7 @@ export function AppSidebar() {
         setShowComingSoon(true);
         return;
       }
-      // Cartão Digital Pass: only allow Meu Cartão and Perfil
+      // Cartão Digital Pass: only allow specific pages
       if (isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil") {
         e.preventDefault();
         setShowComingSoon(true);
