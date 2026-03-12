@@ -74,42 +74,29 @@ export default function AtivarCartao() {
     setIsLoading(true);
 
     try {
-      // 1. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
-          data: { name: data.name.trim(), target_plan: "cartao_digital" },
+      const { data: signupResult, error: signupError } = await supabase.functions.invoke("activate-card-signup", {
+        body: {
+          name: data.name.trim(),
+          email: data.email.trim().toLowerCase(),
+          phone: data.phone,
+          password: data.password,
         },
       });
 
-      if (authError) {
-        setError(translateAuthError(authError.message));
-        setIsLoading(false);
+      if (signupError) {
+        setError(translateAuthError(signupError.message));
         return;
       }
 
-      if (!authData.user) {
-        setError("Não foi possível criar a conta.");
-        setIsLoading(false);
+      if (signupResult?.error) {
+        setError(translateAuthError(signupResult.error));
         return;
       }
-
-      const userId = authData.user.id;
-
-      // 2. Create/update profile
-      await supabase.from("profiles").upsert({
-        user_id: userId,
-        name: data.name.trim(),
-        phone: data.phone.replace(/\D/g, ""),
-        has_password: true,
-      }, { onConflict: "user_id" });
 
       setSuccess(true);
       toast({
         title: "Conta criada com sucesso!",
-        description: "Verifique seu email para confirmar o cadastro.",
+        description: "Agora faça login no app para acessar seu Cartão Digital.",
       });
     } catch (err) {
       console.error("Signup error:", err);
