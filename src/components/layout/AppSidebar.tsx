@@ -236,7 +236,7 @@ export function AppSidebar() {
         setShowComingSoon(true);
         return;
       }
-      // Cartão Digital Pass: only allow Meu Cartão and Perfil
+      // Cartão Digital Pass: only allow specific pages
       if (isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil") {
         e.preventDefault();
         setShowComingSoon(true);
@@ -253,15 +253,17 @@ export function AppSidebar() {
     [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital]
   );
 
-  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
+  const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
+
+  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string, forceShowLock?: boolean) => {
     const isActive =
       location.pathname === item.url ||
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
-    const isLockedByCartaoDigital = isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil";
+    const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
     const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
-    const showLockIcon = isLocked;
+    const showLockIcon = isLocked || forceShowLock;
 
     const menuLink = (
       <Link
@@ -359,7 +361,7 @@ export function AppSidebar() {
                 {section.items.map((item) => {
                   const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
                   const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
-                  const isLockedByCartao = isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil";
+                  const isLockedByCartao = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
                   const isLockedByEduca = isEducaPass && item.url !== "/educa-academy";
                   const isLocked = isLockedByFeature || isLockedByCartao || isLockedByEduca;
                   return (
