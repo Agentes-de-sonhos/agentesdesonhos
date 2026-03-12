@@ -151,7 +151,12 @@ export default function AtivarCartao() {
           </CardHeader>
           <CardContent className="px-8 pb-10">
             <Button
-              onClick={() => navigate("/auth")}
+              onClick={() => {
+                const mainDomain = window.location.hostname.startsWith("ativar-cartao")
+                  ? window.location.origin.replace("ativar-cartao.", "")
+                  : window.location.origin;
+                window.location.href = `${mainDomain}/auth`;
+              }}
               className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20"
             >
               Ir para o Login
