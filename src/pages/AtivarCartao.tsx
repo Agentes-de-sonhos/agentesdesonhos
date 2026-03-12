@@ -77,7 +77,7 @@ export default function AtivarCartao() {
         password: data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth`,
-          data: { name: data.name.trim() },
+          data: { name: data.name.trim(), target_plan: "cartao_digital" },
         },
       });
 
@@ -102,12 +102,6 @@ export default function AtivarCartao() {
         phone: data.phone.replace(/\D/g, ""),
         has_password: true,
       }, { onConflict: "user_id" });
-
-      // 3. Update subscription to cartao_digital
-      await supabase
-        .from("subscriptions")
-        .update({ plan: "cartao_digital" as any })
-        .eq("user_id", userId);
 
       setSuccess(true);
       toast({
