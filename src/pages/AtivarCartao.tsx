@@ -343,7 +343,12 @@ export default function AtivarCartao() {
           <div className="text-center pt-2">
             <button
               type="button"
-              onClick={() => navigate("/auth")}
+              onClick={() => {
+                const mainDomain = window.location.hostname.startsWith("ativar-cartao")
+                  ? window.location.origin.replace("ativar-cartao.", "")
+                  : window.location.origin;
+                window.location.href = `${mainDomain}/auth`;
+              }}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Já tem conta? <span className="font-medium text-primary underline underline-offset-4">Faça login</span>
