@@ -23,9 +23,10 @@ import { useToast } from "@/hooks/use-toast";
 import { formatPhone } from "@/lib/validators";
 
 const translateAuthError = (msg: string): string => {
-  if (/rate.limit/i.test(msg)) return "Muitas tentativas seguidas. Aguarde alguns minutos.";
+  if (/limite de 5 tentativas/i.test(msg)) return msg;
+  if (/already.registered|já está cadastrado/i.test(msg)) return "Este e-mail já está cadastrado. Faça login no app.";
+  if (/rate.limit|too many requests|email rate limit exceeded/i.test(msg)) return "Muitas tentativas seguidas. Aguarde alguns minutos.";
   if (/invalid.login/i.test(msg)) return "E-mail ou senha incorretos.";
-  if (/already.registered/i.test(msg)) return "Este e-mail já está cadastrado. Faça login na página principal.";
   if (/weak.password/i.test(msg)) return "A senha deve ter pelo menos 6 caracteres.";
   if (/network/i.test(msg)) return "Erro de conexão. Verifique sua internet.";
   return msg;
@@ -43,6 +44,8 @@ const signupSchema = z.object({
 });
 
 type SignupData = z.infer<typeof signupSchema>;
+
+const APP_LOGIN_URL = "https://app.agentesdesonhos.com.br/auth";
 
 export default function AtivarCartao() {
   const [error, setError] = useState<string | null>(null);
@@ -71,42 +74,29 @@ export default function AtivarCartao() {
     setIsLoading(true);
 
     try {
-      // 1. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
-          data: { name: data.name.trim(), target_plan: "cartao_digital" },
+      const { data: signupResult, error: signupError } = await supabase.functions.invoke("activate-card-signup", {
+        body: {
+          name: data.name.trim(),
+          email: data.email.trim().toLowerCase(),
+          phone: data.phone,
+          password: data.password,
         },
       });
 
-      if (authError) {
-        setError(translateAuthError(authError.message));
-        setIsLoading(false);
+      if (signupError) {
+        setError(translateAuthError(signupError.message));
         return;
       }
 
-      if (!authData.user) {
-        setError("Não foi possível criar a conta.");
-        setIsLoading(false);
+      if (signupResult?.error) {
+        setError(translateAuthError(signupResult.error));
         return;
       }
-
-      const userId = authData.user.id;
-
-      // 2. Create/update profile
-      await supabase.from("profiles").upsert({
-        user_id: userId,
-        name: data.name.trim(),
-        phone: data.phone.replace(/\D/g, ""),
-        has_password: true,
-      }, { onConflict: "user_id" });
 
       setSuccess(true);
       toast({
         title: "Conta criada com sucesso!",
-        description: "Verifique seu email para confirmar o cadastro.",
+        description: "Agora faça login no app para acessar seu Cartão Digital.",
       });
     } catch (err) {
       console.error("Signup error:", err);
@@ -139,17 +129,14 @@ export default function AtivarCartao() {
             <div className="space-y-2">
               <CardTitle className="text-xl font-semibold">Cadastro realizado!</CardTitle>
               <CardDescription className="text-base leading-relaxed">
-                Enviamos um email de confirmação para você. Clique no link do email para ativar sua conta e começar a usar seu Cartão Digital.
+                Sua conta foi criada com sucesso. Faça login no app para acessar e configurar seu Cartão Digital.
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="px-8 pb-10">
             <Button
               onClick={() => {
-                const mainDomain = window.location.hostname.startsWith("ativar-cartao")
-                  ? window.location.origin.replace("ativar-cartao.", "")
-                  : window.location.origin;
-                window.location.href = `${mainDomain}/auth`;
+                window.location.href = APP_LOGIN_URL;
               }}
               className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20"
             >
@@ -338,10 +325,7 @@ export default function AtivarCartao() {
             <button
               type="button"
               onClick={() => {
-                const mainDomain = window.location.hostname.startsWith("ativar-cartao")
-                  ? window.location.origin.replace("ativar-cartao.", "")
-                  : window.location.origin;
-                window.location.href = `${mainDomain}/auth`;
+                window.location.href = APP_LOGIN_URL;
               }}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
