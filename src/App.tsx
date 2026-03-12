@@ -63,7 +63,13 @@ const App = () => (
         <AuthProvider>
           <SubscriptionProvider>
           <Routes>
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/auth" element={
+              window.location.hostname.startsWith("ativar-cartao") ? (
+                <AtivarCartao />
+              ) : (
+                <Auth />
+              )
+            } />
             <Route
               path="/"
               element={
