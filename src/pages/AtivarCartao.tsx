@@ -140,7 +140,7 @@ export default function AtivarCartao() {
               <img src={logoAgentes} alt="Agentes de Sonhos" className="h-28 w-auto" />
             </div>
             <div className="flex justify-center">
-              <CheckCircle className="h-16 w-16 text-green-500" />
+              <CheckCircle className="h-16 w-16 text-primary" />
             </div>
             <div className="space-y-2">
               <CardTitle className="text-xl font-semibold">Cadastro realizado!</CardTitle>
