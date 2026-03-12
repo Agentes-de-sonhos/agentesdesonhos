@@ -361,7 +361,7 @@ export function AppSidebar() {
                 {section.items.map((item) => {
                   const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
                   const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
-                  const isLockedByCartao = isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil";
+                  const isLockedByCartao = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
                   const isLockedByEduca = isEducaPass && item.url !== "/educa-academy";
                   const isLocked = isLockedByFeature || isLockedByCartao || isLockedByEduca;
                   return (
