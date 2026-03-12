@@ -65,6 +65,42 @@ export type Database = {
         }
         Relationships: []
       }
+      activation_signup_attempts: {
+        Row: {
+          attempts: number
+          blocked_until: string | null
+          created_at: string
+          email: string
+          id: string
+          ip_address: string
+          last_error: string | null
+          updated_at: string
+          window_started_at: string
+        }
+        Insert: {
+          attempts?: number
+          blocked_until?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          ip_address: string
+          last_error?: string | null
+          updated_at?: string
+          window_started_at?: string
+        }
+        Update: {
+          attempts?: number
+          blocked_until?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          ip_address?: string
+          last_error?: string | null
+          updated_at?: string
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       advisor_suggestions: {
         Row: {
           advisor_type: string
