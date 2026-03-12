@@ -172,7 +172,7 @@ export default function MeuCartao() {
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-sm text-muted-foreground whitespace-nowrap">contato.tur.br/</span>
                   <Input
-                    placeholder="sua-agencia"
+                    placeholder="seu-nome"
                     value={slug}
                     onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                   />
