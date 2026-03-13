@@ -347,10 +347,10 @@ export function CommunityQACard() {
               const isAuthor = user?.id === q.user_id;
 
               return (
-                <div key={q.id} className="rounded-xl bg-card border border-border/60 overflow-hidden transition-shadow hover:shadow-sm">
+                <div key={q.id} className="rounded-xl bg-card border border-border/60 overflow-hidden transition-all hover:shadow-md group/question">
                   {/* Question row */}
                   <div
-                    className="flex items-start gap-3 p-3 cursor-pointer hover:bg-[hsl(var(--section-community))]/5 transition-colors"
+                    className="flex items-start gap-3 p-3 cursor-pointer transition-colors group-hover/question:bg-[hsl(var(--section-community))] group-hover/question:text-white"
                     onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
                   >
                     <div className="pt-0.5 text-base flex-shrink-0">❓</div>
