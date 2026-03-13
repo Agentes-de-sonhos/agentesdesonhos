@@ -602,6 +602,29 @@ export function AdminUserManager() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir usuário</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir <strong>{deletingUser?.name}</strong>
+                {deletingUser?.email ? ` (${deletingUser.email})` : ""}? Esta ação é irreversível e removerá todos os dados do usuário.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => deletingUser && deleteUserMutation.mutate(deletingUser.user_id)}
+                disabled={deleteUserMutation.isPending}
+              >
+                {deleteUserMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
