@@ -273,7 +273,10 @@ export function CommunityQACard() {
     <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/20 via-[hsl(var(--section-community))]/10 to-[hsl(var(--section-community))]/[0.03]">
       <CardContent className="pt-5 pb-4 space-y-4">
         <div>
-          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Perguntas da Comunidade</h2>
+          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-[hsl(var(--section-community))]" />
+            Perguntas da Comunidade
+          </h2>
           <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-community))]" />
         </div>
         {/* Quick Ask Bar */}
