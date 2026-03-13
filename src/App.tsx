@@ -100,6 +100,14 @@ const App = () => (
               }
             />
             <Route
+              path="/admin/crm"
+              element={
+                <AdminRoute>
+                  <AdminCRM />
+                </AdminRoute>
+              }
+            />
+            <Route
               path="/ferramentas-ia"
               element={
                 <ProtectedRoute>
