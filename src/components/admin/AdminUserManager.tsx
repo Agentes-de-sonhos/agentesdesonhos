@@ -230,6 +230,7 @@ export function AdminUserManager() {
     },
   });
 
+  const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
