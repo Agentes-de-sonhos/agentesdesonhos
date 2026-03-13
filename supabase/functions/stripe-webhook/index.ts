@@ -77,13 +77,41 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Send activation email via Lovable AI (Gemini) - simple approach using fetch to a transactional email
-    // For now, we log the activation link. Email sending can be added via Resend connector later.
-    const activationUrl = `https://agentesdesonhos.lovable.app/ativar-cartao?token=${activationToken}`;
+    const activationUrl = `https://agentesdesonhos.com/ativar-cartao?token=${activationToken}`;
     console.log(`✅ Activation token created for ${customerEmail}: ${activationUrl}`);
 
-    // TODO: Send email with activationUrl to customerEmail
-    // This can be done via Resend connector or transactional email setup
+    // Send activation email via Resend
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (resendApiKey) {
+      const emailRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "onboarding@resend.dev",
+          to: [customerEmail],
+          subject: "Ative seu Cartão Virtual Agente de Sonhos",
+          html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+            <h2 style="color: #333;">Seu pagamento foi confirmado com sucesso.</h2>
+            <p style="font-size: 16px; color: #555;">Agora ative seu cartão virtual clicando no link abaixo:</p>
+            <p style="margin: 24px 0;">
+              <a href="${activationUrl}" style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Ativar meu cartão</a>
+            </p>
+            <p style="font-size: 14px; color: #888;">Esse link é único e válido por 24 horas.</p>
+          </div>`,
+        }),
+      });
+      if (!emailRes.ok) {
+        const errBody = await emailRes.text();
+        console.error("Resend email error:", errBody);
+      } else {
+        console.log(`📧 Activation email sent to ${customerEmail}`);
+      }
+    } else {
+      console.warn("RESEND_API_KEY not configured, skipping email");
+    }
 
     return new Response(JSON.stringify({ received: true, email: customerEmail }), {
       status: 200,
