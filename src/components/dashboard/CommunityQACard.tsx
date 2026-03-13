@@ -384,9 +384,9 @@ export function CommunityQACard() {
                     </div>
                     <div className="flex-shrink-0 pt-1">
                       {isExpanded ? (
-                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                        <ChevronUp className="h-4 w-4 text-muted-foreground group-hover/question:text-white/70" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        <ChevronDown className="h-4 w-4 text-muted-foreground group-hover/question:text-white/70" />
                       )}
                     </div>
                   </div>

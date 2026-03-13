@@ -192,7 +192,7 @@ export default function Dashboard() {
             </section>
 
             {/* 4. Perguntas da Comunidade */}
-            <section className="order-4">
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-4">
               <CommunityQACard />
             </section>
 
