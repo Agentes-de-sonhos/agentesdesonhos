@@ -108,7 +108,10 @@ export function TripRemindersCard() {
         <CardContent className="pt-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Próximas Viagens</h2>
+              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                <Plane className="h-5 w-5 text-[hsl(var(--section-reminders))]" />
+                Próximas Viagens
+              </h2>
               <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-reminders))]" />
             </div>
             <Badge variant="outline" className="text-[hsl(var(--section-reminders))] border-[hsl(var(--section-reminders))]">
