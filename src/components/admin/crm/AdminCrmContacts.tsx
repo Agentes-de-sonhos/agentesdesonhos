@@ -107,6 +107,30 @@ export function AdminCrmContacts() {
     onError: (err: Error) => toast({ title: "Erro", description: err.message, variant: "destructive" }),
   });
 
+  const updateContactMutation = useMutation({
+    mutationFn: async (contact: CrmContact) => {
+      const { error } = await supabase
+        .from("crm_contacts")
+        .update({
+          nome: contact.nome,
+          email: contact.email,
+          telefone: contact.telefone || null,
+          empresa: contact.empresa || null,
+          status: contact.status,
+          origem: contact.origem || null,
+        })
+        .eq("id", contact.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["crm-contacts"] });
+      toast({ title: "Contato atualizado!" });
+      setEditOpen(false);
+      setEditContact(null);
+    },
+    onError: (err: Error) => toast({ title: "Erro ao atualizar", description: err.message, variant: "destructive" }),
+  });
+
   const deleteContactMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("crm_contacts").delete().eq("id", id);
