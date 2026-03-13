@@ -43,6 +43,9 @@ import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager"
 import { AdminPageBannersManager } from "@/components/admin/AdminPageBannersManager";
 import { AdminSurveyManager } from "@/components/admin/AdminSurveyManager";
 import { AdminBusinessCardsManager } from "@/components/admin/AdminBusinessCardsManager";
+import { AdminCrmContacts } from "@/components/admin/crm/AdminCrmContacts";
+import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
+import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
