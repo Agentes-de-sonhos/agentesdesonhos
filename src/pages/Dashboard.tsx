@@ -34,6 +34,7 @@ import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementC
 import { CommunityQACard } from "@/components/dashboard/CommunityQACard";
 import { AgentToolsCard } from "@/components/dashboard/AgentToolsCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
+import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
@@ -179,6 +180,8 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
+            {/* 1. Banner Rotativo */}
+            <DashboardBanner />
 
             {/* 2. Notícias e Minha Agenda - lado a lado */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
