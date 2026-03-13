@@ -47,6 +47,7 @@ interface UserWithDetails {
   id: string;
   user_id: string;
   name: string;
+  email: string;
   phone: string | null;
   agency_name: string | null;
   city: string | null;
@@ -71,37 +72,30 @@ export function AdminUserManager() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-users-full"],
     queryFn: async () => {
-      // Fetch profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Fetch profiles, roles, subscriptions, and emails in parallel
+      const [profilesRes, rolesRes, subsRes, emailsRes] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("user_roles").select("user_id, role"),
+        supabase.from("subscriptions").select("user_id, plan, is_active"),
+        supabase.functions.invoke("admin-list-emails"),
+      ]);
 
-      if (profilesError) throw profilesError;
+      if (profilesRes.error) throw profilesRes.error;
+      if (rolesRes.error) throw rolesRes.error;
+      if (subsRes.error) throw subsRes.error;
 
-      // Fetch roles
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-
-      if (rolesError) throw rolesError;
-
-      // Fetch subscriptions
-      const { data: subscriptions, error: subsError } = await supabase
-        .from("subscriptions")
-        .select("user_id, plan, is_active");
-
-      if (subsError) throw subsError;
+      const emailMap: Record<string, string> = emailsRes.data?.emails || {};
 
       // Combine data
-      return (profiles || []).map((profile) => {
-        const userRole = roles?.find((r) => r.user_id === profile.user_id);
-        const userSub = subscriptions?.find((s) => s.user_id === profile.user_id);
+      return (profilesRes.data || []).map((profile) => {
+        const userRole = rolesRes.data?.find((r) => r.user_id === profile.user_id);
+        const userSub = subsRes.data?.find((s) => s.user_id === profile.user_id);
 
         return {
           id: profile.id,
           user_id: profile.user_id,
           name: profile.name,
+          email: emailMap[profile.user_id] || "",
           phone: profile.phone,
           agency_name: profile.agency_name,
           city: profile.city,
@@ -208,6 +202,7 @@ export function AdminUserManager() {
     return users.filter((user) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.agency_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.city?.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -282,7 +277,7 @@ export function AdminUserManager() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, agência ou cidade..."
+              placeholder="Buscar por nome, e-mail, agência ou cidade..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -328,6 +323,7 @@ export function AdminUserManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome / Agência</TableHead>
+                  <TableHead>E-mail</TableHead>
                   <TableHead>Localização</TableHead>
                   <TableHead>Plano</TableHead>
                   <TableHead>Permissão</TableHead>
@@ -347,8 +343,10 @@ export function AdminUserManager() {
                         )}
                       </div>
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {user.email || "-"}
+                    </TableCell>
                     <TableCell>
-                      {user.city && user.state ? `${user.city}/${user.state}` : "-"}
                     </TableCell>
                     <TableCell>
                       <Badge className={`${planColors[user.plan]} text-white border-0`}>
