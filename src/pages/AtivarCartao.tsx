@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Eye, EyeOff, Mail, Lock, User, Phone, CreditCard, CheckCircle } from "lucide-react";
+import { Loader2, Eye, EyeOff, Mail, Lock, User, Phone, CreditCard, CheckCircle, ShieldAlert } from "lucide-react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,43 +23,16 @@ import { useToast } from "@/hooks/use-toast";
 import { formatPhone } from "@/lib/validators";
 
 const translateAuthError = (msg: string): string => {
-  if (/limite de 5 tentativas/i.test(msg)) return msg;
   if (/already.registered|já está cadastrado/i.test(msg)) return "Este e-mail já está cadastrado. Faça login no app.";
   if (/rate.limit|too many requests|email rate limit exceeded/i.test(msg)) return "Muitas tentativas seguidas. Aguarde alguns minutos.";
   if (/non-2xx status code/i.test(msg)) return "Não foi possível concluir o cadastro agora. Tente novamente.";
   if (/invalid.login/i.test(msg)) return "E-mail ou senha incorretos.";
   if (/weak.password/i.test(msg)) return "A senha deve ter pelo menos 6 caracteres.";
   if (/network/i.test(msg)) return "Erro de conexão. Verifique sua internet.";
+  if (/token.*inválido|token.*utilizado/i.test(msg)) return msg;
+  if (/expirou/i.test(msg)) return msg;
+  if (/não corresponde/i.test(msg)) return msg;
   return msg;
-};
-
-const extractInvokeErrorMessage = async (
-  error: { message?: string; context?: Response } | null,
-): Promise<string> => {
-  if (!error) return "Ocorreu um erro ao criar a conta. Tente novamente.";
-
-  const fallback = error.message ?? "Ocorreu um erro ao criar a conta. Tente novamente.";
-
-  if (!error.context) return fallback;
-
-  const responseClone = error.context.clone();
-
-  const jsonBody = await responseClone.json().catch(() => null) as { error?: string; message?: string } | null;
-  if (jsonBody?.error) return jsonBody.error;
-  if (jsonBody?.message) return jsonBody.message;
-
-  const textBody = await error.context.clone().text().catch(() => "");
-  if (textBody) {
-    try {
-      const parsedBody = JSON.parse(textBody) as { error?: string; message?: string };
-      if (parsedBody?.error) return parsedBody.error;
-      if (parsedBody?.message) return parsedBody.message;
-    } catch {
-      return textBody;
-    }
-  }
-
-  return fallback;
 };
 
 const signupSchema = z.object({
@@ -77,11 +50,19 @@ type SignupData = z.infer<typeof signupSchema>;
 
 const APP_LOGIN_URL = "https://app.agentesdesonhos.com.br/auth";
 
+// Token validation states
+type TokenState = "loading" | "valid" | "invalid" | "expired" | "missing";
+
 export default function AtivarCartao() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [tokenState, setTokenState] = useState<TokenState>(token ? "loading" : "missing");
+  const [tokenEmail, setTokenEmail] = useState<string>("");
 
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -92,14 +73,54 @@ export default function AtivarCartao() {
     defaultValues: { name: "", email: "", phone: "", password: "", confirmPassword: "" },
   });
 
-  // If already logged in, redirect to /meu-cartao
+  // If already logged in, redirect
   useEffect(() => {
     if (user && !authLoading) {
       navigate("/meu-cartao", { replace: true });
     }
   }, [user, authLoading, navigate]);
 
+  // Validate token on mount
+  useEffect(() => {
+    if (!token) {
+      setTokenState("missing");
+      return;
+    }
+
+    const validateToken = async () => {
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke("validate-activation-token", {
+          body: { token },
+        });
+
+        if (fnError || data?.error) {
+          const errMsg = data?.error || "Token inválido";
+          if (/expir/i.test(errMsg)) {
+            setTokenState("expired");
+          } else {
+            setTokenState("invalid");
+          }
+          return;
+        }
+
+        if (data?.valid && data?.email) {
+          setTokenEmail(data.email);
+          setTokenState("valid");
+          form.setValue("email", data.email);
+        } else {
+          setTokenState("invalid");
+        }
+      } catch {
+        setTokenState("invalid");
+      }
+    };
+
+    validateToken();
+  }, [token, form]);
+
   const handleSubmit = async (data: SignupData) => {
+    if (!token || tokenState !== "valid") return;
+
     setError(null);
     setIsLoading(true);
 
@@ -110,6 +131,7 @@ export default function AtivarCartao() {
           email: data.email.trim().toLowerCase(),
           phone: data.phone,
           password: data.password,
+          activation_token: token,
         },
       });
 
@@ -136,10 +158,48 @@ export default function AtivarCartao() {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || tokenState === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Invalid / expired / missing token screen
+  if (tokenState !== "valid" && !success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
+        <Card className="w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
+          <CardHeader className="pt-10 pb-4 text-center space-y-6">
+            <div className="flex flex-col items-center space-y-3">
+              <img src={logoAgentes} alt="Agentes de Sonhos" className="h-28 w-auto" />
+            </div>
+            <div className="flex justify-center">
+              <ShieldAlert className="h-16 w-16 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">
+                {tokenState === "missing" && "Link de ativação necessário"}
+                {tokenState === "invalid" && "Link de ativação inválido"}
+                {tokenState === "expired" && "Link de ativação expirado"}
+              </CardTitle>
+              <CardDescription className="text-base leading-relaxed">
+                {tokenState === "missing" && "Para ativar seu Cartão Digital, utilize o link enviado para seu e-mail após o pagamento."}
+                {tokenState === "invalid" && "Este link de ativação é inválido ou já foi utilizado. Cada link pode ser usado apenas uma vez."}
+                {tokenState === "expired" && "Este link de ativação expirou. Links são válidos por 24 horas após o pagamento. Entre em contato com o suporte para solicitar um novo."}
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="px-8 pb-10 space-y-3">
+            <Button
+              onClick={() => { window.location.href = APP_LOGIN_URL; }}
+              className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20"
+            >
+              Ir para o Login
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -165,9 +225,7 @@ export default function AtivarCartao() {
           </CardHeader>
           <CardContent className="px-8 pb-10">
             <Button
-              onClick={() => {
-                window.location.href = APP_LOGIN_URL;
-              }}
+              onClick={() => { window.location.href = APP_LOGIN_URL; }}
               className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20"
             >
               Ir para o Login
@@ -178,6 +236,7 @@ export default function AtivarCartao() {
     );
   }
 
+  // Signup form (token is valid)
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
@@ -196,7 +255,7 @@ export default function AtivarCartao() {
           <div className="space-y-1">
             <CardTitle className="text-xl font-semibold">Ative seu Cartão Digital</CardTitle>
             <CardDescription className="text-sm">
-              Crie sua conta para configurar e publicar seu cartão de visita virtual
+              Pagamento confirmado! Preencha seus dados para ativar seu cartão
             </CardDescription>
           </div>
         </CardHeader>
@@ -248,11 +307,13 @@ export default function AtivarCartao() {
                           type="email"
                           placeholder="seu@email.com"
                           autoComplete="email"
-                          className="h-12 pl-11 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
+                          readOnly
+                          className="h-12 pl-11 rounded-xl border-muted-foreground/20 bg-muted/50 cursor-not-allowed transition-colors"
                           {...field}
                         />
                       </div>
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">E-mail vinculado ao pagamento</p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -354,9 +415,7 @@ export default function AtivarCartao() {
           <div className="text-center pt-2">
             <button
               type="button"
-              onClick={() => {
-                window.location.href = APP_LOGIN_URL;
-              }}
+              onClick={() => { window.location.href = APP_LOGIN_URL; }}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Já tem conta? <span className="font-medium text-primary underline underline-offset-4">Faça login</span>
