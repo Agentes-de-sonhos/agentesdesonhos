@@ -323,6 +323,7 @@ export function AdminUserManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome / Agência</TableHead>
+                  <TableHead>E-mail</TableHead>
                   <TableHead>Localização</TableHead>
                   <TableHead>Plano</TableHead>
                   <TableHead>Permissão</TableHead>
