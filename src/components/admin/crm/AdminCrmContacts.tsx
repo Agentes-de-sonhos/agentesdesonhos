@@ -61,6 +61,8 @@ export function AdminCrmContacts() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [newContact, setNewContact] = useState({ nome: "", email: "", telefone: "", empresa: "" });
+  const [editOpen, setEditOpen] = useState(false);
+  const [editContact, setEditContact] = useState<CrmContact | null>(null);
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["crm-contacts"],
@@ -103,6 +105,30 @@ export function AdminCrmContacts() {
       setNewContact({ nome: "", email: "", telefone: "", empresa: "" });
     },
     onError: (err: Error) => toast({ title: "Erro", description: err.message, variant: "destructive" }),
+  });
+
+  const updateContactMutation = useMutation({
+    mutationFn: async (contact: CrmContact) => {
+      const { error } = await supabase
+        .from("crm_contacts")
+        .update({
+          nome: contact.nome,
+          email: contact.email,
+          telefone: contact.telefone || null,
+          empresa: contact.empresa || null,
+          status: contact.status,
+          origem: contact.origem || null,
+        })
+        .eq("id", contact.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["crm-contacts"] });
+      toast({ title: "Contato atualizado!" });
+      setEditOpen(false);
+      setEditContact(null);
+    },
+    onError: (err: Error) => toast({ title: "Erro ao atualizar", description: err.message, variant: "destructive" }),
   });
 
   const deleteContactMutation = useMutation({
@@ -257,7 +283,7 @@ export function AdminCrmContacts() {
             </TableHeader>
             <TableBody>
               {filtered.map((contact) => (
-                <TableRow key={contact.id}>
+                <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50" onClick={() => { setEditContact({ ...contact }); setEditOpen(true); }}>
                   <TableCell className="font-medium">{contact.nome}</TableCell>
                   <TableCell>{contact.email}</TableCell>
                   <TableCell>{contact.empresa || "—"}</TableCell>
@@ -269,14 +295,14 @@ export function AdminCrmContacts() {
                   <TableCell className="capitalize">{contact.origem || "manual"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => openSendModal(contact)} title="Enviar email">
+                      <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); openSendModal(contact); }} title="Enviar email">
                         <Send className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
                         className="text-destructive"
-                        onClick={() => deleteContactMutation.mutate(contact.id)}
+                        onClick={(e) => { e.stopPropagation(); deleteContactMutation.mutate(contact.id); }}
                         title="Excluir"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -365,6 +391,59 @@ export function AdminCrmContacts() {
             <Button onClick={handleSendEmail} disabled={!emailSubject || !emailBody || sendEmailMutation.isPending}>
               {sendEmailMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
               Enviar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Contact Dialog */}
+      <Dialog open={editOpen} onOpenChange={(open) => { setEditOpen(open); if (!open) setEditContact(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Contato</DialogTitle>
+          </DialogHeader>
+          {editContact && (
+            <div className="space-y-4">
+              <div>
+                <Label>Nome *</Label>
+                <Input value={editContact.nome} onChange={(e) => setEditContact({ ...editContact, nome: e.target.value })} />
+              </div>
+              <div>
+                <Label>Email *</Label>
+                <Input type="email" value={editContact.email} onChange={(e) => setEditContact({ ...editContact, email: e.target.value })} />
+              </div>
+              <div>
+                <Label>Telefone</Label>
+                <Input value={editContact.telefone || ""} onChange={(e) => setEditContact({ ...editContact, telefone: e.target.value })} />
+              </div>
+              <div>
+                <Label>Empresa</Label>
+                <Input value={editContact.empresa || ""} onChange={(e) => setEditContact({ ...editContact, empresa: e.target.value })} />
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={editContact.status} onValueChange={(v) => setEditContact({ ...editContact, status: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Origem</Label>
+                <Input value={editContact.origem || ""} onChange={(e) => setEditContact({ ...editContact, origem: e.target.value })} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setEditOpen(false); setEditContact(null); }}>Cancelar</Button>
+            <Button onClick={() => editContact && updateContactMutation.mutate(editContact)} disabled={!editContact?.nome || !editContact?.email || updateContactMutation.isPending}>
+              {updateContactMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Salvar
             </Button>
           </DialogFooter>
         </DialogContent>
