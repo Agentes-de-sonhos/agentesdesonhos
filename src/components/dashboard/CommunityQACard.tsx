@@ -349,18 +349,20 @@ export function CommunityQACard() {
               const isExpanded = expandedQuestionId === q.id;
               const isAuthor = user?.id === q.user_id;
 
-              return (
-                <div key={q.id} className="rounded-xl bg-card border border-border/60 overflow-hidden transition-all hover:shadow-md group/question">
+               return (
+                <div key={q.id} className="rounded-xl bg-card border border-border/60 overflow-hidden transition-all hover:shadow-sm hover:bg-muted/40 group/question cursor-pointer">
                   {/* Question row */}
                   <div
-                    className="flex items-start gap-3 p-3 cursor-pointer transition-colors group-hover/question:bg-[hsl(var(--section-community))] group-hover/question:text-white"
+                    className="flex items-start gap-3 p-3.5 transition-colors"
                     onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
                   >
-                    <div className="pt-0.5 text-base flex-shrink-0">❓</div>
+                    <div className="pt-0.5 flex-shrink-0">
+                      <MessageCircleQuestion className="h-4 w-4 text-[hsl(var(--section-community))]" />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold leading-snug line-clamp-2 group-hover/question:text-white">{q.title}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-muted-foreground group-hover/question:text-white/70">
-                        <span>por <strong className="font-medium text-foreground/70 group-hover/question:text-white/90">{q.author_name}</strong></span>
+                      <p className="text-sm font-semibold leading-snug line-clamp-2 text-foreground">{q.title}</p>
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground/70">{q.author_name}</span>
                         <span>•</span>
                         <span>
                           {formatDistanceToNow(new Date(q.created_at), {
@@ -368,28 +370,35 @@ export function CommunityQACard() {
                             locale: ptBR,
                           })}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-3 mt-1.5">
-                        <span className="text-xs text-muted-foreground group-hover/question:text-white/70 flex items-center gap-1">
-                          💬 {q.answers_count} {q.answers_count === 1 ? "resposta" : "respostas"}
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <MessageCircle className="h-3 w-3" />
+                          {q.answers_count} {q.answers_count === 1 ? "resposta" : "respostas"}
                         </span>
                         {q.total_useful > 0 && (
-                          <span className="text-xs text-muted-foreground group-hover/question:text-white/70 flex items-center gap-1">
-                            👍 {q.total_useful} {q.total_useful === 1 ? "útil" : "úteis"}
-                          </span>
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <ThumbsUp className="h-3 w-3" />
+                              {q.total_useful} {q.total_useful === 1 ? "útil" : "úteis"}
+                            </span>
+                          </>
                         )}
                         {q.is_resolved && (
-                          <Badge variant="default" className="bg-[hsl(var(--success))] text-white text-[10px] px-1.5 py-0">
-                            ✔ Resolvida
+                          <Badge variant="default" className="bg-[hsl(var(--success))] text-white text-[10px] px-1.5 py-0 ml-1">
+                            <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" /> Resolvida
                           </Badge>
                         )}
                       </div>
                     </div>
-                    <div className="flex-shrink-0 pt-1">
+                    <div className="flex-shrink-0 pt-1 flex items-center gap-2">
+                      <span className="text-xs text-[hsl(var(--section-community))] font-medium opacity-0 group-hover/question:opacity-100 transition-opacity whitespace-nowrap flex items-center gap-1">
+                        {q.answers_count > 0 ? "Ver respostas" : "Responder"} <ArrowRight className="h-3 w-3" />
+                      </span>
                       {isExpanded ? (
-                        <ChevronUp className="h-4 w-4 text-muted-foreground group-hover/question:text-white/70" />
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground group-hover/question:text-white/70" />
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
                       )}
                     </div>
                   </div>
