@@ -50,9 +50,13 @@ const extractInvokeErrorMessage = async (
 
   const textBody = await error.context.clone().text().catch(() => "");
   if (textBody) {
-    const parsedBody = JSON.parse(textBody) as { error?: string; message?: string };
-    if (parsedBody?.error) return parsedBody.error;
-    if (parsedBody?.message) return parsedBody.message;
+    try {
+      const parsedBody = JSON.parse(textBody) as { error?: string; message?: string };
+      if (parsedBody?.error) return parsedBody.error;
+      if (parsedBody?.message) return parsedBody.message;
+    } catch {
+      return textBody;
+    }
   }
 
   return fallback;
