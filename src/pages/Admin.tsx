@@ -46,6 +46,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Admin() {
+  const navigate = useNavigate();
   const { data: userStats } = useQuery({
     queryKey: ["admin-user-stats"],
     queryFn: async () => {
