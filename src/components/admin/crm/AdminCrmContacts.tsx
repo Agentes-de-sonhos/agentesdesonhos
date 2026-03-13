@@ -395,6 +395,59 @@ export function AdminCrmContacts() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Contact Dialog */}
+      <Dialog open={editOpen} onOpenChange={(open) => { setEditOpen(open); if (!open) setEditContact(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Contato</DialogTitle>
+          </DialogHeader>
+          {editContact && (
+            <div className="space-y-4">
+              <div>
+                <Label>Nome *</Label>
+                <Input value={editContact.nome} onChange={(e) => setEditContact({ ...editContact, nome: e.target.value })} />
+              </div>
+              <div>
+                <Label>Email *</Label>
+                <Input type="email" value={editContact.email} onChange={(e) => setEditContact({ ...editContact, email: e.target.value })} />
+              </div>
+              <div>
+                <Label>Telefone</Label>
+                <Input value={editContact.telefone || ""} onChange={(e) => setEditContact({ ...editContact, telefone: e.target.value })} />
+              </div>
+              <div>
+                <Label>Empresa</Label>
+                <Input value={editContact.empresa || ""} onChange={(e) => setEditContact({ ...editContact, empresa: e.target.value })} />
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={editContact.status} onValueChange={(v) => setEditContact({ ...editContact, status: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Origem</Label>
+                <Input value={editContact.origem || ""} onChange={(e) => setEditContact({ ...editContact, origem: e.target.value })} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setEditOpen(false); setEditContact(null); }}>Cancelar</Button>
+            <Button onClick={() => editContact && updateContactMutation.mutate(editContact)} disabled={!editContact?.nome || !editContact?.email || updateContactMutation.isPending}>
+              {updateContactMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
