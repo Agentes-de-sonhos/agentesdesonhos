@@ -26,10 +26,36 @@ const translateAuthError = (msg: string): string => {
   if (/limite de 5 tentativas/i.test(msg)) return msg;
   if (/already.registered|já está cadastrado/i.test(msg)) return "Este e-mail já está cadastrado. Faça login no app.";
   if (/rate.limit|too many requests|email rate limit exceeded/i.test(msg)) return "Muitas tentativas seguidas. Aguarde alguns minutos.";
+  if (/non-2xx status code/i.test(msg)) return "Não foi possível concluir o cadastro agora. Tente novamente.";
   if (/invalid.login/i.test(msg)) return "E-mail ou senha incorretos.";
   if (/weak.password/i.test(msg)) return "A senha deve ter pelo menos 6 caracteres.";
   if (/network/i.test(msg)) return "Erro de conexão. Verifique sua internet.";
   return msg;
+};
+
+const extractInvokeErrorMessage = async (
+  error: { message?: string; context?: Response } | null,
+): Promise<string> => {
+  if (!error) return "Ocorreu um erro ao criar a conta. Tente novamente.";
+
+  const fallback = error.message ?? "Ocorreu um erro ao criar a conta. Tente novamente.";
+
+  if (!error.context) return fallback;
+
+  const responseClone = error.context.clone();
+
+  const jsonBody = await responseClone.json().catch(() => null) as { error?: string; message?: string } | null;
+  if (jsonBody?.error) return jsonBody.error;
+  if (jsonBody?.message) return jsonBody.message;
+
+  const textBody = await error.context.clone().text().catch(() => "");
+  if (textBody) {
+    const parsedBody = JSON.parse(textBody) as { error?: string; message?: string };
+    if (parsedBody?.error) return parsedBody.error;
+    if (parsedBody?.message) return parsedBody.message;
+  }
+
+  return fallback;
 };
 
 const signupSchema = z.object({

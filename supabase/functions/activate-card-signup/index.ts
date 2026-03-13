@@ -147,7 +147,9 @@ Deno.serve(async (req) => {
         ? "Este e-mail já está cadastrado. Faça login no app."
         : createUserError.message;
 
-      await registerFailedAttempt(message);
+      if (!isAlreadyRegistered) {
+        await registerFailedAttempt(message);
+      }
 
       return jsonResponse({ error: message }, isAlreadyRegistered ? 409 : 400);
     }
