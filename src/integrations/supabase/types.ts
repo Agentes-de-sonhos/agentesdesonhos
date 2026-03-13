@@ -403,6 +403,39 @@ export type Database = {
         }
         Relationships: []
       }
+      card_activations: {
+        Row: {
+          activation_token: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          payment_status: string
+          stripe_session_id: string
+          used: boolean
+        }
+        Insert: {
+          activation_token: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          payment_status?: string
+          stripe_session_id: string
+          used?: boolean
+        }
+        Update: {
+          activation_token?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          payment_status?: string
+          stripe_session_id?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           city: string | null
