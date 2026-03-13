@@ -279,6 +279,14 @@ export default function Admin() {
           <TabsContent value="business-cards">
             <AdminBusinessCardsManager />
           </TabsContent>
+
+          <TabsContent value="crm">
+            <div className="space-y-6">
+              <AdminCrmContacts />
+              <AdminCrmTemplates />
+              <AdminCrmLogs />
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
