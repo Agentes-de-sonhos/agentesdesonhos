@@ -355,9 +355,9 @@ export function CommunityQACard() {
                   >
                     <div className="pt-0.5 text-base flex-shrink-0">❓</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold leading-snug line-clamp-2">{q.title}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-muted-foreground">
-                        <span>por <strong className="font-medium text-foreground/70">{q.author_name}</strong></span>
+                      <p className="text-sm font-semibold leading-snug line-clamp-2 group-hover/question:text-white">{q.title}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-muted-foreground group-hover/question:text-white/70">
+                        <span>por <strong className="font-medium text-foreground/70 group-hover/question:text-white/90">{q.author_name}</strong></span>
                         <span>•</span>
                         <span>
                           {formatDistanceToNow(new Date(q.created_at), {
