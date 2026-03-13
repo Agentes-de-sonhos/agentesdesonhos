@@ -210,7 +210,26 @@ export function AdminUserManager() {
     },
   });
 
-  const filteredUsers = useMemo(() => {
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const resp = await supabase.functions.invoke("admin-delete-user", {
+        body: { user_id: userId },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao excluir usuário");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
+      toast({ title: "Usuário excluído com sucesso!" });
+      setDeletingUser(null);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao excluir usuário", description: err.message, variant: "destructive" });
+      setDeletingUser(null);
+    },
+  });
+
     return users.filter((user) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
