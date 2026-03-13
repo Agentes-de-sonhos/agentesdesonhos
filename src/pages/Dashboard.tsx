@@ -180,6 +180,8 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
+            {/* 1. Banner Rotativo */}
+            <DashboardBanner />
 
             {/* 2. Notícias e Minha Agenda - lado a lado */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
