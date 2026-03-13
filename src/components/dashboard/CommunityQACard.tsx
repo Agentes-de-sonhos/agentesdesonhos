@@ -371,7 +371,7 @@ export function CommunityQACard() {
                           💬 {q.answers_count} {q.answers_count === 1 ? "resposta" : "respostas"}
                         </span>
                         {q.total_useful > 0 && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground group-hover/question:text-white/70 flex items-center gap-1">
                             👍 {q.total_useful} {q.total_useful === 1 ? "útil" : "úteis"}
                           </span>
                         )}
