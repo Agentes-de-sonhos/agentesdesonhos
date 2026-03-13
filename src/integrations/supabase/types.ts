@@ -555,6 +555,114 @@ export type Database = {
           },
         ]
       }
+      crm_contacts: {
+        Row: {
+          created_at: string
+          email: string
+          empresa: string | null
+          id: string
+          nome: string
+          origem: string | null
+          status: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          empresa?: string | null
+          id?: string
+          nome: string
+          origem?: string | null
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          empresa?: string | null
+          id?: string
+          nome?: string
+          origem?: string | null
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_email_logs: {
+        Row: {
+          assunto: string
+          contact_id: string | null
+          email: string
+          id: string
+          mensagem: string
+          sent_at: string
+          status: string
+          template_id: string | null
+        }
+        Insert: {
+          assunto: string
+          contact_id?: string | null
+          email: string
+          id?: string
+          mensagem: string
+          sent_at?: string
+          status?: string
+          template_id?: string | null
+        }
+        Update: {
+          assunto?: string
+          contact_id?: string | null
+          email?: string
+          id?: string
+          mensagem?: string
+          sent_at?: string
+          status?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_email_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_email_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "crm_email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_email_templates: {
+        Row: {
+          assunto: string
+          created_at: string
+          id: string
+          mensagem: string
+          nome_template: string
+        }
+        Insert: {
+          assunto: string
+          created_at?: string
+          id?: string
+          mensagem: string
+          nome_template: string
+        }
+        Update: {
+          assunto?: string
+          created_at?: string
+          id?: string
+          mensagem?: string
+          nome_template?: string
+        }
+        Relationships: []
+      }
       custom_event_types: {
         Row: {
           color: string
