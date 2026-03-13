@@ -343,8 +343,10 @@ export function AdminUserManager() {
                         )}
                       </div>
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {user.email || "-"}
+                    </TableCell>
                     <TableCell>
-                      {user.city && user.state ? `${user.city}/${user.state}` : "-"}
                     </TableCell>
                     <TableCell>
                       <Badge className={`${planColors[user.plan]} text-white border-0`}>
