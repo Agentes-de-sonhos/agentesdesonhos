@@ -34,6 +34,7 @@ import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementC
 import { CommunityQACard } from "@/components/dashboard/CommunityQACard";
 import { AgentToolsCard } from "@/components/dashboard/AgentToolsCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
+import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
