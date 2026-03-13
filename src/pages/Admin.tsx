@@ -95,13 +95,19 @@ export default function Admin() {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">
-            Painel Administrativo
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie usuários, conteúdo, cursos e toda a plataforma
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-display font-bold text-foreground">
+              Painel Administrativo
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gerencie usuários, conteúdo, cursos e toda a plataforma
+            </p>
+          </div>
+          <Button onClick={() => navigate("/admin/crm")} className="gap-2">
+            <Mail className="h-4 w-4" />
+            CRM / Emails
+          </Button>
         </div>
 
         {/* Stats */}
