@@ -43,6 +43,9 @@ import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager"
 import { AdminPageBannersManager } from "@/components/admin/AdminPageBannersManager";
 import { AdminSurveyManager } from "@/components/admin/AdminSurveyManager";
 import { AdminBusinessCardsManager } from "@/components/admin/AdminBusinessCardsManager";
+import { AdminCrmContacts } from "@/components/admin/crm/AdminCrmContacts";
+import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
+import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -201,6 +204,10 @@ export default function Admin() {
               <CreditCard className="h-4 w-4" />
               <span className="hidden sm:inline">Cartões</span>
             </TabsTrigger>
+            <TabsTrigger value="crm" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              <span className="hidden sm:inline">CRM</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -271,6 +278,14 @@ export default function Admin() {
 
           <TabsContent value="business-cards">
             <AdminBusinessCardsManager />
+          </TabsContent>
+
+          <TabsContent value="crm">
+            <div className="space-y-6">
+              <AdminCrmContacts />
+              <AdminCrmTemplates />
+              <AdminCrmLogs />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
