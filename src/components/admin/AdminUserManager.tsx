@@ -13,6 +13,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -37,6 +47,7 @@ import {
   CreditCard,
   UserPlus,
   KeyRound,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +76,7 @@ export function AdminUserManager() {
   const [editingUser, setEditingUser] = useState<UserWithDetails | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<UserWithDetails | null>(null);
   const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -195,6 +207,26 @@ export function AdminUserManager() {
     },
     onError: (err: Error) => {
       toast({ title: "Erro ao criar usuário", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const resp = await supabase.functions.invoke("admin-delete-user", {
+        body: { user_id: userId },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao excluir usuário");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
+      toast({ title: "Usuário excluído com sucesso!" });
+      setDeletingUser(null);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao excluir usuário", description: err.message, variant: "destructive" });
+      setDeletingUser(null);
     },
   });
 
@@ -409,6 +441,15 @@ export function AdminUserManager() {
                         >
                           <CreditCard className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Excluir usuário"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeletingUser(user)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -561,6 +602,29 @@ export function AdminUserManager() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir usuário</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir <strong>{deletingUser?.name}</strong>
+                {deletingUser?.email ? ` (${deletingUser.email})` : ""}? Esta ação é irreversível e removerá todos os dados do usuário.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => deletingUser && deleteUserMutation.mutate(deletingUser.user_id)}
+                disabled={deleteUserMutation.isPending}
+              >
+                {deleteUserMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
