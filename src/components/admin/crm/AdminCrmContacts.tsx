@@ -283,7 +283,7 @@ export function AdminCrmContacts() {
             </TableHeader>
             <TableBody>
               {filtered.map((contact) => (
-                <TableRow key={contact.id}>
+                <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50" onClick={() => { setEditContact({ ...contact }); setEditOpen(true); }}>
                   <TableCell className="font-medium">{contact.nome}</TableCell>
                   <TableCell>{contact.email}</TableCell>
                   <TableCell>{contact.empresa || "—"}</TableCell>
@@ -295,14 +295,14 @@ export function AdminCrmContacts() {
                   <TableCell className="capitalize">{contact.origem || "manual"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => openSendModal(contact)} title="Enviar email">
+                      <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); openSendModal(contact); }} title="Enviar email">
                         <Send className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
                         className="text-destructive"
-                        onClick={() => deleteContactMutation.mutate(contact.id)}
+                        onClick={(e) => { e.stopPropagation(); deleteContactMutation.mutate(contact.id); }}
                         title="Excluir"
                       >
                         <Trash2 className="h-4 w-4" />
