@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, Loader2, ArrowRight } from "lucide-react";
+import { ExternalLink, Loader2, ArrowRight, Newspaper } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,10 @@ export function CuratedNewsFeed() {
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardContent className="pt-6 space-y-1">
         <div className="mb-3">
-          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Principais Notícias</h2>
+          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+            <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
+            Radar do Turismo
+          </h2>
           <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-news))]" />
         </div>
         {news.map((item) => (

@@ -32,6 +32,7 @@ import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategorie
 import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
 import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
 import { CommunityQACard } from "@/components/dashboard/CommunityQACard";
+import { AgentToolsCard } from "@/components/dashboard/AgentToolsCard";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 
 
@@ -191,9 +192,10 @@ export default function Dashboard() {
               <div className="flex flex-col flex-1 [&>*]:h-full"><TripRemindersCard /></div>
             </section>
 
-            {/* 4. Perguntas da Comunidade */}
+            {/* 4. Perguntas da Comunidade & Ferramentas do Agente */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-4">
               <CommunityQACard />
+              <AgentToolsCard />
             </section>
 
 
