@@ -270,7 +270,7 @@ export function CommunityQACard() {
   const expandedQuestion = questions.find((q: any) => q.id === expandedQuestionId);
 
   return (
-    <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/5 to-[hsl(var(--section-community))]/[0.02]">
+    <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/20 via-[hsl(var(--section-community))]/10 to-[hsl(var(--section-community))]/[0.03]">
       <CardContent className="pt-5 pb-4 space-y-4">
         <div>
           <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Perguntas da Comunidade</h2>
