@@ -11,3 +11,12 @@ verify_jwt = false
 
 [functions.cleanup-materials]
 verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.validate-activation-token]
+verify_jwt = false
+
+[functions.activate-card-signup]
+verify_jwt = false
