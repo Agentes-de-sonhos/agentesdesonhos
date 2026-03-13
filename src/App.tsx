@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import AdminCRM from "./pages/AdminCRM";
 import FerramentasIA from "./pages/FerramentasIA";
 import GerarOrcamento from "./pages/GerarOrcamento";
 import CriarRoteiro from "./pages/CriarRoteiro";
