@@ -1,5 +1,7 @@
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, 
@@ -20,6 +22,7 @@ import {
   Image,
   MessageCircle,
   CreditCard,
+  Mail,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -44,6 +47,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Admin() {
+  const navigate = useNavigate();
   const { data: userStats } = useQuery({
     queryKey: ["admin-user-stats"],
     queryFn: async () => {
@@ -92,13 +96,19 @@ export default function Admin() {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">
-            Painel Administrativo
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie usuários, conteúdo, cursos e toda a plataforma
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-display font-bold text-foreground">
+              Painel Administrativo
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gerencie usuários, conteúdo, cursos e toda a plataforma
+            </p>
+          </div>
+          <Button onClick={() => navigate("/admin/crm")} className="gap-2">
+            <Mail className="h-4 w-4" />
+            CRM / Emails
+          </Button>
         </div>
 
         {/* Stats */}
