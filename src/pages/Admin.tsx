@@ -204,6 +204,10 @@ export default function Admin() {
               <CreditCard className="h-4 w-4" />
               <span className="hidden sm:inline">Cartões</span>
             </TabsTrigger>
+            <TabsTrigger value="crm" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              <span className="hidden sm:inline">CRM</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
