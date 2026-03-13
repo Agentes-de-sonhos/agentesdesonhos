@@ -270,7 +270,7 @@ export function CommunityQACard() {
   const expandedQuestion = questions.find((q: any) => q.id === expandedQuestionId);
 
   return (
-    <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/5 to-[hsl(var(--section-community))]/[0.02]">
+    <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/20 via-[hsl(var(--section-community))]/10 to-[hsl(var(--section-community))]/[0.03]">
       <CardContent className="pt-5 pb-4 space-y-4">
         <div>
           <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">Perguntas da Comunidade</h2>
@@ -347,17 +347,17 @@ export function CommunityQACard() {
               const isAuthor = user?.id === q.user_id;
 
               return (
-                <div key={q.id} className="rounded-xl bg-card border border-border/60 overflow-hidden transition-shadow hover:shadow-sm">
+                <div key={q.id} className="rounded-xl bg-card border border-border/60 overflow-hidden transition-all hover:shadow-md group/question">
                   {/* Question row */}
                   <div
-                    className="flex items-start gap-3 p-3 cursor-pointer hover:bg-[hsl(var(--section-community))]/5 transition-colors"
+                    className="flex items-start gap-3 p-3 cursor-pointer transition-colors group-hover/question:bg-[hsl(var(--section-community))] group-hover/question:text-white"
                     onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
                   >
                     <div className="pt-0.5 text-base flex-shrink-0">❓</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold leading-snug line-clamp-2">{q.title}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-muted-foreground">
-                        <span>por <strong className="font-medium text-foreground/70">{q.author_name}</strong></span>
+                      <p className="text-sm font-semibold leading-snug line-clamp-2 group-hover/question:text-white">{q.title}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-muted-foreground group-hover/question:text-white/70">
+                        <span>por <strong className="font-medium text-foreground/70 group-hover/question:text-white/90">{q.author_name}</strong></span>
                         <span>•</span>
                         <span>
                           {formatDistanceToNow(new Date(q.created_at), {
@@ -367,11 +367,11 @@ export function CommunityQACard() {
                         </span>
                       </div>
                       <div className="flex items-center gap-3 mt-1.5">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground group-hover/question:text-white/70 flex items-center gap-1">
                           💬 {q.answers_count} {q.answers_count === 1 ? "resposta" : "respostas"}
                         </span>
                         {q.total_useful > 0 && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground group-hover/question:text-white/70 flex items-center gap-1">
                             👍 {q.total_useful} {q.total_useful === 1 ? "útil" : "úteis"}
                           </span>
                         )}
@@ -384,9 +384,9 @@ export function CommunityQACard() {
                     </div>
                     <div className="flex-shrink-0 pt-1">
                       {isExpanded ? (
-                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                        <ChevronUp className="h-4 w-4 text-muted-foreground group-hover/question:text-white/70" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        <ChevronDown className="h-4 w-4 text-muted-foreground group-hover/question:text-white/70" />
                       )}
                     </div>
                   </div>
