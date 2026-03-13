@@ -61,6 +61,8 @@ export function AdminCrmContacts() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [newContact, setNewContact] = useState({ nome: "", email: "", telefone: "", empresa: "" });
+  const [editOpen, setEditOpen] = useState(false);
+  const [editContact, setEditContact] = useState<CrmContact | null>(null);
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["crm-contacts"],
