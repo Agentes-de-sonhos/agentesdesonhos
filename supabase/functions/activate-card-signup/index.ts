@@ -2,13 +2,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
-const MAX_FAILED_ATTEMPTS = 5;
-const ATTEMPT_WINDOW_MINUTES = 30;
-const BLOCK_DURATION_MINUTES = 15;
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -18,11 +14,6 @@ const jsonResponse = (body: unknown, status = 200) =>
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 const normalizePhone = (phone: string) => phone.replace(/\D/g, "").slice(0, 20);
-
-const extractIpAddress = (req: Request) => {
-  const forwarded = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
-  return forwarded.split(",")[0]?.trim().slice(0, 64) || "unknown";
-};
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
@@ -67,69 +58,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "A senha deve ter entre 6 e 128 caracteres." }, 400);
     }
 
-    const ipAddress = extractIpAddress(req);
-    const nowMs = Date.now();
-    const nowIso = new Date(nowMs).toISOString();
-
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-
-    const { data: attemptRecord, error: attemptError } = await adminClient
-      .from("activation_signup_attempts")
-      .select("attempts, window_started_at, blocked_until")
-      .eq("email", email)
-      .eq("ip_address", ipAddress)
-      .maybeSingle();
-
-    if (attemptError) {
-      console.error("Erro ao buscar tentativas de cadastro:", attemptError);
-      return jsonResponse({ error: "Não foi possível validar tentativas de cadastro." }, 500);
-    }
-
-    let currentAttempts = attemptRecord?.attempts ?? 0;
-    let windowStartedAt = attemptRecord?.window_started_at ?? nowIso;
-
-    if (attemptRecord?.window_started_at) {
-      const windowMs = new Date(attemptRecord.window_started_at).getTime();
-      if (nowMs - windowMs > ATTEMPT_WINDOW_MINUTES * 60 * 1000) {
-        currentAttempts = 0;
-        windowStartedAt = nowIso;
-      }
-    }
-
-    if (attemptRecord?.blocked_until) {
-      const blockedUntilMs = new Date(attemptRecord.blocked_until).getTime();
-      if (blockedUntilMs > nowMs) {
-        const minutesLeft = Math.max(1, Math.ceil((blockedUntilMs - nowMs) / 60000));
-        return jsonResponse(
-          { error: `Limite de 5 tentativas atingido. Tente novamente em ${minutesLeft} minuto(s).` },
-          429,
-        );
-      }
-    }
-
-    const registerFailedAttempt = async (errorMessage: string) => {
-      const nextAttempts = currentAttempts + 1;
-      const shouldBlock = nextAttempts >= MAX_FAILED_ATTEMPTS;
-      const blockedUntil = shouldBlock
-        ? new Date(nowMs + BLOCK_DURATION_MINUTES * 60 * 1000).toISOString()
-        : null;
-
-      const { error } = await adminClient.from("activation_signup_attempts").upsert(
-        {
-          email,
-          ip_address: ipAddress,
-          attempts: nextAttempts,
-          window_started_at: windowStartedAt,
-          blocked_until: blockedUntil,
-          last_error: errorMessage,
-        },
-        { onConflict: "email,ip_address" },
-      );
-
-      if (error) {
-        console.error("Erro ao registrar tentativa de cadastro:", error);
-      }
-    };
 
     const { data: newUserData, error: createUserError } = await adminClient.auth.admin.createUser({
       email,
@@ -147,17 +76,12 @@ Deno.serve(async (req) => {
         ? "Este e-mail já está cadastrado. Faça login no app."
         : createUserError.message;
 
-      if (!isAlreadyRegistered) {
-        await registerFailedAttempt(message);
-      }
-
       return jsonResponse({ error: message }, isAlreadyRegistered ? 409 : 400);
     }
 
     const userId = newUserData.user?.id;
 
     if (!userId) {
-      await registerFailedAttempt("Não foi possível criar o usuário.");
       return jsonResponse({ error: "Não foi possível criar o usuário." }, 500);
     }
 
@@ -188,12 +112,6 @@ Deno.serve(async (req) => {
       console.error("Erro ao salvar assinatura no cadastro de ativação:", subscriptionError);
       return jsonResponse({ error: "Conta criada, mas houve um erro ao ativar o plano. Tente entrar no app novamente." }, 500);
     }
-
-    await adminClient
-      .from("activation_signup_attempts")
-      .delete()
-      .eq("email", email)
-      .eq("ip_address", ipAddress);
 
     return jsonResponse({ success: true, user_id: userId });
   } catch (error) {
