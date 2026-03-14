@@ -122,8 +122,8 @@ export default function Beneficios() {
         benefit={detailBenefit}
         open={!!detailBenefit}
         onClose={() => setDetailBenefit(null)}
-        comments={commentsQuery?.data || []}
-        isLoadingComments={commentsQuery?.isLoading || false}
+        comments={commentsQuery.data || []}
+        isLoadingComments={commentsQuery.isLoading}
         onAddComment={(content) => detailBenefit && addComment({ benefitId: detailBenefit.id, content })}
         isAddingComment={isAddingComment}
         userConfirmationType={detailBenefit ? getUserConfirmationType(detailBenefit.id) : null}
