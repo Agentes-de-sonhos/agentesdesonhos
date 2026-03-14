@@ -175,13 +175,18 @@ export function UpgradeDialog({
                 <Button
                   className="w-full"
                   variant={isPlanHigher ? "default" : "outline"}
-                  disabled={isCurrentPlan || !isPlanHigher}
+                  disabled={isCurrentPlan || !isPlanHigher || loadingPlan === planKey || !STRIPE_PRICES[planKey]}
+                  onClick={() => isPlanHigher && STRIPE_PRICES[planKey] && handleUpgrade(planKey)}
                 >
-                  {isCurrentPlan 
+                  {loadingPlan === planKey ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Redirecionando...</>
+                  ) : isCurrentPlan 
                     ? "Plano Atual" 
-                    : isPlanHigher 
+                    : isPlanHigher && STRIPE_PRICES[planKey]
                       ? "Fazer Upgrade" 
-                      : "Plano Inferior"}
+                      : isPlanHigher
+                        ? "Em breve"
+                        : "Plano Inferior"}
                 </Button>
               </div>
             );
