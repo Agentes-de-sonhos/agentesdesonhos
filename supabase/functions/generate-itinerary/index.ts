@@ -12,7 +12,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Não autorizado. Faça login para usar esta funcionalidade." }), {
@@ -22,31 +21,61 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
     });
 
-    // Validate JWT and get user claims
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
     
-    if (claimsError || !claimsData?.claims) {
+    if (userError || !userData?.user) {
       return new Response(JSON.stringify({ error: "Token inválido ou expirado. Faça login novamente." }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const userId = claimsData.claims.sub;
+    const userId = userData.user.id;
     console.log("Authenticated user:", userId);
 
+    // Check subscription feature access
+    const { data: hasAccess } = await supabase.rpc('has_feature_access', { _user_id: userId, _feature: 'ai_tools' });
+    if (!hasAccess) {
+      return new Response(JSON.stringify({ error: "Faça upgrade para o plano Profissional para acessar ferramentas de IA.", upgrade_required: true }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check and increment AI usage quota
+    const { data: canUse } = await supabase.rpc('check_ai_usage', { _user_id: userId });
+    if (!canUse) {
+      return new Response(JSON.stringify({ error: "Cota mensal de IA esgotada. Faça upgrade para o plano Premium.", quota_exceeded: true }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { destination, startDate, endDate, travelersCount, tripType, budgetLevel } = await req.json();
-    
+
+    // Input validation
+    if (!destination || typeof destination !== 'string' || destination.length > 200) {
+      return new Response(JSON.stringify({ error: "Destino inválido." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const travelers = Number(travelersCount);
+    if (isNaN(travelers) || travelers < 1 || travelers > 50) {
+      return new Response(JSON.stringify({ error: "Número de viajantes deve ser entre 1 e 50." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      throw new Error("AI key not configured");
     }
 
     const tripTypeLabels: Record<string, string> = {
@@ -66,6 +95,12 @@ serve(async (req) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    if (days < 1 || days > 30) {
+      return new Response(JSON.stringify({ error: "Duração da viagem deve ser entre 1 e 30 dias." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const systemPrompt = `Você é um especialista em turismo e roteiros de viagem. Crie roteiros detalhados, práticos e personalizados para agentes de viagem.
 
@@ -138,21 +173,17 @@ Retorne um JSON com a seguinte estrutura:
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns minutos." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos na sua conta." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: "Erro ao gerar roteiro com IA" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      console.error("AI gateway error:", response.status);
+      return new Response(JSON.stringify({ error: "Erro ao gerar roteiro. Tente novamente." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -160,19 +191,17 @@ Retorne um JSON com a seguinte estrutura:
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
-      throw new Error("No content in AI response");
+      throw new Error("Empty AI response");
     }
 
-    // Parse the JSON from the response
     let itinerary;
     try {
-      // Try to extract JSON from the response (it might be wrapped in markdown code blocks)
       const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
       const jsonString = jsonMatch ? jsonMatch[1] : content;
       itinerary = JSON.parse(jsonString.trim());
-    } catch (parseError) {
-      console.error("Failed to parse AI response:", content);
-      throw new Error("Failed to parse itinerary from AI response");
+    } catch {
+      console.error("Failed to parse AI response");
+      throw new Error("Parse error");
     }
 
     return new Response(JSON.stringify(itinerary), {
@@ -180,7 +209,7 @@ Retorne um JSON com a seguinte estrutura:
     });
   } catch (e) {
     console.error("generate-itinerary error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Erro ao gerar roteiro. Tente novamente em alguns instantes." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
