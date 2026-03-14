@@ -65,6 +65,34 @@ export function UpgradeDialog({
   description,
 }: UpgradeDialogProps) {
   const { plan: currentPlan, getPlanLabel } = useSubscription();
+  const { toast } = useToast();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const STRIPE_PRICES: Partial<Record<SubscriptionPlan, string>> = {
+    profissional: "price_1TB0XKFkGdVt5nie9wsOu3eZ",
+  };
+
+  const handleUpgrade = async (planKey: SubscriptionPlan) => {
+    const priceId = STRIPE_PRICES[planKey];
+    if (!priceId) {
+      toast({ title: "Plano indisponível", description: "Entre em contato com o suporte.", variant: "destructive" });
+      return;
+    }
+    setLoadingPlan(planKey);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message || "Erro ao iniciar checkout.", variant: "destructive" });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   const requiredPlan = requiredFeature 
     ? REQUIRED_PLAN_FOR_FEATURE[requiredFeature] 
