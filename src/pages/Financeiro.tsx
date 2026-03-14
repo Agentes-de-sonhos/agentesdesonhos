@@ -20,7 +20,7 @@ export default function Financeiro() {
             pageKey="financeiro"
             title="Financeiro"
             subtitle="Gerencie vendas, produtos, custos e fluxo de caixa"
-            icon={Loader2}
+            icon={DollarSign}
           />
 
           {isLoading ? (

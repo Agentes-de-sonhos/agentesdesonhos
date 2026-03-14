@@ -152,10 +152,12 @@ export default function Onboarding() {
     if (!file || !user) return;
 
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
+    if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
       toast({
         title: "Formato inválido",
-        description: "Use JPG, PNG ou WebP",
+        description: "Use apenas JPG, PNG ou WebP",
         variant: "destructive",
       });
       return;

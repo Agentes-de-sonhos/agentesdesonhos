@@ -106,18 +106,8 @@ export default function MentoriaDetail() {
   });
 
   if (!isAdmin) {
-    return (
-      <DashboardLayout>
-        <Card className="p-12 text-center">
-          <Lock className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Acesso Restrito</h3>
-          <p className="text-muted-foreground mb-4">
-            Esta área está disponível apenas para administradores.
-          </p>
-          <Button onClick={() => navigate("/mentorias")}>Voltar</Button>
-        </Card>
-      </DashboardLayout>
-    );
+    navigate("/mentorias", { replace: true });
+    return null;
   }
 
   if (loadingMentorship) {

@@ -89,6 +89,7 @@ export default function BlocoNotas() {
         await updateNote({ id: note.id, is_favorite: !note.is_favorite });
       } catch (error) {
         console.error("Error toggling favorite:", error);
+        toast({ title: "Erro ao atualizar favorito", description: "Tente novamente.", variant: "destructive" });
       }
     },
     [updateNote]

@@ -431,7 +431,7 @@ export default function SupplierDetail() {
                         key={index}
                         variant="outline"
                         className="w-full justify-start"
-                        onClick={() => window.open(social.url, "_blank")}
+                        onClick={() => safeOpen(social.url)}
                       >
                         {getSocialIcon(social.type)}
                         <span className="ml-2 capitalize">{social.type}</span>

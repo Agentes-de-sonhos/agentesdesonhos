@@ -215,7 +215,7 @@ export default function Gamificacao() {
                 </p>
               ) : (
                 <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                  {history.map((entry: any) => (
+                  {history.map((entry: PointsHistoryEntry) => (
                     <div
                       key={entry.id}
                       className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 text-sm"
