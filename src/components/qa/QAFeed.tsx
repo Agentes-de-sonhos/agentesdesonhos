@@ -51,6 +51,9 @@ export function QAFeed() {
     setNewTitle("");
     setNewDescription("");
     setNewCategory("");
+    sessionStorage.removeItem("qa_draft_title");
+    sessionStorage.removeItem("qa_draft_desc");
+    sessionStorage.removeItem("qa_draft_cat");
     setComposeExpanded(false);
   };
 

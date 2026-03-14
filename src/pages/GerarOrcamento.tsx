@@ -65,14 +65,9 @@ export default function GerarOrcamento() {
     return (
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia")}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="font-display text-2xl font-bold">Gerar Orçamento</h1>
-              <p className="text-muted-foreground">Crie um orçamento profissional para seu cliente</p>
-            </div>
+          <div>
+            <h1 className="font-display text-2xl font-bold">Gerar Orçamento</h1>
+            <p className="text-muted-foreground">Crie um orçamento profissional para seu cliente</p>
           </div>
           <Card className="max-w-2xl">
             <CardHeader><CardTitle>Informações do Cliente</CardTitle></CardHeader>

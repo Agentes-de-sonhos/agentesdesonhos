@@ -119,7 +119,8 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
                     type="number"
                     min={0}
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    onChange={(e) => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value) || 0)}
+                    onFocus={(e) => e.target.select()}
                   />
                 </FormControl>
                 <FormMessage />
