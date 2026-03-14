@@ -316,6 +316,7 @@ export function QAFeed() {
               onSubmitInlineAnswer={() => handleInlineAnswer(q.id)}
               isSubmitting={createAnswer.isPending}
               getAnswersQuery={getAnswersQuery}
+              onToggleLike={(answerId: string) => toggleAnswerLike.mutate({ answerId, questionId: q.id })}
             />
           ))}
         </div>
