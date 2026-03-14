@@ -30,9 +30,10 @@ export default function Gamificacao() {
   const { user } = useAuth();
   const { myPoints, ranking, isLoadingRanking } = useGamification();
 
-  const myRank =
-    ranking.findIndex((r) => r.total_points <= myPoints) + 1 ||
-    ranking.length + 1;
+  const myRank = (() => {
+    const idx = ranking.findIndex((r) => r.user_id === user?.id);
+    return idx >= 0 ? idx + 1 : ranking.length + 1;
+  })();
 
   // Fetch points history
   const { data: history, isLoading: isLoadingHistory } = useQuery({
