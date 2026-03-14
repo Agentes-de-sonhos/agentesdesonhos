@@ -45,6 +45,7 @@ export default function BlocoNotas() {
       setMobileListOpen(false);
     } catch (error) {
       console.error("Error creating note:", error);
+      toast({ title: "Erro ao criar nota", description: "Tente novamente.", variant: "destructive" });
     }
   }, [createNote]);
 
