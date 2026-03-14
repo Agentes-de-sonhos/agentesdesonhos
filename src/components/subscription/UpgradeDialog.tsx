@@ -1,4 +1,5 @@
-import { Check, Crown, Lock, Sparkles, Star } from "lucide-react";
+import { useState } from "react";
+import { Check, Crown, Lock, Sparkles, Star, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,8 @@ import {
   REQUIRED_PLAN_FOR_FEATURE
 } from "@/types/subscription";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UpgradeDialogProps {
   open: boolean;
