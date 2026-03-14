@@ -185,6 +185,33 @@ export function useQA() {
     },
   });
 
+  const toggleAnswerLike = useMutation({
+    mutationFn: async ({ answerId, questionId }: { answerId: string; questionId: string }) => {
+      if (!user) throw new Error("Não autenticado");
+      // Check if already liked
+      const { data: existing } = await supabase
+        .from("qa_answer_likes")
+        .select("id")
+        .eq("answer_id", answerId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from("qa_answer_likes").delete().eq("id", existing.id);
+        return { liked: false };
+      } else {
+        await supabase.from("qa_answer_likes").insert({ answer_id: answerId, user_id: user.id });
+        return { liked: true };
+      }
+    },
+    onSuccess: (result, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["qa-answers", vars.questionId] });
+      queryClient.invalidateQueries({ queryKey: ["qa-answer-likes"] });
+      if (result?.liked) toast.success("Curtida registrada! 👍");
+    },
+    onError: () => toast.error("Erro ao curtir"),
+  });
+
   return {
     questions: questionsQuery.data || [],
     isLoading: questionsQuery.isLoading,
@@ -193,6 +220,7 @@ export function useQA() {
     createQuestion,
     createAnswer,
     markBestAnswer,
+    toggleAnswerLike,
     getAnswersQuery: answersQuery,
   };
 }

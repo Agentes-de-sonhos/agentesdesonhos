@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQA, QA_CATEGORIES } from "@/hooks/useQA";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, CheckCircle2, Star, Send } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Star, Send, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,8 +20,10 @@ interface Props {
 
 export function QAQuestionDetail({ questionId, onBack }: Props) {
   const { user } = useAuth();
-  const { createAnswer, markBestAnswer, getAnswersQuery } = useQA();
-  const [newAnswer, setNewAnswer] = useState("");
+  const { createAnswer, markBestAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
+  const [newAnswer, setNewAnswer] = useState(() => sessionStorage.getItem(`qa_answer_draft_${questionId}`) || "");
+
+  useEffect(() => { sessionStorage.setItem(`qa_answer_draft_${questionId}`, newAnswer); }, [newAnswer, questionId]);
 
   // Fetch single question
   const questionQuery = useQuery({
@@ -60,7 +62,32 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
       content: newAnswer.trim(),
     });
     setNewAnswer("");
+    sessionStorage.removeItem(`qa_answer_draft_${questionId}`);
   };
+
+  // Fetch likes for answers
+  const likesQuery = useQuery({
+    queryKey: ["qa-answer-likes-detail", questionId],
+    queryFn: async () => {
+      const answerIds = answers.map((a: any) => a.id);
+      if (answerIds.length === 0) return { counts: {} as Record<string, number>, userLikes: new Set<string>() };
+      const { data: allLikes } = await supabase
+        .from("qa_answer_likes")
+        .select("answer_id, user_id")
+        .in("answer_id", answerIds);
+      const counts: Record<string, number> = {};
+      const userLikes = new Set<string>();
+      (allLikes || []).forEach((l: any) => {
+        counts[l.answer_id] = (counts[l.answer_id] || 0) + 1;
+        if (l.user_id === user?.id) userLikes.add(l.answer_id);
+      });
+      return { counts, userLikes };
+    },
+    enabled: answers.length > 0,
+  });
+
+  const likeCounts = likesQuery.data?.counts || {};
+  const userLikes = likesQuery.data?.userLikes || new Set<string>();
 
   const getCategoryLabel = (value: string) =>
     QA_CATEGORIES.find((c) => c.value === value)?.label || value;
@@ -172,22 +199,33 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
                         )}
                       </div>
                       <p className="text-sm mt-2 whitespace-pre-wrap">{a.content}</p>
-                      {isAuthor && !a.is_best_answer && !question.is_resolved && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="mt-2 text-xs text-green-600 hover:text-green-700"
-                          onClick={() =>
-                            markBestAnswer.mutate({
-                              answerId: a.id,
-                              questionId: question.id,
-                            })
-                          }
+                      <div className="flex items-center gap-3 mt-2">
+                        <button
+                          className={`flex items-center gap-1 text-xs transition-colors ${
+                            userLikes.has(a.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                          }`}
+                          onClick={() => toggleAnswerLike.mutate({ answerId: a.id, questionId: question.id })}
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                          Marcar como melhor resposta
-                        </Button>
-                      )}
+                          <Heart className={`h-3.5 w-3.5 ${userLikes.has(a.id) ? "fill-current" : ""}`} />
+                          {likeCounts[a.id] || 0}
+                        </button>
+                        {isAuthor && !a.is_best_answer && !question.is_resolved && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-green-600 hover:text-green-700 h-auto p-0"
+                            onClick={() =>
+                              markBestAnswer.mutate({
+                                answerId: a.id,
+                                questionId: question.id,
+                              })
+                            }
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                            Marcar como melhor resposta
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>

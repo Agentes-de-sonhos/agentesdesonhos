@@ -382,8 +382,13 @@ export default function MinhaVitrine() {
                 </div>
                 <div>
                   <Label>Subcategoria (opcional)</Label>
-                  <Input placeholder="Ex: MSC, Disney..." value={subcategory} onChange={e => setSubcategory(e.target.value)} className="mt-1" list="subcategory-suggestions" />
-                  <datalist id="subcategory-suggestions">{SUGGESTED_SUBCATEGORIES.map(s => <option key={s} value={s} />)}</datalist>
+                  <Select value={subcategory || "__none"} onValueChange={v => setSubcategory(v === "__none" ? "" : v)}>
+                    <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none">Nenhuma</SelectItem>
+                      {SUGGESTED_SUBCATEGORIES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div>

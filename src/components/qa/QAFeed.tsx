@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQA, QA_CATEGORIES } from "@/hooks/useQA";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   MessageCircle, CheckCircle2, Filter, Clock, ThumbsUp, Eye,
   ArrowUpDown, ChevronDown, Send, Search, ChevronUp, MessageSquarePlus,
-  AlertCircle,
+  AlertCircle, Heart,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { QAQuestionDetail } from "./QAQuestionDetail";
@@ -24,11 +25,16 @@ type SortMode = "recent" | "most_answered" | "unanswered";
 
 export function QAFeed() {
   const { user } = useAuth();
-  const { questions, isLoading, selectedCategory, setSelectedCategory, createQuestion, createAnswer, getAnswersQuery } = useQA();
+  const { questions, isLoading, selectedCategory, setSelectedCategory, createQuestion, createAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [newCategory, setNewCategory] = useState("");
+  const [newTitle, setNewTitle] = useState(() => sessionStorage.getItem("qa_draft_title") || "");
+  const [newDescription, setNewDescription] = useState(() => sessionStorage.getItem("qa_draft_desc") || "");
+  const [newCategory, setNewCategory] = useState(() => sessionStorage.getItem("qa_draft_cat") || "");
+
+  // Persist drafts to sessionStorage
+  useEffect(() => { sessionStorage.setItem("qa_draft_title", newTitle); }, [newTitle]);
+  useEffect(() => { sessionStorage.setItem("qa_draft_desc", newDescription); }, [newDescription]);
+  useEffect(() => { sessionStorage.setItem("qa_draft_cat", newCategory); }, [newCategory]);
   const [sortMode, setSortMode] = useState<SortMode>("recent");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [composeExpanded, setComposeExpanded] = useState(false);
@@ -46,6 +52,9 @@ export function QAFeed() {
     setNewTitle("");
     setNewDescription("");
     setNewCategory("");
+    sessionStorage.removeItem("qa_draft_title");
+    sessionStorage.removeItem("qa_draft_desc");
+    sessionStorage.removeItem("qa_draft_cat");
     setComposeExpanded(false);
   };
 
@@ -307,6 +316,7 @@ export function QAFeed() {
               onSubmitInlineAnswer={() => handleInlineAnswer(q.id)}
               isSubmitting={createAnswer.isPending}
               getAnswersQuery={getAnswersQuery}
+              onToggleLike={(answerId: string) => toggleAnswerLike.mutate({ answerId, questionId: q.id })}
             />
           ))}
         </div>
@@ -328,6 +338,7 @@ interface QuestionCardProps {
   onSubmitInlineAnswer: () => void;
   isSubmitting: boolean;
   getAnswersQuery: (id: string) => any;
+  onToggleLike: (answerId: string) => void;
 }
 
 function QuestionCard({
@@ -341,9 +352,35 @@ function QuestionCard({
   onSubmitInlineAnswer,
   isSubmitting,
   getAnswersQuery,
+  onToggleLike,
 }: QuestionCardProps) {
+  const { user } = useAuth();
   const answersQuery = useQuery({ ...getAnswersQuery(q.id), enabled: isExpanded });
   const answers = (answersQuery.data || []) as any[];
+
+  // Fetch likes for this question's answers
+  const likesQuery = useQuery({
+    queryKey: ["qa-answer-likes", q.id],
+    queryFn: async () => {
+      const answerIds = answers.map((a: any) => a.id);
+      if (answerIds.length === 0) return { counts: {}, userLikes: new Set<string>() };
+      const { data: allLikes } = await supabase
+        .from("qa_answer_likes")
+        .select("answer_id, user_id")
+        .in("answer_id", answerIds);
+      const counts: Record<string, number> = {};
+      const userLikes = new Set<string>();
+      (allLikes || []).forEach((l: any) => {
+        counts[l.answer_id] = (counts[l.answer_id] || 0) + 1;
+        if (l.user_id === user?.id) userLikes.add(l.answer_id);
+      });
+      return { counts, userLikes };
+    },
+    enabled: isExpanded && answers.length > 0,
+  });
+
+  const likeCounts = likesQuery.data?.counts || {};
+  const userLikes = likesQuery.data?.userLikes || new Set<string>();
 
   return (
     <Card className={`rounded-2xl border-border/40 transition-all duration-200 hover:shadow-md hover:border-border/60 group ${
@@ -464,6 +501,15 @@ function QuestionCard({
                         )}
                       </div>
                       <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap line-clamp-3 leading-relaxed">{a.content}</p>
+                      <button
+                        className={`flex items-center gap-1 mt-1.5 text-[11px] transition-colors ${
+                          userLikes.has(a.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                        }`}
+                        onClick={(e) => { e.stopPropagation(); onToggleLike(a.id); }}
+                      >
+                        <Heart className={`h-3 w-3 ${userLikes.has(a.id) ? "fill-current" : ""}`} />
+                        {likeCounts[a.id] || 0}
+                      </button>
                     </div>
                   </div>
                 ))}
