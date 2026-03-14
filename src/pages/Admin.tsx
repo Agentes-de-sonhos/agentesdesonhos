@@ -253,7 +253,10 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="community">
-            <AdminCommunityManager />
+            <div className="space-y-6">
+              <AdminCommunityRoomsManager />
+              <AdminCommunityManager />
+            </div>
           </TabsContent>
 
           <TabsContent value="playbooks">

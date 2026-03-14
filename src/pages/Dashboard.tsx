@@ -129,10 +129,13 @@ export default function Dashboard() {
       <div className="space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header with Welcome Message, Exchange Rate, Notifications, Profile & Logout */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          {/* Welcome message */}
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-            {getGreeting()}, {firstName}!
-          </h1>
+          {/* Welcome message + Online agents */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+              {getGreeting()}, {firstName}!
+            </h1>
+            <OnlineAgentsStrip />
+          </div>
           
           {/* Top bar with all header elements */}
           <div className="flex items-center gap-2 sm:gap-3">

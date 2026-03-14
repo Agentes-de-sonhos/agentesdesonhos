@@ -21,6 +21,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Global Popup Modal for admin announcements */}
       <GlobalPopupModal />
       
+      {/* Community Chat Floating Button (Premium only) */}
+      <ChatFloatingButton />
+      
       {/* Main content area - accounts for mobile sidebar width */}
       <main className="transition-all duration-300 pl-14 lg:pl-16 flex-1 flex flex-col w-full">
         <div className="py-4 px-3 sm:py-6 sm:px-4 lg:pl-12 lg:pr-12 flex-1">
