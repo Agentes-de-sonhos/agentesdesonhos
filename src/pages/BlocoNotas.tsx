@@ -126,7 +126,7 @@ export default function BlocoNotas() {
         </head>
         <body>
           <h1>${note.title}</h1>
-          <div class="content">${note.content}</div>
+          <div class="content">${note.content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
           <div class="footer">
             Exportado de Agentes de Sonhos - Bloco de Notas
           </div>
