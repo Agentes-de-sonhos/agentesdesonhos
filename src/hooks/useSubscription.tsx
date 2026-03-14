@@ -92,6 +92,26 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     fetchSubscription();
   }, [fetchSubscription]);
 
+  // Check Stripe subscription status periodically and on load
+  const stripeCheckDone = useRef(false);
+  useEffect(() => {
+    if (!user || stripeCheckDone.current) return;
+    stripeCheckDone.current = true;
+
+    const checkStripe = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("check-subscription");
+        if (!error && data?.subscribed && data?.plan) {
+          // Refetch from DB to get updated plan
+          await fetchSubscription();
+        }
+      } catch (e) {
+        console.error("Error checking Stripe subscription:", e);
+      }
+    };
+    checkStripe();
+  }, [user, fetchSubscription]);
+
   const plan: SubscriptionPlan = subscription?.plan || "essencial";
   const aiLimit = AI_LIMITS[plan];
   const aiUsageCount = subscription?.ai_usage_count || 0;
