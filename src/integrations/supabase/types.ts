@@ -3193,6 +3193,35 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_answer_likes: {
+        Row: {
+          answer_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_answer_likes_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "qa_answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       qa_answer_votes: {
         Row: {
           answer_id: string
