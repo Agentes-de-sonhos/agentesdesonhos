@@ -11,6 +11,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+interface PointsHistoryEntry {
+  id: string;
+  action: string;
+  points: number;
+  created_at: string;
+}
+
 const actionLabels: Record<string, string> = {
   daily_login: "Login diário",
   ask_question: "Pergunta feita",
