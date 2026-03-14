@@ -650,6 +650,74 @@ export type Database = {
         }
         Relationships: []
       }
+      community_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "community_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_rooms: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          emoji: string | null
+          id: string
+          is_active: boolean | null
+          is_general: boolean | null
+          name: string
+          order_index: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_general?: boolean | null
+          name: string
+          order_index?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_general?: boolean | null
+          name?: string
+          order_index?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       community_votes: {
         Row: {
           created_at: string
@@ -986,6 +1054,65 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      direct_conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
+      direct_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "direct_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       events: {
         Row: {
@@ -4702,6 +4829,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_presence: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_active_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_active_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_active_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_quiz_attempts: {
         Row: {
