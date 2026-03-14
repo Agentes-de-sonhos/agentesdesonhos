@@ -29,7 +29,7 @@ export function WizardComplete({ slug, onRestart }: WizardCompleteProps) {
   };
 
   return (
-    <Card className="max-w-lg mx-auto">
+    <Card className="max-w-2xl mx-auto">
       <CardContent className="pt-8 pb-8 text-center space-y-6">
         <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
           <Check className="h-8 w-8 text-primary" />
