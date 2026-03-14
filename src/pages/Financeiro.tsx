@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, DollarSign } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
