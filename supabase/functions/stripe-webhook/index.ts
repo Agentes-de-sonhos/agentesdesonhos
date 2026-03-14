@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "onboarding@resend.dev",
+        from: "Fernando Nobre <fernando.nobre@agentesdesonhos.com.br>",
         to: [normalizedEmail],
         subject: "Ative seu Cartão Virtual Agente de Sonhos",
         html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
