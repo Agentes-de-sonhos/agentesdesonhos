@@ -229,7 +229,7 @@ export default function SupplierDetail() {
             {supplier.website_url && (
               <Button
                 variant="outline"
-                onClick={() => window.open(supplier.website_url!, "_blank")}
+                onClick={() => safeOpen(supplier.website_url)}
               >
                 <Globe className="mr-2 h-4 w-4" />
                 Site
