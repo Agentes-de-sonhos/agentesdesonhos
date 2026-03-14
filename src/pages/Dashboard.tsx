@@ -189,15 +189,15 @@ export default function Dashboard() {
               <div className="flex flex-col flex-1 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
             </section>
 
-            {/* 3. Minha Meta & Próximas Viagens */}
+            {/* 3. Perguntas da Comunidade & Próximas Viagens */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
-              <div className="flex flex-col flex-1 [&>*]:h-full"><ClientsManagementCard /></div>
+              <CommunityQACard />
               <div className="flex flex-col flex-1 [&>*]:h-full"><TripRemindersCard /></div>
             </section>
 
-            {/* 4. Perguntas da Comunidade & Ferramentas do Agente */}
+            {/* 4. Minha Meta & Ferramentas do Agente */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-4">
-              <CommunityQACard />
+              <div className="flex flex-col flex-1 [&>*]:h-full"><ClientsManagementCard /></div>
               <AgentToolsCard />
             </section>
 
