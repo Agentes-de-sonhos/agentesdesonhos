@@ -57,6 +57,20 @@ Deno.serve(async (req) => {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
     sessionId = paymentIntent.id;
 
+    // buscar checkout session associada
+    try {
+      const sessions = await stripe.checkout.sessions.list({
+        payment_intent: paymentIntent.id,
+      });
+
+      if (sessions.data.length > 0) {
+        const session = sessions.data[0];
+        customerEmail = session.customer_details?.email || session.customer_email || null;
+      }
+    } catch (err) {
+      console.error("Error retrieving checkout session:", err);
+    }
+
     // Try to get email from receipt_email or charges
     customerEmail = paymentIntent.receipt_email || null;
 
