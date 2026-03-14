@@ -70,6 +70,12 @@ const socialIcons: Record<string, any> = {
   default: Globe,
 };
 
+const safeOpen = (url: string | null | undefined) => {
+  if (!url) return;
+  const sanitized = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+  window.open(sanitized, "_blank", "noopener,noreferrer");
+};
+
 export default function SupplierDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
