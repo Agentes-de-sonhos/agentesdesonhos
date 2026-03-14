@@ -13,7 +13,6 @@ import {
   ArrowLeft,
   Users,
   Hash,
-  Loader2,
 } from "lucide-react";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
@@ -40,6 +39,18 @@ export function ChatFloatingButton() {
   } = useDirectMessages(activeConversationId);
   const { onlineCount } = usePresence();
 
+  const handleAgentChat = useCallback(
+    async (agent: OnlineAgent) => {
+      const convId = await startConversation(agent.user_id);
+      if (convId) {
+        setActiveConversationId(convId);
+        setView("dm");
+        setIsOpen(true);
+      }
+    },
+    [startConversation]
+  );
+
   if (plan !== "premium") return null;
 
   const openRoom = (room: CommunityRoom) => {
@@ -52,18 +63,6 @@ export function ChatFloatingButton() {
     setActiveConversationId(conversationId);
     setView("dm");
   };
-
-  const handleAgentChat = useCallback(
-    async (agent: OnlineAgent) => {
-      const convId = await startConversation(agent.user_id);
-      if (convId) {
-        setActiveConversationId(convId);
-        setView("dm");
-        setIsOpen(true);
-      }
-    },
-    [startConversation]
-  );
 
   const goBack = () => {
     if (view === "room") {
@@ -95,7 +94,7 @@ export function ChatFloatingButton() {
           <div className="relative">
             <MessageCircle className="h-6 w-6" />
             {totalUnread > 0 && (
-              <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-[10px] flex items-center justify-center font-bold text-white">
+              <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold">
                 {totalUnread > 9 ? "9+" : totalUnread}
               </span>
             )}
@@ -123,7 +122,7 @@ export function ChatFloatingButton() {
             </h3>
             {view === "menu" && (
               <Badge variant="secondary" className="text-xs gap-1">
-                <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
+                <span className="h-2 w-2 rounded-full bg-success inline-block" />
                 {onlineCount + 1} online
               </Badge>
             )}
@@ -280,6 +279,3 @@ export function ChatFloatingButton() {
     </>
   );
 }
-
-// Export the agent chat handler for use by OnlineAgentsStrip
-export { ChatFloatingButton };

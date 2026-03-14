@@ -23,7 +23,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
         <div className="relative">
           <Users className="h-4 w-4 text-primary" />
-          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-green-500 border border-card" />
+          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-success border border-card" />
         </div>
         <span>
           <strong className="text-foreground">{onlineCount + 1}</strong> agentes online
@@ -55,7 +55,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
                           .toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success border-2 border-card" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="text-center">
