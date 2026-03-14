@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
+import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
 
 import { CuratedNewsFeed } from "@/components/dashboard/CuratedNewsFeed";
 import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
