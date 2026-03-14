@@ -490,16 +490,14 @@ export default function MeuCartao() {
                 </div>
               );
             })}
+            <div className="flex justify-end pt-2">
+              <Button onClick={handleSave} disabled={updateCard.isPending} size="sm">
+                <Save className="h-4 w-4 mr-1" />
+                {updateCard.isPending ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
-
-        {/* Save */}
-        <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={updateCard.isPending} size="lg">
-            <Save className="h-4 w-4 mr-2" />
-            {updateCard.isPending ? "Salvando..." : "Salvar alterações"}
-          </Button>
-        </div>
       </div>
     </DashboardLayout>
   );
