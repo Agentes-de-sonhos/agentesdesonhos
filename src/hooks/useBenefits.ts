@@ -159,7 +159,7 @@ export function useBenefits() {
     createBenefit: createBenefit.mutate,
     isCreating: createBenefit.isPending,
     confirmBenefit: confirmBenefit.mutate,
-    getComments,
+    useComments,
     addComment: addComment.mutate,
     isAddingComment: addComment.isPending,
     ranking,

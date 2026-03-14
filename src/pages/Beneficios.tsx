@@ -15,7 +15,7 @@ export default function Beneficios() {
   const {
     benefits, isLoading, userConfirmations,
     createBenefit, isCreating, confirmBenefit,
-    getComments, addComment, isAddingComment, ranking,
+    useComments, addComment, isAddingComment, ranking,
   } = useBenefits();
 
   const [search, setSearch] = useState("");
