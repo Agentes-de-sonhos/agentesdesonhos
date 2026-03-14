@@ -15,7 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAgentProfile, AgentProfile } from "@/hooks/useAgentProfile";
-import type { ServiceType, QuoteFormData } from "@/types/quote";
+import type { ServiceType, QuoteFormData, ServiceData } from "@/types/quote";
 import { SERVICE_TYPE_LABELS } from "@/types/quote";
 
 export default function GerarOrcamento() {
