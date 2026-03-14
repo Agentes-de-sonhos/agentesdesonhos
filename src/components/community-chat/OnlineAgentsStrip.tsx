@@ -16,6 +16,15 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
   const { onlineUsers, onlineCount } = usePresence();
   const { plan } = useSubscription();
 
+  const handleClick = (agent: OnlineAgent) => {
+    if (onAgentClick) {
+      onAgentClick(agent);
+    } else {
+      // Dispatch global event for ChatFloatingButton to pick up
+      window.dispatchEvent(new CustomEvent("start-dm", { detail: agent }));
+    }
+  };
+
   if (plan !== "premium") return null;
 
   return (
@@ -38,7 +47,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
               <Tooltip key={agent.user_id}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => onAgentClick?.(agent)}
+                    onClick={() => handleClick(agent)}
                     className="relative flex-shrink-0 transition-transform hover:scale-110"
                   >
                     <Avatar className="h-9 w-9 border-2 border-card">
