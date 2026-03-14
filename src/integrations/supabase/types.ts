@@ -302,6 +302,136 @@ export type Database = {
         }
         Relationships: []
       }
+      benefit_comments: {
+        Row: {
+          benefit_id: string
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          benefit_id: string
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          benefit_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_comments_benefit_id_fkey"
+            columns: ["benefit_id"]
+            isOneToOne: false
+            referencedRelation: "benefits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefit_confirmations: {
+        Row: {
+          benefit_id: string
+          confirmation_type: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          benefit_id: string
+          confirmation_type?: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          benefit_id?: string
+          confirmation_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_confirmations_benefit_id_fkey"
+            columns: ["benefit_id"]
+            isOneToOne: false
+            referencedRelation: "benefits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefits: {
+        Row: {
+          category: string
+          company_logo_url: string | null
+          company_name: string
+          confirmations_count: number
+          created_at: string
+          destination: string | null
+          full_description: string | null
+          how_to_claim: string | null
+          id: string
+          is_active: boolean
+          not_available_count: number
+          official_link: string | null
+          requirements: string | null
+          short_description: string | null
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          company_logo_url?: string | null
+          company_name: string
+          confirmations_count?: number
+          created_at?: string
+          destination?: string | null
+          full_description?: string | null
+          how_to_claim?: string | null
+          id?: string
+          is_active?: boolean
+          not_available_count?: number
+          official_link?: string | null
+          requirements?: string | null
+          short_description?: string | null
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          company_logo_url?: string | null
+          company_name?: string
+          confirmations_count?: number
+          created_at?: string
+          destination?: string | null
+          full_description?: string | null
+          how_to_claim?: string | null
+          id?: string
+          is_active?: boolean
+          not_available_count?: number
+          official_link?: string | null
+          requirements?: string | null
+          short_description?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       business_card_stats: {
         Row: {
           card_id: string
