@@ -45,82 +45,130 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Extract customer email based on event type
+  let customerEmail: string | null = null;
+  let sessionId: string | null = null;
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const customerEmail = session.customer_details?.email || session.customer_email;
+    customerEmail = session.customer_details?.email || session.customer_email || null;
+    sessionId = session.id;
+  } else if (event.type === "payment_intent.succeeded") {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    sessionId = paymentIntent.id;
 
-    if (!customerEmail) {
-      console.error("No customer email found in session:", session.id);
-      return new Response(JSON.stringify({ error: "No customer email" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Try to get email from receipt_email or charges
+    customerEmail = paymentIntent.receipt_email || null;
 
-    const activationToken = crypto.randomUUID();
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Save activation token
-    const { error: insertError } = await adminClient.from("card_activations").insert({
-      email: customerEmail.trim().toLowerCase(),
-      stripe_session_id: session.id,
-      activation_token: activationToken,
-      payment_status: "paid",
-      used: false,
-    });
-
-    if (insertError) {
-      console.error("Error inserting activation:", insertError);
-      return new Response(JSON.stringify({ error: "Failed to create activation" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const activationUrl = `https://agentesdesonhos.com/ativar-cartao?token=${activationToken}`;
-    console.log(`✅ Activation token created for ${customerEmail}: ${activationUrl}`);
-
-    // Send activation email via Resend
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (resendApiKey) {
-      const emailRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${resendApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "onboarding@resend.dev",
-          to: [customerEmail],
-          subject: "Ative seu Cartão Virtual Agente de Sonhos",
-          html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-            <h2 style="color: #333;">Seu pagamento foi confirmado com sucesso.</h2>
-            <p style="font-size: 16px; color: #555;">Agora ative seu cartão virtual clicando no link abaixo:</p>
-            <p style="margin: 24px 0;">
-              <a href="${activationUrl}" style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Ativar meu cartão</a>
-            </p>
-            <p style="font-size: 14px; color: #888;">Esse link é único e válido por 24 horas.</p>
-          </div>`,
-        }),
-      });
-      if (!emailRes.ok) {
-        const errBody = await emailRes.text();
-        console.error("Resend email error:", errBody);
-      } else {
-        console.log(`📧 Activation email sent to ${customerEmail}`);
+    if (!customerEmail && paymentIntent.latest_charge) {
+      try {
+        const charge = await stripe.charges.retrieve(paymentIntent.latest_charge as string);
+        customerEmail = charge.billing_details?.email || null;
+      } catch (chargeErr) {
+        console.error("Error retrieving charge for email:", chargeErr);
       }
-    } else {
-      console.warn("RESEND_API_KEY not configured, skipping email");
     }
 
-    return new Response(JSON.stringify({ received: true, email: customerEmail }), {
+    // Try customer object as fallback
+    if (!customerEmail && paymentIntent.customer) {
+      try {
+        const customer = await stripe.customers.retrieve(paymentIntent.customer as string);
+        if (customer && !customer.deleted) {
+          customerEmail = (customer as Stripe.Customer).email || null;
+        }
+      } catch (custErr) {
+        console.error("Error retrieving customer for email:", custErr);
+      }
+    }
+  } else {
+    // Acknowledge other events
+    return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  // Acknowledge other events
-  return new Response(JSON.stringify({ received: true }), {
+  if (!customerEmail) {
+    console.error(`No customer email found for ${event.type}:`, sessionId);
+    return new Response(JSON.stringify({ error: "No customer email" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const normalizedEmail = customerEmail.trim().toLowerCase();
+  const activationToken = crypto.randomUUID();
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
+  // Check for duplicate to avoid re-processing
+  const { data: existing } = await adminClient
+    .from("card_activations")
+    .select("id")
+    .eq("stripe_session_id", sessionId!)
+    .maybeSingle();
+
+  if (existing) {
+    console.log(`Activation already exists for session ${sessionId}, skipping.`);
+    return new Response(JSON.stringify({ received: true, already_processed: true }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Save activation token
+  const { error: insertError } = await adminClient.from("card_activations").insert({
+    email: normalizedEmail,
+    stripe_session_id: sessionId!,
+    activation_token: activationToken,
+    payment_status: "paid",
+    used: false,
+  });
+
+  if (insertError) {
+    console.error("Error inserting activation:", insertError);
+    return new Response(JSON.stringify({ error: "Failed to create activation" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const activationUrl = `https://agentesdesonhos.com/ativar-cartao?token=${activationToken}`;
+  console.log(`✅ Activation token created for ${normalizedEmail} via ${event.type}: ${activationUrl}`);
+
+  // Send activation email via Resend
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  if (resendApiKey) {
+    const emailRes = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "onboarding@resend.dev",
+        to: [normalizedEmail],
+        subject: "Ative seu Cartão Virtual Agente de Sonhos",
+        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+          <h2 style="color: #333;">Seu pagamento foi confirmado com sucesso.</h2>
+          <p style="font-size: 16px; color: #555;">Agora ative seu cartão virtual clicando no link abaixo:</p>
+          <p style="margin: 24px 0;">
+            <a href="${activationUrl}" style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Ativar meu cartão</a>
+          </p>
+          <p style="font-size: 14px; color: #888;">Esse link é único e válido por 24 horas.</p>
+        </div>`,
+      }),
+    });
+    if (!emailRes.ok) {
+      const errBody = await emailRes.text();
+      console.error("Resend email error:", errBody);
+    } else {
+      console.log(`📧 Activation email sent to ${normalizedEmail}`);
+    }
+  } else {
+    console.warn("RESEND_API_KEY not configured, skipping email");
+  }
+
+  return new Response(JSON.stringify({ received: true, email: normalizedEmail }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
