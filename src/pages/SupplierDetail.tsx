@@ -238,7 +238,7 @@ export default function SupplierDetail() {
             {supplier.instagram_url && (
               <Button
                 variant="outline"
-                onClick={() => window.open(supplier.instagram_url!, "_blank")}
+                onClick={() => safeOpen(supplier.instagram_url)}
               >
                 <Instagram className="mr-2 h-4 w-4" />
                 Instagram
