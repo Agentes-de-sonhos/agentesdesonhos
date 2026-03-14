@@ -62,7 +62,32 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
       content: newAnswer.trim(),
     });
     setNewAnswer("");
+    sessionStorage.removeItem(`qa_answer_draft_${questionId}`);
   };
+
+  // Fetch likes for answers
+  const likesQuery = useQuery({
+    queryKey: ["qa-answer-likes-detail", questionId],
+    queryFn: async () => {
+      const answerIds = answers.map((a: any) => a.id);
+      if (answerIds.length === 0) return { counts: {} as Record<string, number>, userLikes: new Set<string>() };
+      const { data: allLikes } = await supabase
+        .from("qa_answer_likes")
+        .select("answer_id, user_id")
+        .in("answer_id", answerIds);
+      const counts: Record<string, number> = {};
+      const userLikes = new Set<string>();
+      (allLikes || []).forEach((l: any) => {
+        counts[l.answer_id] = (counts[l.answer_id] || 0) + 1;
+        if (l.user_id === user?.id) userLikes.add(l.answer_id);
+      });
+      return { counts, userLikes };
+    },
+    enabled: answers.length > 0,
+  });
+
+  const likeCounts = likesQuery.data?.counts || {};
+  const userLikes = likesQuery.data?.userLikes || new Set<string>();
 
   const getCategoryLabel = (value: string) =>
     QA_CATEGORIES.find((c) => c.value === value)?.label || value;
