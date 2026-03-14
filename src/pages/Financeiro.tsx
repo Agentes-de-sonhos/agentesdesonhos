@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, DollarSign } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,7 +20,7 @@ export default function Financeiro() {
             pageKey="financeiro"
             title="Financeiro"
             subtitle="Gerencie vendas, produtos, custos e fluxo de caixa"
-            icon={Loader2}
+            icon={DollarSign}
           />
 
           {isLoading ? (

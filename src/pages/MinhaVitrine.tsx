@@ -62,7 +62,9 @@ export default function MinhaVitrine() {
     const file = e.target.files?.[0];
     if (!file) return;
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp"];
-    if (!validTypes.includes(file.type)) {
+    const validExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"];
+    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
+    if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
       toast.error("Formato não suportado. Use JPG, PNG, WEBP, GIF ou BMP.");
       return;
     }

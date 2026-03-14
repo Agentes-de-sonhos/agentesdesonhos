@@ -1,3 +1,7 @@
+// IMPORTANTE: As tabelas mentorships, mentorship_meetings, mentorship_videos,
+// mentorship_modules, mentorship_lessons e mentorship_materials devem ter
+// políticas RLS no Supabase que restrinjam operações de INSERT, UPDATE e DELETE
+// apenas a usuários com role = 'admin'. A verificação no front-end não é suficiente.
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";

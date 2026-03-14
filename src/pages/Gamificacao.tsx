@@ -11,6 +11,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+interface PointsHistoryEntry {
+  id: string;
+  action: string;
+  points: number;
+  created_at: string;
+}
+
 const actionLabels: Record<string, string> = {
   daily_login: "Login diário",
   ask_question: "Pergunta feita",
@@ -23,9 +30,10 @@ export default function Gamificacao() {
   const { user } = useAuth();
   const { myPoints, ranking, isLoadingRanking } = useGamification();
 
-  const myRank =
-    ranking.findIndex((r) => r.total_points <= myPoints) + 1 ||
-    ranking.length + 1;
+  const myRank = (() => {
+    const idx = ranking.findIndex((r) => r.user_id === user?.id);
+    return idx >= 0 ? idx + 1 : ranking.length + 1;
+  })();
 
   // Fetch points history
   const { data: history, isLoading: isLoadingHistory } = useQuery({
@@ -207,7 +215,7 @@ export default function Gamificacao() {
                 </p>
               ) : (
                 <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                  {history.map((entry: any) => (
+                  {history.map((entry: PointsHistoryEntry) => (
                     <div
                       key={entry.id}
                       className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 text-sm"

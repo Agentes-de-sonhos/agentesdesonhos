@@ -70,6 +70,12 @@ const socialIcons: Record<string, any> = {
   default: Globe,
 };
 
+const safeOpen = (url: string | null | undefined) => {
+  if (!url) return;
+  const sanitized = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+  window.open(sanitized, "_blank", "noopener,noreferrer");
+};
+
 export default function SupplierDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -223,7 +229,7 @@ export default function SupplierDetail() {
             {supplier.website_url && (
               <Button
                 variant="outline"
-                onClick={() => window.open(supplier.website_url!, "_blank")}
+                onClick={() => safeOpen(supplier.website_url)}
               >
                 <Globe className="mr-2 h-4 w-4" />
                 Site
@@ -232,7 +238,7 @@ export default function SupplierDetail() {
             {supplier.instagram_url && (
               <Button
                 variant="outline"
-                onClick={() => window.open(supplier.instagram_url!, "_blank")}
+                onClick={() => safeOpen(supplier.instagram_url)}
               >
                 <Instagram className="mr-2 h-4 w-4" />
                 Instagram
@@ -425,7 +431,7 @@ export default function SupplierDetail() {
                         key={index}
                         variant="outline"
                         className="w-full justify-start"
-                        onClick={() => window.open(social.url, "_blank")}
+                        onClick={() => safeOpen(social.url)}
                       >
                         {getSocialIcon(social.type)}
                         <span className="ml-2 capitalize">{social.type}</span>

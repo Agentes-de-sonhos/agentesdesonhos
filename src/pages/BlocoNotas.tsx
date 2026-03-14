@@ -45,6 +45,7 @@ export default function BlocoNotas() {
       setMobileListOpen(false);
     } catch (error) {
       console.error("Error creating note:", error);
+      toast({ title: "Erro ao criar nota", description: "Tente novamente.", variant: "destructive" });
     }
   }, [createNote]);
 
@@ -63,6 +64,7 @@ export default function BlocoNotas() {
       }
     } catch (error) {
       console.error("Error deleting note:", error);
+      toast({ title: "Erro ao excluir nota", description: "Tente novamente.", variant: "destructive" });
     } finally {
       setDeleteNoteId(null);
     }
@@ -75,6 +77,7 @@ export default function BlocoNotas() {
         setSelectedNote(duplicated);
       } catch (error) {
         console.error("Error duplicating note:", error);
+        toast({ title: "Erro ao duplicar nota", description: "Tente novamente.", variant: "destructive" });
       }
     },
     [duplicateNote]
@@ -86,6 +89,7 @@ export default function BlocoNotas() {
         await updateNote({ id: note.id, is_favorite: !note.is_favorite });
       } catch (error) {
         console.error("Error toggling favorite:", error);
+        toast({ title: "Erro ao atualizar favorito", description: "Tente novamente.", variant: "destructive" });
       }
     },
     [updateNote]
@@ -126,7 +130,7 @@ export default function BlocoNotas() {
         </head>
         <body>
           <h1>${note.title}</h1>
-          <div class="content">${note.content}</div>
+          <div class="content">${note.content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
           <div class="footer">
             Exportado de Agentes de Sonhos - Bloco de Notas
           </div>

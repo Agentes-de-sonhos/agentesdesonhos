@@ -92,6 +92,8 @@ export default function CriarRoteiro() {
     }
   };
 
+  // Apenas campos explicitamente mapeados são enviados ao banco.
+  // Novos campos precisam ser adicionados manualmente aqui.
   const handleUpdateActivity = (activityId: string, updates: Partial<Record<string, unknown>>) => {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.title !== undefined) dbUpdates.title = updates.title;

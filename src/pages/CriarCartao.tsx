@@ -58,6 +58,9 @@ export default function CriarCartao() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Selecione uma imagem."); return; }
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) { toast.error("Formato inválido."); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB."); return; }
     setUploadingLogo(true);
     try {

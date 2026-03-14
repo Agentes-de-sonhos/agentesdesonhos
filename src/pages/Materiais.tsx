@@ -64,7 +64,8 @@ export default function Materiais() {
   const galleries = useMemo(() => {
     const filtered = filterMaterials(materials, searchTerm, selectedCategory, selectedType, selectedSupplier);
     return groupIntoGalleries(filtered);
-  }, [materials, searchTerm, selectedCategory, selectedType, selectedSupplier, filterMaterials, groupIntoGalleries]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [materials, searchTerm, selectedCategory, selectedType, selectedSupplier]);
 
   // Group galleries
   const byPeriod = useMemo(() => groupGalleriesByPeriod(galleries), [galleries, groupGalleriesByPeriod]);
