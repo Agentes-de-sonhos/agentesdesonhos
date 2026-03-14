@@ -404,7 +404,13 @@ export default function MeuCartao() {
                   />
                   <span className="text-sm text-muted-foreground">{form.secondary_color}</span>
                 </div>
-              </div>
+             </div>
+            </div>
+            <div className="flex justify-end pt-2">
+              <Button onClick={handleSave} disabled={updateCard.isPending} size="sm">
+                <Save className="h-4 w-4 mr-1" />
+                {updateCard.isPending ? "Salvando..." : "Salvar"}
+              </Button>
             </div>
           </CardContent>
         </Card>
