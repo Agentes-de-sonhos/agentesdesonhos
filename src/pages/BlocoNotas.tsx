@@ -64,6 +64,7 @@ export default function BlocoNotas() {
       }
     } catch (error) {
       console.error("Error deleting note:", error);
+      toast({ title: "Erro ao excluir nota", description: "Tente novamente.", variant: "destructive" });
     } finally {
       setDeleteNoteId(null);
     }
