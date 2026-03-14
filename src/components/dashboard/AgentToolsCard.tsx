@@ -20,7 +20,7 @@ const tools = [
     label: "Orçamento",
     icon: FileText,
     path: "/gerar-orcamento",
-    description: "Gere orçamentos para os seus clientes.",
+    description: "Crie orçamentos para os seus clientes.",
     color: "142 64% 38%",
   },
   {
