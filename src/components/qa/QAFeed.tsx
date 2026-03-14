@@ -338,6 +338,7 @@ interface QuestionCardProps {
   onSubmitInlineAnswer: () => void;
   isSubmitting: boolean;
   getAnswersQuery: (id: string) => any;
+  onToggleLike: (answerId: string) => void;
 }
 
 function QuestionCard({
@@ -351,9 +352,35 @@ function QuestionCard({
   onSubmitInlineAnswer,
   isSubmitting,
   getAnswersQuery,
+  onToggleLike,
 }: QuestionCardProps) {
+  const { user } = useAuth();
   const answersQuery = useQuery({ ...getAnswersQuery(q.id), enabled: isExpanded });
   const answers = (answersQuery.data || []) as any[];
+
+  // Fetch likes for this question's answers
+  const likesQuery = useQuery({
+    queryKey: ["qa-answer-likes", q.id],
+    queryFn: async () => {
+      const answerIds = answers.map((a: any) => a.id);
+      if (answerIds.length === 0) return { counts: {}, userLikes: new Set<string>() };
+      const { data: allLikes } = await supabase
+        .from("qa_answer_likes")
+        .select("answer_id, user_id")
+        .in("answer_id", answerIds);
+      const counts: Record<string, number> = {};
+      const userLikes = new Set<string>();
+      (allLikes || []).forEach((l: any) => {
+        counts[l.answer_id] = (counts[l.answer_id] || 0) + 1;
+        if (l.user_id === user?.id) userLikes.add(l.answer_id);
+      });
+      return { counts, userLikes };
+    },
+    enabled: isExpanded && answers.length > 0,
+  });
+
+  const likeCounts = likesQuery.data?.counts || {};
+  const userLikes = likesQuery.data?.userLikes || new Set<string>();
 
   return (
     <Card className={`rounded-2xl border-border/40 transition-all duration-200 hover:shadow-md hover:border-border/60 group ${
