@@ -77,6 +77,7 @@ export default function BlocoNotas() {
         setSelectedNote(duplicated);
       } catch (error) {
         console.error("Error duplicating note:", error);
+        toast({ title: "Erro ao duplicar nota", description: "Tente novamente.", variant: "destructive" });
       }
     },
     [duplicateNote]
