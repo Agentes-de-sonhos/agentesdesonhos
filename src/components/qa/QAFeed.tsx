@@ -501,6 +501,15 @@ function QuestionCard({
                         )}
                       </div>
                       <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap line-clamp-3 leading-relaxed">{a.content}</p>
+                      <button
+                        className={`flex items-center gap-1 mt-1.5 text-[11px] transition-colors ${
+                          userLikes.has(a.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                        }`}
+                        onClick={(e) => { e.stopPropagation(); onToggleLike(a.id); }}
+                      >
+                        <Heart className={`h-3 w-3 ${userLikes.has(a.id) ? "fill-current" : ""}`} />
+                        {likeCounts[a.id] || 0}
+                      </button>
                     </div>
                   </div>
                 ))}
