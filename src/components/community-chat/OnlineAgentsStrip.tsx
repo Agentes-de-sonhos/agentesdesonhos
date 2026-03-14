@@ -16,6 +16,15 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
   const { onlineUsers, onlineCount } = usePresence();
   const { plan } = useSubscription();
 
+  const handleClick = (agent: OnlineAgent) => {
+    if (onAgentClick) {
+      onAgentClick(agent);
+    } else {
+      // Dispatch global event for ChatFloatingButton to pick up
+      window.dispatchEvent(new CustomEvent("start-dm", { detail: agent }));
+    }
+  };
+
   if (plan !== "premium") return null;
 
   return (
