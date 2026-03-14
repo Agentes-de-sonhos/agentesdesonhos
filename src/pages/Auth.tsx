@@ -154,6 +154,11 @@ export default function Auth() {
     setIsLoading(false);
 
     if (error) {
+      // If user not found (shouldCreateUser: false)
+      if (/signups.not.allowed/i.test(error.message) || /otp_disabled/i.test(error.message) || /user.not.found/i.test(error.message)) {
+        setError("Este e-mail não possui cadastro na plataforma. Por favor, cadastre-se primeiro.");
+        return;
+      }
       setError(translateAuthError(error.message));
       return;
     }
