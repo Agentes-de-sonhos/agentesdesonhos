@@ -27,7 +27,7 @@ const tools = [
     label: "Roteiros",
     icon: Route,
     path: "/criar-roteiro",
-    description: "Gere roteiros de viagem personalizados com IA.",
+    description: "Crie roteiros de viagem personalizados com IA.",
     color: "262 60% 50%",
   },
   {
