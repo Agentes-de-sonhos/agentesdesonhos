@@ -49,7 +49,7 @@ export default function Beneficios() {
   };
 
   // Comments for detail dialog
-  const commentsQuery = detailBenefit ? getComments(detailBenefit.id) : null;
+  const commentsQuery = useComments(detailBenefit?.id || null);
 
   if (isLoading) {
     return (
