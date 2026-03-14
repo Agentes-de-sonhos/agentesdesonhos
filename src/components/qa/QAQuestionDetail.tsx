@@ -199,22 +199,33 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
                         )}
                       </div>
                       <p className="text-sm mt-2 whitespace-pre-wrap">{a.content}</p>
-                      {isAuthor && !a.is_best_answer && !question.is_resolved && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="mt-2 text-xs text-green-600 hover:text-green-700"
-                          onClick={() =>
-                            markBestAnswer.mutate({
-                              answerId: a.id,
-                              questionId: question.id,
-                            })
-                          }
+                      <div className="flex items-center gap-3 mt-2">
+                        <button
+                          className={`flex items-center gap-1 text-xs transition-colors ${
+                            userLikes.has(a.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                          }`}
+                          onClick={() => toggleAnswerLike.mutate({ answerId: a.id, questionId: question.id })}
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                          Marcar como melhor resposta
-                        </Button>
-                      )}
+                          <Heart className={`h-3.5 w-3.5 ${userLikes.has(a.id) ? "fill-current" : ""}`} />
+                          {likeCounts[a.id] || 0}
+                        </button>
+                        {isAuthor && !a.is_best_answer && !question.is_resolved && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-green-600 hover:text-green-700 h-auto p-0"
+                            onClick={() =>
+                              markBestAnswer.mutate({
+                                answerId: a.id,
+                                questionId: question.id,
+                              })
+                            }
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                            Marcar como melhor resposta
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
