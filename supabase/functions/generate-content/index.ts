@@ -84,7 +84,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication check
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
@@ -94,31 +93,56 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
     });
 
-    // Validate JWT and get user claims
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
     
-    if (claimsError || !claimsData?.claims) {
+    if (userError || !userData?.user) {
       return new Response(
         JSON.stringify({ error: 'Token inválido ou expirado. Faça login novamente.' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userId = claimsData.claims.sub;
+    const userId = userData.user.id;
     console.log('Authenticated user:', userId);
+
+    // Check subscription feature access
+    const { data: hasAccess } = await supabase.rpc('has_feature_access', { _user_id: userId, _feature: 'ai_tools' });
+    if (!hasAccess) {
+      return new Response(
+        JSON.stringify({ error: 'Faça upgrade para o plano Profissional para acessar ferramentas de IA.', upgrade_required: true }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check and increment AI usage quota
+    const { data: canUse } = await supabase.rpc('check_ai_usage', { _user_id: userId });
+    if (!canUse) {
+      return new Response(
+        JSON.stringify({ error: 'Cota mensal de IA esgotada. Faça upgrade para o plano Premium.', quota_exceeded: true }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const { imageBase64, imageUrl, contentType } = await req.json() as ContentRequest;
 
     if (!imageBase64 && !imageUrl) {
       return new Response(
         JSON.stringify({ error: 'É necessário enviar uma imagem (base64 ou URL)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate image size
+    if (imageBase64 && imageBase64.length > 10_000_000) {
+      return new Response(
+        JSON.stringify({ error: 'Imagem muito grande. Máximo 10MB.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -132,16 +156,14 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+      throw new Error('AI key not configured');
     }
 
     const systemPrompt = CONTENT_PROMPTS[contentType];
 
-    // Build content array with image
     const userContent: Array<{ type: string; text?: string; image_url?: { url: string } }> = [];
     
     if (imageBase64) {
-      // Detect mime type from base64 header or default to image/jpeg
       let mimeType = 'image/jpeg';
       if (imageBase64.startsWith('data:')) {
         const match = imageBase64.match(/data:([^;]+);/);
@@ -200,24 +222,21 @@ serve(async (req) => {
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
-      throw new Error(`AI Gateway error: ${response.status}`);
+      console.error('AI Gateway error:', response.status);
+      throw new Error('AI Gateway error');
     }
 
     const aiResponse = await response.json();
     const rawContent = aiResponse.choices?.[0]?.message?.content;
 
     if (!rawContent) {
-      throw new Error('Resposta vazia da IA');
+      throw new Error('Empty AI response');
     }
 
-    console.log('Raw AI response:', rawContent);
+    console.log('AI response received successfully');
 
-    // Parse JSON from response (handle potential markdown wrapping)
     let parsedContent;
     try {
-      // Remove markdown code blocks if present
       let jsonStr = rawContent.trim();
       if (jsonStr.startsWith('```json')) {
         jsonStr = jsonStr.slice(7);
@@ -228,9 +247,8 @@ serve(async (req) => {
         jsonStr = jsonStr.slice(0, -3);
       }
       parsedContent = JSON.parse(jsonStr.trim());
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      // If parsing fails, try to extract content manually
+    } catch {
+      console.error('JSON parse error');
       parsedContent = {
         destination: 'Não identificado',
         benefits: [],
@@ -246,9 +264,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Generate content error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Erro ao gerar conteúdo. Tente novamente em alguns instantes.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
