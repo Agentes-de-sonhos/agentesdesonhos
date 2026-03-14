@@ -47,7 +47,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
               <Tooltip key={agent.user_id}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => onAgentClick?.(agent)}
+                    onClick={() => handleClick(agent)}
                     className="relative flex-shrink-0 transition-transform hover:scale-110"
                   >
                     <Avatar className="h-9 w-9 border-2 border-card">
