@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQA, QA_CATEGORIES } from "@/hooks/useQA";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, CheckCircle2, Star, Send } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Star, Send, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,8 +20,10 @@ interface Props {
 
 export function QAQuestionDetail({ questionId, onBack }: Props) {
   const { user } = useAuth();
-  const { createAnswer, markBestAnswer, getAnswersQuery } = useQA();
-  const [newAnswer, setNewAnswer] = useState("");
+  const { createAnswer, markBestAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
+  const [newAnswer, setNewAnswer] = useState(() => sessionStorage.getItem(`qa_answer_draft_${questionId}`) || "");
+
+  useEffect(() => { sessionStorage.setItem(`qa_answer_draft_${questionId}`, newAnswer); }, [newAnswer, questionId]);
 
   // Fetch single question
   const questionQuery = useQuery({
