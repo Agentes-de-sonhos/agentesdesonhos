@@ -95,8 +95,9 @@ export function useBenefits() {
     },
   });
 
-  const getComments = (benefitId: string) =>
+  const useComments = (benefitId: string | null) =>
     useQuery({
+      enabled: !!benefitId,
       queryKey: ["benefit-comments", benefitId],
       queryFn: async () => {
         const { data, error } = await supabase
