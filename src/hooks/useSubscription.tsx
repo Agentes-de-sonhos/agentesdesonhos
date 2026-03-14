@@ -40,6 +40,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // IMPORTANT: Reset loading to true whenever we start fetching for a (new) user.
+    // Without this, there's a race condition: loading was set to false when user was null,
+    // and ProtectedRoute would briefly see plan="essencial" before the real plan is loaded.
+    setLoading(true);
+
     try {
       const { data, error } = await supabase
         .from("subscriptions")
