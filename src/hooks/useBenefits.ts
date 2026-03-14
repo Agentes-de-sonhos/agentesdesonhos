@@ -103,7 +103,7 @@ export function useBenefits() {
         const { data, error } = await supabase
           .from("benefit_comments")
           .select("*")
-          .eq("benefit_id", benefitId)
+          .eq("benefit_id", benefitId!)
           .order("created_at", { ascending: true });
         if (error) throw error;
 
