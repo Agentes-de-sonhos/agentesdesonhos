@@ -26,9 +26,14 @@ export function QAFeed() {
   const { user } = useAuth();
   const { questions, isLoading, selectedCategory, setSelectedCategory, createQuestion, createAnswer, getAnswersQuery } = useQA();
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [newCategory, setNewCategory] = useState("");
+  const [newTitle, setNewTitle] = useState(() => sessionStorage.getItem("qa_draft_title") || "");
+  const [newDescription, setNewDescription] = useState(() => sessionStorage.getItem("qa_draft_desc") || "");
+  const [newCategory, setNewCategory] = useState(() => sessionStorage.getItem("qa_draft_cat") || "");
+
+  // Persist drafts to sessionStorage
+  useEffect(() => { sessionStorage.setItem("qa_draft_title", newTitle); }, [newTitle]);
+  useEffect(() => { sessionStorage.setItem("qa_draft_desc", newDescription); }, [newDescription]);
+  useEffect(() => { sessionStorage.setItem("qa_draft_cat", newCategory); }, [newCategory]);
   const [sortMode, setSortMode] = useState<SortMode>("recent");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [composeExpanded, setComposeExpanded] = useState(false);
