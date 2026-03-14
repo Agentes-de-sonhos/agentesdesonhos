@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wallet, CreditCard, GraduationCap, Users, Plane, Wrench } from "lucide-react";
+import { Wallet, CreditCard, Store, FileText, Route, Image, Wrench } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -22,22 +22,28 @@ const tools = [
     description: "Crie e compartilhe seu cartão de visitas digital com QR Code.",
   },
   {
-    label: "Treinamentos",
-    icon: GraduationCap,
-    path: "/educa-academy",
-    description: "Explore treinamentos e conteúdos da Educa Travel Academy.",
+    label: "Vitrine Virtual",
+    icon: Store,
+    path: "/minha-vitrine",
+    description: "Monte e compartilhe sua vitrine de viagens para atrair clientes.",
   },
   {
-    label: "Comunidade",
-    icon: Users,
-    path: "/perguntas-respostas",
-    description: "Participe das discussões e tire dúvidas com outros agentes.",
+    label: "Orçamento",
+    icon: FileText,
+    path: "/gerar-orcamento",
+    description: "Crie orçamentos profissionais para seus clientes.",
   },
   {
-    label: "Minhas Viagens",
-    icon: Plane,
-    path: "/carteira-digital",
-    description: "Gerencie suas viagens e acompanhe seus clientes.",
+    label: "Roteiros",
+    icon: Route,
+    path: "/criar-roteiro",
+    description: "Gere roteiros de viagem personalizados com IA.",
+  },
+  {
+    label: "Conteúdo",
+    icon: Image,
+    path: "/criar-conteudo",
+    description: "Crie conteúdo para redes sociais a partir de materiais.",
   },
 ];
 
@@ -56,7 +62,7 @@ export function AgentToolsCard() {
         </div>
 
         <TooltipProvider delayDuration={200}>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
             {tools.map((tool) => (
               <Tooltip key={tool.label}>
                 <TooltipTrigger asChild>
