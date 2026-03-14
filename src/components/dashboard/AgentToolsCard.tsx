@@ -34,7 +34,7 @@ const tools = [
     label: "Conteúdo",
     icon: Image,
     path: "/criar-conteudo",
-    description: "Gere conteúdos para redes sociais.",
+    description: "Crie conteúdos para redes sociais.",
     color: "25 90% 50%",
   },
 ];
