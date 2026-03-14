@@ -62,7 +62,7 @@ export function AgentToolsCard() {
         </div>
 
         <TooltipProvider delayDuration={200}>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
             {tools.map((tool) => (
               <Tooltip key={tool.label}>
                 <TooltipTrigger asChild>
