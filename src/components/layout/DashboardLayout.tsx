@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { MobileSidebar } from "./MobileSidebar";
 import { Footer } from "./Footer";
 import { GlobalPopupModal } from "@/components/popup/GlobalPopupModal";
+import { ChatFloatingButton } from "@/components/community-chat/ChatFloatingButton";
 
 interface DashboardLayoutProps {
   children: ReactNode;
