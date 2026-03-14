@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wallet, CreditCard, Store, FileText, Route, Image, Wrench } from "lucide-react";
+import { Wallet, FileText, Route, Image, Wrench } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -13,37 +13,29 @@ const tools = [
     label: "Carteira Digital",
     icon: Wallet,
     path: "/carteira-digital",
-    description: "Acesse sua carteira digital com seus cartões e informações profissionais.",
-  },
-  {
-    label: "Cartão Virtual",
-    icon: CreditCard,
-    path: "/meu-cartao",
-    description: "Crie e compartilhe seu cartão de visitas digital com QR Code.",
-  },
-  {
-    label: "Vitrine Virtual",
-    icon: Store,
-    path: "/minha-vitrine",
-    description: "Monte e compartilhe sua vitrine de viagens para atrair clientes.",
+    description: "Crie uma carteira digital para o seu cliente.",
+    color: "198 93% 40%",
   },
   {
     label: "Orçamento",
     icon: FileText,
     path: "/gerar-orcamento",
-    description: "Crie orçamentos profissionais para seus clientes.",
+    description: "Gere orçamentos para os seus clientes.",
+    color: "142 64% 38%",
   },
   {
     label: "Roteiros",
     icon: Route,
     path: "/criar-roteiro",
     description: "Gere roteiros de viagem personalizados com IA.",
+    color: "262 60% 50%",
   },
   {
     label: "Conteúdo",
     icon: Image,
     path: "/criar-conteudo",
-    description: "Crie conteúdo para redes sociais a partir de materiais.",
+    description: "Gere conteúdos para redes sociais.",
+    color: "25 90% 50%",
   },
 ];
 
@@ -62,16 +54,25 @@ export function AgentToolsCard() {
         </div>
 
         <TooltipProvider delayDuration={200}>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {tools.map((tool) => (
               <Tooltip key={tool.label}>
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => navigate(tool.path)}
-                    className="group flex flex-col items-center gap-2 rounded-xl p-3 transition-all duration-200 hover:bg-[hsl(var(--section-tools))]/10 cursor-pointer"
+                    className="group flex flex-col items-center gap-2 rounded-xl p-3 transition-all duration-200 cursor-pointer"
+                    style={{ ["--tool-color" as string]: tool.color }}
                   >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--section-tools))]/10 transition-colors group-hover:bg-[hsl(var(--section-tools))]/20">
-                      <tool.icon className="h-5 w-5 text-[hsl(var(--section-tools))]" />
+                    <div
+                      className="flex h-11 w-11 items-center justify-center rounded-xl transition-colors"
+                      style={{
+                        backgroundColor: `hsl(${tool.color} / 0.1)`,
+                      }}
+                    >
+                      <tool.icon
+                        className="h-5 w-5"
+                        style={{ color: `hsl(${tool.color})` }}
+                      />
                     </div>
                     <span className="text-xs font-medium text-foreground text-center leading-tight">
                       {tool.label}
