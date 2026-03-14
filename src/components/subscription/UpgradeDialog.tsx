@@ -1,4 +1,5 @@
-import { Check, Crown, Lock, Sparkles, Star } from "lucide-react";
+import { useState } from "react";
+import { Check, Crown, Lock, Sparkles, Star, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,8 @@ import {
   REQUIRED_PLAN_FOR_FEATURE
 } from "@/types/subscription";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UpgradeDialogProps {
   open: boolean;
@@ -62,6 +65,34 @@ export function UpgradeDialog({
   description,
 }: UpgradeDialogProps) {
   const { plan: currentPlan, getPlanLabel } = useSubscription();
+  const { toast } = useToast();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const STRIPE_PRICES: Partial<Record<SubscriptionPlan, string>> = {
+    profissional: "price_1TB0XKFkGdVt5nie9wsOu3eZ",
+  };
+
+  const handleUpgrade = async (planKey: SubscriptionPlan) => {
+    const priceId = STRIPE_PRICES[planKey];
+    if (!priceId) {
+      toast({ title: "Plano indisponível", description: "Entre em contato com o suporte.", variant: "destructive" });
+      return;
+    }
+    setLoadingPlan(planKey);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message || "Erro ao iniciar checkout.", variant: "destructive" });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   const requiredPlan = requiredFeature 
     ? REQUIRED_PLAN_FOR_FEATURE[requiredFeature] 
@@ -144,13 +175,18 @@ export function UpgradeDialog({
                 <Button
                   className="w-full"
                   variant={isPlanHigher ? "default" : "outline"}
-                  disabled={isCurrentPlan || !isPlanHigher}
+                  disabled={isCurrentPlan || !isPlanHigher || loadingPlan === planKey || !STRIPE_PRICES[planKey]}
+                  onClick={() => isPlanHigher && STRIPE_PRICES[planKey] && handleUpgrade(planKey)}
                 >
-                  {isCurrentPlan 
+                  {loadingPlan === planKey ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Redirecionando...</>
+                  ) : isCurrentPlan 
                     ? "Plano Atual" 
-                    : isPlanHigher 
+                    : isPlanHigher && STRIPE_PRICES[planKey]
                       ? "Fazer Upgrade" 
-                      : "Plano Inferior"}
+                      : isPlanHigher
+                        ? "Em breve"
+                        : "Plano Inferior"}
                 </Button>
               </div>
             );

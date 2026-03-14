@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from "react";
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { 
@@ -91,6 +91,26 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchSubscription();
   }, [fetchSubscription]);
+
+  // Check Stripe subscription status periodically and on load
+  const stripeCheckDone = useRef(false);
+  useEffect(() => {
+    if (!user || stripeCheckDone.current) return;
+    stripeCheckDone.current = true;
+
+    const checkStripe = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("check-subscription");
+        if (!error && data?.subscribed && data?.plan) {
+          // Refetch from DB to get updated plan
+          await fetchSubscription();
+        }
+      } catch (e) {
+        console.error("Error checking Stripe subscription:", e);
+      }
+    };
+    checkStripe();
+  }, [user, fetchSubscription]);
 
   const plan: SubscriptionPlan = subscription?.plan || "essencial";
   const aiLimit = AI_LIMITS[plan];
