@@ -43,6 +43,7 @@ import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager"
 import { AdminPageBannersManager } from "@/components/admin/AdminPageBannersManager";
 import { AdminSurveyManager } from "@/components/admin/AdminSurveyManager";
 import { AdminBusinessCardsManager } from "@/components/admin/AdminBusinessCardsManager";
+import { AdminCommunityRoomsManager } from "@/components/admin/AdminCommunityRoomsManager";
 import { AdminCrmContacts } from "@/components/admin/crm/AdminCrmContacts";
 import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
 import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
@@ -252,7 +253,10 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="community">
-            <AdminCommunityManager />
+            <div className="space-y-6">
+              <AdminCommunityRoomsManager />
+              <AdminCommunityManager />
+            </div>
           </TabsContent>
 
           <TabsContent value="playbooks">
