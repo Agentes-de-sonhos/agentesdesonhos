@@ -150,7 +150,13 @@ export default function OperadoraDetail() {
             )}
 
             {/* Reviews list */}
-            <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} />
+            <OperatorReviewsList
+              reviews={reviews}
+              isLoading={reviewsLoading}
+              isAdmin={isAdmin}
+              onDeleteReview={(reviewId, reason) => deleteReview.mutate({ reviewId, reason })}
+              isDeleting={deleteReview.isPending}
+            />
 
             {/* Materials */}
             <SupplierMaterialsCard
