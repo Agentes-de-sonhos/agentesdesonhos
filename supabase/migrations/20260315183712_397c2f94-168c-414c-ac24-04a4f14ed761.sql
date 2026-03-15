@@ -1,0 +1,1 @@
+ALTER TABLE public.tour_operators ADD COLUMN IF NOT EXISTS social_links jsonb DEFAULT '{}' ::jsonb;

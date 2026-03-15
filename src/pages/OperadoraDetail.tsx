@@ -91,10 +91,7 @@ export default function OperadoraDetail() {
         <OperatorHero
           name={operator.name}
           category={operator.category}
-          specialties={operator.specialties}
-          website={operator.website}
-          instagram={operator.instagram}
-          logoUrl={(operator as any).logo_url}
+          logoUrl={operator.logo_url}
         />
 
         {/* Two-column layout */}
@@ -129,7 +126,10 @@ export default function OperadoraDetail() {
           </div>
 
           {/* Sidebar */}
-          <OperatorSidebar operator={operator} />
+          <OperatorSidebar operator={{
+            ...operator,
+            social_links: operator.social_links as Record<string, string> | null,
+          }} />
         </div>
       </div>
     </DashboardLayout>

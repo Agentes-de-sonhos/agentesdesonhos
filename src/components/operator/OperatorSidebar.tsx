@@ -1,15 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Tag,
   Globe,
   Instagram,
+  Facebook,
+  Linkedin,
+  Youtube,
   ExternalLink,
   Info,
   CalendarDays,
   DollarSign,
   Users,
   UserCheck,
+  Share2,
 } from "lucide-react";
 
 interface OperatorSidebarProps {
@@ -17,6 +20,7 @@ interface OperatorSidebarProps {
     specialties?: string | null;
     website?: string | null;
     instagram?: string | null;
+    social_links?: Record<string, string> | null;
     category: string;
     founded_year?: number | null;
     annual_revenue?: string | null;
@@ -41,8 +45,29 @@ const chipColors = [
   "bg-cyan-50 text-cyan-700 border-cyan-200",
 ];
 
+const socialConfig: Record<string, { icon: React.ElementType; label: string; color: string }> = {
+  website: { icon: Globe, label: "Website", color: "text-primary" },
+  instagram: { icon: Instagram, label: "Instagram", color: "text-pink-500" },
+  facebook: { icon: Facebook, label: "Facebook", color: "text-blue-600" },
+  linkedin: { icon: Linkedin, label: "LinkedIn", color: "text-blue-700" },
+  youtube: { icon: Youtube, label: "YouTube", color: "text-red-600" },
+  tiktok: { icon: Share2, label: "TikTok", color: "text-foreground" },
+};
+
 export function OperatorSidebar({ operator }: OperatorSidebarProps) {
   const tags = operator.specialties?.split(",").map((s) => s.trim()).filter(Boolean) || [];
+
+  // Build social links list from legacy fields + social_links JSON
+  const socialLinks: { key: string; url: string }[] = [];
+  if (operator.website) socialLinks.push({ key: "website", url: operator.website });
+  if (operator.instagram) socialLinks.push({ key: "instagram", url: operator.instagram });
+  if (operator.social_links && typeof operator.social_links === "object") {
+    Object.entries(operator.social_links).forEach(([key, url]) => {
+      if (url && !socialLinks.find((s) => s.key === key)) {
+        socialLinks.push({ key, url: String(url) });
+      }
+    });
+  }
 
   const infoItems = [
     { icon: Tag, label: "Categoria", value: operator.category },
@@ -96,35 +121,33 @@ export function OperatorSidebar({ operator }: OperatorSidebarProps) {
         </Card>
       )}
 
-      {/* Links */}
-      {(operator.website || operator.instagram) && (
+      {/* Social Links */}
+      {socialLinks.length > 0 && (
         <Card className="rounded-2xl border-border/60 shadow-sm bg-card">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Outras Redes</CardTitle>
+            <CardTitle className="flex items-center gap-2.5 text-base font-semibold">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Share2 className="h-4 w-4 text-primary" />
+              </div>
+              Redes Sociais
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {operator.website && (
-              <Button
-                variant="outline"
-                className="w-full justify-start rounded-xl border-border/80 hover:border-primary/30 hover:bg-primary/5 transition-all"
-                onClick={() => safeOpen(operator.website)}
-              >
-                <Globe className="h-4 w-4 mr-2 text-primary" />
-                Website
-                <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
-              </Button>
-            )}
-            {operator.instagram && (
-              <Button
-                variant="outline"
-                className="w-full justify-start rounded-xl border-border/80 hover:border-pink-400/30 hover:bg-pink-50 transition-all"
-                onClick={() => safeOpen(operator.instagram)}
-              >
-                <Instagram className="h-4 w-4 mr-2 text-pink-500" />
-                Instagram
-                <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
-              </Button>
-            )}
+          <CardContent className="space-y-1.5">
+            {socialLinks.map(({ key, url }) => {
+              const config = socialConfig[key] || { icon: ExternalLink, label: key, color: "text-muted-foreground" };
+              const Icon = config.icon;
+              return (
+                <button
+                  key={key}
+                  onClick={() => safeOpen(url)}
+                  className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground hover:bg-muted/60 transition-colors text-left"
+                >
+                  <Icon className={`h-4 w-4 shrink-0 ${config.color}`} />
+                  <span className="truncate">{config.label}</span>
+                  <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground shrink-0" />
+                </button>
+              );
+            })}
           </CardContent>
         </Card>
       )}
