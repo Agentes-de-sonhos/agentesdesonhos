@@ -372,13 +372,31 @@ export default function MinhaVitrine() {
                 </div>
               </TabsContent>
               <TabsContent value="upload" className="space-y-4">
-                <div className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
-                  {uploadPreview ? (
-                    <img src={uploadPreview} alt="Preview" className="max-h-48 mx-auto rounded-lg" />
+                <div className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                  {uploadPreviews.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {uploadPreviews.map((preview, i) => (
+                          <div key={i} className="relative aspect-[4/5] rounded-lg overflow-hidden group/thumb">
+                            <img src={preview} alt="" className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); removeUploadFile(i); }}
+                              className="absolute top-1 right-1 h-5 w-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover/thumb:opacity-100 transition-opacity"
+                            >×</button>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{uploadPreviews.length} {uploadPreviews.length === 1 ? "imagem selecionada" : "imagens selecionadas"} • Clique para adicionar mais</p>
+                    </div>
                   ) : (
-                    <><Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" /><p className="text-sm text-muted-foreground">Clique para selecionar uma imagem</p><p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP</p></>
+                    <>
+                      <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">Clique para selecionar imagens</p>
+                      <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP — selecione várias para criar um carrossel</p>
+                    </>
                   )}
-                  <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp" className="hidden" onChange={handleFileChange} />
+                  <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp" multiple className="hidden" onChange={handleFileChange} />
                 </div>
                 <div>
                   <Label>Validade (opcional)</Label>
