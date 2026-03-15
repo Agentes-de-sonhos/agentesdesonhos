@@ -4,7 +4,7 @@ import { useBenefits } from "@/hooks/useBenefits";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Share2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { BenefitSearchBar } from "@/components/benefits/BenefitSearchBar";
 import { BenefitFilters } from "@/components/benefits/BenefitFilters";
 import { BenefitCard } from "@/components/benefits/BenefitCard";
