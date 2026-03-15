@@ -23,6 +23,7 @@ export interface ShowcaseItem {
   user_id: string;
   material_id: string | null;
   image_url: string | null;
+  gallery_urls: string[];
   category: string;
   subcategory: string | null;
   action_type: string;
