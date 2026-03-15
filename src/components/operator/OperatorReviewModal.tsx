@@ -3,14 +3,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, ThumbsUp, ThumbsDown } from "lucide-react";
-import type { OperatorReview } from "@/hooks/useOperatorReviews";
+interface ReviewLike {
+  rating: number;
+  reaction: string | null;
+  comment: string | null;
+}
 
 interface OperatorReviewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: { rating: number; reaction?: string; comment?: string }) => void;
   isSubmitting: boolean;
-  existingReview?: OperatorReview | null;
+  existingReview?: ReviewLike | null;
   operatorName: string;
 }
 
