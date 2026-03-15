@@ -177,10 +177,6 @@ export default function PlaybookViewer() {
               } : undefined}
               tabLabel="Mapa da Cidade"
             />
-          ) : activeTab === 'atracoes' ? (
-            <AttractionsExplorer
-              destinationName={destination.name}
-            />
           ) : activeTab === 'como_vender' ? (
             <PlaybookComoVenderTab
               section={activeSection}
