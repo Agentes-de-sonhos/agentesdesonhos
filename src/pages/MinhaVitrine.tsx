@@ -32,8 +32,8 @@ export default function MinhaVitrine() {
   const [addTab, setAddTab] = useState("materials");
   
   const [selectedMaterialId, setSelectedMaterialId] = useState<string | null>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
   const [category, setCategory] = useState("Geral");
   const [customCategory, setCustomCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
