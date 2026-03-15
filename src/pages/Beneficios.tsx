@@ -4,7 +4,7 @@ import { useBenefits } from "@/hooks/useBenefits";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Share2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { BenefitSearchBar } from "@/components/benefits/BenefitSearchBar";
 import { BenefitFilters } from "@/components/benefits/BenefitFilters";
 import { BenefitCard } from "@/components/benefits/BenefitCard";
@@ -80,17 +80,19 @@ export default function Beneficios() {
           icon={Tag}
         />
 
-        <div className="flex justify-end">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <BenefitSearchBar value={search} onChange={setSearch} />
+          </div>
           <Button
             onClick={() => setShareOpen(true)}
             size="lg"
+            className="shrink-0"
           >
-            <Share2 className="h-4 w-4 mr-2" />
-            Compartilhar benefício
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar benefício
           </Button>
         </div>
-
-        <BenefitSearchBar value={search} onChange={setSearch} />
 
         <BenefitFilters
           selectedCategory={selectedCategory}
