@@ -95,6 +95,43 @@ export function useOperatorReviews(operatorId: string) {
     },
   });
 
+  const deleteReview = useMutation({
+    mutationFn: async ({ reviewId, reason }: { reviewId: string; reason?: string }) => {
+      if (!user) throw new Error("Não autenticado");
+
+      // Find the review to log before deleting
+      const review = reviews.find((r) => r.id === reviewId);
+      if (!review) throw new Error("Avaliação não encontrada");
+
+      // Log moderation action
+      await supabase
+        .from("operator_review_moderation_log")
+        .insert({
+          review_id: review.id,
+          operator_id: review.operator_id,
+          reviewer_user_id: review.user_id,
+          rating: review.rating,
+          reaction: review.reaction,
+          comment: review.comment,
+          reason: reason || null,
+          moderated_by: user.id,
+        });
+
+      const { error } = await supabase
+        .from("operator_reviews")
+        .delete()
+        .eq("id", reviewId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["operator-reviews", operatorId] });
+      toast.success("Avaliação removida");
+    },
+    onError: () => {
+      toast.error("Erro ao remover avaliação");
+    },
+  });
+
   return {
     reviews,
     isLoading,
@@ -102,5 +139,6 @@ export function useOperatorReviews(operatorId: string) {
     averageRating,
     totalReviews: reviews.length,
     submitReview,
+    deleteReview,
   };
 }
