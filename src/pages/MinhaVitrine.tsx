@@ -77,7 +77,7 @@ export default function MinhaVitrine() {
   };
 
   const resetForm = () => {
-    setSelectedMaterialId(null);
+    setSelectedMaterialIds([]);
     setUploadFiles([]);
     setUploadPreviews([]);
     setCategory("Geral");
