@@ -101,7 +101,7 @@ export default function Beneficios() {
         />
 
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center py-20 px-6">
+          <div className="flex flex-col items-center justify-center text-center py-10 px-6">
             <div className="relative mb-6">
               <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center animate-[pulse_3s_ease-in-out_infinite]">
                 <Tag className="h-10 w-10 text-primary/60" />
