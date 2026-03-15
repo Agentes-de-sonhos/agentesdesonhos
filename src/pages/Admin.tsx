@@ -227,7 +227,10 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="trade-suppliers">
-            <AdminTradeSuppliersManager />
+            <AdminTourOperatorsManager />
+            <div className="mt-6">
+              <AdminTradeSuppliersManager />
+            </div>
           </TabsContent>
 
           <TabsContent value="materials">
