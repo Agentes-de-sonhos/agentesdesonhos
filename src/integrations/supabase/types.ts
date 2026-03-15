@@ -4233,6 +4233,63 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_operators: {
+        Row: {
+          annual_revenue: string | null
+          category: string | null
+          commercial_contacts: string | null
+          created_at: string | null
+          employees: number | null
+          executive_team: string | null
+          founded_year: number | null
+          how_to_sell: string | null
+          id: string
+          instagram: string | null
+          is_active: boolean | null
+          name: string
+          sales_channels: string | null
+          specialties: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          annual_revenue?: string | null
+          category?: string | null
+          commercial_contacts?: string | null
+          created_at?: string | null
+          employees?: number | null
+          executive_team?: string | null
+          founded_year?: number | null
+          how_to_sell?: string | null
+          id?: string
+          instagram?: string | null
+          is_active?: boolean | null
+          name: string
+          sales_channels?: string | null
+          specialties?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          annual_revenue?: string | null
+          category?: string | null
+          commercial_contacts?: string | null
+          created_at?: string | null
+          employees?: number | null
+          executive_team?: string | null
+          founded_year?: number | null
+          how_to_sell?: string | null
+          id?: string
+          instagram?: string | null
+          is_active?: boolean | null
+          name?: string
+          sales_channels?: string | null
+          specialties?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       trade_suppliers: {
         Row: {
           category: string
