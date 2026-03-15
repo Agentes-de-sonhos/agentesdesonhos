@@ -211,7 +211,6 @@ export function AdminEventsManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este evento?")) return;
 
     try {
       const { error } = await supabase.from("events").delete().eq("id", id);
