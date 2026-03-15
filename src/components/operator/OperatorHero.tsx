@@ -8,6 +8,7 @@ interface OperatorHeroProps {
   specialties?: string | null;
   website?: string | null;
   instagram?: string | null;
+  logoUrl?: string | null;
 }
 
 const safeOpen = (url: string | null | undefined) => {
