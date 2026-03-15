@@ -94,20 +94,25 @@ export default function MinhaVitrine() {
   };
 
   const handleAddItem = async () => {
-    if (!selectedMaterialId && !uploadFile) {
-      toast.error("Selecione uma lâmina ou faça upload de uma imagem");
+    if (!selectedMaterialId && uploadFiles.length === 0) {
+      toast.error("Selecione uma lâmina ou faça upload de imagens");
       return;
     }
     setIsSubmitting(true);
     try {
       let imageUrl: string | undefined;
-      if (uploadFile) {
-        imageUrl = await uploadImage(uploadFile);
+      let galleryUrls: string[] | undefined;
+      if (uploadFiles.length === 1) {
+        imageUrl = await uploadImage(uploadFiles[0]);
+      } else if (uploadFiles.length > 1) {
+        galleryUrls = await uploadMultipleImages(uploadFiles);
+        imageUrl = galleryUrls[0]; // first image as thumbnail
       }
       const finalCategory = category === "__custom" ? customCategory : category;
       await addItem.mutateAsync({
         material_id: selectedMaterialId || undefined,
         image_url: imageUrl,
+        gallery_urls: galleryUrls,
         category: finalCategory || "Geral",
         subcategory: subcategory || undefined,
         action_type: actionType,
