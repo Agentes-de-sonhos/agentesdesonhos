@@ -30,6 +30,7 @@ export default function BloqueiosAereos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOperator, setSelectedOperator] = useState("Todos");
   const [selectedAirline, setSelectedAirline] = useState("Todas");
+  const { formatAirportLabel } = useAirports();
 
   const { data: blocks, isLoading } = useQuery({
     queryKey: ["flight-blocks"],
