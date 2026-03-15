@@ -53,6 +53,8 @@ import CertificateTest from "./pages/CertificateTest";
 import Gamificacao from "./pages/Gamificacao";
 import Pesquisa from "./pages/Pesquisa";
 import AtivarCartao from "./pages/AtivarCartao";
+import PoliticasPrivacidade from "./pages/PoliticasPrivacidade";
+import TermosDeUso from "./pages/TermosDeUso";
 
 const queryClient = new QueryClient();
 
