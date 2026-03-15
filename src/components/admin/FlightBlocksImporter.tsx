@@ -23,6 +23,13 @@ import {
 import { ClipboardPaste, Loader2, Check, AlertCircle, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAirports } from "@/hooks/useAirports";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 interface ParsedBlock {
   origin: string;
