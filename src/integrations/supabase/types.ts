@@ -4249,6 +4249,7 @@ export type Database = {
           logo_url: string | null
           name: string
           sales_channels: string | null
+          social_links: Json | null
           specialties: string | null
           updated_at: string | null
           website: string | null
@@ -4268,6 +4269,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           sales_channels?: string | null
+          social_links?: Json | null
           specialties?: string | null
           updated_at?: string | null
           website?: string | null
@@ -4287,6 +4289,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           sales_channels?: string | null
+          social_links?: Json | null
           specialties?: string | null
           updated_at?: string | null
           website?: string | null
