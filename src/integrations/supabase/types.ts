@@ -2808,6 +2808,33 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_updates: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          release_date: string
+          title: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          release_date?: string
+          title: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          release_date?: string
+          title?: string
+          version?: string
+        }
+        Relationships: []
+      }
       playbook_destinations: {
         Row: {
           banner_url: string | null
