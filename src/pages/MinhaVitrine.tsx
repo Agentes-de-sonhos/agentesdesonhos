@@ -31,7 +31,7 @@ export default function MinhaVitrine() {
   const [editItem, setEditItem] = useState<ShowcaseItem | null>(null);
   const [addTab, setAddTab] = useState("materials");
   
-  const [selectedMaterialId, setSelectedMaterialId] = useState<string | null>(null);
+  const [selectedMaterialIds, setSelectedMaterialIds] = useState<string[]>([]);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
   const [category, setCategory] = useState("Geral");
@@ -73,11 +73,11 @@ export default function MinhaVitrine() {
     if (validFiles.length === 0) return;
     setUploadFiles(prev => [...prev, ...validFiles]);
     setUploadPreviews(prev => [...prev, ...validFiles.map(f => URL.createObjectURL(f))]);
-    setSelectedMaterialId(null);
+    setSelectedMaterialIds([]);
   };
 
   const resetForm = () => {
-    setSelectedMaterialId(null);
+    setSelectedMaterialIds([]);
     setUploadFiles([]);
     setUploadPreviews([]);
     setCategory("Geral");
@@ -94,23 +94,43 @@ export default function MinhaVitrine() {
   };
 
   const handleAddItem = async () => {
-    if (!selectedMaterialId && uploadFiles.length === 0) {
-      toast.error("Selecione uma lâmina ou faça upload de imagens");
+    if (selectedMaterialIds.length === 0 && uploadFiles.length === 0) {
+      toast.error("Selecione lâminas ou faça upload de imagens");
       return;
     }
     setIsSubmitting(true);
     try {
       let imageUrl: string | undefined;
       let galleryUrls: string[] | undefined;
+      let materialId: string | undefined;
+
       if (uploadFiles.length === 1) {
         imageUrl = await uploadImage(uploadFiles[0]);
       } else if (uploadFiles.length > 1) {
         galleryUrls = await uploadMultipleImages(uploadFiles);
-        imageUrl = galleryUrls[0]; // first image as thumbnail
+        imageUrl = galleryUrls[0];
       }
+
+      // If materials were selected, collect their file URLs as gallery
+      if (selectedMaterialIds.length > 0) {
+        const selectedMats = selectedMaterialIds
+          .map(id => availableMaterials.find(m => m.id === id))
+          .filter(Boolean);
+        const matUrls = selectedMats.map(m => m!.file_url || m!.thumbnail_url).filter(Boolean) as string[];
+        if (selectedMaterialIds.length === 1) {
+          materialId = selectedMaterialIds[0];
+          imageUrl = matUrls[0];
+        } else {
+          // Multiple materials selected → gallery
+          galleryUrls = matUrls;
+          imageUrl = matUrls[0];
+          materialId = selectedMaterialIds[0]; // link to first material for metadata
+        }
+      }
+
       const finalCategory = category === "__custom" ? customCategory : category;
       await addItem.mutateAsync({
-        material_id: selectedMaterialId || undefined,
+        material_id: materialId,
         image_url: imageUrl,
         gallery_urls: galleryUrls,
         category: finalCategory || "Geral",
@@ -360,14 +380,37 @@ export default function MinhaVitrine() {
                 <TabsTrigger value="upload" className="flex-1"><Upload className="h-4 w-4 mr-1" /> Upload</TabsTrigger>
               </TabsList>
               <TabsContent value="materials" className="space-y-4">
+                {selectedMaterialIds.length > 0 && (
+                  <div className="flex items-center justify-between bg-muted/50 rounded-md px-3 py-2">
+                    <span className="text-sm font-medium text-foreground">
+                      {selectedMaterialIds.length} {selectedMaterialIds.length === 1 ? "lâmina selecionada" : "lâminas selecionadas"}
+                    </span>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setSelectedMaterialIds([])}>Limpar seleção</Button>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">Clique para selecionar. Selecione várias para criar um carrossel.</p>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
-                  {availableMaterials.map(m => (
-                    <button key={m.id} onClick={() => { setSelectedMaterialId(m.id); setUploadFiles([]); setUploadPreviews([]); }}
-                      className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-[4/5] ${selectedMaterialId === m.id ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-muted-foreground/30"}`}>
-                      <img src={m.thumbnail_url || m.file_url || "/placeholder.svg"} alt={m.title} className="w-full h-full object-cover" />
-                      {!m.is_permanent && <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">7d</Badge>}
-                    </button>
-                  ))}
+                  {availableMaterials.map(m => {
+                    const isSelected = selectedMaterialIds.includes(m.id);
+                    const selectionIndex = selectedMaterialIds.indexOf(m.id);
+                    return (
+                      <button key={m.id} onClick={() => {
+                        setSelectedMaterialIds(prev =>
+                          isSelected ? prev.filter(id => id !== m.id) : [...prev, m.id]
+                        );
+                        setUploadFiles([]); setUploadPreviews([]);
+                      }}
+                        className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-[4/5] ${isSelected ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-muted-foreground/30"}`}>
+                        <img src={m.thumbnail_url || m.file_url || "/placeholder.svg"} alt={m.title} className="w-full h-full object-cover" />
+                        {isSelected && (
+                          <div className="absolute top-1 left-1 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold">
+                            {selectionIndex + 1}
+                          </div>
+                        )}
+                        {!m.is_permanent && <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">7d</Badge>}
+                      </button>
+                    );
+                  })}
                   {availableMaterials.length === 0 && <p className="col-span-full text-center text-sm text-muted-foreground py-8">Nenhuma lâmina disponível</p>}
                 </div>
               </TabsContent>
