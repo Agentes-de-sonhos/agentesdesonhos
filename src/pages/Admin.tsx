@@ -270,6 +270,10 @@ export default function Admin() {
             </div>
           </TabsContent>
 
+          <TabsContent value="mentorships">
+            <AdminMentorshipsManager />
+          </TabsContent>
+
           <TabsContent value="playbooks">
             <AdminPlaybookManager />
           </TabsContent>
