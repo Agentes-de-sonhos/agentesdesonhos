@@ -31,7 +31,7 @@ export default function MinhaVitrine() {
   const [editItem, setEditItem] = useState<ShowcaseItem | null>(null);
   const [addTab, setAddTab] = useState("materials");
   
-  const [selectedMaterialId, setSelectedMaterialId] = useState<string | null>(null);
+  const [selectedMaterialIds, setSelectedMaterialIds] = useState<string[]>([]);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
   const [category, setCategory] = useState("Geral");
