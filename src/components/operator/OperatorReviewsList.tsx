@@ -14,10 +14,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { OperatorReview } from "@/hooks/useOperatorReviews";
+interface ReviewItem {
+  id: string;
+  user_id: string;
+  rating: number;
+  reaction: string | null;
+  comment: string | null;
+  created_at: string;
+  profile?: { name: string | null; agency_name: string | null; avatar_url: string | null };
+}
 
 interface OperatorReviewsListProps {
-  reviews: OperatorReview[];
+  reviews: ReviewItem[];
   isLoading: boolean;
   isAdmin?: boolean;
   onDeleteReview?: (reviewId: string, reason?: string) => void;

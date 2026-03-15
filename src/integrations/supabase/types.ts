@@ -4102,6 +4102,86 @@ export type Database = {
           },
         ]
       }
+      supplier_review_moderation_log: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          moderated_by: string
+          rating: number
+          reaction: string | null
+          reason: string | null
+          review_id: string
+          reviewer_user_id: string
+          supplier_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          moderated_by: string
+          rating: number
+          reaction?: string | null
+          reason?: string | null
+          review_id: string
+          reviewer_user_id: string
+          supplier_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          moderated_by?: string
+          rating?: number
+          reaction?: string | null
+          reason?: string | null
+          review_id?: string
+          reviewer_user_id?: string
+          supplier_id?: string
+        }
+        Relationships: []
+      }
+      supplier_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reaction: string | null
+          supplier_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reaction?: string | null
+          supplier_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reaction?: string | null
+          supplier_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_reviews_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "trade_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_specialties: {
         Row: {
           created_at: string

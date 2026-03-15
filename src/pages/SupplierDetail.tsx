@@ -1,57 +1,23 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Building2, ShoppingCart, Users, Phone } from "lucide-react";
+import { OperatorHero } from "@/components/operator/OperatorHero";
+import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
+import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
+import { ContactCards } from "@/components/operator/ContactCards";
+import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
-import {
-  ArrowLeft,
-  Building2,
-  Globe,
-  Instagram,
-  Phone,
-  Mail,
-  MessageCircle,
-  User,
-  ExternalLink,
-  Youtube,
-  Linkedin,
-  Send,
-  Info,
-  ShoppingCart,
-  Users,
-  FileText,
-  Tag,
-} from "lucide-react";
-
-interface SocialMedia {
-  type: string;
-  url: string;
-}
-
-interface Specialty {
-  id: string;
-  name: string;
-}
-
-interface TradeSupplier {
-  id: string;
-  name: string;
-  category: string;
-  how_to_sell: string | null;
-  sales_channel: string | null;
-  practical_notes: string | null;
-  website_url: string | null;
-  instagram_url: string | null;
-  logo_url: string | null;
-  other_social_media: SocialMedia[] | null;
-  is_active: boolean;
-  created_at: string;
-  specialties?: Specialty[];
-}
+import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
+import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
+import { useSupplierReviews } from "@/hooks/useSupplierReviews";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { toast } from "sonner";
 
 interface SupplierContact {
   id: string;
@@ -63,24 +29,14 @@ interface SupplierContact {
   email: string | null;
 }
 
-const socialIcons: Record<string, any> = {
-  youtube: Youtube,
-  linkedin: Linkedin,
-  telegram: Send,
-  default: Globe,
-};
-
-const safeOpen = (url: string | null | undefined) => {
-  if (!url) return;
-  const sanitized = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
-  window.open(sanitized, "_blank", "noopener,noreferrer");
-};
-
 export default function SupplierDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isAdmin } = useUserRole();
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
-  const { data: supplier, isLoading: loadingSupplier } = useQuery({
+  const { data: supplier, isLoading } = useQuery({
     queryKey: ["trade-supplier", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -95,30 +51,28 @@ export default function SupplierDetail() {
             )
           )
         `)
-        .eq("id", id)
+        .eq("id", id!)
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      const socialMedia = Array.isArray(data.other_social_media) 
-        ? (data.other_social_media as unknown as SocialMedia[]) 
-        : [];
-      const specialties = data.supplier_specialties?.map((ss: any) => ss.specialties) || [];
+
+      const specialties = data.supplier_specialties?.map((ss: any) => ss.specialties?.name).filter(Boolean) || [];
+
       return {
         ...data,
-        other_social_media: socialMedia,
-        specialties,
-      } as TradeSupplier;
+        specialtiesList: specialties as string[],
+      };
     },
     enabled: !!id,
   });
 
-  const { data: contacts, isLoading: loadingContacts } = useQuery({
+  const { data: contacts } = useQuery({
     queryKey: ["supplier-contacts", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("supplier_contacts")
         .select("*")
-        .eq("supplier_id", id)
+        .eq("supplier_id", id!)
         .order("name");
       if (error) throw error;
       return data as SupplierContact[];
@@ -126,23 +80,37 @@ export default function SupplierDetail() {
     enabled: !!id,
   });
 
-  const getSocialIcon = (type: string) => {
-    const IconComponent = socialIcons[type.toLowerCase()] || socialIcons.default;
-    return <IconComponent className="h-4 w-4" />;
+  const {
+    reviews,
+    isLoading: reviewsLoading,
+    userReview,
+    averageRating,
+    totalReviews,
+    submitReview,
+    deleteReview,
+  } = useSupplierReviews(id || "");
+
+  const handleReviewClick = () => {
+    if (!user) {
+      toast.error("Você precisa estar logado para avaliar");
+      return;
+    }
+    setReviewModalOpen(true);
   };
 
-  const formatWhatsAppLink = (whatsapp: string) => {
-    const numbers = whatsapp.replace(/\D/g, "");
-    return `https://wa.me/55${numbers}`;
-  };
-
-  if (loadingSupplier) {
+  if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-48 w-full" />
+        <div className="space-y-6 max-w-6xl mx-auto">
+          <Skeleton className="h-10 w-32 rounded-xl" />
+          <Skeleton className="h-44 w-full rounded-2xl" />
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-48 w-full rounded-2xl" />
+              <Skeleton className="h-48 w-full rounded-2xl" />
+            </div>
+            <Skeleton className="h-72 w-full rounded-2xl" />
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -151,17 +119,19 @@ export default function SupplierDetail() {
   if (!supplier) {
     return (
       <DashboardLayout>
-        <div className="text-center py-12">
-          <Building2 className="mx-auto h-16 w-16 text-muted-foreground/50" />
-          <h2 className="mt-4 text-xl font-semibold text-foreground">
+        <div className="text-center py-20">
+          <div className="h-20 w-20 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-6">
+            <Building2 className="h-10 w-10 text-muted-foreground/40" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground">
             Fornecedor não encontrado
           </h2>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 mb-8">
             O fornecedor que você está procurando não existe ou foi removido.
           </p>
           <Button
             variant="outline"
-            className="mt-6"
+            className="rounded-xl"
             onClick={() => navigate("/mapa-turismo")}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -172,302 +142,125 @@ export default function SupplierDetail() {
     );
   }
 
+  // Build contacts as formatted text for ContactCards
+  const contactsText = contacts?.map((c) => {
+    const parts = [c.name];
+    if (c.position) parts.push(c.position);
+    if (c.phone) parts.push(`Tel: ${c.phone}`);
+    if (c.whatsapp) parts.push(`WhatsApp: ${c.whatsapp}`);
+    if (c.email) parts.push(`Email: ${c.email}`);
+    return parts.join("\n");
+  }).join("\n\n") || "";
+
+  // Build social links for sidebar
+  const socialLinks: Record<string, string> = {};
+  if (supplier.website_url) socialLinks.website = supplier.website_url;
+  if (supplier.instagram_url) socialLinks.instagram = supplier.instagram_url;
+  if (Array.isArray(supplier.other_social_media)) {
+    (supplier.other_social_media as any[]).forEach((s: any) => {
+      if (s?.type && s?.url) {
+        socialLinks[s.type.toLowerCase()] = s.url;
+      }
+    });
+  }
+
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
-        {/* Back Button */}
+      <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+        {/* Back button */}
         <Button
           variant="ghost"
           onClick={() => navigate("/mapa-turismo")}
-          className="mb-2"
+          className="rounded-xl text-muted-foreground hover:text-foreground -ml-2"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar ao diretório
         </Button>
 
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-start gap-4">
-            {/* Logo or fallback */}
-            <div className="h-20 w-20 rounded-2xl bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 border">
-              {supplier.logo_url ? (
-                <img
-                  src={supplier.logo_url}
-                  alt={supplier.name}
-                  className="h-full w-full object-contain p-2"
-                />
-              ) : (
-                <Building2 className="h-10 w-10 text-muted-foreground" />
-              )}
-            </div>
-            <div>
-              <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
-                {supplier.name}
-              </h1>
-              <Badge variant="secondary" className="mt-2">
-                {supplier.category}
-              </Badge>
-              
-              {/* Specialties */}
-              {supplier.specialties && supplier.specialties.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {supplier.specialties.map((specialty) => (
-                    <Badge
-                      key={specialty.id}
-                      variant="outline"
-                      className="text-xs bg-primary/5"
-                    >
-                      <Tag className="mr-1 h-3 w-3" />
-                      {specialty.name}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            {supplier.website_url && (
-              <Button
-                variant="outline"
-                onClick={() => safeOpen(supplier.website_url)}
-              >
-                <Globe className="mr-2 h-4 w-4" />
-                Site
-              </Button>
-            )}
-            {supplier.instagram_url && (
-              <Button
-                variant="outline"
-                onClick={() => safeOpen(supplier.instagram_url)}
-              >
-                <Instagram className="mr-2 h-4 w-4" />
-                Instagram
-              </Button>
-            )}
-          </div>
-        </div>
+        {/* Hero with rating */}
+        <OperatorHero
+          name={supplier.name}
+          category={supplier.category}
+          logoUrl={supplier.logo_url}
+          averageRating={averageRating}
+          totalReviews={totalReviews}
+          onReviewClick={handleReviewClick}
+        />
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main Info */}
+        {/* Two-column layout */}
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* How to Sell */}
             {supplier.how_to_sell && (
-              <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <ShoppingCart className="h-5 w-5 text-primary" />
-                    Como Vender
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground whitespace-pre-wrap">
-                    {supplier.how_to_sell}
-                  </p>
-                </CardContent>
-              </Card>
+              <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                  {supplier.how_to_sell}
+                </p>
+              </OperatorInfoCard>
             )}
 
-            {/* Sales Channel */}
             {supplier.sales_channel && (
-              <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Users className="h-5 w-5 text-primary" />
-                    Canal de Vendas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground whitespace-pre-wrap">
-                    {supplier.sales_channel}
-                  </p>
-                </CardContent>
-              </Card>
+              <OperatorInfoCard icon={Users} title="Canais de Venda">
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                  {supplier.sales_channel}
+                </p>
+              </OperatorInfoCard>
             )}
 
-            {/* Practical Notes */}
+            {contactsText && (
+              <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
+                <ContactCards contacts={contactsText} />
+              </OperatorInfoCard>
+            )}
+
             {supplier.practical_notes && (
-              <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <FileText className="h-5 w-5 text-primary" />
-                    Observações Práticas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground whitespace-pre-wrap">
-                    {supplier.practical_notes}
-                  </p>
-                </CardContent>
-              </Card>
+              <OperatorInfoCard icon={ShoppingCart} title="Observações Práticas">
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                  {supplier.practical_notes}
+                </p>
+              </OperatorInfoCard>
             )}
 
-            {/* Contacts */}
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <User className="h-5 w-5 text-primary" />
-                  Contatos Comerciais
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loadingContacts ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
-                ) : contacts?.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">
-                    Nenhum contato cadastrado
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {contacts?.map((contact) => (
-                      <div
-                        key={contact.id}
-                        className="flex flex-col gap-3 p-4 rounded-lg border bg-card sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {contact.name}
-                          </p>
-                          {contact.position && (
-                            <p className="text-sm text-muted-foreground">
-                              {contact.position}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {contact.whatsapp && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                window.open(
-                                  formatWhatsAppLink(contact.whatsapp!),
-                                  "_blank"
-                                )
-                              }
-                            >
-                              <MessageCircle className="mr-1 h-3 w-3" />
-                              WhatsApp
-                            </Button>
-                          )}
-                          {contact.phone && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                window.open(`tel:${contact.phone}`, "_blank")
-                              }
-                            >
-                              <Phone className="mr-1 h-3 w-3" />
-                              Ligar
-                            </Button>
-                          )}
-                          {contact.email && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                window.open(`mailto:${contact.email}`, "_blank")
-                              }
-                            >
-                              <Mail className="mr-1 h-3 w-3" />
-                              Email
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Reviews list */}
+            <OperatorReviewsList
+              reviews={reviews}
+              isLoading={reviewsLoading}
+              isAdmin={isAdmin}
+              onDeleteReview={(reviewId, reason) => deleteReview.mutate({ reviewId, reason })}
+              isDeleting={deleteReview.isPending}
+            />
 
-            {/* Marketing Materials */}
-            <SupplierMaterialsCard 
-              supplierId={supplier.id} 
-              supplierName={supplier.name} 
+            {/* Materials */}
+            <SupplierMaterialsCard
+              supplierId={supplier.id}
+              supplierName={supplier.name}
             />
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Specialties Card */}
-            {supplier.specialties && supplier.specialties.length > 0 && (
-              <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Tag className="h-5 w-5" />
-                    Especialidades
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {supplier.specialties.map((specialty) => (
-                      <Badge
-                        key={specialty.id}
-                        variant="secondary"
-                        className="bg-primary/10 text-primary"
-                      >
-                        {specialty.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Social Media */}
-            {supplier.other_social_media &&
-              supplier.other_social_media.length > 0 && (
-                <Card className="shadow-card">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Outras Redes</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {supplier.other_social_media.map((social, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => safeOpen(social.url)}
-                      >
-                        {getSocialIcon(social.type)}
-                        <span className="ml-2 capitalize">{social.type}</span>
-                        <ExternalLink className="ml-auto h-3 w-3" />
-                      </Button>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-
-            {/* Info Card */}
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Info className="h-5 w-5" />
-                  Informações
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Categoria</p>
-                  <p className="font-medium text-foreground">
-                    {supplier.category}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Cadastrado em</p>
-                  <p className="font-medium text-foreground">
-                    {new Date(supplier.created_at).toLocaleDateString("pt-BR")}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <OperatorSidebar operator={{
+            specialties: supplier.specialtiesList.join(", "),
+            website: supplier.website_url,
+            instagram: supplier.instagram_url,
+            social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
+            category: supplier.category,
+          }} />
         </div>
       </div>
+
+      {/* Review Modal */}
+      <OperatorReviewModal
+        open={reviewModalOpen}
+        onOpenChange={setReviewModalOpen}
+        onSubmit={(data) => {
+          submitReview.mutate(data, {
+            onSuccess: () => setReviewModalOpen(false),
+          });
+        }}
+        isSubmitting={submitReview.isPending}
+        existingReview={userReview}
+        operatorName={supplier.name}
+      />
     </DashboardLayout>
   );
 }
