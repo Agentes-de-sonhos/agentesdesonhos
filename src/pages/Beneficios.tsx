@@ -1,7 +1,10 @@
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useBenefits } from "@/hooks/useBenefits";
-import { BenefitHero } from "@/components/benefits/BenefitHero";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Share2 } from "lucide-react";
 import { BenefitSearchBar } from "@/components/benefits/BenefitSearchBar";
 import { BenefitFilters } from "@/components/benefits/BenefitFilters";
 import { BenefitCard } from "@/components/benefits/BenefitCard";
@@ -70,7 +73,22 @@ export default function Beneficios() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <BenefitHero onShareClick={() => setShareOpen(true)} />
+        <div className="flex items-start justify-between gap-4">
+          <PageHeader
+            pageKey="beneficios"
+            title="Benefícios e Descontos"
+            subtitle="Descubra tarifas agente, cortesias e descontos exclusivos oferecidos por empresas do turismo."
+            icon={Tag}
+          />
+          <Button
+            onClick={() => setShareOpen(true)}
+            size="lg"
+            className="shrink-0 mt-1"
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Compartilhar benefício
+          </Button>
+        </div>
 
         <BenefitSearchBar value={search} onChange={setSearch} />
 
