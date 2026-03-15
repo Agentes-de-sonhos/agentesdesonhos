@@ -666,11 +666,60 @@ export function MultiStepSignup({ onComplete, onCancel }: MultiStepSignupProps) 
             </div>
           </div>
 
+          {/* Terms & Privacy checkboxes */}
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="accept-terms"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-border accent-primary cursor-pointer"
+              />
+              <label htmlFor="accept-terms" className="text-sm leading-relaxed cursor-pointer">
+                Li e aceito os{" "}
+                <a
+                  href="/termosdeuso"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline underline-offset-2 hover:text-primary/80"
+                >
+                  Termos de Uso
+                </a>
+              </label>
+            </div>
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="accept-privacy"
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-border accent-primary cursor-pointer"
+              />
+              <label htmlFor="accept-privacy" className="text-sm leading-relaxed cursor-pointer">
+                Li e aceito as{" "}
+                <a
+                  href="/politicasdeprivacidade"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline underline-offset-2 hover:text-primary/80"
+                >
+                  Políticas de Privacidade
+                </a>
+              </label>
+            </div>
+            {termsError && (
+              <p className="text-sm text-destructive font-medium">
+                Você deve aceitar os Termos de Uso e as Políticas de Privacidade para continuar.
+              </p>
+            )}
+          </div>
+
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" onClick={goBack} className="flex-1" disabled={isLoading}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
             </Button>
-            <Button onClick={handleFinalSubmit} className="flex-1" disabled={isLoading}>
+            <Button onClick={handleFinalSubmitWithTerms} className="flex-1" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
