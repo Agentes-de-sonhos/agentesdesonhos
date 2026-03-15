@@ -215,10 +215,10 @@ export function AppSidebar() {
   );
 
   const toggleSection = (title: string) => {
+    setUserInteracted(true);
     setOpenSections((prev) => {
       const isCurrentlyOpen = prev[title];
-      // Close all, then toggle the clicked one
-      const allClosed: Record<string, boolean> = {};
+      const allClosed: Record<string, boolean | undefined> = {};
       if (!isCurrentlyOpen) {
         allClosed[title] = true;
       }
