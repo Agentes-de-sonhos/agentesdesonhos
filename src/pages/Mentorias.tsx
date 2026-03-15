@@ -81,7 +81,7 @@ export default function Mentorias() {
           title="Cursos e Mentorias para Agentes de Viagem"
           subtitle="Aprenda com especialistas do turismo ou compartilhe seu conhecimento criando seus próprios cursos e mentorias."
           icon={GraduationCap}
-          adminTab="community"
+          adminTab="mentorships"
         />
 
         {/* Banner de anúncio */}

@@ -48,6 +48,7 @@ import { AdminCrmContacts } from "@/components/admin/crm/AdminCrmContacts";
 import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
 import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
 import { AdminTourOperatorsManager } from "@/components/admin/AdminTourOperatorsManager";
+import { AdminMentorshipsManager } from "@/components/admin/AdminMentorshipsManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -184,6 +185,10 @@ export default function Admin() {
               <Heart className="h-4 w-4" />
               <span className="hidden sm:inline">Comunidade</span>
             </TabsTrigger>
+            <TabsTrigger value="mentorships" className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" />
+              <span className="hidden sm:inline">Cursos</span>
+            </TabsTrigger>
             <TabsTrigger value="playbooks" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Playbooks</span>
@@ -263,6 +268,10 @@ export default function Admin() {
               <AdminCommunityRoomsManager />
               <AdminCommunityManager />
             </div>
+          </TabsContent>
+
+          <TabsContent value="mentorships">
+            <AdminMentorshipsManager />
           </TabsContent>
 
           <TabsContent value="playbooks">
