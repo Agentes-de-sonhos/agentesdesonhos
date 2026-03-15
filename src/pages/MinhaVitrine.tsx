@@ -73,7 +73,7 @@ export default function MinhaVitrine() {
     if (validFiles.length === 0) return;
     setUploadFiles(prev => [...prev, ...validFiles]);
     setUploadPreviews(prev => [...prev, ...validFiles.map(f => URL.createObjectURL(f))]);
-    setSelectedMaterialId(null);
+    setSelectedMaterialIds([]);
   };
 
   const resetForm = () => {
