@@ -78,9 +78,7 @@ const App = () => (
                 window.location.hostname.startsWith("ativar-cartao") ? (
                   <AtivarCartao />
                 ) : (
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
+                  <LandingPage />
                 )
               }
             />
