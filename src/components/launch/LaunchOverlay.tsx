@@ -43,7 +43,10 @@ export function LaunchOverlay() {
     hostname === "agentesdesonhos.com.br" ||
     hostname === "www.agentesdesonhos.com.br";
 
-  if (!isMainDomain || phase === "unlocked") return null;
+  // Admin bypass: add ?preview=true to skip the overlay
+  const hasPreviewBypass = new URLSearchParams(window.location.search).get("preview") === "true";
+
+  if (!isMainDomain || phase === "unlocked" || hasPreviewBypass) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden">
