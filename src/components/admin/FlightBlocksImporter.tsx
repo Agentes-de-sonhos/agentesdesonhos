@@ -337,7 +337,6 @@ export function FlightBlocksImporter() {
                             </TooltipContent>
                           )}
                         </Tooltip>
-                        />
                       </TableCell>
                       <TableCell>
                         <Input
