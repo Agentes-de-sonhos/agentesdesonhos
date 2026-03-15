@@ -8,12 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { useShowcase, type ShowcaseItem, FEATURED_LABELS, MAX_FEATURED, getFeaturedLabel } from "@/hooks/useShowcase";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
-  Plus, Trash2, ExternalLink, GripVertical, Image as ImageIcon,
-  Upload, Link2, MessageCircle, Loader2, Store, Copy, Eye, Star, ChevronUp, ChevronDown
+  Plus, Trash2, ExternalLink, Image as ImageIcon,
+  Upload, MessageCircle, Loader2, Store, Copy, Eye, Star, ChevronUp, ChevronDown,
+  Settings, Share2, Zap, Check
 } from "lucide-react";
 
 const SUGGESTED_CATEGORIES = ["Cruzeiros", "Bloqueios Aéreos", "Pacotes", "Temporadas", "Promoções", "Geral"];
@@ -22,15 +25,16 @@ const SUGGESTED_SUBCATEGORIES = ["Réveillon", "MSC", "Costa Cruzeiros", "Féria
 export default function MinhaVitrine() {
   const { user } = useAuth();
   const {
-    showcase, items, availableMaterials, loadingShowcase,
-    createShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage, uploadMultipleImages,
+    showcase, items, availableMaterials, allSuppliers, loadingShowcase,
+    createShowcase, updateShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage, uploadMultipleImages,
   } = useShowcase();
 
   const [slug, setSlug] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<ShowcaseItem | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [addTab, setAddTab] = useState("materials");
-  
+
   const [selectedMaterialIds, setSelectedMaterialIds] = useState<string[]>([]);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
@@ -42,6 +46,13 @@ export default function MinhaVitrine() {
   const [expiresAt, setExpiresAt] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Settings state
+  const [tagline, setTagline] = useState(showcase?.tagline || "");
+  const [showcaseMode, setShowcaseMode] = useState(showcase?.showcase_mode || "manual");
+  const [selectedSupplierIds, setSelectedSupplierIds] = useState<string[]>(showcase?.auto_supplier_ids || []);
+  const [maxAutoItems, setMaxAutoItems] = useState(showcase?.max_auto_items || 20);
+  const [autoCategories, setAutoCategories] = useState<string[]>(showcase?.auto_categories || []);
 
   const PUBLIC_DOMAIN = "https://vitrine.tur.br";
   const publicUrl = showcase ? `${PUBLIC_DOMAIN}/${showcase.slug}` : "";
@@ -111,7 +122,6 @@ export default function MinhaVitrine() {
         imageUrl = galleryUrls[0];
       }
 
-      // If materials were selected, collect their file URLs as gallery
       if (selectedMaterialIds.length > 0) {
         const selectedMats = selectedMaterialIds
           .map(id => availableMaterials.find(m => m.id === id))
@@ -121,10 +131,9 @@ export default function MinhaVitrine() {
           materialId = selectedMaterialIds[0];
           imageUrl = matUrls[0];
         } else {
-          // Multiple materials selected → gallery
           galleryUrls = matUrls;
           imageUrl = matUrls[0];
-          materialId = selectedMaterialIds[0]; // link to first material for metadata
+          materialId = selectedMaterialIds[0];
         }
       }
 
@@ -184,20 +193,16 @@ export default function MinhaVitrine() {
 
   const toggleFeatured = async (item: ShowcaseItem, labelValue?: string) => {
     if (item.is_featured) {
-      // Remove featured
       await updateItem.mutateAsync({ id: item.id, is_featured: false, featured_label: null, featured_order: 0 });
       toast.success("Destaque removido");
     } else {
       if (featuredCount >= MAX_FEATURED) {
-        toast.error(`Limite de ${MAX_FEATURED} destaques atingido. Remova um destaque existente primeiro.`);
+        toast.error(`Limite de ${MAX_FEATURED} destaques atingido.`);
         return;
       }
       const maxFeaturedOrder = Math.max(0, ...items.filter(i => i.is_featured).map(i => i.featured_order)) + 1;
       await updateItem.mutateAsync({
-        id: item.id,
-        is_featured: true,
-        featured_label: labelValue || "oferta_especial",
-        featured_order: maxFeaturedOrder,
+        id: item.id, is_featured: true, featured_label: labelValue || "oferta_especial", featured_order: maxFeaturedOrder,
       });
       toast.success("Oferta destacada!");
     }
@@ -212,6 +217,32 @@ export default function MinhaVitrine() {
     if (item.materials?.file_url) return item.materials.file_url;
     if (item.materials?.thumbnail_url) return item.materials.thumbnail_url;
     return null;
+  };
+
+  const handleSaveSettings = async () => {
+    await updateShowcase.mutateAsync({
+      tagline: tagline || null,
+      showcase_mode: showcaseMode,
+      auto_supplier_ids: selectedSupplierIds,
+      max_auto_items: maxAutoItems,
+      auto_categories: autoCategories,
+    } as any);
+    toast.success("Configurações salvas!");
+    setSettingsOpen(false);
+  };
+
+  const openSettingsDialog = () => {
+    setTagline(showcase?.tagline || "");
+    setShowcaseMode(showcase?.showcase_mode || "manual");
+    setSelectedSupplierIds(showcase?.auto_supplier_ids || []);
+    setMaxAutoItems(showcase?.max_auto_items || 20);
+    setAutoCategories(showcase?.auto_categories || []);
+    setSettingsOpen(true);
+  };
+
+  const shareWhatsApp = () => {
+    const text = encodeURIComponent(`Confira nossa vitrine de ofertas: ${publicUrl}`);
+    window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
   if (loadingShowcase) {
@@ -255,7 +286,7 @@ export default function MinhaVitrine() {
   const featuredItems = items.filter(i => i.is_featured).sort((a, b) => a.featured_order - b.featured_order);
   const regularItems = items.filter(i => !i.is_featured);
 
-  const renderItemRow = (item: ShowcaseItem, index: number, list: ShowcaseItem[], isFeaturedSection: boolean) => {
+  const renderItemRow = (item: ShowcaseItem, index: number) => {
     const imgUrl = getItemImageUrl(item);
     const label = getFeaturedLabel(item.featured_label);
 
@@ -278,7 +309,7 @@ export default function MinhaVitrine() {
             )}
             {item.gallery_urls && item.gallery_urls.length > 1 && (
               <span className="absolute bottom-0 right-0 bg-black/70 text-white text-[8px] px-1 py-0.5 font-bold rounded-tl">
-                {item.gallery_urls.length}📷
+                {item.gallery_urls.length} fotos
               </span>
             )}
             {item.is_featured && label && (
@@ -301,13 +332,10 @@ export default function MinhaVitrine() {
             {item.expires_at && <p className="text-[10px] text-muted-foreground">Expira: {new Date(item.expires_at).toLocaleDateString("pt-BR")}</p>}
           </div>
           <div className="flex flex-col gap-1 flex-shrink-0">
-            {/* Featured toggle + label selector */}
             {item.is_featured ? (
               <div className="flex items-center gap-1">
                 <Select value={item.featured_label || "oferta_especial"} onValueChange={v => changeFeaturedLabel(item, v)}>
-                  <SelectTrigger className="h-7 text-[10px] w-24 px-1.5">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-7 text-[10px] w-24 px-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {FEATURED_LABELS.map(l => (
                       <SelectItem key={l.value} value={l.value} className="text-xs">{l.emoji} {l.text}</SelectItem>
@@ -346,16 +374,22 @@ export default function MinhaVitrine() {
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <Store className="h-6 w-6 text-primary" /> Minha Vitrine Virtual
             </h1>
-            <p className="text-sm text-muted-foreground">Gerencie a sua vitrine virtual.</p>
+            <p className="text-sm text-muted-foreground">Gerencie a sua vitrine virtual profissional.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Link copiado!"); }}>
               <Copy className="h-4 w-4 mr-1" /> Copiar link
+            </Button>
+            <Button variant="outline" size="sm" onClick={shareWhatsApp}>
+              <Share2 className="h-4 w-4 mr-1" /> WhatsApp
             </Button>
             <Button variant="outline" size="sm" asChild>
               <a href={`/${showcase.slug}/ofertas`} target="_blank" rel="noopener noreferrer">
                 <Eye className="h-4 w-4 mr-1" /> Visualizar
               </a>
+            </Button>
+            <Button variant="outline" size="sm" onClick={openSettingsDialog}>
+              <Settings className="h-4 w-4 mr-1" /> Configurações
             </Button>
           </div>
         </div>
@@ -363,7 +397,15 @@ export default function MinhaVitrine() {
         <div className="text-sm text-muted-foreground bg-muted/50 rounded-md p-3 flex items-center gap-2 flex-wrap">
           <ExternalLink className="h-4 w-4" />
           <span className="font-medium">{publicUrl}</span>
+          {showcase.showcase_mode !== "manual" && (
+            <Badge variant="secondary" className="text-xs">
+              <Zap className="h-3 w-3 mr-1" />
+              {showcase.showcase_mode === "auto" ? "Automática" : "Combinada"}
+            </Badge>
+          )}
         </div>
+
+        {/* Add button */}
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" onClick={resetForm}>
@@ -422,11 +464,8 @@ export default function MinhaVitrine() {
                         {uploadPreviews.map((preview, i) => (
                           <div key={i} className="relative aspect-[4/5] rounded-lg overflow-hidden group/thumb">
                             <img src={preview} alt="" className="w-full h-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); removeUploadFile(i); }}
-                              className="absolute top-1 right-1 h-5 w-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover/thumb:opacity-100 transition-opacity"
-                            >×</button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); removeUploadFile(i); }}
+                              className="absolute top-1 right-1 h-5 w-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover/thumb:opacity-100 transition-opacity">×</button>
                           </div>
                         ))}
                       </div>
@@ -444,7 +483,6 @@ export default function MinhaVitrine() {
                 <div>
                   <Label>Validade (opcional)</Label>
                   <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="mt-1" />
-                  <p className="text-xs text-muted-foreground mt-1">Deixe em branco para manter ativa até remover manualmente</p>
                 </div>
               </TabsContent>
             </Tabs>
@@ -491,87 +529,213 @@ export default function MinhaVitrine() {
           </DialogContent>
         </Dialog>
 
-      {/* Items List */}
-      {items.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">Sua vitrine está vazia</p>
-            <p className="text-sm text-muted-foreground mt-1">Adicione lâminas dos materiais de divulgação ou faça upload de imagens</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {/* Featured section */}
-          {featuredItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Destaques ({featuredItems.length}/{MAX_FEATURED})</h3>
-              </div>
-              <div className="space-y-2">
-                {featuredItems.map((item, i) => renderItemRow(item, i, featuredItems, true))}
-              </div>
-            </div>
-          )}
-
-          {/* Regular section */}
-          {regularItems.length > 0 && (
-            <div>
-              {featuredItems.length > 0 && (
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Demais ofertas</h3>
-              )}
-              <div className="space-y-2">
-                {regularItems.map((item, i) => renderItemRow(item, i, regularItems, false))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Edit Dialog */}
-      <Dialog open={!!editItem} onOpenChange={open => { if (!open) { setEditItem(null); resetForm(); } }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Lâmina</DialogTitle>
-          </DialogHeader>
+        {/* Items List */}
+        {items.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">Sua vitrine está vazia</p>
+              <p className="text-sm text-muted-foreground mt-1">Adicione lâminas dos materiais ou faça upload de imagens</p>
+            </CardContent>
+          </Card>
+        ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            {featuredItems.length > 0 && (
               <div>
-                <Label>Categoria</Label>
-                <Select value={category} onValueChange={setCategory}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                  <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-400">Destaques ({featuredItems.length}/{MAX_FEATURED})</h3>
+                </div>
+                <div className="space-y-2">
+                  {featuredItems.map((item, i) => renderItemRow(item, i))}
+                </div>
+              </div>
+            )}
+            {regularItems.length > 0 && (
+              <div>
+                {featuredItems.length > 0 && <h3 className="text-sm font-medium text-muted-foreground mb-2">Demais ofertas</h3>}
+                <div className="space-y-2">
+                  {regularItems.map((item, i) => renderItemRow(item, i))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Edit Dialog */}
+        <Dialog open={!!editItem} onOpenChange={open => { if (!open) { setEditItem(null); resetForm(); } }}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Editar Lâmina</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Categoria</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {SUGGESTED_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      <SelectItem value="__custom">Outra...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {category === "__custom" && <Input placeholder="Nome da categoria" value={customCategory} onChange={e => setCustomCategory(e.target.value)} className="mt-2" />}
+                </div>
+                <div>
+                  <Label>Subcategoria</Label>
+                  <Input value={subcategory} onChange={e => setSubcategory(e.target.value)} className="mt-1" />
+                </div>
+              </div>
+              <div>
+                <Label>Ação</Label>
+                <Select value={actionType} onValueChange={setActionType}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {SUGGESTED_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    <SelectItem value="__custom">Outra...</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                    <SelectItem value="link">Link personalizado</SelectItem>
                   </SelectContent>
                 </Select>
-                {category === "__custom" && <Input placeholder="Nome da categoria" value={customCategory} onChange={e => setCustomCategory(e.target.value)} className="mt-2" />}
+                {actionType === "link" && <Input placeholder="https://..." value={actionUrl} onChange={e => setActionUrl(e.target.value)} className="mt-2" />}
               </div>
               <div>
-                <Label>Subcategoria</Label>
-                <Input value={subcategory} onChange={e => setSubcategory(e.target.value)} className="mt-1" />
+                <Label>Validade (opcional)</Label>
+                <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="mt-1" />
               </div>
+              <Button className="w-full" onClick={handleUpdateItem} disabled={updateItem.isPending}>Salvar Alterações</Button>
             </div>
-            <div>
-              <Label>Ação</Label>
-              <Select value={actionType} onValueChange={setActionType}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                  <SelectItem value="link">Link personalizado</SelectItem>
-                </SelectContent>
-              </Select>
-              {actionType === "link" && <Input placeholder="https://..." value={actionUrl} onChange={e => setActionUrl(e.target.value)} className="mt-2" />}
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+          <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>Configurações da Vitrine</DialogTitle></DialogHeader>
+            <div className="space-y-6">
+              {/* Tagline */}
+              <div>
+                <Label>Mensagem da vitrine (opcional)</Label>
+                <Textarea
+                  placeholder="Ex: Ofertas selecionadas pela nossa equipe"
+                  value={tagline}
+                  onChange={e => setTagline(e.target.value)}
+                  className="mt-1"
+                  rows={2}
+                />
+                <p className="text-xs text-muted-foreground mt-1">Exibida abaixo do logo na vitrine pública.</p>
+              </div>
+
+              {/* Mode */}
+              <div className="space-y-3">
+                <Label>Modo da Vitrine</Label>
+                <div className="grid grid-cols-1 gap-2">
+                  {[
+                    { value: "manual", label: "Manual", desc: "Você escolhe e adiciona cada oferta manualmente." },
+                    { value: "auto", label: "Automática", desc: "Ofertas das operadoras selecionadas aparecem automaticamente." },
+                    { value: "combinado", label: "Combinada", desc: "Suas ofertas fixas no topo + ofertas automáticas das operadoras." },
+                  ].map(mode => (
+                    <button
+                      key={mode.value}
+                      onClick={() => setShowcaseMode(mode.value)}
+                      className={`flex items-start gap-3 p-3 rounded-lg border text-left transition-colors ${
+                        showcaseMode === mode.value
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-muted-foreground/30"
+                      }`}
+                    >
+                      <div className={`mt-0.5 h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        showcaseMode === mode.value ? "border-primary bg-primary" : "border-muted-foreground/40"
+                      }`}>
+                        {showcaseMode === mode.value && <Check className="h-3 w-3 text-primary-foreground" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium flex items-center gap-1.5">
+                          {mode.value !== "manual" && <Zap className="h-3.5 w-3.5 text-amber-500" />}
+                          {mode.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{mode.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Auto settings */}
+              {(showcaseMode === "auto" || showcaseMode === "combinado") && (
+                <div className="space-y-4 border-t pt-4">
+                  <div>
+                    <Label>Operadoras para vitrine automática</Label>
+                    <p className="text-xs text-muted-foreground mb-2">Selecione as operadoras cujas ofertas aparecerão automaticamente.</p>
+                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                      {allSuppliers.map(s => {
+                        const isSelected = selectedSupplierIds.includes(s.id);
+                        return (
+                          <button
+                            key={s.id}
+                            onClick={() => setSelectedSupplierIds(prev =>
+                              isSelected ? prev.filter(id => id !== s.id) : [...prev, s.id]
+                            )}
+                            className={`flex items-center gap-2 p-2 rounded-lg border text-left text-sm transition-colors ${
+                              isSelected ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"
+                            }`}
+                          >
+                            {s.logo_url ? (
+                              <img src={s.logo_url} alt="" className="h-6 w-6 rounded object-contain" />
+                            ) : (
+                              <div className="h-6 w-6 rounded bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">{s.name[0]}</div>
+                            )}
+                            <span className="truncate flex-1">{s.name}</span>
+                            {isSelected && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedSupplierIds.length > 0 && (
+                      <p className="text-xs text-primary mt-1">{selectedSupplierIds.length} operadora(s) selecionada(s)</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label>Categorias desejadas (opcional)</Label>
+                    <p className="text-xs text-muted-foreground mb-2">Deixe vazio para exibir todas.</p>
+                    <div className="flex flex-wrap gap-2">
+                      {SUGGESTED_CATEGORIES.map(c => {
+                        const isSelected = autoCategories.includes(c);
+                        return (
+                          <button
+                            key={c}
+                            onClick={() => setAutoCategories(prev =>
+                              isSelected ? prev.filter(x => x !== c) : [...prev, c]
+                            )}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                              isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                            }`}
+                          >
+                            {c}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Máximo de ofertas automáticas</Label>
+                    <Input
+                      type="number"
+                      min={5}
+                      max={50}
+                      value={maxAutoItems}
+                      onChange={e => setMaxAutoItems(Number(e.target.value) || 20)}
+                      className="mt-1 w-24"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <Button className="w-full" onClick={handleSaveSettings} disabled={updateShowcase.isPending}>
+                {updateShowcase.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Salvar Configurações
+              </Button>
             </div>
-            <div>
-              <Label>Validade (opcional)</Label>
-              <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="mt-1" />
-            </div>
-            <Button className="w-full" onClick={handleUpdateItem} disabled={updateItem.isPending}>Salvar Alterações</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

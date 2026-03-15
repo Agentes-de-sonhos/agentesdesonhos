@@ -181,26 +181,41 @@ export type Database = {
       }
       agency_showcases: {
         Row: {
+          auto_categories: string[] | null
+          auto_supplier_ids: string[] | null
           created_at: string
           id: string
           is_active: boolean
+          max_auto_items: number | null
+          showcase_mode: string
           slug: string
+          tagline: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          auto_categories?: string[] | null
+          auto_supplier_ids?: string[] | null
           created_at?: string
           id?: string
           is_active?: boolean
+          max_auto_items?: number | null
+          showcase_mode?: string
           slug: string
+          tagline?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          auto_categories?: string[] | null
+          auto_supplier_ids?: string[] | null
           created_at?: string
           id?: string
           is_active?: boolean
+          max_auto_items?: number | null
+          showcase_mode?: string
           slug?: string
+          tagline?: string | null
           updated_at?: string
           user_id?: string
         }
