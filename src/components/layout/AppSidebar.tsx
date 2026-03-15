@@ -196,7 +196,8 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
+  const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
