@@ -30,7 +30,7 @@ import { useExperiences, useExperienceFilterOptions, ExperienceFilters, EXPERIEN
 const TABS = [
   { key: "hotel", label: "Hotéis", icon: Building2 },
   { key: "dining", label: "Restaurantes", icon: UtensilsCrossed },
-  { key: "attraction", label: "Atrações", icon: Landmark },
+  { key: "attraction", label: "Atrações / Experiências", icon: Landmark },
   { key: "shopping", label: "Compras", icon: ShoppingBag },
 ] as const;
 
