@@ -48,6 +48,7 @@ import { AdminCrmContacts } from "@/components/admin/crm/AdminCrmContacts";
 import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
 import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
 import { AdminTourOperatorsManager } from "@/components/admin/AdminTourOperatorsManager";
+import { AdminMentorshipsManager } from "@/components/admin/AdminMentorshipsManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
