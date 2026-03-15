@@ -16,6 +16,7 @@ import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
 import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 
 export default function OperadoraDetail() {
