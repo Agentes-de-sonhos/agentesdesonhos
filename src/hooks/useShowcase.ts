@@ -212,11 +212,20 @@ export function useShowcase() {
 
   const uploadImage = async (file: File): Promise<string> => {
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${user!.id}/${Date.now()}.${ext}`;
+    const path = `${user!.id}/${Date.now()}_${Math.random().toString(36).slice(2, 6)}.${ext}`;
     const { error } = await supabase.storage.from("showcase-images").upload(path, file);
     if (error) throw error;
     const { data } = supabase.storage.from("showcase-images").getPublicUrl(path);
     return data.publicUrl;
+  };
+
+  const uploadMultipleImages = async (files: File[]): Promise<string[]> => {
+    const urls: string[] = [];
+    for (const file of files) {
+      const url = await uploadImage(file);
+      urls.push(url);
+    }
+    return urls;
   };
 
   return {
