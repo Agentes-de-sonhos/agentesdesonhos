@@ -111,28 +111,67 @@ export default function MapaTurismo() {
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
   const { data: allSpecialties = [] } = useAllSpecialties();
 
+  // Fetch tour operators
+  const { data: tourOperators, isLoading: loadingOperators } = useQuery({
+    queryKey: ["tour-operators-listing"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tour_operators")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Merge trade_suppliers + tour_operators into a unified list
+  const allItems = useMemo(() => {
+    const fromSuppliers = (suppliers || []).map((s: any) => ({
+      ...s,
+      _source: "supplier" as const,
+      website_url: s.website_url,
+      instagram_url: s.instagram_url,
+    }));
+    const fromOperators = (tourOperators || []).map((op: any) => ({
+      id: op.id,
+      name: op.name,
+      category: op.category || "Operadoras de turismo",
+      logo_url: null,
+      website_url: op.website,
+      instagram_url: op.instagram,
+      sales_channel: op.sales_channels,
+      specialties: op.specialties
+        ? op.specialties.split(",").map((s: string, i: number) => ({ id: `op-${i}`, name: s.trim() }))
+        : [],
+      _source: "operator" as const,
+    }));
+    return [...fromSuppliers, ...fromOperators];
+  }, [suppliers, tourOperators]);
+
   const specialtyOptions = allSpecialties.map((s) => ({
     value: s.name,
     label: s.name,
   }));
 
-  // Only show suppliers when a category is selected or search/specialty filters are active
   const hasActiveFilter = categoryFilter !== "all" || search.length > 0 || selectedSpecialties.length > 0;
 
   const filteredSuppliers = hasActiveFilter
-    ? suppliers?.filter((supplier) => {
-        const matchesSearch = supplier.name.toLowerCase().includes(search.toLowerCase());
-        const matchesCategory = categoryFilter === "all" || supplier.category === categoryFilter;
+    ? allItems.filter((item) => {
+        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+        const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
         const matchesSpecialties =
           selectedSpecialties.length === 0 ||
           selectedSpecialties.some((specialtyName) =>
-            supplier.specialties?.some(
+            item.specialties?.some(
               (s: Specialty) => s.name.toLowerCase() === specialtyName.toLowerCase()
             )
           );
         return matchesSearch && matchesCategory && matchesSpecialties;
       })
     : [];
+
+  const isLoadingAll = isLoading || loadingOperators;
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
