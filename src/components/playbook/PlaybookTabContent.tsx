@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Info, Hotel, UtensilsCrossed, Car, Ship, Shield, Compass, MapPin, Plane, ArrowRight } from "lucide-react";
+import { Clock, Info, Hotel, UtensilsCrossed, Car, Ship, Shield, Compass, MapPin, Plane, ShoppingBag, ArrowRight } from "lucide-react";
 import type { PlaybookSection } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
 import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
@@ -44,6 +44,13 @@ const TAB_ADVISOR_MAP: Record<string, { icon: typeof Hotel; label: string; categ
     categoryLabel: "Atrações",
     description: "Explore uma curadoria de atrações e pontos turísticos recomendados para indicar aos seus clientes.",
     advisorTab: "attraction",
+  },
+  compras: {
+    icon: ShoppingBag,
+    label: "Lojas recomendadas",
+    categoryLabel: "Compras",
+    description: "Descubra as melhores lojas e outlets para indicar aos seus clientes, com curadoria feita por especialistas.",
+    advisorTab: "shopping",
   },
 };
 
