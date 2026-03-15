@@ -196,7 +196,8 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
+  const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -214,10 +215,10 @@ export function AppSidebar() {
   );
 
   const toggleSection = (title: string) => {
+    setUserInteracted(true);
     setOpenSections((prev) => {
       const isCurrentlyOpen = prev[title];
-      // Close all, then toggle the clicked one
-      const allClosed: Record<string, boolean> = {};
+      const allClosed: Record<string, boolean | undefined> = {};
       if (!isCurrentlyOpen) {
         allClosed[title] = true;
       }
@@ -324,7 +325,8 @@ export function AppSidebar() {
 
   const renderSection = (section: MenuSection) => {
     const isActive = isSectionActive(section);
-    const isOpen = openSections[section.title] ?? isActive;
+    const hasExplicitState = section.title in openSections;
+    const isOpen = hasExplicitState ? !!openSections[section.title] : (!userInteracted && isActive);
     const Icon = section.icon;
 
     if (collapsed) {
