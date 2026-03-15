@@ -4246,6 +4246,7 @@ export type Database = {
           id: string
           instagram: string | null
           is_active: boolean | null
+          logo_url: string | null
           name: string
           sales_channels: string | null
           specialties: string | null
@@ -4264,6 +4265,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_active?: boolean | null
+          logo_url?: string | null
           name: string
           sales_channels?: string | null
           specialties?: string | null
@@ -4282,6 +4284,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_active?: boolean | null
+          logo_url?: string | null
           name?: string
           sales_channels?: string | null
           specialties?: string | null
