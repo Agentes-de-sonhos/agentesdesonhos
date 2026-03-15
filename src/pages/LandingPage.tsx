@@ -36,6 +36,14 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Menu, X } from "lucide-react";
+
+const sectionLinks = [
+  { label: "Funcionalidades", id: "funcionalidades" },
+  { label: "Benefícios", id: "beneficios" },
+  { label: "Diferenciais", id: "diferenciais" },
+  { label: "FAQ", id: "faq" },
+];
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
