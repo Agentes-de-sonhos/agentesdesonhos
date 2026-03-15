@@ -78,14 +78,19 @@ export default function MinhaVitrine() {
 
   const resetForm = () => {
     setSelectedMaterialId(null);
-    setUploadFile(null);
-    setUploadPreview(null);
+    setUploadFiles([]);
+    setUploadPreviews([]);
     setCategory("Geral");
     setCustomCategory("");
     setSubcategory("");
     setActionType("whatsapp");
     setActionUrl("");
     setExpiresAt("");
+  };
+
+  const removeUploadFile = (index: number) => {
+    setUploadFiles(prev => prev.filter((_, i) => i !== index));
+    setUploadPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleAddItem = async () => {
