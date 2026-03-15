@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -11,10 +12,17 @@ import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
 import { ContactCards } from "@/components/operator/ContactCards";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
+import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
+import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
+import { useOperatorReviews } from "@/hooks/useOperatorReviews";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export default function OperadoraDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const { data: operator, isLoading } = useQuery({
     queryKey: ["tour-operator", id],
@@ -29,6 +37,23 @@ export default function OperadoraDetail() {
     },
     enabled: !!id,
   });
+
+  const {
+    reviews,
+    isLoading: reviewsLoading,
+    userReview,
+    averageRating,
+    totalReviews,
+    submitReview,
+  } = useOperatorReviews(id || "");
+
+  const handleReviewClick = () => {
+    if (!user) {
+      toast.error("Você precisa estar logado para avaliar");
+      return;
+    }
+    setReviewModalOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -87,11 +112,14 @@ export default function OperadoraDetail() {
           Voltar ao diretório
         </Button>
 
-        {/* Hero */}
+        {/* Hero with rating */}
         <OperatorHero
           name={operator.name}
           category={operator.category}
           logoUrl={operator.logo_url}
+          averageRating={averageRating}
+          totalReviews={totalReviews}
+          onReviewClick={handleReviewClick}
         />
 
         {/* Two-column layout */}
@@ -118,6 +146,9 @@ export default function OperadoraDetail() {
               </OperatorInfoCard>
             )}
 
+            {/* Reviews list */}
+            <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} />
+
             {/* Materials */}
             <SupplierMaterialsCard
               supplierId={operator.id}
@@ -132,6 +163,20 @@ export default function OperadoraDetail() {
           }} />
         </div>
       </div>
+
+      {/* Review Modal */}
+      <OperatorReviewModal
+        open={reviewModalOpen}
+        onOpenChange={setReviewModalOpen}
+        onSubmit={(data) => {
+          submitReview.mutate(data, {
+            onSuccess: () => setReviewModalOpen(false),
+          });
+        }}
+        isSubmitting={submitReview.isPending}
+        existingReview={userReview}
+        operatorName={operator.name}
+      />
     </DashboardLayout>
   );
 }
