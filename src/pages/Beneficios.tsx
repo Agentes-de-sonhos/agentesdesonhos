@@ -105,9 +105,9 @@ export default function Beneficios() {
           {/* Cards grid */}
           <div className="flex-1">
             {filtered.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center text-center py-16 text-muted-foreground">
                 <p className="text-lg font-medium">Nenhum benefício encontrado</p>
-                <p className="text-sm mt-1">Tente ajustar os filtros ou compartilhe um novo benefício!</p>
+                <p className="text-sm mt-1">Tente ajustar os filtros ou adicione um novo benefício!</p>
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
