@@ -29,7 +29,7 @@ const chipColors = [
   "bg-indigo-100 text-indigo-700 border-indigo-200",
 ];
 
-export function OperatorHero({ name, category, specialties, website, instagram }: OperatorHeroProps) {
+export function OperatorHero({ name, category, specialties, website, instagram, logoUrl }: OperatorHeroProps) {
   const tags = specialties?.split(",").map((s) => s.trim()).filter(Boolean) || [];
 
   return (
