@@ -16,12 +16,14 @@ import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
 import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 
 export default function OperadoraDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const { data: operator, isLoading } = useQuery({
@@ -45,6 +47,7 @@ export default function OperadoraDetail() {
     averageRating,
     totalReviews,
     submitReview,
+    deleteReview,
   } = useOperatorReviews(id || "");
 
   const handleReviewClick = () => {
@@ -147,7 +150,13 @@ export default function OperadoraDetail() {
             )}
 
             {/* Reviews list */}
-            <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} />
+            <OperatorReviewsList
+              reviews={reviews}
+              isLoading={reviewsLoading}
+              isAdmin={isAdmin}
+              onDeleteReview={(reviewId, reason) => deleteReview.mutate({ reviewId, reason })}
+              isDeleting={deleteReview.isPending}
+            />
 
             {/* Materials */}
             <SupplierMaterialsCard

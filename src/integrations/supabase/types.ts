@@ -2666,6 +2666,45 @@ export type Database = {
         }
         Relationships: []
       }
+      operator_review_moderation_log: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          moderated_by: string
+          operator_id: string
+          rating: number
+          reaction: string | null
+          reason: string | null
+          review_id: string
+          reviewer_user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          moderated_by: string
+          operator_id: string
+          rating: number
+          reaction?: string | null
+          reason?: string | null
+          review_id: string
+          reviewer_user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          moderated_by?: string
+          operator_id?: string
+          rating?: number
+          reaction?: string | null
+          reason?: string | null
+          review_id?: string
+          reviewer_user_id?: string
+        }
+        Relationships: []
+      }
       operator_reviews: {
         Row: {
           comment: string | null
