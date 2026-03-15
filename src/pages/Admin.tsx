@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function Admin() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "users";
   const { data: userStats } = useQuery({
     queryKey: ["admin-user-stats"],
     queryFn: async () => {
@@ -135,7 +137,7 @@ export default function Admin() {
         </div>
 
         {/* Tabs for Content Management */}
-        <Tabs defaultValue="users" className="space-y-6">
+        <Tabs defaultValue={initialTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-8 lg:grid-cols-16">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />

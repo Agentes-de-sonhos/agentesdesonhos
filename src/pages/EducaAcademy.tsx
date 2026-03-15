@@ -141,6 +141,7 @@ export default function EducaAcademy() {
           title="EducaTravel Academy"
           subtitle="Trilhas de aprendizado, certificação e materiais premium para especialistas em destinos"
           icon={GraduationCap}
+          adminTab="academy"
         />
 
         <Tabs defaultValue="dashboard" className="space-y-6">

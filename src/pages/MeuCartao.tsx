@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useBusinessCard, CardButton, SocialLinks } from "@/hooks/useBusinessCard";
 import { toast } from "sonner";
 import { CreditCard, Copy, Eye, ExternalLink } from "lucide-react";
+import { AdminEditButton } from "@/components/layout/AdminEditButton";
 import { WizardProgressBar, WizardStep } from "@/components/card-wizard/WizardProgressBar";
 import { CardPreview } from "@/components/card-wizard/CardPreview";
 import { StepImages } from "@/components/card-wizard/steps/StepImages";
@@ -181,14 +182,17 @@ export default function MeuCartao() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
-            <CreditCard className="h-6 w-6 text-primary" />
-            Configurar Cartão de Visita Virtual
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Configure seu cartão profissional em poucos passos. Leva menos de 2 minutos.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="text-center flex-1 space-y-1">
+            <h1 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
+              <CreditCard className="h-6 w-6 text-primary" />
+              Configurar Cartão de Visita Virtual
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Configure seu cartão profissional em poucos passos. Leva menos de 2 minutos.
+            </p>
+          </div>
+          <AdminEditButton adminTab="business-cards" />
         </div>
 
         {/* Quick actions */}

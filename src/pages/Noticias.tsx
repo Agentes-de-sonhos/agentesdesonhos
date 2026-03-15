@@ -492,6 +492,7 @@ export default function Noticias() {
           title="Notícias do Trade"
           subtitle="Curadoria inteligente das últimas 24 horas"
           icon={Newspaper}
+          adminTab="curadoria"
         />
 
         {/* ── Filter Bar with Icons ── */}

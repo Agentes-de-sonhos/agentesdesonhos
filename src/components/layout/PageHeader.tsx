@@ -1,15 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
+import { AdminEditButton } from "./AdminEditButton";
 
 interface PageHeaderProps {
   pageKey: string;
   title: string;
   subtitle: string;
   icon: LucideIcon;
+  adminTab?: string;
 }
 
-export function PageHeader({ pageKey, title, subtitle, icon: Icon }: PageHeaderProps) {
+export function PageHeader({ pageKey, title, subtitle, icon: Icon, adminTab }: PageHeaderProps) {
   const { data: bannerUrl } = useQuery({
     queryKey: ["page-banner", pageKey],
     queryFn: async () => {
@@ -25,16 +27,17 @@ export function PageHeader({ pageKey, title, subtitle, icon: Icon }: PageHeaderP
 
   return (
     <div className="space-y-4">
-      {/* Title + subtitle */}
-      <div>
-        <h1 className="text-3xl font-bold flex items-center gap-3">
-          <Icon className="h-8 w-8 text-primary" />
-          {title}
-        </h1>
-        <p className="text-muted-foreground mt-1">{subtitle}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Icon className="h-8 w-8 text-primary" />
+            {title}
+          </h1>
+          <p className="text-muted-foreground mt-1">{subtitle}</p>
+        </div>
+        {adminTab && <AdminEditButton adminTab={adminTab} />}
       </div>
 
-      {/* Banner */}
       {bannerUrl && (
         <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
           <img

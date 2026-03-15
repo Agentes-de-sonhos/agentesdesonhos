@@ -39,6 +39,7 @@ export default function Mentorias() {
           title="Mentorias"
           subtitle="Programas de mentoria exclusivos para acelerar seu crescimento profissional"
           icon={GraduationCap}
+          adminTab="community"
         />
 
         {/* Mentorships Grid */}

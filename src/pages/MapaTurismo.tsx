@@ -159,6 +159,7 @@ export default function MapaTurismo() {
           title="Mapa do Turismo"
           subtitle="Encontre parceiros do trade turístico"
           icon={Globe}
+          adminTab="trade-suppliers"
         />
 
         {/* Category Icon Buttons - same as Dashboard */}

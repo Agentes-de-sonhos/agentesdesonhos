@@ -85,6 +85,7 @@ export default function BloqueiosAereos() {
           title="Bloqueios Aéreos"
           subtitle="Consulte bloqueios de passagens aéreas disponíveis"
           icon={Plane}
+          adminTab="flight-blocks"
         />
 
         {/* Filters */}

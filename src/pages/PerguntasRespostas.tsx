@@ -13,6 +13,7 @@ export default function PerguntasRespostas() {
           title="Perguntas e Respostas"
           subtitle="Pergunte, compartilhe e ganhe pontos"
           icon={MessageCircleQuestion}
+          adminTab="community"
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
