@@ -2666,6 +2666,47 @@ export type Database = {
         }
         Relationships: []
       }
+      operator_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          operator_id: string
+          rating: number
+          reaction: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          operator_id: string
+          rating: number
+          reaction?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          operator_id?: string
+          rating?: number
+          reaction?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_reviews_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opportunities: {
         Row: {
           client_id: string
