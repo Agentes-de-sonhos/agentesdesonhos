@@ -187,14 +187,11 @@ export function AdminPageBannersManager() {
                     }}
                   />
                   {banner.banner_url && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemove(banner.page_key)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <ConfirmDeleteDialog onConfirm={() => handleRemove(banner.page_key)} title="Remover banner" description="Tem certeza que deseja remover este banner? Esta ação não pode ser desfeita.">
+                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </ConfirmDeleteDialog>
                   )}
                 </div>
               </div>
