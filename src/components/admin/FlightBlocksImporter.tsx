@@ -303,19 +303,40 @@ export function FlightBlocksImporter() {
                   {parsedBlocks.map((block, idx) => (
                     <TableRow key={idx}>
                       <TableCell>
-                        <Input
-                          value={block.origin}
-                          onChange={(e) => updateBlock(idx, "origin", e.target.value.toUpperCase())}
-                          className="h-8 text-xs px-1"
-                          maxLength={3}
-                        />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Input
+                              value={block.origin}
+                              onChange={(e) => updateBlock(idx, "origin", e.target.value.toUpperCase())}
+                              className="h-8 text-xs px-1"
+                              maxLength={3}
+                            />
+                          </TooltipTrigger>
+                          {getAirport(block.origin) && (
+                            <TooltipContent side="bottom">
+                              <p className="text-xs">{getAirport(block.origin)!.name}</p>
+                              <p className="text-xs text-muted-foreground">{getAirport(block.origin)!.city}, {getAirport(block.origin)!.country}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
-                        <Input
-                          value={block.destination}
-                          onChange={(e) => updateBlock(idx, "destination", e.target.value.toUpperCase())}
-                          className="h-8 text-xs px-1"
-                          maxLength={3}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Input
+                              value={block.destination}
+                              onChange={(e) => updateBlock(idx, "destination", e.target.value.toUpperCase())}
+                              className="h-8 text-xs px-1"
+                              maxLength={3}
+                            />
+                          </TooltipTrigger>
+                          {getAirport(block.destination) && (
+                            <TooltipContent side="bottom">
+                              <p className="text-xs">{getAirport(block.destination)!.name}</p>
+                              <p className="text-xs text-muted-foreground">{getAirport(block.destination)!.city}, {getAirport(block.destination)!.country}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
                         />
                       </TableCell>
                       <TableCell>
