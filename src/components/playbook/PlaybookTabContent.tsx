@@ -45,6 +45,13 @@ const TAB_ADVISOR_MAP: Record<string, { icon: typeof Hotel; label: string; categ
     description: "Explore uma curadoria de atrações e pontos turísticos recomendados para indicar aos seus clientes.",
     advisorTab: "attraction",
   },
+  compras: {
+    icon: ShoppingBag,
+    label: "Lojas recomendadas",
+    categoryLabel: "Compras",
+    description: "Descubra as melhores lojas e outlets para indicar aos seus clientes, com curadoria feita por especialistas.",
+    advisorTab: "shopping",
+  },
 };
 
 interface PlaybookTabContentProps {

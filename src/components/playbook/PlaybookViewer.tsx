@@ -41,7 +41,7 @@ import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, typeof Target> = {
   LayoutDashboard, Target, TrendingUp, FileText, Plane, MapPin, Hotel, Car, Camera,
-  UtensilsCrossed, Package, Shield, Users, Route, AlertTriangle, Lightbulb, CheckSquare, GitBranch,
+  UtensilsCrossed, Package, Shield, Users, Route, AlertTriangle, Lightbulb, CheckSquare, GitBranch, ShoppingBag,
 };
 
 export default function PlaybookViewer() {
