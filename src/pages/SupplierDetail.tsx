@@ -258,7 +258,7 @@ export default function SupplierDetail() {
           });
         }}
         isSubmitting={submitReview.isPending}
-        existingReview={userReview as any}
+        existingReview={userReview}
         operatorName={supplier.name}
       />
     </DashboardLayout>
