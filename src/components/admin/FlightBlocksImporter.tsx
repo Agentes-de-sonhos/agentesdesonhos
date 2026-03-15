@@ -532,7 +532,7 @@ export function FlightBlocksImporter() {
           <div className="space-y-4 text-center py-8">
             <div className="flex justify-center">
               {importResult.errors === 0 ? (
-                <Check className="h-16 w-16 text-green-500" />
+                <Check className="h-16 w-16 text-primary" />
               ) : (
                 <AlertCircle className="h-16 w-16 text-amber-500" />
               )}
