@@ -409,6 +409,7 @@ export function FlightBlocksImporter() {
                 </TableBody>
               </Table>
             </div>
+            </TooltipProvider>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setStep("paste")}>Voltar</Button>
