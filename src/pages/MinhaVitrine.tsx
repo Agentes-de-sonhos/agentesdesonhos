@@ -94,23 +94,43 @@ export default function MinhaVitrine() {
   };
 
   const handleAddItem = async () => {
-    if (!selectedMaterialId && uploadFiles.length === 0) {
-      toast.error("Selecione uma lâmina ou faça upload de imagens");
+    if (selectedMaterialIds.length === 0 && uploadFiles.length === 0) {
+      toast.error("Selecione lâminas ou faça upload de imagens");
       return;
     }
     setIsSubmitting(true);
     try {
       let imageUrl: string | undefined;
       let galleryUrls: string[] | undefined;
+      let materialId: string | undefined;
+
       if (uploadFiles.length === 1) {
         imageUrl = await uploadImage(uploadFiles[0]);
       } else if (uploadFiles.length > 1) {
         galleryUrls = await uploadMultipleImages(uploadFiles);
-        imageUrl = galleryUrls[0]; // first image as thumbnail
+        imageUrl = galleryUrls[0];
       }
+
+      // If materials were selected, collect their file URLs as gallery
+      if (selectedMaterialIds.length > 0) {
+        const selectedMats = selectedMaterialIds
+          .map(id => availableMaterials.find(m => m.id === id))
+          .filter(Boolean);
+        const matUrls = selectedMats.map(m => m!.file_url || m!.thumbnail_url).filter(Boolean) as string[];
+        if (selectedMaterialIds.length === 1) {
+          materialId = selectedMaterialIds[0];
+          imageUrl = matUrls[0];
+        } else {
+          // Multiple materials selected → gallery
+          galleryUrls = matUrls;
+          imageUrl = matUrls[0];
+          materialId = selectedMaterialIds[0]; // link to first material for metadata
+        }
+      }
+
       const finalCategory = category === "__custom" ? customCategory : category;
       await addItem.mutateAsync({
-        material_id: selectedMaterialId || undefined,
+        material_id: materialId,
         image_url: imageUrl,
         gallery_urls: galleryUrls,
         category: finalCategory || "Geral",
