@@ -22,6 +22,7 @@ import CarteiraPublica from "./pages/CarteiraPublica";
 import ShortCodeRedirect from "./pages/ShortCodeRedirect";
 import MapaTurismo from "./pages/MapaTurismo";
 import SupplierDetail from "./pages/SupplierDetail";
+import OperadoraDetail from "./pages/OperadoraDetail";
 import Noticias from "./pages/Noticias";
 import Perfil from "./pages/Perfil";
 import Onboarding from "./pages/Onboarding";
