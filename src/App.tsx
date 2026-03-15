@@ -197,6 +197,14 @@ const App = () => (
               }
             />
             <Route
+              path="/mapa-turismo/operadora/:id"
+              element={
+                <ProtectedRoute>
+                  <OperadoraDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/noticias"
               element={
                 <ProtectedRoute>
