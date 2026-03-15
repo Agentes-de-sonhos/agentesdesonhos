@@ -76,8 +76,20 @@ export function MultiStepSignup({ onComplete, onCancel }: MultiStepSignupProps) 
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null);
   const [step2Data, setStep2Data] = useState<Step2Data | null>(null);
   const [step3Data, setStep3Data] = useState<Step3Data | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [termsError, setTermsError] = useState(false);
   
   const { toast } = useToast();
+
+  const handleFinalSubmitWithTerms = () => {
+    if (!acceptedTerms || !acceptedPrivacy) {
+      setTermsError(true);
+      return;
+    }
+    setTermsError(false);
+    handleFinalSubmit();
+  };
 
   const step1Form = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),

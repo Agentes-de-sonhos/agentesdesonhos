@@ -392,6 +392,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
+            <Route path="/termosdeuso" element={<TermosDeUso />} />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />

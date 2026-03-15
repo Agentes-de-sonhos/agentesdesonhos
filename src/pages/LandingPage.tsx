@@ -550,13 +550,22 @@ export default function LandingPage() {
 
       {/* ── Footer ─────────────────────────────────────────────── */}
       <div className="border-t border-border/40 bg-card">
-        <div className="container py-10 text-center space-y-2">
+        <div className="container py-10 text-center space-y-4">
           <p className="text-sm text-muted-foreground italic">
             A viagem mais importante é a da sua carreira.
           </p>
           <p className="text-xs text-muted-foreground/80">
             Agentes de Sonhos — Plataforma inteligente para agentes de viagem.
           </p>
+          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+            <a href="/politicasdeprivacidade" className="hover:text-foreground transition-colors underline underline-offset-2">
+              Políticas de Privacidade
+            </a>
+            <span>•</span>
+            <a href="/termosdeuso" className="hover:text-foreground transition-colors underline underline-offset-2">
+              Termos de Uso
+            </a>
+          </div>
         </div>
         <Footer />
       </div>
