@@ -127,20 +127,21 @@ export interface AccordionBlockItem {
 
 export const PLAYBOOK_TABS = [
   { key: 'como_vender', label: 'Como Vender', icon: 'TrendingUp' },
-  { key: 'perfis_clientes', label: 'Perfis de Clientes', icon: 'Users' },
+  { key: 'hospedagem', label: 'Hospedagem', icon: 'Hotel' },
+  { key: 'atracoes', label: 'Atrações', icon: 'Camera' },
+  { key: 'gastronomia', label: 'Gastronomia', icon: 'UtensilsCrossed' },
   { key: 'pacote_ideal', label: 'Pacote Ideal', icon: 'Package' },
   { key: 'documentacao', label: 'Documentação', icon: 'FileText' },
   { key: 'logistica_aerea', label: 'Logística Aérea', icon: 'Plane' },
   { key: 'logistica_terrestre', label: 'Logística Terrestre', icon: 'Car' },
-  { key: 'hospedagem', label: 'Hospedagem', icon: 'Hotel' },
-  { key: 'atracoes', label: 'Atrações', icon: 'Camera' },
-  { key: 'gastronomia', label: 'Gastronomia', icon: 'UtensilsCrossed' },
   { key: 'viagens_combinadas', label: 'Viagens Combinadas', icon: 'Route' },
   { key: 'segredos_destino', label: 'Segredos do Destino', icon: 'Lightbulb' },
   { key: 'alertas_golpes', label: 'Alertas e Golpes', icon: 'AlertTriangle' },
   { key: 'mapa', label: 'Mapa', icon: 'MapPin' },
   { key: 'checklist_final', label: 'Checklist Final', icon: 'CheckSquare' },
 ] as const;
+
+export const TRAVEL_ADVISOR_TABS = new Set(['hospedagem', 'atracoes', 'gastronomia']);
 
 export type PlaybookTabKey = typeof PLAYBOOK_TABS[number]['key'];
 
