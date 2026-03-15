@@ -380,14 +380,37 @@ export default function MinhaVitrine() {
                 <TabsTrigger value="upload" className="flex-1"><Upload className="h-4 w-4 mr-1" /> Upload</TabsTrigger>
               </TabsList>
               <TabsContent value="materials" className="space-y-4">
+                {selectedMaterialIds.length > 0 && (
+                  <div className="flex items-center justify-between bg-muted/50 rounded-md px-3 py-2">
+                    <span className="text-sm font-medium text-foreground">
+                      {selectedMaterialIds.length} {selectedMaterialIds.length === 1 ? "lâmina selecionada" : "lâminas selecionadas"}
+                    </span>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setSelectedMaterialIds([])}>Limpar seleção</Button>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">Clique para selecionar. Selecione várias para criar um carrossel.</p>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
-                  {availableMaterials.map(m => (
-                    <button key={m.id} onClick={() => { setSelectedMaterialId(m.id); setUploadFiles([]); setUploadPreviews([]); }}
-                      className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-[4/5] ${selectedMaterialId === m.id ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-muted-foreground/30"}`}>
-                      <img src={m.thumbnail_url || m.file_url || "/placeholder.svg"} alt={m.title} className="w-full h-full object-cover" />
-                      {!m.is_permanent && <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">7d</Badge>}
-                    </button>
-                  ))}
+                  {availableMaterials.map(m => {
+                    const isSelected = selectedMaterialIds.includes(m.id);
+                    const selectionIndex = selectedMaterialIds.indexOf(m.id);
+                    return (
+                      <button key={m.id} onClick={() => {
+                        setSelectedMaterialIds(prev =>
+                          isSelected ? prev.filter(id => id !== m.id) : [...prev, m.id]
+                        );
+                        setUploadFiles([]); setUploadPreviews([]);
+                      }}
+                        className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-[4/5] ${isSelected ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-muted-foreground/30"}`}>
+                        <img src={m.thumbnail_url || m.file_url || "/placeholder.svg"} alt={m.title} className="w-full h-full object-cover" />
+                        {isSelected && (
+                          <div className="absolute top-1 left-1 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold">
+                            {selectionIndex + 1}
+                          </div>
+                        )}
+                        {!m.is_permanent && <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">7d</Badge>}
+                      </button>
+                    );
+                  })}
                   {availableMaterials.length === 0 && <p className="col-span-full text-center text-sm text-muted-foreground py-8">Nenhuma lâmina disponível</p>}
                 </div>
               </TabsContent>
