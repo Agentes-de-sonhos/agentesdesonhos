@@ -25,6 +25,7 @@ import {
   GitBranch,
   List,
   LayoutDashboard,
+  Star,
 } from "lucide-react";
 
 import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
