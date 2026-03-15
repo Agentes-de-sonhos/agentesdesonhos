@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import {
   Dialog,
   DialogContent,
