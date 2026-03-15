@@ -237,7 +237,7 @@ const faqs = [
 export default function LandingPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
@@ -254,8 +254,6 @@ export default function LandingPage() {
   }
 
   if (user) return null;
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const goLogin = () => navigate("/auth");
   const goSignup = () => navigate("/auth?tab=signup");
