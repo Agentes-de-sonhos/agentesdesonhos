@@ -121,6 +121,7 @@ export default function Agenda() {
             title="Minha Agenda"
             subtitle="Planeje e gerencie todos os seus eventos do ano"
             icon={Calendar}
+            adminTab="agenda-events"
           />
 
           <div className="flex items-center gap-2">

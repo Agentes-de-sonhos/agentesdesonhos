@@ -59,6 +59,7 @@ export default function Community() {
           title="Travel Experts"
           subtitle="Conecte-se, aprenda e cresça com a nossa comunidade de agentes de viagem"
           icon={Users}
+          adminTab="community"
         />
 
         {/* 1. Fam Trips & Exclusive Opportunities */}

@@ -321,6 +321,7 @@ export default function DreamAdvisor() {
             title="Travel Advisor"
             subtitle="Encontre hotéis, restaurantes, atrações, compras e experiências para recomendar aos seus clientes"
             icon={Globe}
+            adminTab="hotels"
           />
 
           {/* Tab navigation */}

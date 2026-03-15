@@ -105,6 +105,7 @@ export default function Materiais() {
           title="Materiais de Divulgação"
           subtitle="Sua biblioteca de campanhas para vendas"
           icon={FolderOpen}
+          adminTab="materials"
         />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>

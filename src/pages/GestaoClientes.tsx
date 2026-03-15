@@ -34,6 +34,7 @@ export default function GestaoClientes() {
           title="Gestão de Clientes"
           subtitle="Gerencie clientes, oportunidades e metas de vendas"
           icon={Users}
+          adminTab="crm"
         />
 
         <Tabs value={getCurrentTab()} onValueChange={handleTabChange} className="w-full">
