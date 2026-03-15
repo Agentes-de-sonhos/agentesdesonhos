@@ -109,7 +109,62 @@ export function AdminTourOperatorsManager() {
     },
   });
 
-  const downloadTemplate = () => {
+  const openEdit = (op: any) => {
+    setEditForm({
+      name: op.name || "",
+      category: op.category || "",
+      specialties: op.specialties || "",
+      how_to_sell: op.how_to_sell || "",
+      sales_channels: op.sales_channels || "",
+      commercial_contacts: op.commercial_contacts || "",
+      website: op.website || "",
+      instagram: op.instagram || "",
+      founded_year: op.founded_year ?? "",
+      annual_revenue: op.annual_revenue || "",
+      employees: op.employees ?? "",
+      executive_team: op.executive_team || "",
+    });
+    setEditOperator(op);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editOperator) return;
+    setSaving(true);
+    try {
+      const payload: any = {
+        name: editForm.name.trim(),
+        category: editForm.category.trim() || "Operadoras de turismo",
+        specialties: editForm.specialties.trim() || null,
+        how_to_sell: editForm.how_to_sell.trim() || null,
+        sales_channels: editForm.sales_channels.trim() || null,
+        commercial_contacts: editForm.commercial_contacts.trim() || null,
+        website: editForm.website.trim() || null,
+        instagram: editForm.instagram.trim() || null,
+        founded_year: editForm.founded_year ? Number(editForm.founded_year) || null : null,
+        annual_revenue: editForm.annual_revenue.trim() || null,
+        employees: editForm.employees ? Number(editForm.employees) || null : null,
+        executive_team: editForm.executive_team.trim() || null,
+      };
+      if (!payload.name) {
+        toast.error("Nome é obrigatório");
+        setSaving(false);
+        return;
+      }
+      const { error } = await supabase
+        .from("tour_operators")
+        .update(payload)
+        .eq("id", editOperator.id);
+      if (error) throw error;
+      toast.success("Operadora atualizada!");
+      setEditOperator(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
     const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Operadoras");
