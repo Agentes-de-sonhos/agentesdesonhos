@@ -34,7 +34,7 @@ import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
 import { PlaybookChecklistTab } from "./PlaybookChecklistTab";
 import { PlaybookPdfSection } from "./PlaybookPdfSection";
 import { AttractionsExplorer } from "./AttractionsExplorer";
-import { PLAYBOOK_TABS } from "@/types/playbook";
+import { PLAYBOOK_TABS, TRAVEL_ADVISOR_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, typeof Target> = {
