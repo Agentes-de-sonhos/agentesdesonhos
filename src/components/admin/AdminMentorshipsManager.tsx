@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { GraduationCap, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Mentorship } from "@/types/mentorship";
@@ -195,14 +196,11 @@ export function AdminMentorshipsManager() {
                       <Button size="icon" variant="ghost" onClick={() => openEdit(item)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-destructive"
-                        onClick={() => deleteMutation.mutate(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                        <Button size="icon" variant="ghost" className="text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </ConfirmDeleteDialog>
                     </div>
                   </TableCell>
                 </TableRow>

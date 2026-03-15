@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Upload, Trash2, Building2, Download, AlertCircle, CheckCircle } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -249,7 +250,6 @@ export function AdminHotelsManager() {
   );
 
   const handleDeleteAll = async (destination: string) => {
-    if (!confirm(`Tem certeza que deseja excluir TODOS os hotéis de "${destination}"?`)) return;
     const { error } = await supabase.from("hotels").delete().eq("destination", destination);
     if (error) {
       toast.error("Erro ao excluir hotéis");
@@ -379,10 +379,12 @@ export function AdminHotelsManager() {
                 <Badge variant="secondary">{destHotels!.length}</Badge>
               </CardTitle>
             </div>
-            <Button variant="destructive" size="sm" onClick={() => handleDeleteAll(dest)}>
-              <Trash2 className="h-4 w-4 mr-1" />
-              Excluir todos
-            </Button>
+            <ConfirmDeleteDialog onConfirm={() => handleDeleteAll(dest)} title="Excluir todos os hotéis" description={`Tem certeza que deseja excluir TODOS os hotéis de "${dest}"? Esta ação é permanente.`}>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4 mr-1" />
+                Excluir todos
+              </Button>
+            </ConfirmDeleteDialog>
           </CardHeader>
           <CardContent>
             <Table>

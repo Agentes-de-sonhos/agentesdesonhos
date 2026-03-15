@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Plus, Send, Trash2, Search, Loader2 } from "lucide-react";
+import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 import * as XLSX from "xlsx";
 
 interface CrmContact {
@@ -298,15 +299,11 @@ export function AdminCrmContacts() {
                       <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); openSendModal(contact); }} title="Enviar email">
                         <Send className="h-4 w-4" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-destructive"
-                        onClick={(e) => { e.stopPropagation(); deleteContactMutation.mutate(contact.id); }}
-                        title="Excluir"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <ConfirmDeleteDialog onConfirm={() => deleteContactMutation.mutate(contact.id)}>
+                        <Button size="icon" variant="ghost" className="text-destructive" title="Excluir" onClick={(e) => e.stopPropagation()}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </ConfirmDeleteDialog>
                     </div>
                   </TableCell>
                 </TableRow>

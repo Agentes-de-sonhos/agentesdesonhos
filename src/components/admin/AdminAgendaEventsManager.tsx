@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import {
   Dialog,
   DialogContent,
@@ -213,7 +214,6 @@ export function AdminAgendaEventsManager() {
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este evento global?")) return;
     deleteMutation.mutate(id);
   };
 
@@ -451,14 +451,11 @@ export function AdminAgendaEventsManager() {
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => handleDelete(event.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => handleDelete(event.id)} title="Excluir evento" description="Tem certeza que deseja excluir permanentemente este evento global?">
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 </div>
               </div>
             ))}

@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Pencil, Trash2, Eye, Download, Upload, Loader2, Music, FileText, ExternalLink, X, GripVertical } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -291,11 +292,11 @@ export function AdminSurveyManager() {
                       <Button size="sm" variant="ghost" onClick={() => openEdit(s)} title="Editar">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => {
-                        if (confirm("Excluir esta pesquisa?")) deleteMutation.mutate(s.id);
-                      }}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(s.id)} title="Excluir pesquisa" description="Tem certeza que deseja excluir permanentemente esta pesquisa?">
+                        <Button size="sm" variant="ghost" className="text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </ConfirmDeleteDialog>
                       <Button size="sm" variant="ghost" asChild title="Visualizar">
                         <a href={`/pesquisa/${s.slug}`} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-4 w-4" />
@@ -523,11 +524,11 @@ function QuestionsManager({ surveyId, onClose }: { surveyId: string; onClose: ()
                     <Button size="sm" variant="ghost" onClick={() => editQuestion(q)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => {
-                      if (confirm("Excluir?")) deleteMutation.mutate(q.id);
-                    }}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(q.id)}>
+                      <Button size="sm" variant="ghost" className="text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </ConfirmDeleteDialog>
                   </div>
                 </CardContent>
               </Card>

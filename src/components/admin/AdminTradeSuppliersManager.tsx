@@ -32,6 +32,7 @@ import {
   X,
   Tag,
 } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { useToast } from "@/hooks/use-toast";
 import { SupplierContactsManager } from "./SupplierContactsManager";
 import { SupplierLogoUpload } from "./SupplierLogoUpload";
@@ -638,13 +639,11 @@ export function AdminTradeSuppliersManager() {
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteMutation.mutate(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 </div>
               </div>
             ))}

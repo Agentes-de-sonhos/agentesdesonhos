@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Edit, Trash2, Eye, EyeOff, Upload, ExternalLink, Loader2 } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -131,9 +132,7 @@ export function AdminPopupsManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Tem certeza que deseja excluir este pop-up?")) {
-      await deletePopup.mutateAsync(id);
-    }
+    await deletePopup.mutateAsync(id);
   };
 
   const handlePreview = (popup: GlobalPopup) => {
@@ -249,14 +248,11 @@ export function AdminPopupsManager() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(popup.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <ConfirmDeleteDialog onConfirm={() => handleDelete(popup.id)} title="Excluir pop-up" description="Tem certeza que deseja excluir permanentemente este pop-up?">
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </ConfirmDeleteDialog>
                         </div>
                       </TableCell>
                     </TableRow>

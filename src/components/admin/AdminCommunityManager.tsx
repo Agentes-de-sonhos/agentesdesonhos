@@ -46,6 +46,7 @@ import {
   Loader2,
   Users,
 } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -254,9 +255,11 @@ function FamTripsManager() {
                   <Button variant="ghost" size="icon" onClick={() => handleOpen(item)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(item.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 </TableCell>
               </TableRow>
             ))}
@@ -479,9 +482,11 @@ function OnlineMeetingsManager() {
                   <Button variant="ghost" size="icon" onClick={() => handleOpen(item)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(item.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 </TableCell>
               </TableRow>
             ))}
@@ -690,9 +695,11 @@ function InPersonEventsManager() {
                   <Button variant="ghost" size="icon" onClick={() => handleOpen(item)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(item.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 </TableCell>
               </TableRow>
             ))}
@@ -914,9 +921,11 @@ function WorkshopsManager() {
                   <Button variant="ghost" size="icon" onClick={() => handleOpen(item)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(item.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 </TableCell>
               </TableRow>
             ))}
@@ -1147,9 +1156,11 @@ function PrizesManager() {
                   <Button variant="ghost" size="icon" onClick={() => handleOpen(item)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(item.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 </TableCell>
               </TableRow>
             ))}

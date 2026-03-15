@@ -39,6 +39,7 @@ import {
   GraduationCap,
   GripVertical,
 } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SupplierCombobox } from "./SupplierCombobox";
@@ -827,16 +828,11 @@ export function AdminMaterialsManager() {
                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEdit(material)}>
                         <Pencil className="h-3 w-3" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => {
-                          if (confirm("Excluir este arquivo?")) deleteMutation.mutate(material.id);
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3 text-destructive" />
-                      </Button>
+                      <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(material.id)} title="Excluir arquivo" description="Tem certeza que deseja excluir permanentemente este arquivo?">
+                        <Button variant="ghost" size="icon" className="h-6 w-6">
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </ConfirmDeleteDialog>
                     </div>
                   </div>
                 </div>

@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Pencil, Loader2 } from "lucide-react";
+import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 
 interface CrmTemplate {
   id: string;
@@ -121,9 +122,11 @@ export function AdminCrmTemplates() {
                       <Button size="icon" variant="ghost" onClick={() => openEdit(tpl)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost" className="text-destructive" onClick={() => deleteMutation.mutate(tpl.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(tpl.id)}>
+                        <Button size="icon" variant="ghost" className="text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </ConfirmDeleteDialog>
                     </div>
                   </TableCell>
                 </TableRow>

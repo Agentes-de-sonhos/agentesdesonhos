@@ -8,6 +8,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Image, Loader2, Upload, Trash2 } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -187,14 +188,11 @@ export function AdminPageBannersManager() {
                     }}
                   />
                   {banner.banner_url && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemove(banner.page_key)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <ConfirmDeleteDialog onConfirm={() => handleRemove(banner.page_key)} title="Remover banner" description="Tem certeza que deseja remover este banner? Esta ação não pode ser desfeita.">
+                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </ConfirmDeleteDialog>
                   )}
                 </div>
               </div>

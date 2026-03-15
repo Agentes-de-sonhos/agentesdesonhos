@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ExternalLink, Copy, Eye } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import type { BusinessCard, CardButton, SocialLinks } from "@/hooks/useBusinessCard";
 
 const PUBLIC_DOMAIN = "https://contato.tur.br";
@@ -237,16 +238,11 @@ export function AdminBusinessCardsManager() {
                         <Button variant="ghost" size="icon" onClick={() => openEdit(card)} title="Editar">
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (confirm("Excluir este cartão?")) deleteMutation.mutate(card.id);
-                          }}
-                          title="Excluir"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(card.id)} title="Excluir cartão" description="Tem certeza que deseja excluir permanentemente este cartão?">
+                          <Button variant="ghost" size="icon" title="Excluir">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </ConfirmDeleteDialog>
                       </div>
                     </TableCell>
                   </TableRow>

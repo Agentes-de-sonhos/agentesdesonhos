@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Trash2, GripVertical, Save } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 
 interface Room {
   id: string;
@@ -164,14 +165,11 @@ export function AdminCommunityRoomsManager() {
                   />
                 </div>
                 {!room.is_general && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => deleteRoom.mutate(room.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => deleteRoom.mutate(room.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 )}
               </div>
             </div>
