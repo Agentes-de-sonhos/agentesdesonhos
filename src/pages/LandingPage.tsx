@@ -255,8 +255,16 @@ export default function LandingPage() {
 
   if (user) return null;
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const goLogin = () => navigate("/auth");
   const goSignup = () => navigate("/auth?tab=signup");
+
+  const scrollToSection = (id: string) => {
+    setMobileMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -264,15 +272,60 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">
           <img src={logoAgentes} alt="Agentes de Sonhos" className="h-9" />
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {sectionLinks.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {s.label}
+              </button>
+            ))}
+          </nav>
+
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={goLogin}>
+            <Button variant="ghost" size="sm" onClick={goLogin} className="hidden sm:inline-flex">
               Entrar
             </Button>
-            <Button size="sm" onClick={goSignup}>
+            <Button size="sm" onClick={goSignup} className="hidden sm:inline-flex">
               Cadastrar
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border/40 bg-card py-4 px-4 space-y-2">
+            {sectionLinks.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="block w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
+              >
+                {s.label}
+              </button>
+            ))}
+            <div className="flex gap-2 pt-2 border-t border-border/40">
+              <Button variant="outline" size="sm" onClick={goLogin} className="flex-1">
+                Entrar
+              </Button>
+              <Button size="sm" onClick={goSignup} className="flex-1">
+                Cadastrar
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
