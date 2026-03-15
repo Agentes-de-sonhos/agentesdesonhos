@@ -282,51 +282,8 @@ function ShoppingTab() {
     </>
   );
 }
-function ExperienceTab() {
-  const [filters, setFilters] = useState(defaultExperienceFilters);
-  const [suggestOpen, setSuggestOpen] = useState(false);
-  const { data: items, isLoading } = useExperiences(filters);
-  const { data: filterOptions } = useExperienceFilterOptions();
 
-  const sections = [
-    ...(filterOptions?.categories?.length ? [{ title: "Categoria", type: "checkbox" as const, options: filterOptions.categories, filterKey: "categories" }] : [{ title: "Categoria", type: "checkbox" as const, options: EXPERIENCE_CATEGORY_OPTIONS, filterKey: "categories" }]),
-    { title: "Duração", type: "checkbox" as const, options: EXPERIENCE_DURATION_OPTIONS, filterKey: "durations" },
-    ...(filterOptions?.neighborhoods?.length ? [{ title: "Local", type: "checkbox" as const, options: filterOptions.neighborhoods, filterKey: "neighborhoods" }] : []),
-    { title: "Destaques", type: "checkbox" as const, options: EXPERIENCE_TAG_OPTIONS, filterKey: "tags" },
-    { title: "Preço médio (USD)", type: "price" as const, filterKey: "priceRange", priceMax: 500 },
-  ];
 
-  return (
-    <>
-      <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-4">
-        <DestinationSelector destinations={filterOptions?.destinations || []} selected={filters.search} onSelect={(s) => setFilters((f) => ({ ...f, search: s }))} />
-        <Button variant="outline" className="gap-2 rounded-2xl px-5 py-3.5 h-auto text-sm font-semibold border-2 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:border-primary transition-all" onClick={() => setSuggestOpen(true)}>
-          <PlusCircle className="h-5 w-5" /> Sugerir experiência
-        </Button>
-      </div>
-      <AdvisorContent
-        filters={<AdvisorFiltersPanel filters={filters} onChange={setFilters} sections={sections} />}
-        isLoading={isLoading}
-        count={items?.length || 0}
-        items={items}
-        emptySearch={filters.search}
-        emptyIcon={<Compass className="h-10 w-10 text-muted-foreground" />}
-        renderCard={(item) => {
-          const tags = [item.must_visit && { label: "Imperdível", icon: "🔥", color: "bg-warning/10 text-warning border-warning/20" }].filter(Boolean) as any[];
-          const details = [
-            item.average_duration && { icon: "⏱️", label: item.average_duration },
-            item.category && { icon: "🏷️", label: item.category },
-          ].filter(Boolean) as any[];
-          return (
-            <AdvisorCard key={item.id} name={item.name} location={[item.neighborhood, item.city].filter(Boolean).join(" – ") || item.destination} category={item.category} tags={tags} details={details} shortDescription={item.short_description} googleMapsLink={item.google_maps_link} expertTip={item.expert_tip}
-              priceDisplay={item.average_price != null ? (<><span className="text-xs text-muted-foreground">a partir de</span><span className="text-2xl font-bold text-foreground">${item.average_price.toLocaleString("en-US")}</span></>) : undefined} />
-          );
-        }}
-      />
-      <SuggestAdvisorDialog open={suggestOpen} onOpenChange={setSuggestOpen} advisorType="experience" />
-    </>
-  );
-}
 // ─── Shared content layout with filters + results ──
 
 function AdvisorContent({ filters, isLoading, count, items, renderCard, emptySearch, emptyIcon }: {
