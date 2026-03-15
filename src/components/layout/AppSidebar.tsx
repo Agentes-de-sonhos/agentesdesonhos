@@ -526,14 +526,17 @@ export function AppSidebar() {
           )}
 
           {!collapsed ? (
-            <div className="text-center pt-2">
+            <div className="text-center pt-2 space-y-0.5">
+              <Link to="/atualizacoes" className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors">
+                v1.0 Beta
+              </Link>
               <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>
               <p className="text-[11px] font-medium text-muted-foreground/80">Nobre Digital</p>
             </div>
           ) : (
-            <div className="text-center pt-2">
-              <p className="text-[8px] text-muted-foreground/60">NDH</p>
-            </div>
+            <Link to="/atualizacoes" className="block text-center pt-2">
+              <p className="text-[8px] text-muted-foreground/50 hover:text-primary transition-colors">v1.0</p>
+            </Link>
           )}
         </div>
       </aside>
