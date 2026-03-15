@@ -25,6 +25,7 @@ import {
   GitBranch,
   List,
   LayoutDashboard,
+  ShoppingBag,
   Star,
 } from "lucide-react";
 
