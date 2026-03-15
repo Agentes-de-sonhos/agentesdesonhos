@@ -237,6 +237,7 @@ const faqs = [
 export default function LandingPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
