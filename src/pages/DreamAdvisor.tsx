@@ -32,7 +32,6 @@ const TABS = [
   { key: "dining", label: "Restaurantes", icon: UtensilsCrossed },
   { key: "attraction", label: "Atrações", icon: Landmark },
   { key: "shopping", label: "Compras", icon: ShoppingBag },
-  { key: "experience", label: "Experiências", icon: Compass },
 ] as const;
 
 type TabKey = typeof TABS[number]["key"];
