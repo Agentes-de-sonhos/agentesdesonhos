@@ -24,6 +24,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useAirports } from "@/hooks/useAirports";
 
 export default function BloqueiosAereos() {
   const [searchTerm, setSearchTerm] = useState("");
