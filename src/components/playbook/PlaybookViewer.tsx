@@ -196,6 +196,8 @@ export default function PlaybookViewer() {
             <PlaybookTabContent
               section={activeSection}
               tabLabel={activeTabData.label}
+              tabKey={activeTab}
+              destinationName={destination.name}
               onSaveSection={isAdmin ? handleSaveSection : undefined}
             />
           )}
