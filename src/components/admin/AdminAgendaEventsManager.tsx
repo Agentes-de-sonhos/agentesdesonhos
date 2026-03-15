@@ -214,7 +214,6 @@ export function AdminAgendaEventsManager() {
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este evento global?")) return;
     deleteMutation.mutate(id);
   };
 
