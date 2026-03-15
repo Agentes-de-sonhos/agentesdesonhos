@@ -94,6 +94,7 @@ export default function OperadoraDetail() {
           specialties={operator.specialties}
           website={operator.website}
           instagram={operator.instagram}
+          logoUrl={(operator as any).logo_url}
         />
 
         {/* Two-column layout */}
