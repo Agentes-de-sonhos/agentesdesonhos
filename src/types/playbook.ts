@@ -130,6 +130,7 @@ export const PLAYBOOK_TABS = [
   { key: 'hospedagem', label: 'Hospedagem', icon: 'Hotel' },
   { key: 'atracoes', label: 'Atrações', icon: 'Camera' },
   { key: 'gastronomia', label: 'Gastronomia', icon: 'UtensilsCrossed' },
+  { key: 'compras', label: 'Compras', icon: 'ShoppingBag' },
   { key: 'logistica_aerea', label: 'Logística Aérea', icon: 'Plane' },
   { key: 'logistica_terrestre', label: 'Logística Terrestre', icon: 'Car' },
   { key: 'documentacao', label: 'Documentação', icon: 'FileText' },
@@ -141,7 +142,7 @@ export const PLAYBOOK_TABS = [
   { key: 'checklist_final', label: 'Checklist Final', icon: 'CheckSquare' },
 ] as const;
 
-export const TRAVEL_ADVISOR_TABS = new Set(['hospedagem', 'atracoes', 'gastronomia']);
+export const TRAVEL_ADVISOR_TABS = new Set(['hospedagem', 'atracoes', 'gastronomia', 'compras']);
 
 export type PlaybookTabKey = typeof PLAYBOOK_TABS[number]['key'];
 
