@@ -4,7 +4,7 @@ import { usePublicShowcase, type ShowcaseItem, getFeaturedLabel } from "@/hooks/
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Phone, MessageCircle, X, ExternalLink } from "lucide-react";
+import { Loader2, Phone, MessageCircle, X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 
 function FeaturedBadge({ label }: { label: string | null }) {
   const info = getFeaturedLabel(label);
@@ -13,6 +13,105 @@ function FeaturedBadge({ label }: { label: string | null }) {
     <span className="absolute top-3 left-3 z-10 bg-amber-500 text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
       <span className="text-base">{info.emoji}</span> {info.text}
     </span>
+  );
+}
+
+function ImageCarousel({ images, onImageClick }: { images: string[]; onImageClick?: () => void }) {
+  const [current, setCurrent] = useState(0);
+
+  if (images.length <= 1) {
+    return (
+      <img
+        src={images[0]}
+        alt=""
+        className="w-full block cursor-pointer"
+        loading="lazy"
+        onClick={onImageClick}
+      />
+    );
+  }
+
+  return (
+    <div className="relative" onClick={onImageClick}>
+      <img src={images[current]} alt="" className="w-full block cursor-pointer" loading="lazy" />
+      {/* Dots */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+            className={`h-2 w-2 rounded-full transition-all ${i === current ? "bg-white scale-110 shadow" : "bg-white/50"}`}
+          />
+        ))}
+      </div>
+      {/* Arrows */}
+      {current > 0 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setCurrent(c => c - 1); }}
+          className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors z-10"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+      )}
+      {current < images.length - 1 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setCurrent(c => c + 1); }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors z-10"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      )}
+      {/* Counter */}
+      <span className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10">
+        {current + 1}/{images.length}
+      </span>
+    </div>
+  );
+}
+
+function LightboxCarousel({ images, actionButton }: { images: string[]; actionButton: React.ReactNode }) {
+  const [current, setCurrent] = useState(0);
+
+  return (
+    <div className="relative">
+      <img src={images[current]} alt="" className="w-full max-h-[80vh] object-contain" />
+      {images.length > 1 && (
+        <>
+          <div className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10">
+            {current + 1}/{images.length}
+          </div>
+          {current > 0 && (
+            <button
+              onClick={() => setCurrent(c => c - 1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-10"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+          )}
+          {current < images.length - 1 && (
+            <button
+              onClick={() => setCurrent(c => c + 1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-10"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          )}
+          {/* Dots */}
+          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                className={`h-2.5 w-2.5 rounded-full transition-all ${i === current ? "bg-white scale-110" : "bg-white/50"}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+        {actionButton}
+      </div>
+    </div>
   );
 }
 
@@ -49,11 +148,12 @@ export default function VitrinePublica() {
   );
   const regularItems = applyFilters(items.filter(i => !i.is_featured));
 
-  const getItemImageUrl = (item: ShowcaseItem): string | null => {
-    if (item.image_url) return item.image_url;
-    if (item.materials?.file_url) return item.materials.file_url;
-    if (item.materials?.thumbnail_url) return item.materials.thumbnail_url;
-    return null;
+  const getItemImages = (item: ShowcaseItem): string[] => {
+    // If gallery_urls has multiple images, use them
+    if (item.gallery_urls && item.gallery_urls.length > 1) return item.gallery_urls;
+    // Fallback to single image
+    const single = item.image_url || item.materials?.file_url || item.materials?.thumbnail_url;
+    return single ? [single] : [];
   };
 
   const handleItemClick = (item: ShowcaseItem) => {
@@ -90,23 +190,22 @@ export default function VitrinePublica() {
   }
 
   const renderItem = (item: ShowcaseItem, isFeatured: boolean) => {
-    const imgUrl = getItemImageUrl(item);
-    if (!imgUrl) return null;
+    const images = getItemImages(item);
+    if (images.length === 0) return null;
     return (
       <div
         key={item.id}
-        className={`relative rounded-2xl overflow-hidden cursor-pointer group transition-shadow ${
+        className={`relative rounded-2xl overflow-hidden group transition-shadow ${
           isFeatured ? "shadow-lg ring-2 ring-amber-400/40" : "shadow-md"
         }`}
-        onClick={() => handleItemClick(item)}
       >
         {isFeatured && <FeaturedBadge label={item.featured_label} />}
-        <img src={imgUrl} alt="" className="w-full block" loading="lazy" />
+        <ImageCarousel images={images} onImageClick={() => handleItemClick(item)} />
         {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
           <Button
             size="sm"
-            className="bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white shadow-lg"
+            className="bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white shadow-lg pointer-events-auto"
             onClick={e => { e.stopPropagation(); handleAction(item); }}
           >
             {item.action_type === "whatsapp" ? (
@@ -167,13 +266,11 @@ export default function VitrinePublica() {
           </div>
         ) : (
           <>
-            {/* Featured */}
             {featuredItems.length > 0 && (
               <div className="space-y-3">
                 {featuredItems.map(item => renderItem(item, true))}
               </div>
             )}
-            {/* Divider */}
             {featuredItems.length > 0 && regularItems.length > 0 && (
               <div className="flex items-center gap-3 py-2">
                 <div className="flex-1 h-px bg-border" />
@@ -181,7 +278,6 @@ export default function VitrinePublica() {
                 <div className="flex-1 h-px bg-border" />
               </div>
             )}
-            {/* Regular */}
             {regularItems.map(item => renderItem(item, false))}
           </>
         )}
@@ -212,24 +308,29 @@ export default function VitrinePublica() {
       {/* Lightbox */}
       <Dialog open={!!lightboxItem} onOpenChange={open => { if (!open) setLightboxItem(null); }}>
         <DialogContent className="max-w-[95vw] sm:max-w-xl p-0 overflow-hidden bg-black/95 border-none">
-          {lightboxItem && (
-            <div className="relative">
-              <button onClick={() => setLightboxItem(null)} className="absolute top-3 right-3 z-10 h-8 w-8 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80">
-                <X className="h-4 w-4" />
-              </button>
-              {lightboxItem.is_featured && <FeaturedBadge label={lightboxItem.featured_label} />}
-              <img src={getItemImageUrl(lightboxItem) || "/placeholder.svg"} alt="" className="w-full max-h-[80vh] object-contain" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                <Button className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white" onClick={() => handleAction(lightboxItem)}>
-                  {lightboxItem.action_type === "whatsapp" ? (
-                    <><MessageCircle className="h-4 w-4 mr-2" /> Falar no WhatsApp</>
-                  ) : (
-                    <><ExternalLink className="h-4 w-4 mr-2" /> Saiba mais</>
-                  )}
-                </Button>
+          {lightboxItem && (() => {
+            const images = getItemImages(lightboxItem);
+            return (
+              <div className="relative">
+                <button onClick={() => setLightboxItem(null)} className="absolute top-3 right-3 z-20 h-8 w-8 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80">
+                  <X className="h-4 w-4" />
+                </button>
+                {lightboxItem.is_featured && <FeaturedBadge label={lightboxItem.featured_label} />}
+                <LightboxCarousel
+                  images={images.length > 0 ? images : ["/placeholder.svg"]}
+                  actionButton={
+                    <Button className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white" onClick={() => handleAction(lightboxItem)}>
+                      {lightboxItem.action_type === "whatsapp" ? (
+                        <><MessageCircle className="h-4 w-4 mr-2" /> Falar no WhatsApp</>
+                      ) : (
+                        <><ExternalLink className="h-4 w-4 mr-2" /> Saiba mais</>
+                      )}
+                    </Button>
+                  }
+                />
               </div>
-            </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
