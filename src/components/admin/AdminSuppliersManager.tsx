@@ -256,9 +256,11 @@ export function AdminSuppliersManager() {
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(item.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </ConfirmDeleteDialog>
                   </div>
                 </div>
               );
