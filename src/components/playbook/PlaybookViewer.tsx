@@ -25,6 +25,7 @@ import {
   GitBranch,
   List,
   LayoutDashboard,
+  Star,
 } from "lucide-react";
 
 import { usePlaybook, usePlaybookAdmin } from "@/hooks/usePlaybook";
@@ -34,7 +35,7 @@ import { PlaybookComoVenderTab } from "./PlaybookComoVenderTab";
 import { PlaybookChecklistTab } from "./PlaybookChecklistTab";
 import { PlaybookPdfSection } from "./PlaybookPdfSection";
 import { AttractionsExplorer } from "./AttractionsExplorer";
-import { PLAYBOOK_TABS } from "@/types/playbook";
+import { PLAYBOOK_TABS, TRAVEL_ADVISOR_TABS } from "@/types/playbook";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, typeof Target> = {
@@ -152,6 +153,9 @@ export default function PlaybookViewer() {
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
+                  {TRAVEL_ADVISOR_TABS.has(tab.key) && (
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  )}
                   {tab.label}
                 </button>
               );
