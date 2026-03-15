@@ -362,7 +362,7 @@ export default function MinhaVitrine() {
               <TabsContent value="materials" className="space-y-4">
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
                   {availableMaterials.map(m => (
-                    <button key={m.id} onClick={() => { setSelectedMaterialId(m.id); setUploadFile(null); setUploadPreview(null); }}
+                    <button key={m.id} onClick={() => { setSelectedMaterialId(m.id); setUploadFiles([]); setUploadPreviews([]); }}
                       className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-[4/5] ${selectedMaterialId === m.id ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-muted-foreground/30"}`}>
                       <img src={m.thumbnail_url || m.file_url || "/placeholder.svg"} alt={m.title} className="w-full h-full object-cover" />
                       {!m.is_permanent && <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">7d</Badge>}
