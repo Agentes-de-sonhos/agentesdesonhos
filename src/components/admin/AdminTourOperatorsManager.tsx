@@ -444,6 +444,119 @@ export function AdminTourOperatorsManager() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Operator Dialog */}
+      <Dialog open={!!editOperator} onOpenChange={(open) => !open && setEditOperator(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
+              Editar Operadora
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Label>Nome *</Label>
+              <Input
+                value={editForm.name || ""}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Categoria</Label>
+              <Input
+                value={editForm.category || ""}
+                onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Especialidades</Label>
+              <Input
+                value={editForm.specialties || ""}
+                onChange={(e) => setEditForm({ ...editForm, specialties: e.target.value })}
+                placeholder="Separadas por vírgula"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Como Vender</Label>
+              <Textarea
+                value={editForm.how_to_sell || ""}
+                onChange={(e) => setEditForm({ ...editForm, how_to_sell: e.target.value })}
+                rows={4}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Canais de Venda</Label>
+              <Textarea
+                value={editForm.sales_channels || ""}
+                onChange={(e) => setEditForm({ ...editForm, sales_channels: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Contatos Comerciais</Label>
+              <Textarea
+                value={editForm.commercial_contacts || ""}
+                onChange={(e) => setEditForm({ ...editForm, commercial_contacts: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label>Website</Label>
+              <Input
+                value={editForm.website || ""}
+                onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Instagram</Label>
+              <Input
+                value={editForm.instagram || ""}
+                onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Ano de Fundação</Label>
+              <Input
+                type="number"
+                value={editForm.founded_year || ""}
+                onChange={(e) => setEditForm({ ...editForm, founded_year: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Faturamento Anual</Label>
+              <Input
+                value={editForm.annual_revenue || ""}
+                onChange={(e) => setEditForm({ ...editForm, annual_revenue: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Funcionários</Label>
+              <Input
+                type="number"
+                value={editForm.employees || ""}
+                onChange={(e) => setEditForm({ ...editForm, employees: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Equipe Executiva</Label>
+              <Input
+                value={editForm.executive_team || ""}
+                onChange={(e) => setEditForm({ ...editForm, executive_team: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setEditOperator(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
