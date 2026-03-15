@@ -164,9 +164,9 @@ const features = [
   },
   {
     icon: Sparkles,
-    title: "Mentorias Exclusivas",
+    title: "Cursos e Mentorias Exclusivas",
     description:
-      "Programas de mentoria com especialistas do mercado. Encontros ao vivo, vídeos gravados e trilhas organizadas em módulos.",
+      "Cursos especializados e programas de mentoria com especialistas do mercado. Encontros ao vivo, vídeos gravados e trilhas organizadas em módulos.",
   },
 ];
 

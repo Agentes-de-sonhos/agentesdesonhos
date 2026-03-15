@@ -186,7 +186,7 @@ const marketingSection: MenuSection = {
   ],
 };
 
-const mentoriasItem: MenuItem = { title: "Mentorias", url: "/mentorias", icon: GraduationCap };
+const mentoriasItem: MenuItem = { title: "Cursos e Mentorias", url: "/mentorias", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };

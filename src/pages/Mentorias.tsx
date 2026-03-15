@@ -144,7 +144,7 @@ export default function Mentorias() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                Área de Mentorias em Breve
+                Área de Cursos e Mentorias em Breve
               </DialogTitle>
               <DialogDescription className="pt-4 text-base">
                 Novos programas de mentoria estão sendo preparados especialmente para você.
