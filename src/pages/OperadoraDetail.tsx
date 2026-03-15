@@ -47,6 +47,7 @@ export default function OperadoraDetail() {
     averageRating,
     totalReviews,
     submitReview,
+    deleteReview,
   } = useOperatorReviews(id || "");
 
   const handleReviewClick = () => {
