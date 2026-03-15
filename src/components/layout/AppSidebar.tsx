@@ -324,6 +324,7 @@ export function AppSidebar() {
   };
 
   const renderSection = (section: MenuSection) => {
+    const isActive = isSectionActive(section);
     const hasExplicitState = section.title in openSections;
     const isOpen = hasExplicitState ? !!openSections[section.title] : (!userInteracted && isActive);
     const Icon = section.icon;
