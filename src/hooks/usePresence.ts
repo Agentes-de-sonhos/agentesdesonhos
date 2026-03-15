@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
@@ -14,6 +14,22 @@ export interface OnlineAgent {
 export function usePresence() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [isOnline, setIsOnlineState] = useState(true);
+  const [isOnlineLoading, setIsOnlineLoading] = useState(true);
+
+  // Load initial is_online state from DB
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("user_presence")
+        .select("is_online")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setIsOnlineState(data?.is_online ?? true);
+      setIsOnlineLoading(false);
+    })();
+  }, [user]);
 
   // Heartbeat - update presence every 60s
   useEffect(() => {
@@ -23,7 +39,7 @@ export function usePresence() {
       await (supabase as any)
         .from("user_presence")
         .upsert(
-          { user_id: user.id, last_active_at: new Date().toISOString() },
+          { user_id: user.id, last_active_at: new Date().toISOString(), is_online: isOnline },
           { onConflict: "user_id" }
         );
     };
@@ -31,13 +47,24 @@ export function usePresence() {
     updatePresence();
     const interval = setInterval(updatePresence, 60000);
 
-    // Set offline on unmount
     return () => {
       clearInterval(interval);
     };
-  }, [user]);
+  }, [user, isOnline]);
 
-  // Query online premium users (active in last 5 min)
+  const toggleOnline = useCallback(async (value: boolean) => {
+    if (!user) return;
+    setIsOnlineState(value);
+    await (supabase as any)
+      .from("user_presence")
+      .upsert(
+        { user_id: user.id, last_active_at: new Date().toISOString(), is_online: value },
+        { onConflict: "user_id" }
+      );
+    queryClient.invalidateQueries({ queryKey: ["online-users"] });
+  }, [user, queryClient]);
+
+  // Query online premium users (active in last 5 min AND is_online = true)
   const { data: onlineUsers = [], isLoading } = useQuery({
     queryKey: ["online-users"],
     queryFn: async () => {
@@ -46,20 +73,19 @@ export function usePresence() {
       const { data: presenceData, error } = await (supabase as any)
         .from("user_presence")
         .select("user_id, last_active_at")
-        .gte("last_active_at", fiveMinAgo);
+        .gte("last_active_at", fiveMinAgo)
+        .eq("is_online", true);
 
       if (error) throw error;
       if (!presenceData || presenceData.length === 0) return [];
 
       const userIds = presenceData.map((p: any) => p.user_id);
 
-      // Get profiles
       const { data: profiles } = await supabase
         .from("profiles")
         .select("user_id, name, avatar_url, agency_name, city")
         .in("user_id", userIds);
 
-      // Get premium subscriptions
       const { data: subs } = await supabase
         .from("subscriptions")
         .select("user_id")
@@ -83,7 +109,6 @@ export function usePresence() {
     enabled: !!user,
   });
 
-  // Realtime subscription for presence changes
   useEffect(() => {
     const channel = supabase
       .channel("presence-changes")
@@ -101,5 +126,5 @@ export function usePresence() {
     };
   }, [queryClient]);
 
-  return { onlineUsers, onlineCount: onlineUsers.length, isLoading };
+  return { onlineUsers, onlineCount: onlineUsers.length, isLoading, isOnline, isOnlineLoading, toggleOnline };
 }

@@ -4908,18 +4908,21 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          is_online: boolean
           last_active_at: string
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          is_online?: boolean
           last_active_at?: string
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          is_online?: boolean
           last_active_at?: string
           user_id?: string
         }
