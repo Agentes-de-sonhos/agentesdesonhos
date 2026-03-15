@@ -34,7 +34,7 @@ export const TRACKABLE_SECTIONS: Record<string, string> = {
   "/gestao-clientes": "Gestão de Clientes",
   "/ferramentas-ia": "Ferramentas IA",
   "/comunidade": "Comunidade",
-  "/mentorias": "Mentorias",
+  "/mentorias": "Cursos e Mentorias",
   "/perguntas-respostas": "Perguntas e Respostas",
   "/financeiro": "Financeiro",
   "/calculadora": "Calculadora",

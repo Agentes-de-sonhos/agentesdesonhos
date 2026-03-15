@@ -36,8 +36,8 @@ export default function Mentorias() {
       <div className="space-y-6">
         <PageHeader
           pageKey="mentorias"
-          title="Mentorias"
-          subtitle="Programas de mentoria exclusivos para acelerar seu crescimento profissional"
+          title="Cursos e Mentorias"
+          subtitle="Cursos especializados e programas de mentoria para acelerar seu crescimento profissional"
           icon={GraduationCap}
           adminTab="community"
         />
@@ -144,7 +144,7 @@ export default function Mentorias() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                Área de Mentorias em Breve
+                Área de Cursos e Mentorias em Breve
               </DialogTitle>
               <DialogDescription className="pt-4 text-base">
                 Novos programas de mentoria estão sendo preparados especialmente para você.
