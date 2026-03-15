@@ -91,7 +91,7 @@ function TravelAdvisorCTA({ tabKey, destinationName }: { tabKey: string; destina
         </p>
         <Button
           size="sm"
-          className="w-full gap-2 text-xs"
+          className="w-fit gap-2 text-xs bg-yellow-500 hover:bg-yellow-600 text-white border-0"
           onClick={() => navigate(`/dream-advisor?tab=${mapping.advisorTab}`)}
         >
           Ver {mapping.categoryLabel} no Travel Advisor
