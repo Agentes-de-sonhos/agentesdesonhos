@@ -152,6 +152,9 @@ export default function PlaybookViewer() {
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
+                  {TRAVEL_ADVISOR_TABS.has(tab.key) && (
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  )}
                   {tab.label}
                 </button>
               );
