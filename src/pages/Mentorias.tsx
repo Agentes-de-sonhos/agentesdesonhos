@@ -36,8 +36,8 @@ export default function Mentorias() {
       <div className="space-y-6">
         <PageHeader
           pageKey="mentorias"
-          title="Mentorias"
-          subtitle="Programas de mentoria exclusivos para acelerar seu crescimento profissional"
+          title="Cursos e Mentorias"
+          subtitle="Cursos especializados e programas de mentoria para acelerar seu crescimento profissional"
           icon={GraduationCap}
           adminTab="community"
         />
