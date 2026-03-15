@@ -132,9 +132,7 @@ export function AdminPopupsManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Tem certeza que deseja excluir este pop-up?")) {
-      await deletePopup.mutateAsync(id);
-    }
+    await deletePopup.mutateAsync(id);
   };
 
   const handlePreview = (popup: GlobalPopup) => {
