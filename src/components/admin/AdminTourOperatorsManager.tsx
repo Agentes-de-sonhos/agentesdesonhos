@@ -165,6 +165,7 @@ export function AdminTourOperatorsManager() {
     }
   };
 
+  const downloadTemplate = () => {
     const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Operadoras");
