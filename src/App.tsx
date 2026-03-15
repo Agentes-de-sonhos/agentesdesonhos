@@ -53,6 +53,8 @@ import CertificateTest from "./pages/CertificateTest";
 import Gamificacao from "./pages/Gamificacao";
 import Pesquisa from "./pages/Pesquisa";
 import AtivarCartao from "./pages/AtivarCartao";
+import PoliticasPrivacidade from "./pages/PoliticasPrivacidade";
+import TermosDeUso from "./pages/TermosDeUso";
 
 const queryClient = new QueryClient();
 
@@ -390,6 +392,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
+            <Route path="/termosdeuso" element={<TermosDeUso />} />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />

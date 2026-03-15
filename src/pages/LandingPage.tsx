@@ -36,6 +36,14 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Menu, X } from "lucide-react";
+
+const sectionLinks = [
+  { label: "Funcionalidades", id: "funcionalidades" },
+  { label: "Benefícios", id: "beneficios" },
+  { label: "Diferenciais", id: "diferenciais" },
+  { label: "FAQ", id: "faq" },
+];
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -230,6 +238,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
@@ -250,21 +259,72 @@ export default function LandingPage() {
   const goLogin = () => navigate("/auth");
   const goSignup = () => navigate("/auth?tab=signup");
 
+  const scrollToSection = (id: string) => {
+    setMobileMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">
           <img src={logoAgentes} alt="Agentes de Sonhos" className="h-9" />
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {sectionLinks.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {s.label}
+              </button>
+            ))}
+          </nav>
+
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={goLogin}>
+            <Button variant="ghost" size="sm" onClick={goLogin} className="hidden sm:inline-flex">
               Entrar
             </Button>
-            <Button size="sm" onClick={goSignup}>
+            <Button size="sm" onClick={goSignup} className="hidden sm:inline-flex">
               Cadastrar
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border/40 bg-card py-4 px-4 space-y-2">
+            {sectionLinks.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="block w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
+              >
+                {s.label}
+              </button>
+            ))}
+            <div className="flex gap-2 pt-2 border-t border-border/40">
+              <Button variant="outline" size="sm" onClick={goLogin} className="flex-1">
+                Entrar
+              </Button>
+              <Button size="sm" onClick={goSignup} className="flex-1">
+                Cadastrar
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
@@ -343,7 +403,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features Grid ──────────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-card">
+      <section id="funcionalidades" className="py-16 md:py-24 bg-card scroll-mt-20">
         <div className="container space-y-10">
           <div className="text-center space-y-3">
             <h2 className="text-3xl md:text-4xl font-display font-bold">
@@ -372,7 +432,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Before / After Benefits ────────────────────────────── */}
-      <section className="py-16 md:py-24">
+      <section id="beneficios" className="py-16 md:py-24 scroll-mt-20">
         <div className="container max-w-4xl space-y-10">
           <div className="text-center space-y-3">
             <h2 className="text-3xl md:text-4xl font-display font-bold">
@@ -404,7 +464,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Differentials ──────────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-card">
+      <section id="diferenciais" className="py-16 md:py-24 bg-card scroll-mt-20">
         <div className="container max-w-4xl space-y-10">
           <div className="text-center space-y-3">
             <h2 className="text-3xl md:text-4xl font-display font-bold">
@@ -430,7 +490,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ────────────────────────────────────────────────── */}
-      <section className="py-16 md:py-24">
+      <section id="faq" className="py-16 md:py-24 scroll-mt-20">
         <div className="container max-w-2xl space-y-10">
           <h2 className="text-3xl md:text-4xl font-display font-bold text-center">
             Perguntas frequentes
@@ -489,13 +549,22 @@ export default function LandingPage() {
 
       {/* ── Footer ─────────────────────────────────────────────── */}
       <div className="border-t border-border/40 bg-card">
-        <div className="container py-10 text-center space-y-2">
+        <div className="container py-10 text-center space-y-4">
           <p className="text-sm text-muted-foreground italic">
             A viagem mais importante é a da sua carreira.
           </p>
           <p className="text-xs text-muted-foreground/80">
             Agentes de Sonhos — Plataforma inteligente para agentes de viagem.
           </p>
+          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+            <a href="/politicasdeprivacidade" className="hover:text-foreground transition-colors underline underline-offset-2">
+              Políticas de Privacidade
+            </a>
+            <span>•</span>
+            <a href="/termosdeuso" className="hover:text-foreground transition-colors underline underline-offset-2">
+              Termos de Uso
+            </a>
+          </div>
         </div>
         <Footer />
       </div>
