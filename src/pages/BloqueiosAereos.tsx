@@ -154,7 +154,7 @@ export default function BloqueiosAereos() {
                       <div>
                         <CardTitle className="text-base flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          {block.destination}
+                          {formatAirportLabel(block.destination)}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
                           {block.airline}
