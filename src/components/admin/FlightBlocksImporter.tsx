@@ -143,6 +143,7 @@ export function FlightBlocksImporter() {
   const [importResult, setImportResult] = useState({ success: 0, errors: 0 });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { formatAirportLabel, getAirport } = useAirports();
 
   const importMutation = useMutation({
     mutationFn: async (rows: ParsedBlock[]) => {
