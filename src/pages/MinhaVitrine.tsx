@@ -59,17 +59,20 @@ export default function MinhaVitrine() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp"];
     const validExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"];
-    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
-    if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
-      toast.error("Formato não suportado. Use JPG, PNG, WEBP, GIF ou BMP.");
-      return;
+    const validFiles = files.filter(file => {
+      const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
+      return validTypes.includes(file.type) && validExtensions.includes(fileExtension);
+    });
+    if (validFiles.length < files.length) {
+      toast.error("Alguns arquivos foram ignorados. Use JPG, PNG, WEBP, GIF ou BMP.");
     }
-    setUploadFile(file);
-    setUploadPreview(URL.createObjectURL(file));
+    if (validFiles.length === 0) return;
+    setUploadFiles(prev => [...prev, ...validFiles]);
+    setUploadPreviews(prev => [...prev, ...validFiles.map(f => URL.createObjectURL(f))]);
     setSelectedMaterialId(null);
   };
 
