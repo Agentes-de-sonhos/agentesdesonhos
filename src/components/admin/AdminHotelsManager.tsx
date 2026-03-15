@@ -250,7 +250,6 @@ export function AdminHotelsManager() {
   );
 
   const handleDeleteAll = async (destination: string) => {
-    if (!confirm(`Tem certeza que deseja excluir TODOS os hotéis de "${destination}"?`)) return;
     const { error } = await supabase.from("hotels").delete().eq("destination", destination);
     if (error) {
       toast.error("Erro ao excluir hotéis");
