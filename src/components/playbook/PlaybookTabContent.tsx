@@ -15,7 +15,7 @@ const TAB_ADVISOR_MAP: Record<string, { icon: typeof Hotel; label: string; categ
     label: "Hotéis recomendados",
     categoryLabel: "Hotéis",
     description: "Consulte rapidamente uma curadoria de hotéis recomendados para seus clientes, organizada para facilitar suas vendas.",
-    advisorTab: "hotels",
+    advisorTab: "hotel",
   },
   gastronomia: {
     icon: UtensilsCrossed,
