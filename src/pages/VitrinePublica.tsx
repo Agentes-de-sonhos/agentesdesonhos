@@ -202,9 +202,9 @@ export default function VitrinePublica() {
             onClick={e => { e.stopPropagation(); handleAction(item); }}
           >
             {item.action_type === "whatsapp" ? (
-              <><MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Falar no WhatsApp</>
+              <><MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Faça um orçamento!</>
             ) : (
-              <><ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Solicitar orçamento</>
+              <><ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Faça um orçamento!</>
             )}
           </Button>
         </div>
@@ -359,9 +359,9 @@ export default function VitrinePublica() {
                   actionButton={
                     <Button className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,38%)] text-white" onClick={() => handleAction(lightboxItem)}>
                       {lightboxItem.action_type === "whatsapp" ? (
-                        <><MessageCircle className="h-4 w-4 mr-2" /> Falar no WhatsApp</>
+                        <><MessageCircle className="h-4 w-4 mr-2" /> Faça um orçamento!</>
                       ) : (
-                        <><ExternalLink className="h-4 w-4 mr-2" /> Solicitar orçamento</>
+                        <><ExternalLink className="h-4 w-4 mr-2" /> Faça um orçamento!</>
                       )}
                     </Button>
                   }
