@@ -37,7 +37,13 @@ export function LaunchOverlay() {
   const phase = useMemo(() => getPhase(now), [now]);
   const time = useMemo(() => getTimeRemaining(now), [now]);
 
-  if (phase === "unlocked") return null;
+  // Only show on main domain (agentesdesonhos.com.br / www.agentesdesonhos.com.br)
+  const hostname = window.location.hostname;
+  const isMainDomain =
+    hostname === "agentesdesonhos.com.br" ||
+    hostname === "www.agentesdesonhos.com.br";
+
+  if (!isMainDomain || phase === "unlocked") return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden">
