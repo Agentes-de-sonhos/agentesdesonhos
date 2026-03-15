@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Footer } from "@/components/layout/Footer";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import {
   GraduationCap,
   Map,
@@ -34,9 +35,36 @@ import {
   MessageSquare,
   Target,
 } from "lucide-react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
+
+/* ------------------------------------------------------------------ */
+/*  Scroll-reveal wrapper                                              */
+/* ------------------------------------------------------------------ */
+function Reveal({
+  children,
+  className,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const { ref, visible } = useScrollReveal(0.12);
+  return (
+    <div
+      ref={ref}
+      className={cn(className)}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(32px)",
+        transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 const sectionLinks = [
   { label: "Funcionalidades", id: "funcionalidades" },
@@ -231,6 +259,11 @@ const faqs = [
 ];
 
 /* ------------------------------------------------------------------ */
+/*  Shared styles                                                      */
+/* ------------------------------------------------------------------ */
+const sectionContainer = "max-w-[1100px] mx-auto px-6";
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -239,12 +272,18 @@ export default function LandingPage() {
   const { user, loading } = useAuth();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [heroReady, setHeroReady] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
       navigate("/dashboard", { replace: true });
     }
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setHeroReady(true), 100);
+    return () => clearTimeout(t);
+  }, []);
 
   if (loading) {
     return (
@@ -268,28 +307,37 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-lg">
-        <div className="container flex h-16 items-center justify-between">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-card/70 backdrop-blur-xl">
+        <div className={cn(sectionContainer, "flex h-16 items-center justify-between")}>
           <img src={logoAgentes} alt="Agentes de Sonhos" className="h-9" />
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-8">
             {sectionLinks.map((s) => (
               <button
                 key={s.id}
                 onClick={() => scrollToSection(s.id)}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 {s.label}
               </button>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={goLogin} className="hidden sm:inline-flex">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={goLogin}
+              className="hidden sm:inline-flex rounded-xl font-semibold"
+            >
               Entrar
             </Button>
-            <Button size="sm" onClick={goSignup} className="hidden sm:inline-flex">
+            <Button
+              size="sm"
+              onClick={goSignup}
+              className="hidden sm:inline-flex rounded-xl font-semibold shadow-[0_4px_14px_hsl(var(--primary)/0.25)] hover:shadow-[0_6px_20px_hsl(var(--primary)/0.35)] hover:-translate-y-0.5 transition-all duration-250"
+            >
               Cadastrar
             </Button>
             <Button
@@ -305,7 +353,7 @@ export default function LandingPage() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border/40 bg-card py-4 px-4 space-y-2">
+          <div className="md:hidden border-t border-border/40 bg-card py-4 px-6 space-y-2">
             {sectionLinks.map((s) => (
               <button
                 key={s.id}
@@ -316,10 +364,10 @@ export default function LandingPage() {
               </button>
             ))}
             <div className="flex gap-2 pt-2 border-t border-border/40">
-              <Button variant="outline" size="sm" onClick={goLogin} className="flex-1">
+              <Button variant="outline" size="sm" onClick={goLogin} className="flex-1 rounded-xl">
                 Entrar
               </Button>
-              <Button size="sm" onClick={goSignup} className="flex-1">
+              <Button size="sm" onClick={goSignup} className="flex-1 rounded-xl">
                 Cadastrar
               </Button>
             </div>
@@ -328,28 +376,64 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        {/* subtle gradient blob */}
-        <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-accent/5 blur-3xl pointer-events-none" />
+      <section
+        className="relative overflow-hidden min-h-[85vh] flex items-center"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--primary) / 0.07), transparent 70%)",
+        }}
+      >
+        {/* subtle gradient blobs */}
+        <div className="absolute -top-32 -right-32 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
 
-        <div className="container py-20 md:py-28 lg:py-32 relative">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-[1.1]">
+        <div className={cn(sectionContainer, "py-24 md:py-32 lg:py-40 relative w-full")}>
+          <div className="max-w-3xl mx-auto text-center space-y-8">
+            <h1
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-[3.75rem] font-bold tracking-[-0.02em] leading-[1.08]"
+              style={{
+                opacity: heroReady ? 1 : 0,
+                transform: heroReady ? "translateY(0)" : "translateY(24px)",
+                transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)",
+              }}
+            >
               A plataforma que transforma agentes de viagem em{" "}
               <span className="text-primary">especialistas imbatíveis</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p
+              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-[1.7] font-[450]"
+              style={{
+                opacity: heroReady ? 1 : 0,
+                transform: heroReady ? "translateY(0)" : "translateY(24px)",
+                transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1) 0.15s, transform 0.8s cubic-bezier(0.16,1,0.3,1) 0.15s",
+              }}
+            >
               Tudo o que você precisa para vender mais, se capacitar melhor e impressionar cada
               cliente — reunido em um só lugar. Feito especialmente para agentes de viagem que
               levam a profissão a sério.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <Button size="lg" className="gap-2 text-base px-8" onClick={goSignup}>
+            <div
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+              style={{
+                opacity: heroReady ? 1 : 0,
+                transform: heroReady ? "translateY(0)" : "translateY(24px)",
+                transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s, transform 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s",
+              }}
+            >
+              <Button
+                size="lg"
+                className="gap-2 text-base px-8 py-[14px] rounded-xl font-semibold shadow-[0_10px_30px_hsl(var(--primary)/0.2)] hover:shadow-[0_14px_40px_hsl(var(--primary)/0.3)] hover:-translate-y-0.5 transition-all duration-250"
+                onClick={goSignup}
+              >
                 Quero conhecer a plataforma
                 <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" className="text-base px-8" onClick={goLogin}>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-base px-8 py-[14px] rounded-xl font-semibold hover:-translate-y-0.5 transition-all duration-250"
+                onClick={goLogin}
+              >
                 Já sou cliente
               </Button>
             </div>
@@ -358,198 +442,257 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pain Points ────────────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-card">
-        <div className="container max-w-4xl space-y-10">
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl md:text-4xl font-display font-bold">
-              Você ainda perde tempo com isso?
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              O mercado de turismo exige cada vez mais. Mas a realidade da maioria dos agentes é
-              diferente do que deveria ser.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className="py-[100px] md:py-[120px] bg-card">
+        <div className={cn(sectionContainer, "space-y-12")}>
+          <Reveal>
+            <div className="text-center space-y-4 max-w-2xl mx-auto">
+              <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold tracking-[-0.02em]">
+                Você ainda perde tempo com isso?
+              </h2>
+              <p className="text-muted-foreground leading-[1.7] font-[450]">
+                O mercado de turismo exige cada vez mais. Mas a realidade da maioria dos agentes é
+                diferente do que deveria ser.
+              </p>
+            </div>
+          </Reveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {painPoints.map((p, i) => (
-              <Card key={i} className="border-destructive/20 bg-destructive/[0.03]">
-                <CardContent className="flex items-start gap-3 p-5">
-                  <p.icon className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-                  <p className="text-sm leading-relaxed">{p.text}</p>
-                </CardContent>
-              </Card>
+              <Reveal key={i} delay={i * 80}>
+                <Card className="border-destructive/15 bg-destructive/[0.03] rounded-2xl hover:-translate-y-1.5 hover:shadow-[0_18px_40px_hsl(var(--foreground)/0.06)] transition-all duration-250">
+                  <CardContent className="flex items-start gap-3 p-6">
+                    <div className="h-10 w-10 rounded-[10px] bg-destructive/10 flex items-center justify-center shrink-0">
+                      <p.icon className="h-[18px] w-[18px] text-destructive" />
+                    </div>
+                    <p className="text-sm leading-[1.7]">{p.text}</p>
+                  </CardContent>
+                </Card>
+              </Reveal>
             ))}
           </div>
-          <p className="text-center text-muted-foreground font-medium">
-            Isso tem um nome: <span className="text-foreground">falta de estrutura</span>. E tem
-            solução.
-          </p>
+          <Reveal delay={500}>
+            <p className="text-center text-muted-foreground font-medium">
+              Isso tem um nome: <span className="text-foreground">falta de estrutura</span>. E tem
+              solução.
+            </p>
+          </Reveal>
         </div>
       </section>
 
       {/* ── Solution Intro ─────────────────────────────────────── */}
-      <section className="py-16 md:py-24">
-        <div className="container max-w-3xl text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-display font-bold">
-            Apresentamos a <span className="text-primary">Agentes de Sonhos</span>
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            A primeira plataforma completa criada exclusivamente para o profissional de turismo
-            brasileiro. Não é um curso. Não é um software de reservas. É um{" "}
-            <strong className="text-foreground">ecossistema inteligente</strong> que conecta
-            capacitação, ferramentas, comunidade e tecnologia — tudo calibrado para a realidade do
-            agente de viagem moderno.
-          </p>
+      <section className="py-[100px] md:py-[120px]">
+        <div className={cn(sectionContainer, "max-w-3xl text-center space-y-6")}>
+          <Reveal>
+            <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold tracking-[-0.02em]">
+              Apresentamos a <span className="text-primary">Agentes de Sonhos</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <p className="text-muted-foreground text-lg leading-[1.7] font-[450]">
+              A primeira plataforma completa criada exclusivamente para o profissional de turismo
+              brasileiro. Não é um curso. Não é um software de reservas. É um{" "}
+              <strong className="text-foreground">ecossistema inteligente</strong> que conecta
+              capacitação, ferramentas, comunidade e tecnologia — tudo calibrado para a realidade do
+              agente de viagem moderno.
+            </p>
+          </Reveal>
         </div>
       </section>
 
       {/* ── Features Grid ──────────────────────────────────────── */}
-      <section id="funcionalidades" className="py-16 md:py-24 bg-card scroll-mt-20">
-        <div className="container space-y-10">
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl md:text-4xl font-display font-bold">
-              O que você encontra dentro da plataforma
-            </h2>
-          </div>
+      <section
+        id="funcionalidades"
+        className="py-[100px] md:py-[120px] scroll-mt-20"
+        style={{ backgroundColor: "hsl(210 20% 97%)" }}
+      >
+        <div className={cn(sectionContainer, "space-y-12")}>
+          <Reveal>
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold tracking-[-0.02em]">
+                O que você encontra dentro da plataforma
+              </h2>
+            </div>
+          </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
-              <Card
-                key={i}
-                className="group hover:shadow-lg transition-shadow duration-300 border-border/60"
-              >
-                <CardContent className="p-6 space-y-3">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <f.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-base">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {f.description}
-                  </p>
-                </CardContent>
-              </Card>
+              <Reveal key={i} delay={i * 70}>
+                <Card className="group rounded-2xl border-[hsl(var(--foreground)/0.06)] bg-card shadow-[0_6px_20px_hsl(var(--foreground)/0.04)] hover:-translate-y-1.5 hover:shadow-[0_18px_40px_hsl(var(--foreground)/0.08)] transition-all duration-250 h-full">
+                  <CardContent className="p-7 space-y-4">
+                    <div className="h-[42px] w-[42px] rounded-[10px] bg-primary/10 flex items-center justify-center">
+                      <f.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-[15px] tracking-[-0.01em]">{f.title}</h3>
+                    <p className="text-[13px] text-muted-foreground leading-[1.7]">
+                      {f.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── Before / After Benefits ────────────────────────────── */}
-      <section id="beneficios" className="py-16 md:py-24 scroll-mt-20">
-        <div className="container max-w-4xl space-y-10">
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl md:text-4xl font-display font-bold">
-              O que muda na sua rotina
-            </h2>
-          </div>
+      <section id="beneficios" className="py-[100px] md:py-[120px] scroll-mt-20">
+        <div className={cn(sectionContainer, "max-w-4xl space-y-12")}>
+          <Reveal>
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold tracking-[-0.02em]">
+                O que muda na sua rotina
+              </h2>
+            </div>
+          </Reveal>
           <div className="space-y-4">
             {benefits.map((b, i) => (
-              <div
-                key={i}
-                className="grid md:grid-cols-2 gap-3 md:gap-5 items-stretch"
-              >
-                <Card className="border-destructive/20 bg-destructive/[0.03]">
-                  <CardContent className="flex items-center gap-3 p-5">
-                    <Target className="h-5 w-5 text-destructive shrink-0" />
-                    <p className="text-sm">{b.before}</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-primary/20 bg-primary/[0.03]">
-                  <CardContent className="flex items-center gap-3 p-5">
-                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                    <p className="text-sm font-medium">{b.after}</p>
-                  </CardContent>
-                </Card>
-              </div>
+              <Reveal key={i} delay={i * 100}>
+                <div className="grid md:grid-cols-2 gap-3 md:gap-5 items-stretch">
+                  <Card className="border-destructive/15 bg-destructive/[0.03] rounded-2xl hover:-translate-y-1 transition-all duration-250">
+                    <CardContent className="flex items-center gap-4 p-6">
+                      <div className="h-10 w-10 rounded-[10px] bg-destructive/10 flex items-center justify-center shrink-0">
+                        <Target className="h-[18px] w-[18px] text-destructive" />
+                      </div>
+                      <p className="text-sm leading-[1.6]">{b.before}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-primary/15 bg-primary/[0.03] rounded-2xl hover:-translate-y-1 transition-all duration-250">
+                    <CardContent className="flex items-center gap-4 p-6">
+                      <div className="h-10 w-10 rounded-[10px] bg-primary/10 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="h-[18px] w-[18px] text-primary" />
+                      </div>
+                      <p className="text-sm font-medium leading-[1.6]">{b.after}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── Differentials ──────────────────────────────────────── */}
-      <section id="diferenciais" className="py-16 md:py-24 bg-card scroll-mt-20">
-        <div className="container max-w-4xl space-y-10">
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl md:text-4xl font-display font-bold">
-              Por que a Agentes de Sonhos é diferente
-            </h2>
-          </div>
+      <section
+        id="diferenciais"
+        className="py-[100px] md:py-[120px] scroll-mt-20"
+        style={{ backgroundColor: "hsl(210 20% 97%)" }}
+      >
+        <div className={cn(sectionContainer, "max-w-4xl space-y-12")}>
+          <Reveal>
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold tracking-[-0.02em]">
+                Por que a Agentes de Sonhos é diferente
+              </h2>
+            </div>
+          </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {differentials.map((d, i) => (
-              <Card key={i} className="border-border/60">
-                <CardContent className="p-6 space-y-3">
-                  <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <d.icon className="h-5 w-5 text-accent" />
-                  </div>
-                  <h3 className="font-semibold text-base">{d.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {d.description}
-                  </p>
-                </CardContent>
-              </Card>
+              <Reveal key={i} delay={i * 80}>
+                <Card className="rounded-2xl border-[hsl(var(--foreground)/0.06)] bg-card shadow-[0_6px_20px_hsl(var(--foreground)/0.04)] hover:-translate-y-1.5 hover:shadow-[0_18px_40px_hsl(var(--foreground)/0.08)] transition-all duration-250 h-full">
+                  <CardContent className="p-7 space-y-4">
+                    <div className="h-[42px] w-[42px] rounded-[10px] bg-accent/10 flex items-center justify-center">
+                      <d.icon className="h-5 w-5 text-accent" />
+                    </div>
+                    <h3 className="font-bold text-[15px] tracking-[-0.01em]">{d.title}</h3>
+                    <p className="text-[13px] text-muted-foreground leading-[1.7]">
+                      {d.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── FAQ ────────────────────────────────────────────────── */}
-      <section id="faq" className="py-16 md:py-24 scroll-mt-20">
-        <div className="container max-w-2xl space-y-10">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-center">
-            Perguntas frequentes
-          </h2>
+      <section id="faq" className="py-[100px] md:py-[120px] scroll-mt-20">
+        <div className={cn(sectionContainer, "max-w-2xl space-y-12")}>
+          <Reveal>
+            <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold text-center tracking-[-0.02em]">
+              Perguntas frequentes
+            </h2>
+          </Reveal>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <Card
-                key={i}
-                className="cursor-pointer border-border/60"
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-              >
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <h3 className="font-medium text-sm">{faq.q}</h3>
-                    <ChevronDown
-                      className={cn(
-                        "h-4 w-4 text-muted-foreground shrink-0 transition-transform",
-                        openFaq === i && "rotate-180"
-                      )}
-                    />
-                  </div>
-                  {openFaq === i && (
-                    <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                      {faq.a}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+              <Reveal key={i} delay={i * 80}>
+                <Card
+                  className="cursor-pointer rounded-2xl border-[hsl(var(--foreground)/0.06)] bg-card shadow-[0_4px_12px_hsl(var(--foreground)/0.03)] hover:shadow-[0_8px_24px_hsl(var(--foreground)/0.06)] transition-all duration-250"
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <h3 className="font-semibold text-[15px]">{faq.q}</h3>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-300",
+                          openFaq === i && "rotate-180"
+                        )}
+                      />
+                    </div>
+                    <div
+                      className="overflow-hidden transition-all duration-300"
+                      style={{
+                        maxHeight: openFaq === i ? "200px" : "0px",
+                        opacity: openFaq === i ? 1 : 0,
+                      }}
+                    >
+                      <p className="mt-3 text-sm text-muted-foreground leading-[1.7]">
+                        {faq.a}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── Final CTA ──────────────────────────────────────────── */}
-      <section className="py-20 md:py-28">
-        <div className="container max-w-3xl text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-display font-bold">
-            O seu próximo nível começa aqui
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto leading-relaxed">
-            A plataforma que os melhores agentes de viagem do Brasil já estão usando para fechar
-            mais vendas, atender melhor e crescer mais rápido.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button size="lg" className="gap-2 text-base px-8" onClick={goSignup}>
-              Quero meu acesso agora
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" className="text-base px-8" onClick={goLogin}>
-              Já sou cliente
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">Acesso imediato. Sem burocracia.</p>
+      <section
+        className="py-[120px] md:py-[140px]"
+        style={{ backgroundColor: "hsl(210 20% 97%)" }}
+      >
+        <div className={cn(sectionContainer, "max-w-3xl text-center space-y-8")}>
+          <Reveal>
+            <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-[-0.02em]">
+              O seu próximo nível começa aqui
+            </h2>
+          </Reveal>
+          <Reveal delay={100}>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto leading-[1.7] font-[450]">
+              A plataforma que os melhores agentes de viagem do Brasil já estão usando para fechar
+              mais vendas, atender melhor e crescer mais rápido.
+            </p>
+          </Reveal>
+          <Reveal delay={200}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Button
+                size="lg"
+                className="gap-2 text-base px-10 py-4 rounded-xl font-semibold shadow-[0_10px_30px_hsl(var(--primary)/0.25)] hover:shadow-[0_14px_40px_hsl(var(--primary)/0.35)] hover:-translate-y-0.5 transition-all duration-250 text-[16px]"
+                onClick={goSignup}
+              >
+                Quero meu acesso agora
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-base px-10 py-4 rounded-xl font-semibold hover:-translate-y-0.5 transition-all duration-250"
+                onClick={goLogin}
+              >
+                Já sou cliente
+              </Button>
+            </div>
+          </Reveal>
+          <Reveal delay={300}>
+            <p className="text-sm text-muted-foreground">Acesso imediato. Sem burocracia.</p>
+          </Reveal>
         </div>
       </section>
 
       {/* ── Footer ─────────────────────────────────────────────── */}
       <div className="border-t border-border/40 bg-card">
-        <div className="container py-10 text-center space-y-4">
+        <div className={cn(sectionContainer, "py-10 text-center space-y-4")}>
           <p className="text-sm text-muted-foreground italic">
             A viagem mais importante é a da sua carreira.
           </p>
