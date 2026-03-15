@@ -195,14 +195,11 @@ export function AdminMentorshipsManager() {
                       <Button size="icon" variant="ghost" onClick={() => openEdit(item)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-destructive"
-                        onClick={() => deleteMutation.mutate(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(item.id)}>
+                        <Button size="icon" variant="ghost" className="text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </ConfirmDeleteDialog>
                     </div>
                   </TableCell>
                 </TableRow>
