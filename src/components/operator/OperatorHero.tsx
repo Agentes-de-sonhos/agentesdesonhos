@@ -8,6 +8,7 @@ interface OperatorHeroProps {
   specialties?: string | null;
   website?: string | null;
   instagram?: string | null;
+  logoUrl?: string | null;
 }
 
 const safeOpen = (url: string | null | undefined) => {
@@ -28,7 +29,7 @@ const chipColors = [
   "bg-indigo-100 text-indigo-700 border-indigo-200",
 ];
 
-export function OperatorHero({ name, category, specialties, website, instagram }: OperatorHeroProps) {
+export function OperatorHero({ name, category, specialties, website, instagram, logoUrl }: OperatorHeroProps) {
   const tags = specialties?.split(",").map((s) => s.trim()).filter(Boolean) || [];
 
   return (
@@ -39,11 +40,15 @@ export function OperatorHero({ name, category, specialties, website, instagram }
 
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-5">
-          {/* Logo placeholder */}
-          <div className="h-20 w-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 border border-primary/20 flex items-center justify-center shadow-sm">
-            <span className="text-2xl font-bold text-primary">
-              {name.charAt(0)}
-            </span>
+          {/* Logo */}
+          <div className="h-20 w-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 border border-primary/20 flex items-center justify-center shadow-sm overflow-hidden">
+            {logoUrl ? (
+              <img src={logoUrl} alt={name} className="h-full w-full object-contain p-2" />
+            ) : (
+              <span className="text-2xl font-bold text-primary">
+                {name.charAt(0)}
+              </span>
+            )}
           </div>
 
           <div className="space-y-3">

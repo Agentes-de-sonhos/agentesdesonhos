@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -20,7 +28,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Building2,
@@ -34,10 +41,12 @@ import {
   AlertCircle,
   CheckCircle2,
   Pencil,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
+import { SupplierLogoUpload } from "./SupplierLogoUpload";
 
 const TEMPLATE_HEADERS = [
   "name",
@@ -54,20 +63,66 @@ const TEMPLATE_HEADERS = [
   "executive_team",
 ];
 
+const CATEGORIES = [
+  "Operadoras de turismo",
+  "Consolidadoras",
+  "Companhias aéreas",
+  "Hospedagem",
+  "Locadoras de veículos",
+  "Cruzeiros",
+  "Seguros viagem",
+  "Parques e atrações",
+  "Receptivos",
+  "Guias",
+];
+
 interface ImportResult {
   created: number;
   skipped: number;
   errors: string[];
 }
 
+interface OperatorFormData {
+  name: string;
+  category: string;
+  specialties: string;
+  how_to_sell: string;
+  sales_channels: string;
+  commercial_contacts: string;
+  website: string;
+  instagram: string;
+  founded_year: string;
+  annual_revenue: string;
+  employees: string;
+  executive_team: string;
+  logo_url: string | null;
+}
+
+const initialFormData: OperatorFormData = {
+  name: "",
+  category: "Operadoras de turismo",
+  specialties: "",
+  how_to_sell: "",
+  sales_channels: "",
+  commercial_contacts: "",
+  website: "",
+  instagram: "",
+  founded_year: "",
+  annual_revenue: "",
+  employees: "",
+  executive_team: "",
+  logo_url: null,
+};
+
 export function AdminTourOperatorsManager() {
   const [search, setSearch] = useState("");
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [showResultDialog, setShowResultDialog] = useState(false);
-  const [editOperator, setEditOperator] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState<Record<string, any>>({});
-  const [saving, setSaving] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingOperator, setEditingOperator] = useState<any | null>(null);
+  const [formData, setFormData] = useState<OperatorFormData>(initialFormData);
+  const [activeTab, setActiveTab] = useState("info");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -109,60 +164,80 @@ export function AdminTourOperatorsManager() {
     },
   });
 
+  const saveMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string | null; data: OperatorFormData }) => {
+      const payload: any = {
+        name: data.name.trim(),
+        category: data.category.trim() || "Operadoras de turismo",
+        specialties: data.specialties.trim() || null,
+        how_to_sell: data.how_to_sell.trim() || null,
+        sales_channels: data.sales_channels.trim() || null,
+        commercial_contacts: data.commercial_contacts.trim() || null,
+        website: data.website.trim() || null,
+        instagram: data.instagram.trim() || null,
+        founded_year: data.founded_year ? Number(data.founded_year) || null : null,
+        annual_revenue: data.annual_revenue.trim() || null,
+        employees: data.employees ? Number(data.employees) || null : null,
+        executive_team: data.executive_team.trim() || null,
+        logo_url: data.logo_url || null,
+      };
+
+      if (id) {
+        const { error } = await supabase.from("tour_operators").update(payload).eq("id", id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("tour_operators").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+      toast.success(editingOperator ? "Operadora atualizada!" : "Operadora criada!");
+      resetForm();
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setEditingOperator(null);
+    setIsEditOpen(false);
+    setActiveTab("info");
+  };
+
   const openEdit = (op: any) => {
-    setEditForm({
+    setEditingOperator(op);
+    setFormData({
       name: op.name || "",
-      category: op.category || "",
+      category: op.category || "Operadoras de turismo",
       specialties: op.specialties || "",
       how_to_sell: op.how_to_sell || "",
       sales_channels: op.sales_channels || "",
       commercial_contacts: op.commercial_contacts || "",
       website: op.website || "",
       instagram: op.instagram || "",
-      founded_year: op.founded_year ?? "",
+      founded_year: op.founded_year != null ? String(op.founded_year) : "",
       annual_revenue: op.annual_revenue || "",
-      employees: op.employees ?? "",
+      employees: op.employees != null ? String(op.employees) : "",
       executive_team: op.executive_team || "",
+      logo_url: op.logo_url || null,
     });
-    setEditOperator(op);
+    setActiveTab("info");
+    setIsEditOpen(true);
   };
 
-  const handleSaveEdit = async () => {
-    if (!editOperator) return;
-    setSaving(true);
-    try {
-      const payload: any = {
-        name: editForm.name.trim(),
-        category: editForm.category.trim() || "Operadoras de turismo",
-        specialties: editForm.specialties.trim() || null,
-        how_to_sell: editForm.how_to_sell.trim() || null,
-        sales_channels: editForm.sales_channels.trim() || null,
-        commercial_contacts: editForm.commercial_contacts.trim() || null,
-        website: editForm.website.trim() || null,
-        instagram: editForm.instagram.trim() || null,
-        founded_year: editForm.founded_year ? Number(editForm.founded_year) || null : null,
-        annual_revenue: editForm.annual_revenue.trim() || null,
-        employees: editForm.employees ? Number(editForm.employees) || null : null,
-        executive_team: editForm.executive_team.trim() || null,
-      };
-      if (!payload.name) {
-        toast.error("Nome é obrigatório");
-        setSaving(false);
-        return;
-      }
-      const { error } = await supabase
-        .from("tour_operators")
-        .update(payload)
-        .eq("id", editOperator.id);
-      if (error) throw error;
-      toast.success("Operadora atualizada!");
-      setEditOperator(null);
-      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setSaving(false);
+  const openCreate = () => {
+    resetForm();
+    setIsEditOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim()) {
+      toast.error("Nome é obrigatório");
+      return;
     }
+    saveMutation.mutate({ id: editingOperator?.id || null, data: formData });
   };
 
   const downloadTemplate = () => {
@@ -192,7 +267,6 @@ export function AdminTourOperatorsManager() {
         return;
       }
 
-      // Process in batches of 50
       const BATCH_SIZE = 50;
       for (let i = 0; i < rows.length; i += BATCH_SIZE) {
         const batch = rows.slice(i, i + BATCH_SIZE);
@@ -229,7 +303,6 @@ export function AdminTourOperatorsManager() {
           .select();
 
         if (error) {
-          // Try one by one for better error handling
           for (const item of toInsert) {
             const { error: singleErr } = await supabase
               .from("tour_operators")
@@ -287,6 +360,7 @@ export function AdminTourOperatorsManager() {
           </Button>
           <Button
             size="sm"
+            variant="outline"
             onClick={() => fileInputRef.current?.click()}
             disabled={importing}
           >
@@ -295,7 +369,11 @@ export function AdminTourOperatorsManager() {
             ) : (
               <Upload className="h-4 w-4 mr-1" />
             )}
-            Importar Operadoras
+            Importar
+          </Button>
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-1" />
+            Nova Operadora
           </Button>
           <input
             ref={fileInputRef}
@@ -323,92 +401,276 @@ export function AdminTourOperatorsManager() {
           </div>
         ) : !filtered?.length ? (
           <p className="text-center text-muted-foreground py-8">
-            Nenhuma operadora cadastrada. Importe via planilha.
+            Nenhuma operadora cadastrada. Importe via planilha ou crie manualmente.
           </p>
         ) : (
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((op: any) => (
-                  <TableRow key={op.id}>
-                    <TableCell className="font-medium">{op.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {op.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground truncate max-w-[200px]">
-                      {op.website || "—"}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={op.is_active ? "default" : "secondary"}>
-                        {op.is_active ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEdit(op)}
-                          title="Editar"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/mapa-turismo/operadora/${op.id}`)}
-                          title="Ver página"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() =>
-                            toggleActiveMutation.mutate({
-                              id: op.id,
-                              is_active: !op.is_active,
-                            })
-                          }
-                          title={op.is_active ? "Desativar" : "Ativar"}
-                        >
-                          {op.is_active ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (confirm("Remover esta operadora?")) {
-                              deleteMutation.mutate(op.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="space-y-3">
+            {filtered.map((op: any) => (
+              <div
+                key={op.id}
+                className="flex items-center justify-between p-3 rounded-lg border bg-card"
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {op.logo_url ? (
+                      <img
+                        src={op.logo_url}
+                        alt={op.name}
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <Building2 className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{op.name}</p>
+                    <p className="text-xs text-muted-foreground">{op.category}</p>
+                  </div>
+                  <Badge variant={op.is_active ? "default" : "outline"}>
+                    {op.is_active ? "Ativo" : "Inativo"}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-1 ml-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() =>
+                      toggleActiveMutation.mutate({
+                        id: op.id,
+                        is_active: !op.is_active,
+                      })
+                    }
+                    title={op.is_active ? "Desativar" : "Ativar"}
+                  >
+                    {op.is_active ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate(`/mapa-turismo/operadora/${op.id}`)}
+                    title="Ver página"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => openEdit(op)}
+                    title="Editar"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      if (confirm("Remover esta operadora?")) {
+                        deleteMutation.mutate(op.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
+
+      {/* Edit / Create Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={(open) => { if (!open) resetForm(); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingOperator ? "Editar Operadora" : "Nova Operadora"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="info">Informações</TabsTrigger>
+                <TabsTrigger value="specialties">Especialidades</TabsTrigger>
+                <TabsTrigger value="details">Detalhes</TabsTrigger>
+                <TabsTrigger value="social">Redes Sociais</TabsTrigger>
+              </TabsList>
+
+              {/* Tab: Informações */}
+              <TabsContent value="info" className="space-y-4 mt-4">
+                <SupplierLogoUpload
+                  logoUrl={formData.logo_url}
+                  onLogoChange={(url) => setFormData({ ...formData, logo_url: url })}
+                  supplierId={editingOperator?.id}
+                />
+
+                <div>
+                  <Label>Nome da Empresa *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Categoria *</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Ano de Fundação</Label>
+                    <Input
+                      type="number"
+                      value={formData.founded_year}
+                      onChange={(e) => setFormData({ ...formData, founded_year: e.target.value })}
+                      placeholder="Ex: 1840"
+                    />
+                  </div>
+                  <div>
+                    <Label>Funcionários</Label>
+                    <Input
+                      type="number"
+                      value={formData.employees}
+                      onChange={(e) => setFormData({ ...formData, employees: e.target.value })}
+                      placeholder="Ex: 500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Faturamento Anual</Label>
+                  <Input
+                    value={formData.annual_revenue}
+                    onChange={(e) => setFormData({ ...formData, annual_revenue: e.target.value })}
+                    placeholder="Ex: R$ 550 milhões"
+                  />
+                </div>
+                <div>
+                  <Label>Equipe Executiva</Label>
+                  <Textarea
+                    value={formData.executive_team}
+                    onChange={(e) => setFormData({ ...formData, executive_team: e.target.value })}
+                    placeholder="Nomes e cargos dos executivos..."
+                    rows={2}
+                  />
+                </div>
+              </TabsContent>
+
+              {/* Tab: Especialidades */}
+              <TabsContent value="specialties" className="space-y-4 mt-4">
+                <div>
+                  <Label>Especialidades</Label>
+                  <Textarea
+                    value={formData.specialties}
+                    onChange={(e) => setFormData({ ...formData, specialties: e.target.value })}
+                    placeholder="Separe por vírgula: Europa, Orlando, Cruzeiros, Disney..."
+                    rows={4}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Separe cada especialidade por vírgula. Ex: Europa, Circuitos, Grupos Disney, Bloqueios Aéreos
+                  </p>
+                </div>
+
+                {/* Preview chips */}
+                {formData.specialties.trim() && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Pré-visualização</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.specialties.split(",").map((s, i) => {
+                        const tag = s.trim();
+                        if (!tag) return null;
+                        return (
+                          <Badge key={i} variant="secondary">
+                            {tag}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Tab: Detalhes */}
+              <TabsContent value="details" className="space-y-4 mt-4">
+                <div>
+                  <Label>Como Vender</Label>
+                  <Textarea
+                    value={formData.how_to_sell}
+                    onChange={(e) => setFormData({ ...formData, how_to_sell: e.target.value })}
+                    placeholder="Instruções para venda..."
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label>Canais de Venda</Label>
+                  <Textarea
+                    value={formData.sales_channels}
+                    onChange={(e) => setFormData({ ...formData, sales_channels: e.target.value })}
+                    placeholder="Portais, sistemas, telefone..."
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label>Contatos Comerciais</Label>
+                  <Textarea
+                    value={formData.commercial_contacts}
+                    onChange={(e) => setFormData({ ...formData, commercial_contacts: e.target.value })}
+                    placeholder="Nomes, regiões e telefones..."
+                    rows={4}
+                  />
+                </div>
+              </TabsContent>
+
+              {/* Tab: Redes Sociais */}
+              <TabsContent value="social" className="space-y-4 mt-4">
+                <div>
+                  <Label>Website</Label>
+                  <Input
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                <div>
+                  <Label>Instagram</Label>
+                  <Input
+                    value={formData.instagram}
+                    onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                    placeholder="https://instagram.com/..."
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={saveMutation.isPending}
+            >
+              {saveMutation.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              {editingOperator ? "Salvar" : "Criar"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Import Result Dialog */}
       <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
@@ -443,119 +705,6 @@ export function AdminTourOperatorsManager() {
               )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Operator Dialog */}
-      <Dialog open={!!editOperator} onOpenChange={(open) => !open && setEditOperator(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Pencil className="h-5 w-5" />
-              Editar Operadora
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <Label>Nome *</Label>
-              <Input
-                value={editForm.name || ""}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Categoria</Label>
-              <Input
-                value={editForm.category || ""}
-                onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Especialidades</Label>
-              <Input
-                value={editForm.specialties || ""}
-                onChange={(e) => setEditForm({ ...editForm, specialties: e.target.value })}
-                placeholder="Separadas por vírgula"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>Como Vender</Label>
-              <Textarea
-                value={editForm.how_to_sell || ""}
-                onChange={(e) => setEditForm({ ...editForm, how_to_sell: e.target.value })}
-                rows={4}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>Canais de Venda</Label>
-              <Textarea
-                value={editForm.sales_channels || ""}
-                onChange={(e) => setEditForm({ ...editForm, sales_channels: e.target.value })}
-                rows={3}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>Contatos Comerciais</Label>
-              <Textarea
-                value={editForm.commercial_contacts || ""}
-                onChange={(e) => setEditForm({ ...editForm, commercial_contacts: e.target.value })}
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label>Website</Label>
-              <Input
-                value={editForm.website || ""}
-                onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Instagram</Label>
-              <Input
-                value={editForm.instagram || ""}
-                onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Ano de Fundação</Label>
-              <Input
-                type="number"
-                value={editForm.founded_year || ""}
-                onChange={(e) => setEditForm({ ...editForm, founded_year: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Faturamento Anual</Label>
-              <Input
-                value={editForm.annual_revenue || ""}
-                onChange={(e) => setEditForm({ ...editForm, annual_revenue: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Funcionários</Label>
-              <Input
-                type="number"
-                value={editForm.employees || ""}
-                onChange={(e) => setEditForm({ ...editForm, employees: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Equipe Executiva</Label>
-              <Input
-                value={editForm.executive_team || ""}
-                onChange={(e) => setEditForm({ ...editForm, executive_team: e.target.value })}
-              />
-            </div>
-          </div>
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setEditOperator(null)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveEdit} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-              Salvar
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
