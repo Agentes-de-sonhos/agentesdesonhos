@@ -23,6 +23,7 @@ export default function OperadoraDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const { data: operator, isLoading } = useQuery({
