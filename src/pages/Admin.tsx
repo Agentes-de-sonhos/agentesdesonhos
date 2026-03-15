@@ -185,6 +185,10 @@ export default function Admin() {
               <Heart className="h-4 w-4" />
               <span className="hidden sm:inline">Comunidade</span>
             </TabsTrigger>
+            <TabsTrigger value="mentorships" className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" />
+              <span className="hidden sm:inline">Cursos</span>
+            </TabsTrigger>
             <TabsTrigger value="playbooks" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Playbooks</span>
