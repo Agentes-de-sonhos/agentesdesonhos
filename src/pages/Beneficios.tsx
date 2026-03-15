@@ -1,7 +1,10 @@
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useBenefits } from "@/hooks/useBenefits";
-import { BenefitHero } from "@/components/benefits/BenefitHero";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Share2 } from "lucide-react";
 import { BenefitSearchBar } from "@/components/benefits/BenefitSearchBar";
 import { BenefitFilters } from "@/components/benefits/BenefitFilters";
 import { BenefitCard } from "@/components/benefits/BenefitCard";
