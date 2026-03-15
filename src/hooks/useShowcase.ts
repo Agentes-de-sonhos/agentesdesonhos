@@ -36,7 +36,6 @@ export interface ShowcaseItem {
   featured_label: string | null;
   created_at: string;
   updated_at: string;
-  // Joined material data
   materials?: {
     id: string;
     title: string;
@@ -53,6 +52,11 @@ export interface Showcase {
   user_id: string;
   slug: string;
   is_active: boolean;
+  tagline: string | null;
+  showcase_mode: string;
+  auto_supplier_ids: string[];
+  max_auto_items: number;
+  auto_categories: string[];
   created_at: string;
   updated_at: string;
 }
@@ -106,6 +110,20 @@ export function useShowcase() {
     enabled: !!user?.id,
   });
 
+  const { data: allSuppliers } = useQuery({
+    queryKey: ["showcase-all-suppliers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trade_suppliers")
+        .select("id, name, logo_url, category")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const createShowcase = useMutation({
     mutationFn: async (slug: string) => {
       const { data, error } = await supabase
@@ -126,6 +144,20 @@ export function useShowcase() {
       } else {
         toast.error("Erro ao criar vitrine");
       }
+    },
+  });
+
+  const updateShowcase = useMutation({
+    mutationFn: async (updates: Partial<Showcase>) => {
+      const { error } = await supabase
+        .from("agency_showcases")
+        .update(updates as any)
+        .eq("id", showcase!.id)
+        .eq("user_id", user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-showcase"] });
     },
   });
 
@@ -232,9 +264,11 @@ export function useShowcase() {
     showcase,
     items: items || [],
     availableMaterials: availableMaterials || [],
+    allSuppliers: allSuppliers || [],
     loadingShowcase,
     loadingItems,
     createShowcase,
+    updateShowcase,
     addItem,
     updateItem,
     removeItem,
@@ -275,7 +309,7 @@ export function usePublicShowcase(slug: string | undefined) {
     enabled: !!showcase?.user_id,
   });
 
-  const { data: items } = useQuery({
+  const { data: manualItems } = useQuery({
     queryKey: ["public-showcase-items", showcase?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -285,12 +319,9 @@ export function usePublicShowcase(slug: string | undefined) {
         .eq("is_active", true)
         .order("order_index", { ascending: true });
       if (error) throw error;
-      // Filter: items from materials that expired (non-permanent + older than 7 days)
       const now = new Date();
       return (data as ShowcaseItem[]).filter(item => {
-        // Check item-level expiry
         if (item.expires_at && new Date(item.expires_at) < now) return false;
-        // Check material-level expiry (7 day rule for non-permanent)
         if (item.materials) {
           if (!item.materials.is_active) return false;
           if (!item.materials.is_permanent) {
@@ -306,6 +337,90 @@ export function usePublicShowcase(slug: string | undefined) {
     enabled: !!showcase?.id,
   });
 
+  // Auto-mode: fetch materials from selected suppliers
+  const isAutoMode = showcase?.showcase_mode === "auto" || showcase?.showcase_mode === "combinado";
+  const autoSupplierIds = showcase?.auto_supplier_ids || [];
+  const autoCategories = showcase?.auto_categories || [];
+  const maxAutoItems = showcase?.max_auto_items || 20;
+
+  const { data: autoMaterials } = useQuery({
+    queryKey: ["public-showcase-auto", showcase?.id, autoSupplierIds, autoCategories],
+    queryFn: async () => {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      let query = supabase
+        .from("materials")
+        .select("id, title, file_url, thumbnail_url, category, destination, supplier_id, is_permanent, created_at, trade_suppliers(id, name)")
+        .eq("is_active", true)
+        .is("trail_id", null)
+        .in("material_type", ["Imagem", "Lâmina"])
+        .or(`created_at.gte.${sevenDaysAgo.toISOString()},is_permanent.eq.true`)
+        .order("created_at", { ascending: false })
+        .limit(maxAutoItems);
+
+      if (autoSupplierIds.length > 0) {
+        query = query.in("supplier_id", autoSupplierIds);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      let filtered = data || [];
+      if (autoCategories.length > 0) {
+        filtered = filtered.filter(m => autoCategories.includes(m.category));
+      }
+
+      // Convert materials to ShowcaseItem-like objects
+      return filtered.map((m, i) => ({
+        id: `auto-${m.id}`,
+        showcase_id: showcase!.id,
+        user_id: showcase!.user_id,
+        material_id: m.id,
+        image_url: m.file_url || m.thumbnail_url,
+        gallery_urls: [],
+        category: m.category || "Geral",
+        subcategory: m.destination || null,
+        action_type: "whatsapp",
+        action_url: null,
+        order_index: i,
+        expires_at: null,
+        is_active: true,
+        is_featured: false,
+        featured_order: 0,
+        featured_label: null,
+        created_at: m.created_at,
+        updated_at: m.created_at,
+        materials: {
+          id: m.id,
+          title: m.title,
+          file_url: m.file_url,
+          thumbnail_url: m.thumbnail_url,
+          is_active: true,
+          is_permanent: m.is_permanent || false,
+          created_at: m.created_at,
+        },
+        _supplierName: m.trade_suppliers?.name || null,
+      })) as (ShowcaseItem & { _supplierName?: string | null })[];
+    },
+    enabled: !!showcase?.id && isAutoMode && autoSupplierIds.length > 0,
+  });
+
+  // Combine manual + auto items
+  const items = (() => {
+    const manual = manualItems || [];
+    if (!isAutoMode) return manual;
+    const auto = autoMaterials || [];
+    // In combinado mode, manual first then auto. In pure auto, only auto.
+    if (showcase?.showcase_mode === "combinado") {
+      // Filter out auto items that are already in manual (by material_id)
+      const manualMaterialIds = new Set(manual.map(m => m.material_id).filter(Boolean));
+      const uniqueAuto = auto.filter(a => !manualMaterialIds.has(a.material_id));
+      return [...manual, ...uniqueAuto];
+    }
+    return auto;
+  })();
+
   const trackEvent = async (showcaseId: string, eventType: string, itemId?: string) => {
     await supabase.from("showcase_stats").insert({
       showcase_id: showcaseId,
@@ -317,7 +432,7 @@ export function usePublicShowcase(slug: string | undefined) {
   return {
     showcase,
     profile,
-    items: items || [],
+    items,
     loadingShowcase,
     trackEvent,
   };

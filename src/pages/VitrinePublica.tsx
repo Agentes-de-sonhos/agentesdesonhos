@@ -3,65 +3,56 @@ import { useParams } from "react-router-dom";
 import { usePublicShowcase, type ShowcaseItem, getFeaturedLabel } from "@/hooks/useShowcase";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Phone, MessageCircle, X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, MessageCircle, X, ExternalLink, ChevronLeft, ChevronRight, Phone } from "lucide-react";
 
+/* ─── Featured Badge ─── */
 function FeaturedBadge({ label }: { label: string | null }) {
   const info = getFeaturedLabel(label);
   if (!info) return null;
   return (
-    <span className="absolute top-3 left-3 z-10 bg-amber-500 text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
-      <span className="text-base">{info.emoji}</span> {info.text}
+    <span className="absolute top-3 left-3 z-10 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+      <span className="text-sm">{info.emoji}</span> {info.text}
     </span>
   );
 }
 
+/* ─── Image Carousel ─── */
 function ImageCarousel({ images, onImageClick }: { images: string[]; onImageClick?: () => void }) {
   const [current, setCurrent] = useState(0);
 
   if (images.length <= 1) {
     return (
-      <img
-        src={images[0]}
-        alt=""
-        className="w-full block cursor-pointer"
-        loading="lazy"
-        onClick={onImageClick}
-      />
+      <div className="relative w-full overflow-hidden">
+        <img src={images[0]} alt="" className="w-full block" loading="lazy" onClick={onImageClick} />
+        {/* Bottom gradient */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+      </div>
     );
   }
 
   return (
     <div className="relative" onClick={onImageClick}>
       <img src={images[current]} alt="" className="w-full block cursor-pointer" loading="lazy" />
-      {/* Dots */}
+      {/* Bottom gradient */}
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
         {images.map((_, i) => (
-          <button
-            key={i}
-            onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
-            className={`h-2 w-2 rounded-full transition-all ${i === current ? "bg-white scale-110 shadow" : "bg-white/50"}`}
-          />
+          <button key={i} onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+            className={`h-2 w-2 rounded-full transition-all ${i === current ? "bg-white scale-125 shadow" : "bg-white/50"}`} />
         ))}
       </div>
-      {/* Arrows */}
       {current > 0 && (
-        <button
-          onClick={(e) => { e.stopPropagation(); setCurrent(c => c - 1); }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors z-10"
-        >
+        <button onClick={(e) => { e.stopPropagation(); setCurrent(c => c - 1); }}
+          className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-10">
           <ChevronLeft className="h-5 w-5" />
         </button>
       )}
       {current < images.length - 1 && (
-        <button
-          onClick={(e) => { e.stopPropagation(); setCurrent(c => c + 1); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors z-10"
-        >
+        <button onClick={(e) => { e.stopPropagation(); setCurrent(c => c + 1); }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-10">
           <ChevronRight className="h-5 w-5" />
         </button>
       )}
-      {/* Counter */}
       <span className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10">
         {current + 1}/{images.length}
       </span>
@@ -69,6 +60,7 @@ function ImageCarousel({ images, onImageClick }: { images: string[]; onImageClic
   );
 }
 
+/* ─── Lightbox Carousel ─── */
 function LightboxCarousel({ images, actionButton }: { images: string[]; actionButton: React.ReactNode }) {
   const [current, setCurrent] = useState(0);
 
@@ -77,33 +69,25 @@ function LightboxCarousel({ images, actionButton }: { images: string[]; actionBu
       <img src={images[current]} alt="" className="w-full max-h-[80vh] object-contain" />
       {images.length > 1 && (
         <>
-          <div className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10">
+          <span className="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10">
             {current + 1}/{images.length}
-          </div>
+          </span>
           {current > 0 && (
-            <button
-              onClick={() => setCurrent(c => c - 1)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-10"
-            >
+            <button onClick={() => setCurrent(c => c - 1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-10">
               <ChevronLeft className="h-6 w-6" />
             </button>
           )}
           {current < images.length - 1 && (
-            <button
-              onClick={() => setCurrent(c => c + 1)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-10"
-            >
+            <button onClick={() => setCurrent(c => c + 1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 z-10">
               <ChevronRight className="h-6 w-6" />
             </button>
           )}
-          {/* Dots */}
           <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
             {images.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrent(i)}
-                className={`h-2.5 w-2.5 rounded-full transition-all ${i === current ? "bg-white scale-110" : "bg-white/50"}`}
-              />
+              <button key={i} onClick={() => setCurrent(i)}
+                className={`h-2.5 w-2.5 rounded-full transition-all ${i === current ? "bg-white scale-110" : "bg-white/50"}`} />
             ))}
           </div>
         </>
@@ -115,11 +99,11 @@ function LightboxCarousel({ images, actionButton }: { images: string[]; actionBu
   );
 }
 
+/* ─── Main Component ─── */
 export default function VitrinePublica() {
   const { slug } = useParams<{ slug: string }>();
   const { showcase, profile, items, loadingShowcase, trackEvent } = usePublicShowcase(slug);
   const [selectedCategory, setSelectedCategory] = useState("todas");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("todas");
   const [lightboxItem, setLightboxItem] = useState<ShowcaseItem | null>(null);
   const [contactOpen, setContactOpen] = useState(false);
   const [tracked, setTracked] = useState(false);
@@ -132,26 +116,17 @@ export default function VitrinePublica() {
   }, [showcase, tracked]);
 
   const categories = [...new Set(items.map(i => i.category))];
-  const subcategories = [...new Set(
-    items.filter(i => selectedCategory === "todas" || i.category === selectedCategory)
-      .map(i => i.subcategory).filter(Boolean) as string[]
-  )];
 
-  const applyFilters = (list: ShowcaseItem[]) => list.filter(i => {
+  const filteredItems = items.filter(i => {
     if (selectedCategory !== "todas" && i.category !== selectedCategory) return false;
-    if (selectedSubcategory !== "todas" && i.subcategory !== selectedSubcategory) return false;
     return true;
   });
 
-  const featuredItems = applyFilters(
-    items.filter(i => i.is_featured).sort((a, b) => a.featured_order - b.featured_order)
-  );
-  const regularItems = applyFilters(items.filter(i => !i.is_featured));
+  const featuredItems = filteredItems.filter(i => i.is_featured).sort((a, b) => a.featured_order - b.featured_order);
+  const regularItems = filteredItems.filter(i => !i.is_featured);
 
   const getItemImages = (item: ShowcaseItem): string[] => {
-    // If gallery_urls has multiple images, use them
     if (item.gallery_urls && item.gallery_urls.length > 1) return item.gallery_urls;
-    // Fallback to single image
     const single = item.image_url || item.materials?.file_url || item.materials?.thumbnail_url;
     return single ? [single] : [];
   };
@@ -181,7 +156,7 @@ export default function VitrinePublica() {
   if (!showcase) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
+        <div className="text-center px-6">
           <h1 className="text-2xl font-bold mb-2">Vitrine não encontrada</h1>
           <p className="text-muted-foreground">Esta vitrine não existe ou foi desativada.</p>
         </div>
@@ -189,29 +164,47 @@ export default function VitrinePublica() {
     );
   }
 
-  const renderItem = (item: ShowcaseItem, isFeatured: boolean) => {
+  const hasResults = featuredItems.length > 0 || regularItems.length > 0;
+
+  const renderCard = (item: ShowcaseItem, isFeatured: boolean) => {
     const images = getItemImages(item);
     if (images.length === 0) return null;
+
     return (
       <div
         key={item.id}
-        className={`relative rounded-2xl overflow-hidden group transition-shadow ${
-          isFeatured ? "shadow-lg ring-2 ring-amber-400/40" : "shadow-md"
+        className={`relative rounded-2xl overflow-hidden bg-card shadow-md transition-all duration-200 hover:shadow-xl hover:scale-[1.02] cursor-pointer group ${
+          isFeatured ? "ring-2 ring-amber-400/50 shadow-lg" : ""
         }`}
       >
         {isFeatured && <FeaturedBadge label={item.featured_label} />}
+
+        {/* Image area */}
         <ImageCarousel images={images} onImageClick={() => handleItemClick(item)} />
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+
+        {/* Card info overlay at bottom of image */}
+        <div className="absolute bottom-0 left-0 right-0 z-[5] pointer-events-none">
+          <div className="px-4 pb-3 pt-8">
+            {item.subcategory && (
+              <p className="text-white/80 text-xs font-medium mb-0.5">{item.subcategory}</p>
+            )}
+            {item.materials?.title && (
+              <h3 className="text-white font-semibold text-sm leading-tight line-clamp-2">{item.materials.title}</h3>
+            )}
+          </div>
+        </div>
+
+        {/* CTA Button */}
+        <div className="p-3 border-t border-border/50">
           <Button
             size="sm"
-            className="bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white shadow-lg pointer-events-auto"
+            className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,38%)] text-white font-medium text-xs"
             onClick={e => { e.stopPropagation(); handleAction(item); }}
           >
             {item.action_type === "whatsapp" ? (
-              <><MessageCircle className="h-4 w-4 mr-1" /> Falar no WhatsApp</>
+              <><MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Falar no WhatsApp</>
             ) : (
-              <><ExternalLink className="h-4 w-4 mr-1" /> Saiba mais</>
+              <><ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Solicitar orçamento</>
             )}
           </Button>
         </div>
@@ -219,47 +212,75 @@ export default function VitrinePublica() {
     );
   };
 
-  const hasResults = featuredItems.length > 0 || regularItems.length > 0;
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col">
+      {/* ─── Header / Agency identity ─── */}
+      <header className="bg-background border-b">
+        <div className="max-w-lg mx-auto px-4 py-6 flex flex-col items-center text-center">
           {profile?.agency_logo_url ? (
-            <img src={profile.agency_logo_url} alt="" className="h-10 w-10 rounded-full object-cover border" />
+            <img
+              src={profile.agency_logo_url}
+              alt={profile.agency_name || ""}
+              className="h-20 w-auto max-w-[200px] object-contain mb-3"
+            />
           ) : (
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl mb-3">
               {(profile?.agency_name || profile?.name || "V")[0]}
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <h1 className="font-semibold text-sm truncate">{profile?.agency_name || profile?.name || "Vitrine"}</h1>
-            {profile?.city && <p className="text-xs text-muted-foreground">{profile.city}{profile.state ? `, ${profile.state}` : ""}</p>}
-          </div>
-        </div>
-        <div className="max-w-lg mx-auto px-4 pb-3 flex gap-2">
-          <Select value={selectedCategory} onValueChange={v => { setSelectedCategory(v); setSelectedSubcategory("todas"); }}>
-            <SelectTrigger className="h-8 text-xs flex-1"><SelectValue placeholder="Categoria" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas as ofertas</SelectItem>
-              {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          {subcategories.length > 0 && (
-            <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
-              <SelectTrigger className="h-8 text-xs flex-1"><SelectValue placeholder="Subcategoria" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas</SelectItem>
-                {subcategories.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
+
+          {/* Only show name if no logo (logo usually contains the name) */}
+          {!profile?.agency_logo_url && profile?.agency_name && (
+            <h1 className="font-bold text-lg text-foreground">{profile.agency_name}</h1>
+          )}
+
+          {(profile?.city || profile?.state) && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {[profile.city, profile.state].filter(Boolean).join(" • ")}
+            </p>
+          )}
+
+          {showcase.tagline && (
+            <p className="text-sm text-muted-foreground mt-2 italic max-w-xs">
+              {showcase.tagline}
+            </p>
           )}
         </div>
+
+        {/* ─── Category filter chips ─── */}
+        {categories.length > 1 && (
+          <div className="max-w-lg mx-auto px-4 pb-4">
+            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <button
+                onClick={() => setSelectedCategory("todas")}
+                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors flex-shrink-0 ${
+                  selectedCategory === "todas"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                Todas as ofertas
+              </button>
+              {categories.map(c => (
+                <button
+                  key={c}
+                  onClick={() => setSelectedCategory(c)}
+                  className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors flex-shrink-0 ${
+                    selectedCategory === c
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* Items */}
-      <main className="max-w-lg mx-auto px-4 py-4 space-y-3 pb-24">
+      {/* ─── Items grid ─── */}
+      <main className="max-w-lg mx-auto w-full px-4 py-5 space-y-4 flex-1 pb-28">
         {!hasResults ? (
           <div className="text-center py-16">
             <p className="text-muted-foreground">Nenhuma oferta disponível no momento.</p>
@@ -267,45 +288,62 @@ export default function VitrinePublica() {
         ) : (
           <>
             {featuredItems.length > 0 && (
-              <div className="space-y-3">
-                {featuredItems.map(item => renderItem(item, true))}
+              <div className="space-y-4">
+                {featuredItems.map(item => renderCard(item, true))}
               </div>
             )}
             {featuredItems.length > 0 && regularItems.length > 0 && (
-              <div className="flex items-center gap-3 py-2">
+              <div className="flex items-center gap-3 py-1">
                 <div className="flex-1 h-px bg-border" />
                 <span className="text-xs text-muted-foreground font-medium">Mais ofertas</span>
                 <div className="flex-1 h-px bg-border" />
               </div>
             )}
-            {regularItems.map(item => renderItem(item, false))}
+            <div className="space-y-4">
+              {regularItems.map(item => renderCard(item, false))}
+            </div>
           </>
         )}
       </main>
 
-      {/* Floating Contact Button */}
+      {/* ─── Footer ─── */}
+      <footer className="bg-card border-t py-6">
+        <div className="max-w-lg mx-auto px-4 text-center space-y-1">
+          <p className="font-semibold text-sm text-foreground">{profile?.agency_name || profile?.name}</p>
+          {(profile?.city || profile?.state) && (
+            <p className="text-xs text-muted-foreground">
+              {[profile?.city, profile?.state].filter(Boolean).join(" • ")}
+            </p>
+          )}
+          {profile?.phone && (
+            <p className="text-xs text-muted-foreground">Atendimento via WhatsApp</p>
+          )}
+        </div>
+      </footer>
+
+      {/* ─── Fixed WhatsApp CTA ─── */}
       {profile?.phone && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 sm:left-auto sm:translate-x-0 sm:right-6">
           {contactOpen && (
-            <div className="mb-3 flex flex-col gap-2 animate-fade-in">
+            <div className="mb-3 flex flex-col gap-2 animate-fade-in items-end">
               <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-[hsl(142,70%,45%)] text-white px-4 py-2.5 rounded-full shadow-lg hover:bg-[hsl(142,70%,40%)] transition-colors text-sm font-medium">
+                className="flex items-center gap-2 bg-[hsl(142,70%,45%)] text-white px-5 py-3 rounded-full shadow-lg hover:bg-[hsl(142,70%,38%)] transition-colors text-sm font-medium">
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>
               <a href={phoneUrl}
-                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-full shadow-lg hover:bg-primary/90 transition-colors text-sm font-medium">
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-full shadow-lg hover:bg-primary/90 transition-colors text-sm font-medium">
                 <Phone className="h-4 w-4" /> Ligar
               </a>
             </div>
           )}
           <button onClick={() => setContactOpen(!contactOpen)}
-            className="h-14 w-14 rounded-full bg-[hsl(142,70%,45%)] text-white shadow-xl flex items-center justify-center hover:bg-[hsl(142,70%,40%)] transition-all">
-            {contactOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+            className="h-14 px-6 rounded-full bg-[hsl(142,70%,45%)] text-white shadow-xl flex items-center justify-center gap-2 hover:bg-[hsl(142,70%,38%)] transition-all text-sm font-semibold">
+            {contactOpen ? <X className="h-5 w-5" /> : <><MessageCircle className="h-5 w-5" /> Fale com um especialista</>}
           </button>
         </div>
       )}
 
-      {/* Lightbox */}
+      {/* ─── Lightbox ─── */}
       <Dialog open={!!lightboxItem} onOpenChange={open => { if (!open) setLightboxItem(null); }}>
         <DialogContent className="max-w-[95vw] sm:max-w-xl p-0 overflow-hidden bg-black/95 border-none">
           {lightboxItem && (() => {
@@ -319,11 +357,11 @@ export default function VitrinePublica() {
                 <LightboxCarousel
                   images={images.length > 0 ? images : ["/placeholder.svg"]}
                   actionButton={
-                    <Button className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white" onClick={() => handleAction(lightboxItem)}>
+                    <Button className="w-full bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,38%)] text-white" onClick={() => handleAction(lightboxItem)}>
                       {lightboxItem.action_type === "whatsapp" ? (
                         <><MessageCircle className="h-4 w-4 mr-2" /> Falar no WhatsApp</>
                       ) : (
-                        <><ExternalLink className="h-4 w-4 mr-2" /> Saiba mais</>
+                        <><ExternalLink className="h-4 w-4 mr-2" /> Solicitar orçamento</>
                       )}
                     </Button>
                   }
@@ -333,6 +371,9 @@ export default function VitrinePublica() {
           })()}
         </DialogContent>
       </Dialog>
+
+      {/* No-scrollbar utility */}
+      <style>{`.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
     </div>
   );
 }
