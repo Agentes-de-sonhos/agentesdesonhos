@@ -50,9 +50,12 @@ export default function BloqueiosAereos() {
   const airlines = [...new Set(blocks?.map((b) => b.airline) || [])];
 
   const filteredBlocks = blocks?.filter((block) => {
-    const matchesSearch = block.destination
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase();
+    const airportInfo = getAirport(block.destination);
+    const matchesSearch =
+      block.destination.toLowerCase().includes(term) ||
+      (airportInfo?.city?.toLowerCase().includes(term) ?? false) ||
+      (airportInfo?.name?.toLowerCase().includes(term) ?? false);
     const matchesOperator =
       selectedOperator === "Todos" || block.operator === selectedOperator;
     const matchesAirline =
