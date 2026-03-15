@@ -24,11 +24,13 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useAirports } from "@/hooks/useAirports";
 
 export default function BloqueiosAereos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOperator, setSelectedOperator] = useState("Todos");
   const [selectedAirline, setSelectedAirline] = useState("Todas");
+  const { formatAirportLabel, getAirport } = useAirports();
 
   const { data: blocks, isLoading } = useQuery({
     queryKey: ["flight-blocks"],
@@ -48,9 +50,12 @@ export default function BloqueiosAereos() {
   const airlines = [...new Set(blocks?.map((b) => b.airline) || [])];
 
   const filteredBlocks = blocks?.filter((block) => {
-    const matchesSearch = block.destination
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase();
+    const airportInfo = getAirport(block.destination);
+    const matchesSearch =
+      block.destination.toLowerCase().includes(term) ||
+      (airportInfo?.city?.toLowerCase().includes(term) ?? false) ||
+      (airportInfo?.name?.toLowerCase().includes(term) ?? false);
     const matchesOperator =
       selectedOperator === "Todos" || block.operator === selectedOperator;
     const matchesAirline =
@@ -152,7 +157,7 @@ export default function BloqueiosAereos() {
                       <div>
                         <CardTitle className="text-base flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          {block.destination}
+                          {formatAirportLabel(block.destination)}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
                           {block.airline}

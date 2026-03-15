@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,13 @@ import {
 import { ClipboardPaste, Loader2, Check, AlertCircle, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAirports } from "@/hooks/useAirports";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 interface ParsedBlock {
   origin: string;
@@ -136,6 +143,7 @@ export function FlightBlocksImporter() {
   const [importResult, setImportResult] = useState({ success: 0, errors: 0 });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { formatAirportLabel, getAirport } = useAirports();
 
   const importMutation = useMutation({
     mutationFn: async (rows: ParsedBlock[]) => {
@@ -274,6 +282,7 @@ export function FlightBlocksImporter() {
               {parsedBlocks.length} bloqueio(s) detectado(s). Edite os campos antes de salvar:
             </p>
 
+            <TooltipProvider delayDuration={200}>
             <div className="max-h-[400px] overflow-auto border rounded-lg">
               <Table>
                 <TableHeader>
@@ -294,20 +303,40 @@ export function FlightBlocksImporter() {
                   {parsedBlocks.map((block, idx) => (
                     <TableRow key={idx}>
                       <TableCell>
-                        <Input
-                          value={block.origin}
-                          onChange={(e) => updateBlock(idx, "origin", e.target.value.toUpperCase())}
-                          className="h-8 text-xs px-1"
-                          maxLength={3}
-                        />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Input
+                              value={block.origin}
+                              onChange={(e) => updateBlock(idx, "origin", e.target.value.toUpperCase())}
+                              className="h-8 text-xs px-1"
+                              maxLength={3}
+                            />
+                          </TooltipTrigger>
+                          {getAirport(block.origin) && (
+                            <TooltipContent side="bottom">
+                              <p className="text-xs">{getAirport(block.origin)!.name}</p>
+                              <p className="text-xs text-muted-foreground">{getAirport(block.origin)!.city}, {getAirport(block.origin)!.country}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
-                        <Input
-                          value={block.destination}
-                          onChange={(e) => updateBlock(idx, "destination", e.target.value.toUpperCase())}
-                          className="h-8 text-xs px-1"
-                          maxLength={3}
-                        />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Input
+                              value={block.destination}
+                              onChange={(e) => updateBlock(idx, "destination", e.target.value.toUpperCase())}
+                              className="h-8 text-xs px-1"
+                              maxLength={3}
+                            />
+                          </TooltipTrigger>
+                          {getAirport(block.destination) && (
+                            <TooltipContent side="bottom">
+                              <p className="text-xs">{getAirport(block.destination)!.name}</p>
+                              <p className="text-xs text-muted-foreground">{getAirport(block.destination)!.city}, {getAirport(block.destination)!.country}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
                         <Input
@@ -379,6 +408,7 @@ export function FlightBlocksImporter() {
                 </TableBody>
               </Table>
             </div>
+            </TooltipProvider>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setStep("paste")}>Voltar</Button>
