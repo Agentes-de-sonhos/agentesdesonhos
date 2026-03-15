@@ -126,7 +126,10 @@ export default function OperadoraDetail() {
           </div>
 
           {/* Sidebar */}
-          <OperatorSidebar operator={operator} />
+          <OperatorSidebar operator={{
+            ...operator,
+            social_links: operator.social_links as Record<string, string> | null,
+          }} />
         </div>
       </div>
     </DashboardLayout>
