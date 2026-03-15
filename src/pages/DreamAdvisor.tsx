@@ -388,7 +388,6 @@ export default function DreamAdvisor() {
           {activeTab === "dining" && <DiningTab />}
           {activeTab === "attraction" && <AttractionTab />}
           {activeTab === "shopping" && <ShoppingTab />}
-          {activeTab === "experience" && <ExperienceTab />}
         </div>
       </TooltipProvider>
     </DashboardLayout>
