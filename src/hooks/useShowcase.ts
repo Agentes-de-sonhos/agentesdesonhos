@@ -23,6 +23,7 @@ export interface ShowcaseItem {
   user_id: string;
   material_id: string | null;
   image_url: string | null;
+  gallery_urls: string[];
   category: string;
   subcategory: string | null;
   action_type: string;
@@ -132,6 +133,7 @@ export function useShowcase() {
     mutationFn: async (item: {
       material_id?: string;
       image_url?: string;
+      gallery_urls?: string[];
       category: string;
       subcategory?: string;
       action_type: string;
@@ -146,6 +148,7 @@ export function useShowcase() {
           user_id: user!.id,
           material_id: item.material_id || null,
           image_url: item.image_url || null,
+          gallery_urls: item.gallery_urls || [],
           category: item.category,
           subcategory: item.subcategory || null,
           action_type: item.action_type,
@@ -209,11 +212,20 @@ export function useShowcase() {
 
   const uploadImage = async (file: File): Promise<string> => {
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${user!.id}/${Date.now()}.${ext}`;
+    const path = `${user!.id}/${Date.now()}_${Math.random().toString(36).slice(2, 6)}.${ext}`;
     const { error } = await supabase.storage.from("showcase-images").upload(path, file);
     if (error) throw error;
     const { data } = supabase.storage.from("showcase-images").getPublicUrl(path);
     return data.publicUrl;
+  };
+
+  const uploadMultipleImages = async (files: File[]): Promise<string[]> => {
+    const urls: string[] = [];
+    for (const file of files) {
+      const url = await uploadImage(file);
+      urls.push(url);
+    }
+    return urls;
   };
 
   return {
@@ -228,6 +240,7 @@ export function useShowcase() {
     removeItem,
     reorderItems,
     uploadImage,
+    uploadMultipleImages,
   };
 }
 

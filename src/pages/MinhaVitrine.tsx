@@ -23,7 +23,7 @@ export default function MinhaVitrine() {
   const { user } = useAuth();
   const {
     showcase, items, availableMaterials, loadingShowcase,
-    createShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage,
+    createShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage, uploadMultipleImages,
   } = useShowcase();
 
   const [slug, setSlug] = useState("");
@@ -32,8 +32,8 @@ export default function MinhaVitrine() {
   const [addTab, setAddTab] = useState("materials");
   
   const [selectedMaterialId, setSelectedMaterialId] = useState<string | null>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
   const [category, setCategory] = useState("Geral");
   const [customCategory, setCustomCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
@@ -59,24 +59,27 @@ export default function MinhaVitrine() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp"];
     const validExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"];
-    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
-    if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
-      toast.error("Formato não suportado. Use JPG, PNG, WEBP, GIF ou BMP.");
-      return;
+    const validFiles = files.filter(file => {
+      const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
+      return validTypes.includes(file.type) && validExtensions.includes(fileExtension);
+    });
+    if (validFiles.length < files.length) {
+      toast.error("Alguns arquivos foram ignorados. Use JPG, PNG, WEBP, GIF ou BMP.");
     }
-    setUploadFile(file);
-    setUploadPreview(URL.createObjectURL(file));
+    if (validFiles.length === 0) return;
+    setUploadFiles(prev => [...prev, ...validFiles]);
+    setUploadPreviews(prev => [...prev, ...validFiles.map(f => URL.createObjectURL(f))]);
     setSelectedMaterialId(null);
   };
 
   const resetForm = () => {
     setSelectedMaterialId(null);
-    setUploadFile(null);
-    setUploadPreview(null);
+    setUploadFiles([]);
+    setUploadPreviews([]);
     setCategory("Geral");
     setCustomCategory("");
     setSubcategory("");
@@ -85,21 +88,31 @@ export default function MinhaVitrine() {
     setExpiresAt("");
   };
 
+  const removeUploadFile = (index: number) => {
+    setUploadFiles(prev => prev.filter((_, i) => i !== index));
+    setUploadPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleAddItem = async () => {
-    if (!selectedMaterialId && !uploadFile) {
-      toast.error("Selecione uma lâmina ou faça upload de uma imagem");
+    if (!selectedMaterialId && uploadFiles.length === 0) {
+      toast.error("Selecione uma lâmina ou faça upload de imagens");
       return;
     }
     setIsSubmitting(true);
     try {
       let imageUrl: string | undefined;
-      if (uploadFile) {
-        imageUrl = await uploadImage(uploadFile);
+      let galleryUrls: string[] | undefined;
+      if (uploadFiles.length === 1) {
+        imageUrl = await uploadImage(uploadFiles[0]);
+      } else if (uploadFiles.length > 1) {
+        galleryUrls = await uploadMultipleImages(uploadFiles);
+        imageUrl = galleryUrls[0]; // first image as thumbnail
       }
       const finalCategory = category === "__custom" ? customCategory : category;
       await addItem.mutateAsync({
         material_id: selectedMaterialId || undefined,
         image_url: imageUrl,
+        gallery_urls: galleryUrls,
         category: finalCategory || "Geral",
         subcategory: subcategory || undefined,
         action_type: actionType,
@@ -243,6 +256,11 @@ export default function MinhaVitrine() {
             ) : (
               <div className="w-full h-full flex items-center justify-center"><ImageIcon className="h-5 w-5 text-muted-foreground" /></div>
             )}
+            {item.gallery_urls && item.gallery_urls.length > 1 && (
+              <span className="absolute bottom-0 right-0 bg-black/70 text-white text-[8px] px-1 py-0.5 font-bold rounded-tl">
+                {item.gallery_urls.length}📷
+              </span>
+            )}
             {item.is_featured && label && (
               <span className="absolute top-0 left-0 bg-amber-500 text-white text-[8px] px-1 py-0.5 font-bold rounded-br">
                 {label.emoji}
@@ -344,7 +362,7 @@ export default function MinhaVitrine() {
               <TabsContent value="materials" className="space-y-4">
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
                   {availableMaterials.map(m => (
-                    <button key={m.id} onClick={() => { setSelectedMaterialId(m.id); setUploadFile(null); setUploadPreview(null); }}
+                    <button key={m.id} onClick={() => { setSelectedMaterialId(m.id); setUploadFiles([]); setUploadPreviews([]); }}
                       className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-[4/5] ${selectedMaterialId === m.id ? "border-primary ring-2 ring-primary/30" : "border-transparent hover:border-muted-foreground/30"}`}>
                       <img src={m.thumbnail_url || m.file_url || "/placeholder.svg"} alt={m.title} className="w-full h-full object-cover" />
                       {!m.is_permanent && <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">7d</Badge>}
@@ -354,13 +372,31 @@ export default function MinhaVitrine() {
                 </div>
               </TabsContent>
               <TabsContent value="upload" className="space-y-4">
-                <div className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
-                  {uploadPreview ? (
-                    <img src={uploadPreview} alt="Preview" className="max-h-48 mx-auto rounded-lg" />
+                <div className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                  {uploadPreviews.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {uploadPreviews.map((preview, i) => (
+                          <div key={i} className="relative aspect-[4/5] rounded-lg overflow-hidden group/thumb">
+                            <img src={preview} alt="" className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); removeUploadFile(i); }}
+                              className="absolute top-1 right-1 h-5 w-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover/thumb:opacity-100 transition-opacity"
+                            >×</button>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{uploadPreviews.length} {uploadPreviews.length === 1 ? "imagem selecionada" : "imagens selecionadas"} • Clique para adicionar mais</p>
+                    </div>
                   ) : (
-                    <><Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" /><p className="text-sm text-muted-foreground">Clique para selecionar uma imagem</p><p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP</p></>
+                    <>
+                      <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">Clique para selecionar imagens</p>
+                      <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP — selecione várias para criar um carrossel</p>
+                    </>
                   )}
-                  <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp" className="hidden" onChange={handleFileChange} />
+                  <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp" multiple className="hidden" onChange={handleFileChange} />
                 </div>
                 <div>
                   <Label>Validade (opcional)</Label>
