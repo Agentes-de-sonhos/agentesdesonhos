@@ -540,7 +540,7 @@ export function FlightBlocksImporter() {
             <h3 className="text-xl font-semibold">Importação Concluída!</h3>
             <div className="flex justify-center gap-8">
               <div>
-                <p className="text-3xl font-bold text-green-500">{importResult.success}</p>
+                <p className="text-3xl font-bold text-primary">{importResult.success}</p>
                 <p className="text-sm text-muted-foreground">Importados</p>
               </div>
               {importResult.errors > 0 && (
