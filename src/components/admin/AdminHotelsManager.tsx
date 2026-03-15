@@ -379,10 +379,12 @@ export function AdminHotelsManager() {
                 <Badge variant="secondary">{destHotels!.length}</Badge>
               </CardTitle>
             </div>
-            <Button variant="destructive" size="sm" onClick={() => handleDeleteAll(dest)}>
-              <Trash2 className="h-4 w-4 mr-1" />
-              Excluir todos
-            </Button>
+            <ConfirmDeleteDialog onConfirm={() => handleDeleteAll(dest)} title="Excluir todos os hotéis" description={`Tem certeza que deseja excluir TODOS os hotéis de "${dest}"? Esta ação é permanente.`}>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4 mr-1" />
+                Excluir todos
+              </Button>
+            </ConfirmDeleteDialog>
           </CardHeader>
           <CardContent>
             <Table>

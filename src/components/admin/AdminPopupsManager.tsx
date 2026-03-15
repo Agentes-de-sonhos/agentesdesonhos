@@ -248,14 +248,11 @@ export function AdminPopupsManager() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(popup.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <ConfirmDeleteDialog onConfirm={() => handleDelete(popup.id)} title="Excluir pop-up" description="Tem certeza que deseja excluir permanentemente este pop-up?">
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </ConfirmDeleteDialog>
                         </div>
                       </TableCell>
                     </TableRow>

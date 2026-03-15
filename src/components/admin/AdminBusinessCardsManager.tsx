@@ -238,16 +238,11 @@ export function AdminBusinessCardsManager() {
                         <Button variant="ghost" size="icon" onClick={() => openEdit(card)} title="Editar">
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (confirm("Excluir este cartão?")) deleteMutation.mutate(card.id);
-                          }}
-                          title="Excluir"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(card.id)} title="Excluir cartão" description="Tem certeza que deseja excluir permanentemente este cartão?">
+                          <Button variant="ghost" size="icon" title="Excluir">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </ConfirmDeleteDialog>
                       </div>
                     </TableCell>
                   </TableRow>
