@@ -746,7 +746,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
 
       {/* Training Player Dialog */}
       <Dialog open={!!selectedTraining} onOpenChange={() => setSelectedTraining(null)}>
-        <DialogContent className="max-w-4xl h-[80vh]">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedTraining?.title}</DialogTitle>
           </DialogHeader>
