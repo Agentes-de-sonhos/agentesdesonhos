@@ -358,6 +358,14 @@ export function AdminTourOperatorsManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => openEdit(op)}
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => navigate(`/mapa-turismo/operadora/${op.id}`)}
                           title="Ver página"
                         >
