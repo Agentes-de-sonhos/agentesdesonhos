@@ -248,8 +248,11 @@ export type Database = {
       air_blocks: {
         Row: {
           airline: string
+          arrival_date: string | null
+          arrival_time: string | null
           block_code: string | null
           created_at: string
+          currency: string | null
           deadline: string | null
           departure_date: string
           departure_time: string | null
@@ -257,15 +260,23 @@ export type Database = {
           id: string
           operator: string | null
           origin: string
+          price: number | null
           price_text: string | null
+          return_arrival_date: string | null
+          return_arrival_time: string | null
           return_date: string | null
+          return_departure_date: string | null
+          return_departure_time: string | null
           return_time: string | null
           seats_available: number | null
         }
         Insert: {
           airline: string
+          arrival_date?: string | null
+          arrival_time?: string | null
           block_code?: string | null
           created_at?: string
+          currency?: string | null
           deadline?: string | null
           departure_date: string
           departure_time?: string | null
@@ -273,15 +284,23 @@ export type Database = {
           id?: string
           operator?: string | null
           origin: string
+          price?: number | null
           price_text?: string | null
+          return_arrival_date?: string | null
+          return_arrival_time?: string | null
           return_date?: string | null
+          return_departure_date?: string | null
+          return_departure_time?: string | null
           return_time?: string | null
           seats_available?: number | null
         }
         Update: {
           airline?: string
+          arrival_date?: string | null
+          arrival_time?: string | null
           block_code?: string | null
           created_at?: string
+          currency?: string | null
           deadline?: string | null
           departure_date?: string
           departure_time?: string | null
@@ -289,8 +308,13 @@ export type Database = {
           id?: string
           operator?: string | null
           origin?: string
+          price?: number | null
           price_text?: string | null
+          return_arrival_date?: string | null
+          return_arrival_time?: string | null
           return_date?: string | null
+          return_departure_date?: string | null
+          return_departure_time?: string | null
           return_time?: string | null
           seats_available?: number | null
         }
