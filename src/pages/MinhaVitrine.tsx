@@ -256,6 +256,11 @@ export default function MinhaVitrine() {
             ) : (
               <div className="w-full h-full flex items-center justify-center"><ImageIcon className="h-5 w-5 text-muted-foreground" /></div>
             )}
+            {item.gallery_urls && item.gallery_urls.length > 1 && (
+              <span className="absolute bottom-0 right-0 bg-black/70 text-white text-[8px] px-1 py-0.5 font-bold rounded-tl">
+                {item.gallery_urls.length}📷
+              </span>
+            )}
             {item.is_featured && label && (
               <span className="absolute top-0 left-0 bg-amber-500 text-white text-[8px] px-1 py-0.5 font-bold rounded-br">
                 {label.emoji}
