@@ -240,6 +240,7 @@ export function useShowcase() {
     removeItem,
     reorderItems,
     uploadImage,
+    uploadMultipleImages,
   };
 }
 
