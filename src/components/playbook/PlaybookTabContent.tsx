@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Info, Hotel, UtensilsCrossed, Car, Ship, Shield, Compass, MapPin, Plane, ArrowRight } from "lucide-react";
+import { Clock, Info, Hotel, UtensilsCrossed, Car, Ship, Shield, Compass, MapPin, Plane, ShoppingBag, ArrowRight } from "lucide-react";
 import type { PlaybookSection } from "@/types/playbook";
 import { BlockRenderer } from "./BlockRenderer";
 import { PlaybookInlineEditor } from "./PlaybookInlineEditor";
