@@ -292,11 +292,11 @@ export function AdminSurveyManager() {
                       <Button size="sm" variant="ghost" onClick={() => openEdit(s)} title="Editar">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => {
-                        if (confirm("Excluir esta pesquisa?")) deleteMutation.mutate(s.id);
-                      }}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(s.id)} title="Excluir pesquisa" description="Tem certeza que deseja excluir permanentemente esta pesquisa?">
+                        <Button size="sm" variant="ghost" className="text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </ConfirmDeleteDialog>
                       <Button size="sm" variant="ghost" asChild title="Visualizar">
                         <a href={`/pesquisa/${s.slug}`} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-4 w-4" />
