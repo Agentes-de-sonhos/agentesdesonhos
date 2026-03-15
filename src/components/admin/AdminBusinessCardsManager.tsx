@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ExternalLink, Copy, Eye } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import type { BusinessCard, CardButton, SocialLinks } from "@/hooks/useBusinessCard";
 
 const PUBLIC_DOMAIN = "https://contato.tur.br";
