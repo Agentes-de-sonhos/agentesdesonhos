@@ -65,6 +65,9 @@ export function AdminTourOperatorsManager() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [showResultDialog, setShowResultDialog] = useState(false);
+  const [editOperator, setEditOperator] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
