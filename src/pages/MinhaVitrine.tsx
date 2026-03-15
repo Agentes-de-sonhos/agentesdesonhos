@@ -23,7 +23,7 @@ export default function MinhaVitrine() {
   const { user } = useAuth();
   const {
     showcase, items, availableMaterials, loadingShowcase,
-    createShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage,
+    createShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage, uploadMultipleImages,
   } = useShowcase();
 
   const [slug, setSlug] = useState("");
