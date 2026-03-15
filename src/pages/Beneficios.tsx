@@ -143,7 +143,7 @@ export default function Beneficios() {
               <BenefitContributorsRanking ranking={ranking} />
             </div>
           </div>
-        )
+        )}
       </div>
 
       <ShareBenefitDialog
