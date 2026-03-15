@@ -297,11 +297,7 @@ export function PlaybookComoVenderTab({ section, onSaveSection }: PlaybookComoVe
                   "flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 text-left group",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : isVisited
-                    ? "text-foreground hover:bg-accent"
-                    : hasContent
-                    ? "text-muted-foreground hover:bg-accent hover:text-foreground"
-                    : "text-muted-foreground/60 hover:bg-muted/50"
+                    : "text-foreground hover:bg-accent"
                 )}
               >
                 {/* Progress indicator */}
