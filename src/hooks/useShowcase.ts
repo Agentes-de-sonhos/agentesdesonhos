@@ -133,6 +133,7 @@ export function useShowcase() {
     mutationFn: async (item: {
       material_id?: string;
       image_url?: string;
+      gallery_urls?: string[];
       category: string;
       subcategory?: string;
       action_type: string;
@@ -147,6 +148,7 @@ export function useShowcase() {
           user_id: user!.id,
           material_id: item.material_id || null,
           image_url: item.image_url || null,
+          gallery_urls: item.gallery_urls || [],
           category: item.category,
           subcategory: item.subcategory || null,
           action_type: item.action_type,
