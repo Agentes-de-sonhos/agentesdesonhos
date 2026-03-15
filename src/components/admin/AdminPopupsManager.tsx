@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Edit, Trash2, Eye, EyeOff, Upload, ExternalLink, Loader2 } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
