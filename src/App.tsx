@@ -55,6 +55,7 @@ import Pesquisa from "./pages/Pesquisa";
 import AtivarCartao from "./pages/AtivarCartao";
 import PoliticasPrivacidade from "./pages/PoliticasPrivacidade";
 import TermosDeUso from "./pages/TermosDeUso";
+import Atualizacoes from "./pages/Atualizacoes";
 
 const queryClient = new QueryClient();
 
