@@ -100,34 +100,33 @@ export default function Beneficios() {
           onDestinationChange={setSelectedDestination}
         />
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Cards grid */}
-          <div className="flex-1">
-            {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center text-center py-20 px-6">
-                <div className="relative mb-6">
-                  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center animate-[pulse_3s_ease-in-out_infinite]">
-                    <Tag className="h-10 w-10 text-primary/60" />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center animate-bounce" style={{ animationDuration: '2.5s' }}>
-                    <Search className="h-4 w-4 text-accent-foreground/50" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  Nenhum benefício por aqui… ainda 😉
-                </h3>
-                <p className="text-muted-foreground max-w-md mb-1">
-                  Estamos sempre descobrindo novas tarifas agente, descontos e cortesias.
-                </p>
-                <p className="text-muted-foreground max-w-md mb-6">
-                  Se você conhece algum benefício, compartilhe com a comunidade!
-                </p>
-                <Button onClick={() => setShareOpen(true)} size="lg">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar benefício
-                </Button>
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-20 px-6">
+            <div className="relative mb-6">
+              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center animate-[pulse_3s_ease-in-out_infinite]">
+                <Tag className="h-10 w-10 text-primary/60" />
               </div>
-            ) : (
+              <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center animate-bounce" style={{ animationDuration: '2.5s' }}>
+                <Search className="h-4 w-4 text-accent-foreground/50" />
+              </div>
+            </div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              Nenhum benefício por aqui… ainda 😉
+            </h3>
+            <p className="text-muted-foreground max-w-md mb-1">
+              Estamos sempre descobrindo novas tarifas agente, descontos e cortesias.
+            </p>
+            <p className="text-muted-foreground max-w-md mb-6">
+              Se você conhece algum benefício, compartilhe com a comunidade!
+            </p>
+            <Button onClick={() => setShareOpen(true)} size="lg">
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar benefício
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1">
               <div className="grid gap-4 md:grid-cols-2">
                 {filtered.map((b) => (
                   <BenefitCard
@@ -139,14 +138,12 @@ export default function Beneficios() {
                   />
                 ))}
               </div>
-            )}
+            </div>
+            <div className="lg:w-72 shrink-0">
+              <BenefitContributorsRanking ranking={ranking} />
+            </div>
           </div>
-
-          {/* Sidebar: ranking */}
-          <div className="lg:w-72 shrink-0">
-            <BenefitContributorsRanking ranking={ranking} />
-          </div>
-        </div>
+        )
       </div>
 
       <ShareBenefitDialog
