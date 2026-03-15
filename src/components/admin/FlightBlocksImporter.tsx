@@ -534,7 +534,7 @@ export function FlightBlocksImporter() {
               {importResult.errors === 0 ? (
                 <Check className="h-16 w-16 text-primary" />
               ) : (
-                <AlertCircle className="h-16 w-16 text-amber-500" />
+                <AlertCircle className="h-16 w-16 text-destructive" />
               )}
             </div>
             <h3 className="text-xl font-semibold">Importação Concluída!</h3>
