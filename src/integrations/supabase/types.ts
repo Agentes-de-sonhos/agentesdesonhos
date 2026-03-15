@@ -245,6 +245,57 @@ export type Database = {
         }
         Relationships: []
       }
+      air_blocks: {
+        Row: {
+          airline: string
+          block_code: string | null
+          created_at: string
+          deadline: string | null
+          departure_date: string
+          departure_time: string | null
+          destination: string
+          id: string
+          operator: string | null
+          origin: string
+          price_text: string | null
+          return_date: string | null
+          return_time: string | null
+          seats_available: number | null
+        }
+        Insert: {
+          airline: string
+          block_code?: string | null
+          created_at?: string
+          deadline?: string | null
+          departure_date: string
+          departure_time?: string | null
+          destination: string
+          id?: string
+          operator?: string | null
+          origin: string
+          price_text?: string | null
+          return_date?: string | null
+          return_time?: string | null
+          seats_available?: number | null
+        }
+        Update: {
+          airline?: string
+          block_code?: string | null
+          created_at?: string
+          deadline?: string | null
+          departure_date?: string
+          departure_time?: string | null
+          destination?: string
+          id?: string
+          operator?: string | null
+          origin?: string
+          price_text?: string | null
+          return_date?: string | null
+          return_time?: string | null
+          seats_available?: number | null
+        }
+        Relationships: []
+      }
       attractions: {
         Row: {
           address: string | null

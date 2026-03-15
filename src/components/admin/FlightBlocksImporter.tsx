@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -13,13 +13,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -27,70 +20,155 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Upload, FileSpreadsheet, Loader2, Check, AlertCircle } from "lucide-react";
+import { ClipboardPaste, Loader2, Check, AlertCircle, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface ColumnMapping {
-  operator: string;
-  airline: string;
+interface ParsedBlock {
+  origin: string;
   destination: string;
-  start_date: string;
-  end_date: string;
-  notes: string;
+  departure_date: string;
+  departure_time: string;
+  return_date: string;
+  return_time: string;
+  airline: string;
+  block_code: string;
+  deadline: string;
+  seats_available: string;
+  operator: string;
+  price_text: string;
 }
 
-interface ParsedRow {
-  [key: string]: string;
+const KNOWN_AIRLINES = ["LATAM", "AZUL", "GOL", "QATAR", "TAP", "IBERIA", "AMERICAN", "UNITED", "DELTA", "EMIRATES", "AIR FRANCE", "KLM", "LUFTHANSA", "BRITISH", "COPA", "AVIANCA"];
+
+function parseRawText(text: string): ParsedBlock[] {
+  const chunks = text.split(/bloqueio/i).filter((c) => c.trim().length > 10);
+  const blocks: ParsedBlock[] = [];
+
+  for (const chunk of chunks) {
+    const block: ParsedBlock = {
+      origin: "",
+      destination: "",
+      departure_date: "",
+      departure_time: "",
+      return_date: "",
+      return_time: "",
+      airline: "",
+      block_code: "",
+      deadline: "",
+      seats_available: "",
+      operator: "",
+      price_text: "",
+    };
+
+    // Extract airport codes (3 uppercase letters)
+    const airports = chunk.match(/\b[A-Z]{3}\b/g) || [];
+    if (airports.length >= 2) {
+      block.origin = airports[0];
+      block.destination = airports[1];
+    } else if (airports.length === 1) {
+      block.destination = airports[0];
+    }
+
+    // Extract dates (dd/mm/yy or dd/mm/yyyy)
+    const dates = chunk.match(/\b(\d{2}\/\d{2}\/\d{2,4})\b/g) || [];
+    if (dates.length >= 1) block.departure_date = normalizeDate(dates[0]);
+    if (dates.length >= 2) block.return_date = normalizeDate(dates[1]);
+    // Third date could be deadline
+    if (dates.length >= 3) block.deadline = normalizeDate(dates[2]);
+
+    // Extract times (hh:mmh or hh:mm)
+    const times = chunk.match(/\b(\d{1,2}:\d{2})h?\b/gi) || [];
+    if (times.length >= 1) block.departure_time = times[0].replace(/h$/i, "");
+    if (times.length >= 2) block.return_time = times[1].replace(/h$/i, "");
+
+    // Extract airline
+    for (const airline of KNOWN_AIRLINES) {
+      if (chunk.toUpperCase().includes(airline)) {
+        block.airline = airline;
+        break;
+      }
+    }
+
+    // Extract seats (look for patterns like "20 lugares", "15 assentos", or just numbers near seat keywords)
+    const seatsMatch = chunk.match(/(\d+)\s*(?:lugar|assento|seat|pax|vaga)/i);
+    if (seatsMatch) block.seats_available = seatsMatch[1];
+
+    // Extract block code (alphanumeric patterns like BLK-123, AB1234)
+    const codeMatch = chunk.match(/\b([A-Z]{2,4}[-\s]?\d{3,6})\b/);
+    if (codeMatch) block.block_code = codeMatch[1];
+
+    // Extract price text
+    const priceMatch = chunk.match(/(?:R\$|USD|US\$|EUR)\s*[\d.,]+/i);
+    if (priceMatch) block.price_text = priceMatch[0];
+
+    // Only add if we have minimum useful data
+    if (block.destination || block.airline || block.departure_date) {
+      blocks.push(block);
+    }
+  }
+
+  return blocks;
+}
+
+function normalizeDate(dateStr: string): string {
+  const parts = dateStr.split("/");
+  if (parts.length !== 3) return dateStr;
+  let [day, month, year] = parts;
+  if (year.length === 2) {
+    year = `20${year}`;
+  }
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
+function formatDisplayDate(isoDate: string): string {
+  if (!isoDate) return "";
+  const parts = isoDate.split("-");
+  if (parts.length !== 3) return isoDate;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
 export function FlightBlocksImporter() {
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState<"upload" | "map" | "preview" | "done">("upload");
-  const [csvData, setCsvData] = useState<ParsedRow[]>([]);
-  const [headers, setHeaders] = useState<string[]>([]);
-  const [mapping, setMapping] = useState<ColumnMapping>({
-    operator: "",
-    airline: "",
-    destination: "",
-    start_date: "",
-    end_date: "",
-    notes: "",
-  });
-  const [importResult, setImportResult] = useState<{ success: number; errors: number }>({ success: 0, errors: 0 });
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [step, setStep] = useState<"paste" | "preview" | "done">("paste");
+  const [rawText, setRawText] = useState("");
+  const [parsedBlocks, setParsedBlocks] = useState<ParsedBlock[]>([]);
+  const [importResult, setImportResult] = useState({ success: 0, errors: 0 });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const importMutation = useMutation({
-    mutationFn: async (rows: any[]) => {
+    mutationFn: async (rows: ParsedBlock[]) => {
       let success = 0;
       let errors = 0;
 
       for (const row of rows) {
         try {
-          const { error } = await supabase.from("flight_blocks").insert({
-            operator: row.operator,
-            airline: row.airline,
+          const { error } = await supabase.from("air_blocks" as any).insert({
+            origin: row.origin,
             destination: row.destination,
-            start_date: row.start_date,
-            end_date: row.end_date,
-            notes: row.notes || null,
-            is_active: true,
+            departure_date: row.departure_date || null,
+            departure_time: row.departure_time || null,
+            return_date: row.return_date || null,
+            return_time: row.return_time || null,
+            airline: row.airline,
+            seats_available: row.seats_available ? parseInt(row.seats_available) : null,
+            deadline: row.deadline || null,
+            block_code: row.block_code || null,
+            operator: row.operator || null,
+            price_text: row.price_text || null,
           });
 
           if (error) {
             errors++;
-            console.error("Error importing row:", error);
+            console.error("Error importing block:", error);
           } else {
             success++;
           }
         } catch (err) {
           errors++;
-          console.error("Error importing row:", err);
         }
       }
-
       return { success, errors };
     },
     onSuccess: (result) => {
@@ -100,7 +178,7 @@ export function FlightBlocksImporter() {
       queryClient.invalidateQueries({ queryKey: ["flight-blocks"] });
       toast({
         title: "Importação concluída!",
-        description: `${result.success} registros importados, ${result.errors} erros`,
+        description: `${result.success} bloqueios importados, ${result.errors} erros`,
       });
     },
     onError: () => {
@@ -108,121 +186,44 @@ export function FlightBlocksImporter() {
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      parseCSV(text);
-    };
-    reader.readAsText(file);
-  };
-
-  const parseCSV = (text: string) => {
-    const lines = text.split("\n").filter((line) => line.trim());
-    if (lines.length < 2) {
-      toast({ title: "Arquivo vazio ou inválido", variant: "destructive" });
+  const handleParse = () => {
+    if (!rawText.trim()) {
+      toast({ title: "Cole o texto dos bloqueios aéreos", variant: "destructive" });
       return;
     }
-
-    // Detect separator (comma or semicolon)
-    const separator = lines[0].includes(";") ? ";" : ",";
-
-    const headerLine = lines[0].split(separator).map((h) => h.trim().replace(/"/g, ""));
-    setHeaders(headerLine);
-
-    const rows: ParsedRow[] = [];
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(separator).map((v) => v.trim().replace(/"/g, ""));
-      const row: ParsedRow = {};
-      headerLine.forEach((header, idx) => {
-        row[header] = values[idx] || "";
-      });
-      rows.push(row);
+    const blocks = parseRawText(rawText);
+    if (blocks.length === 0) {
+      toast({ title: "Nenhum bloqueio detectado no texto", variant: "destructive" });
+      return;
     }
-
-    setCsvData(rows);
-    setStep("map");
+    setParsedBlocks(blocks);
+    setStep("preview");
   };
 
-  const handleMapping = (field: keyof ColumnMapping, value: string) => {
-    setMapping((prev) => ({ ...prev, [field]: value }));
+  const updateBlock = (index: number, field: keyof ParsedBlock, value: string) => {
+    setParsedBlocks((prev) =>
+      prev.map((b, i) => (i === index ? { ...b, [field]: value } : b))
+    );
   };
 
-  const canProceedToPreview = () => {
-    return mapping.operator && mapping.airline && mapping.destination && mapping.start_date && mapping.end_date;
-  };
-
-  const getMappedData = () => {
-    return csvData.map((row) => ({
-      operator: row[mapping.operator] || "",
-      airline: row[mapping.airline] || "",
-      destination: row[mapping.destination] || "",
-      start_date: formatDate(row[mapping.start_date]) || "",
-      end_date: formatDate(row[mapping.end_date]) || "",
-      notes: mapping.notes ? row[mapping.notes] : "",
-    }));
-  };
-
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return "";
-    
-    // Try to parse common date formats
-    // DD/MM/YYYY or DD-MM-YYYY
-    const brMatch = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-    if (brMatch) {
-      const [, day, month, year] = brMatch;
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    }
-
-    // YYYY-MM-DD (already in correct format)
-    const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (isoMatch) {
-      return dateStr;
-    }
-
-    // MM/DD/YYYY
-    const usMatch = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-    if (usMatch) {
-      const [, month, day, year] = usMatch;
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    }
-
-    return dateStr;
+  const removeBlock = (index: number) => {
+    setParsedBlocks((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleImport = () => {
-    const mappedData = getMappedData();
-    const validRows = mappedData.filter(
-      (row) => row.operator && row.airline && row.destination && row.start_date && row.end_date
-    );
-
-    if (validRows.length === 0) {
-      toast({ title: "Nenhum registro válido para importar", variant: "destructive" });
+    const valid = parsedBlocks.filter((b) => b.destination && b.airline);
+    if (valid.length === 0) {
+      toast({ title: "Nenhum bloqueio válido para importar", variant: "destructive" });
       return;
     }
-
-    importMutation.mutate(validRows);
+    importMutation.mutate(valid);
   };
 
   const resetImporter = () => {
-    setStep("upload");
-    setCsvData([]);
-    setHeaders([]);
-    setMapping({
-      operator: "",
-      airline: "",
-      destination: "",
-      start_date: "",
-      end_date: "",
-      notes: "",
-    });
+    setStep("paste");
+    setRawText("");
+    setParsedBlocks([]);
     setImportResult({ success: 0, errors: 0 });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   const handleClose = () => {
@@ -234,136 +235,34 @@ export function FlightBlocksImporter() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" onClick={() => setIsOpen(true)}>
-          <Upload className="h-4 w-4 mr-2" />
-          Importar CSV
+          <ClipboardPaste className="h-4 w-4 mr-2" />
+          Importar Texto
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5" />
-            Importar Bloqueios Aéreos
+            <ClipboardPaste className="h-5 w-5" />
+            Importar Bloqueios Aéreos (Texto)
           </DialogTitle>
           <DialogDescription>
-            Faça upload de um arquivo CSV ou Excel para importar múltiplos bloqueios
+            Cole o texto copiado do sistema de bloqueios. O sistema detectará automaticamente os dados.
           </DialogDescription>
         </DialogHeader>
 
-        {step === "upload" && (
+        {step === "paste" && (
           <div className="space-y-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
-              <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">
-                Arraste um arquivo CSV aqui ou clique para selecionar
-              </p>
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv,.txt"
-                onChange={handleFileChange}
-                className="max-w-xs mx-auto"
-              />
-            </div>
-            <div className="text-sm text-muted-foreground">
-              <p className="font-medium">Formato esperado:</p>
-              <p>O arquivo deve conter colunas para: Operadora, Companhia Aérea, Destino, Data Início, Data Fim</p>
-              <p>Datas podem estar nos formatos: DD/MM/YYYY, YYYY-MM-DD ou DD-MM-YYYY</p>
-            </div>
-          </div>
-        )}
-
-        {step === "map" && (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Mapeie as colunas do seu arquivo para os campos do sistema:
-            </p>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Operadora *</Label>
-                <Select value={mapping.operator} onValueChange={(v) => handleMapping("operator", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a coluna" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {headers.map((h) => (
-                      <SelectItem key={h} value={h}>{h}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Companhia Aérea *</Label>
-                <Select value={mapping.airline} onValueChange={(v) => handleMapping("airline", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a coluna" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {headers.map((h) => (
-                      <SelectItem key={h} value={h}>{h}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Destino *</Label>
-                <Select value={mapping.destination} onValueChange={(v) => handleMapping("destination", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a coluna" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {headers.map((h) => (
-                      <SelectItem key={h} value={h}>{h}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Data Início *</Label>
-                <Select value={mapping.start_date} onValueChange={(v) => handleMapping("start_date", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a coluna" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {headers.map((h) => (
-                      <SelectItem key={h} value={h}>{h}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Data Fim *</Label>
-                <Select value={mapping.end_date} onValueChange={(v) => handleMapping("end_date", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a coluna" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {headers.map((h) => (
-                      <SelectItem key={h} value={h}>{h}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Observações (opcional)</Label>
-                <Select value={mapping.notes} onValueChange={(v) => handleMapping("notes", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a coluna" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Nenhuma</SelectItem>
-                    {headers.map((h) => (
-                      <SelectItem key={h} value={h}>{h}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
+            <Textarea
+              value={rawText}
+              onChange={(e) => setRawText(e.target.value)}
+              placeholder={"Cole aqui o texto com os bloqueios aéreos...\n\nO sistema detecta automaticamente:\n• Códigos de aeroporto (GRU, MIA, CDG...)\n• Datas (dd/mm/aa)\n• Horários (hh:mmh)\n• Companhias (LATAM, GOL, AZUL...)\n• Lugares disponíveis\n\nSepare os bloqueios pela palavra \"Bloqueio\""}
+              className="min-h-[250px] font-mono text-sm"
+              autoFocus
+            />
             <DialogFooter>
-              <Button variant="outline" onClick={resetImporter}>Voltar</Button>
-              <Button onClick={() => setStep("preview")} disabled={!canProceedToPreview()}>
-                Prévia
+              <Button variant="outline" onClick={handleClose}>Cancelar</Button>
+              <Button onClick={handleParse} disabled={!rawText.trim()}>
+                Analisar Texto
               </Button>
             </DialogFooter>
           </div>
@@ -372,45 +271,120 @@ export function FlightBlocksImporter() {
         {step === "preview" && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Prévia dos dados a serem importados ({csvData.length} registros):
+              {parsedBlocks.length} bloqueio(s) detectado(s). Edite os campos antes de salvar:
             </p>
 
-            <div className="max-h-[300px] overflow-auto border rounded-lg">
+            <div className="max-h-[400px] overflow-auto border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Operadora</TableHead>
-                    <TableHead>Cia. Aérea</TableHead>
-                    <TableHead>Destino</TableHead>
-                    <TableHead>Início</TableHead>
-                    <TableHead>Fim</TableHead>
+                    <TableHead className="w-[70px]">Origem</TableHead>
+                    <TableHead className="w-[70px]">Destino</TableHead>
+                    <TableHead className="w-[100px]">Ida</TableHead>
+                    <TableHead className="w-[60px]">Hora</TableHead>
+                    <TableHead className="w-[100px]">Volta</TableHead>
+                    <TableHead className="w-[60px]">Hora</TableHead>
+                    <TableHead className="w-[80px]">Cia</TableHead>
+                    <TableHead className="w-[55px]">Lug.</TableHead>
+                    <TableHead className="w-[100px]">Deadline</TableHead>
+                    <TableHead className="w-[40px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {getMappedData().slice(0, 10).map((row, idx) => (
+                  {parsedBlocks.map((block, idx) => (
                     <TableRow key={idx}>
-                      <TableCell>{row.operator}</TableCell>
-                      <TableCell>{row.airline}</TableCell>
-                      <TableCell>{row.destination}</TableCell>
-                      <TableCell>{row.start_date}</TableCell>
-                      <TableCell>{row.end_date}</TableCell>
+                      <TableCell>
+                        <Input
+                          value={block.origin}
+                          onChange={(e) => updateBlock(idx, "origin", e.target.value.toUpperCase())}
+                          className="h-8 text-xs px-1"
+                          maxLength={3}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={block.destination}
+                          onChange={(e) => updateBlock(idx, "destination", e.target.value.toUpperCase())}
+                          className="h-8 text-xs px-1"
+                          maxLength={3}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={formatDisplayDate(block.departure_date)}
+                          onChange={(e) => updateBlock(idx, "departure_date", normalizeDate(e.target.value))}
+                          className="h-8 text-xs px-1"
+                          placeholder="dd/mm/aaaa"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={block.departure_time}
+                          onChange={(e) => updateBlock(idx, "departure_time", e.target.value)}
+                          className="h-8 text-xs px-1"
+                          placeholder="hh:mm"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={formatDisplayDate(block.return_date)}
+                          onChange={(e) => updateBlock(idx, "return_date", normalizeDate(e.target.value))}
+                          className="h-8 text-xs px-1"
+                          placeholder="dd/mm/aaaa"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={block.return_time}
+                          onChange={(e) => updateBlock(idx, "return_time", e.target.value)}
+                          className="h-8 text-xs px-1"
+                          placeholder="hh:mm"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={block.airline}
+                          onChange={(e) => updateBlock(idx, "airline", e.target.value)}
+                          className="h-8 text-xs px-1"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={block.seats_available}
+                          onChange={(e) => updateBlock(idx, "seats_available", e.target.value)}
+                          className="h-8 text-xs px-1"
+                          type="number"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          value={formatDisplayDate(block.deadline)}
+                          onChange={(e) => updateBlock(idx, "deadline", normalizeDate(e.target.value))}
+                          className="h-8 text-xs px-1"
+                          placeholder="dd/mm/aaaa"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => removeBlock(idx)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
 
-            {csvData.length > 10 && (
-              <p className="text-sm text-muted-foreground text-center">
-                ...e mais {csvData.length - 10} registros
-              </p>
-            )}
-
             <DialogFooter>
-              <Button variant="outline" onClick={() => setStep("map")}>Voltar</Button>
+              <Button variant="outline" onClick={() => setStep("paste")}>Voltar</Button>
               <Button onClick={handleImport} disabled={importMutation.isPending}>
                 {importMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Importar {csvData.length} registros
+                Salvar {parsedBlocks.length} bloqueio(s)
               </Button>
             </DialogFooter>
           </div>
