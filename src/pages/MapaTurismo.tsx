@@ -137,7 +137,7 @@ export default function MapaTurismo() {
       id: op.id,
       name: op.name,
       category: op.category || "Operadoras de turismo",
-      logo_url: null,
+      logo_url: op.logo_url || null,
       website_url: op.website,
       instagram_url: op.instagram,
       sales_channel: op.sales_channels,
