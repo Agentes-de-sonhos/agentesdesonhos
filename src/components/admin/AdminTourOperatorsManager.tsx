@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -18,6 +20,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Building2,
@@ -30,6 +33,7 @@ import {
   EyeOff,
   AlertCircle,
   CheckCircle2,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -61,6 +65,9 @@ export function AdminTourOperatorsManager() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [showResultDialog, setShowResultDialog] = useState(false);
+  const [editOperator, setEditOperator] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -101,6 +108,62 @@ export function AdminTourOperatorsManager() {
       queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
     },
   });
+
+  const openEdit = (op: any) => {
+    setEditForm({
+      name: op.name || "",
+      category: op.category || "",
+      specialties: op.specialties || "",
+      how_to_sell: op.how_to_sell || "",
+      sales_channels: op.sales_channels || "",
+      commercial_contacts: op.commercial_contacts || "",
+      website: op.website || "",
+      instagram: op.instagram || "",
+      founded_year: op.founded_year ?? "",
+      annual_revenue: op.annual_revenue || "",
+      employees: op.employees ?? "",
+      executive_team: op.executive_team || "",
+    });
+    setEditOperator(op);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editOperator) return;
+    setSaving(true);
+    try {
+      const payload: any = {
+        name: editForm.name.trim(),
+        category: editForm.category.trim() || "Operadoras de turismo",
+        specialties: editForm.specialties.trim() || null,
+        how_to_sell: editForm.how_to_sell.trim() || null,
+        sales_channels: editForm.sales_channels.trim() || null,
+        commercial_contacts: editForm.commercial_contacts.trim() || null,
+        website: editForm.website.trim() || null,
+        instagram: editForm.instagram.trim() || null,
+        founded_year: editForm.founded_year ? Number(editForm.founded_year) || null : null,
+        annual_revenue: editForm.annual_revenue.trim() || null,
+        employees: editForm.employees ? Number(editForm.employees) || null : null,
+        executive_team: editForm.executive_team.trim() || null,
+      };
+      if (!payload.name) {
+        toast.error("Nome é obrigatório");
+        setSaving(false);
+        return;
+      }
+      const { error } = await supabase
+        .from("tour_operators")
+        .update(payload)
+        .eq("id", editOperator.id);
+      if (error) throw error;
+      toast.success("Operadora atualizada!");
+      setEditOperator(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const downloadTemplate = () => {
     const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS]);
@@ -296,6 +359,14 @@ export function AdminTourOperatorsManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => openEdit(op)}
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => navigate(`/mapa-turismo/operadora/${op.id}`)}
                           title="Ver página"
                         >
@@ -372,6 +443,119 @@ export function AdminTourOperatorsManager() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Operator Dialog */}
+      <Dialog open={!!editOperator} onOpenChange={(open) => !open && setEditOperator(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
+              Editar Operadora
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Label>Nome *</Label>
+              <Input
+                value={editForm.name || ""}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Categoria</Label>
+              <Input
+                value={editForm.category || ""}
+                onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Especialidades</Label>
+              <Input
+                value={editForm.specialties || ""}
+                onChange={(e) => setEditForm({ ...editForm, specialties: e.target.value })}
+                placeholder="Separadas por vírgula"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Como Vender</Label>
+              <Textarea
+                value={editForm.how_to_sell || ""}
+                onChange={(e) => setEditForm({ ...editForm, how_to_sell: e.target.value })}
+                rows={4}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Canais de Venda</Label>
+              <Textarea
+                value={editForm.sales_channels || ""}
+                onChange={(e) => setEditForm({ ...editForm, sales_channels: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Contatos Comerciais</Label>
+              <Textarea
+                value={editForm.commercial_contacts || ""}
+                onChange={(e) => setEditForm({ ...editForm, commercial_contacts: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label>Website</Label>
+              <Input
+                value={editForm.website || ""}
+                onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Instagram</Label>
+              <Input
+                value={editForm.instagram || ""}
+                onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Ano de Fundação</Label>
+              <Input
+                type="number"
+                value={editForm.founded_year || ""}
+                onChange={(e) => setEditForm({ ...editForm, founded_year: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Faturamento Anual</Label>
+              <Input
+                value={editForm.annual_revenue || ""}
+                onChange={(e) => setEditForm({ ...editForm, annual_revenue: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Funcionários</Label>
+              <Input
+                type="number"
+                value={editForm.employees || ""}
+                onChange={(e) => setEditForm({ ...editForm, employees: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Equipe Executiva</Label>
+              <Input
+                value={editForm.executive_team || ""}
+                onChange={(e) => setEditForm({ ...editForm, executive_team: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setEditOperator(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+              Salvar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
