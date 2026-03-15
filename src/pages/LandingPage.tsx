@@ -465,7 +465,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Differentials ──────────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-card">
+      <section id="diferenciais" className="py-16 md:py-24 bg-card scroll-mt-20">
         <div className="container max-w-4xl space-y-10">
           <div className="text-center space-y-3">
             <h2 className="text-3xl md:text-4xl font-display font-bold">
