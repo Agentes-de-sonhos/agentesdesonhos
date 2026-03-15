@@ -189,18 +189,18 @@ const App = () => (
               }
             />
             <Route
-              path="/mapa-turismo/:id"
-              element={
-                <ProtectedRoute>
-                  <SupplierDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/mapa-turismo/operadora/:id"
               element={
                 <ProtectedRoute>
                   <OperadoraDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mapa-turismo/:id"
+              element={
+                <ProtectedRoute>
+                  <SupplierDetail />
                 </ProtectedRoute>
               }
             />
