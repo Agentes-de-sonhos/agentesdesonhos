@@ -103,7 +103,10 @@ export function useCommunityChat(activeRoomId?: string) {
           table: "community_messages",
           filter: `room_id=eq.${activeRoomId}`,
         },
-        () => {
+        (payload: any) => {
+          if (payload.new.user_id !== user?.id) {
+            playNotificationSound();
+          }
           queryClient.invalidateQueries({
             queryKey: ["room-messages", activeRoomId],
           });
