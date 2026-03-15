@@ -76,19 +76,19 @@ function TravelAdvisorCTA({ tabKey, destinationName }: { tabKey: string; destina
   const Icon = mapping.icon;
 
   return (
-    <Card className="rounded-2xl border-primary/20 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent shadow-sm h-full flex flex-col">
+    <Card className="rounded-2xl border-yellow-300/40 bg-gradient-to-br from-yellow-100 via-yellow-50 to-amber-50 shadow-sm h-full flex flex-col">
       <CardContent className="pt-6 pb-5 flex flex-col flex-1 gap-4">
-        <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Icon className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1 space-y-2">
-          <h4 className="text-sm font-bold text-foreground leading-snug">
+        <div className="flex items-center gap-3">
+          <div className="h-11 w-11 shrink-0 rounded-xl bg-yellow-400/20 flex items-center justify-center">
+            <Icon className="h-5 w-5 text-yellow-600" />
+          </div>
+          <h4 className="text-base font-bold text-foreground leading-tight whitespace-nowrap">
             {mapping.label} em {destinationName}
           </h4>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            {mapping.description}
-          </p>
         </div>
+        <p className="text-xs text-muted-foreground leading-relaxed flex-1">
+          {mapping.description}
+        </p>
         <Button
           size="sm"
           className="w-full gap-2 text-xs"
