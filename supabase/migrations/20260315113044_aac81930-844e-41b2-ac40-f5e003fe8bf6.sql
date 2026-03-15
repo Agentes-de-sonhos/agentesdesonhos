@@ -1,0 +1,1 @@
+ALTER TABLE public.user_presence ADD COLUMN IF NOT EXISTS is_online boolean DEFAULT true NOT NULL;

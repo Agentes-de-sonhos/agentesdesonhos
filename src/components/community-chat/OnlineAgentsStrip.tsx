@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
 import { Users } from "lucide-react";
 
 interface OnlineAgentsStripProps {
@@ -13,14 +14,13 @@ interface OnlineAgentsStripProps {
 }
 
 export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
-  const { onlineUsers, onlineCount } = usePresence();
+  const { onlineUsers, onlineCount, isOnline, isOnlineLoading, toggleOnline } = usePresence();
   const { plan } = useSubscription();
 
   const handleClick = (agent: OnlineAgent) => {
     if (onAgentClick) {
       onAgentClick(agent);
     } else {
-      // Dispatch global event for ChatFloatingButton to pick up
       window.dispatchEvent(new CustomEvent("start-dm", { detail: agent }));
     }
   };
@@ -29,13 +29,35 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
 
   return (
     <div className="flex items-center gap-3 bg-card rounded-xl px-4 py-2.5 border border-border shadow-sm">
+      {/* Online/Offline toggle */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-1.5">
+            <Switch
+              checked={isOnline}
+              onCheckedChange={toggleOnline}
+              disabled={isOnlineLoading}
+              className="h-5 w-9 data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-muted [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4"
+            />
+            <span className={`text-xs font-medium ${isOnline ? "text-green-600" : "text-muted-foreground"}`}>
+              {isOnline ? "On" : "Off"}
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{isOnline ? "Você está visível para outros agentes" : "Você está invisível"}</p>
+        </TooltipContent>
+      </Tooltip>
+
+      <div className="h-5 w-px bg-border" />
+
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
         <div className="relative">
           <Users className="h-4 w-4 text-primary" />
           <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-success border border-card" />
         </div>
         <span>
-          <strong className="text-foreground">{onlineCount + 1}</strong> agentes online
+          <strong className="text-foreground">{onlineCount + (isOnline ? 1 : 0)}</strong> agentes online
         </span>
       </div>
 
