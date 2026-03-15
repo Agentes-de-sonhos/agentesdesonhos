@@ -32,6 +32,7 @@ import {
   X,
   Tag,
 } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { useToast } from "@/hooks/use-toast";
 import { SupplierContactsManager } from "./SupplierContactsManager";
 import { SupplierLogoUpload } from "./SupplierLogoUpload";

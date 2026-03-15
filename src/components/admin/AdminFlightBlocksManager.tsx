@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import {
   Plus,
   Pencil,

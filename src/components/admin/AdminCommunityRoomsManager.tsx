@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Trash2, GripVertical, Save } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 
 interface Room {
   id: string;

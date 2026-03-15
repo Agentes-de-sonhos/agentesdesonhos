@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Plus, Send, Trash2, Search, Loader2 } from "lucide-react";
+import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 import * as XLSX from "xlsx";
 
 interface CrmContact {

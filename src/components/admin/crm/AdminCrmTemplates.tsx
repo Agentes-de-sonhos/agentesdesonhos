@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Pencil, Loader2 } from "lucide-react";
+import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 
 interface CrmTemplate {
   id: string;

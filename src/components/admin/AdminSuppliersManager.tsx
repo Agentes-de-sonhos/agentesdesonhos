@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Pencil, Trash2, Loader2, Building2, Plane, CreditCard, Globe, MapPin, Hotel, Ship, Car } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface Supplier {
