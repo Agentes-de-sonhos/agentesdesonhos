@@ -43,7 +43,7 @@ const TAB_ADVISOR_MAP: Record<string, { icon: typeof Hotel; label: string; categ
     label: "Atrações recomendadas",
     categoryLabel: "Atrações",
     description: "Explore uma curadoria de atrações e pontos turísticos recomendados para indicar aos seus clientes.",
-    advisorTab: "attractions",
+    advisorTab: "attraction",
   },
 };
 
