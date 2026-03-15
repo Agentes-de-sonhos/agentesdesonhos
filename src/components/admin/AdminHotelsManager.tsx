@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Upload, Trash2, Building2, Download, AlertCircle, CheckCircle } from "lucide-react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
