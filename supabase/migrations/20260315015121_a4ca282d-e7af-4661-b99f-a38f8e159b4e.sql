@@ -1,0 +1,1 @@
+ALTER TABLE public.showcase_items ADD COLUMN gallery_urls TEXT[] DEFAULT '{}';

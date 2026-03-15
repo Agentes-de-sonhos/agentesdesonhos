@@ -3741,6 +3741,7 @@ export type Database = {
           expires_at: string | null
           featured_label: string | null
           featured_order: number
+          gallery_urls: string[] | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -3760,6 +3761,7 @@ export type Database = {
           expires_at?: string | null
           featured_label?: string | null
           featured_order?: number
+          gallery_urls?: string[] | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -3779,6 +3781,7 @@ export type Database = {
           expires_at?: string | null
           featured_label?: string | null
           featured_order?: number
+          gallery_urls?: string[] | null
           id?: string
           image_url?: string | null
           is_active?: boolean
