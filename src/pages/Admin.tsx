@@ -52,6 +52,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function Admin() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "users";
   const { data: userStats } = useQuery({
     queryKey: ["admin-user-stats"],
     queryFn: async () => {
