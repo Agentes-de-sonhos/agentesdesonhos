@@ -282,6 +282,7 @@ export function FlightBlocksImporter() {
               {parsedBlocks.length} bloqueio(s) detectado(s). Edite os campos antes de salvar:
             </p>
 
+            <TooltipProvider delayDuration={200}>
             <div className="max-h-[400px] overflow-auto border rounded-lg">
               <Table>
                 <TableHeader>
