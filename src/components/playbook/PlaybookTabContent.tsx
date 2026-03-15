@@ -38,6 +38,13 @@ const TAB_ADVISOR_MAP: Record<string, { icon: typeof Hotel; label: string; categ
     description: "Consulte informações sobre companhias aéreas e rotas recomendadas para este destino.",
     advisorTab: "experiences",
   },
+  atracoes: {
+    icon: Compass,
+    label: "Atrações recomendadas",
+    categoryLabel: "Atrações",
+    description: "Explore uma curadoria de atrações e pontos turísticos recomendados para indicar aos seus clientes.",
+    advisorTab: "attraction",
+  },
 };
 
 interface PlaybookTabContentProps {
