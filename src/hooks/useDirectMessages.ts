@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { playNotificationSound } from "@/lib/notification-sound";
 
 export interface Conversation {
   id: string;
@@ -245,6 +246,7 @@ export function useDirectMessages(activeConversationId?: string) {
         { event: "INSERT", schema: "public", table: "direct_messages" },
         (payload: any) => {
           if (payload.new.sender_id !== user.id) {
+            playNotificationSound();
             queryClient.invalidateQueries({ queryKey: ["dm-conversations"] });
           }
         }

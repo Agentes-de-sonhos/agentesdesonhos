@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { playNotificationSound } from "@/lib/notification-sound";
 
 export interface CommunityRoom {
   id: string;
@@ -102,7 +103,10 @@ export function useCommunityChat(activeRoomId?: string) {
           table: "community_messages",
           filter: `room_id=eq.${activeRoomId}`,
         },
-        () => {
+        (payload: any) => {
+          if (payload.new.user_id !== user?.id) {
+            playNotificationSound();
+          }
           queryClient.invalidateQueries({
             queryKey: ["room-messages", activeRoomId],
           });
