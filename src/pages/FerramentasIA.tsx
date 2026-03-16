@@ -47,7 +47,7 @@ export default function FerramentasIA() {
           </div>
 
           {/* AI Usage Indicator */}
-          {plan !== "premium" && (
+          {plan !== "profissional" && (
             <div className="max-w-md mx-auto p-4 rounded-xl bg-muted/50 border">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground flex items-center gap-2">
