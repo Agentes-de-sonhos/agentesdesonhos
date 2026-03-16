@@ -3206,6 +3206,8 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
+        </CollapsibleFormSection>
+
         <MultiFileUpload files={files} setFiles={setFiles} label="Apólice / Voucher do Seguro" />
 
         <div className="flex gap-2 justify-end">
