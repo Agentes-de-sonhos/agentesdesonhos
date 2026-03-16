@@ -443,6 +443,17 @@ export function AdminUserManager() {
                     </TableCell>
                     <TableCell>
                       <Switch
+                        checked={user.monthly_paid}
+                        onCheckedChange={(checked) =>
+                          togglePaymentMutation.mutate({
+                            userId: user.user_id,
+                            isPaid: checked,
+                          })
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Switch
                         checked={user.is_active}
                         onCheckedChange={(checked) =>
                           toggleActiveMutation.mutate({
