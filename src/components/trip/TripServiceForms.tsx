@@ -2445,11 +2445,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        {/* === DETALHES DE USO === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Detalhes de Uso</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📅 Detalhes de Uso">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="entry_time" render={({ field }) => (
