@@ -2176,11 +2176,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           <Plus className="h-4 w-4 mr-2" /> Adicionar Passageiro
         </Button>
 
-        {/* === ORIENTAÇÕES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações Importantes</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⚠️ Orientações Importantes">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
             <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><Textarea placeholder="Passaporte, voucher impresso..." rows={2} {...field} /></FormControl></FormItem>
