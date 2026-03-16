@@ -348,6 +348,7 @@ interface QuestionCardProps {
   isSubmitting: boolean;
   getAnswersQuery: (id: string) => any;
   onToggleLike: (answerId: string) => void;
+  canComment: boolean;
 }
 
 function QuestionCard({
@@ -362,6 +363,7 @@ function QuestionCard({
   isSubmitting,
   getAnswersQuery,
   onToggleLike,
+  canComment,
 }: QuestionCardProps) {
   const { user } = useAuth();
   const answersQuery = useQuery({ ...getAnswersQuery(q.id), enabled: isExpanded });
