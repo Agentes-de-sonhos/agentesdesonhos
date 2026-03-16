@@ -1679,6 +1679,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Informações adicionais..." rows={3} {...field} /></FormControl></FormItem>
         )} />
 
+        </CollapsibleFormSection>
+
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Contrato da Locação" />
 
         <div className="flex gap-2 justify-end">
