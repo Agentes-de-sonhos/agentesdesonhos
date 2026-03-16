@@ -512,13 +512,11 @@ export default function Auth() {
         </CardContent>
         
         {/* Footer branding */}
-        {view !== "password-signup" && (
-          <div className="pb-6 text-center">
-            <p className="text-[10px] text-muted-foreground/50">
-              Desenvolvido por <span className="font-medium">Nobre Digital</span>
-            </p>
-          </div>
-        )}
+        <div className="pb-6 text-center">
+          <p className="text-[10px] text-muted-foreground/50">
+            Desenvolvido por <span className="font-medium">Nobre Digital</span>
+          </p>
+        </div>
       </Card>
     </div>
   );
