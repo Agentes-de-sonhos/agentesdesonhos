@@ -3768,6 +3768,8 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           )} />
         </div>
 
+        </CollapsibleFormSection>
+
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Boarding Pass / Confirmação" />
 
         <div className="flex gap-2 justify-end">
