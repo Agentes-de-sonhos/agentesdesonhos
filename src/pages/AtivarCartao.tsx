@@ -76,7 +76,7 @@ export default function AtivarCartao() {
   // If already logged in, redirect
   useEffect(() => {
     if (user && !authLoading) {
-      navigate("/meu-cartao", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [user, authLoading, navigate]);
 
