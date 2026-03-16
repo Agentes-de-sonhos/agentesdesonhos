@@ -36,6 +36,7 @@ import {
   FileText,
   MessageSquare,
   Target,
+  Quote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
