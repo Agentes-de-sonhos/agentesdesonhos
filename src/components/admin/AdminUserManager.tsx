@@ -390,6 +390,7 @@ export function AdminUserManager() {
                 <TableRow>
                   <TableHead>Nome / Agência</TableHead>
                   <TableHead>E-mail</TableHead>
+                  <TableHead>Telefone</TableHead>
                   <TableHead>Localização</TableHead>
                   <TableHead>Plano</TableHead>
                   <TableHead>Permissão</TableHead>
@@ -419,6 +420,9 @@ export function AdminUserManager() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {user.email || "-"}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {user.phone || "-"}
                     </TableCell>
                     <TableCell>
                     </TableCell>
