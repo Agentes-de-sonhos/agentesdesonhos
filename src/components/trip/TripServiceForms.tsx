@@ -3367,11 +3367,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === INFORMAÇÕES PRINCIPAIS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚢 Informações do Cruzeiro</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🚢 Informações do Cruzeiro" defaultOpen>
 
         <FormField control={form.control} name="cruise_company" render={({ field }) => (
           <FormItem>
