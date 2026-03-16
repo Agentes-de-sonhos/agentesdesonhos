@@ -61,6 +61,7 @@ export default function TripWallet() {
   const [editingPassword, setEditingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isEditingTrip, setIsEditingTrip] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
