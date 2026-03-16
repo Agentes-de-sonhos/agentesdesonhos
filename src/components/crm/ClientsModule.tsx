@@ -124,6 +124,9 @@ export function ClientsModule() {
         status: client.status || "lead",
         travel_preferences: client.travel_preferences || "",
         internal_notes: client.internal_notes || "",
+        birthday_day: client.birthday_day?.toString() || "",
+        birthday_month: client.birthday_month?.toString() || "",
+        birthday_year: client.birthday_year?.toString() || "",
       });
     } else {
       setEditingClient(null);
