@@ -20,3 +20,12 @@ verify_jwt = false
 
 [functions.activate-card-signup]
 verify_jwt = false
+
+[functions.flight-lookup]
+verify_jwt = false
+
+[functions.parse-flight-text]
+verify_jwt = false
+
+[functions.flight-status]
+verify_jwt = false

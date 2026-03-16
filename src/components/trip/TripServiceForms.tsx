@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -224,9 +225,46 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   const tripTypeLabels: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
   const segmentTypeLabels: Record<string, string> = { ida: 'Ida', conexao: 'Conexão', volta: 'Volta' };
 
+  const handleFlightImport = (importData: any) => {
+    // Fill main form fields
+    if (importData.airline) form.setValue("main_airline", importData.airline);
+    if (importData.origin_city) form.setValue("origin_city", importData.origin_city);
+    if (importData.destination_city) form.setValue("destination_city", importData.destination_city);
+
+    // Fill first segment
+    const updatedSegments = [...segments];
+    const seg = updatedSegments[0] || emptySegment();
+    if (importData.airline) seg.airline = importData.airline;
+    if (importData.flight_number) seg.flight_number = importData.flight_number;
+    if (importData.origin_airport) seg.origin_airport = importData.origin_airport;
+    if (importData.origin_city) seg.origin_city = importData.origin_city;
+    if (importData.destination_airport) seg.destination_airport = importData.destination_airport;
+    if (importData.destination_city) seg.destination_city = importData.destination_city;
+    if (importData.departure_time) {
+      const t = importData.departure_time;
+      seg.departure_time = t.includes("T")
+        ? new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+        : t;
+      if (t.includes("T")) {
+        seg.flight_date = t.split("T")[0];
+      }
+    }
+    if (importData.arrival_time) {
+      const t = importData.arrival_time;
+      seg.arrival_time = t.includes("T")
+        ? new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+        : t;
+    }
+    updatedSegments[0] = seg;
+    setSegments(updatedSegments);
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* === IMPORTAÇÃO AUTOMÁTICA === */}
+        <FlightAutoImport onImport={handleFlightImport} />
+
         {/* === RESUMO DO VOO === */}
         <div className="space-y-1">
           <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✈️ Informações Principais</h4>
