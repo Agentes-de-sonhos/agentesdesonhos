@@ -2723,6 +2723,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
+        </CollapsibleFormSection>
+
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Ingresso (PDF ou Imagem)" />
 
         <div className="flex gap-2 justify-end">
