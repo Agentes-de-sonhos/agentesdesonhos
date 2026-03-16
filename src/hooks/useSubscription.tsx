@@ -16,6 +16,7 @@ interface SubscriptionContextType {
   subscription: Subscription | null;
   plan: SubscriptionPlan;
   loading: boolean;
+  isPromotor: boolean;
   hasFeature: (feature: Feature) => boolean;
   canUseAI: () => boolean;
   aiUsageCount: number;
