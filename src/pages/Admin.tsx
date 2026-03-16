@@ -224,9 +224,8 @@ export default function Admin() {
               <span className="hidden sm:inline">Benefícios</span>
             </TabsTrigger>
           </TabsList>
-              <span className="hidden sm:inline">CRM</span>
-            </TabsTrigger>
-          </TabsList>
+
+
 
           <TabsContent value="users">
             <AdminUserManager />
