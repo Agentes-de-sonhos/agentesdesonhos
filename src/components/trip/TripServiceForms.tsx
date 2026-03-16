@@ -1235,6 +1235,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
+        </CollapsibleFormSection>
+
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Hotel" />
 
         <div className="flex gap-2 justify-end">
