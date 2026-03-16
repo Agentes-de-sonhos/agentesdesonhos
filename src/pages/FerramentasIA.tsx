@@ -116,8 +116,7 @@ export default function FerramentasIA() {
           <p className="text-center text-sm text-muted-foreground max-w-lg mx-auto">
             Outras ferramentas como Orçamentos e Carteira Digital estão disponíveis no menu principal.
           </p>
-        </div>
-      </DashboardLayout>
-    </SubscriptionGuard>
+      </div>
+    </DashboardLayout>
   );
 }
