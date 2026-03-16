@@ -866,11 +866,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        {/* === CHECK-IN DETAILS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Detalhes do Check-in</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📅 Detalhes do Check-in">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkin_time" render={({ field }) => (
