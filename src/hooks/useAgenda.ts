@@ -204,11 +204,19 @@ export function useAgenda(year?: number) {
       const { data, error } = await supabase
         .from("agency_events")
         .insert({ 
-          ...event, 
+          title: event.title,
+          description: event.description,
+          event_type: event.event_type,
+          event_date: event.event_date,
+          event_time: event.event_time,
+          color: event.color,
           user_id: user.id,
           client_id: event.client_id || null,
           opportunity_id: event.opportunity_id || null,
-        })
+          location_city: event.location_city || null,
+          location_address: event.location_address || null,
+          event_url: event.event_url || null,
+        } as any)
         .select()
         .single();
 
