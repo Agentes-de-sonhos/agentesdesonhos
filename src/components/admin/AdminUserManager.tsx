@@ -67,6 +67,7 @@ interface UserWithDetails {
   role: "admin" | "agente";
   plan: "essencial" | "profissional";
   is_active: boolean;
+  monthly_paid: boolean;
 }
 
 export function AdminUserManager() {
