@@ -496,7 +496,7 @@ export function AdminUserManager() {
                   if (editingUser) {
                     updatePlanMutation.mutate({
                       userId: editingUser.user_id,
-                      plan: selectedPlan as "essencial" | "profissional" | "premium",
+                      plan: selectedPlan as "essencial" | "profissional",
                     });
                   }
                 }}
