@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
     const { error: subscriptionError } = await adminClient.from("subscriptions").upsert(
       {
         user_id: userId,
-        plan: "cartao_digital",
+        plan: "profissional",
         is_active: true,
       },
       { onConflict: "user_id" },
