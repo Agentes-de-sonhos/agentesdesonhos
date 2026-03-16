@@ -359,13 +359,20 @@ export function AdminUserManager() {
               </TableHeader>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
+                  <TableRow key={user.id} className={user.role === "admin" ? "bg-amber-50/60 dark:bg-amber-950/20 border-l-4 border-l-amber-500" : ""}>
                     <TableCell>
-                      <div>
-                        <p className="font-medium">{user.name}</p>
-                        {user.agency_name && (
-                          <p className="text-sm text-muted-foreground">{user.agency_name}</p>
+                      <div className="flex items-center gap-2">
+                        {user.role === "admin" && (
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
+                            <Shield className="h-4 w-4 text-white" />
+                          </div>
                         )}
+                        <div>
+                          <p className="font-medium">{user.name}</p>
+                          {user.agency_name && (
+                            <p className="text-sm text-muted-foreground">{user.agency_name}</p>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -379,13 +386,15 @@ export function AdminUserManager() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                        {user.role === "admin" ? (
-                          <><Shield className="h-3 w-3 mr-1" /> Admin</>
-                        ) : (
-                          <><UserCheck className="h-3 w-3 mr-1" /> Agente</>
-                        )}
-                      </Badge>
+                      {user.role === "admin" ? (
+                        <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-0 gap-1 px-3 py-1 text-xs font-semibold">
+                          <Shield className="h-3 w-3" /> Administrador
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="gap-1 px-3 py-1 text-xs">
+                          <UserCheck className="h-3 w-3" /> Agente
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {format(new Date(user.created_at), "dd/MM/yyyy")}
@@ -404,8 +413,9 @@ export function AdminUserManager() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
+                          variant={user.role === "admin" ? "destructive" : "default"}
                           size="sm"
+                          className="text-xs gap-1"
                           onClick={() =>
                             toggleRoleMutation.mutate({
                               userId: user.user_id,
@@ -413,7 +423,11 @@ export function AdminUserManager() {
                             })
                           }
                         >
-                          {user.role === "admin" ? "→ Agente" : "→ Admin"}
+                          {user.role === "admin" ? (
+                            <><Shield className="h-3 w-3" /> Remover Admin</>
+                          ) : (
+                            <><Shield className="h-3 w-3" /> Tornar Admin</>
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
