@@ -23,10 +23,10 @@ export function BenefitCard({ benefit, userConfirmationType, onConfirm, onViewDe
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             {benefit.company_logo_url ? (
-              <img src={benefit.company_logo_url} alt={benefit.company_name} className="h-10 w-10 rounded-lg object-contain bg-muted p-1" />
+              <img src={benefit.company_logo_url} alt={benefit.company_name} className="h-20 w-20 rounded-lg object-contain bg-muted p-1" />
             ) : (
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Building2 className="h-5 w-5 text-primary" />
+              <div className="h-20 w-20 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Building2 className="h-10 w-10 text-primary" />
               </div>
             )}
             <div className="min-w-0">
