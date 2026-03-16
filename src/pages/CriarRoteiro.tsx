@@ -49,6 +49,8 @@ export default function CriarRoteiro() {
     deleteItinerary,
   } = useItineraries();
 
+  const { canUse: canCreateItinerary, remaining: itinerariesRemaining, hasLimit, incrementUsage } = useDailyLimit("itinerary");
+
   useEffect(() => {
     if (id) {
       loadItinerary(id);
