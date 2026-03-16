@@ -214,22 +214,28 @@ export default function VitrinePublica() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col">
-      {/* ─── Header / Agency identity ─── */}
-      <header className="bg-background border-b">
-        <div className="max-w-lg mx-auto px-4 py-6 flex flex-col items-center text-center">
-          {profile?.agency_logo_url ? (
+      {/* ─── Agency logo highlight ─── */}
+      {profile?.agency_logo_url && (
+        <div className="bg-background">
+          <div className="max-w-lg mx-auto px-4 pt-8 pb-4 flex justify-center">
             <img
               src={profile.agency_logo_url}
               alt={profile.agency_name || ""}
-              className="h-20 w-auto max-w-[200px] object-contain mb-3"
+              className="h-28 sm:h-36 w-auto max-w-[90%] object-contain"
             />
-          ) : (
+          </div>
+        </div>
+      )}
+
+      {/* ─── Header / Agency identity ─── */}
+      <header className="bg-background border-b">
+        <div className="max-w-lg mx-auto px-4 py-4 flex flex-col items-center text-center">
+          {!profile?.agency_logo_url && (
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl mb-3">
               {(profile?.agency_name || profile?.name || "V")[0]}
             </div>
           )}
 
-          {/* Only show name if no logo (logo usually contains the name) */}
           {!profile?.agency_logo_url && profile?.agency_name && (
             <h1 className="font-bold text-lg text-foreground">{profile.agency_name}</h1>
           )}

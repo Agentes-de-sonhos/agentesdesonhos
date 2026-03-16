@@ -140,7 +140,7 @@ const features = [
   },
   {
     icon: Store,
-    title: "Vitrine Virtual",
+    title: "Vitrine de Ofertas",
     description:
       "Monte sua vitrine de ofertas online com lâminas dos fornecedores ou imagens próprias. Organize por categoria e destaque as melhores promoções.",
   },

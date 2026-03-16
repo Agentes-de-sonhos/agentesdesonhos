@@ -33,7 +33,7 @@ const PAGE_LABELS: Record<string, string> = {
   "gestao-clientes": "Gestão de Clientes",
   "trip-wallet": "Carteira Digital",
   "meu-cartao": "Cartão de Visitas",
-  "minha-vitrine": "Vitrine Virtual",
+  "minha-vitrine": "Vitrine de Ofertas",
   "perguntas-respostas": "Perguntas e Respostas",
   "comunidade": "Travel Experts",
   "mentorias": "Mentorias",
