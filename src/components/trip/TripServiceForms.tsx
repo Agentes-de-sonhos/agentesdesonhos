@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
+import { CollapsibleFormSection } from "@/components/trip/CollapsibleFormSection";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
