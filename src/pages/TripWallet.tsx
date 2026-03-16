@@ -43,6 +43,14 @@ const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
 };
 
 export default function TripWallet() {
+  return (
+    <SubscriptionGuard feature="trip_wallet">
+      <TripWalletContent />
+    </SubscriptionGuard>
+  );
+}
+
+function TripWalletContent() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
