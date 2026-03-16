@@ -43,8 +43,8 @@ export default function GerarOrcamento() {
       toast({ title: "Limite diário atingido", description: "Você já criou seu orçamento de hoje. Faça upgrade para o Plano Fundador para criar orçamentos ilimitados.", variant: "destructive" });
       return;
     }
-    await incrementUsage();
     const newQuote = await createQuote(data);
+    await incrementUsage();
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
   };
 
