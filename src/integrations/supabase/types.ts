@@ -3735,6 +3735,48 @@ export type Database = {
         }
         Relationships: []
       }
+      registration_links: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          max_uses: number
+          notes: string | null
+          plan: string
+          role: string
+          token: string
+          updated_at: string
+          uses_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          notes?: string | null
+          plan?: string
+          role?: string
+          token?: string
+          updated_at?: string
+          uses_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          notes?: string | null
+          plan?: string
+          role?: string
+          token?: string
+          updated_at?: string
+          uses_count?: number
+        }
+        Relationships: []
+      }
       sale_products: {
         Row: {
           commission_type: string
