@@ -62,7 +62,7 @@ export function CuratedNewsFeed() {
   if (!news || news.length === 0) return null;
 
   const getCategoryColor = (categoria: string) => {
-    const cat = categoria.toLowerCase();
+    const cat = (categoria || "").toLowerCase();
     if (cat.includes("aéreo") || cat.includes("aereo") || cat.includes("aviação")) return "bg-sky-500/10 text-sky-600";
     if (cat.includes("cruzeiro") || cat.includes("marítimo")) return "bg-cyan-500/10 text-cyan-600";
     if (cat.includes("hotel") || cat.includes("hospedagem")) return "bg-amber-500/10 text-amber-600";
