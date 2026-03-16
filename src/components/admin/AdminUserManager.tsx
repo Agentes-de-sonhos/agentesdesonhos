@@ -394,6 +394,7 @@ export function AdminUserManager() {
                   <TableHead>Plano</TableHead>
                   <TableHead>Permissão</TableHead>
                   <TableHead>Cadastro</TableHead>
+                  <TableHead>Pago</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
