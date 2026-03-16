@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,6 +19,7 @@ import {
   Plane,
   Clock,
   Cake,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,7 +64,8 @@ import { ClientProfile } from "./ClientProfile";
 import type { Client, ClientStatus } from "@/types/crm";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
 import { cn } from "@/lib/utils";
-
+import { ImportContactsDialog } from "./ImportContactsDialog";
+import { useQueryClient } from "@tanstack/react-query";
 const clientSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
@@ -83,12 +85,28 @@ type ClientFormData = z.infer<typeof clientSchema>;
 export function ClientsModule() {
   const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const existingPhones = useMemo(() => {
+    const map = new Map<string, string>();
+    clients.forEach((c) => {
+      if (c.phone) {
+        const digits = c.phone.replace(/\D/g, "");
+        if (digits) {
+          const normalized = digits.length >= 10 && !digits.startsWith("55") ? "55" + digits : digits;
+          map.set(normalized, c.id);
+        }
+      }
+    });
+    return map;
+  }, [clients]);
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -271,6 +289,9 @@ export function ClientsModule() {
             ))}
           </SelectContent>
         </Select>
+        <Button variant="outline" onClick={() => setIsImportOpen(true)} className="gap-2">
+          <Upload className="h-4 w-4" /> Importar Contatos
+        </Button>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => handleOpenDialog()}>
@@ -597,6 +618,13 @@ export function ClientsModule() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ImportContactsDialog
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        existingPhones={existingPhones}
+        onImportComplete={() => queryClient.invalidateQueries({ queryKey: ["clients"] })}
+      />
     </div>
   );
 }
