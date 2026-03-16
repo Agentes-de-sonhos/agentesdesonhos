@@ -114,7 +114,7 @@ export function UpgradeDialog({
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 md:grid-cols-3 mt-4">
+        <div className="grid gap-4 md:grid-cols-2 mt-4">
           {plans.map((planKey) => {
             const isCurrentPlan = planKey === currentPlan;
             const isPlanHigher = plans.indexOf(planKey) > plans.indexOf(currentPlan);
