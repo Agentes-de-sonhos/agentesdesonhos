@@ -2541,11 +2541,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           )} />
         </div>
 
-        {/* === LOCALIZAÇÃO === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Localização</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📍 Localização">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="venue_name" render={({ field }) => (
