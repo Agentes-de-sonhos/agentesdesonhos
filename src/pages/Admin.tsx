@@ -15,6 +15,7 @@ import {
   CalendarDays,
   GraduationCap,
   Heart,
+  Gift,
   Megaphone,
   BookOpen,
   Sparkles,
