@@ -13,7 +13,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Users } from "lucide-react";
 
 export default function Community() {
-  const {
+  return (
+    <SubscriptionGuard feature="community">
+      <CommunityContent />
+    </SubscriptionGuard>
+  );
+}
+
+function CommunityContent() {
     famTrips,
     upcomingMeetings,
     pastMeetings,
