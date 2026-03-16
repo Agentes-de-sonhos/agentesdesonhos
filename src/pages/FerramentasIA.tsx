@@ -28,9 +28,8 @@ export default function FerramentasIA() {
   const { canUseAI, aiUsageRemaining, aiLimit, plan } = useSubscription();
 
   return (
-    <SubscriptionGuard feature="ai_tools">
-      <DashboardLayout>
-        <div className="space-y-8 animate-fade-in">
+    <DashboardLayout>
+      <div className="space-y-8 animate-fade-in">
           {/* Header */}
           <div className="text-center max-w-2xl mx-auto">
             <div className="flex justify-center mb-4">
