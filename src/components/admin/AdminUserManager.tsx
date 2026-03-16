@@ -250,7 +250,6 @@ export function AdminUserManager() {
     admins: users.filter((u) => u.role === "admin").length,
     essencial: users.filter((u) => u.plan === "essencial").length,
     profissional: users.filter((u) => u.plan === "profissional").length,
-    premium: users.filter((u) => u.plan === "premium").length,
   };
 
   const planColors: Record<string, string> = {
@@ -258,7 +257,6 @@ export function AdminUserManager() {
     cartao_digital: "bg-teal-500",
     essencial: "bg-muted-foreground",
     profissional: "bg-primary",
-    premium: "bg-accent",
   };
 
   return (
