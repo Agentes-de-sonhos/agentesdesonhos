@@ -85,7 +85,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
             <FormItem>
               <FormLabel>Nome do Cliente</FormLabel>
               <FormControl>
-                <Input placeholder="Nome completo do cliente" {...field} />
+                <ClientAutocomplete value={field.value} onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
