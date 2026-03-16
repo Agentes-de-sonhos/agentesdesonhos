@@ -3564,11 +3564,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </Button>
         </div>
 
-        {/* === ITINERÁRIO === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🗺 Roteiro do Cruzeiro</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🗺 Roteiro do Cruzeiro">
 
         <div className="space-y-2">
           {itinerary.map((stop, i) => (
