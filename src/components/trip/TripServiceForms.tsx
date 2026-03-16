@@ -1036,11 +1036,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        {/* === ALIMENTAÇÃO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🍽️ Alimentação</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🍽️ Alimentação">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="breakfast_hours" render={({ field }) => (
