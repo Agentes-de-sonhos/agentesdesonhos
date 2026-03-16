@@ -3460,11 +3460,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           )} />
         </div>
 
-        {/* === CABINE === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛏 Dados da Cabine</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🛏 Dados da Cabine">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="cabin_type" render={({ field }) => (
