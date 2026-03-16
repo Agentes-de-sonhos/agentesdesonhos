@@ -332,11 +332,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           )} />
         </div>
 
-        {/* === TRECHOS DE VOO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛫 Trechos de Voo</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🛫 Trechos de Voo" defaultOpen>
 
         {segments.map((seg, i) => (
           <div key={i} className="border rounded-lg p-4 space-y-3 bg-muted/20">
