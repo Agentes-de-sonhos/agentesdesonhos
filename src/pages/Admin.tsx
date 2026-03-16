@@ -15,6 +15,7 @@ import {
   CalendarDays,
   GraduationCap,
   Heart,
+  Gift,
   Megaphone,
   BookOpen,
   Sparkles,
@@ -49,6 +50,7 @@ import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
 import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
 import { AdminTourOperatorsManager } from "@/components/admin/AdminTourOperatorsManager";
 import { AdminMentorshipsManager } from "@/components/admin/AdminMentorshipsManager";
+import { AdminBenefitsManager } from "@/components/admin/AdminBenefitsManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -217,7 +219,13 @@ export default function Admin() {
               <Mail className="h-4 w-4" />
               <span className="hidden sm:inline">CRM</span>
             </TabsTrigger>
+            <TabsTrigger value="benefits" className="flex items-center gap-2">
+              <Gift className="h-4 w-4" />
+              <span className="hidden sm:inline">Benefícios</span>
+            </TabsTrigger>
           </TabsList>
+
+
 
           <TabsContent value="users">
             <AdminUserManager />
@@ -305,6 +313,10 @@ export default function Admin() {
               <AdminCrmTemplates />
               <AdminCrmLogs />
             </div>
+          </TabsContent>
+
+          <TabsContent value="benefits">
+            <AdminBenefitsManager />
           </TabsContent>
         </Tabs>
       </div>
