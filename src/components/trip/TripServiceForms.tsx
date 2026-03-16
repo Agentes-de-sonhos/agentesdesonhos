@@ -1593,11 +1593,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === CONDUTORES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Condutores</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👤 Condutores">
         {drivers.map((d, i) => (
           <div key={i} className="border rounded-lg p-3 space-y-2 bg-muted/20">
             <div className="flex items-center justify-between">
