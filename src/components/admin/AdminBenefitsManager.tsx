@@ -14,10 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { SupplierLogoUpload } from "@/components/admin/SupplierLogoUpload";
 import { BENEFIT_CATEGORIES, BENEFIT_DESTINATIONS } from "@/types/benefits";
 
 interface BenefitForm {
   company_name: string;
+  company_logo_url: string | null;
   category: string;
   title: string;
   short_description: string;
@@ -31,6 +33,7 @@ interface BenefitForm {
 
 const emptyForm: BenefitForm = {
   company_name: "",
+  company_logo_url: null,
   category: "",
   title: "",
   short_description: "",
@@ -68,6 +71,7 @@ export function AdminBenefitsManager() {
       if (!user?.id) throw new Error("Não autenticado");
       const payload = {
         company_name: form.company_name.trim(),
+        company_logo_url: form.company_logo_url,
         category: form.category,
         title: form.title.trim(),
         short_description: form.short_description.trim() || null,
@@ -136,6 +140,7 @@ export function AdminBenefitsManager() {
     setEditingId(b.id);
     setForm({
       company_name: b.company_name || "",
+      company_logo_url: b.company_logo_url || null,
       category: b.category || "",
       title: b.title || "",
       short_description: b.short_description || "",
@@ -232,6 +237,10 @@ export function AdminBenefitsManager() {
             <DialogTitle>{editingId ? "Editar Benefício" : "Novo Benefício"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-2">
+            <SupplierLogoUpload
+              logoUrl={form.company_logo_url}
+              onLogoChange={(url) => setForm({ ...form, company_logo_url: url })}
+            />
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Empresa *</Label>
