@@ -323,6 +323,10 @@ export default function Admin() {
           <TabsContent value="benefits">
             <AdminBenefitsManager />
           </TabsContent>
+
+          <TabsContent value="registration-links">
+            <AdminRegistrationLinksManager />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
