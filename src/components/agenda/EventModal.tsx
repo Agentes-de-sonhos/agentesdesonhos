@@ -111,12 +111,18 @@ export function EventModal({
       setEventType(event.event_type);
       setEventTime(event.event_time || "");
       setCustomColor(event.color || "");
+      setLocationCity(event.location_city || "");
+      setLocationAddress(event.location_address || "");
+      setEventUrl(event.event_url || "");
     } else {
       setTitle("");
       setDescription("");
       setEventType("compromisso");
       setEventTime("");
       setCustomColor("");
+      setLocationCity("");
+      setLocationAddress("");
+      setEventUrl("");
     }
   }, [event, open]);
 
