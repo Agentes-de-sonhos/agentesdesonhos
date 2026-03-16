@@ -114,7 +114,7 @@ export function AdminUserManager() {
           state: profile.state,
           created_at: profile.created_at,
           role: (userRole?.role as "admin" | "agente") || "agente",
-          plan: (userSub?.plan as "essencial" | "profissional" | "premium") || "essencial",
+          plan: (userSub?.plan as "essencial" | "profissional") || "essencial",
           is_active: userSub?.is_active ?? true,
         } as UserWithDetails;
       });
