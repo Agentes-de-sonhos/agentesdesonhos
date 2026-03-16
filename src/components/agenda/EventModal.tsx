@@ -95,6 +95,9 @@ export function EventModal({
   const [eventType, setEventType] = useState<string>("compromisso");
   const [eventTime, setEventTime] = useState("");
   const [customColor, setCustomColor] = useState("");
+  const [locationCity, setLocationCity] = useState("");
+  const [locationAddress, setLocationAddress] = useState("");
+  const [eventUrl, setEventUrl] = useState("");
   const [showCreateTypeDialog, setShowCreateTypeDialog] = useState(false);
 
   const isEditing = !!event;
