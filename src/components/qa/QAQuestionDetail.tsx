@@ -21,6 +21,8 @@ interface Props {
 
 export function QAQuestionDetail({ questionId, onBack }: Props) {
   const { user } = useAuth();
+  const { hasFeature } = useSubscription();
+  const canComment = hasFeature("qa_comment");
   const { createAnswer, markBestAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
   const [newAnswer, setNewAnswer] = useState(() => sessionStorage.getItem(`qa_answer_draft_${questionId}`) || "");
 
