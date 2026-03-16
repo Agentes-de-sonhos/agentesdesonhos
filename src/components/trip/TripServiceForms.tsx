@@ -2059,11 +2059,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           <FormItem><FormLabel>Observações Logísticas</FormLabel><FormControl><Textarea placeholder="Ex: acesso restrito, portaria lateral..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === MOTORISTA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Motorista e Contato</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👤 Motorista e Contato">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="driver_name" render={({ field }) => (
             <FormItem><FormLabel>Nome do Motorista</FormLabel><FormControl><Input placeholder="Carlos" {...field} /></FormControl></FormItem>
