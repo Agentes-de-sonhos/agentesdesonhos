@@ -239,27 +239,36 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
       </div>
 
       {/* New answer form */}
-      <Card>
-        <CardContent className="py-4">
-          <h4 className="text-sm font-medium mb-2">Sua Resposta (+4 pontos)</h4>
-          <Textarea
-            placeholder="Escreva sua resposta para ajudar o colega..."
-            value={newAnswer}
-            onChange={(e) => setNewAnswer(e.target.value)}
-            maxLength={2000}
-            rows={3}
-          />
-          <Button
-            onClick={handleSubmitAnswer}
-            disabled={!newAnswer.trim() || createAnswer.isPending}
-            className="mt-3 gap-2"
-            size="sm"
-          >
-            <Send className="h-4 w-4" />
-            {createAnswer.isPending ? "Enviando..." : "Responder"}
-          </Button>
-        </CardContent>
-      </Card>
+      {canComment ? (
+        <Card>
+          <CardContent className="py-4">
+            <h4 className="text-sm font-medium mb-2">Sua Resposta (+4 pontos)</h4>
+            <Textarea
+              placeholder="Escreva sua resposta para ajudar o colega..."
+              value={newAnswer}
+              onChange={(e) => setNewAnswer(e.target.value)}
+              maxLength={2000}
+              rows={3}
+            />
+            <Button
+              onClick={handleSubmitAnswer}
+              disabled={!newAnswer.trim() || createAnswer.isPending}
+              className="mt-3 gap-2"
+              size="sm"
+            >
+              <Send className="h-4 w-4" />
+              {createAnswer.isPending ? "Enviando..." : "Responder"}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="h-4 w-4" />
+            <span>Faça upgrade para o <strong>Plano Fundador</strong> para responder perguntas.</span>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
