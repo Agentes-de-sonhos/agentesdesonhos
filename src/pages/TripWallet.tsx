@@ -55,6 +55,7 @@ export default function TripWallet() {
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [editingService, setEditingService] = useState<TripService | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [editingPassword, setEditingPassword] = useState(false);
