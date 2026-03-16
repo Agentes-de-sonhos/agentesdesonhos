@@ -3081,11 +3081,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === PROCEDIMENTO DE EMERGÊNCIA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🆘 O que Fazer em Emergência</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🆘 O que Fazer em Emergência">
 
         <FormField control={form.control} name="how_to_activate" render={({ field }) => (
           <FormItem>
