@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQA, QA_CATEGORIES } from "@/hooks/useQA";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   MessageCircle, CheckCircle2, Filter, Clock, ThumbsUp, Eye,
   ArrowUpDown, ChevronDown, Send, Search, ChevronUp, MessageSquarePlus,
-  AlertCircle, Heart,
+  AlertCircle, Heart, Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
