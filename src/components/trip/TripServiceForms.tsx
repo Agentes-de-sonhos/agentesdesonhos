@@ -1573,11 +1573,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações do Seguro</FormLabel><FormControl><Textarea placeholder="Informações importantes sobre o seguro..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === CAUÇÃO E PAGAMENTO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">💳 Caução e Pagamento</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="💳 Caução e Pagamento">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="deposit_amount" render={({ field }) => (
             <FormItem><FormLabel>Valor da Caução</FormLabel><FormControl><Input placeholder="€ 1.200" {...field} /></FormControl></FormItem>
