@@ -48,7 +48,7 @@ export function AdminBenefitsManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BenefitForm>(emptyForm);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  
   const [search, setSearch] = useState("");
 
   const { data: benefits = [], isLoading } = useQuery({
