@@ -316,6 +316,38 @@ export function EventModal({
                 />
               </div>
 
+              {eventType === "trade" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="locationCity">Cidade do Evento (opcional)</Label>
+                    <Input
+                      id="locationCity"
+                      value={locationCity}
+                      onChange={(e) => setLocationCity(e.target.value)}
+                      placeholder="Ex: São Paulo, SP"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="locationAddress">Endereço (opcional)</Label>
+                    <Input
+                      id="locationAddress"
+                      value={locationAddress}
+                      onChange={(e) => setLocationAddress(e.target.value)}
+                      placeholder="Ex: Centro de Convenções Rebouças"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="eventUrl">Link do Evento / Inscrição (opcional)</Label>
+                    <Input
+                      id="eventUrl"
+                      value={eventUrl}
+                      onChange={(e) => setEventUrl(e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="description">Descrição (opcional)</Label>
                 <Textarea

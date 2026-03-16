@@ -66,6 +66,9 @@ export interface CalendarEvent {
   isHidden?: boolean;
   client_id?: string | null;
   opportunity_id?: string | null;
+  location_city?: string | null;
+  location_address?: string | null;
+  event_url?: string | null;
 }
 
 // Default event type colors

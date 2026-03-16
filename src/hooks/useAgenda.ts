@@ -436,6 +436,9 @@ export function useAgenda(year?: number) {
       isPreset: false,
       client_id: event.client_id,
       opportunity_id: event.opportunity_id,
+      location_city: (event as any).location_city,
+      location_address: (event as any).location_address,
+      event_url: (event as any).event_url,
     })),
     // Preset events (not hidden by user)
     ...presetEvents
