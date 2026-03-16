@@ -2355,11 +2355,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === INFORMAÇÕES PRINCIPAIS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🎟️ Informações Principais</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🎟️ Informações Principais" defaultOpen>
 
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
