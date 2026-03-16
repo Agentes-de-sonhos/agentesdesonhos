@@ -618,6 +618,13 @@ export function ClientsModule() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ImportContactsDialog
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        existingPhones={existingPhones}
+        onImportComplete={() => queryClient.invalidateQueries({ queryKey: ["clients"] })}
+      />
     </div>
   );
 }
