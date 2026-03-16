@@ -667,6 +667,9 @@ export type Database = {
       }
       clients: {
         Row: {
+          birthday_day: number | null
+          birthday_month: number | null
+          birthday_year: number | null
           city: string | null
           created_at: string
           email: string | null
@@ -682,6 +685,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          birthday_day?: number | null
+          birthday_month?: number | null
+          birthday_year?: number | null
           city?: string | null
           created_at?: string
           email?: string | null
@@ -697,6 +703,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          birthday_day?: number | null
+          birthday_month?: number | null
+          birthday_year?: number | null
           city?: string | null
           created_at?: string
           email?: string | null
