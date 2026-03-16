@@ -557,6 +557,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </FormItem>
         )} />
 
+        </CollapsibleFormSection>
+
         <MultiFileUpload files={files} setFiles={setFiles} label="E-ticket / Cartão de Embarque" />
 
         <div className="flex gap-2 justify-end">
