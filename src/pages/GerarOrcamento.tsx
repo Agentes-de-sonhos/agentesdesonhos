@@ -76,6 +76,15 @@ export default function GerarOrcamento() {
             <h1 className="font-display text-2xl font-bold">Gerar Orçamento</h1>
             <p className="text-muted-foreground">Crie um orçamento profissional para seu cliente</p>
           </div>
+          {hasLimit && (
+            <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateQuote ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
+              {canCreateQuote ? (
+                <><FileText className="h-4 w-4" /> Você pode criar mais {quotesRemaining} orçamento(s) hoje.</>
+              ) : (
+                <><Lock className="h-4 w-4" /> Limite diário atingido. Faça upgrade para o Plano Fundador para orçamentos ilimitados.</>
+              )}
+            </div>
+          )}
           <Card className="max-w-2xl">
             <CardHeader><CardTitle>Informações do Cliente</CardTitle></CardHeader>
             <CardContent>
