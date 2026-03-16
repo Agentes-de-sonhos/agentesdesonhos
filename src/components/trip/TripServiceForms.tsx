@@ -1653,11 +1653,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações de Combustível</FormLabel><FormControl><Textarea placeholder="Posto mais próximo, tipo de combustível..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === ORIENTAÇÕES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações Importantes</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⚠️ Orientações Importantes">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
             <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><Textarea placeholder="CNH válida, passaporte..." rows={2} {...field} /></FormControl></FormItem>
