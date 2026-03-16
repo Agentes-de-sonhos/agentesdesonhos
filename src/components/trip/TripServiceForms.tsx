@@ -1391,11 +1391,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === RESUMO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚗 Informações Principais</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🚗 Informações Principais" defaultOpen>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="rental_company" render={({ field }) => (
             <FormItem><FormLabel>Locadora *</FormLabel><FormControl><Input placeholder="Hertz, Alamo, Localiza..." {...field} /></FormControl><FormMessage /></FormItem>
