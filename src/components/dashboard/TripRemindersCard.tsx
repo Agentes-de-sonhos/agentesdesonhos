@@ -51,23 +51,21 @@ export function TripRemindersCard() {
     await markCompleted(reminderId);
   };
 
-  const getDaysRemainingBadge = (days: number, isReturn: boolean = false) => {
-    if (isReturn) {
-      return <Badge className="bg-accent text-accent-foreground">Retorno hoje</Badge>;
+  const getReminderLabel = (daysBefore: number) => {
+    switch (daysBefore) {
+      case 7:
+        return <Badge variant="outline" className="border-primary text-primary">Faltam 7 dias</Badge>;
+      case 3:
+        return <Badge variant="destructive" className="opacity-90">Faltam 3 dias</Badge>;
+      case 1:
+        return <Badge variant="destructive">Falta 1 dia</Badge>;
+      case 0:
+        return <Badge variant="destructive" className="animate-pulse">✈️ Viaja hoje!</Badge>;
+      case -1:
+        return <Badge className="bg-accent text-accent-foreground">🏠 Retorno hoje</Badge>;
+      default:
+        return <Badge variant="secondary">{daysBefore} dias</Badge>;
     }
-    if (days === 0) {
-      return <Badge variant="destructive">Viaja hoje!</Badge>;
-    }
-    if (days === 1) {
-      return <Badge variant="destructive">Amanhã</Badge>;
-    }
-    if (days <= 3) {
-      return <Badge variant="destructive" className="opacity-90">{days} dias</Badge>;
-    }
-    if (days <= 7) {
-      return <Badge variant="outline" className="border-primary text-primary">{days} dias</Badge>;
-    }
-    return <Badge variant="secondary">{days} dias</Badge>;
   };
 
   if (isLoading) {
