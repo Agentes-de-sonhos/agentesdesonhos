@@ -113,7 +113,12 @@ export function QAFeed() {
       {/* ── Compose Box ── */}
       <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden">
         <CardContent className="p-0">
-          {!composeExpanded ? (
+          {!canComment ? (
+            <div className="flex items-center gap-3 p-4 text-sm text-muted-foreground bg-muted/20">
+              <Lock className="h-4 w-4 flex-shrink-0" />
+              <span>Você pode visualizar as perguntas, mas para comentar ou perguntar é necessário o <strong>Plano Fundador</strong>.</span>
+            </div>
+          ) : !composeExpanded ? (
             <button
               onClick={() => setComposeExpanded(true)}
               className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/30 transition-colors"
