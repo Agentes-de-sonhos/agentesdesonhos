@@ -297,7 +297,20 @@ export default function LandingPage() {
   if (user) return null;
 
   const goLogin = () => navigate("/auth");
-  const goSignup = () => navigate("/auth?tab=signup");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const goSignup = async () => {
+    setCheckoutLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-public-checkout");
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      setCheckoutLoading(false);
+    }
+  };
 
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
