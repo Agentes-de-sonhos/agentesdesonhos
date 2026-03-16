@@ -334,7 +334,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
 
         </CollapsibleFormSection>
 
-        <CollapsibleFormSection title="🛫 Trechos de Voo" defaultOpen>
+        <CollapsibleFormSection title="🛫 Trechos de Voo">
 
         {segments.map((seg, i) => (
           <div key={i} className="border rounded-lg p-4 space-y-3 bg-muted/20">
