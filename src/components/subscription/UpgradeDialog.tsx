@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Crown, Lock, Sparkles, Star, Loader2 } from "lucide-react";
+import { Check, Lock, Sparkles, Star, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
