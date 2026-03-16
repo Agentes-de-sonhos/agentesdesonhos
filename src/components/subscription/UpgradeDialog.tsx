@@ -69,7 +69,7 @@ export function UpgradeDialog({
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const STRIPE_PRICES: Partial<Record<SubscriptionPlan, string>> = {
-    profissional: "price_1TB0XKFkGdVt5nie9wsOu3eZ",
+    profissional: "price_1TBXqzFkGdVt5nieafKR9POR",
   };
 
   const handleUpgrade = async (planKey: SubscriptionPlan) => {
