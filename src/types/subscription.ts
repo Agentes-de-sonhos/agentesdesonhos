@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium';
+export type SubscriptionPlan = 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional';
 
 export interface Subscription {
   id: string;
@@ -24,13 +24,17 @@ export type Feature =
   | 'financial'
   // Cartão Digital Pass feature
   | 'business_card'
-  // Profissional features
-  | 'ai_tools'
+  // Features available in Essencial (some with daily limits)
+  | 'qa_forum'
+  | 'qa_comment'
+  | 'itinerary'
   | 'quote_generator'
+  | 'flight_blocks'
+  // Profissional-only features
+  | 'ai_tools'
   | 'trip_wallet'
   | 'reminders'
   | 'trainings_live'
-  // Premium features
   | 'ai_unlimited'
   | 'trails_premium'
   | 'certificates'
@@ -38,7 +42,7 @@ export type Feature =
   | 'premium_group'
   | 'fam_tours'
   | 'community'
-  | 'qa_forum';
+  | 'content_creator';
 
 export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   educa_pass: [
@@ -55,6 +59,11 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'crm_basic',
     'trainings_recorded',
     'financial',
+    'business_card',
+    'flight_blocks',
+    'qa_forum',
+    'itinerary',
+    'quote_generator',
   ],
   profissional: [
     'news',
@@ -64,22 +73,13 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'crm_basic',
     'trainings_recorded',
     'financial',
-    'ai_tools',
+    'business_card',
+    'flight_blocks',
+    'qa_forum',
+    'qa_comment',
+    'itinerary',
     'quote_generator',
-    'trip_wallet',
-    'reminders',
-    'trainings_live',
-  ],
-  premium: [
-    'news',
-    'tourism_map',
-    'materials',
-    'agenda',
-    'crm_basic',
-    'trainings_recorded',
-    'financial',
     'ai_tools',
-    'quote_generator',
     'trip_wallet',
     'reminders',
     'trainings_live',
@@ -90,7 +90,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
     'premium_group',
     'fam_tours',
     'community',
-    'qa_forum',
+    'content_creator',
   ],
 };
 
@@ -99,23 +99,20 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   cartao_digital: 'Cartão Digital Pass',
   essencial: 'Essencial',
   profissional: 'Plano Fundador',
-  premium: 'Premium',
 };
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   educa_pass: 'Acesso gratuito à EducaTravel Academy',
   cartao_digital: 'Acesso exclusivo ao Cartão de Visita Digital',
-  essencial: 'Acesso básico às notícias, mapa do turismo, materiais e CRM',
+  essencial: 'Acesso básico com dashboard, materiais, agenda, roteiros e orçamentos limitados',
   profissional: 'Acesso completo ao Agentes de Sonhos por R$ 85,90/mês',
-  premium: 'Acesso completo com trilhas premium, certificados e benefícios exclusivos',
 };
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   educa_pass: 0,
   cartao_digital: 0,
   essencial: 0,
-  profissional: 20,
-  premium: 1000,
+  profissional: 1000,
 };
 
 export const FEATURE_LABELS: Record<Feature, string> = {
@@ -126,8 +123,12 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   crm_basic: 'CRM Básico',
   trainings_recorded: 'Treinamentos Gravados',
   business_card: 'Cartão de Visita Digital',
-  ai_tools: 'Ferramentas IA',
+  flight_blocks: 'Bloqueios Aéreos',
+  qa_forum: 'Perguntas e Respostas (visualizar)',
+  qa_comment: 'Perguntas e Respostas (comentar)',
+  itinerary: 'Criação de Roteiros',
   quote_generator: 'Gerador de Orçamentos',
+  ai_tools: 'Ferramentas IA',
   trip_wallet: 'Carteira Digital',
   reminders: 'Lembretes Automáticos',
   financial: 'Módulo Financeiro',
@@ -139,7 +140,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   ranking: 'Ranking de Engajamento',
   premium_group: 'Grupo Premium',
   fam_tours: 'Fam Tours Exclusivos',
-  qa_forum: 'Perguntas e Respostas',
+  content_creator: 'Criador de Conteúdo',
 };
 
 export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
@@ -149,21 +150,31 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   agenda: 'essencial',
   crm_basic: 'essencial',
   trainings_recorded: 'educa_pass',
-  business_card: 'cartao_digital',
+  business_card: 'essencial',
   financial: 'essencial',
+  flight_blocks: 'essencial',
+  qa_forum: 'essencial',
+  qa_comment: 'profissional',
+  itinerary: 'essencial',
+  quote_generator: 'essencial',
   ai_tools: 'profissional',
-  quote_generator: 'profissional',
   trip_wallet: 'profissional',
   reminders: 'profissional',
   trainings_live: 'profissional',
-  ai_unlimited: 'premium',
-  trails_premium: 'premium',
-  certificates: 'premium',
-  ranking: 'premium',
-  premium_group: 'premium',
-  fam_tours: 'premium',
-  community: 'premium',
-  qa_forum: 'premium',
+  ai_unlimited: 'profissional',
+  trails_premium: 'profissional',
+  certificates: 'profissional',
+  ranking: 'profissional',
+  premium_group: 'profissional',
+  fam_tours: 'profissional',
+  community: 'profissional',
+  content_creator: 'profissional',
+};
+
+/** Daily usage limits for Essencial plan (profissional has unlimited) */
+export const ESSENCIAL_DAILY_LIMITS: Partial<Record<Feature, number>> = {
+  itinerary: 1,
+  quote_generator: 1,
 };
 
 // Launch date for countdown
