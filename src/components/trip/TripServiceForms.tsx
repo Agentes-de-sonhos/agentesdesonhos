@@ -1431,11 +1431,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === RETIRADA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Dados de Retirada</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📍 Dados de Retirada">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_location" render={({ field }) => (
             <FormItem><FormLabel>Local de Retirada *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
