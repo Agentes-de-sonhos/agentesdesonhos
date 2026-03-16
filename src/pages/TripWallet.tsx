@@ -1,3 +1,4 @@
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -42,6 +43,14 @@ const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
 };
 
 export default function TripWallet() {
+  return (
+    <SubscriptionGuard feature="trip_wallet">
+      <TripWalletContent />
+    </SubscriptionGuard>
+  );
+}
+
+function TripWalletContent() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();

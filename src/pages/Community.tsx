@@ -1,3 +1,4 @@
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
@@ -12,6 +13,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Users } from "lucide-react";
 
 export default function Community() {
+  return (
+    <SubscriptionGuard feature="community">
+      <CommunityContent />
+    </SubscriptionGuard>
+  );
+}
+
+function CommunityContent() {
   const {
     famTrips,
     upcomingMeetings,

@@ -147,7 +147,7 @@ const clientesSection: MenuSection = {
   borderColor: "border-cyan-600",
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
-    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet },
+    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
   ],
 };
 
@@ -166,7 +166,7 @@ const marketingSection: MenuSection = {
   ],
 };
 
-const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart };
+const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart, requiredFeature: "community" };
 const mentoriasItem: MenuItem = { title: "Cursos e Mentorias", url: "/mentorias", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
