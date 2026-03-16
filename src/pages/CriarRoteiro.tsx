@@ -248,7 +248,16 @@ export default function CriarRoteiro() {
               <TabsTrigger value="list">Meus Roteiros</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="create" className="mt-6">
+            <TabsContent value="create" className="mt-6 space-y-4">
+              {hasLimit && (
+                <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateItinerary ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
+                  {canCreateItinerary ? (
+                    <><Wand2 className="h-4 w-4" /> Você pode criar mais {itinerariesRemaining} roteiro(s) hoje.</>
+                  ) : (
+                    <><Lock className="h-4 w-4" /> Limite diário atingido. Faça upgrade para o Plano Fundador para roteiros ilimitados.</>
+                  )}
+                </div>
+              )}
               <Card className="max-w-lg">
                 <CardHeader>
                   <CardTitle>Novo Roteiro de Viagem</CardTitle>
