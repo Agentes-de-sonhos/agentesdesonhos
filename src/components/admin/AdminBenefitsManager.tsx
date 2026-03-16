@@ -140,6 +140,7 @@ export function AdminBenefitsManager() {
     setEditingId(b.id);
     setForm({
       company_name: b.company_name || "",
+      company_logo_url: b.company_logo_url || null,
       category: b.category || "",
       title: b.title || "",
       short_description: b.short_description || "",
