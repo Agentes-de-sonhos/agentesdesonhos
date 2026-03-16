@@ -1468,11 +1468,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Link Google Maps (Retirada)</FormLabel><FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === DEVOLUÇÃO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🔁 Dados de Devolução</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🔁 Dados de Devolução">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="dropoff_location" render={({ field }) => (
             <FormItem><FormLabel>Local de Devolução *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
