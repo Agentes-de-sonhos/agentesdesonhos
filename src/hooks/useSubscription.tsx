@@ -10,6 +10,7 @@ import {
   REQUIRED_PLAN_FOR_FEATURE,
   PLAN_LABELS
 } from "@/types/subscription";
+import { useUserRole } from "./useUserRole";
 
 interface SubscriptionContextType {
   subscription: Subscription | null;
