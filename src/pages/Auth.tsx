@@ -509,13 +509,6 @@ export default function Auth() {
             </div>
           )}
 
-          {/* Password Signup view - Now uses MultiStepSignup */}
-          {view === "password-signup" && (
-            <MultiStepSignup
-              onComplete={() => setSignupSuccess(true)}
-              onCancel={() => setView("password-login")}
-            />
-          )}
         </CardContent>
         
         {/* Footer branding */}
