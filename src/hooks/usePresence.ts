@@ -90,7 +90,7 @@ export function usePresence() {
         .from("subscriptions")
         .select("user_id")
         .in("user_id", userIds)
-        .eq("plan", "premium")
+        .eq("plan", "profissional")
         .eq("is_active", true);
 
       const premiumIds = new Set(subs?.map((s) => s.user_id) || []);

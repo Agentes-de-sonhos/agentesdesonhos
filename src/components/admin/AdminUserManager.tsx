@@ -65,7 +65,7 @@ interface UserWithDetails {
   state: string | null;
   created_at: string;
   role: "admin" | "agente";
-  plan: "essencial" | "profissional" | "premium";
+  plan: "essencial" | "profissional";
   is_active: boolean;
 }
 
@@ -114,7 +114,7 @@ export function AdminUserManager() {
           state: profile.state,
           created_at: profile.created_at,
           role: (userRole?.role as "admin" | "agente") || "agente",
-          plan: (userSub?.plan as "essencial" | "profissional" | "premium") || "essencial",
+          plan: (userSub?.plan as "essencial" | "profissional") || "essencial",
           is_active: userSub?.is_active ?? true,
         } as UserWithDetails;
       });
@@ -139,7 +139,7 @@ export function AdminUserManager() {
   });
 
   const updatePlanMutation = useMutation({
-    mutationFn: async ({ userId, plan }: { userId: string; plan: "essencial" | "profissional" | "premium" }) => {
+    mutationFn: async ({ userId, plan }: { userId: string; plan: "essencial" | "profissional" }) => {
       const { error } = await supabase
         .from("subscriptions")
         .update({ plan })
@@ -250,7 +250,6 @@ export function AdminUserManager() {
     admins: users.filter((u) => u.role === "admin").length,
     essencial: users.filter((u) => u.plan === "essencial").length,
     profissional: users.filter((u) => u.plan === "profissional").length,
-    premium: users.filter((u) => u.plan === "premium").length,
   };
 
   const planColors: Record<string, string> = {
@@ -258,7 +257,6 @@ export function AdminUserManager() {
     cartao_digital: "bg-teal-500",
     essencial: "bg-muted-foreground",
     profissional: "bg-primary",
-    premium: "bg-accent",
   };
 
   return (
@@ -296,11 +294,7 @@ export function AdminUserManager() {
           </div>
           <div className="text-center p-3 bg-primary/10 rounded-lg">
             <p className="text-2xl font-bold">{stats.profissional}</p>
-            <p className="text-xs text-muted-foreground">Profissional</p>
-          </div>
-          <div className="text-center p-3 bg-accent/20 rounded-lg">
-            <p className="text-2xl font-bold">{stats.premium}</p>
-            <p className="text-xs text-muted-foreground">Premium</p>
+            <p className="text-xs text-muted-foreground">Plano Fundador</p>
           </div>
         </div>
 
@@ -332,8 +326,7 @@ export function AdminUserManager() {
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="essencial">Essencial</SelectItem>
-              <SelectItem value="profissional">Profissional</SelectItem>
-              <SelectItem value="premium">Premium</SelectItem>
+              <SelectItem value="profissional">Plano Fundador</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -485,8 +478,7 @@ export function AdminUserManager() {
                     <SelectItem value="educa_pass">Educa Travel Pass</SelectItem>
                     <SelectItem value="cartao_digital">Cartão Digital Pass</SelectItem>
                     <SelectItem value="essencial">Essencial</SelectItem>
-                    <SelectItem value="profissional">Profissional</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="profissional">Plano Fundador</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -500,7 +492,7 @@ export function AdminUserManager() {
                   if (editingUser) {
                     updatePlanMutation.mutate({
                       userId: editingUser.user_id,
-                      plan: selectedPlan as "essencial" | "profissional" | "premium",
+                      plan: selectedPlan as "essencial" | "profissional",
                     });
                   }
                 }}
@@ -581,8 +573,7 @@ export function AdminUserManager() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="essencial">Essencial</SelectItem>
-                      <SelectItem value="profissional">Profissional</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
+                      <SelectItem value="profissional">Plano Fundador</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

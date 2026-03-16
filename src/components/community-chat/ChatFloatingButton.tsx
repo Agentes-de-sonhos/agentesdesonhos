@@ -66,7 +66,7 @@ export function ChatFloatingButton() {
     return () => window.removeEventListener("start-dm", handler);
   }, [handleAgentChat]);
 
-  if (plan !== "premium") return null;
+  if (plan !== "profissional") return null;
 
   const openRoom = (room: CommunityRoom) => {
     setActiveRoomId(room.id);

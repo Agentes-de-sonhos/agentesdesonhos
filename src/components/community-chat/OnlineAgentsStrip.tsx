@@ -25,7 +25,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
     }
   };
 
-  if (plan !== "premium") return null;
+  if (plan !== "profissional") return null;
 
   return (
     <div className="flex items-center gap-3 bg-card rounded-xl px-4 py-2.5 border border-border shadow-sm">

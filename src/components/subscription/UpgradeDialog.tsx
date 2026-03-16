@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Crown, Lock, Sparkles, Star, Loader2 } from "lucide-react";
+import { Check, Lock, Sparkles, Star, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,6 @@ const PLAN_ICONS: Record<SubscriptionPlan, React.ReactNode> = {
   cartao_digital: <Star className="h-5 w-5" />,
   essencial: <Star className="h-5 w-5" />,
   profissional: <Sparkles className="h-5 w-5" />,
-  premium: <Crown className="h-5 w-5" />,
 };
 
 const PLAN_COLORS: Record<SubscriptionPlan, string> = {
@@ -44,7 +43,6 @@ const PLAN_COLORS: Record<SubscriptionPlan, string> = {
   cartao_digital: "border-muted bg-card",
   essencial: "border-muted bg-card",
   profissional: "border-primary/50 bg-primary/5",
-  premium: "border-amber-500 bg-amber-50 dark:bg-amber-950/20",
 };
 
 const PLAN_BADGE_COLORS: Record<SubscriptionPlan, string> = {
@@ -52,10 +50,9 @@ const PLAN_BADGE_COLORS: Record<SubscriptionPlan, string> = {
   cartao_digital: "bg-muted text-muted-foreground",
   essencial: "bg-muted text-muted-foreground",
   profissional: "bg-primary text-primary-foreground",
-  premium: "bg-gradient-to-r from-amber-500 to-orange-500 text-white",
 };
 
-const plans: SubscriptionPlan[] = ["essencial", "profissional", "premium"];
+const plans: SubscriptionPlan[] = ["essencial", "profissional"];
 
 export function UpgradeDialog({
   open,
@@ -117,7 +114,7 @@ export function UpgradeDialog({
           <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 md:grid-cols-3 mt-4">
+        <div className="grid gap-4 md:grid-cols-2 mt-4">
           {plans.map((planKey) => {
             const isCurrentPlan = planKey === currentPlan;
             const isPlanHigher = plans.indexOf(planKey) > plans.indexOf(currentPlan);

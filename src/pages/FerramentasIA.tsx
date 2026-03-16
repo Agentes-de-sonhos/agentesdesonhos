@@ -28,9 +28,8 @@ export default function FerramentasIA() {
   const { canUseAI, aiUsageRemaining, aiLimit, plan } = useSubscription();
 
   return (
-    <SubscriptionGuard feature="ai_tools">
-      <DashboardLayout>
-        <div className="space-y-8 animate-fade-in">
+    <DashboardLayout>
+      <div className="space-y-8 animate-fade-in">
           {/* Header */}
           <div className="text-center max-w-2xl mx-auto">
             <div className="flex justify-center mb-4">
@@ -47,7 +46,7 @@ export default function FerramentasIA() {
           </div>
 
           {/* AI Usage Indicator */}
-          {plan !== "premium" && (
+          {plan !== "profissional" && (
             <div className="max-w-md mx-auto p-4 rounded-xl bg-muted/50 border">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground flex items-center gap-2">
@@ -117,8 +116,7 @@ export default function FerramentasIA() {
           <p className="text-center text-sm text-muted-foreground max-w-lg mx-auto">
             Outras ferramentas como Orçamentos e Carteira Digital estão disponíveis no menu principal.
           </p>
-        </div>
-      </DashboardLayout>
-    </SubscriptionGuard>
+      </div>
+    </DashboardLayout>
   );
 }
