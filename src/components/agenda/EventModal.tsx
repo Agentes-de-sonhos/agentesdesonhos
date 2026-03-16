@@ -139,13 +139,16 @@ export function EventModal({
       }
     }
 
-    const eventData = {
+    const eventData: any = {
       title: title.trim(),
       description: description.trim() || null,
       event_type: eventType,
       event_date: selectedDate,
       event_time: eventTime || null,
       color,
+      location_city: locationCity.trim() || null,
+      location_address: locationAddress.trim() || null,
+      event_url: eventUrl.trim() || null,
     };
 
     if (isEditing && event && onUpdate) {
