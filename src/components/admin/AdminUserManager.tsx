@@ -424,7 +424,6 @@ export function AdminUserManager() {
                     <TableCell className="text-sm text-muted-foreground">
                       {user.phone || "-"}
                     </TableCell>
-                    </TableCell>
                     <TableCell>
                     </TableCell>
                     <TableCell>
