@@ -64,7 +64,8 @@ import { ClientProfile } from "./ClientProfile";
 import type { Client, ClientStatus } from "@/types/crm";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
 import { cn } from "@/lib/utils";
-
+import { ImportContactsDialog } from "./ImportContactsDialog";
+import { useQueryClient } from "@tanstack/react-query";
 const clientSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
