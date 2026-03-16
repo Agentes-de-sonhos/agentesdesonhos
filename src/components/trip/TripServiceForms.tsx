@@ -2513,11 +2513,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        {/* === CÓDIGOS DO INGRESSO === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📱 Códigos do Ingresso</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📱 Códigos do Ingresso">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="ticket_code" render={({ field }) => (
