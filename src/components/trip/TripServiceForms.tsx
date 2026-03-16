@@ -416,11 +416,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           <Plus className="h-4 w-4 mr-2" /> Adicionar Trecho de Voo
         </Button>
 
-        {/* === PASSAGEIROS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Passageiros</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👤 Passageiros">
 
         {passengers.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
