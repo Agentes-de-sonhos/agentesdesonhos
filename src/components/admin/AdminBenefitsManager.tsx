@@ -121,7 +121,7 @@ export function AdminBenefitsManager() {
       toast.success("Benefício excluído");
       queryClient.invalidateQueries({ queryKey: ["admin-benefits"] });
       queryClient.invalidateQueries({ queryKey: ["benefits"] });
-      setDeleteId(null);
+      
     },
     onError: () => toast.error("Erro ao excluir"),
   });
