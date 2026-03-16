@@ -619,6 +619,54 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Depoimentos ────────────────────────────────────────── */}
+      <section className="py-[100px] md:py-[120px] scroll-mt-20" style={{ backgroundColor: "hsl(210 20% 97%)" }}>
+        <div className={cn(sectionContainer, "max-w-3xl space-y-12")}>
+          <Reveal>
+            <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold text-center tracking-[-0.02em]">
+              O que dizem sobre nós
+            </h2>
+          </Reveal>
+
+          <Reveal delay={100}>
+            <Card className="rounded-2xl border-[hsl(var(--foreground)/0.06)] bg-card shadow-[0_8px_30px_hsl(var(--foreground)/0.06)] overflow-hidden">
+              <CardContent className="p-8 md:p-10">
+                <div className="flex flex-col items-center text-center space-y-6">
+                  {/* Avatar circular */}
+                  <div className="relative">
+                    <div className="h-28 w-28 rounded-full overflow-hidden ring-4 ring-primary/10 shadow-[0_8px_24px_hsl(var(--primary)/0.12)]">
+                      <img
+                        src={testimonialDavid}
+                        alt="David Leslie Benveniste"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Ícone de aspas */}
+                  <Quote className="h-8 w-8 text-primary/20" />
+
+                  {/* Depoimento */}
+                  <blockquote className="text-[15px] md:text-base text-muted-foreground leading-[1.85] font-[450] max-w-2xl italic">
+                    Gostaria de parabenizar o meu muito especial amigo Fernando Nobre, um dos mais respeitados profissionais da nossa indústria de turismo que, com uma incrível visão inovadora, vem nos brindar com uma sofisticada ferramenta de trabalho, dedicada exclusivamente aos <span className="font-semibold text-foreground">Agentes de Viagens</span>.
+                    <br /><br />
+                    O seu novo portal conjuga, de forma fácil e extremamente inteligente, processos que nos oferecem uma profunda familiarização com os mais exclusivos destinos turísticos do planeta, com uma plataforma multifacetada, de altíssima tecnologia (incluindo o uso de IA avançada) que permitem uma eficiente ajuda no atendimento e na coordenação das viagens dos nossos clientes.
+                    <br /><br />
+                    Obrigado ao Fernando e, mais uma vez, parabéns pela importantíssima iniciativa!
+                  </blockquote>
+
+                  {/* Autor */}
+                  <div className="pt-2 space-y-1">
+                    <p className="font-bold text-foreground text-[15px] tracking-[-0.01em]">David Leslie Benveniste</p>
+                    <p className="text-sm text-muted-foreground">CBS Marketing Services</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ── FAQ ────────────────────────────────────────────────── */}
       <section id="faq" className="py-[100px] md:py-[120px] scroll-mt-20">
         <div className={cn(sectionContainer, "max-w-2xl space-y-12")}>
