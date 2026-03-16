@@ -3175,11 +3175,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        {/* === DICAS DA AGÊNCIA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧠 Dicas da Agência</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🧠 Dicas da Agência">
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
