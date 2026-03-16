@@ -68,8 +68,13 @@ export default function CriarRoteiro() {
   };
 
   const handleCreateItinerary = async (data: ItineraryFormData) => {
+    if (!canCreateItinerary) {
+      toast.error("Limite diário atingido. Faça upgrade para o Plano Fundador para criar roteiros ilimitados.");
+      return;
+    }
     setIsGenerating(true);
     setFormData(data);
+    await incrementUsage();
 
     try {
       // Create itinerary record
