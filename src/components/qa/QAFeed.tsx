@@ -325,6 +325,7 @@ export function QAFeed() {
               isSubmitting={createAnswer.isPending}
               getAnswersQuery={getAnswersQuery}
               onToggleLike={(answerId: string) => toggleAnswerLike.mutate({ answerId, questionId: q.id })}
+              canComment={canComment}
             />
           ))}
         </div>
