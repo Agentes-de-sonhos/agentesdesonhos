@@ -139,7 +139,7 @@ export function AdminUserManager() {
   });
 
   const updatePlanMutation = useMutation({
-    mutationFn: async ({ userId, plan }: { userId: string; plan: "essencial" | "profissional" | "premium" }) => {
+    mutationFn: async ({ userId, plan }: { userId: string; plan: "essencial" | "profissional" }) => {
       const { error } = await supabase
         .from("subscriptions")
         .update({ plan })
