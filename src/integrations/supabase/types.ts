@@ -1040,6 +1040,33 @@ export type Database = {
           },
         ]
       }
+      daily_feature_usage: {
+        Row: {
+          created_at: string
+          feature: string
+          id: string
+          usage_count: number
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature: string
+          id?: string
+          usage_count?: number
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feature?: string
+          id?: string
+          usage_count?: number
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dashboard_banners: {
         Row: {
           button_link: string | null
