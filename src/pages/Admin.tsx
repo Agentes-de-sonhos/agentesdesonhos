@@ -314,6 +314,10 @@ export default function Admin() {
               <AdminCrmLogs />
             </div>
           </TabsContent>
+
+          <TabsContent value="benefits">
+            <AdminBenefitsManager />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
