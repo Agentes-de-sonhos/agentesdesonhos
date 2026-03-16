@@ -2611,11 +2611,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </Button>
         </div>
 
-        {/* === REGRAS E POLÍTICAS === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📌 Regras e Políticas</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📌 Regras e Políticas">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
