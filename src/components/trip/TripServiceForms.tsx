@@ -3533,11 +3533,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </FormItem>
         )} />
 
-        {/* === PASSAGEIROS === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👥 Passageiros</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👥 Passageiros">
 
         <div className="space-y-2">
           {passengers.map((p, i) => (
