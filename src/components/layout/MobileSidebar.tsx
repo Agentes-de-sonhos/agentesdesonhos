@@ -166,7 +166,7 @@ const marketingSection: MenuSection = {
   ],
 };
 
-const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart };
+const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart, requiredFeature: "community" };
 const mentoriasItem: MenuItem = { title: "Cursos e Mentorias", url: "/mentorias", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
