@@ -65,7 +65,7 @@ interface UserWithDetails {
   state: string | null;
   created_at: string;
   role: "admin" | "agente";
-  plan: "essencial" | "profissional" | "premium";
+  plan: "essencial" | "profissional";
   is_active: boolean;
 }
 
