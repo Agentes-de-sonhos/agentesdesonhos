@@ -537,33 +537,40 @@ function QuestionCard({
             )}
 
             {/* Inline reply */}
-            <div className="flex items-start gap-2.5">
-              <Avatar className="h-7 w-7 flex-shrink-0 mt-0.5">
-                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-medium">U</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 flex gap-2">
-                <Textarea
-                  placeholder="Escreva sua resposta..."
-                  value={inlineAnswer}
-                  onChange={(e) => onInlineAnswerChange(e.target.value)}
-                  maxLength={2000}
-                  rows={2}
-                  className="rounded-xl text-xs resize-none border-border/40 flex-1 min-h-[56px] bg-background"
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <Button
-                  size="icon"
-                  className="h-8 w-8 rounded-full flex-shrink-0 mt-auto shadow-sm shadow-primary/20"
-                  disabled={!inlineAnswer.trim() || isSubmitting}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSubmitInlineAnswer();
-                  }}
-                >
-                  <Send className="h-3.5 w-3.5" />
-                </Button>
+            {canComment ? (
+              <div className="flex items-start gap-2.5">
+                <Avatar className="h-7 w-7 flex-shrink-0 mt-0.5">
+                  <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-medium">U</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 flex gap-2">
+                  <Textarea
+                    placeholder="Escreva sua resposta..."
+                    value={inlineAnswer}
+                    onChange={(e) => onInlineAnswerChange(e.target.value)}
+                    maxLength={2000}
+                    rows={2}
+                    className="rounded-xl text-xs resize-none border-border/40 flex-1 min-h-[56px] bg-background"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <Button
+                    size="icon"
+                    className="h-8 w-8 rounded-full flex-shrink-0 mt-auto shadow-sm shadow-primary/20"
+                    disabled={!inlineAnswer.trim() || isSubmitting}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSubmitInlineAnswer();
+                    }}
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 text-xs text-muted-foreground">
+                <Lock className="h-3.5 w-3.5" />
+                <span>Faça upgrade para o Plano Fundador para responder.</span>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
