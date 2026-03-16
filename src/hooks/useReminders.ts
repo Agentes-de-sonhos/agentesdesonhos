@@ -114,8 +114,18 @@ export function useReminders() {
     return { ...reminder, daysRemaining };
   });
 
+  // Group by trip and keep only the nearest (first) reminder per trip
+  const nextReminderPerTrip = (() => {
+    const seen = new Set<string>();
+    return remindersWithDays.filter((r) => {
+      if (seen.has(r.trip_id)) return false;
+      seen.add(r.trip_id);
+      return true;
+    });
+  })();
+
   return {
-    reminders: remindersWithDays,
+    reminders: nextReminderPerTrip,
     allReminders,
     isLoading,
     isLoadingAll,
