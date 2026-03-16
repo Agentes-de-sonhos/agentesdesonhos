@@ -245,21 +245,22 @@ export function EventModal({
               {event?.description && (
                 <p className="text-sm text-muted-foreground">{event.description}</p>
               )}
-              <div className="flex gap-2 justify-center">
-                <Button variant="outline" size="sm" onClick={handleGoogleCalendar}>
-                  <CalendarPlus className="h-4 w-4 mr-1.5" />
+              <div className="flex gap-1.5 justify-center">
+                <Button variant="outline" size="sm" className="text-xs px-2.5 h-8" onClick={handleGoogleCalendar}>
+                  <CalendarPlus className="h-3.5 w-3.5 mr-1" />
                   Google Calendar
                 </Button>
                 <Button
                   variant={isHighlighted ? "secondary" : "outline"}
                   size="sm"
+                  className="text-xs px-2.5 h-8"
                   onClick={handleToggleHighlight}
                 >
-                  <Star className={`h-4 w-4 mr-1.5 ${isHighlighted ? "fill-yellow-400 text-yellow-400" : ""}`} />
-                  {isHighlighted ? "Destacado" : "Destacar no Dashboard"}
+                  <Star className={`h-3.5 w-3.5 mr-1 ${isHighlighted ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                  {isHighlighted ? "Destacado" : "Destacar"}
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleHide}>
-                  <EyeOff className="h-4 w-4 mr-1.5" />
+                <Button variant="outline" size="sm" className="text-xs px-2.5 h-8" onClick={handleHide}>
+                  <EyeOff className="h-3.5 w-3.5 mr-1" />
                   Ocultar
                 </Button>
               </div>
