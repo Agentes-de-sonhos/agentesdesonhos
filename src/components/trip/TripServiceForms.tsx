@@ -2038,11 +2038,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           </>
         )}
 
-        {/* === LOCAIS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Locais de Embarque e Desembarque</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="📍 Locais de Embarque e Desembarque">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_address" render={({ field }) => (
             <FormItem><FormLabel>Endereço de Embarque</FormLabel><FormControl><Input placeholder="Endereço completo" {...field} /></FormControl></FormItem>
