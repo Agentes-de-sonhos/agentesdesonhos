@@ -1067,11 +1067,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === O QUE ESTÁ INCLUSO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">💰 O que está incluso</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="💰 O que está incluso">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="breakfast_included" render={({ field }) => (
