@@ -6,8 +6,17 @@ import { ClientsModule } from "@/components/crm/ClientsModule";
 import { KanbanBoard } from "@/components/crm/KanbanBoard";
 import { SalesGoalsModule } from "@/components/crm/SalesGoalsModule";
 import { useLocation, useNavigate } from "react-router-dom";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
 export default function GestaoClientes() {
+  return (
+    <SubscriptionGuard feature="crm_basic">
+      <GestaoClientesContent />
+    </SubscriptionGuard>
+  );
+}
+
+function GestaoClientesContent() {
   const location = useLocation();
   const navigate = useNavigate();
   
