@@ -481,11 +481,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </FormItem>
         )} />
 
-        {/* === CHECK-IN === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✅ Check-in Online</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="✅ Check-in Online">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="checkin_url" render={({ field }) => (
