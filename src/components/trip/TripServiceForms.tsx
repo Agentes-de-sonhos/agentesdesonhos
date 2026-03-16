@@ -4149,6 +4149,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
+        </CollapsibleFormSection>
+
         {/* === CHIP / INTERNET (CONDICIONAL) === */}
         {isChip && (
           <>
