@@ -26,6 +26,8 @@ type SortMode = "recent" | "most_answered" | "unanswered";
 
 export function QAFeed() {
   const { user } = useAuth();
+  const { hasFeature } = useSubscription();
+  const canComment = hasFeature("qa_comment");
   const { questions, isLoading, selectedCategory, setSelectedCategory, createQuestion, createAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState(() => sessionStorage.getItem("qa_draft_title") || "");
