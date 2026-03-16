@@ -49,7 +49,7 @@ export function AdminRegistrationLinksManager() {
       if (newLink.expires_at) {
         payload.expires_at = new Date(newLink.expires_at).toISOString();
       }
-      const { error } = await supabase.from("registration_links").insert(payload);
+      const { error } = await supabase.from("registration_links").insert([payload as any]);
       if (error) throw error;
     },
     onSuccess: () => {

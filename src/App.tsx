@@ -57,6 +57,7 @@ import AtivarCartao from "./pages/AtivarCartao";
 import PoliticasPrivacidade from "./pages/PoliticasPrivacidade";
 import TermosDeUso from "./pages/TermosDeUso";
 import Atualizacoes from "./pages/Atualizacoes";
+import CadastroLink from "./pages/CadastroLink";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 
 const queryClient = new QueryClient();
