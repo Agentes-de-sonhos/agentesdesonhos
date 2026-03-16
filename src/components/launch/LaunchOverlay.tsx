@@ -6,7 +6,7 @@ import { ExternalLink } from "lucide-react";
 const MEETING_START = new Date("2026-03-16T13:30:00Z"); // 10:30 BRT
 const PLATFORM_UNLOCK = new Date("2026-03-16T14:30:00Z"); // 11:30 BRT
 
-const MEET_LINK = "https://meet.google.com/INSERIR-LINK-AQUI";
+const MEET_LINK = "https://meet.google.com/pan-stpm-zwp";
 
 type Phase = "countdown" | "live" | "unlocked";
 
