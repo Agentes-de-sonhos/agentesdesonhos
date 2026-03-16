@@ -45,10 +45,10 @@ export function BenefitDetailDialog({
         <DialogHeader>
           <div className="flex items-center gap-3">
             {benefit.company_logo_url ? (
-              <img src={benefit.company_logo_url} alt={benefit.company_name} className="h-12 w-12 rounded-lg object-contain bg-muted p-1" />
+              <img src={benefit.company_logo_url} alt={benefit.company_name} className="h-24 w-24 rounded-lg object-contain bg-muted p-1" />
             ) : (
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-primary" />
+              <div className="h-24 w-24 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Building2 className="h-12 w-12 text-primary" />
               </div>
             )}
             <div>
