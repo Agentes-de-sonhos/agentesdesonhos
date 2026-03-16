@@ -62,12 +62,6 @@ export default function TripWallet() {
   const [newPassword, setNewPassword] = useState("");
   const [isEditingTrip, setIsEditingTrip] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  // Auto-enable edit mode from URL query param
-  useEffect(() => {
-    if (searchParams.get("edit") === "true" && trip) {
-      setIsEditingTrip(true);
-    }
-  }, [searchParams, trip]);
 
   useEffect(() => {
     if (user?.id) {
