@@ -4,7 +4,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock } from "lucide-react";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { ServiceList } from "@/components/quote/ServiceCard";
@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAgentProfile, AgentProfile } from "@/hooks/useAgentProfile";
+import { useDailyLimit } from "@/hooks/useDailyLimit";
 import type { ServiceType, QuoteFormData, ServiceData } from "@/types/quote";
 import { SERVICE_TYPE_LABELS } from "@/types/quote";
 
@@ -25,6 +26,7 @@ export default function GerarOrcamento() {
   const { user } = useAuth();
   const { createQuote, isCreating, publishQuote, isPublishing } = useQuotes();
   const { quote, addService, deleteService, isAddingService } = useQuote(id);
+  const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
   
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
@@ -37,6 +39,11 @@ export default function GerarOrcamento() {
   }, [user?.id]);
 
   const handleCreateQuote = async (data: QuoteFormData) => {
+    if (!canCreateQuote) {
+      toast({ title: "Limite diário atingido", description: "Você já criou seu orçamento de hoje. Faça upgrade para o Plano Fundador para criar orçamentos ilimitados.", variant: "destructive" });
+      return;
+    }
+    await incrementUsage();
     const newQuote = await createQuote(data);
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
   };
@@ -69,6 +76,15 @@ export default function GerarOrcamento() {
             <h1 className="font-display text-2xl font-bold">Gerar Orçamento</h1>
             <p className="text-muted-foreground">Crie um orçamento profissional para seu cliente</p>
           </div>
+          {hasLimit && (
+            <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateQuote ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
+              {canCreateQuote ? (
+                <><FileText className="h-4 w-4" /> Você pode criar mais {quotesRemaining} orçamento(s) hoje.</>
+              ) : (
+                <><Lock className="h-4 w-4" /> Limite diário atingido. Faça upgrade para o Plano Fundador para orçamentos ilimitados.</>
+              )}
+            </div>
+          )}
           <Card className="max-w-2xl">
             <CardHeader><CardTitle>Informações do Cliente</CardTitle></CardHeader>
             <CardContent>

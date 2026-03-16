@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQA, QA_CATEGORIES } from "@/hooks/useQA";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, CheckCircle2, Star, Send, Heart } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Star, Send, Heart, Lock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,8 @@ interface Props {
 
 export function QAQuestionDetail({ questionId, onBack }: Props) {
   const { user } = useAuth();
+  const { hasFeature } = useSubscription();
+  const canComment = hasFeature("qa_comment");
   const { createAnswer, markBestAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
   const [newAnswer, setNewAnswer] = useState(() => sessionStorage.getItem(`qa_answer_draft_${questionId}`) || "");
 
@@ -236,27 +239,36 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
       </div>
 
       {/* New answer form */}
-      <Card>
-        <CardContent className="py-4">
-          <h4 className="text-sm font-medium mb-2">Sua Resposta (+4 pontos)</h4>
-          <Textarea
-            placeholder="Escreva sua resposta para ajudar o colega..."
-            value={newAnswer}
-            onChange={(e) => setNewAnswer(e.target.value)}
-            maxLength={2000}
-            rows={3}
-          />
-          <Button
-            onClick={handleSubmitAnswer}
-            disabled={!newAnswer.trim() || createAnswer.isPending}
-            className="mt-3 gap-2"
-            size="sm"
-          >
-            <Send className="h-4 w-4" />
-            {createAnswer.isPending ? "Enviando..." : "Responder"}
-          </Button>
-        </CardContent>
-      </Card>
+      {canComment ? (
+        <Card>
+          <CardContent className="py-4">
+            <h4 className="text-sm font-medium mb-2">Sua Resposta (+4 pontos)</h4>
+            <Textarea
+              placeholder="Escreva sua resposta para ajudar o colega..."
+              value={newAnswer}
+              onChange={(e) => setNewAnswer(e.target.value)}
+              maxLength={2000}
+              rows={3}
+            />
+            <Button
+              onClick={handleSubmitAnswer}
+              disabled={!newAnswer.trim() || createAnswer.isPending}
+              className="mt-3 gap-2"
+              size="sm"
+            >
+              <Send className="h-4 w-4" />
+              {createAnswer.isPending ? "Enviando..." : "Responder"}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="h-4 w-4" />
+            <span>Faça upgrade para o <strong>Plano Fundador</strong> para responder perguntas.</span>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

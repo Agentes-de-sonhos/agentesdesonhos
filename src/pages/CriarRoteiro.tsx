@@ -7,9 +7,10 @@ import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
 import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
 import { useItineraries } from "@/hooks/useItineraries";
+import { useDailyLimit } from "@/hooks/useDailyLimit";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { toast } from "sonner";
-import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2 } from "lucide-react";
+import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,6 +49,8 @@ export default function CriarRoteiro() {
     deleteItinerary,
   } = useItineraries();
 
+  const { canUse: canCreateItinerary, remaining: itinerariesRemaining, hasLimit, incrementUsage } = useDailyLimit("itinerary");
+
   useEffect(() => {
     if (id) {
       loadItinerary(id);
@@ -65,8 +68,13 @@ export default function CriarRoteiro() {
   };
 
   const handleCreateItinerary = async (data: ItineraryFormData) => {
+    if (!canCreateItinerary) {
+      toast.error("Limite diário atingido. Faça upgrade para o Plano Fundador para criar roteiros ilimitados.");
+      return;
+    }
     setIsGenerating(true);
     setFormData(data);
+    await incrementUsage();
 
     try {
       // Create itinerary record
@@ -240,7 +248,16 @@ export default function CriarRoteiro() {
               <TabsTrigger value="list">Meus Roteiros</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="create" className="mt-6">
+            <TabsContent value="create" className="mt-6 space-y-4">
+              {hasLimit && (
+                <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateItinerary ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
+                  {canCreateItinerary ? (
+                    <><Wand2 className="h-4 w-4" /> Você pode criar mais {itinerariesRemaining} roteiro(s) hoje.</>
+                  ) : (
+                    <><Lock className="h-4 w-4" /> Limite diário atingido. Faça upgrade para o Plano Fundador para roteiros ilimitados.</>
+                  )}
+                </div>
+              )}
               <Card className="max-w-lg">
                 <CardHeader>
                   <CardTitle>Novo Roteiro de Viagem</CardTitle>

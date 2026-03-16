@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQA, QA_CATEGORIES } from "@/hooks/useQA";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   MessageCircle, CheckCircle2, Filter, Clock, ThumbsUp, Eye,
   ArrowUpDown, ChevronDown, Send, Search, ChevronUp, MessageSquarePlus,
-  AlertCircle, Heart,
+  AlertCircle, Heart, Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
@@ -25,6 +26,8 @@ type SortMode = "recent" | "most_answered" | "unanswered";
 
 export function QAFeed() {
   const { user } = useAuth();
+  const { hasFeature } = useSubscription();
+  const canComment = hasFeature("qa_comment");
   const { questions, isLoading, selectedCategory, setSelectedCategory, createQuestion, createAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState(() => sessionStorage.getItem("qa_draft_title") || "");
@@ -110,7 +113,12 @@ export function QAFeed() {
       {/* ── Compose Box ── */}
       <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden">
         <CardContent className="p-0">
-          {!composeExpanded ? (
+          {!canComment ? (
+            <div className="flex items-center gap-3 p-4 text-sm text-muted-foreground bg-muted/20">
+              <Lock className="h-4 w-4 flex-shrink-0" />
+              <span>Você pode visualizar as perguntas, mas para comentar ou perguntar é necessário o <strong>Plano Fundador</strong>.</span>
+            </div>
+          ) : !composeExpanded ? (
             <button
               onClick={() => setComposeExpanded(true)}
               className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/30 transition-colors"
@@ -317,6 +325,7 @@ export function QAFeed() {
               isSubmitting={createAnswer.isPending}
               getAnswersQuery={getAnswersQuery}
               onToggleLike={(answerId: string) => toggleAnswerLike.mutate({ answerId, questionId: q.id })}
+              canComment={canComment}
             />
           ))}
         </div>
@@ -339,6 +348,7 @@ interface QuestionCardProps {
   isSubmitting: boolean;
   getAnswersQuery: (id: string) => any;
   onToggleLike: (answerId: string) => void;
+  canComment: boolean;
 }
 
 function QuestionCard({
@@ -353,6 +363,7 @@ function QuestionCard({
   isSubmitting,
   getAnswersQuery,
   onToggleLike,
+  canComment,
 }: QuestionCardProps) {
   const { user } = useAuth();
   const answersQuery = useQuery({ ...getAnswersQuery(q.id), enabled: isExpanded });
@@ -526,33 +537,40 @@ function QuestionCard({
             )}
 
             {/* Inline reply */}
-            <div className="flex items-start gap-2.5">
-              <Avatar className="h-7 w-7 flex-shrink-0 mt-0.5">
-                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-medium">U</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 flex gap-2">
-                <Textarea
-                  placeholder="Escreva sua resposta..."
-                  value={inlineAnswer}
-                  onChange={(e) => onInlineAnswerChange(e.target.value)}
-                  maxLength={2000}
-                  rows={2}
-                  className="rounded-xl text-xs resize-none border-border/40 flex-1 min-h-[56px] bg-background"
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <Button
-                  size="icon"
-                  className="h-8 w-8 rounded-full flex-shrink-0 mt-auto shadow-sm shadow-primary/20"
-                  disabled={!inlineAnswer.trim() || isSubmitting}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSubmitInlineAnswer();
-                  }}
-                >
-                  <Send className="h-3.5 w-3.5" />
-                </Button>
+            {canComment ? (
+              <div className="flex items-start gap-2.5">
+                <Avatar className="h-7 w-7 flex-shrink-0 mt-0.5">
+                  <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-medium">U</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 flex gap-2">
+                  <Textarea
+                    placeholder="Escreva sua resposta..."
+                    value={inlineAnswer}
+                    onChange={(e) => onInlineAnswerChange(e.target.value)}
+                    maxLength={2000}
+                    rows={2}
+                    className="rounded-xl text-xs resize-none border-border/40 flex-1 min-h-[56px] bg-background"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <Button
+                    size="icon"
+                    className="h-8 w-8 rounded-full flex-shrink-0 mt-auto shadow-sm shadow-primary/20"
+                    disabled={!inlineAnswer.trim() || isSubmitting}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSubmitInlineAnswer();
+                    }}
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 text-xs text-muted-foreground">
+                <Lock className="h-3.5 w-3.5" />
+                <span>Faça upgrade para o Plano Fundador para responder.</span>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
