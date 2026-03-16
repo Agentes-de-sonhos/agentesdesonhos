@@ -71,6 +71,7 @@ export function AdminBenefitsManager() {
       if (!user?.id) throw new Error("Não autenticado");
       const payload = {
         company_name: form.company_name.trim(),
+        company_logo_url: form.company_logo_url,
         category: form.category,
         title: form.title.trim(),
         short_description: form.short_description.trim() || null,
