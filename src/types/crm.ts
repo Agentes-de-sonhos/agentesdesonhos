@@ -9,6 +9,9 @@ export interface Client {
   status: ClientStatus;
   travel_preferences: string | null;
   internal_notes: string | null;
+  birthday_day: number | null;
+  birthday_month: number | null;
+  birthday_year: number | null;
   last_interaction_at: string;
   created_at: string;
   updated_at: string;

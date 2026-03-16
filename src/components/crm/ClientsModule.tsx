@@ -139,6 +139,9 @@ export function ClientsModule() {
         status: "lead",
         travel_preferences: "",
         internal_notes: "",
+        birthday_day: "",
+        birthday_month: "",
+        birthday_year: "",
       });
     }
     setIsDialogOpen(true);
