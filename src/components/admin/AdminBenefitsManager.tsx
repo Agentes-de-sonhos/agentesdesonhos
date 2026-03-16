@@ -19,6 +19,7 @@ import { BENEFIT_CATEGORIES, BENEFIT_DESTINATIONS } from "@/types/benefits";
 
 interface BenefitForm {
   company_name: string;
+  company_logo_url: string | null;
   category: string;
   title: string;
   short_description: string;
@@ -32,6 +33,7 @@ interface BenefitForm {
 
 const emptyForm: BenefitForm = {
   company_name: "",
+  company_logo_url: null,
   category: "",
   title: "",
   short_description: "",
