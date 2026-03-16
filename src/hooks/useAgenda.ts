@@ -431,27 +431,6 @@ export function useAgenda(year?: number) {
 
   const highlightedEventIds = new Set(highlightedEvents.map((h: any) => h.event_id));
 
-  // Fetch user trips to show in calendar
-  const { data: userTrips = [] } = useQuery({
-    queryKey: ["agenda-trips", user?.id, currentYear],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const startDate = `${currentYear}-01-01`;
-      const endDate = `${currentYear}-12-31`;
-      
-      const { data, error } = await supabase
-        .from("trips")
-        .select("id, client_name, destination, start_date, end_date")
-        .eq("user_id", user.id)
-        .gte("start_date", startDate)
-        .lte("start_date", endDate)
-        .order("start_date", { ascending: true });
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user?.id,
-  });
 
   // Combine all events into a unified format
   const hiddenIds = new Set(hiddenPresetEvents.map(h => h.preset_event_id));
