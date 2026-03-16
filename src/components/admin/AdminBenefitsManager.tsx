@@ -237,6 +237,10 @@ export function AdminBenefitsManager() {
             <DialogTitle>{editingId ? "Editar Benefício" : "Novo Benefício"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-2">
+            <SupplierLogoUpload
+              logoUrl={form.company_logo_url}
+              onLogoChange={(url) => setForm({ ...form, company_logo_url: url })}
+            />
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Empresa *</Label>
