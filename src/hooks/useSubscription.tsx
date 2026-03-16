@@ -118,7 +118,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const aiUsageRemaining = Math.max(0, aiLimit - aiUsageCount);
 
   const hasFeature = useCallback((feature: Feature): boolean => {
-    return PLAN_FEATURES[plan].includes(feature);
+    const features = PLAN_FEATURES[plan];
+    if (!features) return false;
+    return features.includes(feature);
   }, [plan]);
 
   const canUseAI = useCallback((): boolean => {
