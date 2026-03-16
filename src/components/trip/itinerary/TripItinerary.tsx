@@ -84,7 +84,15 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
   const handleAddActivity = async (
     dateStr: string,
     period: Period,
-    data: Parameters<typeof ItineraryActivityForm extends React.FC<infer P> ? P : never>["onSubmit"] extends (d: infer D, f?: File[]) => any ? D : never,
+    data: {
+      title: string;
+      description?: string;
+      start_time?: string;
+      location?: string;
+      notes?: string;
+      linked_service_id?: string | null;
+      photo_urls?: string[];
+    },
     files?: File[]
   ) => {
     let photoUrls: string[] = [...(data.photo_urls || [])];
