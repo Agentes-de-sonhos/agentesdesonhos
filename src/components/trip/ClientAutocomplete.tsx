@@ -52,7 +52,7 @@ interface ClientAutocompleteProps {
   onChange: (value: string) => void;
 }
 
-export function ClientAutocomplete({ value, onChange }: ClientAutocompleteProps) {
+export const ClientAutocomplete = forwardRef<HTMLDivElement, ClientAutocompleteProps>(function ClientAutocomplete({ value, onChange }, _ref) {
   const { clients, createClient, isCreating } = useClients();
   const [query, setQuery] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
