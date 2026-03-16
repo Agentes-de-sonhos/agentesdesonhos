@@ -262,8 +262,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === IMPORTAÇÃO AUTOMÁTICA === */}
-        <FlightAutoImport onImport={handleFlightImport} />
+        {/* FlightAutoImport hidden per user request */}
 
         {/* === RESUMO DO VOO === */}
         <div className="space-y-1">
