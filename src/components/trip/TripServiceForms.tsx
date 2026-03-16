@@ -4002,6 +4002,14 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descrição / Detalhes</FormLabel>
+            <FormControl><Textarea placeholder="Informações adicionais do serviço..." rows={2} {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
         </CollapsibleFormSection>
 
         <CollapsibleFormSection title="📅 Agendamento">
