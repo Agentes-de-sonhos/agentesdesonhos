@@ -182,7 +182,7 @@ const marketingSection: MenuSection = {
   borderColor: "border-pink-600",
   items: [
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
-    { title: "Vitrine Virtual", url: "/minha-vitrine", icon: Store },
+    { title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
   ],
 };
 

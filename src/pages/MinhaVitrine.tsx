@@ -372,9 +372,9 @@ export default function MinhaVitrine() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Store className="h-6 w-6 text-primary" /> Minha Vitrine Virtual
+              <Store className="h-6 w-6 text-primary" /> Minha Vitrine de Ofertas
             </h1>
-            <p className="text-sm text-muted-foreground">Gerencie a sua vitrine virtual profissional.</p>
+            <p className="text-sm text-muted-foreground">Gerencie a sua vitrine de ofertas profissional.</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Link copiado!"); }}>
