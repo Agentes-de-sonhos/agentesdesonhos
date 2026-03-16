@@ -715,7 +715,6 @@ export default function LandingPage() {
       {/* ── Final CTA ──────────────────────────────────────────── */}
       <section
         className="py-[120px] md:py-[140px]"
-        style={{ backgroundColor: "hsl(210 20% 97%)" }}
       >
         <div className={cn(sectionContainer, "max-w-3xl text-center space-y-8")}>
           <Reveal>
