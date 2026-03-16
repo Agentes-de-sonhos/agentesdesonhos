@@ -4970,6 +4970,72 @@ export type Database = {
           },
         ]
       }
+      trip_itinerary_activities: {
+        Row: {
+          created_at: string
+          day_date: string
+          description: string | null
+          id: string
+          linked_service_id: string | null
+          location: string | null
+          notes: string | null
+          order_index: number
+          period: string
+          photo_urls: string[] | null
+          start_time: string | null
+          title: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_date: string
+          description?: string | null
+          id?: string
+          linked_service_id?: string | null
+          location?: string | null
+          notes?: string | null
+          order_index?: number
+          period: string
+          photo_urls?: string[] | null
+          start_time?: string | null
+          title: string
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_date?: string
+          description?: string | null
+          id?: string
+          linked_service_id?: string | null
+          location?: string | null
+          notes?: string | null
+          order_index?: number
+          period?: string
+          photo_urls?: string[] | null
+          start_time?: string | null
+          title?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_itinerary_activities_linked_service_id_fkey"
+            columns: ["linked_service_id"]
+            isOneToOne: false
+            referencedRelation: "trip_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_itinerary_activities_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_reminders: {
         Row: {
           created_at: string
