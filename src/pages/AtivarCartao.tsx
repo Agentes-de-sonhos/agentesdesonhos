@@ -185,7 +185,7 @@ export default function AtivarCartao() {
                 {tokenState === "expired" && "Link de ativação expirado"}
               </CardTitle>
               <CardDescription className="text-base leading-relaxed">
-                {tokenState === "missing" && "Para ativar seu Cartão Digital, utilize o link enviado para seu e-mail após o pagamento."}
+                {tokenState === "missing" && "Para ativar sua conta, utilize o link enviado para seu e-mail após o pagamento."}
                 {tokenState === "invalid" && "Este link de ativação é inválido ou já foi utilizado. Cada link pode ser usado apenas uma vez."}
                 {tokenState === "expired" && "Este link de ativação expirou. Links são válidos por 24 horas após o pagamento. Entre em contato com o suporte para solicitar um novo."}
               </CardDescription>
