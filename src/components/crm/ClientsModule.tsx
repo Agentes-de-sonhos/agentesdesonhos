@@ -299,6 +299,7 @@ export function ClientsModule() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
               <DialogTitle>{editingClient ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
