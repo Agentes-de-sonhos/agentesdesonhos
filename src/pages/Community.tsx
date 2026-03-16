@@ -21,6 +21,7 @@ export default function Community() {
 }
 
 function CommunityContent() {
+  const {
     famTrips,
     upcomingMeetings,
     pastMeetings,
