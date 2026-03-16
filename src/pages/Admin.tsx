@@ -75,9 +75,9 @@ export default function Admin() {
 
       const total = profiles?.length || 0;
       const admins = roles?.filter(r => r.role === "admin").length || 0;
-      const premium = subscriptions?.filter(s => s.plan === "premium").length || 0;
+      const fundadores = subscriptions?.filter(s => s.plan === "profissional").length || 0;
 
-      return { total, admins, premium };
+      return { total, admins, premium: fundadores };
     },
   });
 
