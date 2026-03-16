@@ -219,6 +219,13 @@ export default function Admin() {
               <Mail className="h-4 w-4" />
               <span className="hidden sm:inline">CRM</span>
             </TabsTrigger>
+            <TabsTrigger value="benefits" className="flex items-center gap-2">
+              <Gift className="h-4 w-4" />
+              <span className="hidden sm:inline">Benefícios</span>
+            </TabsTrigger>
+          </TabsList>
+              <span className="hidden sm:inline">CRM</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
