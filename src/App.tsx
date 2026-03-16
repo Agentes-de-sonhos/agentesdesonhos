@@ -57,6 +57,7 @@ import AtivarCartao from "./pages/AtivarCartao";
 import PoliticasPrivacidade from "./pages/PoliticasPrivacidade";
 import TermosDeUso from "./pages/TermosDeUso";
 import Atualizacoes from "./pages/Atualizacoes";
+import CadastroLink from "./pages/CadastroLink";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 
 const queryClient = new QueryClient();
@@ -415,6 +416,7 @@ const App = () => (
               }
             />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
+            <Route path="/cadastro/:token" element={<CadastroLink />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/certificate-test" element={<CertificateTest />} />

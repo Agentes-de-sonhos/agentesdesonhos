@@ -24,6 +24,7 @@ import {
   MessageCircle,
   CreditCard,
   Mail,
+  Link2,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -51,6 +52,7 @@ import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
 import { AdminTourOperatorsManager } from "@/components/admin/AdminTourOperatorsManager";
 import { AdminMentorshipsManager } from "@/components/admin/AdminMentorshipsManager";
 import { AdminBenefitsManager } from "@/components/admin/AdminBenefitsManager";
+import { AdminRegistrationLinksManager } from "@/components/admin/AdminRegistrationLinksManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -223,6 +225,10 @@ export default function Admin() {
               <Gift className="h-4 w-4" />
               <span className="hidden sm:inline">Benefícios</span>
             </TabsTrigger>
+            <TabsTrigger value="registration-links" className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Links Cadastro</span>
+            </TabsTrigger>
           </TabsList>
 
 
@@ -317,6 +323,10 @@ export default function Admin() {
 
           <TabsContent value="benefits">
             <AdminBenefitsManager />
+          </TabsContent>
+
+          <TabsContent value="registration-links">
+            <AdminRegistrationLinksManager />
           </TabsContent>
         </Tabs>
       </div>
