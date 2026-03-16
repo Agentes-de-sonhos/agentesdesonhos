@@ -4308,6 +4308,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
+        </CollapsibleFormSection>
+
         <MultiFileUpload files={files} setFiles={setFiles} label="Comprovante / Voucher / Documento" />
 
         <div className="flex gap-2 justify-end">
