@@ -70,6 +70,9 @@ const clientSchema = z.object({
   status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]),
   travel_preferences: z.string().optional(),
   internal_notes: z.string().optional(),
+  birthday_day: z.string().optional(),
+  birthday_month: z.string().optional(),
+  birthday_year: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
