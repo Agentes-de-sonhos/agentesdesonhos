@@ -95,7 +95,7 @@ export default function Admin() {
       color: "text-accent",
     },
     {
-      title: "Premium",
+      title: "Plano Fundador",
       value: userStats?.premium || 0,
       icon: UserCheck,
       color: "text-green-500",
