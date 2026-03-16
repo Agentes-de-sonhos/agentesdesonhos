@@ -274,6 +274,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
@@ -297,8 +298,8 @@ export default function LandingPage() {
   if (user) return null;
 
   const goLogin = () => navigate("/auth");
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const goSignup = async () => {
+    if (checkoutLoading) return;
     setCheckoutLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-public-checkout");
