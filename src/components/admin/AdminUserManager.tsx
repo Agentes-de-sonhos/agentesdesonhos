@@ -577,8 +577,7 @@ export function AdminUserManager() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="essencial">Essencial</SelectItem>
-                      <SelectItem value="profissional">Profissional</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
+                      <SelectItem value="profissional">Plano Fundador</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
