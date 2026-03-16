@@ -67,6 +67,7 @@ interface UserWithDetails {
   role: "admin" | "agente";
   plan: "essencial" | "profissional";
   is_active: boolean;
+  monthly_paid: boolean;
 }
 
 export function AdminUserManager() {
@@ -81,15 +82,19 @@ export function AdminUserManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-users-full"],
     queryFn: async () => {
-      // Fetch profiles, roles, subscriptions, and emails in parallel
-      const [profilesRes, rolesRes, subsRes, emailsRes] = await Promise.all([
+      // Fetch profiles, roles, subscriptions, emails, and monthly payments in parallel
+      const [profilesRes, rolesRes, subsRes, emailsRes, paymentsRes] = await Promise.all([
         supabase.from("profiles").select("*").order("created_at", { ascending: false }),
         supabase.from("user_roles").select("user_id, role"),
         supabase.from("subscriptions").select("user_id, plan, is_active"),
         supabase.functions.invoke("admin-list-emails"),
+        supabase.from("monthly_payments").select("user_id, is_paid").eq("month", currentMonth).eq("year", currentYear),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
@@ -97,6 +102,8 @@ export function AdminUserManager() {
       if (subsRes.error) throw subsRes.error;
 
       const emailMap: Record<string, string> = emailsRes.data?.emails || {};
+      const paymentMap: Record<string, boolean> = {};
+      (paymentsRes.data || []).forEach((p: any) => { paymentMap[p.user_id] = p.is_paid; });
 
       // Combine data
       return (profilesRes.data || []).map((profile) => {
@@ -118,6 +125,7 @@ export function AdminUserManager() {
           role: (userRole as "admin" | "agente") || "agente",
           plan: (userSub?.plan as "essencial" | "profissional") || "essencial",
           is_active: userSub?.is_active ?? true,
+          monthly_paid: paymentMap[profile.user_id] ?? false,
         } as UserWithDetails;
       });
     },
@@ -158,6 +166,37 @@ export function AdminUserManager() {
     },
   });
 
+  const togglePaymentMutation = useMutation({
+    mutationFn: async ({ userId, isPaid }: { userId: string; isPaid: boolean }) => {
+      const { data: existing } = await supabase
+        .from("monthly_payments")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("month", currentMonth)
+        .eq("year", currentYear)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("monthly_payments")
+          .update({ is_paid: isPaid, updated_at: new Date().toISOString() })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("monthly_payments")
+          .insert({ user_id: userId, month: currentMonth, year: currentYear, is_paid: isPaid });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
+      toast({ title: "Pagamento atualizado!" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao atualizar pagamento", variant: "destructive" });
+    },
+  });
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
       const { error } = await supabase
@@ -355,6 +394,7 @@ export function AdminUserManager() {
                   <TableHead>Plano</TableHead>
                   <TableHead>Permissão</TableHead>
                   <TableHead>Cadastro</TableHead>
+                  <TableHead>Pago</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -400,6 +440,17 @@ export function AdminUserManager() {
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {format(new Date(user.created_at), "dd/MM/yyyy")}
+                    </TableCell>
+                    <TableCell>
+                      <Switch
+                        checked={user.monthly_paid}
+                        onCheckedChange={(checked) =>
+                          togglePaymentMutation.mutate({
+                            userId: user.user_id,
+                            isPaid: checked,
+                          })
+                        }
+                      />
                     </TableCell>
                     <TableCell>
                       <Switch
