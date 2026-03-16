@@ -8,6 +8,7 @@ import { CalendarIcon, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { ClientAutocomplete } from "./ClientAutocomplete";
 import {
   Form,
   FormControl,
@@ -84,7 +85,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
             <FormItem>
               <FormLabel>Nome do Cliente</FormLabel>
               <FormControl>
-                <Input placeholder="Nome completo do cliente" {...field} />
+                <ClientAutocomplete value={field.value} onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
