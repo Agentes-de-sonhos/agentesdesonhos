@@ -4287,11 +4287,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === CONTATOS DE SUPORTE === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📞 Contatos de Suporte</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📞 Contatos de Suporte">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="agency_contact" render={({ field }) => (
