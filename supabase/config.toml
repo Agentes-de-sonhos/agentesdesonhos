@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.travel-import]
 verify_jwt = false
+
+[functions.register-via-link]
+verify_jwt = false
