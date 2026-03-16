@@ -2665,11 +2665,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        {/* === DICAS DA AGÊNCIA === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧠 Dicas do Agente de Viagem</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🧠 Dicas do Agente de Viagem">
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
