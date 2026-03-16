@@ -1954,11 +1954,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
 
         {/* === TRANSFER IN (ARRIVAL) === */}
         {(transferType === 'arrival') && (
-          <>
-            <div className="space-y-1">
-              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✈️ Detalhes da Chegada (Transfer IN)</h4>
-              <div className="h-px bg-border" />
-            </div>
+          <CollapsibleFormSection title="✈️ Detalhes da Chegada (Transfer IN)">
             <div className="grid gap-4 sm:grid-cols-3">
               <FormField control={form.control} name="flight_number" render={({ field }) => (
                 <FormItem><FormLabel>Nº do Voo</FormLabel><FormControl><Input placeholder="LA8084" {...field} /></FormControl></FormItem>
@@ -1993,7 +1989,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
             <FormField control={form.control} name="meeting_instructions" render={({ field }) => (
               <FormItem><FormLabel>Onde encontrar o motorista *</FormLabel><FormControl><Textarea placeholder="Ex: Saída do desembarque, portão B, motorista com placa com seu nome" rows={3} {...field} /></FormControl></FormItem>
             )} />
-          </>
+          </CollapsibleFormSection>
         )}
 
         {/* === TRANSFER OUT (DEPARTURE) === */}
