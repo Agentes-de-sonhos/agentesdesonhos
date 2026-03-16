@@ -1950,6 +1950,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           )} />
         </div>
 
+        </CollapsibleFormSection>
+
         {/* === TRANSFER IN (ARRIVAL) === */}
         {(transferType === 'arrival') && (
           <>
