@@ -422,6 +422,14 @@ export default function TripWallet() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Day by Day Itinerary */}
+            <TripItinerary
+              tripId={trip.id}
+              startDate={trip.start_date}
+              endDate={trip.end_date}
+              services={trip.services || []}
+            />
           </div>
 
           {/* Sidebar */}
