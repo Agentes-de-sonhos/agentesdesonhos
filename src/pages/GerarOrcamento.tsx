@@ -26,6 +26,7 @@ export default function GerarOrcamento() {
   const { user } = useAuth();
   const { createQuote, isCreating, publishQuote, isPublishing } = useQuotes();
   const { quote, addService, deleteService, isAddingService } = useQuote(id);
+  const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
   
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
