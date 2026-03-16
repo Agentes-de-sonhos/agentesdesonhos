@@ -85,12 +85,28 @@ type ClientFormData = z.infer<typeof clientSchema>;
 export function ClientsModule() {
   const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const existingPhones = useMemo(() => {
+    const map = new Map<string, string>();
+    clients.forEach((c) => {
+      if (c.phone) {
+        const digits = c.phone.replace(/\D/g, "");
+        if (digits) {
+          const normalized = digits.length >= 10 && !digits.startsWith("55") ? "55" + digits : digits;
+          map.set(normalized, c.id);
+        }
+      }
+    });
+    return map;
+  }, [clients]);
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
