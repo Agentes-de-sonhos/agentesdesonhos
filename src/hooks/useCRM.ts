@@ -34,6 +34,9 @@ export function useClients() {
       status?: ClientStatus;
       travel_preferences?: string | null;
       internal_notes?: string | null;
+      birthday_day?: number | null;
+      birthday_month?: number | null;
+      birthday_year?: number | null;
     }) => {
       if (!user) throw new Error("Not authenticated");
       const { data: result, error } = await supabase

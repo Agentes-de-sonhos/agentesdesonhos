@@ -8,6 +8,7 @@ import { CalendarIcon, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { ClientAutocomplete } from "./ClientAutocomplete";
 import {
   Form,
   FormControl,
