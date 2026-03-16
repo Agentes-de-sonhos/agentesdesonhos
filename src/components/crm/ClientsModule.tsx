@@ -107,14 +107,16 @@ export function ClientsModule() {
     },
   });
 
-  const filteredClients = clients.filter((c) => {
-    const matchesSearch =
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.email?.toLowerCase().includes(search.toLowerCase()) ||
-      c.city?.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredClients = clients
+    .filter((c) => {
+      const matchesSearch =
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.email?.toLowerCase().includes(search.toLowerCase()) ||
+        c.city?.toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = statusFilter === "all" || c.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
   const handleOpenDialog = (client?: Client) => {
     if (client) {
@@ -487,92 +489,92 @@ export function ClientsModule() {
           <p>Nenhum cliente encontrado</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredClients.map((client) => (
-            <Card key={client.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      {client.name}
-                    </CardTitle>
+        <div className="rounded-md border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Nome</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden sm:table-cell">Contato</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden md:table-cell">Cidade</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
+                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">Última interação</th>
+                <th className="text-right py-3 px-4 font-medium text-muted-foreground">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredClients.map((client) => (
+                <tr
+                  key={client.id}
+                  className="border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
+                  onClick={() => setSelectedClient(client)}
+                >
+                  <td className="py-3 px-4 font-medium">{client.name}</td>
+                  <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">
+                    <div className="flex flex-col gap-0.5">
+                      {client.email && (
+                        <span className="flex items-center gap-1.5 truncate max-w-[200px]">
+                          <Mail className="h-3 w-3 flex-shrink-0" />
+                          {client.email}
+                        </span>
+                      )}
+                      {client.phone && (
+                        <span className="flex items-center gap-1.5">
+                          <Phone className="h-3 w-3 flex-shrink-0" />
+                          {client.phone}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-muted-foreground hidden md:table-cell">{client.city || "—"}</td>
+                  <td className="py-3 px-4">
                     <Badge
                       variant="secondary"
                       className={cn(
-                        "mt-1 text-white text-xs",
+                        "text-white text-xs",
                         CLIENT_STATUS_COLORS[client.status as ClientStatus] || "bg-gray-500"
                       )}
                     >
                       {CLIENT_STATUS_LABELS[client.status as ClientStatus] || "Lead"}
                     </Badge>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => setSelectedClient(client)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleOpenDialog(client)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => setDeleteId(client.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                {client.email && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">{client.email}</span>
-                  </div>
-                )}
-                {client.phone && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Phone className="h-4 w-4 flex-shrink-0" />
-                    <span>{client.phone}</span>
-                  </div>
-                )}
-                {client.city && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4 flex-shrink-0" />
-                    <span>{client.city}</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                    <Clock className="h-3 w-3" />
-                    <span>
-                      {formatDistanceToNow(new Date(client.last_interaction_at), {
-                        addSuffix: true,
-                        locale: ptBR,
-                      })}
-                    </span>
-                  </div>
-                  {client.total_spent && client.total_spent > 0 && (
-                    <div className="flex items-center gap-1 text-xs font-medium text-green-600">
-                      <DollarSign className="h-3 w-3" />
-                      {formatCurrency(client.total_spent)}
+                  </td>
+                  <td className="py-3 px-4 text-muted-foreground text-xs hidden lg:table-cell">
+                    {formatDistanceToNow(new Date(client.last_interaction_at), {
+                      addSuffix: true,
+                      locale: ptBR,
+                    })}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setSelectedClient(client)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleOpenDialog(client)}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => setDeleteId(client.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
