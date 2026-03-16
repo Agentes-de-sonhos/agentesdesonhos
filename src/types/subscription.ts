@@ -98,7 +98,7 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   educa_pass: 'EducaTravel Pass',
   cartao_digital: 'Cartão Digital Pass',
   essencial: 'Essencial',
-  profissional: 'Profissional',
+  profissional: 'Plano Fundador',
   premium: 'Premium',
 };
 
@@ -106,7 +106,7 @@ export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   educa_pass: 'Acesso gratuito à EducaTravel Academy',
   cartao_digital: 'Acesso exclusivo ao Cartão de Visita Digital',
   essencial: 'Acesso básico às notícias, mapa do turismo, materiais e CRM',
-  profissional: 'Ferramentas IA, orçamentos, Carteira Digital e financeiro incluídos',
+  profissional: 'Acesso completo ao Agentes de Sonhos por R$ 85,90/mês',
   premium: 'Acesso completo com trilhas premium, certificados e benefícios exclusivos',
 };
 
