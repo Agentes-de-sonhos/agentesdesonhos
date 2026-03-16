@@ -74,7 +74,6 @@ export default function CriarRoteiro() {
     }
     setIsGenerating(true);
     setFormData(data);
-    await incrementUsage();
 
     try {
       // Create itinerary record
@@ -90,6 +89,9 @@ export default function CriarRoteiro() {
       // Load complete itinerary
       const completeItinerary = await getItineraryWithDetails(itinerary.id);
       setCurrentItinerary(completeItinerary);
+
+      // Only increment usage AFTER successful creation
+      await incrementUsage();
 
       toast.success("Roteiro gerado com sucesso!");
     } catch (error) {
