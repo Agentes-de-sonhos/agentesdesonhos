@@ -148,7 +148,7 @@ export default function AtivarCartao() {
       setSuccess(true);
       toast({
         title: "Conta criada com sucesso!",
-        description: "Agora faça login no app para acessar seu Cartão Digital.",
+        description: "Agora faça login para acessar a plataforma.",
       });
     } catch (err) {
       console.error("Signup error:", err);
