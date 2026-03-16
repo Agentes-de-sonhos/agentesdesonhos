@@ -110,7 +110,24 @@ export default function TripWallet() {
     }
   };
 
-  const handleEditService = (service: TripService) => {
+  const handleImportServices = async (services: { service_type: TripServiceType; service_data: any }[]) => {
+    setIsImporting(true);
+    try {
+      for (const svc of services) {
+        await addService({
+          service_type: svc.service_type,
+          service_data: svc.service_data,
+        });
+      }
+      toast({ title: "Serviços importados", description: `${services.length} serviço(s) importado(s) com sucesso.` });
+    } catch (err: any) {
+      toast({ title: "Erro ao importar", description: err.message, variant: "destructive" });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+
     setEditingService(service);
     setSelectedServiceType(service.service_type);
   };
