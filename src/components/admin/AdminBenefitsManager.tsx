@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { SupplierLogoUpload } from "@/components/admin/SupplierLogoUpload";
 import { BENEFIT_CATEGORIES, BENEFIT_DESTINATIONS } from "@/types/benefits";
 
 interface BenefitForm {
