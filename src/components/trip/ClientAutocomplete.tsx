@@ -301,4 +301,4 @@ export const ClientAutocomplete = forwardRef<HTMLDivElement, ClientAutocompleteP
       </Dialog>
     </>
   );
-}
+});
