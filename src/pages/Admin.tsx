@@ -224,6 +224,10 @@ export default function Admin() {
               <Gift className="h-4 w-4" />
               <span className="hidden sm:inline">Benefícios</span>
             </TabsTrigger>
+            <TabsTrigger value="registration-links" className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Links Cadastro</span>
+            </TabsTrigger>
           </TabsList>
 
 
