@@ -2961,11 +2961,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === COBERTURAS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🏥 Coberturas do Seguro</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🏥 Coberturas do Seguro">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="medical_assistance" render={({ field }) => (
