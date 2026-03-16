@@ -294,11 +294,7 @@ export function AdminUserManager() {
           </div>
           <div className="text-center p-3 bg-primary/10 rounded-lg">
             <p className="text-2xl font-bold">{stats.profissional}</p>
-            <p className="text-xs text-muted-foreground">Profissional</p>
-          </div>
-          <div className="text-center p-3 bg-accent/20 rounded-lg">
-            <p className="text-2xl font-bold">{stats.premium}</p>
-            <p className="text-xs text-muted-foreground">Premium</p>
+            <p className="text-xs text-muted-foreground">Plano Fundador</p>
           </div>
         </div>
 
