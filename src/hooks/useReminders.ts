@@ -125,7 +125,7 @@ export function useReminders() {
   })();
 
   return {
-    reminders: remindersWithDays,
+    reminders: nextReminderPerTrip,
     allReminders,
     isLoading,
     isLoadingAll,
