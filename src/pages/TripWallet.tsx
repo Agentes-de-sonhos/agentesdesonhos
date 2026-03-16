@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -230,18 +231,12 @@ export default function TripWallet() {
     return (
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="font-display text-2xl font-bold flex items-center gap-2">
-                <Wallet className="h-6 w-6 text-primary" />
-                Carteira Digital
-              </h1>
-              <p className="text-muted-foreground">Organize vouchers, documentos e serviços das viagens</p>
-            </div>
-          </div>
+          <PageHeader
+            pageKey="trip-wallet"
+            title="Carteira Digital"
+            subtitle="Organize vouchers, documentos e serviços das viagens"
+            icon={Wallet}
+          />
           <TripWalletList />
         </div>
       </DashboardLayout>
