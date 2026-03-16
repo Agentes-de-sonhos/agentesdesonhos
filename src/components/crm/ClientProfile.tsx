@@ -13,6 +13,7 @@ import {
   Calendar,
   TrendingUp,
   Heart,
+  Cake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -137,6 +138,15 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
                 <div className="flex items-center gap-3">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
                   <span>{client.city}</span>
+                </div>
+              )}
+              {client.birthday_day && client.birthday_month && (
+                <div className="flex items-center gap-3">
+                  <Cake className="h-4 w-4 text-muted-foreground" />
+                  <span>
+                    {String(client.birthday_day).padStart(2, "0")}/{String(client.birthday_month).padStart(2, "0")}
+                    {client.birthday_year ? `/${client.birthday_year}` : ""}
+                  </span>
                 </div>
               )}
             </CardContent>

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Plus,
   Search,
@@ -17,6 +18,7 @@ import {
   DollarSign,
   Plane,
   Clock,
+  Cake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +58,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useClients } from "@/hooks/useCRM";
+import { useAuth } from "@/hooks/useAuth";
 import { ClientProfile } from "./ClientProfile";
 import type { Client, ClientStatus } from "@/types/crm";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
@@ -70,12 +73,16 @@ const clientSchema = z.object({
   status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]),
   travel_preferences: z.string().optional(),
   internal_notes: z.string().optional(),
+  birthday_day: z.string().optional(),
+  birthday_month: z.string().optional(),
+  birthday_year: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
 export function ClientsModule() {
   const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -94,6 +101,9 @@ export function ClientsModule() {
       status: "lead",
       travel_preferences: "",
       internal_notes: "",
+      birthday_day: "",
+      birthday_month: "",
+      birthday_year: "",
     },
   });
 
@@ -118,6 +128,9 @@ export function ClientsModule() {
         status: client.status || "lead",
         travel_preferences: client.travel_preferences || "",
         internal_notes: client.internal_notes || "",
+        birthday_day: client.birthday_day?.toString() || "",
+        birthday_month: client.birthday_month?.toString() || "",
+        birthday_year: client.birthday_year?.toString() || "",
       });
     } else {
       setEditingClient(null);
@@ -130,12 +143,45 @@ export function ClientsModule() {
         status: "lead",
         travel_preferences: "",
         internal_notes: "",
+        birthday_day: "",
+        birthday_month: "",
+        birthday_year: "",
       });
     }
     setIsDialogOpen(true);
   };
 
+  const upsertBirthdayEvent = async (clientId: string, clientName: string, day: number, month: number) => {
+    if (!user) return;
+    // Delete existing birthday event for this client
+    await supabase.from("agency_events")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("client_id", clientId)
+      .eq("event_type", "aniversario");
+
+    // Create birthday event for current year (and next year if already passed)
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const birthdayThisYear = new Date(currentYear, month - 1, day);
+    const targetYear = birthdayThisYear < now ? currentYear + 1 : currentYear;
+    const eventDate = `${targetYear}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+    await supabase.from("agency_events").insert({
+      user_id: user.id,
+      client_id: clientId,
+      title: `🎂 Aniversário: ${clientName}`,
+      event_type: "aniversario",
+      event_date: eventDate,
+      color: "#ec4899",
+    });
+  };
+
   const handleSubmit = async (data: ClientFormData) => {
+    const bDay = data.birthday_day ? parseInt(data.birthday_day) : null;
+    const bMonth = data.birthday_month ? parseInt(data.birthday_month) : null;
+    const bYear = data.birthday_year ? parseInt(data.birthday_year) : null;
+
     const payload = {
       name: data.name,
       email: data.email || null,
@@ -145,12 +191,32 @@ export function ClientsModule() {
       status: data.status,
       travel_preferences: data.travel_preferences || null,
       internal_notes: data.internal_notes || null,
+      birthday_day: bDay,
+      birthday_month: bMonth,
+      birthday_year: bYear,
     };
+
+    let clientId: string | undefined;
     if (editingClient) {
       await updateClient({ id: editingClient.id, ...payload });
+      clientId = editingClient.id;
     } else {
-      await createClient(payload);
+      const result = await createClient(payload);
+      clientId = result?.id;
     }
+
+    // Create/update birthday agenda event
+    if (clientId && bDay && bMonth) {
+      await upsertBirthdayEvent(clientId, data.name, bDay, bMonth);
+    } else if (clientId && !bDay && !bMonth && editingClient) {
+      // Remove birthday event if birthday was cleared
+      await supabase.from("agency_events")
+        .delete()
+        .eq("user_id", user!.id)
+        .eq("client_id", clientId)
+        .eq("event_type", "aniversario");
+    }
+
     setIsDialogOpen(false);
     form.reset();
   };
@@ -294,6 +360,65 @@ export function ClientsModule() {
                       </FormItem>
                     )}
                   />
+                </div>
+                <div className="space-y-2">
+                  <FormLabel className="flex items-center gap-1.5">
+                    <Cake className="h-4 w-4" />
+                    Data de Aniversário
+                  </FormLabel>
+                  <div className="grid grid-cols-3 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="birthday_day"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value || ""}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Dia" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                                  <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="birthday_month"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value || ""}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Mês" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"].map((m, i) => (
+                                  <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="birthday_year"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="number" placeholder="Ano (opcional)" min="1920" max={new Date().getFullYear()} {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
                 <FormField
                   control={form.control}
