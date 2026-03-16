@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.flight-status]
 verify_jwt = false
+
+[functions.travel-import]
+verify_jwt = false
