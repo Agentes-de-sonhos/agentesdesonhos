@@ -166,6 +166,37 @@ export function AdminUserManager() {
     },
   });
 
+  const togglePaymentMutation = useMutation({
+    mutationFn: async ({ userId, isPaid }: { userId: string; isPaid: boolean }) => {
+      const { data: existing } = await supabase
+        .from("monthly_payments")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("month", currentMonth)
+        .eq("year", currentYear)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("monthly_payments")
+          .update({ is_paid: isPaid, updated_at: new Date().toISOString() })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("monthly_payments")
+          .insert({ user_id: userId, month: currentMonth, year: currentYear, is_paid: isPaid });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
+      toast({ title: "Pagamento atualizado!" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao atualizar pagamento", variant: "destructive" });
+    },
+  });
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
       const { error } = await supabase
