@@ -128,7 +128,10 @@ export type Database = {
           event_date: string
           event_time: string | null
           event_type: string
+          event_url: string | null
           id: string
+          location_address: string | null
+          location_city: string | null
           opportunity_id: string | null
           title: string
           updated_at: string
@@ -142,7 +145,10 @@ export type Database = {
           event_date: string
           event_time?: string | null
           event_type?: string
+          event_url?: string | null
           id?: string
+          location_address?: string | null
+          location_city?: string | null
           opportunity_id?: string | null
           title: string
           updated_at?: string
@@ -156,7 +162,10 @@ export type Database = {
           event_date?: string
           event_time?: string | null
           event_type?: string
+          event_url?: string | null
           id?: string
+          location_address?: string | null
+          location_city?: string | null
           opportunity_id?: string | null
           title?: string
           updated_at?: string

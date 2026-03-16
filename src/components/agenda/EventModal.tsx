@@ -43,6 +43,9 @@ interface EventModalProps {
     event_date: string;
     event_time: string | null;
     color: string | null;
+    location_city?: string | null;
+    location_address?: string | null;
+    event_url?: string | null;
   }) => void;
   onUpdate?: (id: string, event: Partial<CalendarEvent>) => void;
   onDelete?: (id: string) => void;
@@ -95,6 +98,9 @@ export function EventModal({
   const [eventType, setEventType] = useState<string>("compromisso");
   const [eventTime, setEventTime] = useState("");
   const [customColor, setCustomColor] = useState("");
+  const [locationCity, setLocationCity] = useState("");
+  const [locationAddress, setLocationAddress] = useState("");
+  const [eventUrl, setEventUrl] = useState("");
   const [showCreateTypeDialog, setShowCreateTypeDialog] = useState(false);
 
   const isEditing = !!event;
@@ -108,12 +114,18 @@ export function EventModal({
       setEventType(event.event_type);
       setEventTime(event.event_time || "");
       setCustomColor(event.color || "");
+      setLocationCity(event.location_city || "");
+      setLocationAddress(event.location_address || "");
+      setEventUrl(event.event_url || "");
     } else {
       setTitle("");
       setDescription("");
       setEventType("compromisso");
       setEventTime("");
       setCustomColor("");
+      setLocationCity("");
+      setLocationAddress("");
+      setEventUrl("");
     }
   }, [event, open]);
 
@@ -130,13 +142,16 @@ export function EventModal({
       }
     }
 
-    const eventData = {
+    const eventData: any = {
       title: title.trim(),
       description: description.trim() || null,
       event_type: eventType,
       event_date: selectedDate,
       event_time: eventTime || null,
       color,
+      location_city: locationCity.trim() || null,
+      location_address: locationAddress.trim() || null,
+      event_url: eventUrl.trim() || null,
     };
 
     if (isEditing && event && onUpdate) {
@@ -303,6 +318,38 @@ export function EventModal({
                   onChange={(e) => setEventTime(e.target.value)}
                 />
               </div>
+
+              {eventType === "trade" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="locationCity">Cidade do Evento (opcional)</Label>
+                    <Input
+                      id="locationCity"
+                      value={locationCity}
+                      onChange={(e) => setLocationCity(e.target.value)}
+                      placeholder="Ex: São Paulo, SP"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="locationAddress">Endereço (opcional)</Label>
+                    <Input
+                      id="locationAddress"
+                      value={locationAddress}
+                      onChange={(e) => setLocationAddress(e.target.value)}
+                      placeholder="Ex: Centro de Convenções Rebouças"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="eventUrl">Link do Evento / Inscrição (opcional)</Label>
+                    <Input
+                      id="eventUrl"
+                      value={eventUrl}
+                      onChange={(e) => setEventUrl(e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="description">Descrição (opcional)</Label>
