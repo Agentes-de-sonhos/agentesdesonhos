@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       email_confirm: true,
       user_metadata: {
         name,
-        target_plan: "cartao_digital",
+        target_plan: "profissional",
       },
     });
 
