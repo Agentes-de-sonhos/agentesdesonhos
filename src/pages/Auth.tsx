@@ -426,15 +426,6 @@ export default function Auth() {
                 Entrar com senha
               </Button>
 
-              <div className="text-center pt-2">
-                <button
-                  type="button"
-                  onClick={() => { switchToPassword(); setTimeout(() => setView("password-signup"), 0); }}
-                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Não tem conta? <span className="underline underline-offset-4">Cadastre-se</span>
-                </button>
-              </div>
             </div>
           )}
 
