@@ -213,9 +213,11 @@ export function AdminBenefitsManager() {
                   <Button variant="ghost" size="icon" onClick={() => openEdit(b)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setDeleteId(b.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <ConfirmDeleteDialog onConfirm={() => deleteBenefit.mutate(b.id)}>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </ConfirmDeleteDialog>
                 </div>
               </div>
             ))}
