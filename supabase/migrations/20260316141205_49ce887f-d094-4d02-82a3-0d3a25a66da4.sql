@@ -1,1 +1,0 @@
-UPDATE public.subscriptions SET plan = 'profissional' WHERE user_id = '8c48d7c4-8a00-4fdf-9f11-4d86740e4c03';
