@@ -1994,11 +1994,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
 
         {/* === TRANSFER OUT (DEPARTURE) === */}
         {(transferType === 'departure') && (
-          <>
-            <div className="space-y-1">
-              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧳 Detalhes da Saída (Transfer OUT)</h4>
-              <div className="h-px bg-border" />
-            </div>
+          <CollapsibleFormSection title="🧳 Detalhes da Saída (Transfer OUT)">
             <div className="grid gap-4 sm:grid-cols-3">
               <FormField control={form.control} name="hotel_departure_time" render={({ field }) => (
                 <FormItem><FormLabel>Horário de Saída do Hotel</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
@@ -2031,7 +2027,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
             <FormField control={form.control} name="departure_alert" render={({ field }) => (
               <FormItem><FormLabel>Alerta ao Passageiro</FormLabel><FormControl><Input placeholder="Esteja no lobby com 10 minutos de antecedência" {...field} /></FormControl></FormItem>
             )} />
-          </>
+          </CollapsibleFormSection>
         )}
 
         <CollapsibleFormSection title="📍 Locais de Embarque e Desembarque">
