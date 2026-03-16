@@ -82,6 +82,7 @@ type ClientFormData = z.infer<typeof clientSchema>;
 
 export function ClientsModule() {
   const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
