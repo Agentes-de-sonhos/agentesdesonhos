@@ -306,13 +306,7 @@ export function AdminBenefitsManager() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDeleteDialog
-        open={!!deleteId}
-        onOpenChange={(open) => !open && setDeleteId(null)}
-        onConfirm={() => deleteId && deleteBenefit.mutate(deleteId)}
-        title="Excluir Benefício"
-        description="Tem certeza que deseja excluir este benefício? Esta ação não pode ser desfeita."
-      />
+
     </Card>
   );
 }
