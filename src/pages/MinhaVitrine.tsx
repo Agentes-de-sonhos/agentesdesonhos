@@ -259,8 +259,8 @@ export default function MinhaVitrine() {
         <div className="max-w-xl mx-auto space-y-6 p-4">
           <div className="text-center space-y-2">
             <Store className="h-12 w-12 mx-auto text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Criar Vitrine Virtual</h1>
-            <p className="text-muted-foreground">Crie sua vitrine virtual profissional.</p>
+            <h1 className="text-2xl font-bold text-foreground">Criar Vitrine de Ofertas</h1>
+            <p className="text-muted-foreground">Crie sua vitrine de ofertas profissional.</p>
           </div>
           <Card>
             <CardContent className="pt-6 space-y-4">
