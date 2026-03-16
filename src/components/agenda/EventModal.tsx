@@ -245,9 +245,9 @@ export function EventModal({
               {event?.description && (
                 <p className="text-sm text-muted-foreground">{event.description}</p>
               )}
-              <div className="flex flex-wrap gap-2 justify-end">
+              <div className="flex gap-2 justify-center">
                 <Button variant="outline" size="sm" onClick={handleGoogleCalendar}>
-                  <CalendarPlus className="h-4 w-4 mr-2" />
+                  <CalendarPlus className="h-4 w-4 mr-1.5" />
                   Google Calendar
                 </Button>
                 <Button
@@ -255,11 +255,11 @@ export function EventModal({
                   size="sm"
                   onClick={handleToggleHighlight}
                 >
-                  <Star className={`h-4 w-4 mr-2 ${isHighlighted ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                  <Star className={`h-4 w-4 mr-1.5 ${isHighlighted ? "fill-yellow-400 text-yellow-400" : ""}`} />
                   {isHighlighted ? "Destacado" : "Destacar no Dashboard"}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleHide}>
-                  <EyeOff className="h-4 w-4 mr-2" />
+                  <EyeOff className="h-4 w-4 mr-1.5" />
                   Ocultar
                 </Button>
               </div>
