@@ -1539,11 +1539,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === SEGUROS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛡️ Seguros da Locação</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🛡️ Seguros da Locação">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="basic_insurance" render={({ field }) => (
             <FormItem><FormLabel>Seguro Básico</FormLabel><FormControl><Input placeholder="Sim / Não / Incluso" {...field} /></FormControl></FormItem>
