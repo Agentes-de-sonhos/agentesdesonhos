@@ -405,7 +405,8 @@ export default function TripWallet() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <TravelImporter onImportServices={handleImportServices} isImporting={isImporting} />
+                    <div className="flex flex-wrap gap-2 mb-6 mt-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as TripServiceType[]).map((type) => (
                         <Button key={type} variant="outline" size="sm" onClick={() => setSelectedServiceType(type)}>
                           <Plus className="mr-1 h-3 w-3" /> {SERVICE_TYPE_LABELS[type]}
