@@ -163,6 +163,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       subscription,
       plan,
       loading,
+      isPromotor,
       hasFeature,
       canUseAI,
       aiUsageCount,
