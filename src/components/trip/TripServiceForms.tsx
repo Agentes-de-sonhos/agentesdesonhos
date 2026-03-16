@@ -1218,11 +1218,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === OBSERVAÇÕES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📝 Observações</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📝 Observações">
 
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
