@@ -127,7 +127,7 @@ export default function TripWallet() {
     }
   };
 
-
+  const handleEditService = (service: TripService) => {
     setEditingService(service);
     setSelectedServiceType(service.service_type);
   };
