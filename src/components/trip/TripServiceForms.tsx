@@ -334,12 +334,11 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
 
         </CollapsibleFormSection>
 
-        <CollapsibleFormSection title="🛫 Trechos de Voo" defaultOpen>
+        <CollapsibleFormSection title="🛫 Trechos de Voo">
 
         {segments.map((seg, i) => (
-          <div key={i} className="border rounded-lg p-4 space-y-3 bg-muted/20">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold">Trecho {i + 1}</span>
+          <CollapsibleFormSection key={i} title={`Trecho ${i + 1}${seg.origin_airport && seg.destination_airport ? ` — ${seg.origin_airport} → ${seg.destination_airport}` : ''}`} defaultOpen={i === 0}>
+            <div className="flex items-center justify-end">
               {segments.length > 1 && (
                 <Button type="button" variant="ghost" size="sm" className="h-7 text-destructive" onClick={() => setSegments(segments.filter((_, idx) => idx !== i))}>
                   <X className="h-3 w-3 mr-1" /> Remover
@@ -409,7 +408,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
               <label className="text-xs font-medium text-muted-foreground">Portão de Embarque</label>
               <Input className="mt-1" placeholder="A32" value={seg.gate} onChange={(e) => updateSegment(i, 'gate', e.target.value)} />
             </div>
-          </div>
+          </CollapsibleFormSection>
         ))}
 
         <Button type="button" variant="outline" className="w-full" onClick={() => setSegments([...segments, emptySegment()])}>
