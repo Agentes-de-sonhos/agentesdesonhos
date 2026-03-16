@@ -100,7 +100,9 @@ export function AdminUserManager() {
 
       // Combine data
       return (profilesRes.data || []).map((profile) => {
-        const userRole = rolesRes.data?.find((r) => r.user_id === profile.user_id);
+        const userRoles = rolesRes.data?.filter((r) => r.user_id === profile.user_id) || [];
+        const hasAdmin = userRoles.some((r) => r.role === "admin");
+        const userRole = hasAdmin ? "admin" : (userRoles[0]?.role || "agente");
         const userSub = subsRes.data?.find((s) => s.user_id === profile.user_id);
 
         return {
@@ -113,7 +115,7 @@ export function AdminUserManager() {
           city: profile.city,
           state: profile.state,
           created_at: profile.created_at,
-          role: (userRole?.role as "admin" | "agente") || "agente",
+          role: (userRole as "admin" | "agente") || "agente",
           plan: (userSub?.plan as "essencial" | "profissional") || "essencial",
           is_active: userSub?.is_active ?? true,
         } as UserWithDetails;
