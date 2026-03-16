@@ -361,6 +361,65 @@ export function ClientsModule() {
                     )}
                   />
                 </div>
+                <div className="space-y-2">
+                  <FormLabel className="flex items-center gap-1.5">
+                    <Cake className="h-4 w-4" />
+                    Data de Aniversário
+                  </FormLabel>
+                  <div className="grid grid-cols-3 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="birthday_day"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value || ""}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Dia" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                                  <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="birthday_month"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value || ""}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Mês" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"].map((m, i) => (
+                                  <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="birthday_year"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="number" placeholder="Ano (opcional)" min="1920" max={new Date().getFullYear()} {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name="travel_preferences"
