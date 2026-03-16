@@ -182,11 +182,11 @@ export function MobileSidebar() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
-  const { hasFeature, plan } = useSubscription();
+  const { hasFeature, plan, isPromotor } = useSubscription();
   const { trackSectionVisit } = useGamification();
 
-  const isEducaPass = plan === "educa_pass";
-  const isCartaoDigital = plan === "cartao_digital";
+  const isEducaPass = !isPromotor && plan === "educa_pass";
+  const isCartaoDigital = !isPromotor && plan === "cartao_digital";
 
   const allSections: MenuSection[] = useMemo(
     () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection],
