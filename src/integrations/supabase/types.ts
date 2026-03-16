@@ -2519,6 +2519,39 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_payments: {
+        Row: {
+          created_at: string
+          id: string
+          is_paid: boolean
+          marked_by: string | null
+          month: number
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_paid?: boolean
+          marked_by?: string | null
+          month: number
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_paid?: boolean
+          marked_by?: string | null
+          month?: number
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       monthly_prizes: {
         Row: {
           created_at: string
