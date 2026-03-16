@@ -621,7 +621,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Depoimentos ────────────────────────────────────────── */}
-      <section className="py-[100px] md:py-[120px] scroll-mt-20" style={{ backgroundColor: "hsl(210 20% 97%)" }}>
+      <section className="py-[100px] md:py-[120px] scroll-mt-20">
         <div className={cn(sectionContainer, "max-w-3xl space-y-12")}>
           <Reveal>
             <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold text-center tracking-[-0.02em]">
@@ -669,7 +669,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ────────────────────────────────────────────────── */}
-      <section id="faq" className="py-[100px] md:py-[120px] scroll-mt-20">
+      <section id="faq" className="py-[100px] md:py-[120px] scroll-mt-20" style={{ backgroundColor: "hsl(210 20% 97%)" }}>
         <div className={cn(sectionContainer, "max-w-2xl space-y-12")}>
           <Reveal>
             <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold text-center tracking-[-0.02em]">
@@ -715,7 +715,6 @@ export default function LandingPage() {
       {/* ── Final CTA ──────────────────────────────────────────── */}
       <section
         className="py-[120px] md:py-[140px]"
-        style={{ backgroundColor: "hsl(210 20% 97%)" }}
       >
         <div className={cn(sectionContainer, "max-w-3xl text-center space-y-8")}>
           <Reveal>
