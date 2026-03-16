@@ -1629,11 +1629,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Taxa Condutor Adicional</FormLabel><FormControl><Input placeholder="€ 10/dia" {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === COMBUSTÍVEL === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⛽ Política de Combustível</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⛽ Política de Combustível">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="fuel_policy" render={({ field }) => (
             <FormItem><FormLabel>Política</FormLabel>
