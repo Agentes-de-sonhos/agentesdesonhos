@@ -151,7 +151,37 @@ export function ClientsModule() {
     setIsDialogOpen(true);
   };
 
+  const upsertBirthdayEvent = async (clientId: string, clientName: string, day: number, month: number) => {
+    if (!user) return;
+    // Delete existing birthday event for this client
+    await supabase.from("agency_events")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("client_id", clientId)
+      .eq("event_type", "aniversario");
+
+    // Create birthday event for current year (and next year if already passed)
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const birthdayThisYear = new Date(currentYear, month - 1, day);
+    const targetYear = birthdayThisYear < now ? currentYear + 1 : currentYear;
+    const eventDate = `${targetYear}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+    await supabase.from("agency_events").insert({
+      user_id: user.id,
+      client_id: clientId,
+      title: `🎂 Aniversário: ${clientName}`,
+      event_type: "aniversario",
+      event_date: eventDate,
+      color: "#ec4899",
+    });
+  };
+
   const handleSubmit = async (data: ClientFormData) => {
+    const bDay = data.birthday_day ? parseInt(data.birthday_day) : null;
+    const bMonth = data.birthday_month ? parseInt(data.birthday_month) : null;
+    const bYear = data.birthday_year ? parseInt(data.birthday_year) : null;
+
     const payload = {
       name: data.name,
       email: data.email || null,
@@ -161,12 +191,32 @@ export function ClientsModule() {
       status: data.status,
       travel_preferences: data.travel_preferences || null,
       internal_notes: data.internal_notes || null,
+      birthday_day: bDay,
+      birthday_month: bMonth,
+      birthday_year: bYear,
     };
+
+    let clientId: string | undefined;
     if (editingClient) {
       await updateClient({ id: editingClient.id, ...payload });
+      clientId = editingClient.id;
     } else {
-      await createClient(payload);
+      const result = await createClient(payload);
+      clientId = result?.id;
     }
+
+    // Create/update birthday agenda event
+    if (clientId && bDay && bMonth) {
+      await upsertBirthdayEvent(clientId, data.name, bDay, bMonth);
+    } else if (clientId && !bDay && !bMonth && editingClient) {
+      // Remove birthday event if birthday was cleared
+      await supabase.from("agency_events")
+        .delete()
+        .eq("user_id", user!.id)
+        .eq("client_id", clientId)
+        .eq("event_type", "aniversario");
+    }
+
     setIsDialogOpen(false);
     form.reset();
   };
