@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2 } from "lucide-react";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
+import { TravelImporter } from "@/components/trip/TravelImporter";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { TripWalletList } from "@/components/trip/TripWalletList";
 import { TripEditForm } from "@/components/trip/TripEditForm";
@@ -54,6 +55,7 @@ export default function TripWallet() {
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [editingService, setEditingService] = useState<TripService | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [editingPassword, setEditingPassword] = useState(false);
@@ -105,6 +107,23 @@ export default function TripWallet() {
       setSelectedServiceType(null);
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleImportServices = async (services: { service_type: TripServiceType; service_data: any }[]) => {
+    setIsImporting(true);
+    try {
+      for (const svc of services) {
+        await addService({
+          service_type: svc.service_type,
+          service_data: svc.service_data,
+        });
+      }
+      toast({ title: "Serviços importados", description: `${services.length} serviço(s) importado(s) com sucesso.` });
+    } catch (err: any) {
+      toast({ title: "Erro ao importar", description: err.message, variant: "destructive" });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -386,7 +405,8 @@ export default function TripWallet() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <TravelImporter onImportServices={handleImportServices} isImporting={isImporting} />
+                    <div className="flex flex-wrap gap-2 mb-6 mt-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as TripServiceType[]).map((type) => (
                         <Button key={type} variant="outline" size="sm" onClick={() => setSelectedServiceType(type)}>
                           <Plus className="mr-1 h-3 w-3" /> {SERVICE_TYPE_LABELS[type]}
