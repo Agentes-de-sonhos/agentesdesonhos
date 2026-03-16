@@ -113,16 +113,20 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     checkStripe();
   }, [user, fetchSubscription]);
 
+  const { role } = useUserRole();
+  const isPromotor = role === "promotor";
+
   const plan: SubscriptionPlan = subscription?.plan || "essencial";
   const aiLimit = AI_LIMITS[plan];
   const aiUsageCount = subscription?.ai_usage_count || 0;
   const aiUsageRemaining = Math.max(0, aiLimit - aiUsageCount);
 
   const hasFeature = useCallback((feature: Feature): boolean => {
+    if (isPromotor) return true;
     const features = PLAN_FEATURES[plan];
     if (!features) return false;
     return features.includes(feature);
-  }, [plan]);
+  }, [plan, isPromotor]);
 
   const canUseAI = useCallback((): boolean => {
     if (plan === "educa_pass" || plan === "cartao_digital" || plan === "essencial") return false;
