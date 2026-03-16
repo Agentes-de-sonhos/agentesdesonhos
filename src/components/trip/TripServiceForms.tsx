@@ -4010,11 +4010,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        {/* === AGENDAMENTO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Agendamento</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📅 Agendamento">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="date" render={({ field }) => (
