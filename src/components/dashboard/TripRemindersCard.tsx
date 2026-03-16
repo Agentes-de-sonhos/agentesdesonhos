@@ -53,8 +53,8 @@ export function TripRemindersCard() {
 
   const getReminderLabel = (daysBefore: number) => {
     switch (daysBefore) {
-      case 7:
-        return <Badge variant="outline" className="border-primary text-primary">Faltam 7 dias</Badge>;
+      case 10:
+        return <Badge variant="outline" className="border-primary text-primary">Faltam 10 dias</Badge>;
       case 3:
         return <Badge variant="destructive" className="opacity-90">Faltam 3 dias</Badge>;
       case 1:
