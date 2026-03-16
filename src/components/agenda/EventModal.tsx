@@ -43,6 +43,9 @@ interface EventModalProps {
     event_date: string;
     event_time: string | null;
     color: string | null;
+    location_city?: string | null;
+    location_address?: string | null;
+    event_url?: string | null;
   }) => void;
   onUpdate?: (id: string, event: Partial<CalendarEvent>) => void;
   onDelete?: (id: string) => void;

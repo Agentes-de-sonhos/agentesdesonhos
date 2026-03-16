@@ -195,6 +195,9 @@ export function useAgenda(year?: number) {
       color: string | null;
       client_id?: string | null;
       opportunity_id?: string | null;
+      location_city?: string | null;
+      location_address?: string | null;
+      event_url?: string | null;
     }) => {
       if (!user?.id) throw new Error("Usuário não autenticado");
       
