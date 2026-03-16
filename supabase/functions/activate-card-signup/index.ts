@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       email_confirm: true,
       user_metadata: {
         name,
-        target_plan: "cartao_digital",
+        target_plan: "profissional",
       },
     });
 
@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
     const { error: subscriptionError } = await adminClient.from("subscriptions").upsert(
       {
         user_id: userId,
-        plan: "cartao_digital",
+        plan: "profissional",
         is_active: true,
       },
       { onConflict: "user_id" },

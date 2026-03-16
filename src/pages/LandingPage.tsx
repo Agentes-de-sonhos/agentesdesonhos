@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -273,6 +274,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
@@ -296,7 +298,20 @@ export default function LandingPage() {
   if (user) return null;
 
   const goLogin = () => navigate("/auth");
-  const goSignup = () => navigate("/auth?tab=signup");
+  const goSignup = async () => {
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-public-checkout");
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      setCheckoutLoading(false);
+    }
+  };
 
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);

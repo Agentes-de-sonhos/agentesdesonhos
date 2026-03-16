@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  const activationUrl = `https://ativar-cartao.agentesdesonhos.com.br/?token=${activationToken}`;
+  const activationUrl = `https://agentesdesonhos.lovable.app/ativar-cartao?token=${activationToken}`;
   console.log(`✅ Activation token created for ${normalizedEmail} via ${event.type}: ${activationUrl}`);
 
   // Send activation email via Resend
@@ -161,12 +161,12 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: "Fernando Nobre <fernando.nobre@agentesdesonhos.com.br>",
         to: [normalizedEmail],
-        subject: "Ative seu Cartão Virtual Agente de Sonhos",
+        subject: "Bem-vindo ao Agentes de Sonhos — Ative sua conta",
         html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-          <h2 style="color: #333;">Seu pagamento foi confirmado com sucesso.</h2>
-          <p style="font-size: 16px; color: #555;">Agora ative seu cartão virtual clicando no link abaixo:</p>
+          <h2 style="color: #333;">Seu pagamento foi confirmado com sucesso! 🎉</h2>
+          <p style="font-size: 16px; color: #555;">Agora finalize seu cadastro na plataforma Agentes de Sonhos clicando no botão abaixo:</p>
           <p style="margin: 24px 0;">
-            <a href="${activationUrl}" style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Ativar meu cartão</a>
+            <a href="${activationUrl}" style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Criar minha conta</a>
           </p>
           <p style="font-size: 14px; color: #888;">Esse link é único e válido por 24 horas.</p>
         </div>`,

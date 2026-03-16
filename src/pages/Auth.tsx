@@ -426,15 +426,6 @@ export default function Auth() {
                 Entrar com senha
               </Button>
 
-              <div className="text-center pt-2">
-                <button
-                  type="button"
-                  onClick={() => { switchToPassword(); setTimeout(() => setView("password-signup"), 0); }}
-                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Não tem conta? <span className="underline underline-offset-4">Cadastre-se</span>
-                </button>
-              </div>
             </div>
           )}
 
@@ -515,54 +506,17 @@ export default function Auth() {
                 </form>
               </Form>
 
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setView("password-signup")}
-                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Não tem conta? <span className="underline underline-offset-4">Cadastre-se</span>
-                </button>
-              </div>
-
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-muted-foreground/10" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-4 text-muted-foreground/60 font-medium">ou</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-12 rounded-xl text-base font-medium border-muted-foreground/20 hover:bg-muted/50 hover:border-muted-foreground/30 transition-all"
-                onClick={switchToOtp}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Entrar com código por email
-              </Button>
             </div>
           )}
 
-          {/* Password Signup view - Now uses MultiStepSignup */}
-          {view === "password-signup" && (
-            <MultiStepSignup
-              onComplete={() => setSignupSuccess(true)}
-              onCancel={() => setView("password-login")}
-            />
-          )}
         </CardContent>
         
         {/* Footer branding */}
-        {view !== "password-signup" && (
-          <div className="pb-6 text-center">
-            <p className="text-[10px] text-muted-foreground/50">
-              Desenvolvido por <span className="font-medium">Nobre Digital</span>
-            </p>
-          </div>
-        )}
+        <div className="pb-6 text-center">
+          <p className="text-[10px] text-muted-foreground/50">
+            Desenvolvido por <span className="font-medium">Nobre Digital</span>
+          </p>
+        </div>
       </Card>
     </div>
   );
