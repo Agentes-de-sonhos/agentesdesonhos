@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
+import { CollapsibleFormSection } from "@/components/trip/CollapsibleFormSection";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -264,11 +265,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* FlightAutoImport hidden per user request */}
 
-        {/* === RESUMO DO VOO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✈️ Informações Principais</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="✈️ Informações Principais" defaultOpen>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="main_airline" render={({ field }) => (
@@ -335,11 +332,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           )} />
         </div>
 
-        {/* === TRECHOS DE VOO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛫 Trechos de Voo</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🛫 Trechos de Voo" defaultOpen>
 
         {segments.map((seg, i) => (
           <div key={i} className="border rounded-lg p-4 space-y-3 bg-muted/20">
@@ -421,11 +416,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           <Plus className="h-4 w-4 mr-2" /> Adicionar Trecho de Voo
         </Button>
 
-        {/* === PASSAGEIROS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Passageiros</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👤 Passageiros">
 
         {passengers.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -457,11 +450,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </Button>
         </div>
 
-        {/* === BAGAGEM === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧳 Bagagem</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🧳 Bagagem">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="carry_on" render={({ field }) => (
@@ -490,11 +481,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </FormItem>
         )} />
 
-        {/* === CHECK-IN === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✅ Check-in Online</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="✅ Check-in Online">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="checkin_url" render={({ field }) => (
@@ -531,11 +520,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           )} />
         </div>
 
-        {/* === ORIENTAÇÕES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações de Embarque</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⚠️ Orientações de Embarque">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="recommended_arrival" render={({ field }) => (
@@ -569,6 +556,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
             <FormControl><Textarea placeholder="Informações adicionais para o passageiro..." rows={3} {...field} /></FormControl>
           </FormItem>
         )} />
+
+        </CollapsibleFormSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="E-ticket / Cartão de Embarque" />
 
@@ -732,11 +721,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === INFORMAÇÕES PRINCIPAIS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🏨 Informações Principais</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🏨 Informações Principais" defaultOpen>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
@@ -881,11 +866,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        {/* === CHECK-IN DETAILS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Detalhes do Check-in</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📅 Detalhes do Check-in">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkin_time" render={({ field }) => (
@@ -928,11 +911,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === CHECK-OUT DETAILS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧳 Detalhes do Check-out</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🧳 Detalhes do Check-out">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkout_time" render={({ field }) => (
@@ -976,11 +957,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === ACOMODAÇÃO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛏️ Detalhes da Acomodação</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🛏️ Detalhes da Acomodação">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="guest_count" render={({ field }) => (
@@ -1018,11 +997,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === LOCALIZAÇÃO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Localização e Contato</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📍 Localização e Contato">
 
         <FormField control={form.control} name="address" render={({ field }) => (
           <FormItem>
@@ -1059,11 +1036,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        {/* === ALIMENTAÇÃO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🍽️ Alimentação</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🍽️ Alimentação">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="breakfast_hours" render={({ field }) => (
@@ -1092,11 +1067,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === O QUE ESTÁ INCLUSO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">💰 O que está incluso</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="💰 O que está incluso">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="breakfast_included" render={({ field }) => (
@@ -1176,11 +1149,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === POLÍTICAS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧾 Políticas do Hotel</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🧾 Políticas do Hotel">
 
         <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
           <FormItem>
@@ -1217,11 +1188,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        {/* === HÓSPEDES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👨‍👩‍👧 Hóspedes</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👨‍👩‍👧 Hóspedes">
 
         {guests.map((g, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -1249,11 +1218,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === OBSERVAÇÕES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📝 Observações</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📝 Observações">
 
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
@@ -1267,6 +1234,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
             <FormControl><Textarea placeholder="Informações adicionais..." rows={2} {...field} /></FormControl>
           </FormItem>
         )} />
+
+        </CollapsibleFormSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Hotel" />
 
@@ -1422,11 +1391,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === RESUMO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚗 Informações Principais</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🚗 Informações Principais" defaultOpen>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="rental_company" render={({ field }) => (
             <FormItem><FormLabel>Locadora *</FormLabel><FormControl><Input placeholder="Hertz, Alamo, Localiza..." {...field} /></FormControl><FormMessage /></FormItem>
@@ -1466,11 +1431,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === RETIRADA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Dados de Retirada</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📍 Dados de Retirada">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_location" render={({ field }) => (
             <FormItem><FormLabel>Local de Retirada *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
@@ -1505,11 +1468,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Link Google Maps (Retirada)</FormLabel><FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === DEVOLUÇÃO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🔁 Dados de Devolução</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🔁 Dados de Devolução">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="dropoff_location" render={({ field }) => (
             <FormItem><FormLabel>Local de Devolução *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
@@ -1536,11 +1497,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Política de Atraso</FormLabel><FormControl><Input placeholder="Cobrança por hora adicional..." {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === VEÍCULO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚘 Detalhes do Veículo</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🚘 Detalhes do Veículo">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="car_model" render={({ field }) => (
             <FormItem><FormLabel>Modelo</FormLabel><FormControl><Input placeholder="Corolla ou similar" {...field} /></FormControl></FormItem>
@@ -1580,11 +1539,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === SEGUROS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛡️ Seguros da Locação</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🛡️ Seguros da Locação">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="basic_insurance" render={({ field }) => (
             <FormItem><FormLabel>Seguro Básico</FormLabel><FormControl><Input placeholder="Sim / Não / Incluso" {...field} /></FormControl></FormItem>
@@ -1616,11 +1573,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações do Seguro</FormLabel><FormControl><Textarea placeholder="Informações importantes sobre o seguro..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === CAUÇÃO E PAGAMENTO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">💳 Caução e Pagamento</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="💳 Caução e Pagamento">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="deposit_amount" render={({ field }) => (
             <FormItem><FormLabel>Valor da Caução</FormLabel><FormControl><Input placeholder="€ 1.200" {...field} /></FormControl></FormItem>
@@ -1638,11 +1593,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === CONDUTORES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Condutores</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👤 Condutores">
         {drivers.map((d, i) => (
           <div key={i} className="border rounded-lg p-3 space-y-2 bg-muted/20">
             <div className="flex items-center justify-between">
@@ -1676,11 +1629,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Taxa Condutor Adicional</FormLabel><FormControl><Input placeholder="€ 10/dia" {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === COMBUSTÍVEL === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⛽ Política de Combustível</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⛽ Política de Combustível">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="fuel_policy" render={({ field }) => (
             <FormItem><FormLabel>Política</FormLabel>
@@ -1702,11 +1653,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações de Combustível</FormLabel><FormControl><Textarea placeholder="Posto mais próximo, tipo de combustível..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === ORIENTAÇÕES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações Importantes</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⚠️ Orientações Importantes">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
             <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><Textarea placeholder="CNH válida, passaporte..." rows={2} {...field} /></FormControl></FormItem>
@@ -1729,6 +1678,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Informações adicionais..." rows={3} {...field} /></FormControl></FormItem>
         )} />
+
+        </CollapsibleFormSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Contrato da Locação" />
 
@@ -1888,11 +1839,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === RESUMO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚐 Informações Principais</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🚐 Informações Principais" defaultOpen>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="transfer_type" render={({ field }) => (
@@ -2003,6 +1950,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           )} />
         </div>
 
+        </CollapsibleFormSection>
+
         {/* === TRANSFER IN (ARRIVAL) === */}
         {(transferType === 'arrival') && (
           <>
@@ -2089,11 +2038,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           </>
         )}
 
-        {/* === LOCAIS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Locais de Embarque e Desembarque</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="📍 Locais de Embarque e Desembarque">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_address" render={({ field }) => (
             <FormItem><FormLabel>Endereço de Embarque</FormLabel><FormControl><Input placeholder="Endereço completo" {...field} /></FormControl></FormItem>
@@ -2114,11 +2059,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           <FormItem><FormLabel>Observações Logísticas</FormLabel><FormControl><Textarea placeholder="Ex: acesso restrito, portaria lateral..." rows={2} {...field} /></FormControl></FormItem>
         )} />
 
-        {/* === MOTORISTA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Motorista e Contato</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👤 Motorista e Contato">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="driver_name" render={({ field }) => (
             <FormItem><FormLabel>Nome do Motorista</FormLabel><FormControl><Input placeholder="Carlos" {...field} /></FormControl></FormItem>
@@ -2136,11 +2079,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           )} />
         </div>
 
-        {/* === VEÍCULO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚗 Detalhes do Veículo</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🚗 Detalhes do Veículo">
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="vehicle_type" render={({ field }) => (
             <FormItem><FormLabel>Tipo de Veículo</FormLabel>
@@ -2183,11 +2124,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           )} />
         </div>
 
-        {/* === PASSAGEIROS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👨‍👩‍👧 Passageiros</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👨‍👩‍👧 Passageiros">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adults_count" render={({ field }) => (
             <FormItem><FormLabel>Adultos</FormLabel><FormControl><Input placeholder="2" {...field} /></FormControl></FormItem>
@@ -2237,11 +2176,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           <Plus className="h-4 w-4 mr-2" /> Adicionar Passageiro
         </Button>
 
-        {/* === ORIENTAÇÕES === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações Importantes</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⚠️ Orientações Importantes">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
             <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><Textarea placeholder="Passaporte, voucher impresso..." rows={2} {...field} /></FormControl></FormItem>
@@ -2264,6 +2201,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Notas gerais..." rows={2} {...field} /></FormControl></FormItem>
         )} />
+
+        </CollapsibleFormSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Transfer" />
 
@@ -2416,11 +2355,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === INFORMAÇÕES PRINCIPAIS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🎟️ Informações Principais</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🎟️ Informações Principais" defaultOpen>
 
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
@@ -2510,11 +2445,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        {/* === DETALHES DE USO === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Detalhes de Uso</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📅 Detalhes de Uso">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="entry_time" render={({ field }) => (
@@ -2580,11 +2513,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        {/* === CÓDIGOS DO INGRESSO === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📱 Códigos do Ingresso</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📱 Códigos do Ingresso">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="ticket_code" render={({ field }) => (
@@ -2610,11 +2541,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           )} />
         </div>
 
-        {/* === LOCALIZAÇÃO === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Localização</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📍 Localização">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="venue_name" render={({ field }) => (
@@ -2649,11 +2578,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        {/* === PASSAGEIROS === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👨‍👩‍👧 Passageiros</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👨‍👩‍👧 Passageiros">
 
         <div className="space-y-2">
           {passengers.map((p, i) => (
@@ -2684,11 +2611,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </Button>
         </div>
 
-        {/* === REGRAS E POLÍTICAS === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📌 Regras e Políticas</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📌 Regras e Políticas">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
@@ -2740,11 +2665,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        {/* === DICAS DA AGÊNCIA === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧠 Dicas do Agente de Viagem</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🧠 Dicas do Agente de Viagem">
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
@@ -2754,11 +2677,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        {/* === CONTATOS === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📞 Contatos de Suporte</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📞 Contatos de Suporte">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="attraction_contact" render={({ field }) => (
@@ -2801,6 +2722,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
             <FormMessage />
           </FormItem>
         )} />
+
+        </CollapsibleFormSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Ingresso (PDF ou Imagem)" />
 
@@ -2934,11 +2857,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === INFORMAÇÕES PRINCIPAIS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛡️ Informações Principais</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🛡️ Informações Principais" defaultOpen>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="provider" render={({ field }) => (
@@ -3042,11 +2961,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === COBERTURAS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🏥 Coberturas do Seguro</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🏥 Coberturas do Seguro">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="medical_assistance" render={({ field }) => (
@@ -3111,11 +3028,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        {/* === CONTATOS DE EMERGÊNCIA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📞 Contatos de Emergência</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📞 Contatos de Emergência">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="emergency_phone" render={({ field }) => (
@@ -3166,11 +3081,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        {/* === PROCEDIMENTO DE EMERGÊNCIA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🆘 O que Fazer em Emergência</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🆘 O que Fazer em Emergência">
 
         <FormField control={form.control} name="how_to_activate" render={({ field }) => (
           <FormItem>
@@ -3197,11 +3110,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        {/* === SEGURADOS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👨‍👩‍👧 Segurados</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👨‍👩‍👧 Segurados">
 
         {insuredPersons.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -3232,11 +3143,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </Button>
         </div>
 
-        {/* === DADOS DA VIAGEM === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧳 Dados da Viagem</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🧳 Dados da Viagem">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="trip_purpose" render={({ field }) => (
@@ -3266,11 +3175,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        {/* === DICAS DA AGÊNCIA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧠 Dicas da Agência</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🧠 Dicas da Agência">
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
@@ -3298,6 +3205,8 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
             <FormControl><Textarea placeholder="Informações adicionais..." rows={3} {...field} /></FormControl>
           </FormItem>
         )} />
+
+        </CollapsibleFormSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Apólice / Voucher do Seguro" />
 
@@ -3458,11 +3367,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === INFORMAÇÕES PRINCIPAIS === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🚢 Informações do Cruzeiro</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🚢 Informações do Cruzeiro" defaultOpen>
 
         <FormField control={form.control} name="cruise_company" render={({ field }) => (
           <FormItem>
@@ -3555,11 +3460,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           )} />
         </div>
 
-        {/* === CABINE === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛏 Dados da Cabine</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🛏 Dados da Cabine">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="cabin_type" render={({ field }) => (
@@ -3630,11 +3533,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </FormItem>
         )} />
 
-        {/* === PASSAGEIROS === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👥 Passageiros</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👥 Passageiros">
 
         <div className="space-y-2">
           {passengers.map((p, i) => (
@@ -3663,11 +3564,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </Button>
         </div>
 
-        {/* === ITINERÁRIO === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🗺 Roteiro do Cruzeiro</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="🗺 Roteiro do Cruzeiro">
 
         <div className="space-y-2">
           {itinerary.map((stop, i) => (
@@ -3707,11 +3606,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </Button>
         </div>
 
-        {/* === CHECK-IN === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">✅ Check-in Online</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="✅ Check-in Online">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkin_url" render={({ field }) => (
@@ -3745,11 +3642,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           )} />
         </div>
 
-        {/* === ORIENTAÇÕES DE EMBARQUE === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚠️ Orientações de Embarque</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⚠️ Orientações de Embarque">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="boarding_terminal" render={({ field }) => (
@@ -3826,11 +3721,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           </FormItem>
         )} />
 
-        {/* === DADOS OPERACIONAIS === */}
-        <div className="space-y-1 pt-2">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">⚡ Dados Operacionais do Navio</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="⚡ Dados Operacionais do Navio">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="onboard_currency" render={({ field }) => (
@@ -3874,6 +3767,8 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
             </FormItem>
           )} />
         </div>
+
+        </CollapsibleFormSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Boarding Pass / Confirmação" />
 
@@ -4038,11 +3933,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* === INFO PRINCIPAL === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🛎️ Informações do Serviço</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🛎️ Informações do Serviço" defaultOpen>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="service_name" render={({ field }) => (
@@ -4119,11 +4010,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        {/* === AGENDAMENTO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📅 Agendamento</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📅 Agendamento">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="date" render={({ field }) => (
@@ -4161,11 +4050,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           )} />
         </div>
 
-        {/* === LOCALIZAÇÃO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📍 Localização</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📍 Localização">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="location_name" render={({ field }) => (
@@ -4209,11 +4096,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === CONTATO === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">👤 Contato do Prestador</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="👤 Contato do Prestador">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="contact_name" render={({ field }) => (
@@ -4263,6 +4148,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
             <FormMessage />
           </FormItem>
         )} />
+
+        </CollapsibleFormSection>
 
         {/* === CHIP / INTERNET (CONDICIONAL) === */}
         {isChip && (
@@ -4382,11 +4269,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === DICAS DA AGÊNCIA === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧠 Orientações da Agência</h4>
-          <div className="h-px bg-border" />
-        </div>
+        <CollapsibleFormSection title="🧠 Orientações da Agência">
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
@@ -4404,11 +4287,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           </FormItem>
         )} />
 
-        {/* === CONTATOS DE SUPORTE === */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📞 Contatos de Suporte</h4>
-          <div className="h-px bg-border" />
-        </div>
+        </CollapsibleFormSection>
+
+        <CollapsibleFormSection title="📞 Contatos de Suporte">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="agency_contact" render={({ field }) => (
@@ -4426,6 +4307,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
             </FormItem>
           )} />
         </div>
+
+        </CollapsibleFormSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Comprovante / Voucher / Documento" />
 
