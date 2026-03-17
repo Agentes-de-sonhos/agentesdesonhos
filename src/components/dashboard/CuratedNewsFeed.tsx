@@ -66,43 +66,53 @@ function CategoryBadge({ categoria }: { categoria: string }) {
   );
 }
 
-function NewsItemTags({ item, isTopTrending }: { item: CuratedNews; isTopTrending: boolean }) {
+function NewsMetaRow({ item, isTopTrending }: { item: CuratedNews; isTopTrending: boolean }) {
   const tags: React.ReactNode[] = [];
 
   if (item.is_noticia_do_dia) {
     tags.push(
-      <span key="dia" className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-        <Flame className="h-3 w-3" /> Notícia do Dia
+      <span key="dia" className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider leading-4">
+        <Flame className="h-2.5 w-2.5" /> Dia
       </span>
     );
   }
 
   if (item.top5_position != null) {
     tags.push(
-      <span key="top5" className="inline-flex items-center gap-1 rounded-full bg-warning/15 text-warning border border-warning/30 px-2 py-0.5 text-[10px] font-bold">
-        <Zap className="h-3 w-3" /> Top {item.top5_position}
+      <span key="top5" className="inline-flex items-center gap-0.5 rounded-full bg-warning/15 text-warning border border-warning/30 px-1.5 py-0 text-[9px] font-bold leading-4">
+        <Zap className="h-2.5 w-2.5" /> Top {item.top5_position}
       </span>
     );
   }
 
   if (item.alerta_trade) {
     tags.push(
-      <span key="destaque" className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2 py-0.5 text-[10px] font-bold">
-        <Star className="h-3 w-3" /> Destaque
+      <span key="destaque" className="inline-flex items-center gap-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-1.5 py-0 text-[9px] font-bold leading-4">
+        <Star className="h-2.5 w-2.5" /> Destaque
       </span>
     );
   }
 
   if (isTopTrending && !item.is_noticia_do_dia) {
     tags.push(
-      <span key="alta" className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold">
-        <TrendingUp className="h-3 w-3" /> Em alta
+      <span key="alta" className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 text-destructive px-1.5 py-0 text-[9px] font-bold leading-4">
+        <TrendingUp className="h-2.5 w-2.5" /> Em alta
       </span>
     );
   }
 
-  if (tags.length === 0) return null;
-  return <div className="flex items-center gap-1 flex-wrap mb-1">{tags}</div>;
+  return (
+    <div className="flex items-center gap-1.5 flex-nowrap overflow-hidden min-w-0">
+      <CategoryBadge categoria={item.categoria} />
+      {tags}
+      <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-auto flex-shrink-0">
+        {item.fonte} • {formatDate(item.data_publicacao)}
+        {item.relevancia_score >= 8 && (
+          <span className="font-semibold text-primary ml-1">★ {item.relevancia_score}</span>
+        )}
+      </span>
+    </div>
+  );
 }
 
 export function CuratedNewsFeed() {
