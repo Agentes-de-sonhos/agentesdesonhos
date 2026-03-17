@@ -2,32 +2,24 @@ import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Baby, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Baby, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
-  flight: "Passagem Aérea",
-  hotel: "Hospedagem",
-  car_rental: "Locação de Veículo",
-  transfer: "Transfer",
-  attraction: "Ingressos/Atrações",
-  insurance: "Seguro Viagem",
-  cruise: "Cruzeiro",
-  other: "Outros Serviços",
+  flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
+  transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
+  cruise: "Cruzeiro", other: "Outros Serviços",
 };
 
 const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
-  flight: <Plane className="h-5 w-5" />,
-  hotel: <Hotel className="h-5 w-5" />,
-  car_rental: <Car className="h-5 w-5" />,
-  transfer: <ArrowRightLeft className="h-5 w-5" />,
-  attraction: <Ticket className="h-5 w-5" />,
-  insurance: <Shield className="h-5 w-5" />,
-  cruise: <Ship className="h-5 w-5" />,
-  other: <Package className="h-5 w-5" />,
+  flight: <Plane className="h-5 w-5" />, hotel: <Hotel className="h-5 w-5" />,
+  car_rental: <Car className="h-5 w-5" />, transfer: <ArrowRightLeft className="h-5 w-5" />,
+  attraction: <Ticket className="h-5 w-5" />, insurance: <Shield className="h-5 w-5" />,
+  cruise: <Ship className="h-5 w-5" />, other: <Package className="h-5 w-5" />,
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
@@ -46,19 +38,11 @@ function formatCurrency(value: number) {
 }
 
 function formatDate(dateStr: string) {
-  try {
-    return format(new Date(dateStr), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  } catch {
-    return dateStr;
-  }
+  try { return format(new Date(dateStr), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return dateStr; }
 }
 
 function formatDateShort(dateStr: string) {
-  try {
-    return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR });
-  } catch {
-    return dateStr;
-  }
+  try { return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR }); } catch { return dateStr; }
 }
 
 function getServiceDetails(service: QuoteService): string[] {
@@ -111,34 +95,41 @@ function getServiceDetails(service: QuoteService): string[] {
   return details;
 }
 
-function ServiceCard({ service, showPrice }: { service: QuoteService; showPrice: boolean }) {
+function PublicServiceCard({ service, showPrice }: { service: QuoteService; showPrice: boolean }) {
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
   const colorClass = SERVICE_COLORS[type] || SERVICE_COLORS.other;
 
   return (
     <div className="group rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
-      {/* Service header with gradient */}
       <div className={`bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between`}>
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
             {SERVICE_ICONS[type]}
           </div>
-          <span className="text-sm font-bold uppercase tracking-wide">
-            {SERVICE_LABELS[type]}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold uppercase tracking-wide">{SERVICE_LABELS[type]}</span>
+            {service.option_label && (
+              <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
+                <Tag className="h-3 w-3" />
+                {service.option_label}
+              </Badge>
+            )}
+          </div>
         </div>
         {showPrice && (
-          <span className="text-lg font-extrabold whitespace-nowrap">
-            {formatCurrency(service.amount)}
-          </span>
+          <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
         )}
       </div>
-      {/* Service details */}
       <div className="px-5 py-4 space-y-1.5">
         {details.map((d, i) => (
           <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
         ))}
+        {service.description && (
+          <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic">
+            {service.description}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -190,14 +181,15 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
   }
 
   const showDetailedPrices = (quote as any).show_detailed_prices !== false;
+  const paymentTerms = (quote as any).payment_terms as string | null;
+  const validUntil = (quote as any).valid_until as string | null;
+  const validityDisclaimer = (quote as any).validity_disclaimer as string | null;
   const startDate = new Date(quote.start_date);
   const endDate = new Date(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   const whatsappNumber = agentProfile?.phone?.replace(/\D/g, "") || "";
-  const whatsappMessage = encodeURIComponent(
-    `Olá! Vi o orçamento para ${quote.destination} e gostaria de mais informações.`
-  );
+  const whatsappMessage = encodeURIComponent(`Olá! Vi o orçamento para ${quote.destination} e gostaria de mais informações.`);
   const whatsappUrl = whatsappNumber
     ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${whatsappMessage}`
     : "";
@@ -208,11 +200,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-5 flex items-center justify-center gap-3">
           {agentProfile?.agency_logo_url ? (
-            <img
-              src={agentProfile.agency_logo_url}
-              alt={agentProfile.agency_name || "Agência"}
-              className="h-12 max-w-[200px] object-contain"
-            />
+            <img src={agentProfile.agency_logo_url} alt={agentProfile.agency_name || "Agência"} className="h-12 max-w-[200px] object-contain" />
           ) : (
             <div className="flex items-center gap-2.5">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -286,14 +274,12 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
           <section className="space-y-5">
             <div className="flex items-center gap-3">
               <div className="h-px flex-1 bg-border/60" />
-              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                Serviços Incluídos
-              </h2>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Serviços Incluídos</h2>
               <div className="h-px flex-1 bg-border/60" />
             </div>
             <div className="space-y-4">
               {quote.services.map((service) => (
-                <ServiceCard key={service.id} service={service} showPrice={showDetailedPrices} />
+                <PublicServiceCard key={service.id} service={service} showPrice={showDetailedPrices} />
               ))}
             </div>
           </section>
@@ -317,27 +303,44 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
           </div>
         </div>
 
+        {/* ─── Payment Terms ─── */}
+        {paymentTerms && (
+          <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
+            <div className="flex items-center gap-2 mb-3">
+              <CreditCard className="h-5 w-5 text-primary" />
+              <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Condições de Pagamento</h3>
+            </div>
+            <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{paymentTerms}</p>
+          </div>
+        )}
+
         {/* ─── Validity ─── */}
-        <p className="text-center text-xs text-muted-foreground">
-          Proposta válida por 7 dias a partir da data de emissão. Valores sujeitos a alteração conforme disponibilidade.
-        </p>
+        <div className="text-center space-y-1">
+          {validUntil && (
+            <p className="text-sm font-medium text-foreground">
+              Proposta válida até {formatDate(validUntil)}
+            </p>
+          )}
+          {validityDisclaimer && (
+            <p className="text-xs text-muted-foreground">{validityDisclaimer}</p>
+          )}
+          {!validUntil && !validityDisclaimer && (
+            <p className="text-xs text-muted-foreground">
+              Proposta válida por 7 dias a partir da data de emissão. Valores sujeitos a alteração conforme disponibilidade.
+            </p>
+          )}
+        </div>
 
         {/* ─── Agent Signature ─── */}
         {agentProfile && (
           <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
             <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">
-                Seu consultor de viagens
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">Seu consultor de viagens</p>
             </div>
             <div className="p-6 sm:p-8">
               <div className="flex flex-col items-center text-center space-y-5">
                 {agentProfile.avatar_url ? (
-                  <img
-                    src={agentProfile.avatar_url}
-                    alt={agentProfile.name}
-                    className="h-24 w-24 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white"
-                  />
+                  <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-24 w-24 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
                 ) : (
                   <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg ring-2 ring-white">
                     {agentProfile.name.charAt(0).toUpperCase()}
@@ -345,22 +348,14 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
                 )}
                 <div className="space-y-1">
                   <p className="text-xl font-bold text-foreground">{agentProfile.name}</p>
-                  {agentProfile.agency_name && (
-                    <p className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</p>
-                  )}
+                  {agentProfile.agency_name && <p className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</p>}
                   {(agentProfile.city || agentProfile.state) && (
-                    <p className="text-xs text-muted-foreground">
-                      {[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
                   )}
                 </div>
                 {whatsappUrl && (
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-                  >
+                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
                     <WhatsAppIcon className="h-5 w-5" />
                     Falar no WhatsApp
                   </a>
@@ -374,12 +369,8 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
       {/* ─── Mobile floating WhatsApp ─── */}
       {whatsappUrl && (
         <div className="fixed bottom-6 right-6 sm:hidden z-20">
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl hover:scale-110 transition-transform"
-          >
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl hover:scale-110 transition-transform">
             <WhatsAppIcon className="h-7 w-7" />
           </a>
         </div>

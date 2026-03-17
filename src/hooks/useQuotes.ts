@@ -14,13 +14,11 @@ export function useQuotes() {
     queryKey: ["quotes", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
       const { data, error } = await supabase
         .from("quotes")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       return data as Quote[];
     },
@@ -30,7 +28,6 @@ export function useQuotes() {
   const createQuoteMutation = useMutation({
     mutationFn: async (formData: QuoteFormData) => {
       if (!user) throw new Error("User not authenticated");
-
       const { data, error } = await supabase
         .from("quotes")
         .insert({
@@ -45,33 +42,21 @@ export function useQuotes() {
         })
         .select()
         .single();
-
       if (error) throw error;
       return data as Quote;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
-      toast({
-        title: "Orçamento criado",
-        description: "O orçamento foi criado com sucesso.",
-      });
+      toast({ title: "Orçamento criado", description: "O orçamento foi criado com sucesso." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao criar orçamento",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao criar orçamento", description: error.message, variant: "destructive" });
     },
   });
 
   const updateQuoteMutation = useMutation({
     mutationFn: async ({ id, ...data }: Partial<Quote> & { id: string }) => {
-      const { error } = await supabase
-        .from("quotes")
-        .update(data)
-        .eq("id", id);
-
+      const { error } = await supabase.from("quotes").update(data as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -81,59 +66,33 @@ export function useQuotes() {
 
   const deleteQuoteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("quotes")
-        .delete()
-        .eq("id", id);
-
+      const { error } = await supabase.from("quotes").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
-      toast({
-        title: "Orçamento excluído",
-        description: "O orçamento foi excluído com sucesso.",
-      });
+      toast({ title: "Orçamento excluído", description: "O orçamento foi excluído com sucesso." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao excluir orçamento",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao excluir orçamento", description: error.message, variant: "destructive" });
     },
   });
 
   const publishQuoteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Generate cryptographically secure 32-character hex token
       const array = new Uint8Array(16);
       crypto.getRandomValues(array);
-      const shareToken = Array.from(array)
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-      
-      const { error } = await supabase
-        .from("quotes")
-        .update({ status: "published", share_token: shareToken })
-        .eq("id", id);
-
+      const shareToken = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+      const { error } = await supabase.from("quotes").update({ status: "published", share_token: shareToken } as any).eq("id", id);
       if (error) throw error;
       return shareToken;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
-      toast({
-        title: "Orçamento publicado",
-        description: "O link de compartilhamento foi gerado.",
-      });
+      toast({ title: "Orçamento publicado", description: "O link de compartilhamento foi gerado." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao publicar orçamento",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao publicar orçamento", description: error.message, variant: "destructive" });
     },
   });
 
@@ -158,21 +117,12 @@ export function useQuote(id: string | undefined) {
     queryKey: ["quote", id],
     queryFn: async () => {
       if (!id) return null;
-
       const { data: quoteData, error: quoteError } = await supabase
-        .from("quotes")
-        .select("*")
-        .eq("id", id)
-        .single();
-
+        .from("quotes").select("*").eq("id", id).single();
       if (quoteError) throw quoteError;
 
       const { data: servicesData, error: servicesError } = await supabase
-        .from("quote_services")
-        .select("*")
-        .eq("quote_id", id)
-        .order("order_index", { ascending: true });
-
+        .from("quote_services").select("*").eq("quote_id", id).order("order_index", { ascending: true });
       if (servicesError) throw servicesError;
 
       return {
@@ -189,16 +139,15 @@ export function useQuote(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type,
-      service_data,
-      amount,
+      service_type, service_data, amount, option_label, description,
     }: {
       service_type: ServiceType;
       service_data: ServiceData;
       amount: number;
+      option_label?: string;
+      description?: string;
     }) => {
       if (!id) throw new Error("Quote ID is required");
-
       const currentServices = quote?.services || [];
       const nextOrderIndex = currentServices.length;
 
@@ -210,43 +159,30 @@ export function useQuote(id: string | undefined) {
           service_data: service_data as any,
           amount,
           order_index: nextOrderIndex,
-        })
+          option_label: option_label || null,
+          description: description || null,
+        } as any)
         .select()
         .single();
-
       if (error) throw error;
 
-      // Update quote total
       const newTotal = (quote?.total_amount || 0) + amount;
-      await supabase
-        .from("quotes")
-        .update({ total_amount: newTotal })
-        .eq("id", id);
-
+      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
-      toast({
-        title: "Serviço adicionado",
-        description: "O serviço foi adicionado ao orçamento.",
-      });
+      toast({ title: "Serviço adicionado", description: "O serviço foi adicionado ao orçamento." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao adicionar serviço",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao adicionar serviço", description: error.message, variant: "destructive" });
     },
   });
 
   const updateServiceMutation = useMutation({
     mutationFn: async ({
-      serviceId,
-      service_data,
-      amount,
+      serviceId, service_data, amount,
     }: {
       serviceId: string;
       service_data: ServiceData;
@@ -254,38 +190,21 @@ export function useQuote(id: string | undefined) {
     }) => {
       const oldService = quote?.services?.find((s) => s.id === serviceId);
       const oldAmount = oldService?.amount || 0;
-
       const { error } = await supabase
         .from("quote_services")
-        .update({
-          service_data: service_data as any,
-          amount,
-        })
+        .update({ service_data: service_data as any, amount })
         .eq("id", serviceId);
-
       if (error) throw error;
-
-      // Update quote total
       const newTotal = (quote?.total_amount || 0) - oldAmount + amount;
-      await supabase
-        .from("quotes")
-        .update({ total_amount: newTotal })
-        .eq("id", id);
+      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
-      toast({
-        title: "Serviço atualizado",
-        description: "O serviço foi atualizado com sucesso.",
-      });
+      toast({ title: "Serviço atualizado", description: "O serviço foi atualizado com sucesso." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao atualizar serviço",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao atualizar serviço", description: error.message, variant: "destructive" });
     },
   });
 
@@ -293,35 +212,18 @@ export function useQuote(id: string | undefined) {
     mutationFn: async (serviceId: string) => {
       const service = quote?.services?.find((s) => s.id === serviceId);
       const amount = service?.amount || 0;
-
-      const { error } = await supabase
-        .from("quote_services")
-        .delete()
-        .eq("id", serviceId);
-
+      const { error } = await supabase.from("quote_services").delete().eq("id", serviceId);
       if (error) throw error;
-
-      // Update quote total
       const newTotal = Math.max(0, (quote?.total_amount || 0) - amount);
-      await supabase
-        .from("quotes")
-        .update({ total_amount: newTotal })
-        .eq("id", id);
+      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
-      toast({
-        title: "Serviço removido",
-        description: "O serviço foi removido do orçamento.",
-      });
+      toast({ title: "Serviço removido", description: "O serviço foi removido do orçamento." });
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao remover serviço",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao remover serviço", description: error.message, variant: "destructive" });
     },
   });
 
@@ -340,23 +242,13 @@ export function usePublicQuote(token: string | undefined) {
     queryKey: ["public-quote", token],
     queryFn: async () => {
       if (!token) return null;
-
       const { data: quoteData, error: quoteError } = await supabase
-        .from("quotes")
-        .select("*")
-        .eq("share_token", token)
-        .eq("status", "published")
-        .maybeSingle();
-
+        .from("quotes").select("*").eq("share_token", token).eq("status", "published").maybeSingle();
       if (quoteError) throw quoteError;
       if (!quoteData) return null;
 
       const { data: servicesData, error: servicesError } = await supabase
-        .from("quote_services")
-        .select("*")
-        .eq("quote_id", quoteData.id)
-        .order("order_index", { ascending: true });
-
+        .from("quote_services").select("*").eq("quote_id", quoteData.id).order("order_index", { ascending: true });
       if (servicesError) throw servicesError;
 
       return {

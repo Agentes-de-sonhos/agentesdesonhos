@@ -3686,7 +3686,9 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          description: string | null
           id: string
+          option_label: string | null
           order_index: number
           quote_id: string
           service_data: Json
@@ -3696,7 +3698,9 @@ export type Database = {
         Insert: {
           amount?: number
           created_at?: string
+          description?: string | null
           id?: string
+          option_label?: string | null
           order_index?: number
           quote_id: string
           service_data?: Json
@@ -3706,7 +3710,9 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          description?: string | null
           id?: string
+          option_label?: string | null
           order_index?: number
           quote_id?: string
           service_data?: Json
@@ -3732,6 +3738,7 @@ export type Database = {
           destination: string
           end_date: string
           id: string
+          payment_terms: string | null
           share_expires_at: string | null
           share_token: string | null
           show_detailed_prices: boolean
@@ -3740,6 +3747,8 @@ export type Database = {
           total_amount: number
           updated_at: string
           user_id: string
+          valid_until: string | null
+          validity_disclaimer: string
         }
         Insert: {
           adults_count?: number
@@ -3749,6 +3758,7 @@ export type Database = {
           destination: string
           end_date: string
           id?: string
+          payment_terms?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           show_detailed_prices?: boolean
@@ -3757,6 +3767,8 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           user_id: string
+          valid_until?: string | null
+          validity_disclaimer?: string
         }
         Update: {
           adults_count?: number
@@ -3766,6 +3778,7 @@ export type Database = {
           destination?: string
           end_date?: string
           id?: string
+          payment_terms?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           show_detailed_prices?: boolean
@@ -3774,6 +3787,8 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           user_id?: string
+          valid_until?: string | null
+          validity_disclaimer?: string
         }
         Relationships: []
       }
