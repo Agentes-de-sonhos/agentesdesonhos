@@ -395,7 +395,7 @@ export default function Auth() {
             <div className="flex flex-col items-center gap-3 py-4">
               <div className="relative">
                 <Mail className="h-12 w-12 text-primary/70" />
-                <ShieldCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-green-500" />
+                <ShieldCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-primary" />
               </div>
               <p className="text-sm text-muted-foreground text-center leading-relaxed">
                 Administradores precisam confirmar o acesso clicando no link enviado por e-mail. Essa etapa é obrigatória para garantir a segurança da sua conta.

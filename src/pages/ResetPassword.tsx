@@ -118,7 +118,7 @@ export default function ResetPassword() {
               <img src={logoAgentes} alt="Agentes de Sonhos" className="h-36 w-auto" />
             </div>
             <div className="space-y-2">
-              <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
+              <CheckCircle className="h-12 w-12 text-primary mx-auto" />
               <CardTitle className="text-xl font-semibold">Senha atualizada!</CardTitle>
               <CardDescription className="text-sm">
                 Sua senha foi redefinida com sucesso. Você será redirecionado para o login.
