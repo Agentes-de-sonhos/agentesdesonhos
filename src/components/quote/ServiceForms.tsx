@@ -105,6 +105,36 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel }: Omit<Ser
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {showOptionLabel && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="option_label"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome da Opção (opcional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: Melhor custo-benefício" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="service_description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição (opcional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Detalhes, diferenciais..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
