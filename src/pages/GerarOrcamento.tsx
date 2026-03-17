@@ -106,14 +106,16 @@ function QuoteHistoryRow({
   );
 }
 
-/* ──────────────────────── Payment Template Buttons ──────────────────────── */
-const PAYMENT_TEMPLATES = [
-  { label: "Pix com desconto", text: "💰 Pagamento via Pix com 5% de desconto sobre o valor total." },
-  { label: "Cartão parcelado", text: "💳 Parcelamento em até 10x sem juros no cartão de crédito." },
-  { label: "Entrada + parcelas", text: "📋 Entrada de 30% + saldo em até 8x sem juros no cartão." },
-  { label: "À vista", text: "✅ Pagamento à vista via transferência bancária." },
-  { label: "Boleto", text: "📄 Pagamento via boleto bancário (à vista)." },
+/* ──────────────────────── Payment Display Modes ──────────────────────── */
+type PaymentDisplayMode = "installments" | "installments_with_entry" | "full_payment";
+
+const PAYMENT_MODE_OPTIONS: { value: PaymentDisplayMode; label: string; description: string }[] = [
+  { value: "installments", label: "Parcelado (sem entrada)", description: "Ex: 10x de R$ 2.400" },
+  { value: "installments_with_entry", label: "Parcelado com entrada", description: "Ex: Entrada + 9x de R$ 2.400" },
+  { value: "full_payment", label: "À vista", description: "Ex: R$ 24.000 à vista" },
 ];
+
+const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
 
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function GerarOrcamento() {
@@ -131,6 +133,11 @@ export default function GerarOrcamento() {
   const [validUntil, setValidUntil] = useState<Date | undefined>();
   const [validityDisclaimer, setValidityDisclaimer] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [paymentDisplayMode, setPaymentDisplayMode] = useState<PaymentDisplayMode>("full_payment");
+  const [installmentsCount, setInstallmentsCount] = useState(10);
+  const [entryPercentage, setEntryPercentage] = useState(30);
+  const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
+  const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
 
   useEffect(() => {
     if (user?.id) { fetchAgentProfile(user.id, supabase).then(setAgentProfile); }
@@ -141,6 +148,11 @@ export default function GerarOrcamento() {
       setPaymentTerms((quote as any).payment_terms || "");
       setValidUntil((quote as any).valid_until ? new Date((quote as any).valid_until) : undefined);
       setValidityDisclaimer((quote as any).validity_disclaimer || "Valores sujeitos à alteração sem aviso prévio devido à variação cambial e disponibilidade de tarifas.");
+      setPaymentDisplayMode(((quote as any).payment_display_mode as PaymentDisplayMode) || "full_payment");
+      setInstallmentsCount((quote as any).installments_count || 10);
+      setEntryPercentage((quote as any).entry_percentage || 30);
+      setPaymentMethodLabel((quote as any).payment_method_label || "");
+      setFullPaymentDiscountPercent((quote as any).full_payment_discount_percent || 0);
     }
   }, [quote]);
 
@@ -178,10 +190,17 @@ export default function GerarOrcamento() {
     window.location.reload();
   };
 
-  const handleSavePaymentTerms = async () => {
+  const handleSavePaymentConfig = async () => {
     if (!quote) return;
-    await supabase.from("quotes").update({ payment_terms: paymentTerms || null } as any).eq("id", quote.id);
-    toast({ title: "Salvo", description: "Condições de pagamento atualizadas." });
+    await supabase.from("quotes").update({
+      payment_terms: paymentTerms || null,
+      payment_display_mode: paymentDisplayMode,
+      installments_count: installmentsCount,
+      entry_percentage: entryPercentage,
+      payment_method_label: paymentMethodLabel || null,
+      full_payment_discount_percent: fullPaymentDiscountPercent,
+    } as any).eq("id", quote.id);
+    toast({ title: "Salvo", description: "Configuração de pagamento atualizada." });
   };
 
   const handleSaveValidity = async () => {
@@ -407,39 +426,146 @@ export default function GerarOrcamento() {
               </CardContent>
             </Card>
 
-            {/* Condições de Pagamento */}
+            {/* Apresentação do Investimento */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <CreditCard className="h-4 w-4" />
-                  Condições de Pagamento
+                  Apresentação do Investimento
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap gap-1.5">
-                  {PAYMENT_TEMPLATES.map((tpl) => (
-                    <Button
-                      key={tpl.label}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7"
-                      onClick={() => setPaymentTerms(prev => prev ? `${prev}\n${tpl.text}` : tpl.text)}
-                    >
-                      <Plus className="mr-1 h-3 w-3" />{tpl.label}
-                    </Button>
-                  ))}
+              <CardContent className="space-y-4">
+                {/* Mode selector */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
+                  <div className="grid gap-2">
+                    {PAYMENT_MODE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setPaymentDisplayMode(opt.value)}
+                        className={cn(
+                          "flex items-start gap-3 rounded-xl border p-3 text-left transition-all",
+                          paymentDisplayMode === opt.value
+                            ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                            : "border-border hover:border-border/80 hover:bg-muted/30"
+                        )}
+                      >
+                        <div className={cn(
+                          "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                          paymentDisplayMode === opt.value ? "border-primary" : "border-muted-foreground/40"
+                        )}>
+                          {paymentDisplayMode === opt.value && <div className="h-2 w-2 rounded-full bg-primary" />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{opt.label}</p>
+                          <p className="text-xs text-muted-foreground">{opt.description}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <Textarea
-                  placeholder="Ex: Entrada + saldo em até 10x sem juros no cartão. Pagamento via Pix com 5% de desconto."
-                  value={paymentTerms}
-                  onChange={(e) => setPaymentTerms(e.target.value)}
-                  rows={4}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Use os botões acima para inserir modelos. Personalize livremente o texto.
-                </p>
-                <Button variant="outline" size="sm" onClick={handleSavePaymentTerms}>
-                  Salvar
+
+                <Separator />
+
+                {/* Dynamic fields based on mode */}
+                {paymentDisplayMode === "installments" && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">Nº de parcelas</Label>
+                      <Input type="number" min={2} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">Meio de pagamento</Label>
+                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
+                        <option value="">Selecione...</option>
+                        {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </div>
+                    {quote && (
+                      <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
+                        <p className="text-sm font-medium text-primary">
+                          Destaque: <span className="font-bold">{installmentsCount}x de {formatCurrency(quote.total_amount / (installmentsCount || 1))}</span>
+                          {paymentMethodLabel && <span className="text-muted-foreground font-normal"> no {paymentMethodLabel}</span>}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {paymentDisplayMode === "installments_with_entry" && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">% da entrada</Label>
+                      <Input type="number" min={1} max={90} value={entryPercentage} onChange={(e) => setEntryPercentage(Number(e.target.value))} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">Nº de parcelas (saldo)</Label>
+                      <Input type="number" min={1} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">Meio de pagamento</Label>
+                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
+                        <option value="">Selecione...</option>
+                        {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </div>
+                    {quote && (() => {
+                      const entry = quote.total_amount * (entryPercentage / 100);
+                      const remainder = quote.total_amount - entry;
+                      const installmentValue = remainder / (installmentsCount || 1);
+                      return (
+                        <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
+                          <p className="text-sm font-medium text-primary">
+                            Destaque: <span className="font-bold">Entrada de {formatCurrency(entry)} + {installmentsCount}x de {formatCurrency(installmentValue)}</span>
+                          </p>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {paymentDisplayMode === "full_payment" && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">Desconto à vista (%)</Label>
+                      <Input type="number" min={0} max={50} value={fullPaymentDiscountPercent} onChange={(e) => setFullPaymentDiscountPercent(Number(e.target.value))} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">Meio de pagamento</Label>
+                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
+                        <option value="">Selecione...</option>
+                        {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </div>
+                    {quote && (
+                      <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
+                        <p className="text-sm font-medium text-primary">
+                          Destaque: <span className="font-bold">{formatCurrency(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
+                          {fullPaymentDiscountPercent > 0 && (
+                            <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethodLabel ? ` via ${paymentMethodLabel}` : ""})</span>
+                          )}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <Separator />
+
+                {/* Additional payment notes */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">Observações adicionais de pagamento</Label>
+                  <Textarea
+                    placeholder="Ex: Parcelamento sem juros. Desconto especial para pagamento via Pix."
+                    value={paymentTerms}
+                    onChange={(e) => setPaymentTerms(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <Button variant="outline" size="sm" onClick={handleSavePaymentConfig}>
+                  Salvar Configuração
                 </Button>
               </CardContent>
             </Card>

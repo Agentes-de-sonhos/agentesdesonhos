@@ -332,25 +332,95 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
           </section>
         )}
 
-        {/* ─── Total ─── */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground p-8 sm:p-10 text-center shadow-xl">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
-          <div className="relative space-y-3">
-            <p className="text-sm font-medium opacity-80 uppercase tracking-widest">
-              {showDetailedPrices ? "Investimento Total" : "Valor do Pacote Completo"}
-            </p>
-            <p className="text-5xl sm:text-6xl font-black tracking-tight">
-              {formatCurrency(quote.total_amount)}
-            </p>
-            {quote.services && quote.services.length > 0 && (
-              <p className="text-sm opacity-70">
-                {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
-              </p>
-            )}
-          </div>
-        </div>
+        {/* ─── Investment Highlight ─── */}
+        {(() => {
+          const mode = (quote as any).payment_display_mode || "full_payment";
+          const installments = (quote as any).installments_count || 10;
+          const entryPct = (quote as any).entry_percentage || 0;
+          const discountPct = (quote as any).full_payment_discount_percent || 0;
+          const methodLabel = (quote as any).payment_method_label as string | null;
+          const total = quote.total_amount;
 
-        {/* ─── Payment Terms ─── */}
+          let mainDisplay: React.ReactNode;
+          let subtitleDisplay: React.ReactNode = null;
+
+          if (mode === "installments") {
+            const installmentValue = total / (installments || 1);
+            mainDisplay = (
+              <>
+                <span className="text-2xl sm:text-3xl font-bold opacity-90">{installments}x de</span>
+                <span className="text-5xl sm:text-6xl font-black tracking-tight">{formatCurrency(installmentValue)}</span>
+              </>
+            );
+            subtitleDisplay = (
+              <p className="text-sm opacity-70">
+                Total: {formatCurrency(total)}{methodLabel ? ` • ${methodLabel}` : ""} • sem juros
+              </p>
+            );
+          } else if (mode === "installments_with_entry") {
+            const entryValue = total * (entryPct / 100);
+            const remainder = total - entryValue;
+            const installmentValue = remainder / (installments || 1);
+            mainDisplay = (
+              <div className="space-y-1">
+                <p className="text-xl sm:text-2xl font-bold opacity-90">
+                  Entrada de <span className="text-primary-foreground">{formatCurrency(entryValue)}</span>
+                </p>
+                <p className="text-3xl sm:text-4xl font-black tracking-tight">
+                  + {installments}x de {formatCurrency(installmentValue)}
+                </p>
+              </div>
+            );
+            subtitleDisplay = (
+              <p className="text-sm opacity-70">
+                Total: {formatCurrency(total)}{methodLabel ? ` • ${methodLabel}` : ""}
+              </p>
+            );
+          } else {
+            // full_payment
+            const discountedTotal = total * (1 - discountPct / 100);
+            mainDisplay = (
+              <>
+                <span className="text-5xl sm:text-6xl font-black tracking-tight">{formatCurrency(discountedTotal)}</span>
+                <span className="text-xl sm:text-2xl font-bold opacity-80">à vista</span>
+              </>
+            );
+            if (discountPct > 0) {
+              subtitleDisplay = (
+                <div className="space-y-1">
+                  <p className="text-sm opacity-70 line-through">{formatCurrency(total)}</p>
+                  <p className="text-sm font-semibold opacity-90">
+                    🎉 {discountPct}% de desconto{methodLabel ? ` via ${methodLabel}` : ""}
+                  </p>
+                </div>
+              );
+            } else {
+              subtitleDisplay = methodLabel ? <p className="text-sm opacity-70">{methodLabel}</p> : null;
+            }
+          }
+
+          return (
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground p-8 sm:p-10 text-center shadow-xl">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
+              <div className="relative space-y-3">
+                <p className="text-sm font-medium opacity-80 uppercase tracking-widest">
+                  {showDetailedPrices ? "Investimento Total" : "Valor do Pacote Completo"}
+                </p>
+                <div className="flex flex-col items-center gap-1">
+                  {mainDisplay}
+                </div>
+                {subtitleDisplay}
+                {quote.services && quote.services.length > 0 && (
+                  <p className="text-xs opacity-60 pt-1">
+                    {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ─── Payment Notes ─── */}
         {paymentTerms && (
           <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
             <div className="flex items-center gap-2 mb-3">
