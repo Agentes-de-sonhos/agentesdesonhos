@@ -343,7 +343,7 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
                           <div className="ml-6 mt-2 p-3 bg-muted/20 rounded-lg border">
                             <ItineraryActivityForm
                               tripServices={services}
-                              onSubmit={(data, files) => handleAddActivity(day.dateStr, period, data, files)}
+                              onSubmit={(data, files, docFiles) => handleAddActivity(day.dateStr, period, data, files, docFiles)}
                               onCancel={() => setAddingFor(null)}
                               isLoading={isAdding}
                             />
