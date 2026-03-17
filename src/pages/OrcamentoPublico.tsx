@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Baby, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Baby, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { useQuery } from "@tanstack/react-query";
@@ -45,12 +46,26 @@ function formatDateShort(dateStr: string) {
   try { return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR }); } catch { return dateStr; }
 }
 
+function getServiceSummary(service: QuoteService): string {
+  const data = service.service_data as any;
+  switch (service.service_type) {
+    case "flight": return `${data.origin_city} → ${data.destination_city}`;
+    case "hotel": return `${data.hotel_name} — ${data.city}`;
+    case "car_rental": return `${data.car_type} | ${data.days} diária(s)`;
+    case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} — ${data.location}`;
+    case "attraction": return data.name;
+    case "insurance": return data.provider;
+    case "cruise": return `${data.ship_name} — ${data.route}`;
+    case "other": return data.description;
+    default: return "Serviço";
+  }
+}
+
 function getServiceDetails(service: QuoteService): string[] {
   const data = service.service_data as any;
   const details: string[] = [];
   switch (service.service_type) {
     case "flight":
-      details.push(`${data.origin_city} → ${data.destination_city}`);
       details.push(`Companhia: ${data.airline}`);
       details.push(`Ida: ${formatDateShort(data.departure_date)} | Volta: ${formatDateShort(data.return_date)}`);
       if (data.includes_baggage) details.push("✓ Bagagem incluída");
@@ -58,78 +73,95 @@ function getServiceDetails(service: QuoteService): string[] {
       if (data.notes) details.push(data.notes);
       break;
     case "hotel":
-      details.push(`${data.hotel_name} — ${data.city}`);
       details.push(`Check-in: ${formatDateShort(data.check_in)} | Check-out: ${formatDateShort(data.check_out)}`);
       details.push(`Quarto: ${data.room_type} | Regime: ${data.meal_plan}`);
       if (data.notes) details.push(data.notes);
       break;
     case "car_rental":
-      details.push(`${data.car_type} | ${data.days} diária(s)`);
       details.push(`Retirada: ${data.pickup_location}`);
       details.push(`Devolução: ${data.dropoff_location}`);
       if (data.notes) details.push(data.notes);
       break;
     case "transfer":
-      details.push(`${data.transfer_type === "arrival" ? "Chegada" : "Saída"} — ${data.location}`);
       details.push(`Data: ${formatDateShort(data.date)}`);
       break;
     case "attraction":
-      details.push(data.name);
       details.push(`Data: ${formatDateShort(data.date)} | Qtd: ${data.quantity}`);
       break;
     case "insurance":
-      details.push(`${data.provider}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
       details.push(data.coverage);
       break;
     case "cruise":
-      details.push(`${data.ship_name}`);
-      details.push(`${data.route}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
-      details.push(data.cabin_type);
+      details.push(`Cabine: ${data.cabin_type}`);
       break;
     case "other":
-      details.push(data.description);
       break;
   }
   return details;
 }
 
-function PublicServiceCard({ service, showPrice }: { service: QuoteService; showPrice: boolean }) {
+function CollapsibleServiceCard({
+  service, showPrice, isOpen, onToggle,
+}: {
+  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void;
+}) {
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
   const colorClass = SERVICE_COLORS[type] || SERVICE_COLORS.other;
+  const summary = getServiceSummary(service);
 
   return (
-    <div className="group rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
-      <div className={`bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between`}>
+    <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
+      {/* Clickable header */}
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
+      >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
             {SERVICE_ICONS[type]}
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold uppercase tracking-wide">{SERVICE_LABELS[type]}</span>
-            {service.option_label && (
-              <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
-                <Tag className="h-3 w-3" />
-                {service.option_label}
-              </Badge>
+          <div className="flex flex-col items-start gap-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold uppercase tracking-wide">{SERVICE_LABELS[type]}</span>
+              {service.option_label && (
+                <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
+                  <Tag className="h-3 w-3" />
+                  {service.option_label}
+                </Badge>
+              )}
+            </div>
+            {!isOpen && (
+              <span className="text-xs opacity-70 font-medium truncate max-w-[250px] sm:max-w-none">
+                {summary}
+              </span>
             )}
           </div>
         </div>
-        {showPrice && (
-          <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
-        )}
-      </div>
-      <div className="px-5 py-4 space-y-1.5">
-        {details.map((d, i) => (
-          <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
-        ))}
-        {service.description && (
-          <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic">
-            {service.description}
-          </p>
-        )}
+        <div className="flex items-center gap-3">
+          {showPrice && (
+            <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
+          )}
+          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        </div>
+      </button>
+      {/* Collapsible body */}
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}
+      >
+        <div className="px-5 py-4 space-y-1.5">
+          {isOpen && details.map((d, i) => (
+            <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
+          ))}
+          {isOpen && service.description && (
+            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic">
+              {service.description}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -145,6 +177,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
   const params = useParams<{ token: string }>();
   const token = tokenOverride ?? params.token;
   const { quote, isLoading } = usePublicQuote(token);
+  const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(0);
 
   const { data: agentProfile } = useQuery({
     queryKey: ["agent-profile-public", quote?.user_id],
@@ -194,19 +227,27 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
     ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${whatsappMessage}`
     : "";
 
+  const handleToggleService = (index: number) => {
+    setOpenServiceIndex(prev => prev === index ? null : index);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* ─── Premium Agency Header ─── */}
+      {/* ─── Premium Agency Header with large logo ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-5 flex items-center justify-center gap-3">
+        <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-center">
           {agentProfile?.agency_logo_url ? (
-            <img src={agentProfile.agency_logo_url} alt={agentProfile.agency_name || "Agência"} className="h-12 max-w-[200px] object-contain" />
+            <img
+              src={agentProfile.agency_logo_url}
+              alt={agentProfile.agency_name || "Agência"}
+              className="h-16 sm:h-20 max-w-[280px] object-contain"
+            />
           ) : (
-            <div className="flex items-center gap-2.5">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Briefcase className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Briefcase className="h-7 w-7 text-primary" />
               </div>
-              <span className="text-lg font-bold text-foreground tracking-tight">
+              <span className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                 {agentProfile?.agency_name || "Proposta de Viagem"}
               </span>
             </div>
@@ -269,7 +310,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
           </div>
         </div>
 
-        {/* ─── Services ─── */}
+        {/* ─── Collapsible Services (accordion — one open at a time) ─── */}
         {quote.services && quote.services.length > 0 && (
           <section className="space-y-5">
             <div className="flex items-center gap-3">
@@ -277,9 +318,15 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
               <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Serviços Incluídos</h2>
               <div className="h-px flex-1 bg-border/60" />
             </div>
-            <div className="space-y-4">
-              {quote.services.map((service) => (
-                <PublicServiceCard key={service.id} service={service} showPrice={showDetailedPrices} />
+            <div className="space-y-3">
+              {quote.services.map((service, index) => (
+                <CollapsibleServiceCard
+                  key={service.id}
+                  service={service}
+                  showPrice={showDetailedPrices}
+                  isOpen={openServiceIndex === index}
+                  onToggle={() => handleToggleService(index)}
+                />
               ))}
             </div>
           </section>
@@ -331,7 +378,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
           )}
         </div>
 
-        {/* ─── Agent Signature ─── */}
+        {/* ─── Agent Signature: photo, name, agency, WhatsApp ─── */}
         {agentProfile && (
           <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
             <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
@@ -340,9 +387,9 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
             <div className="p-6 sm:p-8">
               <div className="flex flex-col items-center text-center space-y-5">
                 {agentProfile.avatar_url ? (
-                  <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-24 w-24 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
+                  <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
                 ) : (
-                  <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg ring-2 ring-white">
+                  <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg ring-2 ring-white">
                     {agentProfile.name.charAt(0).toUpperCase()}
                   </div>
                 )}
