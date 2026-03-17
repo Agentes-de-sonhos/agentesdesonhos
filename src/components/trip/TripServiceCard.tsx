@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Plane, Hotel, Car, Bus, Ticket, Shield, Ship, FileText, TrainFront,
-  Trash2, Download, ExternalLink, Pencil, Upload, X, RefreshCw
+  Trash2, Download, ExternalLink, Pencil, Upload, X, RefreshCw, Camera, Image as ImageIcon
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
