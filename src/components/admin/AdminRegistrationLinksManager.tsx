@@ -81,7 +81,7 @@ export function AdminRegistrationLinksManager() {
   }
 
   function copyLink(token: string) {
-    const url = `https://agentesdesonhos.lovable.app/cadastro/${token}`;
+    const url = `https://agentesdesonhos.com.br/cadastro/${token}`;
     navigator.clipboard.writeText(url);
     toast({ title: "Link copiado!" });
   }
