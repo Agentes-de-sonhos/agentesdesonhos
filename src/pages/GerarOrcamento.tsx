@@ -404,8 +404,8 @@ export default function GerarOrcamento() {
                 {selectedServiceType ? (
                   <div className="space-y-4">
                     <h3 className="font-medium">
-                      {SERVICE_TYPE_LABELS[selectedServiceType]}
-                      {MULTI_OPTION_TYPES.includes(selectedServiceType) && serviceCountByType[selectedServiceType] ? (
+                      {editingService ? "Editando: " : ""}{SERVICE_TYPE_LABELS[selectedServiceType]}
+                      {!editingService && MULTI_OPTION_TYPES.includes(selectedServiceType) && serviceCountByType[selectedServiceType] ? (
                         <span className="text-xs text-muted-foreground ml-2">
                           (Opção {(serviceCountByType[selectedServiceType] || 0) + 1})
                         </span>
@@ -418,13 +418,21 @@ export default function GerarOrcamento() {
                       </div>
                     )}
                     <ServiceForm
+                      key={editingService?.id || "new"}
                       serviceType={selectedServiceType}
                       onSubmit={handleAddService}
-                      onCancel={() => setSelectedServiceType(null)}
+                      onCancel={() => { setSelectedServiceType(null); setEditingService(null); }}
                       isLoading={isAddingService}
                       showOptionLabel={MULTI_OPTION_TYPES.includes(selectedServiceType)}
                       tripStartDate={tripStartDate}
                       tripEndDate={tripEndDate}
+                      initialData={editingService ? {
+                        service_data: editingService.service_data,
+                        amount: editingService.amount,
+                        option_label: editingService.option_label,
+                        description: editingService.description,
+                        image_url: editingService.image_url,
+                      } : undefined}
                     />
                   </div>
                 ) : (
@@ -440,7 +448,7 @@ export default function GerarOrcamento() {
                         </Button>
                       ))}
                     </div>
-                    <ServiceList services={quote.services || []} onDeleteService={deleteService} />
+                    <ServiceList services={quote.services || []} onDeleteService={deleteService} onEditService={handleEditService} />
                   </>
                 )}
               </CardContent>
