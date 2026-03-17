@@ -50,6 +50,7 @@ import VitrinePublica from "./pages/VitrinePublica";
 import CartaoPublico from "./pages/CartaoPublico";
 import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
+import OrcamentoPublico from "./pages/OrcamentoPublico";
 import CertificateTest from "./pages/CertificateTest";
 import Gamificacao from "./pages/Gamificacao";
 import Pesquisa from "./pages/Pesquisa";
