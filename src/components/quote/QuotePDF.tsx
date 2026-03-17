@@ -14,11 +14,19 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   other: "Outros Serviços",
 };
 
+const SERVICE_EMOJI: Record<ServiceType, string> = {
+  flight: "✈️",
+  hotel: "🏨",
+  car_rental: "🚗",
+  transfer: "🚐",
+  attraction: "🎟️",
+  insurance: "🛡️",
+  cruise: "🚢",
+  other: "📦",
+};
+
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
 function formatDate(dateStr: string) {
@@ -32,7 +40,6 @@ function formatDate(dateStr: string) {
 function getServiceDetails(service: QuoteService): string[] {
   const data = service.service_data as any;
   const details: string[] = [];
-  
   switch (service.service_type) {
     case "flight":
       details.push(`${data.origin_city} → ${data.destination_city}`);
@@ -43,7 +50,7 @@ function getServiceDetails(service: QuoteService): string[] {
       if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
     case "hotel":
-      details.push(`${data.hotel_name} - ${data.city}`);
+      details.push(`${data.hotel_name} — ${data.city}`);
       details.push(`Check-in: ${formatDate(data.check_in)} | Check-out: ${formatDate(data.check_out)}`);
       details.push(`Quarto: ${data.room_type} | Regime: ${data.meal_plan}`);
       if (data.notes) details.push(`Obs: ${data.notes}`);
@@ -60,7 +67,7 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Data: ${formatDate(data.date)}`);
       break;
     case "attraction":
-      details.push(`${data.name}`);
+      details.push(data.name);
       details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity}`);
       break;
     case "insurance":
@@ -78,28 +85,23 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(data.description);
       break;
   }
-  
   return details;
 }
 
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <h1 style="font-size: 24px; color: #0f766e; margin: 0;">
-          ${profile?.agency_name || 'Agentes de Sonhos'}
-        </h1>
+      <div style="text-align:center;padding:24px 0 20px;border-bottom:2px solid #f1f5f9;">
+        <p style="font-size:20px;font-weight:700;color:#0f766e;margin:0;letter-spacing:-0.3px;">
+          ${profile?.agency_name || "Agentes de Sonhos"}
+        </p>
       </div>
     `;
   }
-  
   return `
-    <div style="text-align: center; margin-bottom: 32px;">
-      <img 
-        src="${profile.agency_logo_url}" 
-        alt="${profile.agency_name || 'Logo'}"
-        style="max-height: 80px; max-width: 200px; object-fit: contain; margin: 0 auto;"
-      />
+    <div style="text-align:center;padding:24px 0 20px;border-bottom:2px solid #f1f5f9;">
+      <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
+        style="max-height:60px;max-width:200px;object-fit:contain;" />
     </div>
   `;
 }
@@ -107,26 +109,36 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
 function generateAgentSignature(profile: AgentProfile | null): string {
   if (!profile) {
     return `
-      <div style="text-align: center; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-        <p style="font-size: 13px; color: #64748b;">
-          Agentes de Sonhos • Sua viagem começa aqui
-        </p>
+      <div style="text-align:center;padding:24px 0;border-top:2px solid #f1f5f9;margin-top:40px;">
+        <p style="font-size:13px;color:#94a3b8;">Agentes de Sonhos • Sua viagem começa aqui</p>
       </div>
     `;
   }
 
   const avatarHtml = profile.avatar_url
-    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 12px;" />`
-    : `<div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; margin-right: 12px;">${profile.name.charAt(0).toUpperCase()}</div>`;
+    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid #e2e8f0;" />`
+    : `<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#0f766e,#14b8a6);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:24px;">${profile.name.charAt(0).toUpperCase()}</div>`;
+
+  const whatsappNumber = profile.phone?.replace(/\D/g, "") || "";
+  const whatsappLink = whatsappNumber
+    ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
+    : "";
 
   return `
-    <div style="padding-top: 24px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
-      ${avatarHtml}
-      <div style="text-align: left;">
-        <p style="font-weight: 600; font-size: 14px; color: #1e293b; margin: 0;">${profile.name}</p>
-        ${profile.phone ? `<p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">📱 ${profile.phone}</p>` : ''}
-        ${profile.agency_name ? `<p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">${profile.agency_name}</p>` : ''}
-      </div>
+    <div style="margin-top:40px;padding:32px 24px;border-top:2px solid #f1f5f9;text-align:center;">
+      <div style="display:inline-block;">${avatarHtml}</div>
+      <p style="font-size:16px;font-weight:700;color:#1e293b;margin:12px 0 2px;">${profile.name}</p>
+      ${profile.agency_name ? `<p style="font-size:13px;color:#64748b;margin:0;">${profile.agency_name}</p>` : ""}
+      ${profile.city || profile.state ? `<p style="font-size:12px;color:#94a3b8;margin:4px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
+      ${
+        whatsappLink
+          ? `<div style="margin-top:16px;">
+              <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:white;padding:10px 28px;border-radius:50px;font-size:14px;font-weight:600;text-decoration:none;">
+                💬 Falar com seu agente
+              </a>
+            </div>`
+          : ""
+      }
     </div>
   `;
 }
@@ -136,117 +148,105 @@ export function generateQuotePDF(quote: Quote, profile?: AgentProfile | null) {
   const endDate = new Date(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-  const servicesHtml = quote.services?.map((service) => {
-    const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
-    const details = getServiceDetails(service);
-    
-    return `
-      <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-          <div>
-            <span style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b;">
-              ${label}
-            </span>
+  const servicesHtml =
+    quote.services
+      ?.map((service) => {
+        const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
+        const emoji = SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
+        const details = getServiceDetails(service);
+        return `
+        <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:12px;page-break-inside:avoid;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:18px;">${emoji}</span>
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;">${label}</span>
+            </div>
+            <span style="font-size:18px;font-weight:700;color:#0f766e;">${formatCurrency(service.amount)}</span>
           </div>
-          <span style="font-weight: 600; color: #0f766e; font-size: 16px;">
-            ${formatCurrency(service.amount)}
-          </span>
+          <div style="padding-left:34px;">
+            ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;">${d}</p>`).join("")}
+          </div>
         </div>
-        <div style="margin-top: 8px;">
-          ${details.map((d) => `<p style="margin: 4px 0; font-size: 13px; color: #475569;">${d}</p>`).join("")}
-        </div>
-      </div>
-    `;
-  }).join("") || "";
+      `;
+      })
+      .join("") || "";
 
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Orçamento - ${quote.client_name}</title>
+      <title>Orçamento — ${quote.client_name}</title>
       <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-          color: #1e293b;
-          line-height: 1.5;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; }
         @media print {
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+          .page-break { page-break-before:always; }
         }
       </style>
     </head>
     <body>
-      <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
-        <!-- Agency Logo/Header -->
+      <div style="max-width:800px;margin:0 auto;padding:40px;">
         ${generateAgencyHeader(profile || null)}
 
-        <!-- Header -->
-        <div style="text-align: center; margin-bottom: 40px;">
-          <h1 style="font-size: 28px; color: #0f766e; margin-bottom: 8px;">
-            Orçamento de Viagem
-          </h1>
-          <p style="color: #64748b;">
-            Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+        <!-- Hero -->
+        <div style="text-align:center;padding:36px 0 32px;">
+          <p style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#0f766e;font-weight:600;margin-bottom:12px;">Proposta de Viagem</p>
+          <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin-bottom:8px;letter-spacing:-0.5px;">${quote.destination}</h1>
+          <p style="font-size:15px;color:#64748b;">
+            Preparado especialmente para <strong style="color:#1e293b;">${quote.client_name}</strong>
           </p>
         </div>
 
-        <!-- Client Info -->
-        <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-radius: 12px; padding: 24px; margin-bottom: 32px;">
-          <h2 style="font-size: 20px; margin-bottom: 16px; color: #0f766e;">
-            ${quote.client_name}
-          </h2>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-            <div>
-              <span style="color: #64748b; font-size: 13px;">Destino</span>
-              <p style="font-weight: 600;">${quote.destination}</p>
-            </div>
-            <div>
-              <span style="color: #64748b; font-size: 13px;">Viajantes</span>
-              <p style="font-weight: 600;">
-                ${quote.adults_count} adulto(s)${quote.children_count > 0 ? `, ${quote.children_count} criança(s)` : ""}
-              </p>
-            </div>
-            <div>
-              <span style="color: #64748b; font-size: 13px;">Período</span>
-              <p style="font-weight: 600;">
-                ${formatDate(quote.start_date)} a ${formatDate(quote.end_date)}
-              </p>
-            </div>
-            <div>
-              <span style="color: #64748b; font-size: 13px;">Duração</span>
-              <p style="font-weight: 600;">${days} dias</p>
-            </div>
+        <!-- Overview -->
+        <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:36px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+          <div>
+            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Destino</p>
+            <p style="font-size:14px;font-weight:600;">${quote.destination}</p>
+          </div>
+          <div>
+            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Período</p>
+            <p style="font-size:14px;font-weight:600;">${formatDate(quote.start_date)} — ${formatDate(quote.end_date)}</p>
+            <p style="font-size:12px;color:#94a3b8;">${days} dias</p>
+          </div>
+          <div>
+            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Adultos</p>
+            <p style="font-size:14px;font-weight:600;">${quote.adults_count}</p>
+          </div>
+          <div>
+            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Crianças</p>
+            <p style="font-size:14px;font-weight:600;">${quote.children_count}</p>
           </div>
         </div>
 
         <!-- Services -->
-        <h3 style="font-size: 18px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
-          Serviços Incluídos
-        </h3>
-        
-        <div style="margin-bottom: 32px;">
-          ${servicesHtml || '<p style="text-align: center; color: #64748b; padding: 24px;">Nenhum serviço adicionado</p>'}
+        <div style="margin-bottom:36px;">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #f1f5f9;">Serviços Incluídos</h3>
+          ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
         </div>
 
         <!-- Total -->
-        <div style="background: #0f766e; color: white; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 40px;">
-          <p style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Total Geral</p>
-          <p style="font-size: 36px; font-weight: 700;">
-            ${formatCurrency(quote.total_amount)}
-          </p>
+        <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
+          <p style="font-size:13px;opacity:0.85;margin-bottom:8px;font-weight:500;">Investimento Total</p>
+          <p style="font-size:40px;font-weight:800;letter-spacing:-1px;">${formatCurrency(quote.total_amount)}</p>
+          ${quote.services && quote.services.length > 0 ? `<p style="font-size:13px;opacity:0.7;margin-top:6px;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
         </div>
 
-        <!-- Validity Notice -->
-        <div style="text-align: center; margin-bottom: 32px;">
-          <p style="font-size: 13px; color: #64748b;">
-            Este orçamento é válido por 7 dias. Valores sujeitos a alteração conforme disponibilidade.
-          </p>
-        </div>
+        <!-- Validity -->
+        <p style="text-align:center;font-size:12px;color:#94a3b8;margin-bottom:16px;">
+          Este orçamento é válido por 7 dias. Valores sujeitos a alteração conforme disponibilidade.
+        </p>
 
         <!-- Agent Signature -->
         ${generateAgentSignature(profile || null)}
+
+        <!-- Footer -->
+        <div style="text-align:center;padding-top:16px;">
+          <p style="font-size:10px;color:#cbd5e1;">
+            Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} • Agentes de Sonhos
+          </p>
+        </div>
       </div>
     </body>
     </html>
