@@ -106,14 +106,16 @@ function QuoteHistoryRow({
   );
 }
 
-/* ──────────────────────── Payment Template Buttons ──────────────────────── */
-const PAYMENT_TEMPLATES = [
-  { label: "Pix com desconto", text: "💰 Pagamento via Pix com 5% de desconto sobre o valor total." },
-  { label: "Cartão parcelado", text: "💳 Parcelamento em até 10x sem juros no cartão de crédito." },
-  { label: "Entrada + parcelas", text: "📋 Entrada de 30% + saldo em até 8x sem juros no cartão." },
-  { label: "À vista", text: "✅ Pagamento à vista via transferência bancária." },
-  { label: "Boleto", text: "📄 Pagamento via boleto bancário (à vista)." },
+/* ──────────────────────── Payment Display Modes ──────────────────────── */
+type PaymentDisplayMode = "installments" | "installments_with_entry" | "full_payment";
+
+const PAYMENT_MODE_OPTIONS: { value: PaymentDisplayMode; label: string; description: string }[] = [
+  { value: "installments", label: "Parcelado (sem entrada)", description: "Ex: 10x de R$ 2.400" },
+  { value: "installments_with_entry", label: "Parcelado com entrada", description: "Ex: Entrada + 9x de R$ 2.400" },
+  { value: "full_payment", label: "À vista", description: "Ex: R$ 24.000 à vista" },
 ];
+
+const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
 
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function GerarOrcamento() {
