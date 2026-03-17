@@ -418,6 +418,7 @@ const App = () => (
               }
             />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
+            <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
             <Route path="/cadastro/:token" element={<CadastroLink />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/reset-password" element={<ResetPassword />} />
