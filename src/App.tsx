@@ -61,6 +61,7 @@ import Atualizacoes from "./pages/Atualizacoes";
 import ResetPassword from "./pages/ResetPassword";
 import CadastroLink from "./pages/CadastroLink";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
+import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
 
