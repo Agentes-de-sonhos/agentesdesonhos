@@ -3737,7 +3737,12 @@ export type Database = {
           created_at: string
           destination: string
           end_date: string
+          entry_percentage: number | null
+          full_payment_discount_percent: number | null
           id: string
+          installments_count: number | null
+          payment_display_mode: string
+          payment_method_label: string | null
           payment_terms: string | null
           share_expires_at: string | null
           share_token: string | null
@@ -3757,7 +3762,12 @@ export type Database = {
           created_at?: string
           destination: string
           end_date: string
+          entry_percentage?: number | null
+          full_payment_discount_percent?: number | null
           id?: string
+          installments_count?: number | null
+          payment_display_mode?: string
+          payment_method_label?: string | null
           payment_terms?: string | null
           share_expires_at?: string | null
           share_token?: string | null
@@ -3777,7 +3787,12 @@ export type Database = {
           created_at?: string
           destination?: string
           end_date?: string
+          entry_percentage?: number | null
+          full_payment_discount_percent?: number | null
           id?: string
+          installments_count?: number | null
+          payment_display_mode?: string
+          payment_method_label?: string | null
           payment_terms?: string | null
           share_expires_at?: string | null
           share_token?: string | null
