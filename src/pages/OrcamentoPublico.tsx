@@ -134,11 +134,9 @@ function CollapsibleServiceCard({
                 </Badge>
               )}
             </div>
-            {!isOpen && (
-              <span className="text-xs opacity-70 font-medium truncate max-w-[250px] sm:max-w-none">
-                {summary}
-              </span>
-            )}
+            <span className="text-xs opacity-70 font-medium truncate max-w-[250px] sm:max-w-none">
+              {summary}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-3">
