@@ -1,0 +1,1 @@
+UPDATE public.quotes SET share_token = 'demo-orlando-juliana-2026-abcdef' WHERE share_token = 'demo-orlando-juliana-2026';
