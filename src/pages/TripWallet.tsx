@@ -207,10 +207,8 @@ function TripWalletContent() {
       setIsUploading(true);
       const result = await uploadVoucher(file);
       await supabase.from("trip_services").update({ image_url: result.url }).eq("id", serviceId);
-      // Refresh trip data
-      const { useQueryClient } = await import("@tanstack/react-query");
-      // Simple approach: just refetch
-      window.location.reload(); // will be replaced with proper invalidation below
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+      toast({ title: "Imagem adicionada" });
     } catch (err: any) {
       toast({ title: "Erro ao enviar imagem", description: err.message, variant: "destructive" });
     } finally {
@@ -221,6 +219,7 @@ function TripWalletContent() {
   const handleRemoveServiceImage = async (serviceId: string) => {
     try {
       await supabase.from("trip_services").update({ image_url: null }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
       toast({ title: "Imagem removida" });
     } catch (err: any) {
       toast({ title: "Erro ao remover imagem", description: err.message, variant: "destructive" });
