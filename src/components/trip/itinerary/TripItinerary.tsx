@@ -1,11 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2 } from "lucide-react";
+import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
+import { usePeriodImages } from "@/hooks/usePeriodImages";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
 import type { TripService } from "@/types/trip";
@@ -48,8 +49,73 @@ function generateDays(startDate: string, endDate: string): { date: Date; dateStr
   return days;
 }
 
+function PeriodImageUpload({
+  imageUrl,
+  onUpload,
+  onRemove,
+  isUploading,
+  readOnly,
+}: {
+  imageUrl: string | null;
+  onUpload: (file: File) => void;
+  onRemove: () => void;
+  isUploading: boolean;
+  readOnly: boolean;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  if (readOnly && !imageUrl) return null;
+
+  return (
+    <div className="ml-6 mb-2">
+      {imageUrl ? (
+        <div className="relative inline-block">
+          <img src={imageUrl} alt="" className="h-24 w-full max-w-[280px] rounded-lg border border-border object-cover" />
+          {!readOnly && (
+            <Button
+              variant="destructive"
+              size="icon"
+              className="absolute top-1 right-1 h-6 w-6 opacity-80 hover:opacity-100"
+              onClick={onRemove}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+      ) : (
+        !readOnly && (
+          <>
+            <input
+              ref={inputRef}
+              type="file"
+              className="hidden"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onUpload(file);
+                if (inputRef.current) inputRef.current.value = "";
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-muted-foreground"
+              onClick={() => inputRef.current?.click()}
+              disabled={isUploading}
+            >
+              {isUploading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Camera className="mr-1 h-3 w-3" />}
+              Adicionar imagem do período
+            </Button>
+          </>
+        )
+      )}
+    </div>
+  );
+}
+
 export function TripItinerary({ tripId, startDate, endDate, services, readOnly = false }: Props) {
   const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto } = useItineraryActivities(tripId);
+  const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading: isPeriodUploading } = usePeriodImages(tripId);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [addingFor, setAddingFor] = useState<{ dateStr: string; period: Period } | null>(null);
   const [editingActivity, setEditingActivity] = useState<ItineraryActivity | null>(null);
@@ -197,7 +263,7 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
                       .filter((a) => a.period === period)
                       .sort((a, b) => a.order_index - b.order_index);
                     const isAddingHere = addingFor?.dateStr === day.dateStr && addingFor?.period === period;
-                    const isEditingHere = editingActivity && editingActivity.day_date === day.dateStr && editingActivity.period === period;
+                    const periodImageUrl = getImageForPeriod(day.dateStr, period);
 
                     return (
                       <div key={period}>
@@ -207,6 +273,15 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
                             {PERIOD_CONFIG[period].label}
                           </span>
                         </div>
+
+                        {/* Period image */}
+                        <PeriodImageUpload
+                          imageUrl={periodImageUrl}
+                          onUpload={(file) => setPeriodImage({ dayDate: day.dateStr, period, file })}
+                          onRemove={() => removePeriodImage({ dayDate: day.dateStr, period })}
+                          isUploading={isPeriodUploading}
+                          readOnly={readOnly}
+                        />
 
                         {/* Activities */}
                         {periodActivities.map((activity) => {
