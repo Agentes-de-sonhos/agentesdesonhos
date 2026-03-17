@@ -5146,9 +5146,11 @@ export type Database = {
           created_at: string
           day_date: string
           description: string | null
+          document_urls: string[] | null
           id: string
           linked_service_id: string | null
           location: string | null
+          maps_url: string | null
           notes: string | null
           order_index: number
           period: string
@@ -5162,9 +5164,11 @@ export type Database = {
           created_at?: string
           day_date: string
           description?: string | null
+          document_urls?: string[] | null
           id?: string
           linked_service_id?: string | null
           location?: string | null
+          maps_url?: string | null
           notes?: string | null
           order_index?: number
           period: string
@@ -5178,9 +5182,11 @@ export type Database = {
           created_at?: string
           day_date?: string
           description?: string | null
+          document_urls?: string[] | null
           id?: string
           linked_service_id?: string | null
           location?: string | null
+          maps_url?: string | null
           notes?: string | null
           order_index?: number
           period?: string
