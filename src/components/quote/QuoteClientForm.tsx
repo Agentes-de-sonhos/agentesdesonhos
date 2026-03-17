@@ -23,17 +23,20 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { QuoteFormData } from "@/types/quote";
+import type { DateRange } from "react-day-picker";
 
 const formSchema = z.object({
   client_name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   adults_count: z.number().min(1, "Mínimo 1 adulto"),
   children_count: z.number().min(0),
   destination: z.string().min(2, "Destino é obrigatório"),
-  start_date: z.date({ required_error: "Data de início é obrigatória" }),
-  end_date: z.date({ required_error: "Data de fim é obrigatória" }),
-}).refine((data) => data.end_date >= data.start_date, {
-  message: "Data de fim deve ser após a data de início",
-  path: ["end_date"],
+  dateRange: z.object({
+    from: z.date({ required_error: "Data de início é obrigatória" }),
+    to: z.date({ required_error: "Data de fim é obrigatória" }),
+  }).refine((r) => r.to >= r.from, {
+    message: "Data de fim deve ser após a data de início",
+    path: ["to"],
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -44,6 +47,8 @@ interface QuoteClientFormProps {
 }
 
 export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,6 +56,7 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
       adults_count: 2,
       children_count: 0,
       destination: "",
+      dateRange: { from: undefined as any, to: undefined as any },
     },
   });
 
@@ -60,8 +66,8 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
       adults_count: values.adults_count,
       children_count: values.children_count,
       destination: values.destination,
-      start_date: format(values.start_date, "yyyy-MM-dd"),
-      end_date: format(values.end_date, "yyyy-MM-dd"),
+      start_date: format(values.dateRange.from, "yyyy-MM-dd"),
+      end_date: format(values.dateRange.to, "yyyy-MM-dd"),
     });
   };
 
@@ -147,90 +153,60 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
           )}
         />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="start_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Data de Início</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd/MM/yyyy", { locale: ptBR })
+        <FormField
+          control={form.control}
+          name="dateRange"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Período da Viagem</FormLabel>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value?.from && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value?.from ? (
+                        field.value.to ? (
+                          <>
+                            {format(field.value.from, "dd/MM/yyyy", { locale: ptBR })}
+                            {" — "}
+                            {format(field.value.to, "dd/MM/yyyy", { locale: ptBR })}
+                          </>
                         ) : (
-                          <span>Selecione a data</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="end_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Data de Fim</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Selecione a data</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => {
-                        const startDate = form.getValues("start_date");
-                        return startDate ? date < startDate : date < new Date();
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                          format(field.value.from, "dd/MM/yyyy", { locale: ptBR })
+                        )
+                      ) : (
+                        <span>Selecione início e fim</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    selected={field.value?.from ? { from: field.value.from, to: field.value.to } as DateRange : undefined}
+                    onSelect={(range: DateRange | undefined) => {
+                      field.onChange({ from: range?.from, to: range?.to });
+                      if (range?.from && range?.to) {
+                        setCalendarOpen(false);
+                      }
+                    }}
+                    disabled={(date) => date < new Date()}
+                    numberOfMonths={2}
+                    locale={ptBR}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Criando..." : "Criar Orçamento"}
