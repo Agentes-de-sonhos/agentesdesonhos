@@ -133,6 +133,11 @@ export default function GerarOrcamento() {
   const [validUntil, setValidUntil] = useState<Date | undefined>();
   const [validityDisclaimer, setValidityDisclaimer] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [paymentDisplayMode, setPaymentDisplayMode] = useState<PaymentDisplayMode>("full_payment");
+  const [installmentsCount, setInstallmentsCount] = useState(10);
+  const [entryPercentage, setEntryPercentage] = useState(30);
+  const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
+  const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
 
   useEffect(() => {
     if (user?.id) { fetchAgentProfile(user.id, supabase).then(setAgentProfile); }
