@@ -132,6 +132,45 @@ export default function GerarOrcamento() {
           </div>
         </div>
 
+        {/* Toggle de exibição de valores */}
+        <Card>
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {(quote as any).show_detailed_prices !== false ? (
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Label htmlFor="show-prices" className="text-sm font-medium cursor-pointer">
+                  Exibir valores detalhados por serviço
+                </Label>
+              </div>
+              <Switch
+                id="show-prices"
+                checked={(quote as any).show_detailed_prices !== false}
+                onCheckedChange={async (checked) => {
+                  const { updateQuote } = await import("@/integrations/supabase/client").then(m => {
+                    return {
+                      updateQuote: async () => {
+                        await m.supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
+                      }
+                    };
+                  });
+                  await updateQuote();
+                  // Refresh
+                  window.location.reload();
+                }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 ml-6">
+              {(quote as any).show_detailed_prices !== false
+                ? "O cliente verá o valor de cada serviço e o total."
+                : "O cliente verá apenas o valor total do pacote."}
+            </p>
+          </CardContent>
+        </Card>
+
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-4">
             <Card>
