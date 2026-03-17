@@ -14,6 +14,8 @@ export interface ItineraryActivity {
   notes: string | null;
   linked_service_id: string | null;
   photo_urls: string[];
+  document_urls: string[];
+  maps_url: string | null;
   order_index: number;
   created_at: string;
   updated_at: string;
@@ -30,6 +32,8 @@ export interface CreateActivityData {
   notes?: string;
   linked_service_id?: string | null;
   photo_urls?: string[];
+  document_urls?: string[];
+  maps_url?: string | null;
   order_index?: number;
 }
 
@@ -69,6 +73,8 @@ export function useItineraryActivities(tripId: string | undefined) {
           ...data,
           order_index: data.order_index ?? maxOrder + 1,
           photo_urls: data.photo_urls ?? [],
+          document_urls: data.document_urls ?? [],
+          maps_url: data.maps_url ?? null,
         })
         .select()
         .single();
@@ -146,6 +152,24 @@ export function useItineraryActivities(tripId: string | undefined) {
     return urlData.publicUrl;
   };
 
+  const uploadDocument = async (file: File): Promise<{ url: string; name: string }> => {
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_SIZE) throw new Error("Arquivo excede o limite de 10MB");
+    const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
+    const allowed = ["pdf", "jpg", "jpeg", "png", "webp"];
+    if (!allowed.includes(ext)) throw new Error("Formato não permitido. Use PDF, JPG ou PNG.");
+    const sanitizedName = file.name
+      .replace(/\.[^.]+$/, "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9_-]/g, "_");
+    const path = `itinerary-docs/${tripId}/${Date.now()}_${sanitizedName}.${ext}`;
+    const { error } = await supabase.storage.from("vouchers").upload(path, file);
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from("vouchers").getPublicUrl(path);
+    return { url: urlData.publicUrl, name: file.name };
+  };
+
   return {
     activities,
     isLoading,
@@ -155,5 +179,6 @@ export function useItineraryActivities(tripId: string | undefined) {
     reorderActivities: reorderActivities.mutateAsync,
     isAdding: addActivity.isPending,
     uploadPhoto,
+    uploadDocument,
   };
 }
