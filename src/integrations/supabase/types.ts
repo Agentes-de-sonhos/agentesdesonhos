@@ -3734,6 +3734,7 @@ export type Database = {
           id: string
           share_expires_at: string | null
           share_token: string | null
+          show_detailed_prices: boolean
           start_date: string
           status: string
           total_amount: number
@@ -3750,6 +3751,7 @@ export type Database = {
           id?: string
           share_expires_at?: string | null
           share_token?: string | null
+          show_detailed_prices?: boolean
           start_date: string
           status?: string
           total_amount?: number
@@ -3766,6 +3768,7 @@ export type Database = {
           id?: string
           share_expires_at?: string | null
           share_token?: string | null
+          show_detailed_prices?: boolean
           start_date?: string
           status?: string
           total_amount?: number

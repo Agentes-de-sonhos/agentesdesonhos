@@ -3,8 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
@@ -69,6 +70,12 @@ export default function GerarOrcamento() {
     }
   };
 
+  const handleToggleDetailedPrices = async (checked: boolean) => {
+    if (!quote) return;
+    await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
+    window.location.reload();
+  };
+
   if (!id) {
     return (
       <DashboardLayout>
@@ -109,6 +116,8 @@ export default function GerarOrcamento() {
     );
   }
 
+  const showDetailed = (quote as any).show_detailed_prices !== false;
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
@@ -131,6 +140,34 @@ export default function GerarOrcamento() {
             </Button>
           </div>
         </div>
+
+        {/* Toggle de exibição de valores */}
+        <Card>
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {showDetailed ? (
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Label htmlFor="show-prices" className="text-sm font-medium cursor-pointer">
+                  Exibir valores detalhados por serviço
+                </Label>
+              </div>
+              <Switch
+                id="show-prices"
+                checked={showDetailed}
+                onCheckedChange={handleToggleDetailedPrices}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 ml-6">
+              {showDetailed
+                ? "O cliente verá o valor de cada serviço e o total."
+                : "O cliente verá apenas o valor total do pacote."}
+            </p>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-4">

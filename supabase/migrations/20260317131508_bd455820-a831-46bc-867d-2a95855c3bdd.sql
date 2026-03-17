@@ -1,0 +1,1 @@
+ALTER TABLE public.quotes ADD COLUMN show_detailed_prices boolean NOT NULL DEFAULT true;
