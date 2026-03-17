@@ -56,7 +56,7 @@ type EmailFormData = z.infer<typeof emailSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
 type ResetFormData = z.infer<typeof resetSchema>;
 
-type AuthView = "login" | "magic-link" | "magic-link-sent" | "forgot-password" | "forgot-sent" | "admin-2fa" | "password-signup";
+type AuthView = "login" | "magic-link" | "magic-link-sent" | "forgot-password" | "forgot-sent" | "password-signup";
 
 // Brand Header Component
 function BrandHeader() {
