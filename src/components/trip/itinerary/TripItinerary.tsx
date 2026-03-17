@@ -114,7 +114,7 @@ function PeriodImageUpload({
 }
 
 export function TripItinerary({ tripId, startDate, endDate, services, readOnly = false }: Props) {
-  const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto } = useItineraryActivities(tripId);
+  const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading: isPeriodUploading } = usePeriodImages(tripId);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [addingFor, setAddingFor] = useState<{ dateStr: string; period: Period } | null>(null);
