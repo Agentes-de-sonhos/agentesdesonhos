@@ -182,14 +182,17 @@ const hotelSchema = z.object({
   notes: z.string().optional(),
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
     defaultValues: {
-      option_label: "", service_description: "", hotel_name: "", city: "",
-      room_type: "", meal_plan: "", price: 0, notes: "",
-      check_in: tripStartDate, check_out: tripEndDate,
+      option_label: initialData?.option_label || "", service_description: initialData?.description || "",
+      hotel_name: init?.hotel_name || "", city: init?.city || "",
+      room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0, notes: init?.notes || "",
+      check_in: init?.check_in ? new Date(init.check_in) : tripStartDate,
+      check_out: init?.check_out ? new Date(init.check_out) : tripEndDate,
     },
   });
 
