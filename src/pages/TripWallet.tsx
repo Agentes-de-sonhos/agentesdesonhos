@@ -451,6 +451,8 @@ function TripWalletContent() {
                       onRemoveVoucher={removeVoucher}
                       onAddAttachment={handleAddAttachment}
                       onRemoveAttachment={handleRemoveAttachment}
+                      onUploadServiceImage={handleUploadServiceImage}
+                      onRemoveServiceImage={handleRemoveServiceImage}
                       groupByType={true}
                     />
                   </>
