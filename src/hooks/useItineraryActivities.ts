@@ -32,6 +32,8 @@ export interface CreateActivityData {
   notes?: string;
   linked_service_id?: string | null;
   photo_urls?: string[];
+  document_urls?: string[];
+  maps_url?: string | null;
   order_index?: number;
 }
 
