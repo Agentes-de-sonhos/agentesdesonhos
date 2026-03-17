@@ -627,18 +627,80 @@ function OtherForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "se
   );
 }
 
+/* ━━━━━━━━━━━━━━━━━━━ IMAGE UPLOAD BLOCK ━━━━━━━━━━━━━━━━━━━ */
+function ServiceImageUpload({ imageUrl, onImageChange, isUploading }: { imageUrl: string | null; onImageChange: (url: string | null) => void; isUploading: boolean }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const allowed = ["jpg", "jpeg", "png", "webp", "gif"];
+    if (!allowed.includes(ext)) return;
+    const path = `${crypto.randomUUID()}.${ext}`;
+    onImageChange("uploading");
+    const { error } = await supabase.storage.from("quote-images").upload(path, file, { upsert: true });
+    if (error) { onImageChange(null); return; }
+    const { data: urlData } = supabase.storage.from("quote-images").getPublicUrl(path);
+    onImageChange(urlData.publicUrl);
+  };
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-medium">Imagem do serviço (opcional)</p>
+      {imageUrl && imageUrl !== "uploading" ? (
+        <div className="relative inline-block">
+          <img src={imageUrl} alt="Serviço" className="h-24 w-36 rounded-lg border border-border object-cover" />
+          <button type="button" onClick={() => onImageChange(null)} className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={isUploading}
+          className="flex items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
+        >
+          {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+          {isUploading ? "Enviando..." : "Adicionar foto"}
+        </button>
+      )}
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+    </div>
+  );
+}
+
 /* ━━━━━━━━━━━━━━━━━━━ MAIN ROUTER ━━━━━━━━━━━━━━━━━━━ */
 export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate }: ServiceFormProps) {
+  const [serviceImageUrl, setServiceImageUrl] = useState<string | null>(null);
+  const isUploading = serviceImageUrl === "uploading";
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
+
+  const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
+    const finalUrl = serviceImageUrl === "uploading" ? null : serviceImageUrl;
+    onSubmit(data, amount, optionLabel, description, finalUrl || undefined);
+  };
+
+  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate };
+
+  let formElement: React.ReactNode = null;
   switch (serviceType) {
-    case "flight": return <FlightForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} showOptionLabel={hasMultipleOptions} tripStartDate={tripStartDate} tripEndDate={tripEndDate} />;
-    case "hotel": return <HotelForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} showOptionLabel={hasMultipleOptions} tripStartDate={tripStartDate} tripEndDate={tripEndDate} />;
-    case "car_rental": return <CarRentalForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
-    case "transfer": return <TransferForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} tripStartDate={tripStartDate} tripEndDate={tripEndDate} />;
-    case "attraction": return <AttractionForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} tripStartDate={tripStartDate} tripEndDate={tripEndDate} />;
-    case "insurance": return <InsuranceForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} tripStartDate={tripStartDate} tripEndDate={tripEndDate} />;
-    case "cruise": return <CruiseForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} tripStartDate={tripStartDate} tripEndDate={tripEndDate} />;
-    case "other": return <OtherForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
+    case "flight": formElement = <FlightForm {...formProps} />; break;
+    case "hotel": formElement = <HotelForm {...formProps} />; break;
+    case "car_rental": formElement = <CarRentalForm {...formProps} />; break;
+    case "transfer": formElement = <TransferForm {...formProps} />; break;
+    case "attraction": formElement = <AttractionForm {...formProps} />; break;
+    case "insurance": formElement = <InsuranceForm {...formProps} />; break;
+    case "cruise": formElement = <CruiseForm {...formProps} />; break;
+    case "other": formElement = <OtherForm {...formProps} />; break;
     default: return null;
   }
+
+  return (
+    <div className="space-y-4">
+      <ServiceImageUpload imageUrl={serviceImageUrl} onImageChange={setServiceImageUrl} isUploading={isUploading} />
+      {formElement}
+    </div>
+  );
 }

@@ -166,9 +166,9 @@ export default function GerarOrcamento() {
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
   };
 
-  const handleAddService = async (serviceData: ServiceData, amount: number, optionLabel?: string, description?: string) => {
+  const handleAddService = async (serviceData: ServiceData, amount: number, optionLabel?: string, description?: string, imageUrl?: string) => {
     if (!selectedServiceType) return;
-    await addService({ service_type: selectedServiceType, service_data: serviceData, amount, option_label: optionLabel, description });
+    await addService({ service_type: selectedServiceType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl });
     setSelectedServiceType(null);
   };
 
