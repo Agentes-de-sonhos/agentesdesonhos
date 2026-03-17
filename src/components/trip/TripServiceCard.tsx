@@ -175,12 +175,15 @@ interface TripServiceCardProps {
   onRemoveVoucher?: (serviceId: string) => void;
   onAddAttachment?: (serviceId: string, file: File) => void;
   onRemoveAttachment?: (serviceId: string, index: number) => void;
+  onUploadServiceImage?: (serviceId: string, file: File) => void;
+  onRemoveServiceImage?: (serviceId: string) => void;
   showActions?: boolean;
 }
 
 export function TripServiceCard({ 
   service, onDelete, onEdit, onReplaceVoucher, onRemoveVoucher, 
-  onAddAttachment, onRemoveAttachment, showActions = true 
+  onAddAttachment, onRemoveAttachment, onUploadServiceImage, onRemoveServiceImage,
+  showActions = true 
 }: TripServiceCardProps) {
   const Icon = SERVICE_ICONS[service.service_type] || FileText;
   const label = SERVICE_LABELS[service.service_type] || "Serviço";
@@ -188,6 +191,7 @@ export function TripServiceCard({
   const notes = getServiceNotes(service);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addFileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -205,11 +209,40 @@ export function TripServiceCard({
     if (addFileInputRef.current) addFileInputRef.current.value = '';
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onUploadServiceImage) {
+      onUploadServiceImage(service.id, file);
+    }
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
   const attachments = service.attachments || [];
   
   return (
     <Card>
       <CardContent className="p-4">
+        {/* Service image banner */}
+        {service.image_url && (
+          <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg">
+            <img
+              src={service.image_url}
+              alt={label}
+              className="w-full h-32 object-cover"
+            />
+            {showActions && onRemoveServiceImage && (
+              <Button
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2 h-7 w-7 opacity-80 hover:opacity-100"
+                onClick={() => onRemoveServiceImage(service.id)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        )}
+
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
@@ -269,24 +302,47 @@ export function TripServiceCard({
                 </div>
               )}
 
-              {/* Add more files */}
-              {showActions && onAddAttachment && (
-                <div className="mt-2">
-                  <input
-                    ref={addFileInputRef}
-                    type="file"
-                    className="hidden"
-                    accept=".pdf,.jpg,.jpeg,.png,.webp"
-                    onChange={handleAddFile}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 text-xs px-2"
-                    onClick={() => addFileInputRef.current?.click()}
-                  >
-                    <Upload className="h-3 w-3 mr-1" /> {attachments.length > 0 ? "Adicionar arquivo" : "Anexar arquivo"}
-                  </Button>
+              {/* Action buttons row */}
+              {showActions && (
+                <div className="mt-2 flex gap-2 flex-wrap">
+                  {onAddAttachment && (
+                    <>
+                      <input
+                        ref={addFileInputRef}
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={handleAddFile}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-xs px-2"
+                        onClick={() => addFileInputRef.current?.click()}
+                      >
+                        <Upload className="h-3 w-3 mr-1" /> {attachments.length > 0 ? "Adicionar arquivo" : "Anexar arquivo"}
+                      </Button>
+                    </>
+                  )}
+                  {onUploadServiceImage && (
+                    <>
+                      <input
+                        ref={imageInputRef}
+                        type="file"
+                        className="hidden"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleImageUpload}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-xs px-2"
+                        onClick={() => imageInputRef.current?.click()}
+                      >
+                        <Camera className="h-3 w-3 mr-1" /> {service.image_url ? "Trocar imagem" : "Adicionar imagem"}
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
