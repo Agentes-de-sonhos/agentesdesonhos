@@ -46,9 +46,10 @@ import type {
 
 interface ServiceFormProps {
   serviceType: ServiceType;
-  onSubmit: (data: any, amount: number) => void;
+  onSubmit: (data: any, amount: number, optionLabel?: string, description?: string) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  showOptionLabel?: boolean;
 }
 
 // Flight Form
