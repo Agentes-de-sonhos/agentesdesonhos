@@ -297,10 +297,11 @@ const carRentalSchema = z.object({
   notes: z.string().optional(),
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, initialData }: Omit<ServiceFormProps, "serviceType">) {
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof carRentalSchema>>({
     resolver: zodResolver(carRentalSchema),
-    defaultValues: { pickup_location: "", dropoff_location: "", car_type: "", days: 1, price: 0, notes: "" },
+    defaultValues: { pickup_location: init?.pickup_location || "", dropoff_location: init?.dropoff_location || "", car_type: init?.car_type || "", days: init?.days || 1, price: init?.price || initialData?.amount || 0, notes: init?.notes || "" },
   });
 
   const handleSubmit = (values: z.infer<typeof carRentalSchema>) => {
