@@ -122,6 +122,7 @@ export function useQuotes() {
           order_index: s.order_index,
           option_label: s.option_label,
           description: s.description,
+          image_url: s.image_url,
         }));
         await supabase.from("quote_services").insert(newServices as any);
       }
@@ -200,13 +201,14 @@ export function useQuote(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type, service_data, amount, option_label, description,
+      service_type, service_data, amount, option_label, description, image_url,
     }: {
       service_type: ServiceType;
       service_data: ServiceData;
       amount: number;
       option_label?: string;
       description?: string;
+      image_url?: string;
     }) => {
       if (!id) throw new Error("Quote ID is required");
       const currentServices = quote?.services || [];
@@ -222,6 +224,7 @@ export function useQuote(id: string | undefined) {
           order_index: nextOrderIndex,
           option_label: option_label || null,
           description: description || null,
+          image_url: image_url || null,
         } as any)
         .select()
         .single();
