@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // kept for potential future use
 import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
