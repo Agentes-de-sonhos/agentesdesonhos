@@ -470,11 +470,12 @@ const insuranceSchema = z.object({
   price: z.number().min(0),
 });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: "", coverage: "", price: 0, start_date: tripStartDate, end_date: tripEndDate },
+    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
   });
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
