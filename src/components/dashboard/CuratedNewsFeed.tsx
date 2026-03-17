@@ -189,24 +189,13 @@ export function CuratedNewsFeed() {
                 {i + 1}
               </span>
 
-              <div className="flex-1 min-w-0">
-                <NewsItemTags item={item} isTopTrending={trendingIds.has(item.id)} />
-                <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors line-clamp-2 leading-snug ${
+              <div className="flex-1 min-w-0 space-y-0.5">
+                <NewsMetaRow item={item} isTopTrending={trendingIds.has(item.id)} />
+                <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors line-clamp-1 leading-snug ${
                   isFirst ? "text-sm" : "text-[13px]"
                 }`}>
                   {item.titulo_curto}
                 </h4>
-                <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                  <CategoryBadge categoria={item.categoria} />
-                  <span className="text-[10px] text-muted-foreground">{item.fonte}</span>
-                  <span className="text-[10px] text-muted-foreground">•</span>
-                  <span className="text-[10px] text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-                  {item.relevancia_score >= 8 && (
-                    <span className="text-[10px] font-semibold text-primary">
-                      ★ {item.relevancia_score}/10
-                    </span>
-                  )}
-                </div>
               </div>
 
               <ExternalLink className="h-4 w-4 flex-shrink-0 text-[hsl(var(--section-news))] opacity-0 transition-opacity group-hover:opacity-100 mt-0.5" />
