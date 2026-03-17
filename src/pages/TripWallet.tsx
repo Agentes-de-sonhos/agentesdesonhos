@@ -54,6 +54,7 @@ export default function TripWallet() {
 function TripWalletContent() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
