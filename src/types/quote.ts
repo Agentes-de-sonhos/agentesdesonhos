@@ -11,6 +11,9 @@ export interface Quote {
   status: 'draft' | 'published';
   share_token: string | null;
   show_detailed_prices: boolean;
+  payment_terms: string | null;
+  valid_until: string | null;
+  validity_disclaimer: string;
   created_at: string;
   updated_at: string;
   services?: QuoteService[];
@@ -23,6 +26,8 @@ export interface QuoteService {
   service_data: ServiceData;
   amount: number;
   order_index: number;
+  option_label: string | null;
+  description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -135,3 +140,5 @@ export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   cruise: 'Cruzeiro',
   other: 'Outros Serviços',
 };
+
+export const MULTI_OPTION_TYPES: ServiceType[] = ['flight', 'hotel'];
