@@ -200,6 +200,31 @@ function TripWalletContent() {
     await replaceVoucher({ serviceId, file });
   };
 
+  const handleUploadServiceImage = async (serviceId: string, file: File) => {
+    try {
+      setIsUploading(true);
+      const result = await uploadVoucher(file);
+      await supabase.from("trip_services").update({ image_url: result.url }).eq("id", serviceId);
+      // Refresh trip data
+      const { useQueryClient } = await import("@tanstack/react-query");
+      // Simple approach: just refetch
+      window.location.reload(); // will be replaced with proper invalidation below
+    } catch (err: any) {
+      toast({ title: "Erro ao enviar imagem", description: err.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveServiceImage = async (serviceId: string) => {
+    try {
+      await supabase.from("trip_services").update({ image_url: null }).eq("id", serviceId);
+      toast({ title: "Imagem removida" });
+    } catch (err: any) {
+      toast({ title: "Erro ao remover imagem", description: err.message, variant: "destructive" });
+    }
+  };
+
   const handleCopyLink = () => {
     if (!trip) return;
     const url = trip.slug 
