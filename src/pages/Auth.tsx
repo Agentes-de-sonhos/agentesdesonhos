@@ -17,11 +17,12 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Eye, EyeOff, Mail, KeyRound, Lock } from "lucide-react";
+import { Loader2, Eye, EyeOff, Mail, Lock, ShieldCheck } from "lucide-react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MultiStepSignup } from "@/components/auth/MultiStepSignup";
@@ -36,7 +37,6 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-// OTP input no longer used - magic link flow
 
 // Schemas
 const emailSchema = z.object({
@@ -48,11 +48,15 @@ const loginSchema = z.object({
   password: z.string().min(6, { message: "Senha deve ter no mínimo 6 caracteres" }),
 });
 
+const resetSchema = z.object({
+  email: z.string().trim().email({ message: "Email inválido" }),
+});
+
 type EmailFormData = z.infer<typeof emailSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
+type ResetFormData = z.infer<typeof resetSchema>;
 
-type AuthMethod = "otp" | "password";
-type AuthView = "main" | "otp-verify" | "password-login" | "password-signup";
+type AuthView = "login" | "magic-link" | "magic-link-sent" | "forgot-password" | "forgot-sent" | "admin-2fa" | "password-signup";
 
 // Brand Header Component
 function BrandHeader() {
@@ -67,12 +71,10 @@ function BrandHeader() {
 }
 
 export default function Auth() {
-  const [view, setView] = useState<AuthView>("main");
-  const [authMethod, setAuthMethod] = useState<AuthMethod>("otp");
+  const [view, setView] = useState<AuthView>("login");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
-  const [_otpValue, setOtpValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
 
@@ -82,7 +84,6 @@ export default function Auth() {
   const { plan, loading: subLoading } = useSubscription();
   const { toast } = useToast();
 
-  // All useForm hooks MUST be called before any early returns
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "" },
@@ -93,32 +94,31 @@ export default function Auth() {
     defaultValues: { email: "", password: "" },
   });
 
+  const resetForm = useForm<ResetFormData>({
+    resolver: zodResolver(resetSchema),
+    defaultValues: { email: "" },
+  });
+
   // Redirect authenticated users away from auth page
   useEffect(() => {
     if (!user) return;
-    
-    // Wait for role and subscription to load before deciding destination
     if (roleLoading || subLoading) return;
-    
-    // Check if user should complete onboarding (skip for educa_pass and cartao_digital)
+
     if (isNewUser && plan !== "educa_pass" && plan !== "cartao_digital") {
       navigate("/onboarding", { replace: true });
       return;
     }
-    
-    // Educa Pass users go directly to Academy
+
     if (plan === "educa_pass") {
       navigate("/educa-academy", { replace: true });
       return;
     }
 
-    // Cartão Digital Pass users go directly to card editor
     if (plan === "cartao_digital") {
       navigate("/meu-cartao", { replace: true });
       return;
     }
-    
-    // Navigate based on role (default to dashboard if role not set)
+
     const destination = role === "admin" ? "/admin" : "/dashboard";
     navigate(destination, { replace: true });
   }, [user, role, roleLoading, isNewUser, navigate, plan, subLoading]);
@@ -136,7 +136,6 @@ export default function Auth() {
     );
   }
 
-  // If user exists, show loading while redirecting
   if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5">
@@ -149,16 +148,73 @@ export default function Auth() {
     );
   }
 
-  // OTP handlers
-  const handleSendOtp = async (data: EmailFormData) => {
+  // ---- Handlers ----
+
+  // Password login (primary)
+  const handleLogin = async (data: LoginFormData) => {
+    setError(null);
+    setIsLoading(true);
+
+    const { error: signInError } = await signIn(data.email, data.password);
+
+    if (signInError) {
+      setIsLoading(false);
+      if (signInError.message.includes("Invalid login credentials")) {
+        setError("Email ou senha incorretos");
+      } else if (signInError.message.includes("Email not confirmed")) {
+        setError("Por favor, confirme seu email antes de fazer login");
+      } else {
+        setError(translateAuthError(signInError.message));
+      }
+      return;
+    }
+
+    // Check if user is admin — if so, enforce 2FA
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", (await supabase.auth.getUser()).data.user?.id ?? "");
+
+    const isAdmin = roleData?.some((r) => r.role === "admin");
+
+    if (isAdmin) {
+      // Sign out immediately — admin must verify via email
+      await supabase.auth.signOut();
+
+      // Send magic link for 2FA
+      const { error: otpErr } = await sendOtp(data.email);
+      setIsLoading(false);
+
+      if (otpErr) {
+        setError(translateAuthError(otpErr.message));
+        return;
+      }
+
+      setPendingEmail(data.email);
+      setView("admin-2fa");
+      toast({
+        title: "Verificação de segurança",
+        description: "Enviamos um link de verificação para seu e-mail.",
+      });
+      return;
+    }
+
+    setIsLoading(false);
+    toast({
+      title: "Bem-vindo de volta!",
+      description: "Login realizado com sucesso.",
+    });
+  };
+
+  // Magic link (secondary)
+  const handleSendMagicLink = async (data: EmailFormData) => {
     setError(null);
     setIsLoading(true);
     const { error } = await sendOtp(data.email);
     setIsLoading(false);
 
     if (error) {
-      // If user not found (shouldCreateUser: false)
-      if (/signups.not.allowed/i.test(error.message) || /otp_disabled/i.test(error.message) || /user.not.found/i.test(error.message)) {
+      if (/signups.not.allowed|otp_disabled|user.not.found/i.test(error.message)) {
         setError("Este e-mail não possui cadastro na plataforma. Por favor, cadastre-se primeiro.");
         return;
       }
@@ -167,19 +223,20 @@ export default function Auth() {
     }
 
     setPendingEmail(data.email);
-    setView("otp-verify");
+    setView("magic-link-sent");
     toast({
       title: "Link enviado!",
       description: "Verifique seu email e clique no link de acesso.",
     });
   };
 
-  // handleVerifyOtp removed - magic link flow used instead
-
-  const handleResendCode = async () => {
+  // Forgot password
+  const handleForgotPassword = async (data: ResetFormData) => {
     setError(null);
     setIsLoading(true);
-    const { error } = await sendOtp(pendingEmail);
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
     setIsLoading(false);
 
     if (error) {
@@ -187,57 +244,48 @@ export default function Auth() {
       return;
     }
 
+    setPendingEmail(data.email);
+    setView("forgot-sent");
     toast({
-      title: "Código reenviado!",
-      description: "Verifique seu email novamente.",
+      title: "Email enviado!",
+      description: "Verifique seu email para redefinir sua senha.",
     });
   };
 
-  // Password handlers
-  const handleLogin = async (data: LoginFormData) => {
+  // Resend handlers
+  const handleResendMagicLink = async () => {
     setError(null);
     setIsLoading(true);
-    const { error } = await signIn(data.email, data.password);
+    const { error } = await sendOtp(pendingEmail);
     setIsLoading(false);
-
     if (error) {
-      if (error.message.includes("Invalid login credentials")) {
-        setError("Email ou senha incorretos");
-      } else if (error.message.includes("Email not confirmed")) {
-        setError("Por favor, confirme seu email antes de fazer login");
-      } else {
-        setError(translateAuthError(error.message));
-      }
+      setError(translateAuthError(error.message));
       return;
     }
-
-    toast({
-      title: "Bem-vindo de volta!",
-      description: "Login realizado com sucesso.",
-    });
+    toast({ title: "Link reenviado!", description: "Verifique seu email novamente." });
   };
 
-  // Navigation helpers
-  const goToMain = () => {
-    setView("main");
+  const handleResendAdmin2fa = async () => {
     setError(null);
-    setOtpValue("");
+    setIsLoading(true);
+    const { error } = await sendOtp(pendingEmail);
+    setIsLoading(false);
+    if (error) {
+      setError(translateAuthError(error.message));
+      return;
+    }
+    toast({ title: "Link reenviado!", description: "Verifique seu email novamente." });
+  };
+
+  // Navigation
+  const goToLogin = () => {
+    setView("login");
+    setError(null);
     setPendingEmail("");
     setSignupSuccess(false);
     loginForm.reset();
     emailForm.reset();
-  };
-
-  const switchToPassword = () => {
-    setAuthMethod("password");
-    setView("password-login");
-    setError(null);
-  };
-
-  const switchToOtp = () => {
-    setAuthMethod("otp");
-    setView("main");
-    setError(null);
+    resetForm.reset();
   };
 
   // Signup success screen
@@ -256,7 +304,7 @@ export default function Auth() {
             </div>
           </CardHeader>
           <CardContent className="px-8 pb-10">
-            <Button onClick={goToMain} className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+            <Button onClick={goToLogin} className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
               Voltar para login
             </Button>
           </CardContent>
@@ -265,8 +313,8 @@ export default function Auth() {
     );
   }
 
-  // Magic Link confirmation screen
-  if (view === "otp-verify") {
+  // Magic Link sent screen
+  if (view === "magic-link-sent") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
@@ -287,40 +335,124 @@ export default function Auth() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
-            <div className="space-y-6">
-              <div className="flex flex-col items-center gap-3 py-4">
-                <Mail className="h-12 w-12 text-primary/70" />
-                <p className="text-sm text-muted-foreground text-center leading-relaxed">
-                  Clique no link enviado para seu email para acessar sua conta. O link é válido por tempo limitado.
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-3 text-center pt-2">
-                <button
-                  type="button"
-                  onClick={handleResendCode}
-                  disabled={isLoading}
-                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
-                >
-                  {isLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Reenviando...
-                    </span>
-                  ) : (
-                    "Reenviar link"
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={goToMain}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  ← Usar outro email
-                </button>
-              </div>
+            <div className="flex flex-col items-center gap-3 py-4">
+              <Mail className="h-12 w-12 text-primary/70" />
+              <p className="text-sm text-muted-foreground text-center leading-relaxed">
+                Clique no link enviado para seu email para acessar sua conta. O link é válido por tempo limitado.
+              </p>
             </div>
+            <div className="flex flex-col gap-3 text-center pt-2">
+              <button
+                type="button"
+                onClick={handleResendMagicLink}
+                disabled={isLoading}
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Reenviando...
+                  </span>
+                ) : (
+                  "Reenviar link"
+                )}
+              </button>
+              <button type="button" onClick={goToLogin} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                ← Voltar para login
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Admin 2FA verification screen
+  if (view === "admin-2fa") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <Card className="relative w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
+          <CardHeader className="pt-10 pb-4 text-center space-y-6">
+            <BrandHeader />
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold flex items-center justify-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                Verificação de segurança
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Para sua segurança, enviamos um link de verificação para<br />
+                <span className="font-medium text-foreground">{pendingEmail}</span>
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="px-8 pb-10 space-y-6">
+            {error && (
+              <Alert variant="destructive" className="rounded-xl">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="relative">
+                <Mail className="h-12 w-12 text-primary/70" />
+                <ShieldCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-primary" />
+              </div>
+              <p className="text-sm text-muted-foreground text-center leading-relaxed">
+                Administradores precisam confirmar o acesso clicando no link enviado por e-mail. Essa etapa é obrigatória para garantir a segurança da sua conta.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 text-center pt-2">
+              <button
+                type="button"
+                onClick={handleResendAdmin2fa}
+                disabled={isLoading}
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Reenviando...
+                  </span>
+                ) : (
+                  "Reenviar link de verificação"
+                )}
+              </button>
+              <button type="button" onClick={goToLogin} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                ← Voltar para login
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Forgot password sent screen
+  if (view === "forgot-sent") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <Card className="relative w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
+          <CardHeader className="pt-10 pb-4 text-center space-y-6">
+            <BrandHeader />
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">Email enviado</CardTitle>
+              <CardDescription className="text-sm">
+                Enviamos um link de redefinição de senha para<br />
+                <span className="font-medium text-foreground">{pendingEmail}</span>
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="px-8 pb-10 space-y-6">
+            <div className="flex flex-col items-center gap-3 py-4">
+              <Mail className="h-12 w-12 text-primary/70" />
+              <p className="text-sm text-muted-foreground text-center leading-relaxed">
+                Verifique sua caixa de entrada e clique no link para criar uma nova senha. O link é válido por tempo limitado.
+              </p>
+            </div>
+            <Button onClick={goToLogin} className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+              Voltar para login
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -329,28 +461,35 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
-      {/* Subtle pattern overlay */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-      
+
       <Card className={`relative w-full rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm transition-all duration-300 ${
         view === "password-signup" ? "max-w-2xl" : "max-w-md"
       }`}>
         <CardHeader className={`text-center space-y-6 ${view === "password-signup" ? "pt-8 pb-4" : "pt-10 pb-4"}`}>
           <BrandHeader />
-          
-           {view !== "password-signup" && (
+
+          {view === "login" && (
             <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">
-                {view === "main" && "Acesse sua conta"}
-                {view === "password-login" && "Login com senha"}
-              </CardTitle>
-              <CardDescription className="text-sm">
-                {view === "main" && "Informe seu email para receber o link de acesso"}
-                {view === "password-login" && "Entre com seu email e senha cadastrados"}
-              </CardDescription>
+              <CardTitle className="text-xl font-semibold">Acesse sua conta</CardTitle>
+              <CardDescription className="text-sm">Entre com seu email e senha</CardDescription>
             </div>
           )}
-          
+
+          {view === "magic-link" && (
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">Acesso por link</CardTitle>
+              <CardDescription className="text-sm">Informe seu email para receber o link de acesso</CardDescription>
+            </div>
+          )}
+
+          {view === "forgot-password" && (
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">Esqueceu sua senha?</CardTitle>
+              <CardDescription className="text-sm">Informe seu email para receber o link de redefinição</CardDescription>
+            </div>
+          )}
+
           {view === "password-signup" && (
             <div className="space-y-2">
               <CardTitle className="text-xl font-semibold">Cadastro de Agente</CardTitle>
@@ -358,7 +497,7 @@ export default function Auth() {
             </div>
           )}
         </CardHeader>
-        
+
         <CardContent className={`space-y-5 ${view === "password-signup" ? "px-6 pb-8" : "px-8 pb-10"}`}>
           {error && (
             <Alert variant="destructive" className="rounded-xl">
@@ -366,74 +505,11 @@ export default function Auth() {
             </Alert>
           )}
 
-          {/* Main OTP view */}
-          {view === "main" && (
-            <div className="space-y-5">
-              <Form {...emailForm}>
-                <form onSubmit={emailForm.handleSubmit(handleSendOtp)} className="space-y-5">
-                  <FormField
-                    control={emailForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Email
-                        </FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              type="email"
-                              placeholder="seu@email.com"
-                              autoComplete="email"
-                              className="h-12 pl-11 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
-                              {...field}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] transition-all" 
-                    disabled={isLoading}
-                  >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    <Mail className="mr-2 h-4 w-4" />
-                    Enviar link de acesso por email
-                  </Button>
-                </form>
-              </Form>
-
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-muted-foreground/10" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-4 text-muted-foreground/60 font-medium">ou</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-12 rounded-xl text-base font-medium border-muted-foreground/20 hover:bg-muted/50 hover:border-muted-foreground/30 transition-all"
-                onClick={switchToPassword}
-              >
-                <KeyRound className="mr-2 h-4 w-4" />
-                Entrar com senha
-              </Button>
-
-            </div>
-          )}
-
-          {/* Password Login view */}
-          {view === "password-login" && (
+          {/* PRIMARY: Password Login */}
+          {view === "login" && (
             <div className="space-y-5">
               <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-5">
+                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                   <FormField
                     control={loginForm.control}
                     name="email"
@@ -495,9 +571,10 @@ export default function Auth() {
                       </FormItem>
                     )}
                   />
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] transition-all" 
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] transition-all"
                     disabled={isLoading}
                   >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -506,11 +583,130 @@ export default function Auth() {
                 </form>
               </Form>
 
+              {/* Secondary options — subtle links */}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setView("magic-link"); setError(null); }}
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Entrar com link por e-mail
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setView("forgot-password"); setError(null); }}
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Esqueci minha senha
+                </button>
+              </div>
             </div>
           )}
 
+          {/* Magic Link view */}
+          {view === "magic-link" && (
+            <div className="space-y-5">
+              <Form {...emailForm}>
+                <form onSubmit={emailForm.handleSubmit(handleSendMagicLink)} className="space-y-5">
+                  <FormField
+                    control={emailForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Email
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              type="email"
+                              placeholder="seu@email.com"
+                              autoComplete="email"
+                              className="h-12 pl-11 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] transition-all"
+                    disabled={isLoading}
+                  >
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Mail className="mr-2 h-4 w-4" />
+                    Enviar link de acesso
+                  </Button>
+                </form>
+              </Form>
+              <div className="text-center pt-1">
+                <button type="button" onClick={goToLogin} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  ← Voltar para login com senha
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Forgot Password view */}
+          {view === "forgot-password" && (
+            <div className="space-y-5">
+              <Form {...resetForm}>
+                <form onSubmit={resetForm.handleSubmit(handleForgotPassword)} className="space-y-5">
+                  <FormField
+                    control={resetForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Email
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              type="email"
+                              placeholder="seu@email.com"
+                              autoComplete="email"
+                              className="h-12 pl-11 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] transition-all"
+                    disabled={isLoading}
+                  >
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Enviar link de redefinição
+                  </Button>
+                </form>
+              </Form>
+              <div className="text-center pt-1">
+                <button type="button" onClick={goToLogin} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  ← Voltar para login
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Signup view */}
+          {view === "password-signup" && (
+            <MultiStepSignup
+              onComplete={() => setSignupSuccess(true)}
+              onCancel={goToLogin}
+            />
+          )}
         </CardContent>
-        
+
         {/* Footer branding */}
         <div className="pb-6 text-center">
           <p className="text-[10px] text-muted-foreground/50">
