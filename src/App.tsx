@@ -50,6 +50,7 @@ import VitrinePublica from "./pages/VitrinePublica";
 import CartaoPublico from "./pages/CartaoPublico";
 import SlugResolver from "./components/routing/SlugResolver";
 import NotFound from "./pages/NotFound";
+import OrcamentoPublico from "./pages/OrcamentoPublico";
 import CertificateTest from "./pages/CertificateTest";
 import Gamificacao from "./pages/Gamificacao";
 import Pesquisa from "./pages/Pesquisa";
@@ -417,6 +418,7 @@ const App = () => (
               }
             />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
+            <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
             <Route path="/cadastro/:token" element={<CadastroLink />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/reset-password" element={<ResetPassword />} />
