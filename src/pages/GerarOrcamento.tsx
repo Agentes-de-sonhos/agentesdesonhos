@@ -124,7 +124,7 @@ export default function GerarOrcamento() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { quotes, isLoading: quotesLoading, createQuote, isCreating, publishQuote, isPublishing, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
-  const { quote, addService, deleteService, isAddingService } = useQuote(id);
+  const { quote, addService, updateService, deleteService, isAddingService } = useQuote(id);
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null);
