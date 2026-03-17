@@ -66,43 +66,53 @@ function CategoryBadge({ categoria }: { categoria: string }) {
   );
 }
 
-function NewsItemTags({ item, isTopTrending }: { item: CuratedNews; isTopTrending: boolean }) {
+function NewsMetaRow({ item, isTopTrending }: { item: CuratedNews; isTopTrending: boolean }) {
   const tags: React.ReactNode[] = [];
 
   if (item.is_noticia_do_dia) {
     tags.push(
-      <span key="dia" className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-        <Flame className="h-3 w-3" /> Notícia do Dia
+      <span key="dia" className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider leading-4">
+        <Flame className="h-2.5 w-2.5" /> Dia
       </span>
     );
   }
 
   if (item.top5_position != null) {
     tags.push(
-      <span key="top5" className="inline-flex items-center gap-1 rounded-full bg-warning/15 text-warning border border-warning/30 px-2 py-0.5 text-[10px] font-bold">
-        <Zap className="h-3 w-3" /> Top {item.top5_position}
+      <span key="top5" className="inline-flex items-center gap-0.5 rounded-full bg-warning/15 text-warning border border-warning/30 px-1.5 py-0 text-[9px] font-bold leading-4">
+        <Zap className="h-2.5 w-2.5" /> Top {item.top5_position}
       </span>
     );
   }
 
   if (item.alerta_trade) {
     tags.push(
-      <span key="destaque" className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2 py-0.5 text-[10px] font-bold">
-        <Star className="h-3 w-3" /> Destaque
+      <span key="destaque" className="inline-flex items-center gap-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-1.5 py-0 text-[9px] font-bold leading-4">
+        <Star className="h-2.5 w-2.5" /> Destaque
       </span>
     );
   }
 
   if (isTopTrending && !item.is_noticia_do_dia) {
     tags.push(
-      <span key="alta" className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold">
-        <TrendingUp className="h-3 w-3" /> Em alta
+      <span key="alta" className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 text-destructive px-1.5 py-0 text-[9px] font-bold leading-4">
+        <TrendingUp className="h-2.5 w-2.5" /> Em alta
       </span>
     );
   }
 
-  if (tags.length === 0) return null;
-  return <div className="flex items-center gap-1 flex-wrap mb-1">{tags}</div>;
+  return (
+    <div className="flex items-center gap-1.5 flex-nowrap overflow-hidden min-w-0">
+      <CategoryBadge categoria={item.categoria} />
+      {tags}
+      <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-auto flex-shrink-0">
+        {item.fonte} • {formatDate(item.data_publicacao)}
+        {item.relevancia_score >= 8 && (
+          <span className="font-semibold text-primary ml-1">★ {item.relevancia_score}</span>
+        )}
+      </span>
+    </div>
+  );
 }
 
 export function CuratedNewsFeed() {
@@ -179,24 +189,13 @@ export function CuratedNewsFeed() {
                 {i + 1}
               </span>
 
-              <div className="flex-1 min-w-0">
-                <NewsItemTags item={item} isTopTrending={trendingIds.has(item.id)} />
-                <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors line-clamp-2 leading-snug ${
+              <div className="flex-1 min-w-0 space-y-0.5">
+                <NewsMetaRow item={item} isTopTrending={trendingIds.has(item.id)} />
+                <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors line-clamp-1 leading-snug ${
                   isFirst ? "text-sm" : "text-[13px]"
                 }`}>
                   {item.titulo_curto}
                 </h4>
-                <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                  <CategoryBadge categoria={item.categoria} />
-                  <span className="text-[10px] text-muted-foreground">{item.fonte}</span>
-                  <span className="text-[10px] text-muted-foreground">•</span>
-                  <span className="text-[10px] text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-                  {item.relevancia_score >= 8 && (
-                    <span className="text-[10px] font-semibold text-primary">
-                      ★ {item.relevancia_score}/10
-                    </span>
-                  )}
-                </div>
               </div>
 
               <ExternalLink className="h-4 w-4 flex-shrink-0 text-[hsl(var(--section-news))] opacity-0 transition-opacity group-hover:opacity-100 mt-0.5" />
