@@ -20,6 +20,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import type {
   ServiceType, FlightData, HotelData, CarRentalData, TransferData,
   AttractionData, InsuranceData, CruiseData, OtherServiceData,
