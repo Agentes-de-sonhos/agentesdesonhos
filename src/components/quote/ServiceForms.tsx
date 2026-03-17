@@ -34,6 +34,8 @@ interface ServiceFormProps {
   showOptionLabel?: boolean;
   tripStartDate?: Date;
   tripEndDate?: Date;
+  /** When editing, pass the existing service data to pre-fill the form */
+  initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null };
 }
 
 /** Helper: disable dates outside trip range */
