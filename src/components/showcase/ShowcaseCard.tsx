@@ -22,10 +22,10 @@ export function ShowcaseCard({ item, isFeatured, images, onImageClick, onAction 
     >
       {isFeatured && <FeaturedBadge label={item.featured_label} />}
 
-      {/* WhatsApp floating button — top right of card */}
+      {/* WhatsApp floating button — centered on card */}
       <button
         onClick={(e) => { e.stopPropagation(); onAction(); }}
-        className="absolute top-3 right-3 z-20 h-10 w-10 rounded-full bg-[hsl(142,70%,45%)] text-white shadow-lg flex items-center justify-center hover:bg-[hsl(142,70%,38%)] hover:scale-110 transition-all duration-200"
+        className="absolute inset-0 m-auto z-20 h-10 w-10 rounded-full bg-[hsl(142,70%,45%)] text-white shadow-lg flex items-center justify-center hover:bg-[hsl(142,70%,38%)] hover:scale-110 transition-all duration-200 opacity-80 hover:opacity-100"
         title="Faça um orçamento!"
       >
         <MessageCircle className="h-5 w-5" />
