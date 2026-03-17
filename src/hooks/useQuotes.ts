@@ -66,6 +66,8 @@ export function useQuotes() {
 
   const deleteQuoteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Delete services first, then the quote
+      await supabase.from("quote_services").delete().eq("quote_id", id);
       const { error } = await supabase.from("quotes").delete().eq("id", id);
       if (error) throw error;
     },
@@ -75,6 +77,63 @@ export function useQuotes() {
     },
     onError: (error) => {
       toast({ title: "Erro ao excluir orçamento", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const duplicateQuoteMutation = useMutation({
+    mutationFn: async (sourceId: string) => {
+      if (!user) throw new Error("User not authenticated");
+      // Fetch source quote
+      const { data: source, error: srcErr } = await supabase
+        .from("quotes").select("*").eq("id", sourceId).single();
+      if (srcErr || !source) throw srcErr || new Error("Quote not found");
+
+      // Create new quote
+      const { data: newQuote, error: newErr } = await supabase
+        .from("quotes")
+        .insert({
+          user_id: user.id,
+          client_name: `${source.client_name} (cópia)`,
+          adults_count: source.adults_count,
+          children_count: source.children_count,
+          destination: source.destination,
+          start_date: source.start_date,
+          end_date: source.end_date,
+          total_amount: source.total_amount,
+          status: "draft",
+          show_detailed_prices: (source as any).show_detailed_prices,
+          payment_terms: (source as any).payment_terms,
+          valid_until: (source as any).valid_until,
+          validity_disclaimer: (source as any).validity_disclaimer,
+        } as any)
+        .select()
+        .single();
+      if (newErr || !newQuote) throw newErr || new Error("Failed to create quote");
+
+      // Copy services
+      const { data: services } = await supabase
+        .from("quote_services").select("*").eq("quote_id", sourceId).order("order_index");
+      if (services && services.length > 0) {
+        const newServices = services.map((s: any) => ({
+          quote_id: newQuote.id,
+          service_type: s.service_type,
+          service_data: s.service_data,
+          amount: s.amount,
+          order_index: s.order_index,
+          option_label: s.option_label,
+          description: s.description,
+        }));
+        await supabase.from("quote_services").insert(newServices as any);
+      }
+
+      return newQuote as Quote;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quotes"] });
+      toast({ title: "Orçamento duplicado", description: "Uma cópia do orçamento foi criada." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao duplicar", description: error.message, variant: "destructive" });
     },
   });
 
@@ -102,9 +161,11 @@ export function useQuotes() {
     createQuote: createQuoteMutation.mutateAsync,
     updateQuote: updateQuoteMutation.mutateAsync,
     deleteQuote: deleteQuoteMutation.mutateAsync,
+    duplicateQuote: duplicateQuoteMutation.mutateAsync,
     publishQuote: publishQuoteMutation.mutateAsync,
     isCreating: createQuoteMutation.isPending,
     isPublishing: publishQuoteMutation.isPending,
+    isDuplicating: duplicateQuoteMutation.isPending,
   };
 }
 
