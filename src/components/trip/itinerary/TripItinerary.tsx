@@ -312,7 +312,7 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
                               <div key={activity.id} className="ml-6 mb-3 p-3 bg-muted/20 rounded-lg border">
                                 <ItineraryActivityForm
                                   tripServices={services}
-                                  onSubmit={handleUpdateActivity}
+                                  onSubmit={(data, files, docFiles) => handleUpdateActivity(data, files, docFiles)}
                                   onCancel={() => setEditingActivity(null)}
                                   isLoading={false}
                                   defaultValues={activity}
