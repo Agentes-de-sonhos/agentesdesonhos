@@ -543,6 +543,16 @@ export function AdminUserManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title="Acessar como usuário"
+                          className="text-amber-600 hover:text-amber-700"
+                          onClick={() => impersonateMutation.mutate(user)}
+                          disabled={impersonateMutation.isPending}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           title="Resetar senha"
                           onClick={() => resetPasswordMutation.mutate(user.user_id)}
                           disabled={resetPasswordMutation.isPending}
