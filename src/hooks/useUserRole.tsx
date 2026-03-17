@@ -10,6 +10,9 @@ export function useUserRole() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Reset loading whenever user changes to prevent stale state
+    setLoading(true);
+
     async function fetchRole() {
       if (!user) {
         setRole(null);
