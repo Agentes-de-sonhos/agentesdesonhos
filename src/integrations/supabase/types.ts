@@ -2725,6 +2725,7 @@ export type Database = {
           data_publicacao: string
           fonte: string
           id: string
+          is_noticia_do_dia: boolean
           nivel_alerta: string
           noticia_bruta_id: string | null
           relevancia_score: number
@@ -2732,6 +2733,7 @@ export type Database = {
           status: string
           tipo_exibicao: string
           titulo_curto: string
+          top5_position: number | null
           updated_at: string
           url_original: string
         }
@@ -2744,6 +2746,7 @@ export type Database = {
           data_publicacao?: string
           fonte: string
           id?: string
+          is_noticia_do_dia?: boolean
           nivel_alerta?: string
           noticia_bruta_id?: string | null
           relevancia_score?: number
@@ -2751,6 +2754,7 @@ export type Database = {
           status?: string
           tipo_exibicao?: string
           titulo_curto: string
+          top5_position?: number | null
           updated_at?: string
           url_original: string
         }
@@ -2763,6 +2767,7 @@ export type Database = {
           data_publicacao?: string
           fonte?: string
           id?: string
+          is_noticia_do_dia?: boolean
           nivel_alerta?: string
           noticia_bruta_id?: string | null
           relevancia_score?: number
@@ -2770,6 +2775,7 @@ export type Database = {
           status?: string
           tipo_exibicao?: string
           titulo_curto?: string
+          top5_position?: number | null
           updated_at?: string
           url_original?: string
         }
