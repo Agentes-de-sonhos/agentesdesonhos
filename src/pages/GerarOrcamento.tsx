@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { ServiceList } from "@/components/quote/ServiceCard";
@@ -72,10 +73,12 @@ export default function GerarOrcamento() {
     return (
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
-          <div>
-            <h1 className="font-display text-2xl font-bold">Gerar Orçamento</h1>
-            <p className="text-muted-foreground">Crie um orçamento profissional para seu cliente</p>
-          </div>
+          <PageHeader
+            pageKey="gerar-orcamento"
+            title="Gerar Orçamento"
+            subtitle="Crie um orçamento profissional para seu cliente"
+            icon={FileText}
+          />
           {hasLimit && (
             <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateQuote ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
               {canCreateQuote ? (
