@@ -5207,6 +5207,44 @@ export type Database = {
           },
         ]
       }
+      trip_itinerary_period_images: {
+        Row: {
+          created_at: string
+          day_date: string
+          id: string
+          image_url: string
+          period: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_date: string
+          id?: string
+          image_url: string
+          period: string
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_date?: string
+          id?: string
+          image_url?: string
+          period?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_itinerary_period_images_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_reminders: {
         Row: {
           created_at: string
@@ -5256,6 +5294,7 @@ export type Database = {
           attachments: Json
           created_at: string
           id: string
+          image_url: string | null
           order_index: number
           service_data: Json
           service_type: string
@@ -5268,6 +5307,7 @@ export type Database = {
           attachments?: Json
           created_at?: string
           id?: string
+          image_url?: string | null
           order_index?: number
           service_data?: Json
           service_type: string
@@ -5280,6 +5320,7 @@ export type Database = {
           attachments?: Json
           created_at?: string
           id?: string
+          image_url?: string | null
           order_index?: number
           service_data?: Json
           service_type?: string

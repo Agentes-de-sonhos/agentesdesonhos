@@ -18,6 +18,7 @@ import { TripEditHistory } from "@/components/trip/TripEditHistory";
 import { generateTripPDF } from "@/components/trip/TripPDF";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { useTrips, useTrip } from "@/hooks/useTrips";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +54,7 @@ export default function TripWallet() {
 function TripWalletContent() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -198,6 +200,30 @@ function TripWalletContent() {
 
   const handleReplaceVoucher = async (serviceId: string, file: File) => {
     await replaceVoucher({ serviceId, file });
+  };
+
+  const handleUploadServiceImage = async (serviceId: string, file: File) => {
+    try {
+      setIsUploading(true);
+      const result = await uploadVoucher(file);
+      await supabase.from("trip_services").update({ image_url: result.url }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+      toast({ title: "Imagem adicionada" });
+    } catch (err: any) {
+      toast({ title: "Erro ao enviar imagem", description: err.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveServiceImage = async (serviceId: string) => {
+    try {
+      await supabase.from("trip_services").update({ image_url: null }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+      toast({ title: "Imagem removida" });
+    } catch (err: any) {
+      toast({ title: "Erro ao remover imagem", description: err.message, variant: "destructive" });
+    }
   };
 
   const handleCopyLink = () => {
@@ -425,6 +451,8 @@ function TripWalletContent() {
                       onRemoveVoucher={removeVoucher}
                       onAddAttachment={handleAddAttachment}
                       onRemoveAttachment={handleRemoveAttachment}
+                      onUploadServiceImage={handleUploadServiceImage}
+                      onRemoveServiceImage={handleRemoveServiceImage}
                       groupByType={true}
                     />
                   </>
