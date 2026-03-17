@@ -442,7 +442,7 @@ export default function LandingPage() {
                 className="gap-2 text-base px-8 py-[14px] rounded-xl font-semibold shadow-[0_10px_30px_hsl(var(--primary)/0.2)] hover:shadow-[0_14px_40px_hsl(var(--primary)/0.3)] hover:-translate-y-0.5 transition-all duration-250"
                 onClick={goSignup}
               >
-                Quero conhecer a plataforma
+                Quero entrar na plataforma
                 <ArrowRight className="h-4 w-4" />
               </Button>
               <Button
