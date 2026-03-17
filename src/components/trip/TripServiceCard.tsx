@@ -406,13 +406,15 @@ interface TripServiceListProps {
   onRemoveVoucher?: (serviceId: string) => void;
   onAddAttachment?: (serviceId: string, file: File) => void;
   onRemoveAttachment?: (serviceId: string, index: number) => void;
+  onUploadServiceImage?: (serviceId: string, file: File) => void;
+  onRemoveServiceImage?: (serviceId: string) => void;
   showActions?: boolean;
   groupByType?: boolean;
 }
 
 export function TripServiceList({ 
   services, onDeleteService, onEditService, onReplaceVoucher, onRemoveVoucher, 
-  onAddAttachment, onRemoveAttachment,
+  onAddAttachment, onRemoveAttachment, onUploadServiceImage, onRemoveServiceImage,
   showActions = true, groupByType = false 
 }: TripServiceListProps) {
   if (services.length === 0) {
@@ -453,6 +455,8 @@ export function TripServiceList({
                   onRemoveVoucher={onRemoveVoucher}
                   onAddAttachment={onAddAttachment}
                   onRemoveAttachment={onRemoveAttachment}
+                  onUploadServiceImage={onUploadServiceImage}
+                  onRemoveServiceImage={onRemoveServiceImage}
                   showActions={showActions}
                 />
               ))}
@@ -475,6 +479,8 @@ export function TripServiceList({
           onRemoveVoucher={onRemoveVoucher}
           onAddAttachment={onAddAttachment}
           onRemoveAttachment={onRemoveAttachment}
+          onUploadServiceImage={onUploadServiceImage}
+          onRemoveServiceImage={onRemoveServiceImage}
           showActions={showActions}
         />
       ))}
