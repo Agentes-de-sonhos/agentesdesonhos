@@ -27,6 +27,7 @@ export interface TripService {
   service_data: TripServiceData;
   voucher_url: string | null;
   voucher_name: string | null;
+  image_url: string | null;
   attachments: TripAttachment[];
   order_index: number;
   created_at: string;
