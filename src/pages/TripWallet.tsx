@@ -18,6 +18,7 @@ import { TripEditHistory } from "@/components/trip/TripEditHistory";
 import { generateTripPDF } from "@/components/trip/TripPDF";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { useTrips, useTrip } from "@/hooks/useTrips";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
