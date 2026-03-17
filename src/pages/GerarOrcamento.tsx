@@ -148,6 +148,11 @@ export default function GerarOrcamento() {
       setPaymentTerms((quote as any).payment_terms || "");
       setValidUntil((quote as any).valid_until ? new Date((quote as any).valid_until) : undefined);
       setValidityDisclaimer((quote as any).validity_disclaimer || "Valores sujeitos à alteração sem aviso prévio devido à variação cambial e disponibilidade de tarifas.");
+      setPaymentDisplayMode(((quote as any).payment_display_mode as PaymentDisplayMode) || "full_payment");
+      setInstallmentsCount((quote as any).installments_count || 10);
+      setEntryPercentage((quote as any).entry_percentage || 30);
+      setPaymentMethodLabel((quote as any).payment_method_label || "");
+      setFullPaymentDiscountPercent((quote as any).full_payment_discount_percent || 0);
     }
   }, [quote]);
 
