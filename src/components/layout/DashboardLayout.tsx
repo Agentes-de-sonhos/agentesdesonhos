@@ -4,14 +4,17 @@ import { MobileSidebar } from "./MobileSidebar";
 import { Footer } from "./Footer";
 import { GlobalPopupModal } from "@/components/popup/GlobalPopupModal";
 import { ChatFloatingButton } from "@/components/community-chat/ChatFloatingButton";
+import { isImpersonating } from "@/components/admin/ImpersonationBanner";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const impersonating = isImpersonating();
+  
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+    <div className={`min-h-screen bg-background flex flex-col overflow-x-hidden ${impersonating ? "pt-10" : ""}`}>
       {/* Desktop Sidebar */}
       <AppSidebar />
       

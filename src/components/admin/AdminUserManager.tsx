@@ -48,11 +48,14 @@ import {
   UserPlus,
   KeyRound,
   Trash2,
+  Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
+import { setImpersonationData, type ImpersonationData } from "./ImpersonationBanner";
 
 interface UserWithDetails {
   id: string;
@@ -81,6 +84,7 @@ export function AdminUserManager() {
   const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
@@ -268,6 +272,56 @@ export function AdminUserManager() {
     onError: (err: Error) => {
       toast({ title: "Erro ao excluir usuário", description: err.message, variant: "destructive" });
       setDeletingUser(null);
+    },
+  });
+
+  const impersonateMutation = useMutation({
+    mutationFn: async (user: UserWithDetails) => {
+      // Save current admin session
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error("Sessão admin não encontrada");
+
+      const resp = await supabase.functions.invoke("impersonate-user", {
+        body: { targetUserId: user.user_id },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao impersonar");
+      if (resp.data?.error) throw new Error(resp.data.error);
+
+      const { token_hash, email, target_user_name, target_user_id } = resp.data;
+
+      // Store admin session before switching
+      const impData: ImpersonationData = {
+        adminSessionAccess: sessionData.session.access_token,
+        adminSessionRefresh: sessionData.session.refresh_token,
+        targetUserName: target_user_name,
+        targetUserId: target_user_id,
+        adminId: sessionData.session.user.id,
+        startedAt: new Date().toISOString(),
+      };
+      setImpersonationData(impData);
+
+      // Sign in as the target user using the magic link token
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        type: "magiclink",
+        email,
+        token_hash,
+      });
+
+      if (verifyError) {
+        // Rollback
+        const { clearImpersonationData } = await import("./ImpersonationBanner");
+        clearImpersonationData();
+        throw new Error("Erro ao autenticar como usuário: " + verifyError.message);
+      }
+
+      return target_user_name;
+    },
+    onSuccess: (name) => {
+      toast({ title: "Modo suporte ativado", description: `Acessando como ${name}` });
+      navigate("/dashboard");
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro na impersonação", description: err.message, variant: "destructive" });
     },
   });
 
@@ -485,6 +539,16 @@ export function AdminUserManager() {
                           ) : (
                             <><Shield className="h-3 w-3" /> Tornar Admin</>
                           )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Acessar como usuário"
+                          className="text-amber-600 hover:text-amber-700"
+                          onClick={() => impersonateMutation.mutate(user)}
+                          disabled={impersonateMutation.isPending}
+                        >
+                          <Eye className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"

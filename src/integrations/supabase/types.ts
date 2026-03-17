@@ -1874,6 +1874,33 @@ export type Database = {
         }
         Relationships: []
       }
+      impersonation_logs: {
+        Row: {
+          admin_id: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          started_at: string
+          target_user_id: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          target_user_id: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       in_person_events: {
         Row: {
           city: string
