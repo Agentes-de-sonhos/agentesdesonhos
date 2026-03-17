@@ -235,18 +235,6 @@ export default function Auth() {
     toast({ title: "Link reenviado!", description: "Verifique seu email novamente." });
   };
 
-  const handleResendAdmin2fa = async () => {
-    setError(null);
-    setIsLoading(true);
-    const { error } = await sendOtp(pendingEmail);
-    setIsLoading(false);
-    if (error) {
-      setError(translateAuthError(error.message));
-      return;
-    }
-    toast({ title: "Link reenviado!", description: "Verifique seu email novamente." });
-  };
-
   // Navigation
   const goToLogin = () => {
     setView("login");
