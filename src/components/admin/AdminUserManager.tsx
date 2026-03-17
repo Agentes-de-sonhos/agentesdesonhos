@@ -84,6 +84,7 @@ export function AdminUserManager() {
   const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
