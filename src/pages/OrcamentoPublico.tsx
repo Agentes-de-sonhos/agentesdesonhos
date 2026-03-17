@@ -120,8 +120,9 @@ function ServiceCard({ service }: { service: QuoteService }) {
   );
 }
 
-export default function OrcamentoPublico() {
-  const { token } = useParams<{ token: string }>();
+export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: string } = {}) {
+  const params = useParams<{ token: string }>();
+  const token = tokenOverride ?? params.token;
   const { quote, isLoading } = usePublicQuote(token);
 
   // Fetch agent profile from the quote's user_id

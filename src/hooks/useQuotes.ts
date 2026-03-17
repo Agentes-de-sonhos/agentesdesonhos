@@ -346,9 +346,10 @@ export function usePublicQuote(token: string | undefined) {
         .select("*")
         .eq("share_token", token)
         .eq("status", "published")
-        .single();
+        .maybeSingle();
 
       if (quoteError) throw quoteError;
+      if (!quoteData) return null;
 
       const { data: servicesData, error: servicesError } = await supabase
         .from("quote_services")
