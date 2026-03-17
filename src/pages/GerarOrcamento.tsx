@@ -135,19 +135,8 @@ export default function GerarOrcamento() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-4">
             <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
+              <CardHeader>
                 <CardTitle>Serviços</CardTitle>
-                {!selectedServiceType && (
-                  <Tabs defaultValue="flight" onValueChange={(v) => setSelectedServiceType(v as ServiceType)}>
-                    <TabsList className="grid grid-cols-4 h-auto">
-                      {(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).slice(0, 4).map((type) => (
-                        <TabsTrigger key={type} value={type} className="text-xs px-2 py-1">
-                          {SERVICE_TYPE_LABELS[type].split(" ")[0]}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                )}
               </CardHeader>
               <CardContent>
                 {selectedServiceType ? (
