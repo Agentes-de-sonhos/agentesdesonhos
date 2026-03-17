@@ -158,14 +158,24 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
       notes?: string;
       linked_service_id?: string | null;
       photo_urls?: string[];
+      document_urls?: string[];
+      maps_url?: string | null;
     },
-    files?: File[]
+    files?: File[],
+    docFiles?: File[]
   ) => {
     let photoUrls: string[] = [...(data.photo_urls || [])];
     if (files && files.length > 0) {
       for (const file of files) {
         const url = await uploadPhoto(file);
         photoUrls.push(url);
+      }
+    }
+    let documentUrls: string[] = [...(data.document_urls || [])];
+    if (docFiles && docFiles.length > 0) {
+      for (const file of docFiles) {
+        const { url } = await uploadDocument(file);
+        documentUrls.push(url);
       }
     }
     await addActivity({
@@ -179,13 +189,16 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
       notes: data.notes,
       linked_service_id: data.linked_service_id,
       photo_urls: photoUrls,
+      document_urls: documentUrls,
+      maps_url: data.maps_url,
     });
     setAddingFor(null);
   };
 
   const handleUpdateActivity = async (
     data: any,
-    files?: File[]
+    files?: File[],
+    docFiles?: File[]
   ) => {
     if (!editingActivity) return;
     let photoUrls: string[] = [...(data.photo_urls || [])];
@@ -193,6 +206,13 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
       for (const file of files) {
         const url = await uploadPhoto(file);
         photoUrls.push(url);
+      }
+    }
+    let documentUrls: string[] = [...(data.document_urls || [])];
+    if (docFiles && docFiles.length > 0) {
+      for (const file of docFiles) {
+        const { url } = await uploadDocument(file);
+        documentUrls.push(url);
       }
     }
     await updateActivity({
@@ -204,6 +224,8 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
       notes: data.notes || null,
       linked_service_id: data.linked_service_id,
       photo_urls: photoUrls,
+      document_urls: documentUrls,
+      maps_url: data.maps_url ?? null,
     });
     setEditingActivity(null);
   };
