@@ -169,36 +169,6 @@ export default function Auth() {
       return;
     }
 
-    // Check if user is admin — if so, enforce 2FA
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", (await supabase.auth.getUser()).data.user?.id ?? "");
-
-    const isAdmin = roleData?.some((r) => r.role === "admin");
-
-    if (isAdmin) {
-      // Sign out immediately — admin must verify via email
-      await supabase.auth.signOut();
-
-      // Send magic link for 2FA
-      const { error: otpErr } = await sendOtp(data.email);
-      setIsLoading(false);
-
-      if (otpErr) {
-        setError(translateAuthError(otpErr.message));
-        return;
-      }
-
-      setPendingEmail(data.email);
-      setView("admin-2fa");
-      toast({
-        title: "Verificação de segurança",
-        description: "Enviamos um link de verificação para seu e-mail.",
-      });
-      return;
-    }
-
     setIsLoading(false);
     toast({
       title: "Bem-vindo de volta!",
