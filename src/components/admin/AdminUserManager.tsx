@@ -275,6 +275,56 @@ export function AdminUserManager() {
     },
   });
 
+  const impersonateMutation = useMutation({
+    mutationFn: async (user: UserWithDetails) => {
+      // Save current admin session
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error("Sessão admin não encontrada");
+
+      const resp = await supabase.functions.invoke("impersonate-user", {
+        body: { targetUserId: user.user_id },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao impersonar");
+      if (resp.data?.error) throw new Error(resp.data.error);
+
+      const { token_hash, email, target_user_name, target_user_id } = resp.data;
+
+      // Store admin session before switching
+      const impData: ImpersonationData = {
+        adminSessionAccess: sessionData.session.access_token,
+        adminSessionRefresh: sessionData.session.refresh_token,
+        targetUserName: target_user_name,
+        targetUserId: target_user_id,
+        adminId: sessionData.session.user.id,
+        startedAt: new Date().toISOString(),
+      };
+      setImpersonationData(impData);
+
+      // Sign in as the target user using the magic link token
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        type: "magiclink",
+        email,
+        token_hash,
+      });
+
+      if (verifyError) {
+        // Rollback
+        const { clearImpersonationData } = await import("./ImpersonationBanner");
+        clearImpersonationData();
+        throw new Error("Erro ao autenticar como usuário: " + verifyError.message);
+      }
+
+      return target_user_name;
+    },
+    onSuccess: (name) => {
+      toast({ title: "Modo suporte ativado", description: `Acessando como ${name}` });
+      navigate("/dashboard");
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro na impersonação", description: err.message, variant: "destructive" });
+    },
+  });
+
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchesSearch =
