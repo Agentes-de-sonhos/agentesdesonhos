@@ -10,6 +10,7 @@ export interface Quote {
   total_amount: number;
   status: 'draft' | 'published';
   share_token: string | null;
+  show_detailed_prices: boolean;
   created_at: string;
   updated_at: string;
   services?: QuoteService[];
