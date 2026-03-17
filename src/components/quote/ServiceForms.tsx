@@ -1408,12 +1408,13 @@ function OtherForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "se
 }
 
 // Main Service Form component
-export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading }: ServiceFormProps) {
+export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel }: ServiceFormProps) {
+  const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
   switch (serviceType) {
     case "flight":
-      return <FlightForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
+      return <FlightForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} showOptionLabel={hasMultipleOptions} />;
     case "hotel":
-      return <HotelForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
+      return <HotelForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} showOptionLabel={hasMultipleOptions} />;
     case "car_rental":
       return <CarRentalForm onSubmit={onSubmit} onCancel={onCancel} isLoading={isLoading} />;
     case "transfer":
