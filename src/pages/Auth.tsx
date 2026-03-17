@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Eye, EyeOff, Mail, Lock, ShieldCheck } from "lucide-react";
+import { Loader2, Eye, EyeOff, Mail, Lock } from "lucide-react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -56,7 +56,7 @@ type EmailFormData = z.infer<typeof emailSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
 type ResetFormData = z.infer<typeof resetSchema>;
 
-type AuthView = "login" | "magic-link" | "magic-link-sent" | "forgot-password" | "forgot-sent" | "admin-2fa" | "password-signup";
+type AuthView = "login" | "magic-link" | "magic-link-sent" | "forgot-password" | "forgot-sent" | "password-signup";
 
 // Brand Header Component
 function BrandHeader() {
@@ -169,36 +169,6 @@ export default function Auth() {
       return;
     }
 
-    // Check if user is admin — if so, enforce 2FA
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", (await supabase.auth.getUser()).data.user?.id ?? "");
-
-    const isAdmin = roleData?.some((r) => r.role === "admin");
-
-    if (isAdmin) {
-      // Sign out immediately — admin must verify via email
-      await supabase.auth.signOut();
-
-      // Send magic link for 2FA
-      const { error: otpErr } = await sendOtp(data.email);
-      setIsLoading(false);
-
-      if (otpErr) {
-        setError(translateAuthError(otpErr.message));
-        return;
-      }
-
-      setPendingEmail(data.email);
-      setView("admin-2fa");
-      toast({
-        title: "Verificação de segurança",
-        description: "Enviamos um link de verificação para seu e-mail.",
-      });
-      return;
-    }
-
     setIsLoading(false);
     toast({
       title: "Bem-vindo de volta!",
@@ -254,18 +224,6 @@ export default function Auth() {
 
   // Resend handlers
   const handleResendMagicLink = async () => {
-    setError(null);
-    setIsLoading(true);
-    const { error } = await sendOtp(pendingEmail);
-    setIsLoading(false);
-    if (error) {
-      setError(translateAuthError(error.message));
-      return;
-    }
-    toast({ title: "Link reenviado!", description: "Verifique seu email novamente." });
-  };
-
-  const handleResendAdmin2fa = async () => {
     setError(null);
     setIsLoading(true);
     const { error } = await sendOtp(pendingEmail);
@@ -367,65 +325,6 @@ export default function Auth() {
     );
   }
 
-  // Admin 2FA verification screen
-  if (view === "admin-2fa") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <Card className="relative w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
-          <CardHeader className="pt-10 pb-4 text-center space-y-6">
-            <BrandHeader />
-            <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold flex items-center justify-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-                Verificação de segurança
-              </CardTitle>
-              <CardDescription className="text-sm">
-                Para sua segurança, enviamos um link de verificação para<br />
-                <span className="font-medium text-foreground">{pendingEmail}</span>
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="px-8 pb-10 space-y-6">
-            {error && (
-              <Alert variant="destructive" className="rounded-xl">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <div className="flex flex-col items-center gap-3 py-4">
-              <div className="relative">
-                <Mail className="h-12 w-12 text-primary/70" />
-                <ShieldCheck className="absolute -bottom-1 -right-1 h-5 w-5 text-primary" />
-              </div>
-              <p className="text-sm text-muted-foreground text-center leading-relaxed">
-                Administradores precisam confirmar o acesso clicando no link enviado por e-mail. Essa etapa é obrigatória para garantir a segurança da sua conta.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 text-center pt-2">
-              <button
-                type="button"
-                onClick={handleResendAdmin2fa}
-                disabled={isLoading}
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Reenviando...
-                  </span>
-                ) : (
-                  "Reenviar link de verificação"
-                )}
-              </button>
-              <button type="button" onClick={goToLogin} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                ← Voltar para login
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   // Forgot password sent screen
   if (view === "forgot-sent") {
