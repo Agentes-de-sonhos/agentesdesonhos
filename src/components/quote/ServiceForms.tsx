@@ -337,6 +337,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel }: Omit<Ser
 
 // Hotel Form
 const hotelSchema = z.object({
+  option_label: z.string().optional(),
+  service_description: z.string().optional(),
   hotel_name: z.string().min(2, "Nome do hotel é obrigatório"),
   city: z.string().min(2, "Cidade é obrigatória"),
   check_in: z.date({ required_error: "Check-in é obrigatório" }),
@@ -347,10 +349,12 @@ const hotelSchema = z.object({
   notes: z.string().optional(),
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel }: Omit<ServiceFormProps, "serviceType">) {
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
     defaultValues: {
+      option_label: "",
+      service_description: "",
       hotel_name: "",
       city: "",
       room_type: "",
@@ -371,12 +375,42 @@ function HotelForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "se
       price: values.price,
       notes: values.notes || "",
     };
-    onSubmit(data, values.price);
+    onSubmit(data, values.price, values.option_label || undefined, values.service_description || undefined);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {showOptionLabel && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="option_label"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome da Opção (opcional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: Hotel mais próximo do parque" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="service_description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição (opcional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Detalhes, diferenciais..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
