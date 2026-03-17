@@ -48,11 +48,14 @@ import {
   UserPlus,
   KeyRound,
   Trash2,
+  Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
+import { setImpersonationData, type ImpersonationData } from "./ImpersonationBanner";
 
 interface UserWithDetails {
   id: string;

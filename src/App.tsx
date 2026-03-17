@@ -73,6 +73,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <ImpersonationBanner />
           <SubscriptionProvider>
           <Routes>
             <Route path="/auth" element={
