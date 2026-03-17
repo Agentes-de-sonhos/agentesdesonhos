@@ -161,7 +161,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -280,7 +280,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -342,7 +342,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData }: Omit<Serv
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -400,7 +400,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -454,7 +454,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -520,7 +520,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -600,7 +600,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -635,7 +635,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData }: Omit<ServiceF
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
