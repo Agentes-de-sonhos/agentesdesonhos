@@ -128,6 +128,7 @@ export default function GerarOrcamento() {
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null);
+  const [editingService, setEditingService] = useState<import("@/types/quote").QuoteService | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
