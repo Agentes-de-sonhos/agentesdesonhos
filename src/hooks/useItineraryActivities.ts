@@ -73,6 +73,8 @@ export function useItineraryActivities(tripId: string | undefined) {
           ...data,
           order_index: data.order_index ?? maxOrder + 1,
           photo_urls: data.photo_urls ?? [],
+          document_urls: data.document_urls ?? [],
+          maps_url: data.maps_url ?? null,
         })
         .select()
         .single();
