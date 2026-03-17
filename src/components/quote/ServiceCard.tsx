@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -78,10 +78,11 @@ function getServiceDetails(service: QuoteService): string[] {
 interface ServiceCardProps {
   service: QuoteService;
   onDelete: (id: string) => void;
+  onEdit: (service: QuoteService) => void;
   isDeleting?: boolean;
 }
 
-export function ServiceCard({ service, onDelete, isDeleting }: ServiceCardProps) {
+export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCardProps) {
   const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
   const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
   
@@ -122,10 +123,13 @@ export function ServiceCard({ service, onDelete, isDeleting }: ServiceCardProps)
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-primary">{formatCurrency(service.amount)}</span>
-            <Button variant="ghost" size="icon" onClick={() => onDelete(service.id)} disabled={isDeleting} className="text-muted-foreground hover:text-destructive">
-              <Trash2 className="h-4 w-4" />
+          <div className="flex items-center gap-1">
+            <span className="font-semibold text-primary mr-1">{formatCurrency(service.amount)}</span>
+            <Button variant="ghost" size="icon" onClick={() => onEdit(service)} className="text-muted-foreground hover:text-primary h-8 w-8">
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => onDelete(service.id)} disabled={isDeleting} className="text-muted-foreground hover:text-destructive h-8 w-8">
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
@@ -137,16 +141,17 @@ export function ServiceCard({ service, onDelete, isDeleting }: ServiceCardProps)
 interface ServiceListProps {
   services: QuoteService[];
   onDeleteService: (id: string) => void;
+  onEditService: (service: QuoteService) => void;
 }
 
-export function ServiceList({ services, onDeleteService }: ServiceListProps) {
+export function ServiceList({ services, onDeleteService, onEditService }: ServiceListProps) {
   if (services.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">Nenhum serviço adicionado ainda</div>;
   }
   return (
     <div className="space-y-3">
       {services.map((service) => (
-        <ServiceCard key={service.id} service={service} onDelete={onDeleteService} />
+        <ServiceCard key={service.id} service={service} onDelete={onDeleteService} onEdit={onEditService} />
       ))}
     </div>
   );

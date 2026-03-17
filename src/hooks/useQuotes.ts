@@ -246,17 +246,28 @@ export function useQuote(id: string | undefined) {
 
   const updateServiceMutation = useMutation({
     mutationFn: async ({
-      serviceId, service_data, amount,
+      serviceId, service_type, service_data, amount, option_label, description, image_url,
     }: {
       serviceId: string;
+      service_type: ServiceType;
       service_data: ServiceData;
       amount: number;
+      option_label?: string;
+      description?: string;
+      image_url?: string;
     }) => {
       const oldService = quote?.services?.find((s) => s.id === serviceId);
       const oldAmount = oldService?.amount || 0;
       const { error } = await supabase
         .from("quote_services")
-        .update({ service_data: service_data as any, amount })
+        .update({
+          service_type,
+          service_data: service_data as any,
+          amount,
+          option_label: option_label || null,
+          description: description || null,
+          image_url: image_url || null,
+        } as any)
         .eq("id", serviceId);
       if (error) throw error;
       const newTotal = (quote?.total_amount || 0) - oldAmount + amount;

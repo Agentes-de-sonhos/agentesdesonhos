@@ -124,10 +124,11 @@ export default function GerarOrcamento() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { quotes, isLoading: quotesLoading, createQuote, isCreating, publishQuote, isPublishing, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
-  const { quote, addService, deleteService, isAddingService } = useQuote(id);
+  const { quote, addService, updateService, deleteService, isAddingService } = useQuote(id);
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
   const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null);
+  const [editingService, setEditingService] = useState<import("@/types/quote").QuoteService | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
@@ -167,9 +168,28 @@ export default function GerarOrcamento() {
   };
 
   const handleAddService = async (serviceData: ServiceData, amount: number, optionLabel?: string, description?: string, imageUrl?: string) => {
+    if (editingService) {
+      await updateService({
+        serviceId: editingService.id,
+        service_type: editingService.service_type,
+        service_data: serviceData,
+        amount,
+        option_label: optionLabel,
+        description,
+        image_url: imageUrl,
+      });
+      setEditingService(null);
+      setSelectedServiceType(null);
+      return;
+    }
     if (!selectedServiceType) return;
     await addService({ service_type: selectedServiceType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl });
     setSelectedServiceType(null);
+  };
+
+  const handleEditService = (service: import("@/types/quote").QuoteService) => {
+    setEditingService(service);
+    setSelectedServiceType(service.service_type);
   };
 
   const handlePublish = async () => {
@@ -384,8 +404,8 @@ export default function GerarOrcamento() {
                 {selectedServiceType ? (
                   <div className="space-y-4">
                     <h3 className="font-medium">
-                      {SERVICE_TYPE_LABELS[selectedServiceType]}
-                      {MULTI_OPTION_TYPES.includes(selectedServiceType) && serviceCountByType[selectedServiceType] ? (
+                      {editingService ? "Editando: " : ""}{SERVICE_TYPE_LABELS[selectedServiceType]}
+                      {!editingService && MULTI_OPTION_TYPES.includes(selectedServiceType) && serviceCountByType[selectedServiceType] ? (
                         <span className="text-xs text-muted-foreground ml-2">
                           (Opção {(serviceCountByType[selectedServiceType] || 0) + 1})
                         </span>
@@ -398,13 +418,21 @@ export default function GerarOrcamento() {
                       </div>
                     )}
                     <ServiceForm
+                      key={editingService?.id || "new"}
                       serviceType={selectedServiceType}
                       onSubmit={handleAddService}
-                      onCancel={() => setSelectedServiceType(null)}
+                      onCancel={() => { setSelectedServiceType(null); setEditingService(null); }}
                       isLoading={isAddingService}
                       showOptionLabel={MULTI_OPTION_TYPES.includes(selectedServiceType)}
                       tripStartDate={tripStartDate}
                       tripEndDate={tripEndDate}
+                      initialData={editingService ? {
+                        service_data: editingService.service_data,
+                        amount: editingService.amount,
+                        option_label: editingService.option_label,
+                        description: editingService.description,
+                        image_url: editingService.image_url,
+                      } : undefined}
                     />
                   </div>
                 ) : (
@@ -420,7 +448,7 @@ export default function GerarOrcamento() {
                         </Button>
                       ))}
                     </div>
-                    <ServiceList services={quote.services || []} onDeleteService={deleteService} />
+                    <ServiceList services={quote.services || []} onDeleteService={deleteService} onEditService={handleEditService} />
                   </>
                 )}
               </CardContent>

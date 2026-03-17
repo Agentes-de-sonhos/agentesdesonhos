@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, ImageIcon, X, Loader2 } from "lucide-react";
+import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +34,8 @@ interface ServiceFormProps {
   showOptionLabel?: boolean;
   tripStartDate?: Date;
   tripEndDate?: Date;
+  /** When editing, pass the existing service data to pre-fill the form */
+  initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null };
 }
 
 /** Helper: disable dates outside trip range */
@@ -63,15 +65,19 @@ const flightSchema = z.object({
   notes: z.string().optional(),
 });
 
-function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
     defaultValues: {
-      option_label: "", service_description: "", origin_city: "", destination_city: "",
-      airline: "", includes_baggage: true, includes_boarding_fee: true,
-      adult_price: 0, child_price: 0, notes: "",
-      departure_date: tripStartDate, return_date: tripEndDate,
+      option_label: initialData?.option_label || "", service_description: initialData?.description || "",
+      origin_city: init?.origin_city || "", destination_city: init?.destination_city || "",
+      airline: init?.airline || "",
+      includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
+      adult_price: init?.adult_price || 0, child_price: init?.child_price || 0, notes: init?.notes || "",
+      departure_date: init?.departure_date ? new Date(init.departure_date) : tripStartDate,
+      return_date: init?.return_date ? new Date(init.return_date) : tripEndDate,
     },
   });
 
@@ -155,7 +161,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -176,14 +182,17 @@ const hotelSchema = z.object({
   notes: z.string().optional(),
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
     defaultValues: {
-      option_label: "", service_description: "", hotel_name: "", city: "",
-      room_type: "", meal_plan: "", price: 0, notes: "",
-      check_in: tripStartDate, check_out: tripEndDate,
+      option_label: initialData?.option_label || "", service_description: initialData?.description || "",
+      hotel_name: init?.hotel_name || "", city: init?.city || "",
+      room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0, notes: init?.notes || "",
+      check_in: init?.check_in ? new Date(init.check_in) : tripStartDate,
+      check_out: init?.check_out ? new Date(init.check_out) : tripEndDate,
     },
   });
 
@@ -271,7 +280,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -288,10 +297,11 @@ const carRentalSchema = z.object({
   notes: z.string().optional(),
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, initialData }: Omit<ServiceFormProps, "serviceType">) {
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof carRentalSchema>>({
     resolver: zodResolver(carRentalSchema),
-    defaultValues: { pickup_location: "", dropoff_location: "", car_type: "", days: 1, price: 0, notes: "" },
+    defaultValues: { pickup_location: init?.pickup_location || "", dropoff_location: init?.dropoff_location || "", car_type: init?.car_type || "", days: init?.days || 1, price: init?.price || initialData?.amount || 0, notes: init?.notes || "" },
   });
 
   const handleSubmit = (values: z.infer<typeof carRentalSchema>) => {
@@ -332,7 +342,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps,
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -347,11 +357,12 @@ const transferSchema = z.object({
   price: z.number().min(0),
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof transferSchema>>({
     resolver: zodResolver(transferSchema),
-    defaultValues: { transfer_type: "arrival", location: "", price: 0, date: tripStartDate },
+    defaultValues: { transfer_type: init?.transfer_type || "arrival", location: init?.location || "", price: init?.price || initialData?.amount || 0, date: init?.date ? new Date(init.date) : tripStartDate },
   });
 
   const handleSubmit = (values: z.infer<typeof transferSchema>) => {
@@ -389,7 +400,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -404,11 +415,12 @@ const attractionSchema = z.object({
   price: z.number().min(0),
 });
 
-function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
-    defaultValues: { name: "", quantity: 1, price: 0, date: tripStartDate },
+    defaultValues: { name: init?.name || "", quantity: init?.quantity || 1, price: init?.price || initialData?.amount || 0, date: init?.date ? new Date(init.date) : tripStartDate },
   });
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
@@ -442,7 +454,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -458,11 +470,12 @@ const insuranceSchema = z.object({
   price: z.number().min(0),
 });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: "", coverage: "", price: 0, start_date: tripStartDate, end_date: tripEndDate },
+    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
   });
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
@@ -507,7 +520,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -524,11 +537,12 @@ const cruiseSchema = z.object({
   price: z.number().min(0),
 });
 
-function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof cruiseSchema>>({
     resolver: zodResolver(cruiseSchema),
-    defaultValues: { ship_name: "", route: "", cabin_type: "", price: 0, start_date: tripStartDate, end_date: tripEndDate },
+    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
   });
 
   const handleSubmit = (values: z.infer<typeof cruiseSchema>) => {
@@ -586,7 +600,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate 
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -599,10 +613,11 @@ const otherSchema = z.object({
   price: z.number().min(0),
 });
 
-function OtherForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "serviceType">) {
+function OtherForm({ onSubmit, onCancel, isLoading, initialData }: Omit<ServiceFormProps, "serviceType">) {
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
-    defaultValues: { description: "", price: 0 },
+    defaultValues: { description: init?.description || "", price: init?.price || initialData?.amount || 0 },
   });
 
   const handleSubmit = (values: z.infer<typeof otherSchema>) => {
@@ -620,7 +635,7 @@ function OtherForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "se
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
         </div>
       </form>
     </Form>
@@ -672,8 +687,8 @@ function ServiceImageUpload({ imageUrl, onImageChange, isUploading }: { imageUrl
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ MAIN ROUTER ━━━━━━━━━━━━━━━━━━━ */
-export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate }: ServiceFormProps) {
-  const [serviceImageUrl, setServiceImageUrl] = useState<string | null>(null);
+export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData }: ServiceFormProps) {
+  const [serviceImageUrl, setServiceImageUrl] = useState<string | null>(initialData?.image_url || null);
   const isUploading = serviceImageUrl === "uploading";
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
@@ -682,7 +697,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     onSubmit(data, amount, optionLabel, description, finalUrl || undefined);
   };
 
-  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate };
+  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, initialData };
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
