@@ -687,8 +687,8 @@ function ServiceImageUpload({ imageUrl, onImageChange, isUploading }: { imageUrl
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ MAIN ROUTER ━━━━━━━━━━━━━━━━━━━ */
-export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate }: ServiceFormProps) {
-  const [serviceImageUrl, setServiceImageUrl] = useState<string | null>(null);
+export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData }: ServiceFormProps) {
+  const [serviceImageUrl, setServiceImageUrl] = useState<string | null>(initialData?.image_url || null);
   const isUploading = serviceImageUrl === "uploading";
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
@@ -697,7 +697,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     onSubmit(data, amount, optionLabel, description, finalUrl || undefined);
   };
 
-  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate };
+  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, initialData };
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
