@@ -54,6 +54,8 @@ interface ServiceFormProps {
 
 // Flight Form
 const flightSchema = z.object({
+  option_label: z.string().optional(),
+  service_description: z.string().optional(),
   origin_city: z.string().min(2, "Cidade de origem é obrigatória"),
   destination_city: z.string().min(2, "Cidade de destino é obrigatória"),
   airline: z.string().min(2, "Companhia aérea é obrigatória"),
@@ -66,10 +68,12 @@ const flightSchema = z.object({
   notes: z.string().optional(),
 });
 
-function FlightForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel }: Omit<ServiceFormProps, "serviceType">) {
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
     defaultValues: {
+      option_label: "",
+      service_description: "",
       origin_city: "",
       destination_city: "",
       airline: "",
@@ -95,7 +99,7 @@ function FlightForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "s
       notes: values.notes || "",
     };
     const amount = values.adult_price + values.child_price;
-    onSubmit(data, amount);
+    onSubmit(data, amount, values.option_label || undefined, values.service_description || undefined);
   };
 
   return (
