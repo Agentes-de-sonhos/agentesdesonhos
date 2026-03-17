@@ -190,10 +190,17 @@ export default function GerarOrcamento() {
     window.location.reload();
   };
 
-  const handleSavePaymentTerms = async () => {
+  const handleSavePaymentConfig = async () => {
     if (!quote) return;
-    await supabase.from("quotes").update({ payment_terms: paymentTerms || null } as any).eq("id", quote.id);
-    toast({ title: "Salvo", description: "Condições de pagamento atualizadas." });
+    await supabase.from("quotes").update({
+      payment_terms: paymentTerms || null,
+      payment_display_mode: paymentDisplayMode,
+      installments_count: installmentsCount,
+      entry_percentage: entryPercentage,
+      payment_method_label: paymentMethodLabel || null,
+      full_payment_discount_percent: fullPaymentDiscountPercent,
+    } as any).eq("id", quote.id);
+    toast({ title: "Salvo", description: "Configuração de pagamento atualizada." });
   };
 
   const handleSaveValidity = async () => {
