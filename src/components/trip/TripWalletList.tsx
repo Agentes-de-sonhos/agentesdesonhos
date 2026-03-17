@@ -61,10 +61,11 @@ export function TripWalletList() {
   const filteredTrips = filterTrips(trips, filter);
 
   const handleCopyLink = (trip: Trip) => {
+    const origin = "https://agentesdesonhos.com.br";
     const url = trip.slug 
-      ? `${window.location.origin}/c/${trip.slug}`
+      ? `${origin}/c/${trip.slug}`
       : trip.share_token 
-        ? `${window.location.origin}/viagem/${trip.share_token}` 
+        ? `${origin}/viagem/${trip.share_token}` 
         : '';
     if (!url) return;
     navigator.clipboard.writeText(url);
