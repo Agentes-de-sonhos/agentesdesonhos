@@ -613,10 +613,11 @@ const otherSchema = z.object({
   price: z.number().min(0),
 });
 
-function OtherForm({ onSubmit, onCancel, isLoading }: Omit<ServiceFormProps, "serviceType">) {
+function OtherForm({ onSubmit, onCancel, isLoading, initialData }: Omit<ServiceFormProps, "serviceType">) {
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
-    defaultValues: { description: "", price: 0 },
+    defaultValues: { description: init?.description || "", price: init?.price || initialData?.amount || 0 },
   });
 
   const handleSubmit = (values: z.infer<typeof otherSchema>) => {
