@@ -1,12 +1,18 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import OrcamentoPublico from "./OrcamentoPublico";
 
 const NotFound = () => {
   const location = useLocation();
+  const publicQuoteMatch = location.pathname.match(/^\/orcamento\/([^/]+)\/?$/);
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
+
+  if (publicQuoteMatch?.[1]) {
+    return <OrcamentoPublico tokenOverride={decodeURIComponent(publicQuoteMatch[1])} />;
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
