@@ -179,5 +179,6 @@ export function useItineraryActivities(tripId: string | undefined) {
     reorderActivities: reorderActivities.mutateAsync,
     isAdding: addActivity.isPending,
     uploadPhoto,
+    uploadDocument,
   };
 }
