@@ -357,11 +357,12 @@ const transferSchema = z.object({
   price: z.number().min(0),
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof transferSchema>>({
     resolver: zodResolver(transferSchema),
-    defaultValues: { transfer_type: "arrival", location: "", price: 0, date: tripStartDate },
+    defaultValues: { transfer_type: init?.transfer_type || "arrival", location: init?.location || "", price: init?.price || initialData?.amount || 0, date: init?.date ? new Date(init.date) : tripStartDate },
   });
 
   const handleSubmit = (values: z.infer<typeof transferSchema>) => {
