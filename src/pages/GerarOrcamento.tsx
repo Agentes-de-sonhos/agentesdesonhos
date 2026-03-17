@@ -168,9 +168,28 @@ export default function GerarOrcamento() {
   };
 
   const handleAddService = async (serviceData: ServiceData, amount: number, optionLabel?: string, description?: string, imageUrl?: string) => {
+    if (editingService) {
+      await updateService({
+        serviceId: editingService.id,
+        service_type: editingService.service_type,
+        service_data: serviceData,
+        amount,
+        option_label: optionLabel,
+        description,
+        image_url: imageUrl,
+      });
+      setEditingService(null);
+      setSelectedServiceType(null);
+      return;
+    }
     if (!selectedServiceType) return;
     await addService({ service_type: selectedServiceType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl });
     setSelectedServiceType(null);
+  };
+
+  const handleEditService = (service: import("@/types/quote").QuoteService) => {
+    setEditingService(service);
+    setSelectedServiceType(service.service_type);
   };
 
   const handlePublish = async () => {
