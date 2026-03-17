@@ -3,8 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
@@ -69,6 +70,12 @@ export default function GerarOrcamento() {
     }
   };
 
+  const handleToggleDetailedPrices = async (checked: boolean) => {
+    if (!quote) return;
+    await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
+    window.location.reload();
+  };
+
   if (!id) {
     return (
       <DashboardLayout>
@@ -109,6 +116,8 @@ export default function GerarOrcamento() {
     );
   }
 
+  const showDetailed = (quote as any).show_detailed_prices !== false;
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
@@ -137,7 +146,7 @@ export default function GerarOrcamento() {
           <CardContent className="py-3 px-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {(quote as any).show_detailed_prices !== false ? (
+                {showDetailed ? (
                   <Eye className="h-4 w-4 text-muted-foreground" />
                 ) : (
                   <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -148,23 +157,12 @@ export default function GerarOrcamento() {
               </div>
               <Switch
                 id="show-prices"
-                checked={(quote as any).show_detailed_prices !== false}
-                onCheckedChange={async (checked) => {
-                  const { updateQuote } = await import("@/integrations/supabase/client").then(m => {
-                    return {
-                      updateQuote: async () => {
-                        await m.supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
-                      }
-                    };
-                  });
-                  await updateQuote();
-                  // Refresh
-                  window.location.reload();
-                }}
+                checked={showDetailed}
+                onCheckedChange={handleToggleDetailedPrices}
               />
             </div>
             <p className="text-xs text-muted-foreground mt-1 ml-6">
-              {(quote as any).show_detailed_prices !== false
+              {showDetailed
                 ? "O cliente verá o valor de cada serviço e o total."
                 : "O cliente verá apenas o valor total do pacote."}
             </p>
