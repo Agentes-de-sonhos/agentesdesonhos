@@ -65,15 +65,19 @@ const flightSchema = z.object({
   notes: z.string().optional(),
 });
 
-function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init = initialData?.service_data;
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
     defaultValues: {
-      option_label: "", service_description: "", origin_city: "", destination_city: "",
-      airline: "", includes_baggage: true, includes_boarding_fee: true,
-      adult_price: 0, child_price: 0, notes: "",
-      departure_date: tripStartDate, return_date: tripEndDate,
+      option_label: initialData?.option_label || "", service_description: initialData?.description || "",
+      origin_city: init?.origin_city || "", destination_city: init?.destination_city || "",
+      airline: init?.airline || "",
+      includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
+      adult_price: init?.adult_price || 0, child_price: init?.child_price || 0, notes: init?.notes || "",
+      departure_date: init?.departure_date ? new Date(init.departure_date) : tripStartDate,
+      return_date: init?.return_date ? new Date(init.return_date) : tripEndDate,
     },
   });
 
