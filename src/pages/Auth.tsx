@@ -701,9 +701,8 @@ export default function Auth() {
           {/* Signup view */}
           {view === "password-signup" && (
             <MultiStepSignup
-              onSuccess={() => setSignupSuccess(true)}
-              onError={(msg) => setError(msg)}
-              onBack={goToLogin}
+              onComplete={() => setSignupSuccess(true)}
+              onCancel={goToLogin}
             />
           )}
         </CardContent>
