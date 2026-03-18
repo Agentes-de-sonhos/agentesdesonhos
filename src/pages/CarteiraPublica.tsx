@@ -73,6 +73,7 @@ function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: strin
 
 export default function CarteiraPublica() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [tripData, setTripData] = useState<{ trip: Trip; agentProfile: AgentProfile | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
