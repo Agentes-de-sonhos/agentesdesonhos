@@ -275,6 +275,36 @@ export function CommunityQACard() {
     },
   });
 
+  // Admin delete mutations
+  const deleteQuestionMut = useMutation({
+    mutationFn: async (questionId: string) => {
+      await supabase.from("qa_answers").delete().eq("question_id", questionId);
+      const { error } = await supabase.from("qa_questions").delete().eq("id", questionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["community-qa-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
+      setExpandedQuestionId(null);
+      toast.success("Pergunta excluída");
+    },
+    onError: () => toast.error("Erro ao excluir"),
+  });
+
+  const deleteAnswerMut = useMutation({
+    mutationFn: async (answerId: string) => {
+      await supabase.from("qa_answer_likes").delete().eq("answer_id", answerId);
+      const { error } = await supabase.from("qa_answers").delete().eq("id", answerId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["community-qa-answers", expandedQuestionId] });
+      queryClient.invalidateQueries({ queryKey: ["community-qa-dashboard"] });
+      toast.success("Resposta excluída");
+    },
+    onError: () => toast.error("Erro ao excluir"),
+  });
+
   const expandedQuestion = questions.find((q: any) => q.id === expandedQuestionId);
 
   return (
