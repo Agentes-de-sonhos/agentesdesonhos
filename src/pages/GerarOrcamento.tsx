@@ -157,6 +157,7 @@ export default function GerarOrcamento() {
   const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
   const [autoSaved, setAutoSaved] = useState(false);
+  const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
 
   // Persist selectedServiceType & editingService to sessionStorage
   useEffect(() => {
