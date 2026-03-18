@@ -83,9 +83,9 @@ export default function PersonalizadorLaminas() {
         .from("materials")
         .select("id, title, file_url")
         .eq("is_active", true)
-        .in("file_type", ["image"])
+        .eq("file_type", "image")
         .order("created_at", { ascending: false })
-        .limit(60);
+        .limit(60) as { data: { id: string; title: string; file_url: string }[] | null; error: any };
       if (error) throw error;
       return data;
     },
