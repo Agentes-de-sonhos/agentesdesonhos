@@ -2129,6 +2129,98 @@ export type Database = {
           },
         ]
       }
+      lead_capture_forms: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          token: string
+          updated_at: string | null
+          user_id: string
+          welcome_message: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          token?: string
+          updated_at?: string | null
+          user_id: string
+          welcome_message?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          token?: string
+          updated_at?: string | null
+          user_id?: string
+          welcome_message?: string | null
+        }
+        Relationships: []
+      }
+      lead_captures: {
+        Row: {
+          additional_info: string | null
+          agent_user_id: string
+          ai_suggestion: string | null
+          budget: string | null
+          created_at: string | null
+          destination: string | null
+          form_id: string
+          id: string
+          is_read: boolean | null
+          lead_name: string
+          lead_phone: string
+          status: string | null
+          travel_dates: string | null
+          travelers_count: string | null
+          whatsapp_message: string | null
+        }
+        Insert: {
+          additional_info?: string | null
+          agent_user_id: string
+          ai_suggestion?: string | null
+          budget?: string | null
+          created_at?: string | null
+          destination?: string | null
+          form_id: string
+          id?: string
+          is_read?: boolean | null
+          lead_name: string
+          lead_phone: string
+          status?: string | null
+          travel_dates?: string | null
+          travelers_count?: string | null
+          whatsapp_message?: string | null
+        }
+        Update: {
+          additional_info?: string | null
+          agent_user_id?: string
+          ai_suggestion?: string | null
+          budget?: string | null
+          created_at?: string | null
+          destination?: string | null
+          form_id?: string
+          id?: string
+          is_read?: boolean | null
+          lead_name?: string
+          lead_phone?: string
+          status?: string | null
+          travel_dates?: string | null
+          travelers_count?: string | null
+          whatsapp_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_captures_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "lead_capture_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_trails: {
         Row: {
           banner_url: string | null
