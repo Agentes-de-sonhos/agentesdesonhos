@@ -46,9 +46,10 @@ export function useQuotes() {
       if (error) throw error;
       return data as Quote;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
       toast({ title: "Orçamento criado", description: "O orçamento foi criado com sucesso." });
+      if (user) awardGamificationPoints(user.id, POINTS_CONFIG.create_quote, "create_quote", data.id);
     },
     onError: (error) => {
       toast({ title: "Erro ao criar orçamento", description: error.message, variant: "destructive" });

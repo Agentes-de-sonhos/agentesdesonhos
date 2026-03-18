@@ -187,9 +187,10 @@ export function useOpportunities() {
 
       return result as Opportunity;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       toast({ title: "Oportunidade criada" });
+      if (user) awardGamificationPoints(user.id, POINTS_CONFIG.create_opportunity, "create_opportunity");
     },
     onError: (error) => {
       toast({ title: "Erro ao criar oportunidade", description: error.message, variant: "destructive" });
