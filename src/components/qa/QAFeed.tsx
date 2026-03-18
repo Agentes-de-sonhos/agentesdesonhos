@@ -472,6 +472,32 @@ function QuestionCard({
               <Eye className="h-3.5 w-3.5" />
               {(q as any).views_count || 0}
             </span>
+            {isAdmin && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="text-[11px] text-destructive/60 hover:text-destructive flex items-center gap-1 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir pergunta?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Essa ação excluirá a pergunta e todas as respostas associadas. Não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={onDeleteQuestion} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Excluir
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
           <Button
             variant={isExpanded ? "secondary" : "ghost"}
