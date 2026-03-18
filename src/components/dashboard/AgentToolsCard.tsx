@@ -26,14 +26,14 @@ const tools = [
   {
     label: "Roteiros",
     icon: Route,
-    path: "/criar-roteiro",
+    path: "/ferramentas-ia/criar-roteiro",
     description: "Crie roteiros de viagem personalizados com IA.",
     color: "262 60% 50%",
   },
   {
     label: "Conteúdo",
     icon: Image,
-    path: "/criar-conteudo",
+    path: "/ferramentas-ia/criar-conteudo",
     description: "Crie conteúdos para redes sociais.",
     color: "25 90% 50%",
   },
