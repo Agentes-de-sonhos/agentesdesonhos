@@ -887,6 +887,9 @@ export default function Noticias() {
                     onSetNoticiaDoDia={handleSetNoticiaDoDia}
                     onAddTop5={handleAddTop5}
                     onRemoveTop5={handleRemoveTop5}
+                    getLikeCount={getLikeCount}
+                    isLiked={isLiked}
+                    onToggleLike={onToggleLike}
                   />
                 )}
 
