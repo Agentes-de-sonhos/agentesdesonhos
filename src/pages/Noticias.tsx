@@ -240,13 +240,14 @@ function Top5ReplacementDialog({
 }
 
 /* ── Hero Card (Notícia do Dia) ─────────────────────────── */
-function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5 }: {
+function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, likeCount, liked, onToggleLike }: {
   item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void;
   saved: boolean; onToggleSave: (id: string) => void;
   allNews: NoticiaHub[];
   onSetNoticiaDoDia: (id: string) => void;
   onAddTop5: (id: string) => void;
   onRemoveTop5: (id: string) => void;
+  likeCount: number; liked: boolean; onToggleLike: (id: string) => void;
 }) {
   return (
     <div className="relative group/card h-full">
