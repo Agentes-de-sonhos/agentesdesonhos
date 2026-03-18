@@ -212,6 +212,37 @@ export function useQA() {
     onError: () => toast.error("Erro ao curtir"),
   });
 
+  const deleteQuestion = useMutation({
+    mutationFn: async (questionId: string) => {
+      // Delete all answers first (cascade), then the question
+      await supabase.from("qa_answers").delete().eq("question_id", questionId);
+      const { error } = await supabase.from("qa_questions").delete().eq("id", questionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["community-qa-dashboard"] });
+      toast.success("Pergunta excluída");
+    },
+    onError: () => toast.error("Erro ao excluir pergunta"),
+  });
+
+  const deleteAnswer = useMutation({
+    mutationFn: async ({ answerId, questionId }: { answerId: string; questionId: string }) => {
+      // Delete likes first
+      await supabase.from("qa_answer_likes").delete().eq("answer_id", answerId);
+      const { error } = await supabase.from("qa_answers").delete().eq("id", answerId);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["qa-answers", vars.questionId] });
+      queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["community-qa-dashboard"] });
+      toast.success("Resposta excluída");
+    },
+    onError: () => toast.error("Erro ao excluir resposta"),
+  });
+
   return {
     questions: questionsQuery.data || [],
     isLoading: questionsQuery.isLoading,
@@ -221,6 +252,8 @@ export function useQA() {
     createAnswer,
     markBestAnswer,
     toggleAnswerLike,
+    deleteQuestion,
+    deleteAnswer,
     getAnswersQuery: answersQuery,
   };
 }
