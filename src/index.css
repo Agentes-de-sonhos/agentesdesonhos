@@ -300,3 +300,12 @@
   margin: 1em auto;
   display: block;
 }
+
+/* Hide scrollbar for horizontal nav strips */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

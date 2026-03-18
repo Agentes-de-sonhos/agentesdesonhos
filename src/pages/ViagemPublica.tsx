@@ -1,15 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Wallet, MapPin, Calendar, FileText, Loader2, Lock, Plane, Hotel, Car, Bus,
-  Ticket, Shield, Ship, TrainFront, Download, ExternalLink, Eye, MessageSquare
+  Ticket, Shield, Ship, TrainFront, Download, ExternalLink, MessageSquare,
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF } from "@/components/trip/TripPDF";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
@@ -257,26 +261,40 @@ function PasswordGate({ onUnlock }: { onUnlock: (password: string) => void }) {
   );
 }
 
-// Vertical Tab Menu
-function ServiceTab({ type, count, active, onClick }: {
-  type: TripServiceType; count: number; active: boolean; onClick: () => void;
+// Collapsible Service Section
+function CollapsibleServiceSection({ 
+  type, services, defaultOpen, sectionRef 
+}: { 
+  type: TripServiceType; services: TripService[]; defaultOpen: boolean; sectionRef: (el: HTMLDivElement | null) => void;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
   const Icon = SERVICE_ICONS[type];
+  const label = SERVICE_LABELS[type];
+
   return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-all ${
-        active
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "hover:bg-muted/50 text-muted-foreground"
-      }`}
-    >
-      <Icon className="h-5 w-5 shrink-0" />
-      <span className="flex-1 text-sm font-medium">{SERVICE_LABELS[type]}</span>
-      <span className={`text-xs font-semibold rounded-full px-2 py-0.5 ${
-        active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
-      }`}>{count}</span>
-    </button>
+    <div ref={sectionRef} data-service-type={type} style={{ scrollMarginTop: '70px' }}>
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <button className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                <Icon className="h-4.5 w-4.5 text-primary" />
+              </div>
+              <span className="font-semibold text-sm">{label}</span>
+              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                {services.length}
+              </span>
+            </div>
+            <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-2 mt-2 mb-1">
+            {services.map((s) => <PublicServiceCard key={s.id} service={s} />)}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
 }
 
@@ -1205,9 +1223,20 @@ export default function ViagemPublica() {
   const [authenticated, setAuthenticated] = useState(!!preAuth?.preAuthenticated);
   const [tripData, setTripData] = useState<Trip | null>(preAuth?.tripData || null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preAuth?.agentProfile || null);
-  const [activeTab, setActiveTab] = useState<TripServiceType | "overview" | "notes">("overview");
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const scrollToSection = useCallback((type: TripServiceType) => {
+    const el = sectionRefs.current[type];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Also open the collapsible if it's closed - we trigger a click on the trigger
+      const trigger = el.querySelector('[data-state="closed"]');
+      if (trigger) (trigger as HTMLElement).click();
+    }
+  }, []);
 
   // Also try without password for trips that have no password set
   useEffect(() => {
@@ -1349,70 +1378,45 @@ export default function ViagemPublica() {
           </CardContent>
         </Card>
 
-        {/* Content: Vertical Tabs + Services */}
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Vertical Tab Menu */}
-          <nav className="md:w-56 shrink-0 space-y-1">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-all ${
-                activeTab === "overview"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "hover:bg-muted/50 text-muted-foreground"
-              }`}
-            >
-              <Eye className="h-5 w-5 shrink-0" />
-              <span className="flex-1 text-sm font-medium">Visão Geral</span>
-            </button>
+        {/* Mobile Quick Nav */}
+        {isMobile && availableTabs.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-2 -mx-1 px-1 scrollbar-hide">
+            {availableTabs.map((type) => {
+              const Icon = SERVICE_ICONS[type];
+              return (
+                <button
+                  key={type}
+                  onClick={() => scrollToSection(type)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-muted/50 hover:bg-primary/10 text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0 transition-colors"
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {SERVICE_LABELS[type]}
+                  <span className="bg-primary/10 text-primary px-1 py-0.5 rounded-full text-[10px] font-semibold">{grouped[type].length}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-            {availableTabs.map((type) => (
-              <ServiceTab
+        {/* Collapsible Service Sections */}
+        <div className="space-y-3">
+          {services.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Nenhum serviço adicionado ainda
+              </CardContent>
+            </Card>
+          ) : (
+            availableTabs.map((type, index) => (
+              <CollapsibleServiceSection
                 key={type}
                 type={type}
-                count={grouped[type].length}
-                active={activeTab === type}
-                onClick={() => setActiveTab(type)}
+                services={grouped[type]}
+                defaultOpen={index === 0}
+                sectionRef={(el) => { sectionRefs.current[type] = el; }}
               />
-            ))}
-          </nav>
-
-          {/* Tab Content */}
-          <div className="flex-1 min-w-0">
-            {activeTab === "overview" ? (
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold">Todos os Serviços</h2>
-                {services.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-8 text-center text-muted-foreground">
-                      Nenhum serviço adicionado ainda
-                    </CardContent>
-                  </Card>
-                ) : (
-                  availableTabs.map((type) => (
-                    <div key={type}>
-                      <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2 uppercase tracking-wide">
-                        {(() => { const Icon = SERVICE_ICONS[type]; return <Icon className="h-4 w-4" />; })()}
-                        {SERVICE_LABELS[type]}
-                      </h3>
-                      <div className="space-y-2 mb-4">
-                        {grouped[type].map((s) => <PublicServiceCard key={s.id} service={s} />)}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            ) : activeTab !== "notes" && grouped[activeTab as TripServiceType] ? (
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  {(() => { const Icon = SERVICE_ICONS[activeTab as TripServiceType]; return <Icon className="h-5 w-5 text-primary" />; })()}
-                  {SERVICE_LABELS[activeTab as TripServiceType]}
-                </h2>
-                {grouped[activeTab as TripServiceType].map((s) => (
-                  <PublicServiceCard key={s.id} service={s} />
-                ))}
-              </div>
-            ) : null}
-          </div>
+            ))
+          )}
         </div>
 
         {/* Agent Footer */}
