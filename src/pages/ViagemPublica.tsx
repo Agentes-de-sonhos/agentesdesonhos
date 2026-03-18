@@ -261,26 +261,40 @@ function PasswordGate({ onUnlock }: { onUnlock: (password: string) => void }) {
   );
 }
 
-// Vertical Tab Menu
-function ServiceTab({ type, count, active, onClick }: {
-  type: TripServiceType; count: number; active: boolean; onClick: () => void;
+// Collapsible Service Section
+function CollapsibleServiceSection({ 
+  type, services, defaultOpen, sectionRef 
+}: { 
+  type: TripServiceType; services: TripService[]; defaultOpen: boolean; sectionRef: (el: HTMLDivElement | null) => void;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
   const Icon = SERVICE_ICONS[type];
+  const label = SERVICE_LABELS[type];
+
   return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-all ${
-        active
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "hover:bg-muted/50 text-muted-foreground"
-      }`}
-    >
-      <Icon className="h-5 w-5 shrink-0" />
-      <span className="flex-1 text-sm font-medium">{SERVICE_LABELS[type]}</span>
-      <span className={`text-xs font-semibold rounded-full px-2 py-0.5 ${
-        active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
-      }`}>{count}</span>
-    </button>
+    <div ref={sectionRef} data-service-type={type}>
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <button className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                <Icon className="h-4.5 w-4.5 text-primary" />
+              </div>
+              <span className="font-semibold text-sm">{label}</span>
+              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                {services.length}
+              </span>
+            </div>
+            <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-2 mt-2 mb-1">
+            {services.map((s) => <PublicServiceCard key={s.id} service={s} />)}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
 }
 
