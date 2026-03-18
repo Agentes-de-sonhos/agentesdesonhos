@@ -79,13 +79,13 @@ export default function PersonalizadorLaminas() {
     queryKey: ["materials-gallery-picker"],
     enabled: showGallery,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
+      const { data, error } = await (supabase
+        .from("materials" as any)
         .select("id, title, file_url")
         .eq("is_active", true)
         .eq("file_type", "image")
         .order("created_at", { ascending: false })
-        .limit(60) as { data: { id: string; title: string; file_url: string }[] | null; error: any };
+        .limit(60)) as { data: { id: string; title: string; file_url: string }[] | null; error: any };
       if (error) throw error;
       return data;
     },
