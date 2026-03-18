@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQA, QA_CATEGORIES } from "@/hooks/useQA";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, CheckCircle2, Star, Send, Heart, Lock } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { ArrowLeft, CheckCircle2, Star, Send, Heart, Lock, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,9 +26,11 @@ interface Props {
 
 export function QAQuestionDetail({ questionId, onBack }: Props) {
   const { user } = useAuth();
+  const { role } = useUserRole();
+  const isAdmin = role === "admin";
   const { hasFeature } = useSubscription();
   const canComment = hasFeature("qa_comment");
-  const { createAnswer, markBestAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
+  const { createAnswer, markBestAnswer, toggleAnswerLike, deleteQuestion, deleteAnswer, getAnswersQuery } = useQA();
   const [newAnswer, setNewAnswer] = useState(() => sessionStorage.getItem(`qa_answer_draft_${questionId}`) || "");
 
   useEffect(() => { sessionStorage.setItem(`qa_answer_draft_${questionId}`, newAnswer); }, [newAnswer, questionId]);
@@ -134,6 +141,28 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
                     Resolvida
                   </Badge>
                 )}
+                {isAdmin && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/60 hover:text-destructive ml-auto">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir pergunta?</AlertDialogTitle>
+                        <AlertDialogDescription>Essa ação excluirá a pergunta e todas as respostas. Não pode ser desfeita.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => { deleteQuestion.mutate(questionId); onBack(); }}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >Excluir</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="secondary" className="text-[10px]">
@@ -227,6 +256,29 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
                             <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                             Marcar como melhor resposta
                           </Button>
+                        )}
+                        {isAdmin && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="text-xs text-destructive/60 hover:text-destructive h-auto p-0">
+                                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                Excluir
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir resposta?</AlertDialogTitle>
+                                <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteAnswer.mutate({ answerId: a.id, questionId: question.id })}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >Excluir</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         )}
                       </div>
                     </div>

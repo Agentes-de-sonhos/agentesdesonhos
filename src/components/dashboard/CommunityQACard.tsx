@@ -9,6 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   MessageCircleQuestion,
   Send,
   ThumbsUp,
@@ -19,11 +23,13 @@ import {
   ChevronUp,
   Loader2,
   Star,
+  Trash2,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useGamification } from "@/hooks/useGamification";
 import { QA_CATEGORIES } from "@/hooks/useQA";
 import { toast } from "sonner";
@@ -31,6 +37,8 @@ import { toast } from "sonner";
 export function CommunityQACard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { role } = useUserRole();
+  const isAdmin = role === "admin";
   const { awardPoints } = useGamification();
   const queryClient = useQueryClient();
 
@@ -267,6 +275,36 @@ export function CommunityQACard() {
     },
   });
 
+  // Admin delete mutations
+  const deleteQuestionMut = useMutation({
+    mutationFn: async (questionId: string) => {
+      await supabase.from("qa_answers").delete().eq("question_id", questionId);
+      const { error } = await supabase.from("qa_questions").delete().eq("id", questionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["community-qa-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["qa-questions"] });
+      setExpandedQuestionId(null);
+      toast.success("Pergunta excluída");
+    },
+    onError: () => toast.error("Erro ao excluir"),
+  });
+
+  const deleteAnswerMut = useMutation({
+    mutationFn: async (answerId: string) => {
+      await supabase.from("qa_answer_likes").delete().eq("answer_id", answerId);
+      const { error } = await supabase.from("qa_answers").delete().eq("id", answerId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["community-qa-answers", expandedQuestionId] });
+      queryClient.invalidateQueries({ queryKey: ["community-qa-dashboard"] });
+      toast.success("Resposta excluída");
+    },
+    onError: () => toast.error("Erro ao excluir"),
+  });
+
   const expandedQuestion = questions.find((q: any) => q.id === expandedQuestionId);
 
   return (
@@ -395,6 +433,28 @@ export function CommunityQACard() {
                       <span className="text-xs text-[hsl(var(--section-community))] font-medium opacity-0 group-hover/question:opacity-100 transition-opacity whitespace-nowrap flex items-center gap-1">
                         {q.answers_count > 0 ? "Ver respostas" : "Responder"} <ArrowRight className="h-3 w-3" />
                       </span>
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              className="text-destructive/50 hover:text-destructive transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir pergunta?</AlertDialogTitle>
+                              <AlertDialogDescription>Essa ação excluirá a pergunta e todas as respostas. Não pode ser desfeita.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteQuestionMut.mutate(q.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                       {isExpanded ? (
                         <ChevronUp className="h-4 w-4 text-muted-foreground" />
                       ) : (
@@ -477,6 +537,25 @@ export function CommunityQACard() {
                                   >
                                     <CheckCircle2 className="h-3 w-3" /> Melhor resposta
                                   </Button>
+                                )}
+                                {isAdmin && (
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1 text-destructive/60 hover:text-destructive">
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Excluir resposta?</AlertDialogTitle>
+                                        <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteAnswerMut.mutate(a.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
                                 )}
                               </div>
                             </div>

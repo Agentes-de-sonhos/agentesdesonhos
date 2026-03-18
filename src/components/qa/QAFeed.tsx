@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQA, QA_CATEGORIES } from "@/hooks/useQA";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,9 +13,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   MessageCircle, CheckCircle2, Filter, Clock, ThumbsUp, Eye,
   ArrowUpDown, ChevronDown, Send, Search, ChevronUp, MessageSquarePlus,
-  AlertCircle, Heart, Lock,
+  AlertCircle, Heart, Lock, Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
@@ -26,9 +31,11 @@ type SortMode = "recent" | "most_answered" | "unanswered";
 
 export function QAFeed() {
   const { user } = useAuth();
+  const { role } = useUserRole();
+  const isAdmin = role === "admin";
   const { hasFeature } = useSubscription();
   const canComment = hasFeature("qa_comment");
-  const { questions, isLoading, selectedCategory, setSelectedCategory, createQuestion, createAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
+  const { questions, isLoading, selectedCategory, setSelectedCategory, createQuestion, createAnswer, toggleAnswerLike, deleteQuestion, deleteAnswer, getAnswersQuery } = useQA();
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState(() => sessionStorage.getItem("qa_draft_title") || "");
   const [newDescription, setNewDescription] = useState(() => sessionStorage.getItem("qa_draft_desc") || "");
@@ -326,6 +333,9 @@ export function QAFeed() {
               getAnswersQuery={getAnswersQuery}
               onToggleLike={(answerId: string) => toggleAnswerLike.mutate({ answerId, questionId: q.id })}
               canComment={canComment}
+              isAdmin={isAdmin}
+              onDeleteQuestion={() => deleteQuestion.mutate(q.id)}
+              onDeleteAnswer={(answerId: string) => deleteAnswer.mutate({ answerId, questionId: q.id })}
             />
           ))}
         </div>
@@ -349,6 +359,9 @@ interface QuestionCardProps {
   getAnswersQuery: (id: string) => any;
   onToggleLike: (answerId: string) => void;
   canComment: boolean;
+  isAdmin: boolean;
+  onDeleteQuestion: () => void;
+  onDeleteAnswer: (answerId: string) => void;
 }
 
 function QuestionCard({
@@ -364,6 +377,9 @@ function QuestionCard({
   getAnswersQuery,
   onToggleLike,
   canComment,
+  isAdmin,
+  onDeleteQuestion,
+  onDeleteAnswer,
 }: QuestionCardProps) {
   const { user } = useAuth();
   const answersQuery = useQuery({ ...getAnswersQuery(q.id), enabled: isExpanded });
@@ -456,6 +472,32 @@ function QuestionCard({
               <Eye className="h-3.5 w-3.5" />
               {(q as any).views_count || 0}
             </span>
+            {isAdmin && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="text-[11px] text-destructive/60 hover:text-destructive flex items-center gap-1 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir pergunta?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Essa ação excluirá a pergunta e todas as respostas associadas. Não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={onDeleteQuestion} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Excluir
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
           <Button
             variant={isExpanded ? "secondary" : "ghost"}
@@ -512,15 +554,39 @@ function QuestionCard({
                         )}
                       </div>
                       <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap line-clamp-3 leading-relaxed">{a.content}</p>
-                      <button
-                        className={`flex items-center gap-1 mt-1.5 text-[11px] transition-colors ${
-                          userLikes.has(a.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
-                        }`}
-                        onClick={(e) => { e.stopPropagation(); onToggleLike(a.id); }}
-                      >
-                        <Heart className={`h-3 w-3 ${userLikes.has(a.id) ? "fill-current" : ""}`} />
-                        {likeCounts[a.id] || 0}
-                      </button>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <button
+                          className={`flex items-center gap-1 text-[11px] transition-colors ${
+                            userLikes.has(a.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                          }`}
+                          onClick={(e) => { e.stopPropagation(); onToggleLike(a.id); }}
+                        >
+                          <Heart className={`h-3 w-3 ${userLikes.has(a.id) ? "fill-current" : ""}`} />
+                          {likeCounts[a.id] || 0}
+                        </button>
+                        {isAdmin && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button
+                                className="text-[11px] text-destructive/50 hover:text-destructive flex items-center gap-1 transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir resposta?</AlertDialogTitle>
+                                <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => onDeleteAnswer(a.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
