@@ -52,9 +52,10 @@ export function useClients() {
       if (error) throw error;
       return result as Client;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({ title: "Cliente criado com sucesso" });
+      if (result?.id) awardGamificationPoints(result.user_id, POINTS_CONFIG.create_client, "create_client", result.id);
     },
     onError: (error) => {
       toast({ title: "Erro ao criar cliente", description: error.message, variant: "destructive" });
