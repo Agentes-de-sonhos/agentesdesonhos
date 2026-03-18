@@ -37,6 +37,8 @@ import { toast } from "sonner";
 export function CommunityQACard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { role } = useUserRole();
+  const isAdmin = role === "admin";
   const { awardPoints } = useGamification();
   const queryClient = useQueryClient();
 
