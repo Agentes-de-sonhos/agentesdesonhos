@@ -54,6 +54,7 @@ import { AdminTourOperatorsManager } from "@/components/admin/AdminTourOperators
 import { AdminMentorshipsManager } from "@/components/admin/AdminMentorshipsManager";
 import { AdminBenefitsManager } from "@/components/admin/AdminBenefitsManager";
 import { AdminRegistrationLinksManager } from "@/components/admin/AdminRegistrationLinksManager";
+import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
