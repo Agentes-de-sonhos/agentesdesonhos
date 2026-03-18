@@ -30,7 +30,7 @@ export function useAcademy() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { awardCertificatePoints } = useGamification();
+  const { awardPoints, POINTS_CONFIG } = useGamification();
 
   const { data: trails = [], isLoading: trailsLoading } = useQuery({
     queryKey: ["learning-trails"],
