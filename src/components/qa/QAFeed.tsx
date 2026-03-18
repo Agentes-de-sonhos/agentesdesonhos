@@ -587,6 +587,7 @@ function QuestionCard({
                           </AlertDialog>
                         )}
                       </div>
+                    </div>
                   </div>
                 ))}
                 {answers.length > 3 && (
