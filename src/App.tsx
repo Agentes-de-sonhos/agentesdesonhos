@@ -58,6 +58,7 @@ import AtivarCartao from "./pages/AtivarCartao";
 import PoliticasPrivacidade from "./pages/PoliticasPrivacidade";
 import TermosDeUso from "./pages/TermosDeUso";
 import Atualizacoes from "./pages/Atualizacoes";
+import PersonalizadorLaminas from "./pages/PersonalizadorLaminas";
 import ResetPassword from "./pages/ResetPassword";
 import CadastroLink from "./pages/CadastroLink";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
@@ -411,6 +412,14 @@ const App = () => (
             />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
+            <Route
+              path="/personalizador-laminas"
+              element={
+                <ProtectedRoute>
+                  <PersonalizadorLaminas />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/atualizacoes"
               element={
