@@ -334,6 +334,10 @@ export default function Admin() {
           <TabsContent value="registration-links">
             <AdminRegistrationLinksManager />
           </TabsContent>
+
+          <TabsContent value="tickets">
+            <AdminTicketsManager />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
