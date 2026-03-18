@@ -67,7 +67,14 @@ import Suporte from "./pages/Suporte";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
