@@ -61,6 +61,8 @@ import Atualizacoes from "./pages/Atualizacoes";
 import PersonalizadorLaminas from "./pages/PersonalizadorLaminas";
 import ResetPassword from "./pages/ResetPassword";
 import CadastroLink from "./pages/CadastroLink";
+import LeadFormPublic from "./pages/LeadFormPublic";
+import MeusLeads from "./pages/MeusLeads";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
 
@@ -431,6 +433,15 @@ const App = () => (
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
             <Route path="/cadastro/:token" element={<CadastroLink />} />
+            <Route path="/formulario/:token" element={<LeadFormPublic />} />
+            <Route
+              path="/meus-leads"
+              element={
+                <ProtectedRoute>
+                  <MeusLeads />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />

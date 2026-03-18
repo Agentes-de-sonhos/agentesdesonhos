@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.register-via-link]
 verify_jwt = false
+
+[functions.lead-wizard-ai]
+verify_jwt = false
