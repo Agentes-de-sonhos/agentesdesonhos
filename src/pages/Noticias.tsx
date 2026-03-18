@@ -525,6 +525,7 @@ function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, t
           </Card>
         </a>
         <div className="absolute top-3 right-3 flex items-center gap-1">
+          <NewsLikeButton noticiaId={current.id} count={getLikeCount(current.id)} liked={isLiked(current.id)} onToggle={onToggleLike} size="md" />
           <Button
             variant="ghost"
             size="icon"
