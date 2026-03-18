@@ -1,16 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 export interface GlobalPopup {
   id: string;
   title: string;
   description: string | null;
   image_url: string | null;
+  video_url: string | null;
   button_text: string | null;
   button_link: string | null;
   has_button: boolean;
   is_active: boolean;
+  is_forced: boolean;
+  forced_at: string | null;
   start_date: string | null;
   end_date: string | null;
   created_at: string;
@@ -118,6 +122,24 @@ export function useGlobalPopups() {
     },
   });
 
+  const forcePopup = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("global_popups")
+        .update({ is_forced: true, forced_at: new Date().toISOString(), is_active: true })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["global-popups"] });
+      toast.success("Pop-up forçado enviado para todos os usuários online!");
+    },
+    onError: () => {
+      toast.error("Erro ao forçar pop-up");
+    },
+  });
+
   return {
     popups,
     isLoading,
@@ -125,6 +147,7 @@ export function useGlobalPopups() {
     updatePopup,
     deletePopup,
     toggleActive,
+    forcePopup,
   };
 }
 
@@ -147,4 +170,43 @@ export function useActivePopup() {
       return data as GlobalPopup | null;
     },
   });
+}
+
+/**
+ * Hook to listen for force-pushed popups via realtime.
+ * Returns the forced popup when it arrives.
+ */
+export function useForcedPopupListener(onForced: (popup: GlobalPopup) => void) {
+  useEffect(() => {
+    const channel = supabase
+      .channel("forced-popups")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "global_popups",
+          filter: "is_forced=eq.true",
+        },
+        async (payload) => {
+          const updated = payload.new as any;
+          if (updated.is_forced && updated.is_active) {
+            // Fetch full record
+            const { data } = await supabase
+              .from("global_popups")
+              .select("*")
+              .eq("id", updated.id)
+              .single();
+            if (data) {
+              onForced(data as GlobalPopup);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [onForced]);
 }
