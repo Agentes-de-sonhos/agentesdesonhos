@@ -542,18 +542,25 @@ const insuranceSchema = z.object({
   end_date: z.date({ required_error: "Data fim é obrigatória" }),
   coverage: z.string().min(2, "Cobertura é obrigatória"),
   price: z.number().min(0),
+  is_unit_price: z.boolean(),
 });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
+function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0 }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
+  const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
+    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: init?.is_unit_price !== false, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
   });
 
+  const isUnitPrice = form.watch("is_unit_price");
+  const price = form.watch("price");
+  const totalAmount = isUnitPrice ? price * totalPax : price;
+
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
-    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price }, values.price);
+    const computed = values.is_unit_price ? values.price * totalPax : values.price;
+    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: values.is_unit_price }, computed);
   };
 
   return (
@@ -589,8 +596,29 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
         <FormField control={form.control} name="coverage" render={({ field }) => (
           <FormItem><FormLabel>Cobertura</FormLabel><FormControl><Input placeholder="USD 60.000, USD 100.000..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
+
+        <FormField control={form.control} name="is_unit_price" render={({ field }) => (
+          <FormItem className="flex items-center gap-3 space-y-0 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+            <FormControl>
+              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+            </FormControl>
+            <FormLabel className="font-normal text-sm cursor-pointer">
+              Valor por pessoa <span className="text-muted-foreground">(multiplicar pela quantidade de passageiros)</span>
+            </FormLabel>
+          </FormItem>
+        )} />
+
         <FormField control={form.control} name="price" render={({ field }) => (
-          <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+          <FormItem>
+            <FormLabel>{isUnitPrice ? "Valor por pessoa (R$)" : "Valor total (R$)"}</FormLabel>
+            <FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} /></FormControl>
+            {isUnitPrice && totalPax > 0 && price > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {totalPax} passageiro{totalPax > 1 ? "s" : ""} × {formatCurrencyInline(price)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalAmount)}</span>
+              </p>
+            )}
+            <FormMessage />
+          </FormItem>
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
