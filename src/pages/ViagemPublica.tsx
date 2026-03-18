@@ -1378,70 +1378,45 @@ export default function ViagemPublica() {
           </CardContent>
         </Card>
 
-        {/* Content: Vertical Tabs + Services */}
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Vertical Tab Menu */}
-          <nav className="md:w-56 shrink-0 space-y-1">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-all ${
-                activeTab === "overview"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "hover:bg-muted/50 text-muted-foreground"
-              }`}
-            >
-              <Eye className="h-5 w-5 shrink-0" />
-              <span className="flex-1 text-sm font-medium">Visão Geral</span>
-            </button>
+        {/* Mobile Quick Nav */}
+        {isMobile && availableTabs.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-2 -mx-1 px-1 scrollbar-hide">
+            {availableTabs.map((type) => {
+              const Icon = SERVICE_ICONS[type];
+              return (
+                <button
+                  key={type}
+                  onClick={() => scrollToSection(type)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-muted/50 hover:bg-primary/10 text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0 transition-colors"
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {SERVICE_LABELS[type]}
+                  <span className="bg-primary/10 text-primary px-1 py-0.5 rounded-full text-[10px] font-semibold">{grouped[type].length}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-            {availableTabs.map((type) => (
-              <ServiceTab
+        {/* Collapsible Service Sections */}
+        <div className="space-y-3">
+          {services.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Nenhum serviço adicionado ainda
+              </CardContent>
+            </Card>
+          ) : (
+            availableTabs.map((type, index) => (
+              <CollapsibleServiceSection
                 key={type}
                 type={type}
-                count={grouped[type].length}
-                active={activeTab === type}
-                onClick={() => setActiveTab(type)}
+                services={grouped[type]}
+                defaultOpen={index === 0}
+                sectionRef={(el) => { sectionRefs.current[type] = el; }}
               />
-            ))}
-          </nav>
-
-          {/* Tab Content */}
-          <div className="flex-1 min-w-0">
-            {activeTab === "overview" ? (
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold">Todos os Serviços</h2>
-                {services.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-8 text-center text-muted-foreground">
-                      Nenhum serviço adicionado ainda
-                    </CardContent>
-                  </Card>
-                ) : (
-                  availableTabs.map((type) => (
-                    <div key={type}>
-                      <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2 uppercase tracking-wide">
-                        {(() => { const Icon = SERVICE_ICONS[type]; return <Icon className="h-4 w-4" />; })()}
-                        {SERVICE_LABELS[type]}
-                      </h3>
-                      <div className="space-y-2 mb-4">
-                        {grouped[type].map((s) => <PublicServiceCard key={s.id} service={s} />)}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            ) : activeTab !== "notes" && grouped[activeTab as TripServiceType] ? (
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  {(() => { const Icon = SERVICE_ICONS[activeTab as TripServiceType]; return <Icon className="h-5 w-5 text-primary" />; })()}
-                  {SERVICE_LABELS[activeTab as TripServiceType]}
-                </h2>
-                {grouped[activeTab as TripServiceType].map((s) => (
-                  <PublicServiceCard key={s.id} service={s} />
-                ))}
-              </div>
-            ) : null}
-          </div>
+            ))
+          )}
         </div>
 
         {/* Agent Footer */}
