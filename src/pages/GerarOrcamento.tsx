@@ -222,9 +222,9 @@ export default function GerarOrcamento() {
     const sType = selectedServiceType;
     if (!sType) return;
     // Queue add calls so round-trip transfers (2 rapid submits) are processed sequentially
-    addQueueRef.current = addQueueRef.current.then(() =>
-      addService({ service_type: sType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl })
-    );
+    addQueueRef.current = addQueueRef.current.then(async () => {
+      await addService({ service_type: sType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl });
+    });
     // Clear service type after a micro-delay so a second synchronous call can still use it
     setTimeout(() => setSelectedServiceType(null), 100);
   };
