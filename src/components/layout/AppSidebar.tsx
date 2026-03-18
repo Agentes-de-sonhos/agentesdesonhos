@@ -32,6 +32,7 @@ import {
   Heart,
   Paintbrush,
   UserPlus,
+  Headset,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -194,6 +195,7 @@ const mentoriasItem: MenuItem = { title: "Cursos e Mentorias", url: "/mentorias"
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
 
 export function AppSidebar() {
@@ -502,6 +504,7 @@ export function AppSidebar() {
           )}
 
           {isAdmin && renderSingleItem(adminMenuItem)}
+          {renderSingleItem(suporteMenuItem)}
           {renderSingleItem(profileMenuItem)}
 
           {collapsed ? (

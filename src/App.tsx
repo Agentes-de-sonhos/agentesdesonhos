@@ -63,6 +63,7 @@ import ResetPassword from "./pages/ResetPassword";
 import CadastroLink from "./pages/CadastroLink";
 import LeadFormPublic from "./pages/LeadFormPublic";
 import MeusLeads from "./pages/MeusLeads";
+import Suporte from "./pages/Suporte";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
 
@@ -443,6 +444,14 @@ const App = () => (
               }
             />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
+            <Route
+              path="/suporte"
+              element={
+                <ProtectedRoute>
+                  <Suporte />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
