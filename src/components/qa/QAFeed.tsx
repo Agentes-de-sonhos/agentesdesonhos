@@ -554,16 +554,39 @@ function QuestionCard({
                         )}
                       </div>
                       <p className="text-xs text-foreground/80 mt-1 whitespace-pre-wrap line-clamp-3 leading-relaxed">{a.content}</p>
-                      <button
-                        className={`flex items-center gap-1 mt-1.5 text-[11px] transition-colors ${
-                          userLikes.has(a.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
-                        }`}
-                        onClick={(e) => { e.stopPropagation(); onToggleLike(a.id); }}
-                      >
-                        <Heart className={`h-3 w-3 ${userLikes.has(a.id) ? "fill-current" : ""}`} />
-                        {likeCounts[a.id] || 0}
-                      </button>
-                    </div>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <button
+                          className={`flex items-center gap-1 text-[11px] transition-colors ${
+                            userLikes.has(a.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                          }`}
+                          onClick={(e) => { e.stopPropagation(); onToggleLike(a.id); }}
+                        >
+                          <Heart className={`h-3 w-3 ${userLikes.has(a.id) ? "fill-current" : ""}`} />
+                          {likeCounts[a.id] || 0}
+                        </button>
+                        {isAdmin && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button
+                                className="text-[11px] text-destructive/50 hover:text-destructive flex items-center gap-1 transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir resposta?</AlertDialogTitle>
+                                <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => onDeleteAnswer(a.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                   </div>
                 ))}
                 {answers.length > 3 && (
