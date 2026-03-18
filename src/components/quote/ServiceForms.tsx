@@ -145,7 +145,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -156,7 +156,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -307,7 +307,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -318,7 +318,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -424,9 +424,10 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData }: Omit<Serv
 
 /* ━━━━━━━━━━━━━━━━━━━ TRANSFER FORM ━━━━━━━━━━━━━━━━━━━ */
 const transferSchema = z.object({
-  transfer_type: z.enum(["arrival", "departure"]),
+  transfer_mode: z.enum(["arrival", "departure", "round_trip"]),
   location: z.string().min(2, "Local é obrigatório"),
-  date: z.date({ required_error: "Data é obrigatória" }),
+  arrival_date: z.date({ required_error: "Data de chegada é obrigatória" }),
+  departure_date: z.date().optional(),
   price: z.number().min(0),
 });
 
@@ -435,45 +436,141 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof transferSchema>>({
     resolver: zodResolver(transferSchema),
-    defaultValues: { transfer_type: init?.transfer_type || "arrival", location: init?.location || "", price: init?.price || initialData?.amount || 0, date: init?.date ? new Date(init.date) : tripStartDate },
+    defaultValues: {
+      transfer_mode: init?.transfer_type || "round_trip",
+      location: init?.location || "",
+      price: init?.price || initialData?.amount || 0,
+      arrival_date: init?.date ? new Date(init.date) : tripStartDate,
+      departure_date: tripEndDate,
+    },
   });
 
+  const transferMode = form.watch("transfer_mode");
+  const price = form.watch("price");
+  const isRoundTrip = transferMode === "round_trip";
+
   const handleSubmit = (values: z.infer<typeof transferSchema>) => {
-    onSubmit({ transfer_type: values.transfer_type, location: values.location, date: format(values.date, "yyyy-MM-dd"), price: values.price }, values.price);
+    if (values.transfer_mode === "round_trip") {
+      // Submit arrival
+      onSubmit(
+        { transfer_type: "arrival" as const, location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        values.price
+      );
+      // Submit departure as second service — uses a special flag
+      if (values.departure_date) {
+        onSubmit(
+          { transfer_type: "departure" as const, location: values.location, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
+          values.price
+        );
+      }
+    } else {
+      const mappedType = values.transfer_mode === "arrival" ? "arrival" : "departure";
+      onSubmit(
+        { transfer_type: mappedType, location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        values.price
+      );
+    }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField control={form.control} name="transfer_type" render={({ field }) => (
+        <FormField control={form.control} name="transfer_mode" render={({ field }) => (
           <FormItem><FormLabel>Tipo de Transfer</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-              <SelectContent>
-                <SelectItem value="arrival">Chegada (Aeroporto → Hotel)</SelectItem>
-                <SelectItem value="departure">Saída (Hotel → Aeroporto)</SelectItem>
-              </SelectContent>
-            </Select><FormMessage /></FormItem>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { value: "arrival", label: "Chegada", icon: "✈️ → 🏨", desc: "Aeroporto → Hotel" },
+                { value: "departure", label: "Saída", icon: "🏨 → ✈️", desc: "Hotel → Aeroporto" },
+                { value: "round_trip", label: "Ida e Volta", icon: "✈️ ↔ 🏨", desc: "Combinado" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => field.onChange(opt.value)}
+                  className={cn(
+                    "rounded-lg border-2 p-3 text-center transition-all hover:bg-muted/50",
+                    field.value === opt.value
+                      ? "border-primary bg-primary/5"
+                      : "border-border"
+                  )}
+                >
+                  <div className="text-lg mb-1">{opt.icon}</div>
+                  <div className="text-sm font-medium">{opt.label}</div>
+                  <div className="text-[10px] text-muted-foreground">{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+            <FormMessage />
+          </FormItem>
         )} />
+
         <FormField control={form.control} name="location" render={({ field }) => (
-          <FormItem><FormLabel>Local</FormLabel><FormControl><Input placeholder="Aeroporto CDG → Hotel Marriott" {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem>
+            <FormLabel>Local / Trajeto</FormLabel>
+            <FormControl><Input placeholder="Ex: Aeroporto CDG ↔ Hotel Marriott" {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
         )} />
-        <FormField control={form.control} name="date" render={({ field }) => (
-          <FormItem className="flex flex-col"><FormLabel>Data</FormLabel>
-            <Popover><PopoverTrigger asChild><FormControl>
-              <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-              </Button></FormControl></PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus />
-              </PopoverContent>
-            </Popover><FormMessage /></FormItem>
-        )} />
+
+        <div className={cn("grid gap-4", isRoundTrip ? "sm:grid-cols-2" : "sm:grid-cols-1")}>
+          <FormField control={form.control} name="arrival_date" render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{transferMode === "departure" ? "Data de Saída" : "Data de Chegada"}</FormLabel>
+              <Popover><PopoverTrigger asChild><FormControl>
+                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button></FormControl></PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
+                </PopoverContent>
+              </Popover><FormMessage />
+            </FormItem>
+          )} />
+
+          {isRoundTrip && (
+            <FormField control={form.control} name="departure_date" render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Data de Saída</FormLabel>
+                <Popover><PopoverTrigger asChild><FormControl>
+                  <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                    {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button></FormControl></PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover><FormMessage />
+              </FormItem>
+            )} />
+          )}
+        </div>
+
         <FormField control={form.control} name="price" render={({ field }) => (
-          <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+          <FormItem>
+            <FormLabel>{isRoundTrip ? "Valor por trecho (R$)" : "Valor (R$)"}</FormLabel>
+            <FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} /></FormControl>
+            <FormMessage />
+          </FormItem>
         )} />
+
+        {/* Round trip total summary */}
+        {isRoundTrip && price > 0 && (
+          <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Total Transfer (2 trechos)</span>
+              <span className="text-lg font-bold text-primary">{formatCurrencyInline(price * 2)}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              2 × {formatCurrencyInline(price)}
+            </p>
+          </div>
+        )}
+
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
+          <Button type="submit" disabled={isLoading}>
+            {initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
+            {initialData ? "Salvar" : isRoundTrip ? "Adicionar 2 trechos" : "Adicionar"}
+          </Button>
         </div>
       </form>
     </Form>
@@ -515,7 +612,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -577,7 +674,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -588,7 +685,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -672,7 +769,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -683,7 +780,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus />
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />

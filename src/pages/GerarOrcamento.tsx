@@ -201,6 +201,9 @@ export default function GerarOrcamento() {
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
   };
 
+  // Track pending add calls so round-trip transfers can fire two submits sequentially
+  const addQueueRef = useRef<Promise<void>>(Promise.resolve());
+
   const handleAddService = async (serviceData: ServiceData, amount: number, optionLabel?: string, description?: string, imageUrl?: string) => {
     if (editingService) {
       await updateService({
@@ -216,9 +219,14 @@ export default function GerarOrcamento() {
       setSelectedServiceType(null);
       return;
     }
-    if (!selectedServiceType) return;
-    await addService({ service_type: selectedServiceType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl });
-    setSelectedServiceType(null);
+    const sType = selectedServiceType;
+    if (!sType) return;
+    // Queue add calls so round-trip transfers (2 rapid submits) are processed sequentially
+    addQueueRef.current = addQueueRef.current.then(async () => {
+      await addService({ service_type: sType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl });
+    });
+    // Clear service type after a micro-delay so a second synchronous call can still use it
+    setTimeout(() => setSelectedServiceType(null), 100);
   };
 
   const handleEditService = (service: import("@/types/quote").QuoteService) => {
