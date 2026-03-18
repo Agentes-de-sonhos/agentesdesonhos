@@ -333,6 +333,9 @@ export function QAFeed() {
               getAnswersQuery={getAnswersQuery}
               onToggleLike={(answerId: string) => toggleAnswerLike.mutate({ answerId, questionId: q.id })}
               canComment={canComment}
+              isAdmin={isAdmin}
+              onDeleteQuestion={() => deleteQuestion.mutate(q.id)}
+              onDeleteAnswer={(answerId: string) => deleteAnswer.mutate({ answerId, questionId: q.id })}
             />
           ))}
         </div>
