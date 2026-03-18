@@ -174,6 +174,7 @@ export default function GerarOrcamento() {
     if (user?.id) { fetchAgentProfile(user.id, supabase).then(setAgentProfile); }
   }, [user?.id]);
 
+  const quoteLoadedRef = useRef(false);
   useEffect(() => {
     if (quote) {
       setPaymentTerms((quote as any).payment_terms || "");
@@ -184,6 +185,9 @@ export default function GerarOrcamento() {
       setEntryPercentage((quote as any).entry_percentage || 30);
       setPaymentMethodLabel((quote as any).payment_method_label || "");
       setFullPaymentDiscountPercent((quote as any).full_payment_discount_percent || 0);
+      // Mark that quote data has been loaded — auto-save effects below
+      // will skip their first run to avoid saving the initial values right back.
+      setTimeout(() => { quoteLoadedRef.current = true; }, 2500);
     }
   }, [quote]);
 
