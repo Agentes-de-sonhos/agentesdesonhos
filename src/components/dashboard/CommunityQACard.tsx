@@ -433,6 +433,28 @@ export function CommunityQACard() {
                       <span className="text-xs text-[hsl(var(--section-community))] font-medium opacity-0 group-hover/question:opacity-100 transition-opacity whitespace-nowrap flex items-center gap-1">
                         {q.answers_count > 0 ? "Ver respostas" : "Responder"} <ArrowRight className="h-3 w-3" />
                       </span>
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              className="text-destructive/50 hover:text-destructive transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir pergunta?</AlertDialogTitle>
+                              <AlertDialogDescription>Essa ação excluirá a pergunta e todas as respostas. Não pode ser desfeita.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteQuestionMut.mutate(q.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                       {isExpanded ? (
                         <ChevronUp className="h-4 w-4 text-muted-foreground" />
                       ) : (
