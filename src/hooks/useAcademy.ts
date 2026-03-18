@@ -317,7 +317,7 @@ export function useAcademy() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["user-certificates"] });
       toast({ title: "Certificado gerado com sucesso! 🏆" });
-      awardCertificatePoints(result.trailId);
+      awardPoints(POINTS_CONFIG.earn_certificate, "earn_certificate", result.trailId);
     },
   });
 

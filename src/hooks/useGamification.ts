@@ -195,7 +195,7 @@ export function useGamification() {
         .select("mission_key, period_key")
         .eq("user_id", user.id);
       if (error) throw error;
-      return (data || []) as { mission_key: string; period_key: string }[];
+      return (data || []) as unknown as { mission_key: string; period_key: string }[];
     },
     enabled: !!user,
   });
