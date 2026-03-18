@@ -234,7 +234,6 @@ export default function GerarOrcamento() {
     if (quote) generateQuotePDF(quote, agentProfile);
   };
 
-  const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
   const handleToggleDetailedPrices = async (checked: boolean) => {
     if (!quote) return;
     setShowDetailedLocal(checked);
