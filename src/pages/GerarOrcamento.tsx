@@ -239,7 +239,7 @@ export default function GerarOrcamento() {
     window.location.reload();
   };
 
-  const handleSavePaymentConfig = async () => {
+  const handleSavePaymentConfig = useCallback(async () => {
     if (!quote) return;
     await supabase.from("quotes").update({
       payment_terms: paymentTerms || null,
@@ -249,17 +249,33 @@ export default function GerarOrcamento() {
       payment_method_label: paymentMethodLabel || null,
       full_payment_discount_percent: fullPaymentDiscountPercent,
     } as any).eq("id", quote.id);
-    toast({ title: "Salvo", description: "Configuração de pagamento atualizada." });
-  };
+    setAutoSaved(true);
+    setTimeout(() => setAutoSaved(false), 2500);
+  }, [quote, paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
 
-  const handleSaveValidity = async () => {
+  const handleSaveValidity = useCallback(async () => {
     if (!quote) return;
     await supabase.from("quotes").update({
       valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
       validity_disclaimer: validityDisclaimer,
     } as any).eq("id", quote.id);
-    toast({ title: "Salvo", description: "Validade do orçamento atualizada." });
-  };
+    setAutoSaved(true);
+    setTimeout(() => setAutoSaved(false), 2500);
+  }, [quote, validUntil, validityDisclaimer]);
+
+  // Debounced auto-save for payment config
+  useEffect(() => {
+    if (!quote) return;
+    const timer = setTimeout(() => { handleSavePaymentConfig(); }, 2000);
+    return () => clearTimeout(timer);
+  }, [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
+
+  // Debounced auto-save for validity config
+  useEffect(() => {
+    if (!quote) return;
+    const timer = setTimeout(() => { handleSaveValidity(); }, 2000);
+    return () => clearTimeout(timer);
+  }, [validUntil, validityDisclaimer]);
 
   const handleDeleteQuote = async (qId: string) => {
     await deleteQuote(qId);
