@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Users, Baby, MapPin } from "lucide-react";
+import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -48,19 +49,31 @@ interface QuoteClientFormProps {
 
 export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("quote-client");
+
+  const draft = loadDraft();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      client_name: "",
-      adults_count: 2,
-      children_count: 0,
-      destination: "",
-      dateRange: { from: undefined as any, to: undefined as any },
+      client_name: draft?.client_name || "",
+      adults_count: draft?.adults_count || 2,
+      children_count: draft?.children_count || 0,
+      destination: draft?.destination || "",
+      dateRange: draft?.dateRange?.from
+        ? { from: new Date(draft.dateRange.from), to: draft.dateRange.to ? new Date(draft.dateRange.to) : undefined as any }
+        : { from: undefined as any, to: undefined as any },
     },
   });
 
+  // Auto-save form values on change
+  const watchedValues = form.watch();
+  useEffect(() => {
+    saveDraft(watchedValues);
+  }, [watchedValues, saveDraft]);
+
   const handleSubmit = (values: FormValues) => {
+    clearDraft();
     onSubmit({
       client_name: values.client_name,
       adults_count: values.adults_count,

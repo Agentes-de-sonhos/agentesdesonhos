@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect, useCallback, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Play, FileText, Clock, User, ClipboardCheck } from "lucide-react";
@@ -28,19 +29,32 @@ function toEmbedUrl(url: string): string {
   }
 }
 
+/**
+ * Memoised iframe that only re-renders when the actual video URL changes.
+ * This prevents the iframe from being destroyed/recreated on parent re-renders
+ * or tab switches, preserving the user's playback position.
+ */
+const StableIframe = memo(function StableIframe({ src }: { src: string }) {
+  return (
+    <iframe
+      src={src}
+      className="absolute inset-0 w-full h-full"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    />
+  );
+}, (prev, next) => prev.src === next.src);
+
 export function TrainingPlayer({ training, isCompleted, onComplete }: TrainingPlayerProps) {
+  const embedUrl = training.video_url ? toEmbedUrl(training.video_url) : null;
+
   return (
     <div className="flex flex-col gap-4">
       {/* Video Player - 16:9 aspect ratio */}
       <div className="w-full rounded-xl overflow-hidden bg-black shadow-lg">
         <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-          {training.video_url ? (
-            <iframe
-              src={toEmbedUrl(training.video_url)}
-              className="absolute inset-0 w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+          {embedUrl ? (
+            <StableIframe src={embedUrl} />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-white/60">
               <div className="text-center">

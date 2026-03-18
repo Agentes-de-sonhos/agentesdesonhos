@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, MapPin } from "lucide-react";
+import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -47,22 +48,33 @@ interface TripFormProps {
 
 export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("trip-form");
+
+  const draft = !defaultValues ? loadDraft() : null;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      client_name: defaultValues?.client_name || "",
-      destination: defaultValues?.destination || "",
+      client_name: defaultValues?.client_name || draft?.client_name || "",
+      destination: defaultValues?.destination || draft?.destination || "",
       dateRange: defaultValues?.start_date && defaultValues?.end_date
         ? { from: new Date(defaultValues.start_date), to: new Date(defaultValues.end_date) }
-        : undefined,
+        : draft?.dateRange?.from
+          ? { from: new Date(draft.dateRange.from), to: draft.dateRange.to ? new Date(draft.dateRange.to) : undefined }
+          : undefined,
     },
   });
 
+  // Auto-save form values on change
+  const watchedValues = form.watch();
+  useEffect(() => {
+    if (!defaultValues) saveDraft(watchedValues);
+  }, [watchedValues, saveDraft, defaultValues]);
+
   const handleSubmit = (values: FormValues) => {
+    clearDraft();
     const from = values.dateRange.from;
     const to = values.dateRange.to;
-    // Use local date parts to avoid UTC timezone shift
     const formatLocalDate = (d: Date) =>
       `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     onSubmit({
