@@ -4,7 +4,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Wallet, MapPin, Calendar, FileText, Loader2, Lock, Plane, Hotel, Car, Bus,
-  Ticket, Shield, Ship, TrainFront, Download, ExternalLink, Eye, MessageSquare
+  Ticket, Shield, Ship, TrainFront, Download, ExternalLink, Eye, MessageSquare,
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
