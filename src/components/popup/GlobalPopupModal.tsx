@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useActivePopup, GlobalPopup } from "@/hooks/useGlobalPopups";
+import { useActivePopup, useForcedPopupListener, GlobalPopup } from "@/hooks/useGlobalPopups";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, ExternalLink } from "lucide-react";
@@ -38,12 +38,21 @@ export function GlobalPopupModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentPopup, setCurrentPopup] = useState<GlobalPopup | null>(null);
 
+  // Normal popup on load
   useEffect(() => {
     if (!isLoading && activePopup && !hasViewedPopup(activePopup.id)) {
       setCurrentPopup(activePopup);
       setIsOpen(true);
     }
   }, [activePopup, isLoading]);
+
+  // Force-pushed popup via realtime — always opens, ignores session viewed state
+  const handleForcedPopup = useCallback((popup: GlobalPopup) => {
+    setCurrentPopup(popup);
+    setIsOpen(true);
+  }, []);
+
+  useForcedPopupListener(handleForcedPopup);
 
   const handleClose = () => {
     if (currentPopup) {
@@ -56,8 +65,7 @@ export function GlobalPopupModal() {
     if (currentPopup?.button_link) {
       markPopupAsViewed(currentPopup.id);
       setIsOpen(false);
-      
-      // Check if it's an internal or external link
+
       if (currentPopup.button_link.startsWith("http")) {
         window.open(currentPopup.button_link, "_blank", "noopener,noreferrer");
       } else {
@@ -67,6 +75,9 @@ export function GlobalPopupModal() {
   };
 
   if (!currentPopup) return null;
+
+  const hasVideo = !!currentPopup.video_url;
+  const hasImage = !!currentPopup.image_url;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -80,11 +91,24 @@ export function GlobalPopupModal() {
           <X className="h-4 w-4" />
         </button>
 
-        {/* Image */}
-        {currentPopup.image_url && (
+        {/* Video */}
+        {hasVideo && (
+          <div className="w-full bg-black">
+            <video
+              src={currentPopup.video_url!}
+              controls
+              autoPlay
+              playsInline
+              className="w-full max-h-[60vh] object-contain"
+            />
+          </div>
+        )}
+
+        {/* Image (only if no video) */}
+        {!hasVideo && hasImage && (
           <div className="w-full relative overflow-hidden bg-muted">
             <img
-              src={currentPopup.image_url}
+              src={currentPopup.image_url!}
               alt={currentPopup.title}
               className="w-full max-h-[60vh] object-contain"
             />
@@ -96,7 +120,7 @@ export function GlobalPopupModal() {
           <h2 className="text-xl font-semibold leading-tight">
             {currentPopup.title}
           </h2>
-          
+
           {currentPopup.description && (
             <p className="text-muted-foreground text-sm leading-relaxed">
               {currentPopup.description}
@@ -105,7 +129,7 @@ export function GlobalPopupModal() {
 
           {/* Action Button */}
           {currentPopup.has_button && currentPopup.button_text && (
-            <Button 
+            <Button
               onClick={handleButtonClick}
               className="w-full"
               size="lg"
@@ -119,7 +143,7 @@ export function GlobalPopupModal() {
 
           {/* Close text button if no action button */}
           {!currentPopup.has_button && (
-            <Button 
+            <Button
               onClick={handleClose}
               variant="outline"
               className="w-full"

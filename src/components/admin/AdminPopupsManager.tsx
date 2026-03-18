@@ -11,15 +11,17 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Eye, EyeOff, Upload, ExternalLink, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Upload, ExternalLink, Loader2, Zap, Video } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 
 interface PopupFormData {
   title: string;
   description: string;
   image_url: string;
+  video_url: string;
   button_text: string;
   button_link: string;
   has_button: boolean;
@@ -32,6 +34,7 @@ const initialFormData: PopupFormData = {
   title: "",
   description: "",
   image_url: "",
+  video_url: "",
   button_text: "",
   button_link: "",
   has_button: false,
@@ -42,14 +45,16 @@ const initialFormData: PopupFormData = {
 
 export function AdminPopupsManager() {
   const { user } = useAuth();
-  const { popups, isLoading, createPopup, updatePopup, deletePopup, toggleActive } = useGlobalPopups();
+  const { popups, isLoading, createPopup, updatePopup, deletePopup, toggleActive, forcePopup } = useGlobalPopups();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPopup, setEditingPopup] = useState<GlobalPopup | null>(null);
   const [formData, setFormData] = useState<PopupFormData>(initialFormData);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewPopup, setPreviewPopup] = useState<GlobalPopup | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpenDialog = (popup?: GlobalPopup) => {
     if (popup) {
@@ -58,6 +63,7 @@ export function AdminPopupsManager() {
         title: popup.title,
         description: popup.description || "",
         image_url: popup.image_url || "",
+        video_url: popup.video_url || "",
         button_text: popup.button_text || "",
         button_link: popup.button_link || "",
         has_button: popup.has_button,
@@ -101,8 +107,44 @@ export function AdminPopupsManager() {
       setFormData((prev) => ({ ...prev, image_url: publicUrl }));
     } catch (error) {
       console.error("Error uploading image:", error);
+      toast.error("Erro ao enviar imagem.");
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Vídeo muito grande (máx. 50MB).");
+      return;
+    }
+
+    setIsUploadingVideo(true);
+    try {
+      const fileExt = file.name.split(".").pop()?.toLowerCase() || "mp4";
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `popups/videos/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("popup-images")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("popup-images")
+        .getPublicUrl(filePath);
+
+      setFormData((prev) => ({ ...prev, video_url: publicUrl }));
+      toast.success("Vídeo enviado!");
+    } catch (error) {
+      console.error("Error uploading video:", error);
+      toast.error("Erro ao enviar vídeo.");
+    } finally {
+      setIsUploadingVideo(false);
     }
   };
 
@@ -113,10 +155,13 @@ export function AdminPopupsManager() {
       title: formData.title,
       description: formData.description || null,
       image_url: formData.image_url || null,
+      video_url: formData.video_url || null,
       button_text: formData.has_button ? formData.button_text || null : null,
       button_link: formData.has_button ? formData.button_link || null : null,
       has_button: formData.has_button,
       is_active: formData.is_active,
+      is_forced: false,
+      forced_at: null,
       start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,
       end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
       created_by: user?.id || null,
@@ -138,6 +183,12 @@ export function AdminPopupsManager() {
   const handlePreview = (popup: GlobalPopup) => {
     setPreviewPopup(popup);
     setPreviewOpen(true);
+  };
+
+  const handleForce = (popup: GlobalPopup) => {
+    if (confirm("Deseja enviar este pop-up AGORA para todos os usuários online? Eles terão que fechar para continuar navegando.")) {
+      forcePopup.mutate(popup.id);
+    }
   };
 
   const getStatusBadge = (popup: GlobalPopup) => {
@@ -192,9 +243,9 @@ export function AdminPopupsManager() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Título</TableHead>
+                    <TableHead>Mídia</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Período</TableHead>
-                    <TableHead>Botão</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -202,6 +253,13 @@ export function AdminPopupsManager() {
                   {popups.map((popup) => (
                     <TableRow key={popup.id}>
                       <TableCell className="font-medium">{popup.title}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {popup.image_url && <Badge variant="outline" className="text-xs">Imagem</Badge>}
+                          {popup.video_url && <Badge variant="outline" className="text-xs border-violet-400 text-violet-600">Vídeo</Badge>}
+                          {!popup.image_url && !popup.video_url && <span className="text-muted-foreground/50 text-xs">-</span>}
+                        </div>
+                      </TableCell>
                       <TableCell>{getStatusBadge(popup)}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {popup.start_date || popup.end_date ? (
@@ -214,21 +272,24 @@ export function AdminPopupsManager() {
                           <span className="text-muted-foreground/50">Sem período</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        {popup.has_button ? (
-                          <Badge variant="outline">{popup.button_text}</Badge>
-                        ) : (
-                          <span className="text-muted-foreground/50">-</span>
-                        )}
-                      </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handlePreview(popup)}
+                            title="Pré-visualizar"
                           >
                             <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleForce(popup)}
+                            title="Forçar envio agora"
+                            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                          >
+                            <Zap className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -320,6 +381,56 @@ export function AdminPopupsManager() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Video Upload */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Video className="h-4 w-4 text-violet-500" />
+                Vídeo (opcional — substitui a imagem no pop-up)
+              </Label>
+              <div className="flex items-start gap-4">
+                {formData.video_url ? (
+                  <div className="relative w-48 rounded-lg overflow-hidden border bg-black">
+                    <video
+                      src={formData.video_url}
+                      className="w-full h-32 object-contain"
+                      muted
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-1 right-1"
+                      onClick={() => setFormData((prev) => ({ ...prev, video_url: "" }))}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => videoInputRef.current?.click()}
+                    className="w-48 h-32 border-2 border-dashed border-violet-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-violet-500 transition-colors"
+                  >
+                    {isUploadingVideo ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+                    ) : (
+                      <>
+                        <Video className="h-6 w-6 text-violet-400 mb-2" />
+                        <span className="text-sm text-muted-foreground">Upload vídeo</span>
+                        <span className="text-[10px] text-muted-foreground/70 mt-0.5">Máx. 50MB</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  onChange={handleVideoUpload}
                   className="hidden"
                 />
               </div>
@@ -446,7 +557,15 @@ export function AdminPopupsManager() {
         <DialogContent className="max-w-md p-0 overflow-hidden">
           {previewPopup && (
             <div className="relative">
-              {previewPopup.image_url && (
+              {previewPopup.video_url ? (
+                <div className="w-full bg-black">
+                  <video
+                    src={previewPopup.video_url}
+                    controls
+                    className="w-full max-h-[50vh] object-contain"
+                  />
+                </div>
+              ) : previewPopup.image_url ? (
                 <div className="w-full aspect-video">
                   <img
                     src={previewPopup.image_url}
@@ -454,7 +573,7 @@ export function AdminPopupsManager() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-              )}
+              ) : null}
               <div className="p-6 space-y-4">
                 <h3 className="text-xl font-semibold">{previewPopup.title}</h3>
                 {previewPopup.description && (
