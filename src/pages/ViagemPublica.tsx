@@ -1223,9 +1223,20 @@ export default function ViagemPublica() {
   const [authenticated, setAuthenticated] = useState(!!preAuth?.preAuthenticated);
   const [tripData, setTripData] = useState<Trip | null>(preAuth?.tripData || null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preAuth?.agentProfile || null);
-  const [activeTab, setActiveTab] = useState<TripServiceType | "overview" | "notes">("overview");
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const scrollToSection = useCallback((type: TripServiceType) => {
+    const el = sectionRefs.current[type];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Also open the collapsible if it's closed - we trigger a click on the trigger
+      const trigger = el.querySelector('[data-state="closed"]');
+      if (trigger) (trigger as HTMLElement).click();
+    }
+  }, []);
 
   // Also try without password for trips that have no password set
   useEffect(() => {
