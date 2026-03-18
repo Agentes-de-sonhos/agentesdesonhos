@@ -359,6 +359,9 @@ interface QuestionCardProps {
   getAnswersQuery: (id: string) => any;
   onToggleLike: (answerId: string) => void;
   canComment: boolean;
+  isAdmin: boolean;
+  onDeleteQuestion: () => void;
+  onDeleteAnswer: (answerId: string) => void;
 }
 
 function QuestionCard({
@@ -374,6 +377,9 @@ function QuestionCard({
   getAnswersQuery,
   onToggleLike,
   canComment,
+  isAdmin,
+  onDeleteQuestion,
+  onDeleteAnswer,
 }: QuestionCardProps) {
   const { user } = useAuth();
   const answersQuery = useQuery({ ...getAnswersQuery(q.id), enabled: isExpanded });
