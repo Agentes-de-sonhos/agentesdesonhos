@@ -184,6 +184,7 @@ const marketingSection: MenuSection = {
   items: [
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
     { title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
+    { title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
   ],
 };
 
