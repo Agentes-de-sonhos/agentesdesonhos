@@ -270,14 +270,14 @@ export default function GerarOrcamento() {
 
   // Debounced auto-save for payment config
   useEffect(() => {
-    if (!quote) return;
+    if (!quote || !quoteLoadedRef.current) return;
     const timer = setTimeout(() => { handleSavePaymentConfig(); }, 2000);
     return () => clearTimeout(timer);
   }, [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
 
   // Debounced auto-save for validity config
   useEffect(() => {
-    if (!quote) return;
+    if (!quote || !quoteLoadedRef.current) return;
     const timer = setTimeout(() => { handleSaveValidity(); }, 2000);
     return () => clearTimeout(timer);
   }, [validUntil, validityDisclaimer]);
