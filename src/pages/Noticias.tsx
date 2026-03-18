@@ -439,13 +439,14 @@ function CompactNewsItem({ item, index, isAdmin, allNews, onSetNoticiaDoDia, onA
 }
 
 /* ── Destaques Full-width Carousel with auto-advance ─────── */
-function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, trendingSet, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5 }: {
+function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, trendingSet, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, getLikeCount, isLiked, onToggleLike }: {
   items: NoticiaHub[]; isAdmin: boolean; onDelete: (id: string) => void;
   savedIds: Set<string>; onToggleSave: (id: string) => void; trendingSet: Set<string>;
   allNews: NoticiaHub[];
   onSetNoticiaDoDia: (id: string) => void;
   onAddTop5: (id: string) => void;
   onRemoveTop5: (id: string) => void;
+  getLikeCount: (id: string) => number; isLiked: (id: string) => boolean; onToggleLike: (id: string) => void;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
