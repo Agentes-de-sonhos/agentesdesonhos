@@ -30,7 +30,7 @@ export function useAcademy() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { awardCertificatePoints } = useGamification();
+  const { awardPoints, POINTS_CONFIG } = useGamification();
 
   const { data: trails = [], isLoading: trailsLoading } = useQuery({
     queryKey: ["learning-trails"],
@@ -317,7 +317,7 @@ export function useAcademy() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["user-certificates"] });
       toast({ title: "Certificado gerado com sucesso! 🏆" });
-      awardCertificatePoints(result.trailId);
+      awardPoints(POINTS_CONFIG.earn_certificate, "earn_certificate", result.trailId);
     },
   });
 
