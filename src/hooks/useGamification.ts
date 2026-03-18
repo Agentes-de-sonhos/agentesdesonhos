@@ -129,19 +129,44 @@ export function useGamification() {
     enabled: !!user,
   });
 
-  const categoryRankingQuery = (category: string) =>
-    useQuery({
-      queryKey: ["gamification", "ranking-category", category],
-      queryFn: async () => {
-        const { data, error } = await (supabase.rpc as any)("get_gamification_ranking_by_category", {
-          category_name: category,
-          limit_count: 50,
-        });
-        if (error) throw error;
-        return (data || []) as RankingEntry[];
-      },
-      enabled: !!user,
-    });
+  const vendasRankingQuery = useQuery({
+    queryKey: ["gamification", "ranking-category", "vendas"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.rpc as any)("get_gamification_ranking_by_category", {
+        category_name: "vendas",
+        limit_count: 50,
+      });
+      if (error) throw error;
+      return (data || []) as RankingEntry[];
+    },
+    enabled: !!user,
+  });
+
+  const conteudoRankingQuery = useQuery({
+    queryKey: ["gamification", "ranking-category", "conteudo"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.rpc as any)("get_gamification_ranking_by_category", {
+        category_name: "conteudo",
+        limit_count: 50,
+      });
+      if (error) throw error;
+      return (data || []) as RankingEntry[];
+    },
+    enabled: !!user,
+  });
+
+  const educacaoRankingQuery = useQuery({
+    queryKey: ["gamification", "ranking-category", "educacao"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.rpc as any)("get_gamification_ranking_by_category", {
+        category_name: "educacao",
+        limit_count: 50,
+      });
+      if (error) throw error;
+      return (data || []) as RankingEntry[];
+    },
+    enabled: !!user,
+  });
 
   // ─── Today's Actions (for missions) ───────────────────
   const todayActionsQuery = useQuery({
