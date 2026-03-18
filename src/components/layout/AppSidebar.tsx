@@ -171,7 +171,8 @@ const clientesSection: MenuSection = {
   borderColor: "border-cyan-600",
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
-    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
+    { title: "Oportunidades", url: "/gestao-clientes", icon: ShoppingCart, requiredFeature: "crm_basic" },
+    { title: "Meta de Vendas", url: "/financeiro", icon: Calculator, requiredFeature: "financial" },
   ],
 };
 
