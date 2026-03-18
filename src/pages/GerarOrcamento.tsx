@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -127,8 +127,25 @@ export default function GerarOrcamento() {
   const { quote, addService, updateService, deleteService, isAddingService } = useQuote(id);
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
-  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null);
-  const [editingService, setEditingService] = useState<import("@/types/quote").QuoteService | null>(null);
+  // Persist UI state in sessionStorage so tab switches don't lose progress
+  const storageKey = id ? `quote-editor-${id}` : null;
+
+  const readPersistedState = useCallback(() => {
+    if (!storageKey) return null;
+    try {
+      const raw = sessionStorage.getItem(storageKey);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }, [storageKey]);
+
+  const persisted = readPersistedState();
+
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(
+    persisted?.selectedServiceType || null
+  );
+  const [editingService, setEditingService] = useState<import("@/types/quote").QuoteService | null>(
+    persisted?.editingService || null
+  );
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
@@ -139,11 +156,25 @@ export default function GerarOrcamento() {
   const [entryPercentage, setEntryPercentage] = useState(30);
   const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
+  const [autoSaved, setAutoSaved] = useState(false);
+  const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
+
+  // Persist selectedServiceType & editingService to sessionStorage
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify({
+        selectedServiceType,
+        editingService,
+      }));
+    } catch { /* quota exceeded — ignore */ }
+  }, [storageKey, selectedServiceType, editingService]);
 
   useEffect(() => {
     if (user?.id) { fetchAgentProfile(user.id, supabase).then(setAgentProfile); }
   }, [user?.id]);
 
+  const quoteLoadedRef = useRef(false);
   useEffect(() => {
     if (quote) {
       setPaymentTerms((quote as any).payment_terms || "");
@@ -154,6 +185,9 @@ export default function GerarOrcamento() {
       setEntryPercentage((quote as any).entry_percentage || 30);
       setPaymentMethodLabel((quote as any).payment_method_label || "");
       setFullPaymentDiscountPercent((quote as any).full_payment_discount_percent || 0);
+      // Mark that quote data has been loaded — auto-save effects below
+      // will skip their first run to avoid saving the initial values right back.
+      setTimeout(() => { quoteLoadedRef.current = true; }, 2500);
     }
   }, [quote]);
 
@@ -206,11 +240,11 @@ export default function GerarOrcamento() {
 
   const handleToggleDetailedPrices = async (checked: boolean) => {
     if (!quote) return;
+    setShowDetailedLocal(checked);
     await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
-    window.location.reload();
   };
 
-  const handleSavePaymentConfig = async () => {
+  const handleSavePaymentConfig = useCallback(async () => {
     if (!quote) return;
     await supabase.from("quotes").update({
       payment_terms: paymentTerms || null,
@@ -220,17 +254,33 @@ export default function GerarOrcamento() {
       payment_method_label: paymentMethodLabel || null,
       full_payment_discount_percent: fullPaymentDiscountPercent,
     } as any).eq("id", quote.id);
-    toast({ title: "Salvo", description: "Configuração de pagamento atualizada." });
-  };
+    setAutoSaved(true);
+    setTimeout(() => setAutoSaved(false), 2500);
+  }, [quote, paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
 
-  const handleSaveValidity = async () => {
+  const handleSaveValidity = useCallback(async () => {
     if (!quote) return;
     await supabase.from("quotes").update({
       valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
       validity_disclaimer: validityDisclaimer,
     } as any).eq("id", quote.id);
-    toast({ title: "Salvo", description: "Validade do orçamento atualizada." });
-  };
+    setAutoSaved(true);
+    setTimeout(() => setAutoSaved(false), 2500);
+  }, [quote, validUntil, validityDisclaimer]);
+
+  // Debounced auto-save for payment config
+  useEffect(() => {
+    if (!quote || !quoteLoadedRef.current) return;
+    const timer = setTimeout(() => { handleSavePaymentConfig(); }, 2000);
+    return () => clearTimeout(timer);
+  }, [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
+
+  // Debounced auto-save for validity config
+  useEffect(() => {
+    if (!quote || !quoteLoadedRef.current) return;
+    const timer = setTimeout(() => { handleSaveValidity(); }, 2000);
+    return () => clearTimeout(timer);
+  }, [validUntil, validityDisclaimer]);
 
   const handleDeleteQuote = async (qId: string) => {
     await deleteQuote(qId);
@@ -342,7 +392,7 @@ export default function GerarOrcamento() {
     );
   }
 
-  const showDetailed = (quote as any).show_detailed_prices !== false;
+  const showDetailed = showDetailedLocal !== null ? showDetailedLocal : (quote as any).show_detailed_prices !== false;
   const serviceCountByType: Record<string, number> = {};
   (quote.services || []).forEach(s => {
     serviceCountByType[s.service_type] = (serviceCountByType[s.service_type] || 0) + 1;
@@ -367,7 +417,13 @@ export default function GerarOrcamento() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
+            {autoSaved && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Salvo automaticamente
+              </span>
+            )}
             <Button variant="outline" onClick={handleGeneratePDF}>
               <FileText className="mr-2 h-4 w-4" /> PDF
             </Button>
