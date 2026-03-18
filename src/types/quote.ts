@@ -83,6 +83,9 @@ export interface TransferData {
   price: number;
 }
 
+/** Used internally by the form — the round_trip option generates two TransferData entries */
+export type TransferFormType = 'arrival' | 'departure' | 'round_trip';
+
 export interface AttractionData {
   name: string;
   date: string;
