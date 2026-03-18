@@ -63,6 +63,7 @@ import ResetPassword from "./pages/ResetPassword";
 import CadastroLink from "./pages/CadastroLink";
 import LeadFormPublic from "./pages/LeadFormPublic";
 import MeusLeads from "./pages/MeusLeads";
+import Suporte from "./pages/Suporte";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
 
