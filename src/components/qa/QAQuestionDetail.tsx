@@ -257,6 +257,29 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
                             Marcar como melhor resposta
                           </Button>
                         )}
+                        {isAdmin && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="text-xs text-destructive/60 hover:text-destructive h-auto p-0">
+                                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                Excluir
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir resposta?</AlertDialogTitle>
+                                <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteAnswer.mutate({ answerId: a.id, questionId: question.id })}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >Excluir</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
                       </div>
                     </div>
                   </div>
