@@ -26,9 +26,11 @@ interface Props {
 
 export function QAQuestionDetail({ questionId, onBack }: Props) {
   const { user } = useAuth();
+  const { role } = useUserRole();
+  const isAdmin = role === "admin";
   const { hasFeature } = useSubscription();
   const canComment = hasFeature("qa_comment");
-  const { createAnswer, markBestAnswer, toggleAnswerLike, getAnswersQuery } = useQA();
+  const { createAnswer, markBestAnswer, toggleAnswerLike, deleteQuestion, deleteAnswer, getAnswersQuery } = useQA();
   const [newAnswer, setNewAnswer] = useState(() => sessionStorage.getItem(`qa_answer_draft_${questionId}`) || "");
 
   useEffect(() => { sessionStorage.setItem(`qa_answer_draft_${questionId}`, newAnswer); }, [newAnswer, questionId]);
