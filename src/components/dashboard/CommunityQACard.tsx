@@ -538,6 +538,25 @@ export function CommunityQACard() {
                                     <CheckCircle2 className="h-3 w-3" /> Melhor resposta
                                   </Button>
                                 )}
+                                {isAdmin && (
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1 text-destructive/60 hover:text-destructive">
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Excluir resposta?</AlertDialogTitle>
+                                        <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteAnswerMut.mutate(a.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                )}
                               </div>
                             </div>
                           ))}
