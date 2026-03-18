@@ -127,8 +127,25 @@ export default function GerarOrcamento() {
   const { quote, addService, updateService, deleteService, isAddingService } = useQuote(id);
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
-  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(null);
-  const [editingService, setEditingService] = useState<import("@/types/quote").QuoteService | null>(null);
+  // Persist UI state in sessionStorage so tab switches don't lose progress
+  const storageKey = id ? `quote-editor-${id}` : null;
+
+  const readPersistedState = useCallback(() => {
+    if (!storageKey) return null;
+    try {
+      const raw = sessionStorage.getItem(storageKey);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }, [storageKey]);
+
+  const persisted = readPersistedState();
+
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(
+    persisted?.selectedServiceType || null
+  );
+  const [editingService, setEditingService] = useState<import("@/types/quote").QuoteService | null>(
+    persisted?.editingService || null
+  );
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
@@ -139,6 +156,18 @@ export default function GerarOrcamento() {
   const [entryPercentage, setEntryPercentage] = useState(30);
   const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
+  const [autoSaved, setAutoSaved] = useState(false);
+
+  // Persist selectedServiceType & editingService to sessionStorage
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify({
+        selectedServiceType,
+        editingService,
+      }));
+    } catch { /* quota exceeded — ignore */ }
+  }, [storageKey, selectedServiceType, editingService]);
 
   useEffect(() => {
     if (user?.id) { fetchAgentProfile(user.id, supabase).then(setAgentProfile); }
