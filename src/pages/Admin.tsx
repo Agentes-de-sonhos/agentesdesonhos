@@ -25,6 +25,7 @@ import {
   CreditCard,
   Mail,
   Link2,
+  Headset,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
