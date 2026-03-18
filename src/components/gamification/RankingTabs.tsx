@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy } from "lucide-react";
 import type { RankingEntry } from "@/hooks/useGamification";
 import { useAuth } from "@/hooks/useAuth";
 import { useGamification } from "@/hooks/useGamification";
@@ -60,11 +58,15 @@ function RankingList({
 
 export function RankingTabs() {
   const { user } = useAuth();
-  const { ranking, weeklyRanking, isLoadingRanking, categoryRankingQuery } = useGamification();
-
-  const vendasRanking = categoryRankingQuery("vendas");
-  const conteudoRanking = categoryRankingQuery("conteudo");
-  const educacaoRanking = categoryRankingQuery("educacao");
+  const {
+    ranking,
+    weeklyRanking,
+    isLoadingRanking,
+    vendasRanking,
+    conteudoRanking,
+    educacaoRanking,
+    isLoadingCategoryRanking,
+  } = useGamification();
 
   return (
     <Tabs defaultValue="geral" className="w-full">
@@ -82,25 +84,13 @@ export function RankingTabs() {
         <RankingList entries={weeklyRanking} isLoading={isLoadingRanking} currentUserId={user?.id} />
       </TabsContent>
       <TabsContent value="vendas" className="mt-4">
-        <RankingList
-          entries={vendasRanking.data || []}
-          isLoading={vendasRanking.isLoading}
-          currentUserId={user?.id}
-        />
+        <RankingList entries={vendasRanking} isLoading={isLoadingCategoryRanking} currentUserId={user?.id} />
       </TabsContent>
       <TabsContent value="conteudo" className="mt-4">
-        <RankingList
-          entries={conteudoRanking.data || []}
-          isLoading={conteudoRanking.isLoading}
-          currentUserId={user?.id}
-        />
+        <RankingList entries={conteudoRanking} isLoading={isLoadingCategoryRanking} currentUserId={user?.id} />
       </TabsContent>
       <TabsContent value="educacao" className="mt-4">
-        <RankingList
-          entries={educacaoRanking.data || []}
-          isLoading={educacaoRanking.isLoading}
-          currentUserId={user?.id}
-        />
+        <RankingList entries={educacaoRanking} isLoading={isLoadingCategoryRanking} currentUserId={user?.id} />
       </TabsContent>
     </Tabs>
   );
