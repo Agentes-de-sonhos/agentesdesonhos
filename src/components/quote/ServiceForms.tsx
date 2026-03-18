@@ -488,12 +488,13 @@ const attractionSchema = z.object({
   price: z.number().min(0),
 });
 
-function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0 }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
+  const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
-    defaultValues: { name: init?.name || "", quantity: init?.quantity || 1, price: init?.price || initialData?.amount || 0, date: init?.date ? new Date(init.date) : tripStartDate },
+    defaultValues: { name: init?.name || "", quantity: init?.quantity || totalPax, price: init?.price || initialData?.amount || 0, date: init?.date ? new Date(init.date) : tripStartDate },
   });
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
