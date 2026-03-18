@@ -61,6 +61,8 @@ import Atualizacoes from "./pages/Atualizacoes";
 import PersonalizadorLaminas from "./pages/PersonalizadorLaminas";
 import ResetPassword from "./pages/ResetPassword";
 import CadastroLink from "./pages/CadastroLink";
+import LeadFormPublic from "./pages/LeadFormPublic";
+import MeusLeads from "./pages/MeusLeads";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
 
