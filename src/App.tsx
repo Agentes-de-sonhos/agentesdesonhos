@@ -413,6 +413,14 @@ const App = () => (
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
             <Route
+              path="/personalizador-laminas"
+              element={
+                <ProtectedRoute>
+                  <PersonalizadorLaminas />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/atualizacoes"
               element={
                 <ProtectedRoute>
