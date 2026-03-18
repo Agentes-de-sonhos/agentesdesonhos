@@ -272,7 +272,7 @@ function CollapsibleServiceSection({
   const label = SERVICE_LABELS[type];
 
   return (
-    <div ref={sectionRef} data-service-type={type}>
+    <div ref={sectionRef} data-service-type={type} style={{ scrollMarginTop: '70px' }}>
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
           <button className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
