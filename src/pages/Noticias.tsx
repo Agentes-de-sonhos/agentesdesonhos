@@ -286,6 +286,7 @@ function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, o
         </Card>
       </a>
       <div className="absolute top-3 right-3 flex items-center gap-1">
+        <NewsLikeButton noticiaId={item.id} count={likeCount} liked={liked} onToggle={onToggleLike} size="md" />
         <Button
           variant="ghost"
           size="icon"
