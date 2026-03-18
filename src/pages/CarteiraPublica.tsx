@@ -147,10 +147,16 @@ export default function CarteiraPublica() {
 
   if (!tripData) return null;
 
-  // Redirect to the existing ViagemPublica page using the share_token
-  // This avoids duplicating the massive trip viewer UI
+  // Redirect to ViagemPublica with pre-authenticated state to avoid double password prompt
   if (tripData.trip.share_token) {
-    window.location.replace(`/viagem/${tripData.trip.share_token}`);
+    navigate(`/viagem/${tripData.trip.share_token}`, {
+      replace: true,
+      state: {
+        preAuthenticated: true,
+        tripData: tripData.trip,
+        agentProfile: tripData.agentProfile,
+      },
+    });
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

@@ -1200,12 +1200,30 @@ function PublicServiceCard({ service }: { service: TripService }) {
 // Main Public View
 export default function ViagemPublica() {
   const { token } = useParams();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [tripData, setTripData] = useState<Trip | null>(null);
-  const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+  const location = useLocation();
+  const preAuth = location.state as { preAuthenticated?: boolean; tripData?: Trip; agentProfile?: AgentProfile | null } | null;
+  const [authenticated, setAuthenticated] = useState(!!preAuth?.preAuthenticated);
+  const [tripData, setTripData] = useState<Trip | null>(preAuth?.tripData || null);
+  const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preAuth?.agentProfile || null);
   const [activeTab, setActiveTab] = useState<TripServiceType | "overview" | "notes">("overview");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Also try without password for trips that have no password set
+  useEffect(() => {
+    if (authenticated || !token) return;
+    const tryNoPassword = async () => {
+      try {
+        const result = await verifyTripAccess(token, "");
+        setTripData(result.trip);
+        setAgentProfile(result.agentProfile);
+        setAuthenticated(true);
+      } catch {
+        // Needs password — show the gate
+      }
+    };
+    tryNoPassword();
+  }, [token, authenticated]);
 
   const handleUnlock = async (password: string) => {
     if (!token) return;
