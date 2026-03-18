@@ -313,13 +313,14 @@ function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, o
 }
 
 /* ── Standard News Card ──────────────────────────────────── */
-function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5 }: {
+function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, likeCount, liked, onToggleLike }: {
   item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void;
   saved: boolean; onToggleSave: (id: string) => void; trending?: boolean;
   allNews: NoticiaHub[];
   onSetNoticiaDoDia: (id: string) => void;
   onAddTop5: (id: string) => void;
   onRemoveTop5: (id: string) => void;
+  likeCount: number; liked: boolean; onToggleLike: (id: string) => void;
 }) {
   return (
     <div className="relative group/card h-full">
