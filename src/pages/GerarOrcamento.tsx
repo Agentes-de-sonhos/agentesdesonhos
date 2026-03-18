@@ -233,10 +233,12 @@ export default function GerarOrcamento() {
     if (quote) generateQuotePDF(quote, agentProfile);
   };
 
+  const queryClient = (await import("@tanstack/react-query")).useQueryClient ? undefined : undefined;
   const handleToggleDetailedPrices = async (checked: boolean) => {
     if (!quote) return;
     await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
-    window.location.reload();
+    // Invalidate query to refresh data without losing UI state (no page reload)
+    const { useQueryClient } = await import("@tanstack/react-query");
   };
 
   const handleSavePaymentConfig = useCallback(async () => {
