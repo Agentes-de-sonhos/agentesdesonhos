@@ -186,6 +186,7 @@ const marketingSection: MenuSection = {
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
     { title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
     { title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
+    { title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
   ],
 };
 
