@@ -2,40 +2,35 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Trophy, Star, Clock, Gift } from "lucide-react";
-import { useGamification, POINTS_CONFIG } from "@/hooks/useGamification";
+import { Trophy, Star, Clock, Gift, Target, Flame } from "lucide-react";
+import { useGamification } from "@/hooks/useGamification";
+import { ACTION_LABELS, LEVELS } from "@/lib/gamification";
+import { LevelProgress } from "@/components/gamification/LevelProgress";
+import { MissionsPanel } from "@/components/gamification/MissionsPanel";
+import { RankingTabs } from "@/components/gamification/RankingTabs";
+import { PointsInfoGrid } from "@/components/gamification/PointsInfoGrid";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-interface PointsHistoryEntry {
-  id: string;
-  action: string;
-  points: number;
-  created_at: string;
-}
-
-const actionLabels: Record<string, string> = {
-  daily_login: "Login diário",
-  ask_question: "Pergunta feita",
-  answer_question: "Resposta enviada",
-  menu_visit: "Navegação no menu",
-  earn_certificate: "Certificado conquistado",
-};
-
 export default function Gamificacao() {
   const { user } = useAuth();
-  const { myPoints, ranking, isLoadingRanking } = useGamification();
+  const {
+    myPoints,
+    ranking,
+    isLoadingRanking,
+    missionsProgress,
+    completeMission,
+    level,
+  } = useGamification();
 
   const myRank = (() => {
     const idx = ranking.findIndex((r) => r.user_id === user?.id);
     return idx >= 0 ? idx + 1 : ranking.length + 1;
   })();
 
-  // Fetch points history
   const { data: history, isLoading: isLoadingHistory } = useQuery({
     queryKey: ["gamification", "history", user?.id],
     queryFn: async () => {
@@ -52,153 +47,131 @@ export default function Gamificacao() {
     enabled: !!user,
   });
 
+  const completedMissions = missionsProgress.filter((m) => m.completed).length;
+  const totalMissions = missionsProgress.length;
+
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+      <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
         <PageHeader
           pageKey="gamificacao"
           title="Gamificação"
-          subtitle="Acompanhe seus pontos, ranking e conquistas"
+          subtitle="Acompanhe seus pontos, ranking, missões e conquistas"
           icon={Trophy}
         />
 
-        {/* Points + Rank summary */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        {/* Summary Cards */}
+        <div className="grid gap-4 sm:grid-cols-3">
           <Card>
-            <CardContent className="flex items-center gap-4 p-6">
+            <CardContent className="flex items-center gap-4 p-5">
               <div className="p-3 rounded-full bg-primary/10">
-                <Star className="h-7 w-7 text-primary" />
+                <Star className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Meus Pontos</p>
-                <p className="text-3xl font-bold text-primary">
-                  {myPoints.toFixed(2)}
-                </p>
+                <p className="text-xs text-muted-foreground">Meus Pontos</p>
+                <p className="text-2xl font-bold text-primary">{myPoints.toFixed(0)}</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="flex items-center gap-4 p-6">
+            <CardContent className="flex items-center gap-4 p-5">
               <div className="p-3 rounded-full bg-yellow-500/10">
-                <Trophy className="h-7 w-7 text-yellow-500" />
+                <Trophy className="h-6 w-6 text-yellow-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
-                  Posição no Ranking
-                </p>
-                <p className="text-3xl font-bold text-foreground">
-                  #{myRank}º lugar
+                <p className="text-xs text-muted-foreground">Posição</p>
+                <p className="text-2xl font-bold">#{myRank}º</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="p-3 rounded-full bg-green-500/10">
+                <Target className="h-6 w-6 text-green-500" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Missões Completas</p>
+                <p className="text-2xl font-bold">
+                  {completedMissions}/{totalMissions}
                 </p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* How to earn points */}
+        {/* Level Progress */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Gift className="h-5 w-5 text-primary" />
-              Como ganhar pontos
+              <Flame className="h-5 w-5 text-orange-500" />
+              Seu Nível
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <span className="text-lg">🔑</span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Login diário</p>
+            <LevelProgress points={myPoints} />
+            {/* All Levels */}
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t overflow-x-auto pb-1">
+              {LEVELS.map((l) => (
+                <div
+                  key={l.name}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                    l.name === level.name
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  <span>{l.icon}</span>
+                  <span>{l.name}</span>
+                  <span className="opacity-60">{l.max === Infinity ? "1200+" : `${l.min}-${l.max}`}</span>
                 </div>
-                <Badge variant="secondary">+{POINTS_CONFIG.daily_login} pt</Badge>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <span className="text-lg">❓</span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Fazer pergunta</p>
-                </div>
-                <Badge variant="secondary">+{POINTS_CONFIG.ask_question} pts</Badge>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <span className="text-lg">💬</span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Responder pergunta</p>
-                </div>
-                <Badge variant="secondary">+{POINTS_CONFIG.answer_question} pts</Badge>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <span className="text-lg">📂</span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Navegar pelo menu</p>
-                </div>
-                <Badge variant="secondary">+{POINTS_CONFIG.menu_visit} pt</Badge>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <span className="text-lg">🏆</span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Certificado conquistado</p>
-                </div>
-                <Badge variant="secondary">+{POINTS_CONFIG.earn_certificate} pts</Badge>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
+        {/* Missions + Rankings side by side */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Full ranking */}
-          <Card>
+          {/* Missions */}
+          <Card className="flex flex-col">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-yellow-500" />
-                Ranking Completo
+                <Target className="h-5 w-5 text-green-500" />
+                Missões
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {isLoadingRanking ? (
-                <p className="text-sm text-muted-foreground">Carregando...</p>
-              ) : ranking.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Nenhum ranking ainda
-                </p>
-              ) : (
-                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                  {ranking.map((entry, i) => (
-                    <div
-                      key={entry.user_id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 text-sm"
-                    >
-                      <span className="w-7 text-center font-bold text-muted-foreground">
-                        {i === 0
-                          ? "🥇"
-                          : i === 1
-                          ? "🥈"
-                          : i === 2
-                          ? "🥉"
-                          : `${i + 1}º`}
-                      </span>
-                      <Avatar className="h-7 w-7">
-                        <AvatarFallback className="text-xs">
-                          {entry.user_name?.charAt(0) || "?"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <span className="truncate block">{entry.user_name}</span>
-                        {entry.agency_name && (
-                          <span className="text-xs text-muted-foreground truncate block">
-                            {entry.agency_name}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-semibold text-primary">
-                        {entry.total_points.toFixed(1)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <CardContent className="flex-1 overflow-y-auto max-h-[500px]">
+              <MissionsPanel missions={missionsProgress} onComplete={completeMission} />
             </CardContent>
           </Card>
 
-          {/* History */}
+          {/* Rankings */}
+          <Card className="flex flex-col">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                Rankings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1">
+              <RankingTabs />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* How to earn + History */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Gift className="h-5 w-5 text-primary" />
+                Como ganhar pontos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PointsInfoGrid />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -210,30 +183,23 @@ export default function Gamificacao() {
               {isLoadingHistory ? (
                 <p className="text-sm text-muted-foreground">Carregando...</p>
               ) : !history || history.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Nenhum ponto registrado ainda
-                </p>
+                <p className="text-sm text-muted-foreground">Nenhum ponto registrado ainda</p>
               ) : (
                 <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                  {history.map((entry: PointsHistoryEntry) => (
+                  {history.map((entry: any) => (
                     <div
                       key={entry.id}
                       className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 text-sm"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium">
-                          {actionLabels[entry.action] || entry.action}
+                        <p className="font-medium text-xs">
+                          {ACTION_LABELS[entry.action] || entry.action}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(entry.created_at), "dd MMM yyyy, HH:mm", {
-                            locale: ptBR,
-                          })}
+                          {format(new Date(entry.created_at), "dd MMM yyyy, HH:mm", { locale: ptBR })}
                         </p>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className="text-primary font-semibold"
-                      >
+                      <Badge variant="outline" className="text-primary font-semibold text-xs">
                         +{entry.points}
                       </Badge>
                     </div>
