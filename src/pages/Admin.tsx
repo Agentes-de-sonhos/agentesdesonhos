@@ -231,6 +231,10 @@ export default function Admin() {
               <Link2 className="h-4 w-4" />
               <span className="hidden sm:inline">Links Cadastro</span>
             </TabsTrigger>
+            <TabsTrigger value="tickets" className="flex items-center gap-2">
+              <Headset className="h-4 w-4" />
+              <span className="hidden sm:inline">Suporte</span>
+            </TabsTrigger>
           </TabsList>
 
 
