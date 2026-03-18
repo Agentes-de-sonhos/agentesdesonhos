@@ -143,6 +143,9 @@ export function CuratedNewsFeed() {
     refetchInterval: 5 * 60 * 1000,
   });
 
+  const newsIds = useMemo(() => (news || []).map((n) => n.id), [news]);
+  const { getLikeCount, isLiked, toggleLike } = useNewsLikes(newsIds);
+
   if (isLoading) {
     return (
       <Card className="border-0 shadow-md">
@@ -173,36 +176,48 @@ export function CuratedNewsFeed() {
 
         {news.map((item, i) => {
           const isFirst = i === 0;
+          const likeCount = getLikeCount(item.id);
           return (
-            <a
-              key={item.id}
-              href={item.url_original}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`group relative flex items-start gap-3 rounded-xl p-3 transition-all duration-200 hover:bg-[hsl(var(--section-news))]/5 ${
-                isFirst ? "bg-primary/[0.03] border border-primary/10" : ""
-              }`}
-            >
-              {/* Rank indicator */}
-              <span className={`flex-shrink-0 w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center mt-0.5 ${
-                isFirst
-                  ? "bg-[hsl(var(--section-news))] text-white"
-                  : "bg-[hsl(var(--section-news))]/10 text-[hsl(var(--section-news))]"
-              }`}>
-                {i + 1}
-              </span>
-
-              <div className="flex-1 min-w-0 space-y-0.5">
-                <NewsMetaRow item={item} isTopTrending={trendingIds.has(item.id)} />
-                <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors line-clamp-1 leading-snug ${
-                  isFirst ? "text-sm" : "text-[13px]"
+            <div key={item.id} className="relative group/item">
+              <a
+                href={item.url_original}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`group flex items-start gap-3 rounded-xl p-3 transition-all duration-200 hover:bg-[hsl(var(--section-news))]/5 ${
+                  isFirst ? "bg-primary/[0.03] border border-primary/10" : ""
+                }`}
+              >
+                {/* Rank indicator */}
+                <span className={`flex-shrink-0 w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center mt-0.5 ${
+                  isFirst
+                    ? "bg-[hsl(var(--section-news))] text-white"
+                    : "bg-[hsl(var(--section-news))]/10 text-[hsl(var(--section-news))]"
                 }`}>
-                  {item.titulo_curto}
-                </h4>
-              </div>
+                  {i + 1}
+                </span>
 
-              <ExternalLink className="h-4 w-4 flex-shrink-0 text-[hsl(var(--section-news))] opacity-0 transition-opacity group-hover:opacity-100 mt-0.5" />
-            </a>
+                <div className="flex-1 min-w-0 space-y-0.5">
+                  <NewsMetaRow item={item} isTopTrending={trendingIds.has(item.id)} />
+                  <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors line-clamp-1 leading-snug ${
+                    isFirst ? "text-sm" : "text-[13px]"
+                  }`}>
+                    {item.titulo_curto}
+                  </h4>
+                </div>
+
+                <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
+                  {likeCount > 0 && (
+                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                      <ThumbsUp className="h-3 w-3" /> {likeCount}
+                    </span>
+                  )}
+                  <ExternalLink className="h-4 w-4 text-[hsl(var(--section-news))] opacity-0 transition-opacity group-hover:opacity-100" />
+                </div>
+              </a>
+              <div className="absolute top-1.5 right-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                <NewsLikeButton noticiaId={item.id} count={likeCount} liked={isLiked(item.id)} onToggle={toggleLike} />
+              </div>
+            </div>
           );
         })}
 
