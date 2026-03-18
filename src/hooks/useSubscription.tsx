@@ -34,18 +34,22 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const initialLoadDone = useRef(false);
 
   const fetchSubscription = useCallback(async () => {
     if (!user) {
       setSubscription(null);
       setLoading(false);
+      initialLoadDone.current = false;
       return;
     }
 
-    // IMPORTANT: Reset loading to true whenever we start fetching for a (new) user.
-    // Without this, there's a race condition: loading was set to false when user was null,
-    // and ProtectedRoute would briefly see plan="essencial" before the real plan is loaded.
-    setLoading(true);
+    // Only show loading spinner on the very first fetch.
+    // Subsequent refetches (e.g. token refresh on tab focus) update silently
+    // to avoid unmounting ProtectedRoute children and losing UI state.
+    if (!initialLoadDone.current) {
+      setLoading(true);
+    }
 
     try {
       const { data, error } = await supabase
@@ -87,6 +91,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       console.error("Error in subscription fetch:", err);
     } finally {
       setLoading(false);
+      initialLoadDone.current = true;
     }
   }, [user]);
 
