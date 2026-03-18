@@ -141,6 +141,28 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
                     Resolvida
                   </Badge>
                 )}
+                {isAdmin && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/60 hover:text-destructive ml-auto">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir pergunta?</AlertDialogTitle>
+                        <AlertDialogDescription>Essa ação excluirá a pergunta e todas as respostas. Não pode ser desfeita.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => { deleteQuestion.mutate(questionId); onBack(); }}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >Excluir</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="secondary" className="text-[10px]">
