@@ -412,7 +412,13 @@ export default function GerarOrcamento() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
+            {autoSaved && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Salvo automaticamente
+              </span>
+            )}
             <Button variant="outline" onClick={handleGeneratePDF}>
               <FileText className="mr-2 h-4 w-4" /> PDF
             </Button>
