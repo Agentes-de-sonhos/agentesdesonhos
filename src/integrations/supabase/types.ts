@@ -2746,6 +2746,35 @@ export type Database = {
         }
         Relationships: []
       }
+      news_likes: {
+        Row: {
+          created_at: string
+          id: string
+          noticia_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          noticia_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          noticia_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_likes_noticia_id_fkey"
+            columns: ["noticia_id"]
+            isOneToOne: false
+            referencedRelation: "noticias_dashboard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           client_id: string | null
