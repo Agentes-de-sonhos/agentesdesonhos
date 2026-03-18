@@ -137,6 +137,7 @@ const recursosVendasSection: MenuSection = {
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
+    { title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
   ],
 };
 
