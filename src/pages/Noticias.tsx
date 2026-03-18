@@ -357,6 +357,7 @@ function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending, allN
         </Card>
       </a>
       <div className="absolute top-2.5 right-2.5 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
+        <NewsLikeButton noticiaId={item.id} count={likeCount} liked={liked} onToggle={onToggleLike} />
         <Button
           variant="ghost"
           size="icon"
