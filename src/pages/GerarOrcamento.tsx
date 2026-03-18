@@ -388,7 +388,7 @@ export default function GerarOrcamento() {
     );
   }
 
-  const showDetailed = (quote as any).show_detailed_prices !== false;
+  const showDetailed = showDetailedLocal !== null ? showDetailedLocal : (quote as any).show_detailed_prices !== false;
   const serviceCountByType: Record<string, number> = {};
   (quote.services || []).forEach(s => {
     serviceCountByType[s.service_type] = (serviceCountByType[s.service_type] || 0) + 1;
