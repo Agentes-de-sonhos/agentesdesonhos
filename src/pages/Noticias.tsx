@@ -28,6 +28,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
+import { useNewsLikes } from "@/hooks/useNewsLikes";
+import { NewsLikeButton } from "@/components/news/NewsLikeButton";
 
 interface NoticiaHub {
   id: string;
@@ -238,13 +240,14 @@ function Top5ReplacementDialog({
 }
 
 /* ── Hero Card (Notícia do Dia) ─────────────────────────── */
-function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5 }: {
+function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, likeCount, liked, onToggleLike }: {
   item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void;
   saved: boolean; onToggleSave: (id: string) => void;
   allNews: NoticiaHub[];
   onSetNoticiaDoDia: (id: string) => void;
   onAddTop5: (id: string) => void;
   onRemoveTop5: (id: string) => void;
+  likeCount: number; liked: boolean; onToggleLike: (id: string) => void;
 }) {
   return (
     <div className="relative group/card h-full">
@@ -283,6 +286,7 @@ function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, o
         </Card>
       </a>
       <div className="absolute top-3 right-3 flex items-center gap-1">
+        <NewsLikeButton noticiaId={item.id} count={likeCount} liked={liked} onToggle={onToggleLike} size="md" />
         <Button
           variant="ghost"
           size="icon"
@@ -309,13 +313,14 @@ function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, o
 }
 
 /* ── Standard News Card ──────────────────────────────────── */
-function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5 }: {
+function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, likeCount, liked, onToggleLike }: {
   item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void;
   saved: boolean; onToggleSave: (id: string) => void; trending?: boolean;
   allNews: NoticiaHub[];
   onSetNoticiaDoDia: (id: string) => void;
   onAddTop5: (id: string) => void;
   onRemoveTop5: (id: string) => void;
+  likeCount: number; liked: boolean; onToggleLike: (id: string) => void;
 }) {
   return (
     <div className="relative group/card h-full">
@@ -352,6 +357,7 @@ function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending, allN
         </Card>
       </a>
       <div className="absolute top-2.5 right-2.5 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
+        <NewsLikeButton noticiaId={item.id} count={likeCount} liked={liked} onToggle={onToggleLike} />
         <Button
           variant="ghost"
           size="icon"
@@ -433,13 +439,14 @@ function CompactNewsItem({ item, index, isAdmin, allNews, onSetNoticiaDoDia, onA
 }
 
 /* ── Destaques Full-width Carousel with auto-advance ─────── */
-function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, trendingSet, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5 }: {
+function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, trendingSet, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, getLikeCount, isLiked, onToggleLike }: {
   items: NoticiaHub[]; isAdmin: boolean; onDelete: (id: string) => void;
   savedIds: Set<string>; onToggleSave: (id: string) => void; trendingSet: Set<string>;
   allNews: NoticiaHub[];
   onSetNoticiaDoDia: (id: string) => void;
   onAddTop5: (id: string) => void;
   onRemoveTop5: (id: string) => void;
+  getLikeCount: (id: string) => number; isLiked: (id: string) => boolean; onToggleLike: (id: string) => void;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -518,6 +525,7 @@ function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, t
           </Card>
         </a>
         <div className="absolute top-3 right-3 flex items-center gap-1">
+          <NewsLikeButton noticiaId={current.id} count={getLikeCount(current.id)} liked={isLiked(current.id)} onToggle={onToggleLike} size="md" />
           <Button
             variant="ghost"
             size="icon"
@@ -587,6 +595,9 @@ export default function Noticias() {
     },
     refetchInterval: 5 * 60 * 1000,
   });
+
+  const newsIds = useMemo(() => (allNews || []).map((n) => n.id), [allNews]);
+  const { getLikeCount, isLiked, toggleLike: onToggleLike } = useNewsLikes(newsIds);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -827,6 +838,9 @@ export default function Noticias() {
                           onSetNoticiaDoDia={handleSetNoticiaDoDia}
                           onAddTop5={handleAddTop5}
                           onRemoveTop5={handleRemoveTop5}
+                          likeCount={getLikeCount(hero.id)}
+                          liked={isLiked(hero.id)}
+                          onToggleLike={onToggleLike}
                         />
                       </div>
                     )}
@@ -873,6 +887,9 @@ export default function Noticias() {
                     onSetNoticiaDoDia={handleSetNoticiaDoDia}
                     onAddTop5={handleAddTop5}
                     onRemoveTop5={handleRemoveTop5}
+                    getLikeCount={getLikeCount}
+                    isLiked={isLiked}
+                    onToggleLike={onToggleLike}
                   />
                 )}
 
@@ -898,6 +915,9 @@ export default function Noticias() {
                           onSetNoticiaDoDia={handleSetNoticiaDoDia}
                           onAddTop5={handleAddTop5}
                           onRemoveTop5={handleRemoveTop5}
+                          likeCount={getLikeCount(item.id)}
+                          liked={isLiked(item.id)}
+                          onToggleLike={onToggleLike}
                         />
                       ))}
                     </div>
@@ -923,6 +943,9 @@ export default function Noticias() {
                       onSetNoticiaDoDia={handleSetNoticiaDoDia}
                       onAddTop5={handleAddTop5}
                       onRemoveTop5={handleRemoveTop5}
+                      likeCount={getLikeCount(item.id)}
+                      liked={isLiked(item.id)}
+                      onToggleLike={onToggleLike}
                     />
                   ))}
                 </div>
