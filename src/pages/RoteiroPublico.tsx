@@ -235,9 +235,9 @@ export default function RoteiroPublico() {
 
           // Also try trip_itinerary_activities for documents & maps
           const { data: tripActivities } = await supabase
-            .from("trip_itinerary_activities")
+            .from("trip_itinerary_activities" as any)
             .select("title, document_urls, maps_url")
-            .eq("day_id", day.id);
+            .eq("day_id", day.id) as { data: any[] | null };
 
           const tripActMap = new Map<string, any>();
           (tripActivities || []).forEach((ta: any) => {
