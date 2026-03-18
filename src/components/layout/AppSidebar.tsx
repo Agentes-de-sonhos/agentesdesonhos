@@ -504,6 +504,7 @@ export function AppSidebar() {
           )}
 
           {isAdmin && renderSingleItem(adminMenuItem)}
+          {renderSingleItem(suporteMenuItem)}
           {renderSingleItem(profileMenuItem)}
 
           {collapsed ? (
