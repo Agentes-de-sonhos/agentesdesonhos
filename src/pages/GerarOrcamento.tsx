@@ -426,6 +426,8 @@ export default function GerarOrcamento() {
                       showOptionLabel={MULTI_OPTION_TYPES.includes(selectedServiceType)}
                       tripStartDate={tripStartDate}
                       tripEndDate={tripEndDate}
+                      adultsCount={quote.adults_count}
+                      childrenCount={quote.children_count}
                       initialData={editingService ? {
                         service_data: editingService.service_data,
                         amount: editingService.amount,
