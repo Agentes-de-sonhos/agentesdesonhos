@@ -596,6 +596,9 @@ export default function Noticias() {
     refetchInterval: 5 * 60 * 1000,
   });
 
+  const newsIds = useMemo(() => (allNews || []).map((n) => n.id), [allNews]);
+  const { getLikeCount, isLiked, toggleLike: onToggleLike } = useNewsLikes(newsIds);
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("noticias_dashboard").delete().eq("id", id);
