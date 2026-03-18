@@ -28,6 +28,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
+import { useNewsLikes } from "@/hooks/useNewsLikes";
+import { NewsLikeButton } from "@/components/news/NewsLikeButton";
 
 interface NoticiaHub {
   id: string;
