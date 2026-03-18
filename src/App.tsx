@@ -444,6 +444,14 @@ const App = () => (
               }
             />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
+            <Route
+              path="/suporte"
+              element={
+                <ProtectedRoute>
+                  <Suporte />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
