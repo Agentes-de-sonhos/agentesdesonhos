@@ -12,14 +12,14 @@ const tools = [
   {
     label: "Carteira Digital",
     icon: Wallet,
-    path: "/carteira-digital",
+    path: "/ferramentas-ia/trip-wallet",
     description: "Crie uma carteira digital para o seu cliente.",
     color: "198 93% 40%",
   },
   {
     label: "Orçamento",
     icon: FileText,
-    path: "/gerar-orcamento",
+    path: "/ferramentas-ia/gerar-orcamento",
     description: "Crie orçamentos para os seus clientes.",
     color: "142 64% 38%",
   },
