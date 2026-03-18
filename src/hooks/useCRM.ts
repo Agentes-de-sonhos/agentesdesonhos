@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
 import type { Client, Opportunity, OpportunityStage, SalesGoal, ClientStatus } from "@/types/crm";
 
 export function useClients() {
