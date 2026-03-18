@@ -1534,6 +1534,30 @@ export type Database = {
         }
         Relationships: []
       }
+      gamification_mission_completions: {
+        Row: {
+          completed_at: string | null
+          id: string
+          mission_key: string
+          period_key: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          mission_key: string
+          period_key: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          mission_key?: string
+          period_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       gamification_points: {
         Row: {
           action: string
@@ -5885,6 +5909,26 @@ export type Database = {
       }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
       get_gamification_ranking: {
+        Args: { limit_count?: number }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          total_points: number
+          user_id: string
+          user_name: string
+        }[]
+      }
+      get_gamification_ranking_by_category: {
+        Args: { category_name: string; limit_count?: number }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          total_points: number
+          user_id: string
+          user_name: string
+        }[]
+      }
+      get_gamification_ranking_weekly: {
         Args: { limit_count?: number }
         Returns: {
           agency_name: string
