@@ -47,6 +47,7 @@ export default function LeadFormPublic() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSending, setIsSending] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [whatsappUrl, setWhatsappUrl] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
