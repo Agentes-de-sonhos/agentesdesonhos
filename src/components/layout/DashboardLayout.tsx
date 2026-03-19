@@ -29,7 +29,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       
       {/* Main content area */}
       <main className="transition-all duration-300 pl-0 lg:pl-16 flex-1 flex flex-col w-full">
-        <div className="py-4 px-3 sm:py-6 sm:px-4 lg:pl-12 lg:pr-12 flex-1 pb-20 lg:pb-4">
+        <div className="py-4 px-4 sm:py-6 sm:px-6 lg:pl-12 lg:pr-12 flex-1 pb-20 lg:pb-4">
           {children}
         </div>
         <Footer />
