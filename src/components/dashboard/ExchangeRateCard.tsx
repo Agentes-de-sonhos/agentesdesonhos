@@ -19,34 +19,21 @@ export function ExchangeRateCard() {
   const { data: rates, isLoading, isError } = useQuery({
     queryKey: ["exchange-rates"],
     queryFn: async (): Promise<ExchangeRate[]> => {
-      // Using frankfurter.app - free API, no key required
-      const response = await fetch(
-        "https://api.frankfurter.app/latest?from=USD&to=BRL"
-      );
-      if (!response.ok) throw new Error("Failed to fetch USD rate");
-      const usdData = await response.json();
-
-      const responseEur = await fetch(
-        "https://api.frankfurter.app/latest?from=EUR&to=BRL"
-      );
-      if (!responseEur.ok) throw new Error("Failed to fetch EUR rate");
-      const eurData = await responseEur.json();
+      // Fetch both rates in parallel
+      const [usdRes, eurRes] = await Promise.all([
+        fetch("https://api.frankfurter.app/latest?from=USD&to=BRL"),
+        fetch("https://api.frankfurter.app/latest?from=EUR&to=BRL"),
+      ]);
+      if (!usdRes.ok || !eurRes.ok) throw new Error("Failed to fetch rates");
+      const [usdData, eurData] = await Promise.all([usdRes.json(), eurRes.json()]);
 
       return [
-        {
-          code: "USD",
-          symbol: "$",
-          rate: usdData.rates.BRL,
-        },
-        {
-          code: "EUR",
-          symbol: "€",
-          rate: eurData.rates.BRL,
-        },
+        { code: "USD", symbol: "$", rate: usdData.rates.BRL },
+        { code: "EUR", symbol: "€", rate: eurData.rates.BRL },
       ];
     },
-    staleTime: 1000 * 60 * 60, // 1 hour
-    refetchInterval: 1000 * 60 * 60, // Refetch every hour
+    staleTime: 1000 * 60 * 60,
+    refetchInterval: 1000 * 60 * 60,
     retry: 2,
   });
 
