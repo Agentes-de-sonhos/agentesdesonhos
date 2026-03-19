@@ -12,14 +12,6 @@ export function GamificationPill() {
   const navigate = useNavigate();
   const { myPoints, level } = useGamificationLite();
 
-  const myRank =
-    ranking.findIndex((r) => r.total_points <= myPoints) + 1 ||
-    ranking.length + 1;
-
-  if (isLoadingRanking) {
-    return <Skeleton className="h-7 w-24 rounded-full" />;
-  }
-
   return (
     <TooltipProvider delayDuration={300}>
       <Tooltip>
