@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Star, Trophy } from "lucide-react";
-import { useGamification } from "@/hooks/useGamification";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useGamificationLite } from "@/hooks/useGamificationLite";
 import {
   Tooltip,
   TooltipContent,
@@ -11,7 +10,7 @@ import {
 
 export function GamificationPill() {
   const navigate = useNavigate();
-  const { myPoints, ranking, isLoadingRanking, level } = useGamification();
+  const { myPoints, level } = useGamificationLite();
 
   const myRank =
     ranking.findIndex((r) => r.total_points <= myPoints) + 1 ||
