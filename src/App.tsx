@@ -54,7 +54,7 @@ const MeuCartao = lazy(() => import("./pages/MeuCartao"));
 const CriarCartao = lazy(() => import("./pages/CriarCartao"));
 const VitrinePublica = lazy(() => import("./pages/VitrinePublica"));
 const CartaoPublico = lazy(() => import("./pages/CartaoPublico"));
-const SlugResolver = lazy(() => import("./components/routing/SlugResolver").then(m => ({ default: m.default ?? m.SlugResolver })));
+const SlugResolver = lazy(() => import("./components/routing/SlugResolver"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const OrcamentoPublico = lazy(() => import("./pages/OrcamentoPublico"));
 const CertificateTest = lazy(() => import("./pages/CertificateTest"));
