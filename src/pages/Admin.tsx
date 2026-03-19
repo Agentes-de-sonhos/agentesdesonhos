@@ -298,7 +298,18 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="mentorships">
-            <AdminMentorshipsManager />
+            <Tabs defaultValue="marketplace">
+              <TabsList className="mb-4">
+                <TabsTrigger value="marketplace">Marketplace de Cursos</TabsTrigger>
+                <TabsTrigger value="admin-mentorships">Mentorias (Admin)</TabsTrigger>
+              </TabsList>
+              <TabsContent value="marketplace">
+                <AdminMarketplaceManager />
+              </TabsContent>
+              <TabsContent value="admin-mentorships">
+                <AdminMentorshipsManager />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="playbooks">
