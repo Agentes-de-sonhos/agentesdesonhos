@@ -322,7 +322,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
       {/* ── Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-card/70 backdrop-blur-xl">
         <div className={cn(sectionContainer, "flex h-16 items-center justify-between")}>
