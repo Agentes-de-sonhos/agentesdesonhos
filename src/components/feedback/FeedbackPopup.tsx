@@ -44,21 +44,27 @@ export function FeedbackPopup() {
     if (!user) return;
     if (hasFeedbackDismissed(user.id)) return;
 
-    // Check if user already submitted feedback in DB
-    supabase
-      .from("user_feedback" as any)
-      .select("id")
-      .eq("user_id", user.id)
-      .limit(1)
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          markFeedbackDismissed(user.id);
-          return;
-        }
-        // Small delay so dashboard loads first
-        const timer = setTimeout(() => setIsOpen(true), 2000);
-        return () => clearTimeout(timer);
-      });
+    // Check if popup is enabled and user hasn't submitted yet
+    Promise.all([
+      supabase
+        .from("feedback_settings")
+        .select("value")
+        .eq("key", "feedback_popup_enabled")
+        .maybeSingle(),
+      supabase
+        .from("user_feedback" as any)
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1),
+    ]).then(([settingsRes, feedbackRes]) => {
+      if (settingsRes.data?.value !== "true") return;
+      if (feedbackRes.data && feedbackRes.data.length > 0) {
+        markFeedbackDismissed(user.id);
+        return;
+      }
+      const timer = setTimeout(() => setIsOpen(true), 2000);
+      return () => clearTimeout(timer);
+    });
   }, [user]);
 
   const handleClose = () => {
