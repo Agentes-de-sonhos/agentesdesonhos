@@ -183,7 +183,7 @@ export function MobileSidebar() {
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
-  const { trackSectionVisit } = useGamification();
+  const { trackSectionVisit } = useGamificationLite();
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
