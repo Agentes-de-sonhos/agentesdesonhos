@@ -53,6 +53,7 @@ import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
 import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
 import { AdminTourOperatorsManager } from "@/components/admin/AdminTourOperatorsManager";
 import { AdminMentorshipsManager } from "@/components/admin/AdminMentorshipsManager";
+import { AdminMarketplaceManager } from "@/components/admin/AdminMarketplaceManager";
 import { AdminBenefitsManager } from "@/components/admin/AdminBenefitsManager";
 import { AdminRegistrationLinksManager } from "@/components/admin/AdminRegistrationLinksManager";
 import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
