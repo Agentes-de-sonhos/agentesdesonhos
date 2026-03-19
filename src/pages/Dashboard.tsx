@@ -1,4 +1,5 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
+const FeedbackPopup = lazy(() => import("@/components/feedback/FeedbackPopup").then(m => ({ default: m.FeedbackPopup })));
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useGamification } from "@/hooks/useGamification";
