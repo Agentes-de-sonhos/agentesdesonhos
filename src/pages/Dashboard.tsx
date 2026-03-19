@@ -210,6 +210,9 @@ export default function Dashboard() {
           </>
         )}
       </div>
+      <Suspense fallback={null}>
+        <FeedbackPopup />
+      </Suspense>
     </DashboardLayout>
   );
 }
