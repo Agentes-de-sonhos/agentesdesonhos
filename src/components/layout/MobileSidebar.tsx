@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map,
@@ -31,12 +31,14 @@ import {
   PlusCircle,
   FileText,
   Route,
+  Paintbrush,
+  UserPlus,
+  Headset,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -72,6 +74,8 @@ interface MenuSection {
   headerHoverBg: string;
 }
 
+// ── Sections identical to desktop (AppSidebar.tsx) ──
+
 const conhecimentoSection: MenuSection = {
   title: "Conhecimento",
   icon: BookOpen,
@@ -84,7 +88,21 @@ const conhecimentoSection: MenuSection = {
   items: [
     { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
-    { title: "Pergunte e Responda", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
+  ],
+};
+
+const comunidadeSection: MenuSection = {
+  title: "Comunidade",
+  icon: Heart,
+  hoverColor: "hover:bg-red-600 hover:text-white",
+  headerBg: "bg-red-600 text-white",
+  headerHoverBg: "hover:bg-red-700",
+  bgColor: "bg-red-50",
+  textColor: "text-red-700",
+  borderColor: "border-red-600",
+  items: [
+    { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
+    { title: "Travel Experts", url: "/comunidade", icon: Users, requiredFeature: "community" },
   ],
 };
 
@@ -130,6 +148,7 @@ const criarSection: MenuSection = {
   textColor: "text-violet-700",
   borderColor: "border-violet-600",
   items: [
+    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
     { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
     { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
     { title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
@@ -147,7 +166,8 @@ const clientesSection: MenuSection = {
   borderColor: "border-cyan-600",
   items: [
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
-    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
+    { title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
+    { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
   ],
 };
 
@@ -163,21 +183,24 @@ const marketingSection: MenuSection = {
   items: [
     { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
     { title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
+    { title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
+    { title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
   ],
 };
 
-const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart, requiredFeature: "community" };
 const mentoriasItem: MenuItem = { title: "Cursos e Mentorias", url: "/mentorias", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
 
 export function MobileSidebar() {
   const [expanded, setExpanded] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
+  const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -188,15 +211,19 @@ export function MobileSidebar() {
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
 
+  // Same order as desktop
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
     []
   );
 
+  const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
+
   const toggleSection = (title: string) => {
+    setUserInteracted(true);
     setOpenSections((prev) => {
       const isCurrentlyOpen = prev[title];
-      const allClosed: Record<string, boolean> = {};
+      const allClosed: Record<string, boolean | undefined> = {};
       if (!isCurrentlyOpen) {
         allClosed[title] = true;
       }
@@ -207,33 +234,29 @@ export function MobileSidebar() {
   const isSectionActive = (section: MenuSection) =>
     section.items.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
 
-  const handleMenuClick = (item: MenuItem, e: React.MouseEvent) => {
-    // Educa Pass: only allow EducaTravel Academy
-    if (isEducaPass && item.url !== "/educa-academy") {
-      e.preventDefault();
-      setShowComingSoon(true);
-      return;
-    }
-    // Cartão Digital Pass: only allow Meu Cartão
-    if (isCartaoDigital && item.url !== "/meu-cartao") {
-      e.preventDefault();
-      setShowComingSoon(true);
-      return;
-    }
-    if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
-      e.preventDefault();
-      setUpgradeFeature(item.requiredFeature);
-      return;
-    }
-    trackSectionVisit(item.url);
-    setExpanded(false);
-    navigate(item.url);
-  };
-
-  const handleSignOut = () => {
-    setExpanded(false);
-    signOut();
-  };
+  const handleMenuClick = useCallback(
+    (item: MenuItem, e: React.MouseEvent) => {
+      if (isEducaPass && item.url !== "/educa-academy") {
+        e.preventDefault();
+        setShowComingSoon(true);
+        return;
+      }
+      if (isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url)) {
+        e.preventDefault();
+        setShowComingSoon(true);
+        return;
+      }
+      if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
+        e.preventDefault();
+        setUpgradeFeature(item.requiredFeature);
+        return;
+      }
+      trackSectionVisit(item.url);
+      setExpanded(false);
+      navigate(item.url);
+    },
+    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, navigate]
+  );
 
   const renderMenuItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
     const isActive =
@@ -241,7 +264,7 @@ export function MobileSidebar() {
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
-    const isLockedByCartaoDigital = isCartaoDigital && item.url !== "/meu-cartao";
+    const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
     const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
 
     const iconElement = (
@@ -249,11 +272,11 @@ export function MobileSidebar() {
         <item.icon
           className={cn(
             "h-5 w-5 transition-colors",
-            isActive && !isLocked && !sectionBgColor ? "text-primary-foreground" : "",
-            isLocked && !isLockedByEducaPass ? "text-muted-foreground" : ""
+            isActive && !isLocked && !sectionBgColor ? "text-foreground" : "",
+            isLocked ? "text-muted-foreground" : ""
           )}
         />
-        {isLocked && !isLockedByEducaPass && (
+        {isLocked && (
           <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />
         )}
       </div>
@@ -268,8 +291,8 @@ export function MobileSidebar() {
               className={cn(
                 "w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200",
                 isActive && !isLocked
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : (isLocked && !isLockedByEducaPass)
+                  ? "bg-muted text-foreground shadow-sm"
+                  : isLocked
                     ? "opacity-50"
                     : "text-sidebar-foreground hover:bg-sidebar-accent"
               )}
@@ -278,7 +301,6 @@ export function MobileSidebar() {
             </button>
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={8}>
-            <p className="text-sm font-medium">{item.title}</p>
             <p className="text-sm font-medium">{item.title}</p>
           </TooltipContent>
         </Tooltip>
@@ -294,8 +316,8 @@ export function MobileSidebar() {
           isActive && !isLocked && sectionBgColor
             ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
             : isActive && !isLocked
-              ? "bg-primary text-primary-foreground shadow-md"
-              : (isLocked && !isLockedByEducaPass)
+              ? "bg-muted text-foreground font-semibold shadow-sm"
+              : isLocked
                 ? "opacity-60"
                 : sectionBgColor
                   ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
@@ -303,7 +325,7 @@ export function MobileSidebar() {
         )}
       >
         {iconElement}
-        <span className={cn("truncate flex-1", isLocked && !isLockedByEducaPass && "text-muted-foreground")}>
+        <span className={cn("truncate flex-1", isLocked && "text-muted-foreground")}>
           {item.title}
         </span>
         {item.isHighlighted && !isActive && !isLocked && (
@@ -315,7 +337,8 @@ export function MobileSidebar() {
 
   const renderSection = (section: MenuSection) => {
     const isActive = isSectionActive(section);
-    const isOpen = openSections[section.title] ?? isActive;
+    const hasExplicitState = section.title in openSections;
+    const isOpen = hasExplicitState ? !!openSections[section.title] : (!userInteracted && isActive);
     const Icon = section.icon;
 
     if (!expanded) {
@@ -355,6 +378,11 @@ export function MobileSidebar() {
         )}
       </div>
     );
+  };
+
+  const handleSignOut = () => {
+    setExpanded(false);
+    signOut();
   };
 
   return (
@@ -426,12 +454,11 @@ export function MobileSidebar() {
             <Separator className="bg-sidebar-border" />
           </div>
 
-          {/* All sections */}
+          {/* All sections - same order as desktop */}
           {allSections.map((section) => renderSection(section))}
 
-          {/* Standalone items */}
+          {/* Standalone items - same as desktop */}
           <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
-            {renderMenuItem(comunidadeItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>
         </div>
@@ -450,6 +477,7 @@ export function MobileSidebar() {
           )}
 
           {isAdmin && renderMenuItem(adminMenuItem)}
+          {renderMenuItem(suporteMenuItem)}
           {renderMenuItem(profileMenuItem)}
 
           {/* Logout */}
@@ -480,11 +508,18 @@ export function MobileSidebar() {
             </Tooltip>
           )}
 
-          {expanded && (
-            <div className="text-center pt-2">
+          {expanded ? (
+            <div className="text-center pt-2 space-y-0.5">
+              <Link to="/atualizacoes" className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors">
+                v1.0 Beta
+              </Link>
               <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>
               <p className="text-[11px] font-medium text-muted-foreground/80">Nobre Digital</p>
             </div>
+          ) : (
+            <Link to="/atualizacoes" className="block text-center pt-2">
+              <p className="text-[8px] text-muted-foreground/50 hover:text-primary transition-colors">v1.0</p>
+            </Link>
           )}
         </div>
       </aside>
