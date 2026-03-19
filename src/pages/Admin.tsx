@@ -344,6 +344,10 @@ export default function Admin() {
           <TabsContent value="tickets">
             <AdminTicketsManager />
           </TabsContent>
+
+          <TabsContent value="feedback">
+            <AdminFeedbackManager />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
