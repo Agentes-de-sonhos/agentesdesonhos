@@ -26,6 +26,7 @@ import {
   Mail,
   Link2,
   Headset,
+  Star,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
