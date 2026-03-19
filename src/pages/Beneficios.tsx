@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
 import { useBenefits } from "@/hooks/useBenefits";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tag, Plus, Search } from "lucide-react";
