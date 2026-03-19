@@ -298,7 +298,7 @@ export default function LeadFormPublic() {
       </div>
 
       {/* Input */}
-      {!isComplete && (
+      {!isComplete && !isFinalizing && (
         <div className="sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-gray-100 p-3 max-w-2xl w-full mx-auto">
           <form
             onSubmit={(e) => {
