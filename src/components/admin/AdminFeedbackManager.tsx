@@ -36,12 +36,12 @@ export function AdminFeedbackManager() {
     queryKey: ["feedback-popup-enabled"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("feedback_settings")
+        .from("feedback_settings" as any)
         .select("value")
         .eq("key", "feedback_popup_enabled")
         .maybeSingle();
       if (error) throw error;
-      return data?.value === "true";
+      return (data as any)?.value === "true";
     },
   });
 
