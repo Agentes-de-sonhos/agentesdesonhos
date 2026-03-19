@@ -46,7 +46,7 @@ const Community = lazy(() => import("./pages/Community"));
 const Beneficios = lazy(() => import("./pages/Beneficios"));
 const Mentorias = lazy(() => import("./pages/Mentorias"));
 const MentoriaDetail = lazy(() => import("./pages/MentoriaDetail"));
-const PlaybookViewer = lazy(() => import("./components/playbook/PlaybookViewer").then(m => ({ default: m.PlaybookViewer ?? m.default })));
+const PlaybookViewer = lazy(() => import("./components/playbook/PlaybookViewer"));
 const PerguntasRespostas = lazy(() => import("./pages/PerguntasRespostas"));
 const DreamAdvisor = lazy(() => import("./pages/DreamAdvisor"));
 const MinhaVitrine = lazy(() => import("./pages/MinhaVitrine"));
