@@ -111,8 +111,6 @@ export default function LeadFormPublic() {
     }
   };
 
-  const [isFinalizing, setIsFinalizing] = useState(false);
-
   const handleSend = async () => {
     if (!inputValue.trim() || isSending || isComplete || isFinalizing) return;
 
