@@ -110,8 +110,10 @@ export default function LeadFormPublic() {
     }
   };
 
+  const [isFinalizing, setIsFinalizing] = useState(false);
+
   const handleSend = async () => {
-    if (!inputValue.trim() || isSending || isComplete) return;
+    if (!inputValue.trim() || isSending || isComplete || isFinalizing) return;
 
     const answer = inputValue.trim();
     setInputValue("");
@@ -138,7 +140,8 @@ export default function LeadFormPublic() {
         setIsSending(false);
       }, empathy ? 800 : 300);
     } else {
-      // All steps done - generate AI suggestion and save lead
+      // All steps done - block input immediately and finalize
+      setIsFinalizing(true);
       addBotMessage("Perfeito! 🎯 Estou preparando tudo pra você...");
       await finalizeLead(newAnswers);
       setIsSending(false);
