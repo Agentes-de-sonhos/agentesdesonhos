@@ -27,11 +27,6 @@ export function GamificationPill() {
                 {myPoints.toFixed(0)} pts
               </span>
             </span>
-            <span className="w-px h-3 bg-white/30" />
-            <span className="flex items-center gap-1">
-              <Trophy className="h-3.5 w-3.5 text-yellow-400" />
-              <span className="text-white/70">#{myRank}º</span>
-            </span>
           </button>
         </TooltipTrigger>
         <TooltipContent>
