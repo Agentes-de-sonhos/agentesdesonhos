@@ -75,8 +75,10 @@ export function AdminFeedbackManager() {
     mutationFn: async (enabled: boolean) => {
       const { error } = await supabase
         .from("feedback_settings" as any)
-        .update({ value: enabled ? "true" : "false", updated_at: new Date().toISOString() } as any)
-        .eq("key", "feedback_popup_enabled");
+        .upsert(
+          { key: "feedback_popup_enabled", value: enabled ? "true" : "false", updated_at: new Date().toISOString() } as any,
+          { onConflict: "key" }
+        );
       if (error) throw error;
     },
     onSuccess: (_, enabled) => {
