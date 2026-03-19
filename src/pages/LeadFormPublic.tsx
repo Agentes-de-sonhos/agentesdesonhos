@@ -47,6 +47,7 @@ export default function LeadFormPublic() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSending, setIsSending] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [whatsappUrl, setWhatsappUrl] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -111,7 +112,7 @@ export default function LeadFormPublic() {
   };
 
   const handleSend = async () => {
-    if (!inputValue.trim() || isSending || isComplete) return;
+    if (!inputValue.trim() || isSending || isComplete || isFinalizing) return;
 
     const answer = inputValue.trim();
     setInputValue("");
@@ -138,7 +139,8 @@ export default function LeadFormPublic() {
         setIsSending(false);
       }, empathy ? 800 : 300);
     } else {
-      // All steps done - generate AI suggestion and save lead
+      // All steps done - block input immediately and finalize
+      setIsFinalizing(true);
       addBotMessage("Perfeito! 🎯 Estou preparando tudo pra você...");
       await finalizeLead(newAnswers);
       setIsSending(false);
@@ -295,7 +297,7 @@ export default function LeadFormPublic() {
       </div>
 
       {/* Input */}
-      {!isComplete && (
+      {!isComplete && !isFinalizing && (
         <div className="sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-gray-100 p-3 max-w-2xl w-full mx-auto">
           <form
             onSubmit={(e) => {
