@@ -57,7 +57,7 @@ export function FeedbackPopup() {
         .eq("user_id", user.id)
         .limit(1),
     ]).then(([settingsRes, feedbackRes]) => {
-      if (settingsRes.data?.value !== "true") return;
+      if ((settingsRes.data as any)?.value !== "true") return;
       if (feedbackRes.data && feedbackRes.data.length > 0) {
         markFeedbackDismissed(user.id);
         return;
