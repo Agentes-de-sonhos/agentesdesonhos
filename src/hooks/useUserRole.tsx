@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
@@ -6,46 +6,29 @@ export type AppRole = "admin" | "agente" | "promotor";
 
 export function useUserRole() {
   const { user } = useAuth();
-  const [role, setRole] = useState<AppRole | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Reset loading whenever user changes to prevent stale state
-    setLoading(true);
+  const { data: role = null, isLoading: loading } = useQuery({
+    queryKey: ["user-role", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
 
-    async function fetchRole() {
-      if (!user) {
-        setRole(null);
-        setLoading(false);
-        return;
+      if (error) {
+        console.error("Error fetching user role:", error);
+        return null;
       }
-
-      try {
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id);
-
-        if (error) {
-          console.error("Error fetching user role:", error);
-          setRole(null);
-        } else if (data && data.length > 0) {
-          // Prioritize admin role if user has multiple roles
-          const hasAdmin = data.some((r) => r.role === "admin");
-          setRole(hasAdmin ? "admin" : (data[0].role as AppRole));
-        } else {
-          setRole("agente");
-        }
-      } catch (err) {
-        console.error("Error fetching user role:", err);
-        setRole(null);
-      } finally {
-        setLoading(false);
+      if (data && data.length > 0) {
+        const hasAdmin = data.some((r) => r.role === "admin");
+        return (hasAdmin ? "admin" : data[0].role) as AppRole;
       }
-    }
-
-    fetchRole();
-  }, [user]);
+      return "agente" as AppRole;
+    },
+    enabled: !!user,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   const isAdmin = role === "admin";
   const isAgente = role === "agente";

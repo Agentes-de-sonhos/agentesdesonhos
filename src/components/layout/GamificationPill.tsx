@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Star, Trophy } from "lucide-react";
-import { useGamification } from "@/hooks/useGamification";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useGamificationLite } from "@/hooks/useGamificationLite";
 import {
   Tooltip,
   TooltipContent,
@@ -11,15 +10,7 @@ import {
 
 export function GamificationPill() {
   const navigate = useNavigate();
-  const { myPoints, ranking, isLoadingRanking, level } = useGamification();
-
-  const myRank =
-    ranking.findIndex((r) => r.total_points <= myPoints) + 1 ||
-    ranking.length + 1;
-
-  if (isLoadingRanking) {
-    return <Skeleton className="h-7 w-24 rounded-full" />;
-  }
+  const { myPoints, level } = useGamificationLite();
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -35,11 +26,6 @@ export function GamificationPill() {
               <span className="font-semibold text-white/90">
                 {myPoints.toFixed(0)} pts
               </span>
-            </span>
-            <span className="w-px h-3 bg-white/30" />
-            <span className="flex items-center gap-1">
-              <Trophy className="h-3.5 w-3.5 text-yellow-400" />
-              <span className="text-white/70">#{myRank}º</span>
             </span>
           </button>
         </TooltipTrigger>

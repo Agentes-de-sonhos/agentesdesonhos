@@ -109,22 +109,8 @@ export function usePresence() {
     enabled: !!user,
   });
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("presence-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "user_presence" },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["online-users"] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  // Removed realtime listener on user_presence — it was invalidating queries
+  // on every heartbeat from every user. The 30s refetchInterval is sufficient.
 
   return { onlineUsers, onlineCount: onlineUsers.length, isLoading, isOnline, isOnlineLoading, toggleOnline };
 }
