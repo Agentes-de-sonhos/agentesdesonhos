@@ -236,6 +236,10 @@ export default function Admin() {
               <Headset className="h-4 w-4" />
               <span className="hidden sm:inline">Suporte</span>
             </TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2">
+              <Star className="h-4 w-4" />
+              <span className="hidden sm:inline">Feedback</span>
+            </TabsTrigger>
           </TabsList>
 
 
