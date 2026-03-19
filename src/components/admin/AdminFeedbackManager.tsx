@@ -74,8 +74,8 @@ export function AdminFeedbackManager() {
   const toggleMutation = useMutation({
     mutationFn: async (enabled: boolean) => {
       const { error } = await supabase
-        .from("feedback_settings")
-        .update({ value: enabled ? "true" : "false", updated_at: new Date().toISOString() })
+        .from("feedback_settings" as any)
+        .update({ value: enabled ? "true" : "false", updated_at: new Date().toISOString() } as any)
         .eq("key", "feedback_popup_enabled");
       if (error) throw error;
     },

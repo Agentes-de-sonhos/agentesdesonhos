@@ -47,7 +47,7 @@ export function FeedbackPopup() {
     // Check if popup is enabled and user hasn't submitted yet
     Promise.all([
       supabase
-        .from("feedback_settings")
+        .from("feedback_settings" as any)
         .select("value")
         .eq("key", "feedback_popup_enabled")
         .maybeSingle(),
