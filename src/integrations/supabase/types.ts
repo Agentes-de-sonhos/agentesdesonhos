@@ -2325,6 +2325,314 @@ export type Database = {
           },
         ]
       }
+      marketplace_comments: {
+        Row: {
+          content: string
+          course_id: string
+          created_at: string
+          id: string
+          lesson_id: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_id?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_comments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_comments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_courses: {
+        Row: {
+          category: string
+          cover_image_url: string | null
+          created_at: string
+          creator_id: string
+          description: string | null
+          enrolled_count: number
+          id: string
+          is_active: boolean
+          level: string
+          price: number
+          product_type: string
+          rejection_reason: string | null
+          status: string
+          title: string
+          total_duration_minutes: number
+          total_lessons: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          enrolled_count?: number
+          id?: string
+          is_active?: boolean
+          level?: string
+          price?: number
+          product_type?: string
+          rejection_reason?: string | null
+          status?: string
+          title: string
+          total_duration_minutes?: number
+          total_lessons?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          enrolled_count?: number
+          id?: string
+          is_active?: boolean
+          level?: string
+          price?: number
+          product_type?: string
+          rejection_reason?: string | null
+          status?: string
+          title?: string
+          total_duration_minutes?: number
+          total_lessons?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketplace_enrollments: {
+        Row: {
+          amount_paid: number
+          course_id: string
+          enrolled_at: string
+          id: string
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          course_id: string
+          enrolled_at?: string
+          id?: string
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          course_id?: string
+          enrolled_at?: string
+          id?: string
+          stripe_session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_lesson_progress: {
+        Row: {
+          completed_at: string
+          enrollment_id: string
+          id: string
+          lesson_id: string
+        }
+        Insert: {
+          completed_at?: string
+          enrollment_id: string
+          id?: string
+          lesson_id: string
+        }
+        Update: {
+          completed_at?: string
+          enrollment_id?: string
+          id?: string
+          lesson_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_lesson_progress_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_lessons: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_preview: boolean
+          material_name: string | null
+          material_url: string | null
+          module_id: string
+          order_index: number
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_preview?: boolean
+          material_name?: string | null
+          material_url?: string | null
+          module_id: string
+          order_index?: number
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_preview?: boolean
+          material_name?: string | null
+          material_url?: string | null
+          module_id?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_meetings: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          id: string
+          meeting_date: string
+          meeting_url: string | null
+          recording_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          meeting_date: string
+          meeting_url?: string | null
+          recording_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          meeting_date?: string
+          meeting_url?: string | null
+          recording_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_meetings_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_modules: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          id: string
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           canva_url: string | null
