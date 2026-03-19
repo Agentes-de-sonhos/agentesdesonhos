@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
