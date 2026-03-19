@@ -148,48 +148,64 @@ export default function LeadFormPublic() {
   };
 
   const finalizeLead = async (allAnswers: Record<string, string>) => {
-    if (!formData || !agent) return;
+    if (!formData) {
+      addBotMessage("Obrigado pelas informações! Entraremos em contato em breve. 😊");
+      setIsComplete(true);
+      return;
+    }
 
     try {
-      // Get AI suggestion
-      const { data: aiData } = await supabase.functions.invoke("lead-wizard-ai", {
-        body: {
-          type: "suggestion",
-          data: {
-            leadName: allAnswers.name,
-            destination: allAnswers.destination,
-            travelDates: allAnswers.travel_dates,
-            travelersCount: allAnswers.travelers_count,
-            budget: allAnswers.budget,
-            additionalInfo: allAnswers.additional_info,
-          },
-          agentName: agent.name,
-          agentPhone: agent.phone,
-        },
-      });
+      let suggestion = "";
+      let whatsappMessage = `Olá! Tenho interesse em uma viagem. Meu nome é ${allAnswers.name}.`;
 
-      const suggestion = aiData?.suggestion || "";
-      const whatsappMessage = aiData?.whatsapp_message || `Olá ${agent.name}! Tenho interesse em uma viagem. Meu nome é ${allAnswers.name}.`;
+      // Try AI suggestion only if agent exists
+      if (agent) {
+        try {
+          const { data: aiData } = await supabase.functions.invoke("lead-wizard-ai", {
+            body: {
+              type: "suggestion",
+              data: {
+                leadName: allAnswers.name,
+                destination: allAnswers.destination,
+                travelDates: allAnswers.travel_dates,
+                travelersCount: allAnswers.travelers_count,
+                budget: allAnswers.budget,
+                additionalInfo: allAnswers.additional_info,
+              },
+              agentName: agent.name,
+              agentPhone: agent.phone,
+            },
+          });
+          suggestion = aiData?.suggestion || "";
+          whatsappMessage = aiData?.whatsapp_message || whatsappMessage;
+        } catch (aiErr) {
+          console.warn("AI suggestion failed, continuing without it:", aiErr);
+        }
+      }
 
       setAiSuggestion(suggestion);
 
-      // Save lead
-      await supabase.from("lead_captures").insert({
-        form_id: formData.id,
-        agent_user_id: formData.user_id,
-        lead_name: allAnswers.name,
-        lead_phone: allAnswers.phone,
-        destination: allAnswers.destination || null,
-        travel_dates: allAnswers.travel_dates || null,
-        travelers_count: allAnswers.travelers_count || null,
-        budget: allAnswers.budget || null,
-        additional_info: allAnswers.additional_info || null,
-        ai_suggestion: suggestion,
-        whatsapp_message: whatsappMessage,
-      } as never);
+      // Save lead (don't let save failure block completion)
+      try {
+        await supabase.from("lead_captures").insert({
+          form_id: formData.id,
+          agent_user_id: formData.user_id,
+          lead_name: allAnswers.name,
+          lead_phone: allAnswers.phone,
+          destination: allAnswers.destination || null,
+          travel_dates: allAnswers.travel_dates || null,
+          travelers_count: allAnswers.travelers_count || null,
+          budget: allAnswers.budget || null,
+          additional_info: allAnswers.additional_info || null,
+          ai_suggestion: suggestion,
+          whatsapp_message: whatsappMessage,
+        } as never);
+      } catch (saveErr) {
+        console.error("Lead save error:", saveErr);
+      }
 
       // Build WhatsApp URL
-      if (agent.phone) {
+      if (agent?.phone) {
         const cleanPhone = agent.phone.replace(/\D/g, "");
         const encoded = encodeURIComponent(whatsappMessage);
         setWhatsappUrl(`https://wa.me/${cleanPhone}?text=${encoded}`);
@@ -202,15 +218,16 @@ export default function LeadFormPublic() {
 
       setTimeout(() => {
         addBotMessage(
-          agent.phone
+          agent?.phone
             ? `Pronto! Agora é só clicar no botão abaixo para falar diretamente com ${agent.name} pelo WhatsApp! 💚`
-            : `Obrigado! ${agent.name} vai entrar em contato com você em breve!`
+            : `Obrigado! ${agent?.name || "Nosso consultor"} vai entrar em contato com você em breve!`
         );
         setIsComplete(true);
       }, 1500);
     } catch (err) {
       console.error("Finalize error:", err);
-      toast.error("Erro ao processar. Tente novamente.");
+      addBotMessage("Obrigado pelas informações! Entraremos em contato em breve. 😊");
+      setIsComplete(true);
     }
   };
 
