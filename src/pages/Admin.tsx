@@ -53,6 +53,7 @@ import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
 import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
 import { AdminTourOperatorsManager } from "@/components/admin/AdminTourOperatorsManager";
 import { AdminMentorshipsManager } from "@/components/admin/AdminMentorshipsManager";
+import { AdminMarketplaceManager } from "@/components/admin/AdminMarketplaceManager";
 import { AdminBenefitsManager } from "@/components/admin/AdminBenefitsManager";
 import { AdminRegistrationLinksManager } from "@/components/admin/AdminRegistrationLinksManager";
 import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
@@ -297,7 +298,18 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="mentorships">
-            <AdminMentorshipsManager />
+            <Tabs defaultValue="marketplace">
+              <TabsList className="mb-4">
+                <TabsTrigger value="marketplace">Marketplace de Cursos</TabsTrigger>
+                <TabsTrigger value="admin-mentorships">Mentorias (Admin)</TabsTrigger>
+              </TabsList>
+              <TabsContent value="marketplace">
+                <AdminMarketplaceManager />
+              </TabsContent>
+              <TabsContent value="admin-mentorships">
+                <AdminMentorshipsManager />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="playbooks">

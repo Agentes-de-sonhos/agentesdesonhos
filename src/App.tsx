@@ -70,6 +70,9 @@ const CadastroLink = lazy(() => import("./pages/CadastroLink"));
 const LeadFormPublic = lazy(() => import("./pages/LeadFormPublic"));
 const MeusLeads = lazy(() => import("./pages/MeusLeads"));
 const Suporte = lazy(() => import("./pages/Suporte"));
+const CursosMarketplace = lazy(() => import("./pages/CursosMarketplace"));
+const CursoDetalhe = lazy(() => import("./pages/CursoDetalhe"));
+const CursoEditar = lazy(() => import("./pages/CursoEditar"));
 
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
@@ -155,6 +158,9 @@ const App = () => (
             <Route path="/beneficios" element={<ProtectedRoute><Beneficios /></ProtectedRoute>} />
             <Route path="/mentorias" element={<ProtectedRoute><Mentorias /></ProtectedRoute>} />
             <Route path="/mentorias/:id" element={<ProtectedRoute><MentoriaDetail /></ProtectedRoute>} />
+            <Route path="/cursos" element={<ProtectedRoute><CursosMarketplace /></ProtectedRoute>} />
+            <Route path="/cursos/:id" element={<ProtectedRoute><CursoDetalhe /></ProtectedRoute>} />
+            <Route path="/cursos/:id/editar" element={<ProtectedRoute><CursoEditar /></ProtectedRoute>} />
             <Route path="/playbook/:slug" element={<ProtectedRoute><PlaybookViewer /></ProtectedRoute>} />
             <Route path="/perguntas-respostas" element={<ProtectedRoute><PerguntasRespostas /></ProtectedRoute>} />
             <Route path="/dream-advisor" element={<ProtectedRoute><DreamAdvisor /></ProtectedRoute>} />
