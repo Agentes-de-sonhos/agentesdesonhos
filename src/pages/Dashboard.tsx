@@ -127,7 +127,7 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 sm:space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in min-w-0 overflow-x-hidden">
         {/* Header with Welcome Message, Exchange Rate, Notifications, Profile & Logout */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* Welcome message + Online agents */}
@@ -190,20 +190,20 @@ export default function Dashboard() {
 
             {/* 2. Notícias e Minha Agenda - lado a lado */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
-              <div className="flex flex-col flex-1 [&>*]:h-full"><CuratedNewsFeed /></div>
-              <div className="flex flex-col flex-1 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
+              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><CuratedNewsFeed /></div>
+              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
             </section>
 
             {/* 3. Perguntas da Comunidade & Próximas Viagens */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
-              <CommunityQACard />
-              <div className="flex flex-col flex-1 [&>*]:h-full"><TripRemindersCard /></div>
+              <div className="min-w-0"><CommunityQACard /></div>
+              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
             </section>
 
             {/* 4. Minha Meta & Ferramentas do Agente */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-4">
-              <div className="flex flex-col flex-1 [&>*]:h-full"><ClientsManagementCard /></div>
-              <AgentToolsCard />
+              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><ClientsManagementCard /></div>
+              <div className="min-w-0"><AgentToolsCard /></div>
             </section>
 
 
