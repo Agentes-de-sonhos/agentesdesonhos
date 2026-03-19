@@ -127,6 +127,9 @@ export function useItineraries() {
         travelersCount: formData.travelersCount,
         tripType: formData.tripType,
         budgetLevel: formData.budgetLevel,
+        interests: formData.interests || [],
+        travelPace: formData.travelPace || "moderado",
+        additionalPreferences: formData.additionalPreferences || {},
       },
     });
 
