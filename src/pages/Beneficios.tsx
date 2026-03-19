@@ -72,6 +72,7 @@ export default function Beneficios() {
 
   return (
     <DashboardLayout>
+      <ComingSoonOverlay pageKey="beneficios" />
       <div className="space-y-6">
         <PageHeader
           pageKey="beneficios"

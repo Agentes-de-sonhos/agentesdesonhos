@@ -195,6 +195,7 @@ export default function MapaTurismo() {
 
   return (
     <DashboardLayout>
+      <ComingSoonOverlay pageKey="mapa-turismo" />
       <div className="space-y-6 animate-fade-in">
         <PageHeader
           pageKey="mapa-turismo"

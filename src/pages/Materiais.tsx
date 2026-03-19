@@ -100,6 +100,7 @@ export default function Materiais() {
 
   return (
     <DashboardLayout>
+      <ComingSoonOverlay pageKey="materiais" />
       <div className="space-y-6">
         <PageHeader
           pageKey="materiais"
