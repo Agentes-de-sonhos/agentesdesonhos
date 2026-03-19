@@ -4,10 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Users, MapPin, Sparkles } from "lucide-react";
+import { CalendarIcon, Users, MapPin, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -22,15 +24,30 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { ItineraryFormData } from "@/types/itinerary";
+import {
+  ItineraryFormData,
+  TripProfile,
+  TravelInterest,
+  TravelPace,
+  TRIP_PROFILE_LABELS,
+  TRAVEL_INTEREST_LABELS,
+  TRAVEL_INTEREST_ICONS,
+  TRAVEL_PACE_LABELS,
+} from "@/types/itinerary";
 
 const formSchema = z.object({
   destination: z.string().min(2, "Destino é obrigatório"),
   startDate: z.date({ required_error: "Data de início é obrigatória" }),
   endDate: z.date({ required_error: "Data de fim é obrigatória" }),
   travelersCount: z.number().min(1, "Mínimo 1 viajante"),
-  tripType: z.enum(["familia", "casal", "lua_de_mel", "sozinho", "corporativo"]),
+  tripType: z.string(),
   budgetLevel: z.enum(["economico", "conforto", "luxo"]),
+  interests: z.array(z.string()).default([]),
+  travelPace: z.string().default("moderado"),
+  dietaryRestrictions: z.string().optional(),
+  localOrTouristy: z.string().optional(),
+  exclusiveOrPopular: z.string().optional(),
+  mobilityLimitations: z.string().optional(),
 });
 
 interface ItineraryFormProps {
@@ -41,6 +58,8 @@ interface ItineraryFormProps {
 export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
+  const [selectedInterests, setSelectedInterests] = useState<TravelInterest[]>([]);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,16 +68,48 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
       travelersCount: 2,
       tripType: "casal",
       budgetLevel: "conforto",
+      interests: [],
+      travelPace: "moderado",
+      dietaryRestrictions: "",
+      localOrTouristy: "mix",
+      exclusiveOrPopular: "mix",
+      mobilityLimitations: "",
     },
   });
 
+  const toggleInterest = (interest: TravelInterest) => {
+    setSelectedInterests((prev) => {
+      const next = prev.includes(interest)
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest];
+      form.setValue("interests", next);
+      return next;
+    });
+  };
+
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    onSubmit(values as ItineraryFormData);
+    onSubmit({
+      destination: values.destination,
+      startDate: values.startDate,
+      endDate: values.endDate,
+      travelersCount: values.travelersCount,
+      tripType: values.tripType as TripProfile,
+      budgetLevel: values.budgetLevel,
+      interests: selectedInterests,
+      travelPace: (values.travelPace || "moderado") as TravelPace,
+      additionalPreferences: {
+        dietaryRestrictions: values.dietaryRestrictions || undefined,
+        localOrTouristy: (values.localOrTouristy as "local" | "touristy" | "mix") || "mix",
+        exclusiveOrPopular: (values.exclusiveOrPopular as "exclusive" | "popular" | "mix") || "mix",
+        mobilityLimitations: values.mobilityLimitations || undefined,
+      },
+    });
   };
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       <div className="space-y-4">
+        {/* Destination */}
         <div className="space-y-2">
           <Label htmlFor="destination">Destino</Label>
           <div className="relative">
@@ -77,6 +128,7 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           )}
         </div>
 
+        {/* Dates */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Data de Início</Label>
@@ -90,11 +142,7 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? (
-                    format(startDate, "dd/MM/yyyy", { locale: ptBR })
-                  ) : (
-                    <span>Selecione</span>
-                  )}
+                  {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Selecione</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -131,11 +179,7 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? (
-                    format(endDate, "dd/MM/yyyy", { locale: ptBR })
-                  ) : (
-                    <span>Selecione</span>
-                  )}
+                  {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Selecione</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -156,6 +200,7 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
         </div>
 
+        {/* Travelers */}
         <div className="space-y-2">
           <Label htmlFor="travelersCount">Número de Viajantes</Label>
           <div className="relative">
@@ -170,50 +215,163 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
         </div>
 
+        {/* Trip Profile */}
         <div className="space-y-2">
-          <Label>Tipo de Viagem</Label>
+          <Label>Perfil do Viajante</Label>
           <Select
             defaultValue="casal"
-            onValueChange={(value) =>
-              form.setValue("tripType", value as ItineraryFormData["tripType"])
-            }
+            onValueChange={(value) => form.setValue("tripType", value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecione o tipo" />
+              <SelectValue placeholder="Selecione o perfil" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="familia">Família</SelectItem>
-              <SelectItem value="casal">Casal</SelectItem>
-              <SelectItem value="lua_de_mel">Lua de Mel</SelectItem>
-              <SelectItem value="sozinho">Sozinho</SelectItem>
-              <SelectItem value="corporativo">Corporativo</SelectItem>
+              {(Object.entries(TRIP_PROFILE_LABELS) as [TripProfile, string][]).map(
+                ([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                )
+              )}
             </SelectContent>
           </Select>
         </div>
 
+        {/* Budget */}
         <div className="space-y-2">
           <Label>Nível de Orçamento</Label>
           <Select
             defaultValue="conforto"
             onValueChange={(value) =>
-              form.setValue(
-                "budgetLevel",
-                value as ItineraryFormData["budgetLevel"]
-              )
+              form.setValue("budgetLevel", value as ItineraryFormData["budgetLevel"])
             }
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione o orçamento" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="economico">
-                Econômico (3 estrelas)
-              </SelectItem>
+              <SelectItem value="economico">Econômico (3 estrelas)</SelectItem>
               <SelectItem value="conforto">Conforto (4 estrelas)</SelectItem>
               <SelectItem value="luxo">Luxo (5 estrelas)</SelectItem>
             </SelectContent>
           </Select>
         </div>
+
+        {/* Interests multi-select */}
+        <div className="space-y-2">
+          <Label>Interesses da Viagem</Label>
+          <p className="text-xs text-muted-foreground">Selecione um ou mais interesses</p>
+          <div className="grid grid-cols-2 gap-2">
+            {(Object.entries(TRAVEL_INTEREST_LABELS) as [TravelInterest, string][]).map(
+              ([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => toggleInterest(value)}
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
+                    selectedInterests.includes(value)
+                      ? "border-primary bg-primary/10 text-primary font-medium"
+                      : "border-border hover:bg-muted"
+                  )}
+                >
+                  <span>{TRAVEL_INTEREST_ICONS[value]}</span>
+                  <span className="truncate">{label}</span>
+                </button>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Travel Pace */}
+        <div className="space-y-2">
+          <Label>Ritmo da Viagem</Label>
+          <Select
+            defaultValue="moderado"
+            onValueChange={(value) => form.setValue("travelPace", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o ritmo" />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.entries(TRAVEL_PACE_LABELS) as [TravelPace, string][]).map(
+                ([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                )
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Advanced Preferences Toggle */}
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full justify-between text-muted-foreground"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+        >
+          Preferências adicionais
+          {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+
+        {showAdvanced && (
+          <div className="space-y-4 rounded-lg border border-border p-4">
+            <div className="space-y-2">
+              <Label htmlFor="dietaryRestrictions">Restrições alimentares</Label>
+              <Input
+                id="dietaryRestrictions"
+                placeholder="Ex: vegetariano, sem glúten, kosher..."
+                {...form.register("dietaryRestrictions")}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Preferência de experiências</Label>
+              <Select
+                defaultValue="mix"
+                onValueChange={(value) => form.setValue("localOrTouristy", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="local">Experiências locais e autênticas</SelectItem>
+                  <SelectItem value="touristy">Pontos turísticos clássicos</SelectItem>
+                  <SelectItem value="mix">Mistura de ambos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tipo de locais</Label>
+              <Select
+                defaultValue="mix"
+                onValueChange={(value) => form.setValue("exclusiveOrPopular", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="exclusive">Locais exclusivos e reservados</SelectItem>
+                  <SelectItem value="popular">Locais populares e movimentados</SelectItem>
+                  <SelectItem value="mix">Mistura de ambos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="mobilityLimitations">Limitações de mobilidade</Label>
+              <Textarea
+                id="mobilityLimitations"
+                placeholder="Descreva qualquer limitação de mobilidade..."
+                rows={2}
+                {...form.register("mobilityLimitations")}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
