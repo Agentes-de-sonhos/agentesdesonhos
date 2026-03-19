@@ -26,6 +26,7 @@ import {
   Mail,
   Link2,
   Headset,
+  Star,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -55,6 +56,7 @@ import { AdminMentorshipsManager } from "@/components/admin/AdminMentorshipsMana
 import { AdminBenefitsManager } from "@/components/admin/AdminBenefitsManager";
 import { AdminRegistrationLinksManager } from "@/components/admin/AdminRegistrationLinksManager";
 import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
+import { AdminFeedbackManager } from "@/components/admin/AdminFeedbackManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -235,6 +237,10 @@ export default function Admin() {
               <Headset className="h-4 w-4" />
               <span className="hidden sm:inline">Suporte</span>
             </TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2">
+              <Star className="h-4 w-4" />
+              <span className="hidden sm:inline">Feedback</span>
+            </TabsTrigger>
           </TabsList>
 
 
@@ -337,6 +343,10 @@ export default function Admin() {
 
           <TabsContent value="tickets">
             <AdminTicketsManager />
+          </TabsContent>
+
+          <TabsContent value="feedback">
+            <AdminFeedbackManager />
           </TabsContent>
         </Tabs>
       </div>
