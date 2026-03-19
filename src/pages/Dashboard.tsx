@@ -127,7 +127,7 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 sm:space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in min-w-0 overflow-x-hidden">
         {/* Header with Welcome Message, Exchange Rate, Notifications, Profile & Logout */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* Welcome message + Online agents */}
