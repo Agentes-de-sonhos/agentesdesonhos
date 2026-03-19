@@ -33,7 +33,7 @@ import {
   Route,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useGamification } from "@/hooks/useGamification";
+import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
