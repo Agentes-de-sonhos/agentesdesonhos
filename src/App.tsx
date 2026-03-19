@@ -70,6 +70,9 @@ const CadastroLink = lazy(() => import("./pages/CadastroLink"));
 const LeadFormPublic = lazy(() => import("./pages/LeadFormPublic"));
 const MeusLeads = lazy(() => import("./pages/MeusLeads"));
 const Suporte = lazy(() => import("./pages/Suporte"));
+const CursosMarketplace = lazy(() => import("./pages/CursosMarketplace"));
+const CursoDetalhe = lazy(() => import("./pages/CursoDetalhe"));
+const CursoEditar = lazy(() => import("./pages/CursoEditar"));
 
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
