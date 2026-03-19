@@ -115,10 +115,10 @@ export default function Mentorias() {
               <Button
                 size="lg"
                 className="bg-white text-violet-700 hover:bg-white/90 font-semibold shadow-md flex-shrink-0"
-                onClick={() => setShowMentorInterest(true)}
+                onClick={() => navigate("/cursos")}
               >
                 <GraduationCap className="h-4 w-4 mr-2" />
-                Quero ser mentor
+                Explorar Cursos
               </Button>
             </div>
           </CardContent>
