@@ -134,10 +134,24 @@ export function useItineraries() {
     });
 
     if (response.error) {
+      console.error("Edge function invoke error:", response.error);
       throw new Error(response.error.message || "Erro ao gerar roteiro");
     }
 
-    return response.data as AIGeneratedItinerary;
+    const data = response.data;
+    
+    // Check if the response contains an error message from the edge function
+    if (data?.error) {
+      throw new Error(data.error);
+    }
+
+    // Validate the response has the expected structure
+    if (!data?.days || !Array.isArray(data.days) || data.days.length === 0) {
+      console.error("Invalid AI response structure:", data);
+      throw new Error("A IA retornou uma resposta inválida. Tente novamente.");
+    }
+
+    return data as AIGeneratedItinerary;
   };
 
   const saveGeneratedItinerary = async (
