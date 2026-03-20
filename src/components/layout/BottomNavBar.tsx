@@ -39,10 +39,6 @@ const navItems: NavItem[] = [
     subItems: [
       { label: "EducaTravel Academy", icon: GraduationCap, path: "/educa-academy" },
       { label: "Notícias do Trade", icon: Newspaper, path: "/noticias", requiredFeature: "news" },
-      { label: "Mapa do Turismo", icon: Map, path: "/mapa-turismo", requiredFeature: "tourism_map" },
-      { label: "Travel Advisor", icon: Compass, path: "/dream-advisor" },
-      { label: "Benefícios", icon: Tag, path: "/beneficios", requiredFeature: "community" },
-      { label: "Minha Agenda", icon: CalendarDays, path: "/agenda" },
     ],
   },
   {
