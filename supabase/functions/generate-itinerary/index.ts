@@ -212,10 +212,13 @@ Retorne um JSON com a seguinte estrutura:
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
+        response_format: { type: "json_object" },
       }),
     });
 
     if (!response.ok) {
+      const errBody = await response.text();
+      console.error("AI gateway error:", response.status, errBody);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns minutos." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -226,7 +229,6 @@ Retorne um JSON com a seguinte estrutura:
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      console.error("AI gateway error:", response.status);
       return new Response(JSON.stringify({ error: "Erro ao gerar roteiro. Tente novamente." }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -234,16 +236,25 @@ Retorne um JSON com a seguinte estrutura:
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
-    if (!content) throw new Error("Empty AI response");
+    if (!content) {
+      console.error("Empty AI response:", JSON.stringify(data));
+      throw new Error("Empty AI response");
+    }
 
     let itinerary;
     try {
-      const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
-      const jsonString = jsonMatch ? jsonMatch[1] : content;
-      itinerary = JSON.parse(jsonString.trim());
+      // Try direct parse first (response_format should give clean JSON)
+      itinerary = JSON.parse(content.trim());
     } catch {
-      console.error("Failed to parse AI response");
-      throw new Error("Parse error");
+      // Fallback: extract from code fences
+      try {
+        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        const jsonString = jsonMatch ? jsonMatch[1] : content;
+        itinerary = JSON.parse(jsonString.trim());
+      } catch {
+        console.error("Failed to parse AI response:", content.substring(0, 500));
+        throw new Error("Parse error");
+      }
     }
 
     return new Response(JSON.stringify(itinerary), {
