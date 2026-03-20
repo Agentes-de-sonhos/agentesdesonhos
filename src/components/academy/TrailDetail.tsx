@@ -390,7 +390,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
       </div>
 
       <Tabs defaultValue="videos" className="space-y-4">
-        <TabsList className="flex-wrap">
+        <TabsList className="h-auto flex-nowrap overflow-x-auto justify-start w-full">
           <TabsTrigger value="videos" className="flex items-center gap-2">
             <Video className="h-4 w-4" /> Módulos
           </TabsTrigger>
