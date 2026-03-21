@@ -19,7 +19,7 @@ export function ShareTripModal({ trip, open, onOpenChange }: ShareTripModalProps
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const origin = "https://agentesdesonhos.com.br";
+  const origin = PUBLIC_DOMAIN;
   const slugLink = trip.slug ? `${origin}/c/${trip.slug}` : null;
   const shortLink = trip.short_code ? `${origin}/v/${trip.short_code}` : null;
   const legacyLink = trip.share_token ? `${origin}/viagem/${trip.share_token}` : null;

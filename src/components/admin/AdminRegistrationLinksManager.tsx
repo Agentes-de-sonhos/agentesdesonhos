@@ -81,7 +81,7 @@ export function AdminRegistrationLinksManager() {
   }
 
   function copyLink(token: string) {
-    const url = `https://agentesdesonhos.com.br/cadastro/${token}`;
+    const url = `${PUBLIC_DOMAIN}/cadastro/${token}`;
     navigator.clipboard.writeText(url);
     toast({ title: "Link copiado!" });
   }

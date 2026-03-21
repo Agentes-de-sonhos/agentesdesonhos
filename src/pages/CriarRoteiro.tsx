@@ -208,7 +208,7 @@ export default function CriarRoteiro() {
   };
 
   const handleCopyLink = async (shareToken: string) => {
-    const url = `${window.location.origin}/roteiro/${shareToken}`;
+    const url = `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };

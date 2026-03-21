@@ -54,7 +54,7 @@ export default function MeusLeads() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const formUrl = form?.token
-    ? `https://agentesdesonhos.com.br/formulario/${form.token}`
+    ? `${PUBLIC_DOMAIN}/formulario/${form.token}`
     : "";
 
   const copyLink = () => {
