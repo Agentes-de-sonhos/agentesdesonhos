@@ -281,7 +281,19 @@ Use a função generate_itinerary para retornar o roteiro completo.`;
       });
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    if (!responseText || responseText.trim().length === 0) {
+      console.error("AI gateway returned empty response body, status:", response.status);
+      throw new Error("AI gateway returned empty response");
+    }
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseErr) {
+      console.error("Failed to parse AI gateway response:", responseText.substring(0, 500));
+      throw new Error("AI gateway returned invalid JSON");
+    }
     console.log("AI response received, choices:", data.choices?.length);
 
     // Extract from tool call response
