@@ -11,7 +11,7 @@ import { useItineraries } from "@/hooks/useItineraries";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { toast } from "sonner";
-import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock } from "lucide-react";
+import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
