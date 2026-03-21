@@ -50,7 +50,7 @@ export function AgentToolsCard() {
             <Wrench className="h-5 w-5 text-[hsl(var(--section-tools))]" />
             Ferramentas do Agente
           </h2>
-          <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-tools))]" />
+          <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-tools))]" />
         </div>
 
         <TooltipProvider delayDuration={200}>

@@ -50,7 +50,7 @@ export function ClientsManagementCard() {
               <Target className="h-5 w-5 text-[hsl(var(--section-financial))]" />
               Minha Meta
             </h2>
-            <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-financial))]" />
+            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-financial))]" />
           </div>
           <Button
             variant="ghost"

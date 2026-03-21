@@ -315,7 +315,7 @@ export function CommunityQACard() {
             <MessageCircle className="h-5 w-5 text-[hsl(var(--section-community))]" />
             Perguntas da Comunidade
           </h2>
-          <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-community))]" />
+          <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
         </div>
         {/* Quick Ask Bar */}
         {!showAskForm ? (
