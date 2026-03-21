@@ -294,6 +294,31 @@ export function useItineraries() {
     },
   });
 
+  const updateItineraryDetails = useMutation({
+    mutationFn: async ({
+      itineraryId,
+      updates,
+    }: {
+      itineraryId: string;
+      updates: Partial<{
+        destination: string;
+        travelers_count: number;
+        trip_type: string;
+        budget_level: string;
+      }>;
+    }) => {
+      const { error } = await supabase
+        .from("itineraries")
+        .update(updates)
+        .eq("id", itineraryId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["itineraries"] });
+    },
+  });
+
   const deleteItinerary = useMutation({
     mutationFn: async (itineraryId: string) => {
       const { error } = await supabase
@@ -320,6 +345,7 @@ export function useItineraries() {
     deleteActivity,
     addActivity,
     updateItineraryStatus,
+    updateItineraryDetails,
     deleteItinerary,
   };
 }
