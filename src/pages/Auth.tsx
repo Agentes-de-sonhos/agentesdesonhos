@@ -483,14 +483,7 @@ export default function Auth() {
               </Form>
 
               {/* Secondary options — subtle links */}
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setView("magic-link"); setError(null); }}
-                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Entrar com link por e-mail
-                </button>
+              <div className="flex items-center justify-end pt-1">
                 <button
                   type="button"
                   onClick={() => { setView("forgot-password"); setError(null); }}
