@@ -151,11 +151,13 @@ export function TripEditForm({ trip, onSubmit, onCancel, isLoading }: TripEditFo
                     mode="range"
                     selected={field.value as DateRange}
                     onSelect={(range) => {
-                      if (range?.from && range?.to) {
+                      if (range?.from && range?.to && range.from.getTime() !== range.to.getTime()) {
                         field.onChange({ from: range.from, to: range.to });
                         setCalendarOpen(false);
                       } else if (range?.from) {
-                        field.onChange({ from: range.from, to: range.from });
+                        field.onChange({ from: range.from, to: undefined });
+                      } else {
+                        field.onChange(undefined);
                       }
                     }}
                     numberOfMonths={2}
