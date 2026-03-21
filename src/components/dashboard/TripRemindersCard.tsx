@@ -82,12 +82,12 @@ export function TripRemindersCard() {
     return (
       <Card className="border-0 shadow-md">
         <CardContent className="pt-6">
-          <div className="mb-4">
+          <div className="mb-4 w-fit">
             <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
               <Plane className="h-5 w-5 text-[hsl(var(--section-reminders))]" />
               Próximas Viagens
             </h2>
-            <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-reminders))]" />
+            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-reminders))]" />
           </div>
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -106,12 +106,12 @@ export function TripRemindersCard() {
       <Card className="border-0 shadow-md">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between mb-4">
-            <div>
+            <div className="w-fit">
               <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
                 <Plane className="h-5 w-5 text-[hsl(var(--section-reminders))]" />
                 Próximas Viagens
               </h2>
-              <div className="mt-2 h-1 w-16 rounded-full bg-[hsl(var(--section-reminders))]" />
+              <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-reminders))]" />
             </div>
             <Badge variant="outline" className="text-[hsl(var(--section-reminders))] border-[hsl(var(--section-reminders))]">
               {reminders.length} lembrete{reminders.length !== 1 ? "s" : ""}
