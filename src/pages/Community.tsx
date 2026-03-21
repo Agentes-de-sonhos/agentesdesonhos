@@ -139,53 +139,51 @@ function CommunityContent() {
             </aside>
           )}
 
-          {/* Central Feed */}
-          <main className="flex-1 min-w-0 space-y-8">
-            <div ref={feedRef}>
-              <CommunityFeedSection
-                famTrips={famTrips}
-                events={inPersonEvents}
-              />
-            </div>
+          {/* Central Content */}
+          <main className="flex-1 min-w-0">
+            {activeSection === "feed" && (
+              <CommunityFeedSection famTrips={famTrips} events={inPersonEvents} />
+            )}
 
-            {/* Members Section */}
-            <div ref={membersRef} className="scroll-mt-20">
-              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                Membros da Comunidade
-              </h2>
-              <MemberDirectory />
-            </div>
+            {activeSection === "members" && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  Membros da Comunidade
+                </h2>
+                <MemberDirectory />
+              </div>
+            )}
 
-            {/* Content Section */}
-            <div ref={contentRef} className="scroll-mt-20 space-y-8">
-              <FamTripsSection trips={famTrips} />
-              <OnlineMeetingsSection upcoming={upcomingMeetings} past={pastMeetings} />
-              <PaidTrainingsSection trainings={paidTrainings} />
-              <WhatsAppSection community={whatsappCommunity} />
-            </div>
+            {activeSection === "content" && (
+              <div className="space-y-8">
+                <OnlineMeetingsSection upcoming={upcomingMeetings} past={pastMeetings} />
+                <PaidTrainingsSection trainings={paidTrainings} />
+                <WhatsAppSection community={whatsappCommunity} />
+              </div>
+            )}
 
-            {/* Events Section */}
-            <div ref={eventsRef} className="scroll-mt-20 space-y-8">
-              <InPersonEventsSection events={inPersonEvents} />
-              <WorkshopsSection
-                workshops={workshops}
-                getWorkshopsByCategory={getWorkshopsByCategory}
-              />
-            </div>
+            {activeSection === "events" && (
+              <div className="space-y-8">
+                <InPersonEventsSection events={inPersonEvents} />
+                <WorkshopsSection workshops={workshops} getWorkshopsByCategory={getWorkshopsByCategory} />
+              </div>
+            )}
 
-            {/* Opportunities / Highlights */}
-            <div ref={opportunitiesRef} className="scroll-mt-20">
-              <HighlightsSection
-                highlights={highlights}
-                prize={currentPrize}
-                currentMonth={currentMonth}
-                currentYear={currentYear}
-                hasVoted={hasVoted}
-                onVote={vote}
-                isVoting={isVoting}
-              />
-            </div>
+            {activeSection === "opportunities" && (
+              <div className="space-y-8">
+                <FamTripsSection trips={famTrips} />
+                <HighlightsSection
+                  highlights={highlights}
+                  prize={currentPrize}
+                  currentMonth={currentMonth}
+                  currentYear={currentYear}
+                  hasVoted={hasVoted}
+                  onVote={vote}
+                  isVoting={isVoting}
+                />
+              </div>
+            )}
           </main>
 
           {/* Right Sidebar - hidden on mobile */}
