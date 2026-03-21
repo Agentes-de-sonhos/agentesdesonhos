@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
 import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
+import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
 import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
 import { useItineraries } from "@/hooks/useItineraries";
@@ -80,7 +81,6 @@ export default function CriarRoteiro() {
       const itinerary = await createItinerary.mutateAsync(data);
 
       // Generate with AI
-      toast.info("Gerando roteiro com IA...");
       const generatedData = await generateWithAI(data);
 
       // Save generated data
@@ -377,6 +377,8 @@ export default function CriarRoteiro() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      <AIGeneratingOverlay visible={isGenerating} />
     </DashboardLayout>
   );
 }
