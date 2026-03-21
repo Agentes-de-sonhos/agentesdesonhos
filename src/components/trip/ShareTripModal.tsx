@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, Check, Link, QrCode, ExternalLink, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
