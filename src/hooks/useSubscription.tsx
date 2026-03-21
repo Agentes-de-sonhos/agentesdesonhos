@@ -99,7 +99,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     fetchSubscription();
   }, [fetchSubscription]);
 
-  // Check Stripe subscription status periodically and on load
+  // Check Stripe subscription status once on load
   const stripeCheckDone = useRef(false);
   useEffect(() => {
     if (!user || stripeCheckDone.current) return;
@@ -109,15 +109,19 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       try {
         const { data, error } = await supabase.functions.invoke("check-subscription");
         if (!error && data?.subscribed && data?.plan) {
-          // Refetch from DB to get updated plan
-          await fetchSubscription();
+          // Only refetch if plan actually changed
+          if (data.plan !== subscription?.plan) {
+            await fetchSubscription();
+          }
         }
       } catch (e) {
         console.error("Error checking Stripe subscription:", e);
       }
     };
-    checkStripe();
-  }, [user, fetchSubscription]);
+    // Delay stripe check to not block initial render
+    const timer = window.setTimeout(checkStripe, 2000);
+    return () => window.clearTimeout(timer);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { role } = useUserRole();
   const isPromotor = role === "promotor";
