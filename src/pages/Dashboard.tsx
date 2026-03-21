@@ -122,6 +122,7 @@ export default function Dashboard() {
         description: item.description,
       }));
     },
+    staleTime: 10 * 60 * 1000,
   });
 
   const isLoading = suppliersLoading;
