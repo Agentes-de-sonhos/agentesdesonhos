@@ -758,6 +758,48 @@ export type Database = {
         }
         Relationships: []
       }
+      community_members: {
+        Row: {
+          bio: string | null
+          cnpj: string | null
+          created_at: string | null
+          entry_method: string
+          id: string
+          segments: string[] | null
+          specialties: string[] | null
+          status: string
+          updated_at: string | null
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          cnpj?: string | null
+          created_at?: string | null
+          entry_method: string
+          id?: string
+          segments?: string[] | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          cnpj?: string | null
+          created_at?: string | null
+          entry_method?: string
+          id?: string
+          segments?: string[] | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       community_messages: {
         Row: {
           content: string
@@ -789,6 +831,103 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      community_post_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_post_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_posts: {
+        Row: {
+          comments_count: number | null
+          content: string
+          created_at: string | null
+          id: string
+          is_pinned: boolean | null
+          likes_count: number | null
+          tags: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comments_count?: number | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       community_rooms: {
         Row: {
@@ -6328,6 +6467,7 @@ export type Database = {
         Args: { _user_id: string; _year: number }
         Returns: boolean
       }
+      is_community_member: { Args: { _user_id: string }; Returns: boolean }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
       unaccent: { Args: { "": string }; Returns: string }
       verify_trip_access: {
