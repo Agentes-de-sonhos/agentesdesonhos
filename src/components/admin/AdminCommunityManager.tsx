@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AdminCommunityMembersManager } from "./AdminCommunityMembersManager";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,8 +74,12 @@ export function AdminCommunityManager() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="fam-trips" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs defaultValue="members" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="members" className="text-xs sm:text-sm">
+              <Users className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Membros</span>
+            </TabsTrigger>
             <TabsTrigger value="fam-trips" className="text-xs sm:text-sm">
               <Plane className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">Fam Trips</span>
@@ -97,6 +102,9 @@ export function AdminCommunityManager() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="members">
+            <AdminCommunityMembersManager />
+          </TabsContent>
           <TabsContent value="fam-trips">
             <FamTripsManager />
           </TabsContent>

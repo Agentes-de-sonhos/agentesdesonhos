@@ -2,6 +2,10 @@ import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
+import { useCommunityMembership } from "@/hooks/useCommunityMembership";
+import { CommunityGate } from "@/components/community/CommunityGate";
+import { CommunityFeedSection } from "@/components/community/CommunityFeedSection";
+import { MemberDirectory } from "@/components/community/MemberDirectory";
 import { FamTripsSection } from "@/components/community/FamTripsSection";
 import { OnlineMeetingsSection } from "@/components/community/OnlineMeetingsSection";
 import { InPersonEventsSection } from "@/components/community/InPersonEventsSection";
@@ -10,7 +14,9 @@ import { PaidTrainingsSection } from "@/components/community/PaidTrainingsSectio
 import { WhatsAppSection } from "@/components/community/WhatsAppSection";
 import { HighlightsSection } from "@/components/community/HighlightsSection";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, MessageSquare, UserCheck, Compass, ShieldX } from "lucide-react";
 
 export default function Community() {
   return (
@@ -21,26 +27,17 @@ export default function Community() {
 }
 
 function CommunityContent() {
+  const { membership, isLoading: memberLoading, isMember, isBlocked, join, isJoining } =
+    useCommunityMembership();
+
   const {
-    famTrips,
-    upcomingMeetings,
-    pastMeetings,
-    inPersonEvents,
-    workshops,
-    getWorkshopsByCategory,
-    paidTrainings,
-    whatsappCommunity,
-    highlights,
-    currentPrize,
-    hasVoted,
-    vote,
-    isVoting,
-    currentMonth,
-    currentYear,
-    isLoading,
+    famTrips, upcomingMeetings, pastMeetings, inPersonEvents,
+    workshops, getWorkshopsByCategory, paidTrainings,
+    whatsappCommunity, highlights, currentPrize,
+    hasVoted, vote, isVoting, currentMonth, currentYear, isLoading,
   } = useCommunity();
 
-  if (isLoading) {
+  if (memberLoading || isLoading) {
     return (
       <DashboardLayout>
         <div className="space-y-8">
@@ -50,19 +47,39 @@ function CommunityContent() {
             <Skeleton className="h-64" />
             <Skeleton className="h-64" />
           </div>
-          <Skeleton className="h-48" />
-          <div className="grid gap-4 md:grid-cols-2">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
-          </div>
         </div>
       </DashboardLayout>
     );
   }
 
+  // Blocked user
+  if (isBlocked) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-lg mx-auto text-center py-20 space-y-4">
+          <ShieldX className="h-16 w-16 mx-auto text-destructive/60" />
+          <h2 className="text-xl font-bold text-foreground">Acesso revisado</h2>
+          <p className="text-muted-foreground">
+            Seu acesso à comunidade foi revisado e não atende aos critérios atuais.
+          </p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Gate for non-members
+  if (!isMember) {
+    return (
+      <DashboardLayout>
+        <CommunityGate onJoin={join} isJoining={isJoining} />
+      </DashboardLayout>
+    );
+  }
+
+  // Full community access
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6">
         <PageHeader
           pageKey="comunidade"
           title="Travel Experts"
@@ -71,37 +88,50 @@ function CommunityContent() {
           adminTab="community"
         />
 
-        {/* 1. Fam Trips & Exclusive Opportunities */}
-        <FamTripsSection trips={famTrips} />
+        <Tabs defaultValue="feed" className="w-full">
+          <TabsList className="w-full justify-start overflow-x-auto">
+            <TabsTrigger value="feed" className="gap-1.5">
+              <MessageSquare className="h-4 w-4" /> Feed
+            </TabsTrigger>
+            <TabsTrigger value="members" className="gap-1.5">
+              <UserCheck className="h-4 w-4" /> Membros
+            </TabsTrigger>
+            <TabsTrigger value="content" className="gap-1.5">
+              <Compass className="h-4 w-4" /> Conteúdos
+            </TabsTrigger>
+          </TabsList>
 
-        {/* 2. Online Weekly Meetings */}
-        <OnlineMeetingsSection upcoming={upcomingMeetings} past={pastMeetings} />
+          <TabsContent value="feed" className="mt-6">
+            <CommunityFeedSection />
+          </TabsContent>
 
-        {/* 3. In-Person Monthly Events */}
-        <InPersonEventsSection events={inPersonEvents} />
+          <TabsContent value="members" className="mt-6">
+            <MemberDirectory />
+          </TabsContent>
 
-        {/* 4. Professional Workshops */}
-        <WorkshopsSection
-          workshops={workshops}
-          getWorkshopsByCategory={getWorkshopsByCategory}
-        />
-
-        {/* 5. Paid Training Opportunities */}
-        <PaidTrainingsSection trainings={paidTrainings} />
-
-        {/* 6. WhatsApp Community */}
-        <WhatsAppSection community={whatsappCommunity} />
-
-        {/* 7. Monthly Highlights & Prizes */}
-        <HighlightsSection
-          highlights={highlights}
-          prize={currentPrize}
-          currentMonth={currentMonth}
-          currentYear={currentYear}
-          hasVoted={hasVoted}
-          onVote={vote}
-          isVoting={isVoting}
-        />
+          <TabsContent value="content" className="mt-6">
+            <div className="space-y-8">
+              <FamTripsSection trips={famTrips} />
+              <OnlineMeetingsSection upcoming={upcomingMeetings} past={pastMeetings} />
+              <InPersonEventsSection events={inPersonEvents} />
+              <WorkshopsSection
+                workshops={workshops}
+                getWorkshopsByCategory={getWorkshopsByCategory}
+              />
+              <PaidTrainingsSection trainings={paidTrainings} />
+              <WhatsAppSection community={whatsappCommunity} />
+              <HighlightsSection
+                highlights={highlights}
+                prize={currentPrize}
+                currentMonth={currentMonth}
+                currentYear={currentYear}
+                hasVoted={hasVoted}
+                onVote={vote}
+                isVoting={isVoting}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
