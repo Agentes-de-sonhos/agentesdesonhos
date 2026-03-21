@@ -2,14 +2,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Users, MapPin, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -34,6 +33,7 @@ import {
   TRAVEL_INTEREST_ICONS,
   TRAVEL_PACE_LABELS,
 } from "@/types/itinerary";
+import type { DateRange } from "react-day-picker";
 
 const formSchema = z.object({
   destination: z.string().min(2, "Destino é obrigatório"),
@@ -56,8 +56,8 @@ interface ItineraryFormProps {
 }
 
 export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<TravelInterest[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -128,76 +128,66 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           )}
         </div>
 
-        {/* Dates */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Data de Início</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !startDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Selecione</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={(date) => {
-                    setStartDate(date);
-                    if (date) {
-                      form.setValue("startDate", date);
-                      if (!endDate || endDate < date) {
-                        const newEndDate = addDays(date, 5);
-                        setEndDate(newEndDate);
-                        form.setValue("endDate", newEndDate);
-                      }
-                    }
-                  }}
-                  disabled={(date) => date < new Date()}
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Data de Fim</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !endDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Selecione</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={(date) => {
-                    setEndDate(date);
-                    if (date) form.setValue("endDate", date);
-                  }}
-                  disabled={(date) =>
-                    date < new Date() || (startDate ? date < startDate : false)
+        {/* Date Range */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4" />
+            Período da Viagem
+          </Label>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !dateRange?.from && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateRange?.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })}
+                      {" → "}
+                      {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
+                    </>
+                  ) : (
+                    format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
+                  )
+                ) : (
+                  <span>Selecione o período</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={(range) => {
+                  setDateRange(range);
+                  if (range?.from) {
+                    form.setValue("startDate", range.from);
                   }
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+                  if (range?.from && range?.to) {
+                    form.setValue("endDate", range.to);
+                    setCalendarOpen(false);
+                  }
+                }}
+                disabled={(date) => date < new Date()}
+                numberOfMonths={2}
+                locale={ptBR}
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+          {dateRange?.from && dateRange?.to && (
+            <p className="text-xs text-muted-foreground">
+              {Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1} dias de viagem
+            </p>
+          )}
+          {(form.formState.errors.startDate || form.formState.errors.endDate) && (
+            <p className="text-sm text-destructive">Selecione o período completo da viagem</p>
+          )}
         </div>
 
         {/* Travelers */}
