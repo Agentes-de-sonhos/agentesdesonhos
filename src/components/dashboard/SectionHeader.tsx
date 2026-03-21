@@ -44,20 +44,20 @@
    community: "text-[hsl(var(--section-community))]",
  };
 
- export function SectionHeader({ title, color, className }: SectionHeaderProps) {
-   return (
-     <div className={cn("mb-4", className)}>
-       <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">
-         {title}
-       </h2>
-       <div 
-         className={cn(
-           "mt-2 h-1 w-16 rounded-full",
-           colorStyles[color]
-         )}
-       />
-     </div>
-   );
- }
+  export function SectionHeader({ title, color, className }: SectionHeaderProps) {
+    return (
+      <div className={cn("mb-4 w-fit", className)}>
+        <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">
+          {title}
+        </h2>
+        <div 
+          className={cn(
+            "mt-2 h-1 w-full rounded-full",
+            colorStyles[color]
+          )}
+        />
+      </div>
+    );
+  }
 
  export { colorStyles, iconColorStyles, type SectionColor };
