@@ -1,4 +1,5 @@
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
+import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -229,9 +230,9 @@ function TripWalletContent() {
   const handleCopyLink = () => {
     if (!trip) return;
     const url = trip.slug 
-      ? `${window.location.origin}/c/${trip.slug}`
+      ? `${PUBLIC_DOMAIN}/c/${trip.slug}`
       : trip.share_token 
-        ? `${window.location.origin}/viagem/${trip.share_token}` 
+        ? `${PUBLIC_DOMAIN}/viagem/${trip.share_token}` 
         : '';
     if (!url) return;
     navigator.clipboard.writeText(url);

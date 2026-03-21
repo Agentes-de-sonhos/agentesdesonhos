@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useLeadCapture, LeadCapture } from "@/hooks/useLeadCapture";
 import { useAuth } from "@/hooks/useAuth";
@@ -54,7 +55,7 @@ export default function MeusLeads() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const formUrl = form?.token
-    ? `https://agentesdesonhos.com.br/formulario/${form.token}`
+    ? `${PUBLIC_DOMAIN}/formulario/${form.token}`
     : "";
 
   const copyLink = () => {

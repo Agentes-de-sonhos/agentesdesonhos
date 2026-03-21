@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -202,13 +203,13 @@ export default function CriarRoteiro() {
       shareToken,
     });
 
-    const url = `${window.location.origin}/roteiro/${shareToken}`;
+    const url = `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado! O roteiro foi publicado.");
   };
 
   const handleCopyLink = async (shareToken: string) => {
-    const url = `${window.location.origin}/roteiro/${shareToken}`;
+    const url = `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };

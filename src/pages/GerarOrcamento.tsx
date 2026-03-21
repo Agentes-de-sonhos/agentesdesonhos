@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -89,7 +90,7 @@ function QuoteHistoryRow({
           </DropdownMenuItem>
           {q.share_token && (
             <DropdownMenuItem onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/orcamento/${q.share_token}`);
+              navigator.clipboard.writeText(`${PUBLIC_DOMAIN}/orcamento/${q.share_token}`);
             }}>
               <ExternalLink className="mr-2 h-3.5 w-3.5" /> Copiar Link
             </DropdownMenuItem>
@@ -237,7 +238,7 @@ export default function GerarOrcamento() {
   const handlePublish = async () => {
     if (!id) return;
     const token = await publishQuote(id);
-    const url = `${window.location.origin}/orcamento/${token}`;
+    const url = `${PUBLIC_DOMAIN}/orcamento/${token}`;
     await navigator.clipboard.writeText(url);
     toast({ title: "Link copiado!", description: "O link do orçamento foi copiado para a área de transferência." });
   };

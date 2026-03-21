@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, Check, Link, QrCode, ExternalLink, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ export function ShareTripModal({ trip, open, onOpenChange }: ShareTripModalProps
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const origin = "https://agentesdesonhos.com.br";
+  const origin = PUBLIC_DOMAIN;
   const slugLink = trip.slug ? `${origin}/c/${trip.slug}` : null;
   const shortLink = trip.short_code ? `${origin}/v/${trip.short_code}` : null;
   const legacyLink = trip.share_token ? `${origin}/viagem/${trip.share_token}` : null;
