@@ -378,6 +378,8 @@ export default function CriarRoteiro() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      <AIGeneratingOverlay visible={isGenerating} />
     </DashboardLayout>
   );
 }
