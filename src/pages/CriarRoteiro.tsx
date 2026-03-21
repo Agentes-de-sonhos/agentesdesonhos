@@ -81,7 +81,6 @@ export default function CriarRoteiro() {
       const itinerary = await createItinerary.mutateAsync(data);
 
       // Generate with AI
-      toast.info("Gerando roteiro com IA...");
       const generatedData = await generateWithAI(data);
 
       // Save generated data
