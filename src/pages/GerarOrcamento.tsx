@@ -90,7 +90,7 @@ function QuoteHistoryRow({
           </DropdownMenuItem>
           {q.share_token && (
             <DropdownMenuItem onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/orcamento/${q.share_token}`);
+              navigator.clipboard.writeText(`${PUBLIC_DOMAIN}/orcamento/${q.share_token}`);
             }}>
               <ExternalLink className="mr-2 h-3.5 w-3.5" /> Copiar Link
             </DropdownMenuItem>
