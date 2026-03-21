@@ -60,6 +60,19 @@ export default function ResetPassword() {
       setIsRecovery(true);
     }
 
+    // If user already has a session (recovery link was already processed
+    // by AuthProvider before this component mounted), allow password reset
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session && !isRecovery) {
+        // Check if we arrived here from a recovery flow (URL or referrer hint)
+        const url = new URL(window.location.href);
+        const isRecoveryRoute = url.pathname === "/reset-password";
+        if (isRecoveryRoute) {
+          setIsRecovery(true);
+        }
+      }
+    });
+
     return () => subscription.unsubscribe();
   }, []);
 
