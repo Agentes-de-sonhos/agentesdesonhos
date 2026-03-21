@@ -102,6 +102,9 @@ export function AdminCommunityManager() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="members">
+            <AdminCommunityMembersManager />
+          </TabsContent>
           <TabsContent value="fam-trips">
             <FamTripsManager />
           </TabsContent>
