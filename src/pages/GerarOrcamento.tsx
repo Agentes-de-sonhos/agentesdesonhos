@@ -238,7 +238,7 @@ export default function GerarOrcamento() {
   const handlePublish = async () => {
     if (!id) return;
     const token = await publishQuote(id);
-    const url = `${window.location.origin}/orcamento/${token}`;
+    const url = `${PUBLIC_DOMAIN}/orcamento/${token}`;
     await navigator.clipboard.writeText(url);
     toast({ title: "Link copiado!", description: "O link do orçamento foi copiado para a área de transferência." });
   };
