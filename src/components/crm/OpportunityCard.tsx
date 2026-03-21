@@ -49,13 +49,14 @@ import {
 import { OpportunityForm } from "./OpportunityForm";
 import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
 import { useOpportunities } from "@/hooks/useCRM";
-import { STAGE_LABELS, type Opportunity } from "@/types/crm";
+import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, type Opportunity, type OpportunityStage } from "@/types/crm";
 import { cn } from "@/lib/utils";
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
   onDragStart: (e: React.DragEvent, id: string) => void;
   isOverdue?: boolean;
+  stageColor?: OpportunityStage;
 }
 
 function formatCurrency(value: number) {
@@ -65,7 +66,7 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export function OpportunityCard({ opportunity, onDragStart, isOverdue }: OpportunityCardProps) {
+export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColor }: OpportunityCardProps) {
   const navigate = useNavigate();
   const { deleteOpportunity } = useOpportunities();
   const [isEditing, setIsEditing] = useState(false);
@@ -111,17 +112,22 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue }: Opportu
         draggable
         onDragStart={(e) => onDragStart(e, opportunity.id)}
         className={cn(
-          "cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow bg-card",
-          isOverdue && "ring-2 ring-destructive/50"
+          "cursor-grab active:cursor-grabbing transition-all hover:shadow-lg hover:-translate-y-0.5 bg-card border",
+          isOverdue && "ring-2 ring-destructive/60 shadow-destructive/10"
         )}
       >
-        <CardContent className="p-3">
-          <div className="flex items-start justify-between gap-2 mb-2">
+        <CardContent className="p-3.5">
+          {/* Header: client name + menu */}
+          <div className="flex items-start justify-between gap-2 mb-2.5">
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm truncate">{opportunity.client?.name}</p>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3" />
-                <span className="truncate">{opportunity.destination}</span>
+              <p className="font-bold text-sm text-foreground leading-tight truncate">
+                {opportunity.client?.name}
+              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <MapPin className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                <span className="text-xs font-medium text-foreground/80 truncate">
+                  {opportunity.destination}
+                </span>
               </div>
             </div>
             <DropdownMenu>
@@ -157,23 +163,25 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue }: Opportu
             </DropdownMenu>
           </div>
 
-          <div className="space-y-1.5">
+          {/* Key info */}
+          <div className="space-y-2">
             {(opportunity.start_date || opportunity.end_date) && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" />
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
                 <span>
                   {opportunity.start_date &&
                     format(new Date(opportunity.start_date), "dd/MM", { locale: ptBR })}
-                  {opportunity.start_date && opportunity.end_date && " - "}
+                  {opportunity.start_date && opportunity.end_date && " → "}
                   {opportunity.end_date &&
                     format(new Date(opportunity.end_date), "dd/MM", { locale: ptBR })}
                 </span>
               </div>
             )}
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Users className="h-3 w-3" />
+                  <Users className="h-3.5 w-3.5" />
                   <span>{opportunity.passengers_count} pax</span>
                 </div>
                 {isOverdue && (
@@ -185,11 +193,13 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue }: Opportu
                   </Tooltip>
                 )}
               </div>
-              <Badge variant="secondary" className="text-xs">
+              <span className="text-sm font-bold text-foreground">
                 {formatCurrency(opportunity.estimated_value)}
-              </Badge>
+              </span>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground pt-1 border-t">
+
+            {/* Time in stage - subtle */}
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground/70 pt-1.5 border-t border-border/50">
               <Clock className="h-3 w-3" />
               <span>Há {timeInStage} nesta etapa</span>
             </div>

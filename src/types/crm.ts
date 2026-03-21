@@ -95,14 +95,47 @@ export const STAGE_LABELS: Record<OpportunityStage, string> = {
 };
 
 export const STAGE_COLORS: Record<OpportunityStage, string> = {
-  new_contact: 'bg-blue-500',
-  in_service: 'bg-yellow-500',
-  quote_creating: 'bg-orange-500',
-  quote_sent: 'bg-purple-500',
-  negotiation: 'bg-pink-500',
-  follow_up: 'bg-cyan-500',
-  closed: 'bg-green-500',
-  lost: 'bg-gray-500',
+  new_contact: 'bg-blue-600',
+  in_service: 'bg-amber-500',
+  quote_creating: 'bg-orange-600',
+  quote_sent: 'bg-violet-600',
+  negotiation: 'bg-rose-600',
+  follow_up: 'bg-sky-600',
+  closed: 'bg-emerald-600',
+  lost: 'bg-slate-500',
+};
+
+export const STAGE_BG_COLORS: Record<OpportunityStage, string> = {
+  new_contact: 'bg-blue-50 dark:bg-blue-950/40',
+  in_service: 'bg-amber-50 dark:bg-amber-950/40',
+  quote_creating: 'bg-orange-50 dark:bg-orange-950/40',
+  quote_sent: 'bg-violet-50 dark:bg-violet-950/40',
+  negotiation: 'bg-rose-50 dark:bg-rose-950/40',
+  follow_up: 'bg-sky-50 dark:bg-sky-950/40',
+  closed: 'bg-emerald-50 dark:bg-emerald-950/40',
+  lost: 'bg-slate-100 dark:bg-slate-900/40',
+};
+
+export const STAGE_BORDER_COLORS: Record<OpportunityStage, string> = {
+  new_contact: 'border-blue-200 dark:border-blue-800',
+  in_service: 'border-amber-200 dark:border-amber-800',
+  quote_creating: 'border-orange-200 dark:border-orange-800',
+  quote_sent: 'border-violet-200 dark:border-violet-800',
+  negotiation: 'border-rose-200 dark:border-rose-800',
+  follow_up: 'border-sky-200 dark:border-sky-800',
+  closed: 'border-emerald-200 dark:border-emerald-800',
+  lost: 'border-slate-200 dark:border-slate-700',
+};
+
+export const STAGE_TEXT_COLORS: Record<OpportunityStage, string> = {
+  new_contact: 'text-blue-700 dark:text-blue-300',
+  in_service: 'text-amber-700 dark:text-amber-300',
+  quote_creating: 'text-orange-700 dark:text-orange-300',
+  quote_sent: 'text-violet-700 dark:text-violet-300',
+  negotiation: 'text-rose-700 dark:text-rose-300',
+  follow_up: 'text-sky-700 dark:text-sky-300',
+  closed: 'text-emerald-700 dark:text-emerald-300',
+  lost: 'text-slate-600 dark:text-slate-400',
 };
 
 export const STAGES_ORDER: OpportunityStage[] = [
