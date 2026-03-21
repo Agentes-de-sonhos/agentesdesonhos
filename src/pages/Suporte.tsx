@@ -86,6 +86,7 @@ function NewTicketDialog({ onCreated }: { onCreated: (id: string) => void }) {
 
 function TicketChat({ ticket, onBack }: { ticket: SupportTicket; onBack: () => void }) {
   const { messages, isLoading, sendMessage, uploadAttachment, markAsRead } = useTicketMessages(ticket.id);
+  const { updateStatus } = useSupportTickets();
   const [input, setInput] = useState("");
   const [attachFiles, setAttachFiles] = useState<File[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
