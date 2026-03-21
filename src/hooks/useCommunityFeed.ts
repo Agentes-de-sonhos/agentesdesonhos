@@ -48,6 +48,7 @@ export function useCommunityFeed() {
         user_liked: userLikes.includes(post.id),
       })) as CommunityPost[];
     },
+    staleTime: 2 * 60 * 1000,
   });
 
   const createPost = useMutation({
