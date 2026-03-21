@@ -1,11 +1,16 @@
+import { useState, useRef, useCallback } from "react";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useCommunityMembership } from "@/hooks/useCommunityMembership";
+import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { CommunityGate } from "@/components/community/CommunityGate";
 import { CommunityFeedSection } from "@/components/community/CommunityFeedSection";
+import { CommunityLeftSidebar } from "@/components/community/CommunityLeftSidebar";
+import { CommunityRightSidebar } from "@/components/community/CommunityRightSidebar";
 import { MemberDirectory } from "@/components/community/MemberDirectory";
+import { MemberProfileDialog } from "@/components/community/MemberProfileDialog";
 import { FamTripsSection } from "@/components/community/FamTripsSection";
 import { OnlineMeetingsSection } from "@/components/community/OnlineMeetingsSection";
 import { InPersonEventsSection } from "@/components/community/InPersonEventsSection";
@@ -14,9 +19,11 @@ import { PaidTrainingsSection } from "@/components/community/PaidTrainingsSectio
 import { WhatsAppSection } from "@/components/community/WhatsAppSection";
 import { HighlightsSection } from "@/components/community/HighlightsSection";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Users, MessageSquare, UserCheck, Compass, ShieldX } from "lucide-react";
+import { Users, ShieldX } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
+import type { CommunityMember } from "@/types/community-members";
 
 export default function Community() {
   return (
@@ -27,15 +34,62 @@ export default function Community() {
 }
 
 function CommunityContent() {
+  const isMobile = useIsMobile();
   const { membership, isLoading: memberLoading, isMember, isBlocked, join, isJoining } =
     useCommunityMembership();
-
   const {
     famTrips, upcomingMeetings, pastMeetings, inPersonEvents,
     workshops, getWorkshopsByCategory, paidTrainings,
     whatsappCommunity, highlights, currentPrize,
     hasVoted, vote, isVoting, currentMonth, currentYear, isLoading,
   } = useCommunity();
+  const { posts } = useCommunityFeed();
+
+  const [activeSection, setActiveSection] = useState("feed");
+  const [filterSpecialty, setFilterSpecialty] = useState<string | null>(null);
+  const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null);
+
+  const feedRef = useRef<HTMLDivElement>(null);
+  const membersRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const eventsRef = useRef<HTMLDivElement>(null);
+  const opportunitiesRef = useRef<HTMLDivElement>(null);
+
+  // Members query for right sidebar
+  const { data: members = [] } = useQuery({
+    queryKey: ["community-members"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("community_members")
+        .select("*")
+        .in("status", ["approved_unverified", "verified"])
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      if (!data || data.length === 0) return [];
+      const userIds = data.map((m: any) => m.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name, avatar_url, agency_name, city, state")
+        .in("user_id", userIds);
+      return data.map((m: any) => ({
+        ...m,
+        profile: profiles?.find((p: any) => p.user_id === m.user_id),
+      })) as CommunityMember[];
+    },
+  });
+
+  const handleNavigate = useCallback((section: string) => {
+    setActiveSection(section);
+    const refs: Record<string, React.RefObject<HTMLDivElement>> = {
+      feed: feedRef,
+      members: membersRef,
+      content: contentRef,
+      events: eventsRef,
+      opportunities: opportunitiesRef,
+    };
+    const ref = refs[section];
+    ref?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   if (memberLoading || isLoading) {
     return (
@@ -52,7 +106,6 @@ function CommunityContent() {
     );
   }
 
-  // Blocked user
   if (isBlocked) {
     return (
       <DashboardLayout>
@@ -67,7 +120,6 @@ function CommunityContent() {
     );
   }
 
-  // Gate for non-members
   if (!isMember) {
     return (
       <DashboardLayout>
@@ -76,50 +128,69 @@ function CommunityContent() {
     );
   }
 
-  // Full community access
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <PageHeader
           pageKey="comunidade"
           title="Travel Experts"
-          subtitle="Conecte-se, aprenda e cresça com a nossa comunidade de agentes de viagem"
+          subtitle="Conecte-se, aprenda e cresça com a nossa comunidade"
           icon={Users}
           adminTab="community"
         />
 
-        <Tabs defaultValue="feed" className="w-full">
-          <TabsList className="w-full justify-start overflow-x-auto">
-            <TabsTrigger value="feed" className="gap-1.5">
-              <MessageSquare className="h-4 w-4" /> Feed
-            </TabsTrigger>
-            <TabsTrigger value="members" className="gap-1.5">
-              <UserCheck className="h-4 w-4" /> Membros
-            </TabsTrigger>
-            <TabsTrigger value="content" className="gap-1.5">
-              <Compass className="h-4 w-4" /> Conteúdos
-            </TabsTrigger>
-          </TabsList>
+        {/* 3-column layout */}
+        <div className="flex gap-6">
+          {/* Left Sidebar - hidden on mobile */}
+          {!isMobile && (
+            <aside className="w-[240px] shrink-0 sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto scrollbar-thin">
+              <CommunityLeftSidebar
+                membership={membership as CommunityMember}
+                activeSection={activeSection}
+                onNavigate={handleNavigate}
+                filterSpecialty={filterSpecialty}
+                onFilterSpecialty={setFilterSpecialty}
+              />
+            </aside>
+          )}
 
-          <TabsContent value="feed" className="mt-6">
-            <CommunityFeedSection />
-          </TabsContent>
+          {/* Central Feed */}
+          <main className="flex-1 min-w-0 space-y-8">
+            <div ref={feedRef}>
+              <CommunityFeedSection
+                famTrips={famTrips}
+                events={inPersonEvents}
+              />
+            </div>
 
-          <TabsContent value="members" className="mt-6">
-            <MemberDirectory />
-          </TabsContent>
+            {/* Members Section */}
+            <div ref={membersRef} className="scroll-mt-20">
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                Membros da Comunidade
+              </h2>
+              <MemberDirectory />
+            </div>
 
-          <TabsContent value="content" className="mt-6">
-            <div className="space-y-8">
+            {/* Content Section */}
+            <div ref={contentRef} className="scroll-mt-20 space-y-8">
               <FamTripsSection trips={famTrips} />
               <OnlineMeetingsSection upcoming={upcomingMeetings} past={pastMeetings} />
+              <PaidTrainingsSection trainings={paidTrainings} />
+              <WhatsAppSection community={whatsappCommunity} />
+            </div>
+
+            {/* Events Section */}
+            <div ref={eventsRef} className="scroll-mt-20 space-y-8">
               <InPersonEventsSection events={inPersonEvents} />
               <WorkshopsSection
                 workshops={workshops}
                 getWorkshopsByCategory={getWorkshopsByCategory}
               />
-              <PaidTrainingsSection trainings={paidTrainings} />
-              <WhatsAppSection community={whatsappCommunity} />
+            </div>
+
+            {/* Opportunities / Highlights */}
+            <div ref={opportunitiesRef} className="scroll-mt-20">
               <HighlightsSection
                 highlights={highlights}
                 prize={currentPrize}
@@ -130,9 +201,28 @@ function CommunityContent() {
                 isVoting={isVoting}
               />
             </div>
-          </TabsContent>
-        </Tabs>
+          </main>
+
+          {/* Right Sidebar - hidden on mobile */}
+          {!isMobile && (
+            <aside className="w-[260px] shrink-0 sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto scrollbar-thin">
+              <CommunityRightSidebar
+                members={members}
+                highlights={highlights}
+                events={inPersonEvents}
+                posts={posts}
+                onMemberClick={setSelectedMember}
+              />
+            </aside>
+          )}
+        </div>
       </div>
+
+      <MemberProfileDialog
+        member={selectedMember}
+        open={!!selectedMember}
+        onOpenChange={(open) => !open && setSelectedMember(null)}
+      />
     </DashboardLayout>
   );
 }
