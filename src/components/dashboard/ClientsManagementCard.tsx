@@ -45,7 +45,7 @@ export function ClientsManagementCard() {
     <Card className="border-0 shadow-card">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="w-fit">
             <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
               <Target className="h-5 w-5 text-[hsl(var(--section-financial))]" />
               Minha Meta

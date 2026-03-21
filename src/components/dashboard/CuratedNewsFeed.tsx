@@ -166,7 +166,7 @@ export function CuratedNewsFeed() {
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardContent className="pt-6 space-y-0.5">
-        <div className="mb-3">
+        <div className="mb-3 w-fit">
           <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
             <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
             Radar do Turismo

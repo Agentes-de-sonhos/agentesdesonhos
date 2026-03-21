@@ -45,7 +45,7 @@ export function AgentToolsCard() {
   return (
     <Card className="border-0 shadow-card">
       <CardContent className="pt-5 pb-4 space-y-4">
-        <div>
+        <div className="w-fit">
           <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
             <Wrench className="h-5 w-5 text-[hsl(var(--section-tools))]" />
             Ferramentas do Agente
