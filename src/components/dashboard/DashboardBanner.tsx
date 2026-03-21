@@ -38,6 +38,7 @@ export function DashboardBanner() {
       if (error) throw error;
       return data as Banner[];
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   const items = banners ?? [];

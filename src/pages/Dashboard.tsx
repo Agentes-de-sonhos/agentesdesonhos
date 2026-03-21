@@ -92,6 +92,7 @@ export default function Dashboard() {
       return data;
     },
     enabled: !!user,
+    staleTime: 5 * 60 * 1000,
   });
 
   const firstName = profile?.name?.split(" ")[0] || "Agente";
@@ -121,6 +122,7 @@ export default function Dashboard() {
         description: item.description,
       }));
     },
+    staleTime: 10 * 60 * 1000,
   });
 
   const isLoading = suppliersLoading;

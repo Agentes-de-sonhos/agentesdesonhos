@@ -37,15 +37,14 @@ function CommunityContent() {
   const isMobile = useIsMobile();
   const { membership, isLoading: memberLoading, isMember, isBlocked, join, isJoining } =
     useCommunityMembership();
+  const [activeSection, setActiveSection] = useState("feed");
   const {
     famTrips, upcomingMeetings, pastMeetings, inPersonEvents,
     workshops, getWorkshopsByCategory, paidTrainings,
     whatsappCommunity, highlights, currentPrize,
     hasVoted, vote, isVoting, currentMonth, currentYear, isLoading,
-  } = useCommunity();
+  } = useCommunity(activeSection);
   const { posts } = useCommunityFeed();
-
-  const [activeSection, setActiveSection] = useState("feed");
   const [filterSpecialty, setFilterSpecialty] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null);
 
@@ -70,6 +69,7 @@ function CommunityContent() {
         profile: profiles?.find((p: any) => p.user_id === m.user_id),
       })) as CommunityMember[];
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   const handleNavigate = useCallback((section: string) => {
