@@ -426,14 +426,8 @@ export default function RoteiroPublico() {
           </div>
         )}
 
-        {/* ─── Footer ─── */}
-        <div className="text-center text-sm text-muted-foreground">
-          <p>Roteiro criado com ❤️ por Agentes de Sonhos</p>
-          <p className="mt-4 text-xs text-muted-foreground/60">
-            Desenvolvido por{" "}
-            <span className="font-medium text-muted-foreground/80">Nobre Digital</span>
-          </p>
-        </div>
+
+
       </main>
 
       {/* ─── Mobile floating WhatsApp ─── */}
