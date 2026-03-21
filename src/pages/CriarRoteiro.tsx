@@ -28,7 +28,7 @@ import {
 export default function CriarRoteiro() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState<"create" | "list">(id ? "create" : "list");
+  const [activeTab, setActiveTab] = useState<"create" | "list">("create");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
