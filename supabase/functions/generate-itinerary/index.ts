@@ -67,6 +67,7 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData?.user) {
+      console.error("Auth error:", userError?.message);
       return new Response(JSON.stringify({ error: "Token inválido ou expirado." }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -74,14 +75,20 @@ serve(async (req) => {
 
     const userId = userData.user.id;
 
-    const { data: hasAccess } = await supabase.rpc('has_feature_access', { _user_id: userId, _feature: 'ai_tools' });
+    const { data: hasAccess, error: accessError } = await supabase.rpc('has_feature_access', { _user_id: userId, _feature: 'ai_tools' });
+    if (accessError) {
+      console.error("has_feature_access error:", accessError.message);
+    }
     if (!hasAccess) {
       return new Response(JSON.stringify({ error: "Faça upgrade para o plano Profissional para acessar ferramentas de IA.", upgrade_required: true }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data: canUse } = await supabase.rpc('check_ai_usage', { _user_id: userId });
+    const { data: canUse, error: usageError } = await supabase.rpc('check_ai_usage', { _user_id: userId });
+    if (usageError) {
+      console.error("check_ai_usage error:", usageError.message);
+    }
     if (!canUse) {
       return new Response(JSON.stringify({ error: "Cota mensal de IA esgotada.", quota_exceeded: true }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -105,7 +112,10 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("AI key not configured");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
+      throw new Error("AI key not configured");
+    }
 
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -154,10 +164,17 @@ serve(async (req) => {
     // Build profile-specific rules
     const profileRules = buildProfileRules(tripType);
 
+    // Build dates array for the tool schema description
+    const datesInfo: string[] = [];
+    for (let i = 0; i < days; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      datesInfo.push(`Dia ${i + 1}: ${d.toISOString().split('T')[0]}`);
+    }
+
     const systemPrompt = `Você é um especialista em turismo e roteiros de viagem, contratado para auxiliar agentes de viagem a criar roteiros altamente personalizados para seus clientes.
 
 REGRAS FUNDAMENTAIS:
-- Responda APENAS com JSON válido, sem texto adicional
 - Cada dia deve ter exatamente 3 atividades: manhã, tarde e noite
 - PRIORIZE os interesses selecionados pelo agente na distribuição das atividades
 - Adapte RIGOROSAMENTE ao perfil do viajante — nunca sugira atividades incompatíveis
@@ -178,27 +195,11 @@ ${profileRules}`;
 - Tipo de viagem: ${tripTypeLabels[tripType] || tripType}
 - Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}
 
-Retorne um JSON com a seguinte estrutura:
-{
-  "days": [
-    {
-      "dayNumber": 1,
-      "date": "${startDate}",
-      "activities": [
-        {
-          "period": "manha",
-          "title": "Título da atividade",
-          "description": "Descrição detalhada e personalizada da atividade, explicando por que ela é ideal para este perfil de viajante",
-          "location": "Nome do local específico",
-          "estimatedDuration": "2 horas",
-          "estimatedCost": "R$ 50 por pessoa"
-        },
-        { "period": "tarde", "title": "...", "description": "...", "location": "...", "estimatedDuration": "...", "estimatedCost": "..." },
-        { "period": "noite", "title": "...", "description": "...", "location": "...", "estimatedDuration": "...", "estimatedCost": "..." }
-      ]
-    }
-  ]
-}`;
+Datas dos dias: ${datesInfo.join(', ')}
+
+Use a função generate_itinerary para retornar o roteiro completo.`;
+
+    console.log("Calling AI gateway for destination:", destination, "days:", days);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -207,12 +208,58 @@ Retorne um JSON com a seguinte estrutura:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        response_format: { type: "json_object" },
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "generate_itinerary",
+              description: "Gera um roteiro de viagem completo com atividades para cada dia.",
+              parameters: {
+                type: "object",
+                properties: {
+                  days: {
+                    type: "array",
+                    description: "Lista de dias do roteiro",
+                    items: {
+                      type: "object",
+                      properties: {
+                        dayNumber: { type: "number", description: "Número do dia (1, 2, 3...)" },
+                        date: { type: "string", description: "Data no formato YYYY-MM-DD" },
+                        activities: {
+                          type: "array",
+                          description: "Exatamente 3 atividades: manhã, tarde e noite",
+                          items: {
+                            type: "object",
+                            properties: {
+                              period: { type: "string", enum: ["manha", "tarde", "noite"], description: "Período do dia" },
+                              title: { type: "string", description: "Título da atividade" },
+                              description: { type: "string", description: "Descrição detalhada e personalizada" },
+                              location: { type: "string", description: "Nome do local específico" },
+                              estimatedDuration: { type: "string", description: "Duração estimada (ex: 2 horas)" },
+                              estimatedCost: { type: "string", description: "Custo estimado (ex: R$ 50 por pessoa)" },
+                            },
+                            required: ["period", "title", "description", "location", "estimatedDuration", "estimatedCost"],
+                            additionalProperties: false,
+                          },
+                        },
+                      },
+                      required: ["dayNumber", "date", "activities"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["days"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "generate_itinerary" } },
       }),
     });
 
@@ -225,7 +272,7 @@ Retorne um JSON com a seguinte estrutura:
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos insuficientes." }), {
+        return new Response(JSON.stringify({ error: "Créditos de IA insuficientes. Entre em contato com o suporte." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -235,27 +282,53 @@ Retorne um JSON com a seguinte estrutura:
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      console.error("Empty AI response:", JSON.stringify(data));
-      throw new Error("Empty AI response");
-    }
+    console.log("AI response received, choices:", data.choices?.length);
 
+    // Extract from tool call response
     let itinerary;
-    try {
-      // Try direct parse first (response_format should give clean JSON)
-      itinerary = JSON.parse(content.trim());
-    } catch {
-      // Fallback: extract from code fences
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    
+    if (toolCall?.function?.arguments) {
+      // Tool calling response (preferred path)
       try {
-        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-        const jsonString = jsonMatch ? jsonMatch[1] : content;
-        itinerary = JSON.parse(jsonString.trim());
+        const args = typeof toolCall.function.arguments === 'string' 
+          ? JSON.parse(toolCall.function.arguments) 
+          : toolCall.function.arguments;
+        itinerary = args;
+        console.log("Parsed tool call response, days:", itinerary?.days?.length);
+      } catch (e) {
+        console.error("Failed to parse tool call arguments:", e, toolCall.function.arguments?.substring?.(0, 200));
+        throw new Error("Parse error from tool call");
+      }
+    } else {
+      // Fallback: try content as JSON
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) {
+        console.error("Empty AI response, no tool_calls and no content:", JSON.stringify(data).substring(0, 500));
+        throw new Error("Empty AI response");
+      }
+      
+      try {
+        itinerary = JSON.parse(content.trim());
       } catch {
-        console.error("Failed to parse AI response:", content.substring(0, 500));
-        throw new Error("Parse error");
+        try {
+          const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+          const jsonString = jsonMatch ? jsonMatch[1] : content;
+          itinerary = JSON.parse(jsonString.trim());
+        } catch {
+          console.error("Failed to parse AI content response:", content.substring(0, 500));
+          throw new Error("Parse error");
+        }
       }
     }
+
+    // Validate structure
+    if (!itinerary?.days || !Array.isArray(itinerary.days) || itinerary.days.length === 0) {
+      console.error("Invalid itinerary structure:", JSON.stringify(itinerary).substring(0, 500));
+      throw new Error("Invalid itinerary structure");
+    }
+
+    console.log("Successfully generated itinerary with", itinerary.days.length, "days");
 
     return new Response(JSON.stringify(itinerary), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
