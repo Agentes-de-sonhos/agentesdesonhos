@@ -133,6 +133,26 @@ function TicketChat({ ticket, onBack }: { ticket: SupportTicket; onBack: () => v
             <span className="text-xs text-muted-foreground">{TICKET_CATEGORIES[ticket.category as TicketCategory]}</span>
           </div>
         </div>
+        {ticket.status !== "resolvido" && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 gap-1.5 text-xs"
+            onClick={async () => {
+              try {
+                await updateStatus.mutateAsync({ ticketId: ticket.id, status: "resolvido" });
+                toast.success("Chamado marcado como resolvido!");
+                onBack();
+              } catch {
+                toast.error("Erro ao atualizar chamado");
+              }
+            }}
+            disabled={updateStatus.isPending}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Resolvido
+          </Button>
+        )}
       </div>
 
       {/* Messages */}
