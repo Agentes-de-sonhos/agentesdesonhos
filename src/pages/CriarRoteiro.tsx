@@ -48,8 +48,12 @@ export default function CriarRoteiro() {
     deleteActivity,
     addActivity,
     updateItineraryStatus,
+    updateItineraryDetails,
     deleteItinerary,
   } = useItineraries();
+
+  const [isEditingDestination, setIsEditingDestination] = useState(false);
+  const [editDestination, setEditDestination] = useState("");
 
   const { canUse: canCreateItinerary, remaining: itinerariesRemaining, hasLimit, incrementUsage } = useDailyLimit("itinerary");
 
