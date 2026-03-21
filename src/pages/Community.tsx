@@ -49,12 +49,6 @@ function CommunityContent() {
   const [filterSpecialty, setFilterSpecialty] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null);
 
-  const feedRef = useRef<HTMLDivElement>(null);
-  const membersRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const eventsRef = useRef<HTMLDivElement>(null);
-  const opportunitiesRef = useRef<HTMLDivElement>(null);
-
   // Members query for right sidebar
   const { data: members = [] } = useQuery({
     queryKey: ["community-members"],
@@ -80,15 +74,6 @@ function CommunityContent() {
 
   const handleNavigate = useCallback((section: string) => {
     setActiveSection(section);
-    const refs: Record<string, React.RefObject<HTMLDivElement>> = {
-      feed: feedRef,
-      members: membersRef,
-      content: contentRef,
-      events: eventsRef,
-      opportunities: opportunitiesRef,
-    };
-    const ref = refs[section];
-    ref?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   if (memberLoading || isLoading) {
