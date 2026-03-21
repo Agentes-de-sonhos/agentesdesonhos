@@ -344,7 +344,73 @@ export default function CriarRoteiro() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  {currentItinerary.destination}
+                  {isEditingDestination ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <Input
+                        value={editDestination}
+                        onChange={(e) => setEditDestination(e.target.value)}
+                        className="text-lg font-semibold"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            updateItineraryDetails.mutate(
+                              { itineraryId: currentItinerary.id, updates: { destination: editDestination } },
+                              {
+                                onSuccess: () => {
+                                  setCurrentItinerary({ ...currentItinerary, destination: editDestination });
+                                  setIsEditingDestination(false);
+                                  toast.success("Destino atualizado!");
+                                },
+                              }
+                            );
+                          }
+                          if (e.key === "Escape") setIsEditingDestination(false);
+                        }}
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => {
+                          updateItineraryDetails.mutate(
+                            { itineraryId: currentItinerary.id, updates: { destination: editDestination } },
+                            {
+                              onSuccess: () => {
+                                setCurrentItinerary({ ...currentItinerary, destination: editDestination });
+                                setIsEditingDestination(false);
+                                toast.success("Destino atualizado!");
+                              },
+                            }
+                          );
+                        }}
+                      >
+                        <Check className="h-4 w-4 text-green-600" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => setIsEditingDestination(false)}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      {currentItinerary.destination}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => {
+                          setEditDestination(currentItinerary.destination);
+                          setIsEditingDestination(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </>
+                  )}
                 </CardTitle>
                 <CardDescription>
                   {currentItinerary.travelersCount} viajante(s) •{" "}
