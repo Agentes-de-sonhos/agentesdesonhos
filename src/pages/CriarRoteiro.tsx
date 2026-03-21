@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
