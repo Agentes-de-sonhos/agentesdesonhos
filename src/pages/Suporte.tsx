@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
-  Headset, Plus, ArrowLeft, Send, Paperclip, Loader2, Clock, MessageSquare, X,
+  Headset, Plus, ArrowLeft, Send, Paperclip, Loader2, Clock, MessageSquare, X, CheckCircle2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -86,6 +86,7 @@ function NewTicketDialog({ onCreated }: { onCreated: (id: string) => void }) {
 
 function TicketChat({ ticket, onBack }: { ticket: SupportTicket; onBack: () => void }) {
   const { messages, isLoading, sendMessage, uploadAttachment, markAsRead } = useTicketMessages(ticket.id);
+  const { updateStatus } = useSupportTickets();
   const [input, setInput] = useState("");
   const [attachFiles, setAttachFiles] = useState<File[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -132,6 +133,26 @@ function TicketChat({ ticket, onBack }: { ticket: SupportTicket; onBack: () => v
             <span className="text-xs text-muted-foreground">{TICKET_CATEGORIES[ticket.category as TicketCategory]}</span>
           </div>
         </div>
+        {ticket.status !== "resolvido" && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 gap-1.5 text-xs"
+            onClick={async () => {
+              try {
+                await updateStatus.mutateAsync({ ticketId: ticket.id, status: "resolvido" });
+                toast.success("Chamado marcado como resolvido!");
+                onBack();
+              } catch {
+                toast.error("Erro ao atualizar chamado");
+              }
+            }}
+            disabled={updateStatus.isPending}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Resolvido
+          </Button>
+        )}
       </div>
 
       {/* Messages */}
