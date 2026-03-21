@@ -69,6 +69,7 @@ function CommunityContent() {
         profile: profiles?.find((p: any) => p.user_id === m.user_id),
       })) as CommunityMember[];
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   const handleNavigate = useCallback((section: string) => {
