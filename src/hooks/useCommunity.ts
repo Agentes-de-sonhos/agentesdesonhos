@@ -14,9 +14,12 @@ import type {
   WorkshopCategory,
 } from "@/types/community";
 
-export function useCommunity() {
+export function useCommunity(activeSection: string = "feed") {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Only fetch data for the active section to avoid 8+ simultaneous queries
+  const isSectionActive = (sections: string[]) => sections.includes(activeSection);
 
   // Fam Trips
   const { data: famTrips = [], isLoading: loadingFamTrips } = useQuery({
@@ -29,6 +32,8 @@ export function useCommunity() {
       if (error) throw error;
       return data as FamTrip[];
     },
+    enabled: isSectionActive(["famtrips"]),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Online Meetings
@@ -42,6 +47,8 @@ export function useCommunity() {
       if (error) throw error;
       return data as OnlineMeeting[];
     },
+    enabled: isSectionActive(["meetings"]),
+    staleTime: 5 * 60 * 1000,
   });
 
   const upcomingMeetings = onlineMeetings.filter((m) => !m.is_past);
@@ -58,6 +65,8 @@ export function useCommunity() {
       if (error) throw error;
       return data as InPersonEvent[];
     },
+    enabled: isSectionActive(["events"]),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Professional Workshops
@@ -71,6 +80,8 @@ export function useCommunity() {
       if (error) throw error;
       return data as ProfessionalWorkshop[];
     },
+    enabled: isSectionActive(["workshops"]),
+    staleTime: 5 * 60 * 1000,
   });
 
   const getWorkshopsByCategory = (category: WorkshopCategory) =>
@@ -87,6 +98,8 @@ export function useCommunity() {
       if (error) throw error;
       return data as PaidTraining[];
     },
+    enabled: isSectionActive(["trainings"]),
+    staleTime: 5 * 60 * 1000,
   });
 
   // WhatsApp Community
@@ -100,6 +113,8 @@ export function useCommunity() {
       if (error && error.code !== "PGRST116") throw error;
       return data as WhatsAppCommunity | null;
     },
+    enabled: isSectionActive(["whatsapp"]),
+    staleTime: 10 * 60 * 1000,
   });
 
   // Current Month/Year for highlights
@@ -111,7 +126,6 @@ export function useCommunity() {
   const { data: highlights = [], isLoading: loadingHighlights } = useQuery({
     queryKey: ["community-highlights", currentMonth, currentYear],
     queryFn: async () => {
-      // Fetch highlights
       const { data: highlightsData, error } = await supabase
         .from("community_highlights")
         .select("*")
@@ -121,19 +135,19 @@ export function useCommunity() {
       
       if (error) throw error;
       
-      // Fetch profiles for each highlight
       const userIds = highlightsData.map(h => h.user_id);
       const { data: profilesData } = await supabase
         .from("profiles")
         .select("user_id, name, avatar_url")
         .in("user_id", userIds);
       
-      // Map profiles to highlights
       return highlightsData.map(highlight => ({
         ...highlight,
         profile: profilesData?.find(p => p.user_id === highlight.user_id) || undefined,
       })) as CommunityHighlight[];
     },
+    enabled: isSectionActive(["highlights"]),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Monthly Prize
@@ -149,6 +163,8 @@ export function useCommunity() {
       if (error && error.code !== "PGRST116") throw error;
       return data as MonthlyPrize | null;
     },
+    enabled: isSectionActive(["highlights"]),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Check if user has voted this month
@@ -166,7 +182,8 @@ export function useCommunity() {
       if (error) throw error;
       return !!data;
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && isSectionActive(["highlights"]),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Vote mutation
@@ -193,15 +210,15 @@ export function useCommunity() {
     },
   });
 
-  const isLoading =
-    loadingFamTrips ||
-    loadingMeetings ||
-    loadingEvents ||
-    loadingWorkshops ||
-    loadingTrainings ||
-    loadingWhatsapp ||
-    loadingHighlights ||
-    loadingPrize;
+  // Only consider loading for the active section
+  const isLoading = activeSection === "feed" ? false :
+    (isSectionActive(["famtrips"]) && loadingFamTrips) ||
+    (isSectionActive(["meetings"]) && loadingMeetings) ||
+    (isSectionActive(["events"]) && loadingEvents) ||
+    (isSectionActive(["workshops"]) && loadingWorkshops) ||
+    (isSectionActive(["trainings"]) && loadingTrainings) ||
+    (isSectionActive(["whatsapp"]) && loadingWhatsapp) ||
+    (isSectionActive(["highlights"]) && (loadingHighlights || loadingPrize));
 
   return {
     famTrips,
