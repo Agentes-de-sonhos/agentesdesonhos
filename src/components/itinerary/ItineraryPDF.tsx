@@ -194,9 +194,8 @@ export function generatePDFContent(
       )
       .join("")}
 
-    <div class="footer">
-      <p>Roteiro gerado por Agentes de Sonhos • ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
-    </div>
+
+
   </div>
 </body>
 </html>
