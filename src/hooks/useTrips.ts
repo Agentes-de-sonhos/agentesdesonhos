@@ -41,13 +41,14 @@ export function useTrips() {
         .insert({
           user_id: user.id,
           client_name: formData.client_name,
+          client_id: formData.client_id || null,
           destination: formData.destination,
           start_date: formData.start_date,
           end_date: formData.end_date,
           status: "active",
           share_token: shareToken,
           access_password: password,
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;

@@ -106,7 +106,8 @@ export function useItineraries() {
           trip_type: formData.tripType,
           budget_level: formData.budgetLevel,
           status: "generating",
-        })
+          client_id: formData.clientId || null,
+        } as any)
         .select()
         .single();
 

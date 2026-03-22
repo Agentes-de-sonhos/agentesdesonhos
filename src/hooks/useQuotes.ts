@@ -34,13 +34,14 @@ export function useQuotes() {
         .insert({
           user_id: user.id,
           client_name: formData.client_name,
+          client_id: formData.client_id || null,
           adults_count: formData.adults_count,
           children_count: formData.children_count,
           destination: formData.destination,
           start_date: formData.start_date,
           end_date: formData.end_date,
           status: "draft",
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;
