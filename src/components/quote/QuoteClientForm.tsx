@@ -9,6 +9,8 @@ import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { ClientSelector } from "@/components/shared/ClientSelector";
+import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -49,6 +51,8 @@ interface QuoteClientFormProps {
 
 export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
+  const [clientError, setClientError] = useState("");
   const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("quote-client");
 
   const draft = loadDraft();
@@ -72,9 +76,22 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
     saveDraft(watchedValues);
   }, [watchedValues, saveDraft]);
 
+  // Sync client name from selector
+  useEffect(() => {
+    if (selectedClient) {
+      form.setValue("client_name", selectedClient.name);
+      setClientError("");
+    }
+  }, [selectedClient, form]);
+
   const handleSubmit = (values: FormValues) => {
+    if (!selectedClient) {
+      setClientError("Selecione um cliente para continuar");
+      return;
+    }
     clearDraft();
     onSubmit({
+      client_id: selectedClient.id,
       client_name: values.client_name,
       adults_count: values.adults_count,
       children_count: values.children_count,
@@ -87,19 +104,16 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="client_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Cliente</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome completo do cliente" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Client Selector */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Cliente *</Label>
+          <ClientSelector
+            value={selectedClient}
+            onChange={setSelectedClient}
+            required
+            error={clientError}
+          />
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
