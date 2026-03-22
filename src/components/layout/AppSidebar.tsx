@@ -484,7 +484,7 @@ export function AppSidebar() {
             {renderSingleItem(dashboardItem)}
           </nav>
 
-          <div className="px-3 py-2">
+          <div className="px-3 py-1">
             <Separator className="bg-sidebar-border" />
           </div>
 
