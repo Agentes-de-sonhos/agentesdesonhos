@@ -429,8 +429,17 @@ export default function GerarOrcamento() {
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
               </p>
+              {headerEditDates && (
+                <div className="mt-2">
+                  <QuoteDateEditor
+                    quoteId={quote.id}
+                    startDateStr={quote.start_date}
+                    endDateStr={quote.end_date}
+                    onClose={() => setHeaderEditDates(false)}
+                  />
+                </div>
+              )}
             </div>
-          </div>
           <div className="flex items-center gap-3">
             {autoSaved && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
