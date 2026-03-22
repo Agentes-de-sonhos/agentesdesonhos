@@ -130,6 +130,7 @@ export function useHotels(filters: HotelFilters) {
 
       return results;
     },
+    staleTime: 5 * 60 * 1000,
   });
 }
 
