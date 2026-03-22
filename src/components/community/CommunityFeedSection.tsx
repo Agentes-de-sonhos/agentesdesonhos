@@ -1,3 +1,5 @@
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { CreatePostForm } from "./CreatePostForm";
 import { PostCard } from "./PostCard";
