@@ -24,7 +24,7 @@ export function WhatsAppSupportButton() {
         </span>
       </a>
       <span className="text-xs text-muted-foreground max-w-[200px] leading-tight hidden sm:block">
-        Encontrou algum erro ou gostaria de sugerir alguma melhoria?
+        Encontrou algum erro ou tem uma sugestão de melhoria?
       </span>
     </div>
   );
