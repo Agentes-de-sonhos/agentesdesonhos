@@ -173,6 +173,13 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
           })}
         </div>
       )}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={goToPage}
+        totalItems={totalItems}
+        pageSize={pageSize}
+      />
     </div>
   );
 }

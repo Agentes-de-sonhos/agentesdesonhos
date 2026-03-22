@@ -137,7 +137,7 @@ export default function Beneficios() {
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1">
               <div className="grid gap-4 md:grid-cols-2">
-                {filtered.map((b) => (
+                {paginatedBenefits.map((b) => (
                   <BenefitCard
                     key={b.id}
                     benefit={b}
@@ -147,6 +147,13 @@ export default function Beneficios() {
                   />
                 ))}
               </div>
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                totalItems={totalItems}
+                pageSize={pageSize}
+              />
             </div>
             <div className="lg:w-72 shrink-0">
               <BenefitContributorsRanking ranking={ranking} />
