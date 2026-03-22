@@ -29,9 +29,14 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+function parseLocalDate(dateStr: string) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function formatDate(dateStr: string) {
   try {
-    return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR });
+    return format(parseLocalDate(dateStr), "dd/MM/yyyy", { locale: ptBR });
   } catch {
     return dateStr;
   }
@@ -144,8 +149,8 @@ function generateAgentSignature(profile: AgentProfile | null): string {
 }
 
 export function generateQuotePDF(quote: Quote, profile?: AgentProfile | null) {
-  const startDate = new Date(quote.start_date);
-  const endDate = new Date(quote.end_date);
+  const startDate = parseLocalDate(quote.start_date);
+  const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   const servicesHtml =
