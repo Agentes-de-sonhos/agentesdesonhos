@@ -112,7 +112,7 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
                       {(item.data as FamTrip[]).map((trip) => (
                         <div key={trip.id} className="flex gap-3 items-start">
                           {trip.image_url && (
-                            <img src={trip.image_url} alt={trip.destination} className="w-16 h-16 rounded-md object-cover shrink-0" />
+                            <img src={trip.image_url} alt={trip.destination} loading="lazy" decoding="async" className="w-16 h-16 rounded-md object-cover shrink-0" />
                           )}
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium text-foreground truncate">{trip.destination}</p>
