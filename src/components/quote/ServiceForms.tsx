@@ -85,6 +85,9 @@ const flightSchema = z.object({
 function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0 }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
+  const [showFlightDetails, setShowFlightDetails] = useState(
+    !!(init?.outbound_detail || init?.return_detail)
+  );
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
     defaultValues: {
@@ -97,6 +100,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       notes: init?.notes || "",
       departure_date: init?.departure_date ? new Date(init.departure_date) : tripStartDate,
       return_date: init?.return_date ? new Date(init.return_date) : tripEndDate,
+      outbound_detail: init?.outbound_detail || { airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" },
+      return_detail: init?.return_detail || { airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" },
     },
   });
 
