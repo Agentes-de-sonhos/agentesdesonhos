@@ -2180,6 +2180,7 @@ export type Database = {
       itineraries: {
         Row: {
           budget_level: string
+          client_id: string | null
           created_at: string
           destination: string
           end_date: string
@@ -2195,6 +2196,7 @@ export type Database = {
         }
         Insert: {
           budget_level: string
+          client_id?: string | null
           created_at?: string
           destination: string
           end_date: string
@@ -2210,6 +2212,7 @@ export type Database = {
         }
         Update: {
           budget_level?: string
+          client_id?: string | null
           created_at?: string
           destination?: string
           end_date?: string
@@ -2223,7 +2226,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "itineraries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       itinerary_activities: {
         Row: {
@@ -4385,6 +4396,7 @@ export type Database = {
         Row: {
           adults_count: number
           children_count: number
+          client_id: string | null
           client_name: string
           created_at: string
           destination: string
@@ -4410,6 +4422,7 @@ export type Database = {
         Insert: {
           adults_count?: number
           children_count?: number
+          client_id?: string | null
           client_name: string
           created_at?: string
           destination: string
@@ -4435,6 +4448,7 @@ export type Database = {
         Update: {
           adults_count?: number
           children_count?: number
+          client_id?: string | null
           client_name?: string
           created_at?: string
           destination?: string
@@ -4457,7 +4471,15 @@ export type Database = {
           valid_until?: string | null
           validity_disclaimer?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quotes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       registration_links: {
         Row: {
@@ -6071,6 +6093,7 @@ export type Database = {
       trips: {
         Row: {
           access_password: string | null
+          client_id: string | null
           client_name: string
           created_at: string
           destination: string
@@ -6087,6 +6110,7 @@ export type Database = {
         }
         Insert: {
           access_password?: string | null
+          client_id?: string | null
           client_name: string
           created_at?: string
           destination: string
@@ -6103,6 +6127,7 @@ export type Database = {
         }
         Update: {
           access_password?: string | null
+          client_id?: string | null
           client_name?: string
           created_at?: string
           destination?: string
@@ -6117,7 +6142,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trips_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_achievements: {
         Row: {
