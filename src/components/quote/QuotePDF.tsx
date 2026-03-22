@@ -50,6 +50,24 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`${data.origin_city} → ${data.destination_city}`);
       details.push(`Companhia: ${data.airline}`);
       details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
+      if (data.outbound_detail) {
+        const ob = data.outbound_detail;
+        const parts: string[] = [];
+        if (ob.flight_number) parts.push(`Voo ${ob.flight_number}`);
+        if (ob.airport_origin && ob.airport_destination) parts.push(`${ob.airport_origin} → ${ob.airport_destination}`);
+        if (ob.departure_time) parts.push(`Saída ${ob.departure_time}`);
+        if (ob.arrival_time) parts.push(`Chegada ${ob.arrival_time}`);
+        if (parts.length) details.push(`Ida: ${parts.join(" | ")}`);
+      }
+      if (data.return_detail) {
+        const rt = data.return_detail;
+        const parts: string[] = [];
+        if (rt.flight_number) parts.push(`Voo ${rt.flight_number}`);
+        if (rt.airport_origin && rt.airport_destination) parts.push(`${rt.airport_origin} → ${rt.airport_destination}`);
+        if (rt.departure_time) parts.push(`Saída ${rt.departure_time}`);
+        if (rt.arrival_time) parts.push(`Chegada ${rt.arrival_time}`);
+        if (parts.length) details.push(`Volta: ${parts.join(" | ")}`);
+      }
       if (data.includes_baggage) details.push("✓ Bagagem incluída");
       if (data.includes_boarding_fee) details.push("✓ Taxa de embarque incluída");
       if (data.notes) details.push(`Obs: ${data.notes}`);
