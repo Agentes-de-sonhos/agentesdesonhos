@@ -191,6 +191,70 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
         </div>
 
+        {/* Flight Details - Expandable */}
+        <div className="border border-border/60 rounded-lg">
+          <button
+            type="button"
+            onClick={() => setShowFlightDetails(!showFlightDetails)}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Plane className="h-4 w-4" />
+            <span className="flex-1 text-left">Adicionar detalhes do voo</span>
+            <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showFlightDetails && "rotate-180")} />
+          </button>
+          {showFlightDetails && (
+            <div className="px-4 pb-4 space-y-4 border-t border-border/40">
+              {/* Outbound Leg */}
+              <div className="pt-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">✈ Ida</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField control={form.control} name="outbound_detail.airport_origin" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Aeroporto de origem</FormLabel><FormControl><Input placeholder="GRU" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                  <FormField control={form.control} name="outbound_detail.airport_destination" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Aeroporto de destino</FormLabel><FormControl><Input placeholder="CDG" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3 mt-2">
+                  <FormField control={form.control} name="outbound_detail.departure_time" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Horário de saída</FormLabel><FormControl><Input type="time" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                  <FormField control={form.control} name="outbound_detail.arrival_time" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Horário de chegada</FormLabel><FormControl><Input type="time" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                  <FormField control={form.control} name="outbound_detail.flight_number" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Nº do voo</FormLabel><FormControl><Input placeholder="LA8084" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                </div>
+              </div>
+
+              {/* Return Leg */}
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">✈ Volta</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField control={form.control} name="return_detail.airport_origin" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Aeroporto de origem</FormLabel><FormControl><Input placeholder="CDG" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                  <FormField control={form.control} name="return_detail.airport_destination" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Aeroporto de destino</FormLabel><FormControl><Input placeholder="GRU" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3 mt-2">
+                  <FormField control={form.control} name="return_detail.departure_time" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Horário de saída</FormLabel><FormControl><Input type="time" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                  <FormField control={form.control} name="return_detail.arrival_time" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Horário de chegada</FormLabel><FormControl><Input type="time" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                  <FormField control={form.control} name="return_detail.flight_number" render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Nº do voo</FormLabel><FormControl><Input placeholder="LA8085" {...field} className="h-8 text-sm" /></FormControl></FormItem>
+                  )} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Pricing is always per-person — multiplication is automatic */}
 
         <div className="grid gap-4 sm:grid-cols-2">
