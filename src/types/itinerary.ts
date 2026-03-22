@@ -35,6 +35,8 @@ export interface AdditionalPreferences {
 }
 
 export interface ItineraryFormData {
+  clientId?: string;
+  clientName?: string;
   destination: string;
   startDate: Date;
   endDate: Date;

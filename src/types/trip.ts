@@ -557,6 +557,7 @@ export type TripServiceData =
   | TripOtherData;
 
 export interface TripFormData {
+  client_id?: string;
   client_name: string;
   destination: string;
   start_date: string;
