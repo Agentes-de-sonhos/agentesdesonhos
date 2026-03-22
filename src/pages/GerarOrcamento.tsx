@@ -423,6 +423,9 @@ export default function GerarOrcamento() {
                 <MapPin className="h-3.5 w-3.5" />{quote.destination}
                 <span className="text-xs">•</span>
                 {formatDateShort(quote.start_date)} — {formatDateShort(quote.end_date)}
+                <Button variant="ghost" size="icon" className="h-6 w-6 ml-0.5" onClick={() => setHeaderEditDates(true)} title="Editar datas">
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
               </p>
             </div>
           </div>
