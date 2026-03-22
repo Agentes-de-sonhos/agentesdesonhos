@@ -28,6 +28,7 @@ import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { ServiceList } from "@/components/quote/ServiceCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
+import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
