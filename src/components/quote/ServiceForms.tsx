@@ -83,31 +83,31 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       airline: init?.airline || "",
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
       adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
-      is_unit_price: init?.is_unit_price !== false,
+      is_unit_price: true,
       notes: init?.notes || "",
       departure_date: init?.departure_date ? new Date(init.departure_date) : tripStartDate,
       return_date: init?.return_date ? new Date(init.return_date) : tripEndDate,
     },
   });
 
-  const isUnitPrice = form.watch("is_unit_price");
+  const isUnitPrice = true;
   const adultPrice = form.watch("adult_price");
   const childPrice = form.watch("child_price");
 
-  const totalAdults = isUnitPrice ? adultPrice * adultsCount : adultPrice;
-  const totalChildren = isUnitPrice ? childPrice * childrenCount : childPrice;
+  const totalAdults = adultPrice * adultsCount;
+  const totalChildren = childPrice * childrenCount;
   const totalAmount = totalAdults + totalChildren;
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
-    const computedTotalAdults = values.is_unit_price ? values.adult_price * adultsCount : values.adult_price;
-    const computedTotalChildren = values.is_unit_price ? values.child_price * childrenCount : values.child_price;
+    const computedTotalAdults = values.adult_price * adultsCount;
+    const computedTotalChildren = values.child_price * childrenCount;
     const data = {
       origin_city: values.origin_city, destination_city: values.destination_city,
       airline: values.airline, departure_date: format(values.departure_date, "yyyy-MM-dd"),
       return_date: format(values.return_date, "yyyy-MM-dd"),
       includes_baggage: values.includes_baggage, includes_boarding_fee: values.includes_boarding_fee,
       adult_price: values.adult_price, child_price: values.child_price,
-      is_unit_price: values.is_unit_price,
+      is_unit_price: true,
       notes: values.notes || "",
     };
     onSubmit(data, computedTotalAdults + computedTotalChildren, values.option_label || undefined, values.service_description || undefined);
@@ -170,22 +170,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
         </div>
 
-        {/* Pricing mode toggle */}
-        <FormField control={form.control} name="is_unit_price" render={({ field }) => (
-          <FormItem className="flex items-center gap-3 space-y-0 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-            <FormControl>
-              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-            <FormLabel className="font-normal text-sm cursor-pointer">
-              Valor por pessoa <span className="text-muted-foreground">(multiplicar automaticamente pela quantidade de passageiros)</span>
-            </FormLabel>
-          </FormItem>
-        )} />
+        {/* Pricing is always per-person — multiplication is automatic */}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adult_price" render={({ field }) => (
             <FormItem>
-              <FormLabel>{isUnitPrice ? "Valor por adulto (R$)" : "Valor total adultos (R$)"}</FormLabel>
+              <FormLabel>Valor por adulto (R$)</FormLabel>
               <FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
               </FormControl>
@@ -199,7 +189,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
           <FormField control={form.control} name="child_price" render={({ field }) => (
             <FormItem>
-              <FormLabel>{isUnitPrice ? "Valor por criança (R$)" : "Valor total crianças (R$)"}</FormLabel>
+              <FormLabel>Valor por criança (R$)</FormLabel>
               <FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
               </FormControl>
@@ -220,12 +210,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
               <span className="text-sm font-medium">Total Passagens</span>
               <span className="text-lg font-bold text-primary">{formatCurrencyInline(totalAmount)}</span>
             </div>
-            {isUnitPrice && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {adultsCount} adulto{adultsCount > 1 ? "s" : ""}
-                {childrenCount > 0 ? ` + ${childrenCount} criança${childrenCount > 1 ? "s" : ""}` : ""}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              {adultsCount} adulto{adultsCount > 1 ? "s" : ""}
+              {childrenCount > 0 ? ` + ${childrenCount} criança${childrenCount > 1 ? "s" : ""}` : ""}
+            </p>
           </div>
         )}
 
@@ -648,16 +636,16 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
   const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: init?.is_unit_price !== false, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
+    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: true, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
   });
 
-  const isUnitPrice = form.watch("is_unit_price");
+  const isUnitPrice = true;
   const price = form.watch("price");
-  const totalAmount = isUnitPrice ? price * totalPax : price;
+  const totalAmount = price * totalPax;
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
-    const computed = values.is_unit_price ? values.price * totalPax : values.price;
-    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: values.is_unit_price }, computed);
+    const computed = values.price * totalPax;
+    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: true }, computed);
   };
 
   return (
@@ -694,20 +682,11 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
           <FormItem><FormLabel>Cobertura</FormLabel><FormControl><Input placeholder="USD 60.000, USD 100.000..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
-        <FormField control={form.control} name="is_unit_price" render={({ field }) => (
-          <FormItem className="flex items-center gap-3 space-y-0 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-            <FormControl>
-              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-            <FormLabel className="font-normal text-sm cursor-pointer">
-              Valor por pessoa <span className="text-muted-foreground">(multiplicar pela quantidade de passageiros)</span>
-            </FormLabel>
-          </FormItem>
-        )} />
+        {/* Pricing is always per-person — multiplication is automatic */}
 
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem>
-            <FormLabel>{isUnitPrice ? "Valor por pessoa (R$)" : "Valor total (R$)"}</FormLabel>
+            <FormLabel>Valor por pessoa (R$)</FormLabel>
             <FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} /></FormControl>
             {isUnitPrice && totalPax > 0 && price > 0 && (
               <p className="text-xs text-muted-foreground">
