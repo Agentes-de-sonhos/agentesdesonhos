@@ -54,7 +54,7 @@ export default function Beneficios() {
   const { paginatedItems: paginatedBenefits, currentPage, totalPages, totalItems, pageSize, goToPage, resetPage } = usePagination(filtered, { pageSize: 20 });
 
   // Reset page when filters change
-  useEffect(() => { resetPage(); }, [search, selectedCategory, selectedDestination, resetPage]);
+  useEffect(() => { resetPage(); }, [debouncedSearch, selectedCategory, selectedDestination, resetPage]);
 
   const getUserConfirmationType = (benefitId: string) => {
     const c = userConfirmations.find((uc) => uc.benefit_id === benefitId);

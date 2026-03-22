@@ -28,7 +28,14 @@ const defaultFilters: HotelFilters = {
 export default function HotelAdvisor() {
   const [filters, setFilters] = useState<HotelFilters>(defaultFilters);
   const [suggestOpen, setSuggestOpen] = useState(false);
-  const { data: hotels, isLoading } = useHotels(filters);
+
+  // Debounce the search field to avoid firing a DB query on every keystroke
+  const debouncedFilters = useMemo(() => ({
+    ...filters,
+    search: useDebounce(filters.search, 300),
+  }), [filters]);
+
+  const { data: hotels, isLoading } = useHotels(debouncedFilters);
   const { data: filterOptions } = useHotelFilterOptions();
 
   const regions = filterOptions?.regions || [];
