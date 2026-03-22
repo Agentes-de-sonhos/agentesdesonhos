@@ -709,7 +709,7 @@ export default function GerarOrcamento() {
               </CardContent>
             </Card>
           </div>
-          <div><QuoteSummary quote={quote} /></div>
+          <div><QuoteSummary quote={quote} externalEditDates={headerEditDates} onExternalEditDatesChange={setHeaderEditDates} /></div>
         </div>
       </div>
     </DashboardLayout>

@@ -15,6 +15,8 @@ import type { Quote } from "@/types/quote";
 
 interface QuoteSummaryProps {
   quote: Quote;
+  externalEditDates?: boolean;
+  onExternalEditDatesChange?: (v: boolean) => void;
 }
 
 function formatCurrency(value: number) {
