@@ -811,7 +811,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof cruiseSchema>>({
     resolver: zodResolver(cruiseSchema),
-    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
+    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate },
   });
 
   const handleSubmit = (values: z.infer<typeof cruiseSchema>) => {
