@@ -443,6 +443,8 @@ export function AppSidebar() {
   return (
     <TooltipProvider delayDuration={300}>
       <aside
+        id="app-sidebar"
+        style={{ '--sidebar-current-width': collapsed ? '64px' : '256px' } as React.CSSProperties}
         className={cn(
           "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 flex-col hidden lg:flex",
           collapsed ? "w-16" : "w-64"
