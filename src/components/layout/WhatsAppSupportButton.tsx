@@ -11,7 +11,7 @@ export function WhatsAppSupportButton() {
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 flex items-center gap-3">
+    <div className="fixed bottom-20 md:bottom-4 left-4 md:left-[4.5rem] z-40 flex items-center gap-3">
       <a
         href={WHATSAPP_URL}
         target="_blank"
