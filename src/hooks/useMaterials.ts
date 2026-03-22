@@ -40,6 +40,7 @@ export function useMaterials() {
       if (error) throw error;
       return data;
     },
+    staleTime: 10 * 60 * 1000,
   });
 
   // Normalize title by removing trailing numbering like (1), (2), etc.

@@ -43,6 +43,7 @@ export function useCommunityChat(activeRoomId?: string) {
       if (error) throw error;
       return data as CommunityRoom[];
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch messages for active room

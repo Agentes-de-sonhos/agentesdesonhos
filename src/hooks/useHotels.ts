@@ -150,5 +150,6 @@ export function useHotelFilterOptions() {
 
       return { regions: regions.sort(), brands: brands.sort(), destinations: destinations.sort() };
     },
+    staleTime: 10 * 60 * 1000,
   });
 }

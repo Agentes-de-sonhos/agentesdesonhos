@@ -171,6 +171,7 @@ export function useGamification() {
       return (data || []) as RankingEntry[];
     },
     enabled: !!user,
+    staleTime: 3 * 60 * 1000,
   });
 
   // ─── Today's Actions (for missions) ───────────────────
