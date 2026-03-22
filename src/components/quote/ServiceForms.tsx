@@ -210,12 +210,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
               <span className="text-sm font-medium">Total Passagens</span>
               <span className="text-lg font-bold text-primary">{formatCurrencyInline(totalAmount)}</span>
             </div>
-            {isUnitPrice && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {adultsCount} adulto{adultsCount > 1 ? "s" : ""}
-                {childrenCount > 0 ? ` + ${childrenCount} criança${childrenCount > 1 ? "s" : ""}` : ""}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              {adultsCount} adulto{adultsCount > 1 ? "s" : ""}
+              {childrenCount > 0 ? ` + ${childrenCount} criança${childrenCount > 1 ? "s" : ""}` : ""}
+            </p>
           </div>
         )}
 
