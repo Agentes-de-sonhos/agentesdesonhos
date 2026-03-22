@@ -188,6 +188,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          <WhatsAppSupportButton />
           </SubscriptionProvider>
         </AuthProvider>
       </BrowserRouter>
