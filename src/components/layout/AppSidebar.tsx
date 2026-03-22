@@ -346,7 +346,7 @@ export function AppSidebar() {
                 <PopoverTrigger asChild>
                   <button
                     className={cn(
-                      "group flex items-center justify-center rounded-xl px-3 py-2.5 transition-all duration-300 w-full",
+                      "group flex items-center justify-center rounded-xl px-3 py-1.5 transition-all duration-300 w-full",
                       isActive
                         ? cn(section.headerBg)
                         : cn("text-sidebar-foreground", section.hoverColor)
