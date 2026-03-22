@@ -38,12 +38,17 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+function parseLocalDate(dateStr: string) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function formatDate(dateStr: string) {
-  try { return format(new Date(dateStr), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return dateStr; }
+  try { return format(parseLocalDate(dateStr), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return dateStr; }
 }
 
 function formatDateShort(dateStr: string) {
-  try { return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR }); } catch { return dateStr; }
+  try { return format(parseLocalDate(dateStr), "dd/MM/yyyy", { locale: ptBR }); } catch { return dateStr; }
 }
 
 function getServiceSummary(service: QuoteService): string {
