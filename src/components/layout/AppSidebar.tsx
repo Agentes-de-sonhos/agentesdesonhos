@@ -280,7 +280,7 @@ export function AppSidebar() {
         to={isLocked ? "#" : item.url}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
-          "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
+          "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-300",
           isActive && !isLocked && sectionBgColor
             ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
             : isActive && !isLocked
@@ -346,7 +346,7 @@ export function AppSidebar() {
                 <PopoverTrigger asChild>
                   <button
                     className={cn(
-                      "group flex items-center justify-center rounded-xl px-3 py-2.5 transition-all duration-300 w-full",
+                      "group flex items-center justify-center rounded-xl px-3 py-1.5 transition-all duration-300 w-full",
                       isActive
                         ? cn(section.headerBg)
                         : cn("text-sidebar-foreground", section.hoverColor)
@@ -410,7 +410,7 @@ export function AppSidebar() {
         <button
           onClick={() => toggleSection(section.title)}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+            "w-full flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
             isOpen
               ? cn(section.headerBg, section.headerHoverBg)
               : cn("text-sidebar-foreground", section.hoverColor)
@@ -478,13 +478,13 @@ export function AppSidebar() {
         </div>
 
         {/* Scrollable Navigation */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-1">
+        <div className="flex-1 overflow-y-auto py-2 space-y-0.5">
           {/* Início */}
           <nav className="flex flex-col gap-0.5 px-3">
             {renderSingleItem(dashboardItem)}
           </nav>
 
-          <div className="px-3 py-2">
+          <div className="px-3 py-1">
             <Separator className="bg-sidebar-border" />
           </div>
 
@@ -497,57 +497,87 @@ export function AppSidebar() {
           </nav>
         </div>
 
-        {/* Bottom Section - Conta */}
-        <div className="flex-shrink-0 border-t border-sidebar-border p-3 space-y-1">
-          {!collapsed && (
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 px-3 pb-1">
-              Conta
-            </p>
-          )}
-
+        {/* Bottom Section - Compact */}
+        <div className="flex-shrink-0 border-t border-sidebar-border px-3 py-2 space-y-0.5">
           {isAdmin && renderSingleItem(adminMenuItem)}
-          {renderSingleItem(suporteMenuItem)}
-          {renderSingleItem(profileMenuItem)}
 
           {collapsed ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-full h-9 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                <p className="text-sm font-medium">Sair</p>
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 h-9 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive text-sm"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              Sair
-            </Button>
-          )}
-
-          {!collapsed ? (
-            <div className="text-center pt-2 space-y-0.5">
-              <Link to="/atualizacoes" className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors">
-                v1.0 Beta
-              </Link>
-              <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>
-              <p className="text-[11px] font-medium text-muted-foreground/80">Nobre Digital</p>
+            <div className="flex flex-col items-center gap-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/suporte"
+                    className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                  >
+                    <Headset className="h-4 w-4" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
+                  <p className="text-sm font-medium">Suporte</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/perfil"
+                    className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                  >
+                    <User className="h-4 w-4" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
+                  <p className="text-sm font-medium">Perfil</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-full h-7 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
+                  <p className="text-sm font-medium">Sair</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           ) : (
-            <Link to="/atualizacoes" className="block text-center pt-2">
-              <p className="text-[8px] text-muted-foreground/50 hover:text-primary transition-colors">v1.0</p>
-            </Link>
+            <>
+              <div className="flex items-center gap-1">
+                <Link
+                  to="/suporte"
+                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
+                >
+                  <Headset className="h-3.5 w-3.5" />
+                  Suporte
+                </Link>
+                <Link
+                  to="/perfil"
+                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
+                >
+                  <User className="h-3.5 w-3.5" />
+                  Perfil
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive text-xs"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-3.5 w-3.5 mr-1" />
+                  Sair
+                </Button>
+              </div>
+              <div className="text-center pt-1">
+                <Link to="/atualizacoes" className="text-[9px] text-muted-foreground/50 hover:text-primary transition-colors">
+                  v1.0 Beta · Nobre Digital
+                </Link>
+              </div>
+            </>
           )}
         </div>
       </aside>
