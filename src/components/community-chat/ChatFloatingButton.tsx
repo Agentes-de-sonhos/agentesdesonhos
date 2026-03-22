@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useDirectMessages } from "@/hooks/useDirectMessages";
 import { useCommunityChat, CommunityRoom } from "@/hooks/useCommunityChat";
