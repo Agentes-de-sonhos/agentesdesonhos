@@ -26,6 +26,7 @@ export function useMaterials() {
       if (error) throw error;
       return data as Material[];
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: suppliers } = useQuery({
