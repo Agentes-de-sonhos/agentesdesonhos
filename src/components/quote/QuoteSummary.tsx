@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Users, Baby, MapPin, Calendar as CalendarIcon, DollarSign, Pencil, Loader2 } from "lucide-react";
@@ -15,6 +15,8 @@ import type { Quote } from "@/types/quote";
 
 interface QuoteSummaryProps {
   quote: Quote;
+  externalEditDates?: boolean;
+  onExternalEditDatesChange?: (v: boolean) => void;
 }
 
 function formatCurrency(value: number) {
@@ -36,7 +38,7 @@ function toYMD(date: Date) {
   return `${y}-${m}-${d}`;
 }
 
-export function QuoteSummary({ quote }: QuoteSummaryProps) {
+export function QuoteSummary({ quote, externalEditDates, onExternalEditDatesChange }: QuoteSummaryProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
@@ -45,6 +47,13 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const [endDate, setEndDate] = useState<Date | undefined>(() => parseLocalDate(quote.end_date));
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
+
+  useEffect(() => {
+    if (externalEditDates && !editing) {
+      handleStartEdit();
+      onExternalEditDatesChange?.(false);
+    }
+  }, [externalEditDates]);
 
   const displayStart = parseLocalDate(quote.start_date);
   const displayEnd = parseLocalDate(quote.end_date);
