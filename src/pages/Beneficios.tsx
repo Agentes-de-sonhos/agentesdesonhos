@@ -49,7 +49,7 @@ export default function Beneficios() {
     if (selectedCategory) result = result.filter((b) => b.category === selectedCategory);
     if (selectedDestination) result = result.filter((b) => b.destination === selectedDestination);
     return result;
-  }, [benefits, search, selectedCategory, selectedDestination]);
+  }, [benefits, debouncedSearch, selectedCategory, selectedDestination]);
 
   const { paginatedItems: paginatedBenefits, currentPage, totalPages, totalItems, pageSize, goToPage, resetPage } = usePagination(filtered, { pageSize: 20 });
 
