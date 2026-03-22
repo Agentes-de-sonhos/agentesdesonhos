@@ -116,6 +116,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
     const computedTotalAdults = values.adult_price * adultsCount;
     const computedTotalChildren = values.child_price * childrenCount;
+    
+    const hasOutbound = showFlightDetails && values.outbound_detail && Object.values(values.outbound_detail).some(v => v && v.length > 0);
+    const hasReturn = showFlightDetails && values.return_detail && Object.values(values.return_detail).some(v => v && v.length > 0);
+    
     const data = {
       origin_city: values.origin_city, destination_city: values.destination_city,
       airline: values.airline, departure_date: format(values.departure_date, "yyyy-MM-dd"),
@@ -124,6 +128,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       adult_price: values.adult_price, child_price: values.child_price,
       is_unit_price: true,
       notes: values.notes || "",
+      ...(hasOutbound ? { outbound_detail: values.outbound_detail } : {}),
+      ...(hasReturn ? { return_detail: values.return_detail } : {}),
     };
     onSubmit(data, computedTotalAdults + computedTotalChildren, values.option_label || undefined, values.service_description || undefined);
   };
