@@ -478,7 +478,7 @@ export function AppSidebar() {
         </div>
 
         {/* Scrollable Navigation */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-1">
+        <div className="flex-1 overflow-y-auto py-2 space-y-0.5">
           {/* Início */}
           <nav className="flex flex-col gap-0.5 px-3">
             {renderSingleItem(dashboardItem)}
