@@ -48,6 +48,11 @@ export default function Beneficios() {
     return result;
   }, [benefits, search, selectedCategory, selectedDestination]);
 
+  const { paginatedItems: paginatedBenefits, currentPage, totalPages, totalItems, pageSize, goToPage, resetPage } = usePagination(filtered, { pageSize: 20 });
+
+  // Reset page when filters change
+  useEffect(() => { resetPage(); }, [search, selectedCategory, selectedDestination, resetPage]);
+
   const getUserConfirmationType = (benefitId: string) => {
     const c = userConfirmations.find((uc) => uc.benefit_id === benefitId);
     return c?.confirmation_type || null;
