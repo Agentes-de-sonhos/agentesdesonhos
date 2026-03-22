@@ -28,6 +28,7 @@ import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { ServiceList } from "@/components/quote/ServiceCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
+import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
@@ -428,6 +429,16 @@ export default function GerarOrcamento() {
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
               </p>
+              {headerEditDates && (
+                <div className="mt-2">
+                  <QuoteDateEditor
+                    quoteId={quote.id}
+                    startDateStr={quote.start_date}
+                    endDateStr={quote.end_date}
+                    onClose={() => setHeaderEditDates(false)}
+                  />
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -709,7 +720,7 @@ export default function GerarOrcamento() {
               </CardContent>
             </Card>
           </div>
-          <div><QuoteSummary quote={quote} externalEditDates={headerEditDates} onExternalEditDatesChange={setHeaderEditDates} /></div>
+          <div><QuoteSummary quote={quote} /></div>
         </div>
       </div>
     </DashboardLayout>
