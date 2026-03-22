@@ -94,13 +94,13 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const adultPrice = form.watch("adult_price");
   const childPrice = form.watch("child_price");
 
-  const totalAdults = isUnitPrice ? adultPrice * adultsCount : adultPrice;
-  const totalChildren = isUnitPrice ? childPrice * childrenCount : childPrice;
+  const totalAdults = adultPrice * adultsCount;
+  const totalChildren = childPrice * childrenCount;
   const totalAmount = totalAdults + totalChildren;
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
-    const computedTotalAdults = values.is_unit_price ? values.adult_price * adultsCount : values.adult_price;
-    const computedTotalChildren = values.is_unit_price ? values.child_price * childrenCount : values.child_price;
+    const computedTotalAdults = values.adult_price * adultsCount;
+    const computedTotalChildren = values.child_price * childrenCount;
     const data = {
       origin_city: values.origin_city, destination_city: values.destination_city,
       airline: values.airline, departure_date: format(values.departure_date, "yyyy-MM-dd"),
