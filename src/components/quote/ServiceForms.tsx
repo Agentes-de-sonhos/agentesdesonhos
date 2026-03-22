@@ -670,7 +670,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
-    defaultValues: { name: init?.name || "", quantity: init?.quantity || totalPax, price: init?.price || initialData?.amount || 0, date: init?.date ? new Date(init.date) : tripStartDate },
+    defaultValues: { name: init?.name || "", quantity: init?.quantity || totalPax, price: init?.price || initialData?.amount || 0, date: init?.date ? parseLocalDate(init.date) : tripStartDate },
   });
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
