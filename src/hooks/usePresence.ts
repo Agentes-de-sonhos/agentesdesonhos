@@ -64,53 +64,20 @@ export function usePresence() {
     queryClient.invalidateQueries({ queryKey: ["online-users"] });
   }, [user, queryClient]);
 
-  // Query online premium users (active in last 5 min AND is_online = true)
+  // Optimized: single RPC call replaces 3 separate queries
   const { data: onlineUsers = [], isLoading } = useQuery({
     queryKey: ["online-users"],
     queryFn: async () => {
-      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-
-      const { data: presenceData, error } = await (supabase as any)
-        .from("user_presence")
-        .select("user_id, last_active_at")
-        .gte("last_active_at", fiveMinAgo)
-        .eq("is_online", true);
-
+      const { data, error } = await supabase.rpc("get_online_premium_users", {
+        _exclude_user_id: user?.id ?? null,
+      });
       if (error) throw error;
-      if (!presenceData || presenceData.length === 0) return [];
-
-      const userIds = presenceData.map((p: any) => p.user_id);
-
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, name, avatar_url, agency_name, city")
-        .in("user_id", userIds);
-
-      const { data: subs } = await supabase
-        .from("subscriptions")
-        .select("user_id")
-        .in("user_id", userIds)
-        .eq("plan", "profissional")
-        .eq("is_active", true);
-
-      const premiumIds = new Set(subs?.map((s) => s.user_id) || []);
-
-      return (profiles || [])
-        .filter((p) => premiumIds.has(p.user_id) && p.user_id !== user?.id)
-        .map((p) => ({
-          user_id: p.user_id,
-          name: p.name || "Agente",
-          avatar_url: p.avatar_url,
-          agency_name: p.agency_name,
-          city: p.city,
-        })) as OnlineAgent[];
+      return (data ?? []) as OnlineAgent[];
     },
     refetchInterval: 30000,
+    staleTime: 25000,
     enabled: !!user,
   });
-
-  // Removed realtime listener on user_presence — it was invalidating queries
-  // on every heartbeat from every user. The 30s refetchInterval is sufficient.
 
   return { onlineUsers, onlineCount: onlineUsers.length, isLoading, isOnline, isOnlineLoading, toggleOnline };
 }
