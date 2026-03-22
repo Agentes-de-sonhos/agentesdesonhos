@@ -90,7 +90,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     },
   });
 
-  const isUnitPrice = form.watch("is_unit_price");
+  const isUnitPrice = true;
   const adultPrice = form.watch("adult_price");
   const childPrice = form.watch("child_price");
 
