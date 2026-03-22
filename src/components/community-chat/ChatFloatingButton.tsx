@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useDirectMessages } from "@/hooks/useDirectMessages";
 import { useCommunityChat, CommunityRoom } from "@/hooks/useCommunityChat";
@@ -26,6 +27,7 @@ type ChatView = "menu" | "room" | "dm" | "conversations";
 
 export function ChatFloatingButton() {
   const { plan } = useSubscription();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<ChatView>("menu");
   const [activeRoomId, setActiveRoomId] = useState<string>();
@@ -67,6 +69,10 @@ export function ChatFloatingButton() {
   }, [handleAgentChat]);
 
   if (plan !== "profissional") return null;
+
+  const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
+  const shouldShow = isDashboard || totalUnread > 0 || isOpen;
+  if (!shouldShow) return null;
 
   const openRoom = (room: CommunityRoom) => {
     setActiveRoomId(room.id);
