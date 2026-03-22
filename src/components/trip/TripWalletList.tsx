@@ -62,6 +62,10 @@ export function TripWalletList() {
   const [filter, setFilter] = useState<FilterType>("all");
 
   const filteredTrips = filterTrips(trips, filter);
+  const { paginatedItems: paginatedTrips, currentPage, totalPages, totalItems, pageSize, goToPage, resetPage } = usePagination(filteredTrips, { pageSize: 15 });
+
+  // Reset to page 1 when filter changes
+  useEffect(() => { resetPage(); }, [filter, resetPage]);
 
   const handleCopyLink = (trip: Trip) => {
     const origin = PUBLIC_DOMAIN;
