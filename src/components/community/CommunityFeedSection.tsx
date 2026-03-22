@@ -63,7 +63,6 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
     if (upcoming.length > 0 && !feedItems.find((f) => f.key === "events-block")) {
       feedItems.push({ type: "events", data: upcoming, key: "events-block" });
     }
-    }
   }
 
   return (
