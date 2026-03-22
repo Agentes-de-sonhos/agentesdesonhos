@@ -9,7 +9,8 @@ import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { ClientAutocomplete } from "./ClientAutocomplete";
+import { ClientSelector } from "@/components/shared/ClientSelector";
+import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
