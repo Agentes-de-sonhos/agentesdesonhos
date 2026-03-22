@@ -19,11 +19,13 @@ export function useQuotes() {
         .from("quotes")
         .select("*")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
       return data as Quote[];
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   const createQuoteMutation = useMutation({

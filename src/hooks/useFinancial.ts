@@ -34,11 +34,13 @@ export function useFinancial() {
         .from("sales")
         .select("*")
         .eq("user_id", user.id)
-        .order("sale_date", { ascending: false });
+        .order("sale_date", { ascending: false })
+        .limit(500);
       if (error) throw error;
       return data as Sale[];
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   // Fetch sale products

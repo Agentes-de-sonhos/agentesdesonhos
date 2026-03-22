@@ -74,6 +74,8 @@ export function GalleryCard({ gallery, variant = "default", onOpen }: GalleryCar
             <img 
               src={thumbnail} 
               alt={gallery.title}
+              loading="lazy"
+              decoding="async"
               className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
             />
           </div>

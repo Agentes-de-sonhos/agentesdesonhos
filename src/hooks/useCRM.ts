@@ -18,11 +18,13 @@ export function useClients() {
         .from("clients")
         .select("*")
         .eq("user_id", user.id)
-        .order("name", { ascending: true });
+        .order("name", { ascending: true })
+        .limit(500);
       if (error) throw error;
       return data as Client[];
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   const createClientMutation = useMutation({
