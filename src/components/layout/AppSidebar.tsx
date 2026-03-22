@@ -280,7 +280,7 @@ export function AppSidebar() {
         to={isLocked ? "#" : item.url}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
-          "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",
+          "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-300",
           isActive && !isLocked && sectionBgColor
             ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
             : isActive && !isLocked
