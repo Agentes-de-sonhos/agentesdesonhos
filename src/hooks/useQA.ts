@@ -57,8 +57,9 @@ export function useQA() {
     queryFn: async () => {
       let query = supabase
         .from("qa_questions")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("id, user_id, title, description, category, is_resolved, answers_count, created_at, updated_at")
+        .order("created_at", { ascending: false })
+        .limit(200);
 
       if (selectedCategory) {
         query = query.eq("category", selectedCategory);
