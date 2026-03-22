@@ -30,10 +30,11 @@ export default function HotelAdvisor() {
   const [suggestOpen, setSuggestOpen] = useState(false);
 
   // Debounce the search field to avoid firing a DB query on every keystroke
+  const debouncedSearch = useDebounce(filters.search, 300);
   const debouncedFilters = useMemo(() => ({
     ...filters,
-    search: useDebounce(filters.search, 300),
-  }), [filters]);
+    search: debouncedSearch,
+  }), [filters, debouncedSearch]);
 
   const { data: hotels, isLoading } = useHotels(debouncedFilters);
   const { data: filterOptions } = useHotelFilterOptions();
