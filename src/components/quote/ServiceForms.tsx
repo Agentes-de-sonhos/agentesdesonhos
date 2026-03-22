@@ -26,6 +26,12 @@ import type {
   AttractionData, InsuranceData, CruiseData, OtherServiceData,
 } from "@/types/quote";
 
+/** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day). */
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 interface ServiceFormProps {
   serviceType: ServiceType;
   onSubmit: (data: any, amount: number, optionLabel?: string, description?: string, imageUrl?: string) => void;
@@ -98,8 +104,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
       is_unit_price: true,
       notes: init?.notes || "",
-      departure_date: init?.departure_date ? new Date(init.departure_date) : tripStartDate,
-      return_date: init?.return_date ? new Date(init.return_date) : tripEndDate,
+      departure_date: init?.departure_date ? parseLocalDate(init.departure_date) : tripStartDate,
+      return_date: init?.return_date ? parseLocalDate(init.return_date) : tripEndDate,
       outbound_detail: init?.outbound_detail || { airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" },
       return_detail: init?.return_detail || { airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" },
     },
@@ -337,8 +343,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
       hotel_name: init?.hotel_name || "", city: init?.city || "",
       room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0, notes: init?.notes || "",
-      check_in: init?.check_in ? new Date(init.check_in) : tripStartDate,
-      check_out: init?.check_out ? new Date(init.check_out) : tripEndDate,
+      check_in: init?.check_in ? parseLocalDate(init.check_in) : tripStartDate,
+      check_out: init?.check_out ? parseLocalDate(init.check_out) : tripEndDate,
     },
   });
 
@@ -513,7 +519,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
       transfer_mode: init?.transfer_type || "round_trip",
       location: init?.location || "",
       price: init?.price || initialData?.amount || 0,
-      arrival_date: init?.date ? new Date(init.date) : tripStartDate,
+      arrival_date: init?.date ? parseLocalDate(init.date) : tripStartDate,
       departure_date: tripEndDate,
     },
   });
@@ -664,7 +670,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
-    defaultValues: { name: init?.name || "", quantity: init?.quantity || totalPax, price: init?.price || initialData?.amount || 0, date: init?.date ? new Date(init.date) : tripStartDate },
+    defaultValues: { name: init?.name || "", quantity: init?.quantity || totalPax, price: init?.price || initialData?.amount || 0, date: init?.date ? parseLocalDate(init.date) : tripStartDate },
   });
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
@@ -721,7 +727,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
   const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: true, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
+    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: true, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate },
   });
 
   const isUnitPrice = true;
@@ -805,7 +811,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof cruiseSchema>>({
     resolver: zodResolver(cruiseSchema),
-    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
+    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate },
   });
 
   const handleSubmit = (values: z.infer<typeof cruiseSchema>) => {
