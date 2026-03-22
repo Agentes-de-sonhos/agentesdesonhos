@@ -30,11 +30,13 @@ export default function Beneficios() {
   const [shareOpen, setShareOpen] = useState(false);
   const [detailBenefit, setDetailBenefit] = useState<Benefit | null>(null);
 
+  const debouncedSearch = useDebounce(search, 300);
+
   // Filter benefits
   const filtered = useMemo(() => {
     let result = benefits;
-    if (search) {
-      const q = search.toLowerCase();
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
       result = result.filter(
         (b) =>
           b.title.toLowerCase().includes(q) ||
