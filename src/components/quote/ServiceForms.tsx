@@ -56,6 +56,14 @@ function formatCurrencyInline(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+const flightLegSchema = z.object({
+  airport_origin: z.string().optional(),
+  airport_destination: z.string().optional(),
+  departure_time: z.string().optional(),
+  arrival_time: z.string().optional(),
+  flight_number: z.string().optional(),
+});
+
 const flightSchema = z.object({
   option_label: z.string().optional(),
   service_description: z.string().optional(),
@@ -70,6 +78,8 @@ const flightSchema = z.object({
   child_price: z.number().min(0),
   is_unit_price: z.boolean(),
   notes: z.string().optional(),
+  outbound_detail: flightLegSchema.optional(),
+  return_detail: flightLegSchema.optional(),
 });
 
 function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0 }: Omit<ServiceFormProps, "serviceType">) {
