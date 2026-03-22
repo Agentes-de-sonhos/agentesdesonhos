@@ -49,6 +49,8 @@ interface TripFormProps {
 
 export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
+  const [clientError, setClientError] = useState("");
   const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("trip-form");
 
   const draft = !defaultValues ? loadDraft() : null;
@@ -72,13 +74,26 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
     if (!defaultValues) saveDraft(watchedValues);
   }, [watchedValues, saveDraft, defaultValues]);
 
+  // Sync client name from selector
+  useEffect(() => {
+    if (selectedClient) {
+      form.setValue("client_name", selectedClient.name);
+      setClientError("");
+    }
+  }, [selectedClient, form]);
+
   const handleSubmit = (values: FormValues) => {
+    if (!selectedClient) {
+      setClientError("Selecione um cliente para continuar");
+      return;
+    }
     clearDraft();
     const from = values.dateRange.from;
     const to = values.dateRange.to;
     const formatLocalDate = (d: Date) =>
       `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     onSubmit({
+      client_id: selectedClient.id,
       client_name: values.client_name,
       destination: values.destination,
       start_date: formatLocalDate(from),
@@ -91,19 +106,16 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="client_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Cliente</FormLabel>
-              <FormControl>
-                <ClientAutocomplete value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Client Selector */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Cliente *</Label>
+          <ClientSelector
+            value={selectedClient}
+            onChange={setSelectedClient}
+            required
+            error={clientError}
+          />
+        </div>
 
         <FormField
           control={form.control}
