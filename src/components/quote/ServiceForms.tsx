@@ -83,7 +83,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       airline: init?.airline || "",
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
       adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
-      is_unit_price: init?.is_unit_price !== false,
+      is_unit_price: true,
       notes: init?.notes || "",
       departure_date: init?.departure_date ? new Date(init.departure_date) : tripStartDate,
       return_date: init?.return_date ? new Date(init.return_date) : tripEndDate,
