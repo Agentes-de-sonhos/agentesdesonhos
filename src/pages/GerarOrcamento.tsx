@@ -440,6 +440,7 @@ export default function GerarOrcamento() {
                 </div>
               )}
             </div>
+          </div>
           <div className="flex items-center gap-3">
             {autoSaved && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
