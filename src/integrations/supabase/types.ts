@@ -4555,39 +4555,63 @@ export type Database = {
         Row: {
           client_id: string | null
           client_name: string
+          commission: number | null
           created_at: string
           destination: string
+          end_date: string | null
           id: string
+          include_in_billing: boolean | null
           notes: string | null
           opportunity_id: string | null
+          origin: string | null
+          payment_method: string | null
           sale_amount: number
           sale_date: string
+          start_date: string | null
+          trip_status: string | null
+          trip_type: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           client_id?: string | null
           client_name: string
+          commission?: number | null
           created_at?: string
           destination: string
+          end_date?: string | null
           id?: string
+          include_in_billing?: boolean | null
           notes?: string | null
           opportunity_id?: string | null
+          origin?: string | null
+          payment_method?: string | null
           sale_amount?: number
           sale_date?: string
+          start_date?: string | null
+          trip_status?: string | null
+          trip_type?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           client_id?: string | null
           client_name?: string
+          commission?: number | null
           created_at?: string
           destination?: string
+          end_date?: string | null
           id?: string
+          include_in_billing?: boolean | null
           notes?: string | null
           opportunity_id?: string | null
+          origin?: string | null
+          payment_method?: string | null
           sale_amount?: number
           sale_date?: string
+          start_date?: string | null
+          trip_status?: string | null
+          trip_type?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -101,6 +101,10 @@ export function useClients() {
 }
 
 export function useClientDetails(clientId: string) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: sales = [], isLoading: salesLoading } = useQuery({
     queryKey: ["client-sales", clientId],
     queryFn: async () => {
@@ -129,10 +133,89 @@ export function useClientDetails(clientId: string) {
     enabled: !!clientId,
   });
 
+  const createTripMutation = useMutation({
+    mutationFn: async (data: {
+      destination: string;
+      sale_amount: number;
+      sale_date: string;
+      client_name: string;
+      start_date?: string | null;
+      end_date?: string | null;
+      trip_type?: string;
+      trip_status?: string;
+      commission?: number;
+      payment_method?: string;
+      include_in_billing?: boolean;
+      notes?: string;
+    }) => {
+      if (!user) throw new Error("Not authenticated");
+      const { error } = await supabase.from("sales").insert({
+        user_id: user.id,
+        client_id: clientId,
+        client_name: data.client_name,
+        destination: data.destination,
+        sale_amount: data.sale_amount,
+        sale_date: data.sale_date,
+        start_date: data.start_date || null,
+        end_date: data.end_date || null,
+        trip_type: data.trip_type || "past",
+        trip_status: data.trip_status || "confirmed",
+        commission: data.commission || 0,
+        payment_method: data.payment_method || null,
+        include_in_billing: data.include_in_billing ?? true,
+        notes: data.notes || null,
+        origin: "manual",
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-sales", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["sales-stats"] });
+      toast({ title: "Viagem adicionada com sucesso" });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao adicionar viagem", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateTripMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: string; [key: string]: any }) => {
+      const { error } = await supabase.from("sales").update(data as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-sales", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["sales-stats"] });
+      toast({ title: "Viagem atualizada" });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao atualizar viagem", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteTripMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("sales").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-sales", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["sales-stats"] });
+      toast({ title: "Viagem excluída" });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao excluir viagem", description: error.message, variant: "destructive" });
+    },
+  });
+
   return {
     sales,
     opportunities,
     isLoading: salesLoading || oppsLoading,
+    createTrip: createTripMutation.mutateAsync,
+    updateTrip: updateTripMutation.mutateAsync,
+    deleteTrip: deleteTripMutation.mutateAsync,
+    isCreatingTrip: createTripMutation.isPending,
   };
 }
 
