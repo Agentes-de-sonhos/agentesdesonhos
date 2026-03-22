@@ -40,6 +40,7 @@ export function useFinancial() {
       return data as Sale[];
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   // Fetch sale products

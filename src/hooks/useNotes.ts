@@ -27,7 +27,7 @@ export function useNotes() {
 
       let query = supabase
         .from("notes")
-        .select("*")
+        .select("id, user_id, title, content, color, is_pinned, created_at, updated_at")
         .eq("user_id", user.id);
 
       // Apply search filter

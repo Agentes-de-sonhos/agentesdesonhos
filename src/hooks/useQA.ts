@@ -84,6 +84,7 @@ export function useQA() {
       })) as QAQuestion[];
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   const answersQuery = useCallback(

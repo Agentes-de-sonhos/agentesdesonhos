@@ -19,9 +19,10 @@ export function useTrips() {
       if (!user) return [];
       const { data, error } = await supabase
         .from("trips")
-        .select("*")
+        .select("id, user_id, client_name, client_id, destination, start_date, end_date, status, share_token, access_password, slug, short_code, created_at, updated_at")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
       return data as Trip[];
     },

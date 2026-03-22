@@ -25,6 +25,7 @@ export function useQuotes() {
       return data as Quote[];
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   const createQuoteMutation = useMutation({
