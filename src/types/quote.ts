@@ -136,6 +136,7 @@ export type ServiceData =
   | OtherServiceData;
 
 export interface QuoteFormData {
+  client_id?: string;
   client_name: string;
   adults_count: number;
   children_count: number;

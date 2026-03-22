@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ClientSelector } from "@/components/shared/ClientSelector";
 import {
   Select,
   SelectContent,
@@ -60,6 +61,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<TravelInterest[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
+  const [clientError, setClientError] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,7 +91,14 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   };
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    if (!selectedClient) {
+      setClientError("Selecione um cliente para continuar");
+      return;
+    }
+    setClientError("");
     onSubmit({
+      clientId: selectedClient.id,
+      clientName: selectedClient.name,
       destination: values.destination,
       startDate: values.startDate,
       endDate: values.endDate,
@@ -109,6 +119,17 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       <div className="space-y-4">
+        {/* Client Selector */}
+        <div className="space-y-2">
+          <Label>Cliente *</Label>
+          <ClientSelector
+            value={selectedClient}
+            onChange={(c) => { setSelectedClient(c); setClientError(""); }}
+            required
+            error={clientError}
+          />
+        </div>
+
         {/* Destination */}
         <div className="space-y-2">
           <Label htmlFor="destination">Destino</Label>

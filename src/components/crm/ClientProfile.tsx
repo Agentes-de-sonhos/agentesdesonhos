@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -14,6 +15,9 @@ import {
   Cake,
   Trash2,
   Pencil,
+  FileText,
+  Wand2,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +58,8 @@ const TRIP_STATUS_COLORS: Record<string, string> = {
 };
 
 export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
-  const { sales, opportunities, isLoading, createTrip, updateTrip, deleteTrip, isCreatingTrip } =
+  const navigate = useNavigate();
+  const { sales, opportunities, clientQuotes, clientItineraries, clientTrips, isLoading, createTrip, updateTrip, deleteTrip, isCreatingTrip } =
     useClientDetails(client.id);
 
   const totalSpent = sales.reduce((sum, s) => sum + s.sale_amount, 0);
@@ -64,11 +69,16 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
+  const formatDateShort = (dateStr: string) => {
+    try {
+      return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const handleCreateTrip = async (data: TripFormData) => {
-    await createTrip({
-      ...data,
-      client_name: client.name,
-    });
+    await createTrip({ ...data, client_name: client.name });
   };
 
   const handleUpdateTrip = async (id: string, data: TripFormData) => {
@@ -156,10 +166,21 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
 
       {/* Tabs */}
       <Tabs defaultValue="dados" className="w-full">
-        <TabsList>
-          <TabsTrigger value="dados">Dados do Cliente</TabsTrigger>
-          <TabsTrigger value="historico">Histórico de Viagens</TabsTrigger>
-          <TabsTrigger value="financeiro">Resumo Financeiro</TabsTrigger>
+        <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="dados">Dados</TabsTrigger>
+          <TabsTrigger value="historico">
+            Viagens {sales.length > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{sales.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="orcamentos">
+            Orçamentos {clientQuotes.length > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{clientQuotes.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="roteiros">
+            Roteiros {clientItineraries.length > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{clientItineraries.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="carteiras">
+            Carteiras {clientTrips.length > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{clientTrips.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dados" className="mt-4 space-y-4">
@@ -176,11 +197,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
               {isLoading ? (
                 <p className="text-muted-foreground">Carregando...</p>
               ) : sales.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Plane className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Nenhuma viagem registrada</p>
-                  <p className="text-sm mt-1">Adicione viagens manualmente ou feche oportunidades no funil.</p>
-                </div>
+                <EmptyState icon={Plane} message="Nenhuma viagem registrada" sub="Adicione viagens manualmente ou feche oportunidades no funil." />
               ) : (
                 <div className="space-y-3">
                   {sales.map((sale: any) => (
@@ -193,7 +210,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
                           <p className="font-medium">{sale.destination}</p>
                           <div className="flex items-center gap-2 mt-0.5">
                             <p className="text-sm text-muted-foreground">
-                              {format(new Date(sale.sale_date), "dd/MM/yyyy", { locale: ptBR })}
+                              {formatDateShort(sale.sale_date)}
                             </p>
                             <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                               {sale.origin === "manual" ? "Manual" : "Funil"}
@@ -206,10 +223,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
                           <p className="font-medium text-green-600">{formatCurrency(sale.sale_amount)}</p>
                           <Badge
                             variant="secondary"
-                            className={cn(
-                              "text-xs text-white",
-                              TRIP_STATUS_COLORS[sale.trip_status] || "bg-green-500"
-                            )}
+                            className={cn("text-xs text-white", TRIP_STATUS_COLORS[sale.trip_status] || "bg-green-500")}
                           >
                             {TRIP_STATUS_LABELS[sale.trip_status] || "Realizada"}
                           </Badge>
@@ -257,6 +271,135 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
                           </AlertDialog>
                         </div>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Orçamentos Tab */}
+        <TabsContent value="orcamentos" className="mt-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Orçamentos</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
+                <FileText className="mr-2 h-4 w-4" /> Novo Orçamento
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {clientQuotes.length === 0 ? (
+                <EmptyState icon={FileText} message="Nenhum orçamento vinculado" sub="Crie um orçamento selecionando este cliente." />
+              ) : (
+                <div className="space-y-3">
+                  {clientQuotes.map((q: any) => (
+                    <div
+                      key={q.id}
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/40 cursor-pointer transition-colors"
+                      onClick={() => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{q.destination}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatDateShort(q.start_date)} — {formatDateShort(q.end_date)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-primary">{formatCurrency(q.total_amount)}</p>
+                        <Badge variant={q.status === "published" ? "default" : "secondary"} className="text-[10px]">
+                          {q.status === "published" ? "Enviado" : "Rascunho"}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Roteiros Tab */}
+        <TabsContent value="roteiros" className="mt-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Roteiros</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => navigate("/ferramentas-ia/criar-roteiro")}>
+                <Wand2 className="mr-2 h-4 w-4" /> Novo Roteiro
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {clientItineraries.length === 0 ? (
+                <EmptyState icon={Wand2} message="Nenhum roteiro vinculado" sub="Crie um roteiro selecionando este cliente." />
+              ) : (
+                <div className="space-y-3">
+                  {clientItineraries.map((it: any) => (
+                    <div
+                      key={it.id}
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/40 cursor-pointer transition-colors"
+                      onClick={() => navigate(`/ferramentas-ia/criar-roteiro/${it.id}`)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Wand2 className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{it.destination}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatDateShort(it.start_date)} — {formatDateShort(it.end_date)}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant={it.status === "published" ? "default" : "secondary"} className="text-[10px]">
+                        {it.status === "published" ? "Publicado" : it.status === "approved" ? "Aprovado" : "Rascunho"}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Carteiras Digitais Tab */}
+        <TabsContent value="carteiras" className="mt-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Carteiras Digitais</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => navigate("/carteira-digital")}>
+                <Briefcase className="mr-2 h-4 w-4" /> Nova Carteira
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {clientTrips.length === 0 ? (
+                <EmptyState icon={Briefcase} message="Nenhuma carteira vinculada" sub="Crie uma carteira digital selecionando este cliente." />
+              ) : (
+                <div className="space-y-3">
+                  {clientTrips.map((trip: any) => (
+                    <div
+                      key={trip.id}
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/40 cursor-pointer transition-colors"
+                      onClick={() => navigate(`/carteira-digital/${trip.id}`)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Briefcase className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{trip.destination}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {trip.client_name} • {formatDateShort(trip.start_date)} — {formatDateShort(trip.end_date)}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant={trip.status === "active" ? "default" : "secondary"} className="text-[10px]">
+                        {trip.status === "active" ? "Ativa" : "Arquivada"}
+                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -314,6 +457,16 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
           </div>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function EmptyState({ icon: Icon, message, sub }: { icon: any; message: string; sub: string }) {
+  return (
+    <div className="text-center py-8 text-muted-foreground">
+      <Icon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+      <p>{message}</p>
+      <p className="text-sm mt-1">{sub}</p>
     </div>
   );
 }
