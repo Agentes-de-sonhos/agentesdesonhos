@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
+import { WhatsAppSupportButton } from "./components/layout/WhatsAppSupportButton";
 import { Loader2 } from "lucide-react";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
