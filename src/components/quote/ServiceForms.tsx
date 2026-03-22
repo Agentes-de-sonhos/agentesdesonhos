@@ -107,7 +107,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       return_date: format(values.return_date, "yyyy-MM-dd"),
       includes_baggage: values.includes_baggage, includes_boarding_fee: values.includes_boarding_fee,
       adult_price: values.adult_price, child_price: values.child_price,
-      is_unit_price: values.is_unit_price,
+      is_unit_price: true,
       notes: values.notes || "",
     };
     onSubmit(data, computedTotalAdults + computedTotalChildren, values.option_label || undefined, values.service_description || undefined);
