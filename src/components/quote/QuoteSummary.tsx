@@ -38,7 +38,7 @@ function toYMD(date: Date) {
   return `${y}-${m}-${d}`;
 }
 
-export function QuoteSummary({ quote }: QuoteSummaryProps) {
+export function QuoteSummary({ quote, externalEditDates, onExternalEditDatesChange }: QuoteSummaryProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
@@ -47,6 +47,13 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const [endDate, setEndDate] = useState<Date | undefined>(() => parseLocalDate(quote.end_date));
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
+
+  useEffect(() => {
+    if (externalEditDates && !editing) {
+      handleStartEdit();
+      onExternalEditDatesChange?.(false);
+    }
+  }, [externalEditDates]);
 
   const displayStart = parseLocalDate(quote.start_date);
   const displayEnd = parseLocalDate(quote.end_date);
