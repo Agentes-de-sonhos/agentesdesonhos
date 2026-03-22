@@ -686,7 +686,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
 
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem>
-            <FormLabel>{isUnitPrice ? "Valor por pessoa (R$)" : "Valor total (R$)"}</FormLabel>
+            <FormLabel>Valor por pessoa (R$)</FormLabel>
             <FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} /></FormControl>
             {isUnitPrice && totalPax > 0 && price > 0 && (
               <p className="text-xs text-muted-foreground">
