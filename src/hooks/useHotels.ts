@@ -130,6 +130,7 @@ export function useHotels(filters: HotelFilters) {
 
       return results;
     },
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -149,5 +150,6 @@ export function useHotelFilterOptions() {
 
       return { regions: regions.sort(), brands: brands.sort(), destinations: destinations.sort() };
     },
+    staleTime: 10 * 60 * 1000,
   });
 }

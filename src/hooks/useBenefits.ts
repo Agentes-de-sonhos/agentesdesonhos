@@ -30,6 +30,7 @@ export function useBenefits() {
         profile: profiles?.find((p) => p.user_id === b.user_id),
       })) as Benefit[];
     },
+    staleTime: 3 * 60 * 1000,
   });
 
   const { data: userConfirmations = [] } = useQuery({

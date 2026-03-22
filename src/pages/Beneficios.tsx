@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/shared/PaginationControls";
+import { useDebounce } from "@/hooks/useDebounce";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
 import { useBenefits } from "@/hooks/useBenefits";
@@ -29,11 +30,13 @@ export default function Beneficios() {
   const [shareOpen, setShareOpen] = useState(false);
   const [detailBenefit, setDetailBenefit] = useState<Benefit | null>(null);
 
+  const debouncedSearch = useDebounce(search, 300);
+
   // Filter benefits
   const filtered = useMemo(() => {
     let result = benefits;
-    if (search) {
-      const q = search.toLowerCase();
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
       result = result.filter(
         (b) =>
           b.title.toLowerCase().includes(q) ||
@@ -46,12 +49,12 @@ export default function Beneficios() {
     if (selectedCategory) result = result.filter((b) => b.category === selectedCategory);
     if (selectedDestination) result = result.filter((b) => b.destination === selectedDestination);
     return result;
-  }, [benefits, search, selectedCategory, selectedDestination]);
+  }, [benefits, debouncedSearch, selectedCategory, selectedDestination]);
 
   const { paginatedItems: paginatedBenefits, currentPage, totalPages, totalItems, pageSize, goToPage, resetPage } = usePagination(filtered, { pageSize: 20 });
 
   // Reset page when filters change
-  useEffect(() => { resetPage(); }, [search, selectedCategory, selectedDestination, resetPage]);
+  useEffect(() => { resetPage(); }, [debouncedSearch, selectedCategory, selectedDestination, resetPage]);
 
   const getUserConfirmationType = (benefitId: string) => {
     const c = userConfirmations.find((uc) => uc.benefit_id === benefitId);

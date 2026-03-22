@@ -106,6 +106,7 @@ export function useGamification() {
       return (data || []).reduce((sum: number, row: any) => sum + row.points, 0);
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   // ─── Rankings ──────────────────────────────────────────
@@ -117,6 +118,7 @@ export function useGamification() {
       return (data || []) as RankingEntry[];
     },
     enabled: !!user,
+    staleTime: 3 * 60 * 1000,
   });
 
   const weeklyRankingQuery = useQuery({
@@ -127,6 +129,7 @@ export function useGamification() {
       return (data || []) as RankingEntry[];
     },
     enabled: !!user,
+    staleTime: 3 * 60 * 1000,
   });
 
   const vendasRankingQuery = useQuery({
@@ -140,6 +143,7 @@ export function useGamification() {
       return (data || []) as RankingEntry[];
     },
     enabled: !!user,
+    staleTime: 3 * 60 * 1000,
   });
 
   const conteudoRankingQuery = useQuery({
@@ -153,6 +157,7 @@ export function useGamification() {
       return (data || []) as RankingEntry[];
     },
     enabled: !!user,
+    staleTime: 3 * 60 * 1000,
   });
 
   const educacaoRankingQuery = useQuery({
@@ -166,6 +171,7 @@ export function useGamification() {
       return (data || []) as RankingEntry[];
     },
     enabled: !!user,
+    staleTime: 3 * 60 * 1000,
   });
 
   // ─── Today's Actions (for missions) ───────────────────

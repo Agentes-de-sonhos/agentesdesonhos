@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Building2, SlidersHorizontal, PlusCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { HotelSearchBar } from "@/components/hotels/HotelSearchBar";
@@ -27,7 +28,15 @@ const defaultFilters: HotelFilters = {
 export default function HotelAdvisor() {
   const [filters, setFilters] = useState<HotelFilters>(defaultFilters);
   const [suggestOpen, setSuggestOpen] = useState(false);
-  const { data: hotels, isLoading } = useHotels(filters);
+
+  // Debounce the search field to avoid firing a DB query on every keystroke
+  const debouncedSearch = useDebounce(filters.search, 300);
+  const debouncedFilters = useMemo(() => ({
+    ...filters,
+    search: debouncedSearch,
+  }), [filters, debouncedSearch]);
+
+  const { data: hotels, isLoading } = useHotels(debouncedFilters);
   const { data: filterOptions } = useHotelFilterOptions();
 
   const regions = filterOptions?.regions || [];

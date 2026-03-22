@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -61,12 +62,14 @@ export default function Materiais() {
     groupGalleriesByPeriod, 
   } = useMaterials();
 
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
   // Filter materials first, then group into galleries
   const galleries = useMemo(() => {
-    const filtered = filterMaterials(materials, searchTerm, selectedCategory, selectedType, selectedSupplier);
+    const filtered = filterMaterials(materials, debouncedSearch, selectedCategory, selectedType, selectedSupplier);
     return groupIntoGalleries(filtered);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [materials, searchTerm, selectedCategory, selectedType, selectedSupplier]);
+  }, [materials, debouncedSearch, selectedCategory, selectedType, selectedSupplier]);
 
   // Group galleries
   const byPeriod = useMemo(() => groupGalleriesByPeriod(galleries), [galleries, groupGalleriesByPeriod]);

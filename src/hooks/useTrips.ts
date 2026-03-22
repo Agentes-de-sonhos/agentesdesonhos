@@ -26,6 +26,7 @@ export function useTrips() {
       return data as Trip[];
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   const createTripMutation = useMutation({
