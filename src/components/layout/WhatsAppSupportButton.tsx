@@ -1,10 +1,15 @@
 import { MessageCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const WHATSAPP_URL = `https://wa.me/5511982853937?text=${encodeURIComponent(
   "Olá! Estou utilizando a plataforma Agentes de Sonhos (versão beta) e gostaria de reportar um problema ou sugerir uma melhoria."
 )}`;
 
 export function WhatsAppSupportButton() {
+  const { user } = useAuth();
+
+  if (!user) return null;
+
   return (
     <a
       href={WHATSAPP_URL}
