@@ -133,6 +133,48 @@ export function useClientDetails(clientId: string) {
     enabled: !!clientId,
   });
 
+  const { data: clientQuotes = [] } = useQuery({
+    queryKey: ["client-quotes", clientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotes")
+        .select("*")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!clientId,
+  });
+
+  const { data: clientItineraries = [] } = useQuery({
+    queryKey: ["client-itineraries", clientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("itineraries")
+        .select("*")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!clientId,
+  });
+
+  const { data: clientTrips = [] } = useQuery({
+    queryKey: ["client-trips", clientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trips")
+        .select("*")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!clientId,
+  });
+
   const createTripMutation = useMutation({
     mutationFn: async (data: {
       destination: string;
