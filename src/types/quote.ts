@@ -43,6 +43,14 @@ export type ServiceType =
   | 'cruise'
   | 'other';
 
+export interface FlightLegDetail {
+  airport_origin?: string;
+  airport_destination?: string;
+  departure_time?: string;
+  arrival_time?: string;
+  flight_number?: string;
+}
+
 export interface FlightData {
   origin_city: string;
   destination_city: string;
@@ -54,6 +62,8 @@ export interface FlightData {
   adult_price: number;
   child_price: number;
   notes: string;
+  outbound_detail?: FlightLegDetail;
+  return_detail?: FlightLegDetail;
 }
 
 export interface HotelData {
