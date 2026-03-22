@@ -16,9 +16,14 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
+function parseLocalDate(dateStr: string) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export function QuoteSummary({ quote }: QuoteSummaryProps) {
-  const startDate = new Date(quote.start_date);
-  const endDate = new Date(quote.end_date);
+  const startDate = parseLocalDate(quote.start_date);
+  const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   return (

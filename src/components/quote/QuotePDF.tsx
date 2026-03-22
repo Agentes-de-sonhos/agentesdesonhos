@@ -149,8 +149,8 @@ function generateAgentSignature(profile: AgentProfile | null): string {
 }
 
 export function generateQuotePDF(quote: Quote, profile?: AgentProfile | null) {
-  const startDate = new Date(quote.start_date);
-  const endDate = new Date(quote.end_date);
+  const startDate = parseLocalDate(quote.start_date);
+  const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   const servicesHtml =

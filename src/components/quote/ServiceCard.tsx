@@ -27,7 +27,7 @@ function formatCurrency(value: number) {
 }
 
 function formatDate(dateStr: string) {
-  try { return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR }); } catch { return dateStr; }
+  try { const [y, m, d] = dateStr.split("-").map(Number); return format(new Date(y, m - 1, d), "dd/MM/yyyy", { locale: ptBR }); } catch { return dateStr; }
 }
 
 function getServiceDescription(service: QuoteService): string {
