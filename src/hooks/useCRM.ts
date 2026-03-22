@@ -253,6 +253,9 @@ export function useClientDetails(clientId: string) {
   return {
     sales,
     opportunities,
+    clientQuotes,
+    clientItineraries,
+    clientTrips,
     isLoading: salesLoading || oppsLoading,
     createTrip: createTripMutation.mutateAsync,
     updateTrip: updateTripMutation.mutateAsync,
