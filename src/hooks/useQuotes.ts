@@ -17,9 +17,10 @@ export function useQuotes() {
       if (!user) return [];
       const { data, error } = await supabase
         .from("quotes")
-        .select("*")
+        .select("id, user_id, client_name, client_id, destination, trip_start, trip_end, status, share_token, created_at, updated_at, total_price, currency, cover_image_url")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
       return data as Quote[];
     },
