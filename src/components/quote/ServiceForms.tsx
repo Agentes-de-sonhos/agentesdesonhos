@@ -682,16 +682,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
           <FormItem><FormLabel>Cobertura</FormLabel><FormControl><Input placeholder="USD 60.000, USD 100.000..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
-        <FormField control={form.control} name="is_unit_price" render={({ field }) => (
-          <FormItem className="flex items-center gap-3 space-y-0 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-            <FormControl>
-              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-            <FormLabel className="font-normal text-sm cursor-pointer">
-              Valor por pessoa <span className="text-muted-foreground">(multiplicar pela quantidade de passageiros)</span>
-            </FormLabel>
-          </FormItem>
-        )} />
+        {/* Pricing is always per-person — multiplication is automatic */}
 
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem>
