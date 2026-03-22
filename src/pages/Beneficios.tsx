@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
 import { useBenefits } from "@/hooks/useBenefits";
