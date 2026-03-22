@@ -26,6 +26,12 @@ import type {
   AttractionData, InsuranceData, CruiseData, OtherServiceData,
 } from "@/types/quote";
 
+/** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day). */
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 interface ServiceFormProps {
   serviceType: ServiceType;
   onSubmit: (data: any, amount: number, optionLabel?: string, description?: string, imageUrl?: string) => void;
