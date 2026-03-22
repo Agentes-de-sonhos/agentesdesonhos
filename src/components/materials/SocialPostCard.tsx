@@ -249,6 +249,8 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
         <img
           src={current.thumbnail_url}
           alt={current.title}
+          loading="lazy"
+          decoding="async"
           className="absolute inset-0 w-full h-full object-cover"
         />
       );
