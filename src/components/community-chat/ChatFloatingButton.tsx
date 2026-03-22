@@ -27,6 +27,7 @@ type ChatView = "menu" | "room" | "dm" | "conversations";
 
 export function ChatFloatingButton() {
   const { plan } = useSubscription();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<ChatView>("menu");
   const [activeRoomId, setActiveRoomId] = useState<string>();
