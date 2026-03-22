@@ -70,6 +70,10 @@ export function ChatFloatingButton() {
 
   if (plan !== "profissional") return null;
 
+  const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
+  const shouldShow = isDashboard || totalUnread > 0 || isOpen;
+  if (!shouldShow) return null;
+
   const openRoom = (room: CommunityRoom) => {
     setActiveRoomId(room.id);
     setActiveRoomName(`${room.emoji} ${room.name}`);
