@@ -519,7 +519,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
       transfer_mode: init?.transfer_type || "round_trip",
       location: init?.location || "",
       price: init?.price || initialData?.amount || 0,
-      arrival_date: init?.date ? new Date(init.date) : tripStartDate,
+      arrival_date: init?.date ? parseLocalDate(init.date) : tripStartDate,
       departure_date: tripEndDate,
     },
   });
