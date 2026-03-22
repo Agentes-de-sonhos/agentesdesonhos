@@ -639,7 +639,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
     defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: true, start_date: init?.start_date ? new Date(init.start_date) : tripStartDate, end_date: init?.end_date ? new Date(init.end_date) : tripEndDate },
   });
 
-  const isUnitPrice = form.watch("is_unit_price");
+  const isUnitPrice = true;
   const price = form.watch("price");
   const totalAmount = isUnitPrice ? price * totalPax : price;
 
