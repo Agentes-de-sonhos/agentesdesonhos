@@ -641,11 +641,11 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
 
   const isUnitPrice = true;
   const price = form.watch("price");
-  const totalAmount = isUnitPrice ? price * totalPax : price;
+  const totalAmount = price * totalPax;
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
-    const computed = values.is_unit_price ? values.price * totalPax : values.price;
-    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: values.is_unit_price }, computed);
+    const computed = values.price * totalPax;
+    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: true }, computed);
   };
 
   return (
