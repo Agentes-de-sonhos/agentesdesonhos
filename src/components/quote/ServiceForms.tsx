@@ -343,8 +343,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
       hotel_name: init?.hotel_name || "", city: init?.city || "",
       room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0, notes: init?.notes || "",
-      check_in: init?.check_in ? new Date(init.check_in) : tripStartDate,
-      check_out: init?.check_out ? new Date(init.check_out) : tripEndDate,
+      check_in: init?.check_in ? parseLocalDate(init.check_in) : tripStartDate,
+      check_out: init?.check_out ? parseLocalDate(init.check_out) : tripEndDate,
     },
   });
 
