@@ -1,3 +1,5 @@
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { CreatePostForm } from "./CreatePostForm";
 import { PostCard } from "./PostCard";
@@ -29,19 +31,22 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
     deleteComment,
   } = useCommunityFeed();
 
+  // Paginate posts first, then build feed items
+  const { paginatedItems: paginatedPosts, currentPage, totalPages, totalItems, pageSize, goToPage } = usePagination(posts, { pageSize: 10 });
+
   // Build feed items: posts interspersed with content blocks
   const feedItems: { type: string; data: any; key: string }[] = [];
 
-  posts.forEach((post, i) => {
+  paginatedPosts.forEach((post, i) => {
     feedItems.push({ type: "post", data: post, key: post.id });
 
-    // After 2nd post, inject fam trips if available
-    if (i === 1 && famTrips.length > 0) {
+    // After 2nd post on first page, inject fam trips if available
+    if (i === 1 && currentPage === 1 && famTrips.length > 0) {
       feedItems.push({ type: "famtrips", data: famTrips.slice(0, 2), key: "famtrips-block" });
     }
 
-    // After 5th post, inject upcoming events
-    if (i === 4 && events.length > 0) {
+    // After 5th post on first page, inject upcoming events
+    if (i === 4 && currentPage === 1 && events.length > 0) {
       const upcoming = events.filter((e) => new Date(e.event_date) >= new Date()).slice(0, 2);
       if (upcoming.length > 0) {
         feedItems.push({ type: "events", data: upcoming, key: "events-block" });
@@ -49,11 +54,11 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
     }
   });
 
-  // If few posts, still show blocks
-  if (posts.length <= 1 && famTrips.length > 0) {
+  // If few posts on first page, still show blocks
+  if (currentPage === 1 && paginatedPosts.length <= 1 && famTrips.length > 0) {
     feedItems.push({ type: "famtrips", data: famTrips.slice(0, 2), key: "famtrips-block" });
   }
-  if (posts.length <= 4 && events.length > 0) {
+  if (currentPage === 1 && paginatedPosts.length <= 4 && events.length > 0) {
     const upcoming = events.filter((e) => new Date(e.event_date) >= new Date()).slice(0, 2);
     if (upcoming.length > 0 && !feedItems.find((f) => f.key === "events-block")) {
       feedItems.push({ type: "events", data: upcoming, key: "events-block" });
@@ -167,6 +172,13 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
           })}
         </div>
       )}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={goToPage}
+        totalItems={totalItems}
+        pageSize={pageSize}
+      />
     </div>
   );
 }

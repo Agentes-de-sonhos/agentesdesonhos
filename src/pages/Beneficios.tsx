@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
 import { useBenefits } from "@/hooks/useBenefits";
@@ -45,6 +47,11 @@ export default function Beneficios() {
     if (selectedDestination) result = result.filter((b) => b.destination === selectedDestination);
     return result;
   }, [benefits, search, selectedCategory, selectedDestination]);
+
+  const { paginatedItems: paginatedBenefits, currentPage, totalPages, totalItems, pageSize, goToPage, resetPage } = usePagination(filtered, { pageSize: 20 });
+
+  // Reset page when filters change
+  useEffect(() => { resetPage(); }, [search, selectedCategory, selectedDestination, resetPage]);
 
   const getUserConfirmationType = (benefitId: string) => {
     const c = userConfirmations.find((uc) => uc.benefit_id === benefitId);
@@ -130,7 +137,7 @@ export default function Beneficios() {
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1">
               <div className="grid gap-4 md:grid-cols-2">
-                {filtered.map((b) => (
+                {paginatedBenefits.map((b) => (
                   <BenefitCard
                     key={b.id}
                     benefit={b}
@@ -140,6 +147,13 @@ export default function Beneficios() {
                   />
                 ))}
               </div>
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                totalItems={totalItems}
+                pageSize={pageSize}
+              />
             </div>
             <div className="lg:w-72 shrink-0">
               <BenefitContributorsRanking ranking={ranking} />

@@ -6497,6 +6497,16 @@ export type Database = {
           user_name: string
         }[]
       }
+      get_online_premium_users: {
+        Args: { _exclude_user_id?: string }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          city: string
+          name: string
+          user_id: string
+        }[]
+      }
       get_user_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["subscription_plan"]

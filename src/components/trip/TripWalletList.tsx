@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { useNavigate } from "react-router-dom";
 import { format, isAfter, isBefore, isWithinInterval, startOfDay } from "date-fns";
 
@@ -60,6 +62,10 @@ export function TripWalletList() {
   const [filter, setFilter] = useState<FilterType>("all");
 
   const filteredTrips = filterTrips(trips, filter);
+  const { paginatedItems: paginatedTrips, currentPage, totalPages, totalItems, pageSize, goToPage, resetPage } = usePagination(filteredTrips, { pageSize: 15 });
+
+  // Reset to page 1 when filter changes
+  useEffect(() => { resetPage(); }, [filter, resetPage]);
 
   const handleCopyLink = (trip: Trip) => {
     const origin = PUBLIC_DOMAIN;
@@ -129,78 +135,87 @@ export function TripWalletList() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3">
-          {filteredTrips.map((trip) => {
-            const status = getTripStatus(trip);
-            return (
-              <Card key={trip.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="font-semibold truncate">{trip.client_name}</h3>
-                        <Badge variant={status.variant} className="text-xs shrink-0">
-                          {status.label}
-                        </Badge>
+        <>
+          <div className="grid gap-3">
+            {paginatedTrips.map((trip) => {
+              const status = getTripStatus(trip);
+              return (
+                <Card key={trip.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h3 className="font-semibold truncate">{trip.client_name}</h3>
+                          <Badge variant={status.variant} className="text-xs shrink-0">
+                            {status.label}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3.5 w-3.5" /> {trip.destination}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {format(parseLocalDate(trip.start_date), "dd/MM", { locale: ptBR })} - {format(parseLocalDate(trip.end_date), "dd/MM/yy", { locale: ptBR })}
+                          </span>
+                        </div>
+                        {trip.access_password && (
+                          <button
+                            onClick={() => handleCopyPassword(trip)}
+                            className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5 hover:text-foreground transition-colors"
+                          >
+                            <Lock className="h-3 w-3" /> Senha: {trip.access_password}
+                            <Copy className="h-3 w-3 ml-1" />
+                          </button>
+                        )}
                       </div>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5" /> {trip.destination}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {format(parseLocalDate(trip.start_date), "dd/MM", { locale: ptBR })} - {format(parseLocalDate(trip.end_date), "dd/MM/yy", { locale: ptBR })}
-                        </span>
-                      </div>
-                      {trip.access_password && (
-                        <button
-                          onClick={() => handleCopyPassword(trip)}
-                          className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5 hover:text-foreground transition-colors"
-                        >
-                          <Lock className="h-3 w-3" /> Senha: {trip.access_password}
-                          <Copy className="h-3 w-3 ml-1" />
-                        </button>
-                      )}
-                    </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/ferramentas-ia/trip-wallet/${trip.id}`)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/ferramentas-ia/trip-wallet/${trip.id}?edit=true`)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCopyLink(trip)}>
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir carteira?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              A carteira de {trip.client_name} será excluída permanentemente, incluindo todos os serviços e documentos.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => deleteTrip(trip.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/ferramentas-ia/trip-wallet/${trip.id}`)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/ferramentas-ia/trip-wallet/${trip.id}?edit=true`)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCopyLink(trip)}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir carteira?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                A carteira de {trip.client_name} será excluída permanentemente, incluindo todos os serviços e documentos.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteTrip(trip.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+          />
+        </>
       )}
     </div>
   );
