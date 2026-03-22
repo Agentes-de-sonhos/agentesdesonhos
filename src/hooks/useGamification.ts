@@ -106,6 +106,7 @@ export function useGamification() {
       return (data || []).reduce((sum: number, row: any) => sum + row.points, 0);
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 
   // ─── Rankings ──────────────────────────────────────────
