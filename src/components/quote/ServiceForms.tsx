@@ -170,17 +170,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
         </div>
 
-        {/* Pricing mode toggle */}
-        <FormField control={form.control} name="is_unit_price" render={({ field }) => (
-          <FormItem className="flex items-center gap-3 space-y-0 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-            <FormControl>
-              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-            <FormLabel className="font-normal text-sm cursor-pointer">
-              Valor por pessoa <span className="text-muted-foreground">(multiplicar automaticamente pela quantidade de passageiros)</span>
-            </FormLabel>
-          </FormItem>
-        )} />
+        {/* Pricing is always per-person — multiplication is automatic */}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adult_price" render={({ field }) => (
