@@ -175,7 +175,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adult_price" render={({ field }) => (
             <FormItem>
-              <FormLabel>{isUnitPrice ? "Valor por adulto (R$)" : "Valor total adultos (R$)"}</FormLabel>
+              <FormLabel>Valor por adulto (R$)</FormLabel>
               <FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
               </FormControl>
