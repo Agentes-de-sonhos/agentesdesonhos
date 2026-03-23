@@ -54,9 +54,11 @@ export default function Agenda() {
     isCreatingCustomType,
   } = agenda;
 
+  const queryClient = (await import("@tanstack/react-query")).useQueryClient();
+
   const handleSyncComplete = useCallback(() => {
-    agenda.refetch?.();
-  }, [agenda]);
+    queryClient.invalidateQueries({ queryKey: ["agency-events"] });
+  }, [queryClient]);
 
   const handleDayClick = useCallback((date: string) => {
     setSelectedDate(date);
