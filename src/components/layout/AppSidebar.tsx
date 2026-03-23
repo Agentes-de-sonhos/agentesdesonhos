@@ -371,7 +371,7 @@ export function AppSidebar() {
                 {section.title}
               </p>
               <nav className="flex flex-col gap-0.5 mt-1">
-                {section.items.map((item) => {
+                {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => {
                   const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
                   const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
                   const isLockedByCartao = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
