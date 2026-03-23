@@ -166,6 +166,11 @@ export default function Agenda() {
           </div>
         </div>
 
+        {/* Google Calendar Sync */}
+        <div className="flex justify-end">
+          <GoogleCalendarSyncButton onSyncComplete={handleSyncComplete} />
+        </div>
+
         {/* Filter Bar */}
         <EventTypeFilter
           eventTypes={allEventTypes}
