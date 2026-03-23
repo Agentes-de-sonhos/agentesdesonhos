@@ -912,8 +912,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData }: Omit<ServiceF
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ IMAGE UPLOAD BLOCK ━━━━━━━━━━━━━━━━━━━ */
-function ServiceImageUpload({ imageUrl, onImageChange, isUploading }: { imageUrl: string | null; onImageChange: (url: string | null) => void; isUploading: boolean }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -922,34 +923,41 @@ function ServiceImageUpload({ imageUrl, onImageChange, isUploading }: { imageUrl
     const allowed = ["jpg", "jpeg", "png", "webp", "gif"];
     if (!allowed.includes(ext)) return;
     const path = `${crypto.randomUUID()}.${ext}`;
-    onImageChange("uploading");
+    setUploading(true);
     const { error } = await supabase.storage.from("quote-images").upload(path, file, { upsert: true });
-    if (error) { onImageChange(null); return; }
+    if (error) { setUploading(false); return; }
     const { data: urlData } = supabase.storage.from("quote-images").getPublicUrl(path);
-    onImageChange(urlData.publicUrl);
+    onImageUrlsChange([...imageUrls, urlData.publicUrl]);
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const removeImage = (index: number) => {
+    onImageUrlsChange(imageUrls.filter((_, i) => i !== index));
   };
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium">Imagem do serviço (opcional)</p>
-      {imageUrl && imageUrl !== "uploading" ? (
-        <div className="relative inline-block">
-          <img src={imageUrl} alt="Serviço" className="h-24 w-36 rounded-lg border border-border object-cover" />
-          <button type="button" onClick={() => onImageChange(null)} className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
-            <X className="h-3 w-3" />
-          </button>
-        </div>
-      ) : (
+      <p className="text-sm font-medium">Fotos do serviço (opcional)</p>
+      <div className="flex flex-wrap gap-2">
+        {imageUrls.map((url, i) => (
+          <div key={i} className="relative inline-block">
+            <img src={url} alt={`Serviço ${i + 1}`} className="h-24 w-36 rounded-lg border border-border object-cover" />
+            <button type="button" onClick={() => removeImage(i)} className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          disabled={isUploading}
-          className="flex items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
+          disabled={uploading}
+          className="flex items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:bg-muted/50 transition-colors h-24"
         >
-          {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
-          {isUploading ? "Enviando..." : "Adicionar foto"}
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+          {uploading ? "Enviando..." : "Adicionar foto"}
         </button>
-      )}
+      </div>
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
     </div>
   );
