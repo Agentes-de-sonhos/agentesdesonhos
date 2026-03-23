@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,8 +32,14 @@ export function CommunityGate({ onJoin, isJoining }: CommunityGateProps) {
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
 
   const toggleSpecialty = (s: string) => {
-    setSelectedSpecialties((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : prev.length < 5 ? [...prev, s] : prev
+    setSelectedSpecialties((prev) => {
+      if (prev.includes(s)) return prev.filter((x) => x !== s);
+      if (prev.length >= 10) {
+        toast.error("Máximo de 10 especialidades atingido");
+        return prev;
+      }
+      return [...prev, s];
+    }
     );
   };
 
@@ -212,8 +219,8 @@ function SpecialtySelector({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label>Especialidades (até 5)</Label>
-        <span className="text-xs text-muted-foreground">{selected.length}/5</span>
+        <Label>Especialidades (até 10)</Label>
+        <span className="text-xs text-muted-foreground">{selected.length}/10</span>
       </div>
       {(Object.entries(SPECIALTY_OPTIONS) as [string, string[]][]).map(([cat, items]) => (
         <div key={cat} className="space-y-1.5">
