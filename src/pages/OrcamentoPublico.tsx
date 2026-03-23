@@ -9,6 +9,7 @@ import type { QuoteService, ServiceType } from "@/types/quote";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
