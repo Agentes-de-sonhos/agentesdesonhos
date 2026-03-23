@@ -9,12 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Plus, Send, Trash2, Search, Loader2, Tag } from "lucide-react";
+import { Upload, Plus, Send, Trash2, Search, Loader2, Tag, Check, ChevronsUpDown } from "lucide-react";
 import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 import { useClientCategories } from "@/hooks/useClientCategories";
 import { SubcategoryCombobox } from "@/components/crm/SubcategoryCombobox";
+import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
 
 interface CrmContact {
@@ -265,41 +267,70 @@ export function AdminCrmContacts() {
     subcategoryId: string | null,
     onCategoryChange: (val: string) => void,
     onSubcategoryChange: (val: string | null) => void
-  ) => (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <div>
-        <Label className="flex items-center gap-1.5">
-          <Tag className="h-4 w-4" />
-          Categoria
-        </Label>
-        <select
-          value={categoryId || ""}
-          onChange={(e) => {
-            onCategoryChange(e.target.value);
-            onSubcategoryChange(null);
-          }}
-          className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-        >
-          <option value="">Selecione a categoria</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+  ) => {
+    const selectedCategory = categories.find((cat) => cat.id === categoryId);
+
+    return (
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label className="flex items-center gap-1.5">
+            <Tag className="h-4 w-4" />
+            Categoria
+          </Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                role="combobox"
+                className="w-full justify-between font-normal"
+              >
+                <span className={cn("truncate", !selectedCategory && "text-muted-foreground")}>
+                  {selectedCategory?.name || "Selecione a categoria"}
+                </span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1" align="start">
+              <div className="max-h-64 overflow-y-auto">
+                {categories.map((cat) => {
+                  const isSelected = cat.id === categoryId;
+
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                        isSelected && "bg-accent text-accent-foreground"
+                      )}
+                      onClick={() => {
+                        onCategoryChange(cat.id);
+                        onSubcategoryChange(null);
+                      }}
+                    >
+                      <span>{cat.name}</span>
+                      <Check className={cn("h-4 w-4", isSelected ? "opacity-100" : "opacity-0")} />
+                    </button>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div>
+          <Label>Subcategoria</Label>
+          <SubcategoryCombobox
+            categoryId={categoryId}
+            subcategories={subcategories}
+            value={subcategoryId}
+            onChange={onSubcategoryChange}
+            onCreateNew={(name, catId) => createSubcategory({ name, category_id: catId })}
+          />
+        </div>
       </div>
-      <div>
-        <Label>Subcategoria</Label>
-        <SubcategoryCombobox
-          categoryId={categoryId}
-          subcategories={subcategories}
-          value={subcategoryId}
-          onChange={onSubcategoryChange}
-          onCreateNew={(name, catId) => createSubcategory({ name, category_id: catId })}
-        />
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Card>
