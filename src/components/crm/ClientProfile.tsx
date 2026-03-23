@@ -28,6 +28,7 @@ import { useClientDetails } from "@/hooks/useCRM";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS, type Client, type ClientStatus } from "@/types/crm";
 import { cn } from "@/lib/utils";
 import { AddTripDialog, type TripFormData } from "./AddTripDialog";
+import { TravelersSection } from "./TravelersSection";
 import {
   AlertDialog,
   AlertDialogAction,
