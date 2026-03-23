@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
+import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -132,9 +133,9 @@ function getServiceDetails(service: QuoteService): string[] {
 }
 
 function CollapsibleServiceCard({
-  service, showPrice, isOpen, onToggle,
+  service, showPrice, isOpen, onToggle, showPaymentPerService = false,
 }: {
-  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void;
+  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean;
 }) {
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
@@ -194,6 +195,19 @@ function CollapsibleServiceCard({
               {service.description}
             </p>
           )}
+          {/* Per-service payment display */}
+          {isOpen && showPaymentPerService && (() => {
+            const payConfig = extractServicePaymentConfig(service);
+            if (!payConfig.is_custom_payment) return null;
+            const display = getServicePaymentDisplay(service.amount, payConfig);
+            if (!display) return null;
+            return (
+              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30">
+                <CreditCard className="h-4 w-4 text-primary/70" />
+                <span className="text-sm font-medium text-primary">{display}</span>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
@@ -250,6 +264,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
   const paymentTerms = (quote as any).payment_terms as string | null;
   const validUntil = (quote as any).valid_until as string | null;
   const validityDisclaimer = (quote as any).validity_disclaimer as string | null;
+  const useServicePayment = (quote as any).use_service_payment ?? false;
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -359,6 +374,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
                   showPrice={showDetailedPrices}
                   isOpen={openServiceIndex === index}
                   onToggle={() => handleToggleService(index)}
+                  showPaymentPerService={useServicePayment}
                 />
               ))}
             </div>

@@ -41,8 +41,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import type { ServiceType, QuoteFormData, ServiceData, Quote } from "@/types/quote";
+import type { ServiceType, QuoteFormData, ServiceData, Quote, QuoteService } from "@/types/quote";
 import { SERVICE_TYPE_LABELS, MULTI_OPTION_TYPES } from "@/types/quote";
+import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
+import type { ServicePaymentConfig } from "@/lib/servicePayment";
+import { extractServicePaymentConfig } from "@/lib/servicePayment";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -161,6 +164,8 @@ export default function GerarOrcamento() {
   const [autoSaved, setAutoSaved] = useState(false);
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
   const [headerEditDates, setHeaderEditDates] = useState(false);
+  const [useServicePayment, setUseServicePayment] = useState(false);
+  const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
 
   // Persist selectedServiceType & editingService to sessionStorage
   useEffect(() => {
@@ -188,6 +193,13 @@ export default function GerarOrcamento() {
       setEntryPercentage((quote as any).entry_percentage || 30);
       setPaymentMethodLabel((quote as any).payment_method_label || "");
       setFullPaymentDiscountPercent((quote as any).full_payment_discount_percent || 0);
+      setUseServicePayment((quote as any).use_service_payment ?? false);
+      // Build per-service payment configs from loaded services
+      const configs: Record<string, ServicePaymentConfig> = {};
+      (quote.services || []).forEach((s: any) => {
+        configs[s.id] = extractServicePaymentConfig(s);
+      });
+      setServicePaymentConfigs(configs);
       // Mark that quote data has been loaded — auto-save effects below
       // will skip their first run to avoid saving the initial values right back.
       setTimeout(() => { quoteLoadedRef.current = true; }, 2500);
@@ -254,6 +266,25 @@ export default function GerarOrcamento() {
     if (!quote) return;
     setShowDetailedLocal(checked);
     await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
+  };
+
+  const handleToggleServicePayment = async (checked: boolean) => {
+    if (!quote) return;
+    setUseServicePayment(checked);
+    await supabase.from("quotes").update({ use_service_payment: checked } as any).eq("id", quote.id);
+  };
+
+  const handleServicePaymentChange = async (serviceId: string, config: ServicePaymentConfig) => {
+    setServicePaymentConfigs((prev) => ({ ...prev, [serviceId]: config }));
+    await supabase.from("quote_services").update({
+      is_custom_payment: config.is_custom_payment,
+      payment_type: config.payment_type,
+      installments: config.installments,
+      entry_value: config.entry_value,
+      discount_type: config.discount_type,
+      discount_value: config.discount_value,
+      payment_method: config.payment_method,
+    } as any).eq("id", serviceId);
   };
 
   const handleSavePaymentConfig = useCallback(async () => {
@@ -476,6 +507,26 @@ export default function GerarOrcamento() {
           </CardContent>
         </Card>
 
+        {/* Toggle de pagamento por serviço */}
+        <Card>
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="service-payment" className="text-sm font-medium cursor-pointer">
+                  Definir forma de pagamento por serviço
+                </Label>
+              </div>
+              <Switch id="service-payment" checked={useServicePayment} onCheckedChange={handleToggleServicePayment} />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 ml-6">
+              {useServicePayment
+                ? "Cada serviço pode ter sua própria forma de pagamento personalizada."
+                : "Todos os serviços usam a forma de pagamento global."}
+            </p>
+          </CardContent>
+        </Card>
+
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-4">
             {/* Serviços */}
@@ -533,6 +584,34 @@ export default function GerarOrcamento() {
                       ))}
                     </div>
                     <ServiceList services={quote.services || []} onDeleteService={deleteService} onEditService={handleEditService} />
+
+                    {/* Per-service payment forms — only when toggle is ON */}
+                    {useServicePayment && (quote.services || []).length > 0 && (
+                      <div className="mt-4 space-y-3">
+                        <Separator />
+                        <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          Pagamento por serviço
+                        </p>
+                        {(quote.services || []).map((s) => {
+                          const sData = s.service_data as any;
+                          const label = SERVICE_TYPE_LABELS[s.service_type] || 'Serviço';
+                          const desc = s.service_type === 'flight' ? `${sData.origin_city} → ${sData.destination_city}` :
+                                       s.service_type === 'hotel' ? sData.hotel_name :
+                                       label;
+                          return (
+                            <div key={s.id} className="space-y-1.5">
+                              <p className="text-sm font-medium">{label}: {desc} — {formatCurrency(s.amount)}</p>
+                              <ServicePaymentForm
+                                amount={s.amount}
+                                config={servicePaymentConfigs[s.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
+                                onChange={(config) => handleServicePaymentChange(s.id, config)}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </>
                 )}
               </CardContent>

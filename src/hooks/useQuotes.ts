@@ -110,6 +110,7 @@ export function useQuotes() {
           payment_terms: (source as any).payment_terms,
           valid_until: (source as any).valid_until,
           validity_disclaimer: (source as any).validity_disclaimer,
+          use_service_payment: (source as any).use_service_payment ?? false,
         } as any)
         .select()
         .single();
@@ -129,6 +130,13 @@ export function useQuotes() {
           description: s.description,
           image_url: s.image_url,
           image_urls: s.image_urls || [],
+          is_custom_payment: s.is_custom_payment ?? false,
+          payment_type: s.payment_type ?? null,
+          installments: s.installments ?? null,
+          entry_value: s.entry_value ?? null,
+          discount_type: s.discount_type ?? null,
+          discount_value: s.discount_value ?? null,
+          payment_method: s.payment_method ?? null,
         }));
         await supabase.from("quote_services").insert(newServices as any);
       }
