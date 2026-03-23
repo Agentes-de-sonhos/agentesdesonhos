@@ -128,6 +128,7 @@ export function useQuotes() {
           option_label: s.option_label,
           description: s.description,
           image_url: s.image_url,
+          image_urls: s.image_urls || [],
         }));
         await supabase.from("quote_services").insert(newServices as any);
       }
@@ -206,7 +207,7 @@ export function useQuote(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type, service_data, amount, option_label, description, image_url,
+      service_type, service_data, amount, option_label, description, image_url, image_urls,
     }: {
       service_type: ServiceType;
       service_data: ServiceData;
@@ -214,6 +215,7 @@ export function useQuote(id: string | undefined) {
       option_label?: string;
       description?: string;
       image_url?: string;
+      image_urls?: string[];
     }) => {
       if (!id) throw new Error("Quote ID is required");
       const currentServices = quote?.services || [];
@@ -230,6 +232,7 @@ export function useQuote(id: string | undefined) {
           option_label: option_label || null,
           description: description || null,
           image_url: image_url || null,
+          image_urls: image_urls && image_urls.length > 0 ? image_urls : [],
         } as any)
         .select()
         .single();
@@ -251,7 +254,7 @@ export function useQuote(id: string | undefined) {
 
   const updateServiceMutation = useMutation({
     mutationFn: async ({
-      serviceId, service_type, service_data, amount, option_label, description, image_url,
+      serviceId, service_type, service_data, amount, option_label, description, image_url, image_urls,
     }: {
       serviceId: string;
       service_type: ServiceType;
@@ -260,6 +263,7 @@ export function useQuote(id: string | undefined) {
       option_label?: string;
       description?: string;
       image_url?: string;
+      image_urls?: string[];
     }) => {
       const oldService = quote?.services?.find((s) => s.id === serviceId);
       const oldAmount = oldService?.amount || 0;
@@ -272,6 +276,7 @@ export function useQuote(id: string | undefined) {
           option_label: option_label || null,
           description: description || null,
           image_url: image_url || null,
+          image_urls: image_urls && image_urls.length > 0 ? image_urls : [],
         } as any)
         .eq("id", serviceId);
       if (error) throw error;

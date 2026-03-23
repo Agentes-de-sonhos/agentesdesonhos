@@ -102,7 +102,8 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
   const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
   const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
   const details = getServiceDetails(service);
-  const hasExpandableContent = details.length > 0 || service.description || service.image_url;
+  const images = service.image_urls?.length ? service.image_urls : (service.image_url ? [service.image_url] : []);
+  const hasExpandableContent = details.length > 0 || service.description || images.length > 0;
 
   return (
     <Card>
@@ -152,8 +153,12 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
             <CollapsibleContent>
               <div className="px-4 pb-4 pt-0 border-t border-border/50">
                 <div className="pt-3 space-y-3">
-                  {service.image_url && (
-                    <img src={service.image_url} alt={label} className="h-24 w-full max-w-[200px] rounded-lg border border-border object-cover" />
+                  {images.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {images.map((url, i) => (
+                        <img key={i} src={url} alt={`${label} ${i + 1}`} className="h-24 w-auto max-w-[200px] rounded-lg border border-border object-cover" />
+                      ))}
+                    </div>
                   )}
                   {details.length > 0 && (
                     <div className="flex flex-wrap gap-x-4 gap-y-1">
