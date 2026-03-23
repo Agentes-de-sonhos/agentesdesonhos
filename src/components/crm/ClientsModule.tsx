@@ -473,7 +473,7 @@ export function ClientsModule() {
                           subcategories={subcategories}
                           value={field.value || null}
                           onChange={(id) => field.onChange(id || "")}
-                          onCreateNew={createSubcategory}
+                          onCreateNew={(name, categoryId) => createSubcategory({ name, category_id: categoryId })}
                         />
                         <FormMessage />
                       </FormItem>
