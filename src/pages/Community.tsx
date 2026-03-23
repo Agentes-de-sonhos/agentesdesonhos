@@ -36,8 +36,9 @@ export default function Community() {
 
 function CommunityContent() {
   const isMobile = useIsMobile();
-  const { membership, isLoading: memberLoading, isMember, isBlocked, join, isJoining } =
+  const { membership, isLoading: memberLoading, isMember, isBlocked, join, isJoining, updateProfile, isUpdating } =
     useCommunityMembership();
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("feed");
   const {
     famTrips, upcomingMeetings, pastMeetings, inPersonEvents,
