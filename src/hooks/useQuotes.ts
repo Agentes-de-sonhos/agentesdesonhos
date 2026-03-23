@@ -205,6 +205,15 @@ export function useQuote(id: string | undefined) {
     enabled: !!id,
   });
 
+  async function recalcQuoteTotal(quoteId: string) {
+    const { data: allServices } = await supabase
+      .from("quote_services")
+      .select("amount")
+      .eq("quote_id", quoteId);
+    const total = (allServices || []).reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+    await supabase.from("quotes").update({ total_amount: total }).eq("id", quoteId);
+  }
+
   const addServiceMutation = useMutation({
     mutationFn: async ({
       service_type, service_data, amount, option_label, description, image_url, image_urls,
@@ -238,8 +247,7 @@ export function useQuote(id: string | undefined) {
         .single();
       if (error) throw error;
 
-      const newTotal = (quote?.total_amount || 0) + amount;
-      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
+      await recalcQuoteTotal(id);
       return data;
     },
     onSuccess: () => {
@@ -265,8 +273,6 @@ export function useQuote(id: string | undefined) {
       image_url?: string;
       image_urls?: string[];
     }) => {
-      const oldService = quote?.services?.find((s) => s.id === serviceId);
-      const oldAmount = oldService?.amount || 0;
       const { error } = await supabase
         .from("quote_services")
         .update({
@@ -280,8 +286,7 @@ export function useQuote(id: string | undefined) {
         } as any)
         .eq("id", serviceId);
       if (error) throw error;
-      const newTotal = (quote?.total_amount || 0) - oldAmount + amount;
-      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
+      await recalcQuoteTotal(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });
@@ -295,12 +300,9 @@ export function useQuote(id: string | undefined) {
 
   const deleteServiceMutation = useMutation({
     mutationFn: async (serviceId: string) => {
-      const service = quote?.services?.find((s) => s.id === serviceId);
-      const amount = service?.amount || 0;
       const { error } = await supabase.from("quote_services").delete().eq("id", serviceId);
       if (error) throw error;
-      const newTotal = Math.max(0, (quote?.total_amount || 0) - amount);
-      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
+      await recalcQuoteTotal(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });

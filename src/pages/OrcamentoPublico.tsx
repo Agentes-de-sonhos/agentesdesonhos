@@ -372,7 +372,9 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
           const entryPct = (quote as any).entry_percentage || 0;
           const discountPct = (quote as any).full_payment_discount_percent || 0;
           const methodLabel = (quote as any).payment_method_label as string | null;
-          const total = quote.total_amount;
+          const total = quote.services && quote.services.length > 0
+            ? quote.services.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
+            : quote.total_amount;
 
           let mainDisplay: React.ReactNode;
           let subtitleDisplay: React.ReactNode = null;
