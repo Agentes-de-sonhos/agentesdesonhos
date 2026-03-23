@@ -1216,13 +1216,19 @@ function PublicServiceCard({ service }: { service: TripService }) {
 }
 
 // Main Public View
-export default function ViagemPublica() {
+interface ViagemPublicaProps {
+  preLoadedTrip?: Trip;
+  preLoadedAgent?: AgentProfile | null;
+}
+
+export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemPublicaProps = {}) {
   const { token } = useParams();
   const location = useLocation();
   const preAuth = location.state as { preAuthenticated?: boolean; tripData?: Trip; agentProfile?: AgentProfile | null } | null;
-  const [authenticated, setAuthenticated] = useState(!!preAuth?.preAuthenticated);
-  const [tripData, setTripData] = useState<Trip | null>(preAuth?.tripData || null);
-  const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preAuth?.agentProfile || null);
+  const hasPreData = !!preLoadedTrip || !!preAuth?.preAuthenticated;
+  const [authenticated, setAuthenticated] = useState(hasPreData);
+  const [tripData, setTripData] = useState<Trip | null>(preLoadedTrip || preAuth?.tripData || null);
+  const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preLoadedAgent ?? preAuth?.agentProfile ?? null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
