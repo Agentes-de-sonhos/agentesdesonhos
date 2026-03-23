@@ -14,6 +14,7 @@ interface CommunityLeftSidebarProps {
   onNavigate: (section: string) => void;
   filterSpecialty: string | null;
   onFilterSpecialty: (s: string | null) => void;
+  onEditProfile?: () => void;
 }
 
 const NAV_ITEMS = [
