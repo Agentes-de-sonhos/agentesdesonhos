@@ -8,7 +8,8 @@ const corsHeaders = {
 };
 
 const PLAN_MAP: Record<string, string> = {
-  "prod_U9J9e1DdfeYvXg": "profissional",
+  "prod_U9J9e1DdfeYvXg": "fundador",
+  "prod_U9jMtBbO6vmjsl": "profissional",
 };
 
 serve(async (req) => {

@@ -44,7 +44,7 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/dashboard?upgrade=success`,
       cancel_url: `${req.headers.get("origin")}/dashboard?upgrade=cancelled`,
-      metadata: { user_id: user.id },
+      metadata: { user_id: user.id, plan: "profissional" },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

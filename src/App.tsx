@@ -75,7 +75,7 @@ const Suporte = lazy(() => import("./pages/Suporte"));
 const CursosMarketplace = lazy(() => import("./pages/CursosMarketplace"));
 const CursoDetalhe = lazy(() => import("./pages/CursoDetalhe"));
 const CursoEditar = lazy(() => import("./pages/CursoEditar"));
-
+const Planos = lazy(() => import("./pages/Planos"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -123,6 +123,7 @@ const App = () => (
                 )
               }
             />
+            <Route path="/planos" element={<Planos />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/crm" element={<AdminRoute><AdminCRM /></AdminRoute>} />

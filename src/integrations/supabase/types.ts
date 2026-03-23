@@ -6998,6 +6998,7 @@ export type Database = {
         | "premium"
         | "educa_pass"
         | "cartao_digital"
+        | "fundador"
       workshop_category:
         | "contabilidade"
         | "tributaria"
@@ -7138,6 +7139,7 @@ export const Constants = {
         "premium",
         "educa_pass",
         "cartao_digital",
+        "fundador",
       ],
       workshop_category: [
         "contabilidade",

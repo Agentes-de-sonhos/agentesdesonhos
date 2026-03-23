@@ -36,6 +36,7 @@ const PLAN_ICONS: Record<SubscriptionPlan, React.ReactNode> = {
   cartao_digital: <Star className="h-5 w-5" />,
   essencial: <Star className="h-5 w-5" />,
   profissional: <Sparkles className="h-5 w-5" />,
+  fundador: <Sparkles className="h-5 w-5" />,
 };
 
 const PLAN_COLORS: Record<SubscriptionPlan, string> = {
@@ -43,6 +44,7 @@ const PLAN_COLORS: Record<SubscriptionPlan, string> = {
   cartao_digital: "border-muted bg-card",
   essencial: "border-muted bg-card",
   profissional: "border-primary/50 bg-primary/5",
+  fundador: "border-primary/50 bg-primary/5",
 };
 
 const PLAN_BADGE_COLORS: Record<SubscriptionPlan, string> = {
@@ -50,6 +52,7 @@ const PLAN_BADGE_COLORS: Record<SubscriptionPlan, string> = {
   cartao_digital: "bg-muted text-muted-foreground",
   essencial: "bg-muted text-muted-foreground",
   profissional: "bg-primary text-primary-foreground",
+  fundador: "bg-primary text-primary-foreground",
 };
 
 const plans: SubscriptionPlan[] = ["essencial", "profissional"];
@@ -66,7 +69,7 @@ export function UpgradeDialog({
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const STRIPE_PRICES: Partial<Record<SubscriptionPlan, string>> = {
-    profissional: "price_1TBXqzFkGdVt5nieafKR9POR",
+    profissional: "price_1TE4lRFkGdVt5nieLz51QfLV",
   };
 
   const handleUpgrade = async (planKey: SubscriptionPlan) => {
