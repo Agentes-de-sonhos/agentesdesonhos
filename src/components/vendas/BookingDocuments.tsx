@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { generateReceiptPdf, ReceiptData } from "@/lib/generateReceiptPdf";
+import { generateContractPdf, ContractData } from "@/lib/generateContractPdf";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
