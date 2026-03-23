@@ -99,7 +99,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
             <span className="font-medium">Total Geral</span>
           </div>
           <span className="text-2xl font-bold text-primary">
-            {formatCurrency(quote.total_amount)}
+            {formatCurrency(computedTotal)}
           </span>
         </div>
 
