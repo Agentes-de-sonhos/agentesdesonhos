@@ -209,6 +209,14 @@ function CommunityContent() {
         open={!!selectedMember}
         onOpenChange={(open) => !open && setSelectedMember(null)}
       />
+
+      <EditCommunityProfileDialog
+        open={editProfileOpen}
+        onOpenChange={setEditProfileOpen}
+        membership={membership as CommunityMember}
+        onSave={updateProfile}
+        isSaving={isUpdating}
+      />
     </DashboardLayout>
   );
 }
