@@ -284,19 +284,6 @@ export function ClientsModule() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filtrar categoria" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as categorias</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
         <Button variant="outline" onClick={() => setIsImportOpen(true)} className="gap-2">
           <Upload className="h-4 w-4" /> Importar Contatos
         </Button>
