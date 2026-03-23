@@ -18,6 +18,7 @@ import {
   FileText,
   Wand2,
   Briefcase,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,7 @@ import { useClientDetails } from "@/hooks/useCRM";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS, type Client, type ClientStatus } from "@/types/crm";
 import { cn } from "@/lib/utils";
 import { AddTripDialog, type TripFormData } from "./AddTripDialog";
+import { TravelersSection } from "./TravelersSection";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -179,6 +181,9 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
           </TabsTrigger>
           <TabsTrigger value="carteiras">
             Carteiras {clientTrips.length > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{clientTrips.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="viajantes">
+            <Users className="mr-1 h-3.5 w-3.5" /> Viajantes
           </TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
         </TabsList>
@@ -406,6 +411,10 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="viajantes" className="mt-4">
+          <TravelersSection clientId={client.id} clientName={client.name} />
         </TabsContent>
 
         <TabsContent value="financeiro" className="mt-4">
