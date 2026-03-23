@@ -1,108 +1,194 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Loader2 } from "lucide-react";
-import { BookingService, SERVICE_TYPES } from "@/hooks/useBookings";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { Plus, Trash2, Loader2, Pencil, Copy, X, Check } from "lucide-react";
+import { BookingService, SERVICE_TYPES, SERVICE_ICONS, useClients } from "@/hooks/useBookings";
+import { format } from "date-fns";
 
 interface Props {
   bookingId: string;
   services: BookingService[];
   onAdd: (values: any) => void;
+  onUpdate: (values: any) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (svc: BookingService) => void;
   isAdding: boolean;
 }
 
-export function ServicesList({ bookingId, services, onAdd, onDelete, isAdding }: Props) {
-  const { user } = useAuth();
-  const [showForm, setShowForm] = useState(false);
-  const [serviceType, setServiceType] = useState("hotel");
-  const [supplierId, setSupplierId] = useState("");
-  const [description, setDescription] = useState("");
-  const [salePrice, setSalePrice] = useState("");
-  const [costPrice, setCostPrice] = useState("");
-  const [expectedCommission, setExpectedCommission] = useState("");
-  const [suppliers, setSuppliers] = useState<{ id: string; name: string }[]>([]);
+const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
-  useEffect(() => {
-    if (showForm && user) {
-      supabase.from("clients").select("id, name").eq("user_id", user.id).order("name").then(({ data }) => setSuppliers(data ?? []));
-    }
-  }, [showForm, user]);
+const statusLabels: Record<string, string> = { pendente: "Pendente", confirmado: "Confirmado", cancelado: "Cancelado" };
+const statusColors: Record<string, string> = {
+  pendente: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  confirmado: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  cancelado: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+};
+
+function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
+  bookingId: string;
+  onSubmit: (v: any) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+  initial?: BookingService;
+}) {
+  const { data: clients = [] } = useClients();
+  const [serviceType, setServiceType] = useState(initial?.service_type || "hotel");
+  const [supplierId, setSupplierId] = useState(initial?.supplier_id || "");
+  const [description, setDescription] = useState(initial?.description || "");
+  const [salePrice, setSalePrice] = useState(initial ? String(initial.sale_price) : "");
+  const [costPrice, setCostPrice] = useState(initial ? String(initial.cost_price) : "");
+  const [expectedCommission, setExpectedCommission] = useState(initial ? String(initial.expected_commission) : "");
+  const [commissionDate, setCommissionDate] = useState(initial?.expected_commission_date || "");
+  const [status, setStatus] = useState(initial?.status || "pendente");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd({
-      booking_id: bookingId,
+    const payload = {
+      ...(initial ? { id: initial.id } : { booking_id: bookingId }),
       service_type: serviceType,
       supplier_id: supplierId || null,
       description: description || null,
       sale_price: Number(salePrice) || 0,
       cost_price: Number(costPrice) || 0,
       expected_commission: Number(expectedCommission) || 0,
-      status: "pendente",
-    });
-    setShowForm(false);
-    setDescription("");
-    setSalePrice("");
-    setCostPrice("");
-    setExpectedCommission("");
-    setSupplierId("");
+      expected_commission_date: commissionDate || null,
+      status,
+    };
+    onSubmit(payload);
   };
 
   return (
-    <div className="space-y-3">
-      {services.map((s) => (
-        <Card key={s.id}>
-          <CardContent className="py-3 flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{SERVICE_TYPES[s.service_type] || s.service_type}</Badge>
-                <span className="text-sm">{s.description || "Sem descrição"}</span>
+    <form onSubmit={handleSubmit} className="border rounded-lg p-4 space-y-4 bg-muted/30">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div>
+          <Label className="text-xs">Tipo *</Label>
+          <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            {Object.entries(SERVICE_TYPES).map(([k, v]) => <option key={k} value={k}>{SERVICE_ICONS[k]} {v}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">Fornecedor</Label>
+          <select value={supplierId} onChange={(e) => setSupplierId(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <option value="">Selecione</option>
+            {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">Status</Label>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            {Object.entries(statusLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+      </div>
+      <div>
+        <Label className="text-xs">Descrição</Label>
+        <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" placeholder="Ex: Hotel Marriott Paris - 5 noites" />
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div>
+          <Label className="text-xs">Valor Venda *</Label>
+          <Input type="number" step="0.01" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="mt-1" required />
+        </div>
+        <div>
+          <Label className="text-xs">Custo</Label>
+          <Input type="number" step="0.01" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <Label className="text-xs">Comissão Esperada</Label>
+          <Input type="number" step="0.01" value={expectedCommission} onChange={(e) => setExpectedCommission(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <Label className="text-xs">Data Comissão</Label>
+          <Input type="date" value={commissionDate} onChange={(e) => setCommissionDate(e.target.value)} className="mt-1" />
+        </div>
+      </div>
+      <div className="flex gap-2 justify-end">
+        <Button type="button" variant="outline" size="sm" onClick={onCancel}><X className="h-3.5 w-3.5 mr-1" />Cancelar</Button>
+        <Button type="submit" size="sm" disabled={isLoading}>
+          {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Check className="h-3.5 w-3.5 mr-1" />}
+          {initial ? "Salvar" : "Adicionar"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, onDuplicate, isAdding }: Props) {
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  return (
+    <div className="space-y-2">
+      {services.map((s) => {
+        if (editingId === s.id) {
+          return (
+            <ServiceForm
+              key={s.id}
+              bookingId={bookingId}
+              initial={s}
+              onSubmit={(v) => { onUpdate(v); setEditingId(null); }}
+              onCancel={() => setEditingId(null)}
+              isLoading={false}
+            />
+          );
+        }
+        const margin = Number(s.sale_price) - Number(s.cost_price);
+        return (
+          <Card key={s.id} className="group hover:shadow-sm transition-shadow">
+            <CardContent className="py-3 px-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <span className="text-2xl mt-0.5">{SERVICE_ICONS[s.service_type] || "📦"}</span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-foreground">{SERVICE_TYPES[s.service_type] || s.service_type}</span>
+                      <Badge className={`${statusColors[s.status] || ""} border-0 text-[10px]`}>
+                        {statusLabels[s.status] || s.status}
+                      </Badge>
+                    </div>
+                    {s.description && <p className="text-sm text-muted-foreground truncate mt-0.5">{s.description}</p>}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Fornecedor: {s.supplier?.name || "—"}
+                      {s.expected_commission_date && ` • Comissão: ${format(new Date(s.expected_commission_date + "T00:00:00"), "dd/MM/yyyy")}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-semibold text-foreground">R$ {fmt(Number(s.sale_price))}</p>
+                  <p className="text-xs text-muted-foreground">Custo: R$ {fmt(Number(s.cost_price))}</p>
+                  <p className={`text-xs font-medium ${margin >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                    Margem: R$ {fmt(margin)}
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Fornecedor: {s.supplier?.name || "—"} • Venda: R$ {Number(s.sale_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} • Custo: R$ {Number(s.cost_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-              </p>
-            </div>
-            <Button variant="ghost" size="icon" onClick={() => onDelete(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-          </CardContent>
-        </Card>
-      ))}
+              <div className="flex items-center gap-1 mt-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => setEditingId(s.id)}>
+                  <Pencil className="h-3 w-3" /> Editar
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => onDuplicate(s)}>
+                  <Copy className="h-3 w-3" /> Duplicar
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1 text-destructive" onClick={() => onDelete(s.id)}>
+                  <Trash2 className="h-3 w-3" /> Remover
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
 
       {showForm ? (
-        <form onSubmit={handleSubmit} className="border rounded-lg p-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Tipo *</Label>
-              <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                {Object.entries(SERVICE_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
-            </div>
-            <div>
-              <Label>Fornecedor</Label>
-              <select value={supplierId} onChange={(e) => setSupplierId(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                <option value="">Selecione</option>
-                {suppliers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-          </div>
-          <div><Label>Descrição</Label><Input value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-          <div className="grid grid-cols-3 gap-3">
-            <div><Label>Valor Venda</Label><Input type="number" step="0.01" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} required /></div>
-            <div><Label>Custo</Label><Input type="number" step="0.01" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} /></div>
-            <div><Label>Comissão Esperada</Label><Input type="number" step="0.01" value={expectedCommission} onChange={(e) => setExpectedCommission(e.target.value)} /></div>
-          </div>
-          <div className="flex gap-2">
-            <Button type="submit" disabled={isAdding}>{isAdding ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}Adicionar</Button>
-            <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-          </div>
-        </form>
+        <ServiceForm
+          bookingId={bookingId}
+          onSubmit={(v) => { onAdd(v); setShowForm(false); }}
+          onCancel={() => setShowForm(false)}
+          isLoading={isAdding}
+        />
       ) : (
-        <Button variant="outline" onClick={() => setShowForm(true)} className="w-full gap-2">
+        <Button variant="outline" onClick={() => setShowForm(true)} className="w-full gap-2 border-dashed">
           <Plus className="h-4 w-4" /> Adicionar Serviço
         </Button>
       )}

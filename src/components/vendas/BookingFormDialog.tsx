@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { BOOKING_STATUSES } from "@/hooks/useBookings";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { BOOKING_STATUSES, useClients } from "@/hooks/useBookings";
 import { Loader2 } from "lucide-react";
 
 interface Props {
@@ -24,25 +22,13 @@ interface Props {
 }
 
 export function BookingFormDialog({ open, onOpenChange, onSubmit, isLoading }: Props) {
-  const { user } = useAuth();
+  const { data: clients = [] } = useClients();
   const [tripName, setTripName] = useState("");
   const [clientId, setClientId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("lead");
   const [notes, setNotes] = useState("");
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
-
-  useEffect(() => {
-    if (open && user) {
-      supabase
-        .from("clients")
-        .select("id, name")
-        .eq("user_id", user.id)
-        .order("name")
-        .then(({ data }) => setClients(data ?? []));
-    }
-  }, [open, user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
