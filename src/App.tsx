@@ -123,6 +123,7 @@ const App = () => (
                 )
               }
             />
+            <Route path="/planos" element={<Planos />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/crm" element={<AdminRoute><AdminCRM /></AdminRoute>} />
