@@ -26,7 +26,7 @@ import { ChatInput } from "./ChatInput";
 type ChatView = "menu" | "room" | "dm" | "conversations";
 
 export function ChatFloatingButton() {
-  const { plan } = useSubscription();
+  const { hasFeature } = useSubscription();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<ChatView>("menu");
@@ -58,7 +58,6 @@ export function ChatFloatingButton() {
     [startConversation]
   );
 
-  // Listen for global "start-dm" events from OnlineAgentsStrip on Dashboard
   useEffect(() => {
     const handler = (e: Event) => {
       const agent = (e as CustomEvent<OnlineAgent>).detail;
@@ -68,7 +67,7 @@ export function ChatFloatingButton() {
     return () => window.removeEventListener("start-dm", handler);
   }, [handleAgentChat]);
 
-  if (plan !== "profissional") return null;
+  if (!hasFeature("community")) return null;
 
   const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
   const shouldShow = isDashboard || totalUnread > 0 || isOpen;
