@@ -118,7 +118,7 @@ export function BookingDetail({ bookingId, onBack }: Props) {
           <span className="w-1.5 h-5 rounded-full bg-amber-500" />
           Documentos
         </h2>
-        <BookingDocuments bookingId={bookingId} documents={documents} booking={booking} />
+        <BookingDocuments bookingId={bookingId} documents={documents} booking={booking} services={services} payments={payments} />
       </section>
     </div>
   );
