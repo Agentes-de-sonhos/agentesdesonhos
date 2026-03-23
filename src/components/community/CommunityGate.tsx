@@ -220,7 +220,7 @@ function SpecialtySelector({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Label>Especialidades (até 5)</Label>
-        <span className="text-xs text-muted-foreground">{selected.length}/5</span>
+        <span className="text-xs text-muted-foreground">{selected.length}/10</span>
       </div>
       {(Object.entries(SPECIALTY_OPTIONS) as [string, string[]][]).map(([cat, items]) => (
         <div key={cat} className="space-y-1.5">
