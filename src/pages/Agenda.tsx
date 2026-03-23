@@ -55,7 +55,7 @@ export default function Agenda() {
     isCreatingCustomType,
   } = agenda;
 
-  const queryClient = (await import("@tanstack/react-query")).useQueryClient();
+  const queryClient = useQueryClient();
 
   const handleSyncComplete = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["agency-events"] });
