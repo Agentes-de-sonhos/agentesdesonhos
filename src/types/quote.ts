@@ -29,6 +29,7 @@ export interface QuoteService {
   option_label: string | null;
   description: string | null;
   image_url: string | null;
+  image_urls: string[];
   created_at: string;
   updated_at: string;
 }

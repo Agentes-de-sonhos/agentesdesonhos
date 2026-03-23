@@ -965,16 +965,16 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading }: { ima
 
 /* ━━━━━━━━━━━━━━━━━━━ MAIN ROUTER ━━━━━━━━━━━━━━━━━━━ */
 export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData }: ServiceFormProps) {
-  const [serviceImageUrl, setServiceImageUrl] = useState<string | null>(initialData?.image_url || null);
-  const isUploading = serviceImageUrl === "uploading";
+  const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
+  const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
+  const [isImgUploading, setIsImgUploading] = useState(false);
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
-    const finalUrl = serviceImageUrl === "uploading" ? null : serviceImageUrl;
-    onSubmit(data, amount, optionLabel, description, finalUrl || undefined);
+    onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
-  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData };
+  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData };
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
@@ -991,7 +991,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
 
   return (
     <div className="space-y-4">
-      <ServiceImageUpload imageUrl={serviceImageUrl} onImageChange={setServiceImageUrl} isUploading={isUploading} />
+      <ServiceImageUpload imageUrls={serviceImageUrls} onImageUrlsChange={setServiceImageUrls} isUploading={isImgUploading} />
       {formElement}
     </div>
   );
