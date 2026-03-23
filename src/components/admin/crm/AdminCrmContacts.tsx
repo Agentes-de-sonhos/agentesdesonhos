@@ -71,6 +71,7 @@ export function AdminCrmContacts() {
   const [newContact, setNewContact] = useState({ nome: "", email: "", telefone: "", empresa: "", category_id: "", subcategory_id: "" });
   const [editOpen, setEditOpen] = useState(false);
   const [editContact, setEditContact] = useState<CrmContact | null>(null);
+  const [catPopoverOpen, setCatPopoverOpen] = useState(false);
 
   const { categories, subcategories, createSubcategory } = useClientCategories();
 
