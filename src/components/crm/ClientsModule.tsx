@@ -168,8 +168,6 @@ export function ClientsModule() {
         birthday_day: "",
         birthday_month: "",
         birthday_year: "",
-        category_id: "",
-        subcategory_id: "",
       });
     }
     setIsDialogOpen(true);
