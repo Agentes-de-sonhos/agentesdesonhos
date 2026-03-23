@@ -168,7 +168,7 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
                     </div>
                   )}
                   {service.description && (
-                    <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 italic">
+                    <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 italic whitespace-pre-wrap break-words">
                       {service.description}
                     </p>
                   )}
