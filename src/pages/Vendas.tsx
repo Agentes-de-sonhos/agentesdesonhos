@@ -5,13 +5,26 @@ import { Briefcase, Loader2 } from "lucide-react";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { BookingList } from "@/components/vendas/BookingList";
 import { BookingFormDialog } from "@/components/vendas/BookingFormDialog";
-import { BookingDetailDialog } from "@/components/vendas/BookingDetailDialog";
+import { BookingDetail } from "@/components/vendas/BookingDetail";
 import { useBookings } from "@/hooks/useBookings";
 
 export default function Vendas() {
-  const { bookings, isLoading, createBooking, updateBooking, deleteBooking } = useBookings();
+  const { bookings, isLoading, paymentsByBooking, commissionsByBooking, createBooking, updateBooking, deleteBooking } = useBookings();
   const [showCreate, setShowCreate] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  if (selectedId) {
+    return (
+      <SubscriptionGuard feature="financial">
+        <DashboardLayout>
+          <BookingDetail
+            bookingId={selectedId}
+            onBack={() => setSelectedId(null)}
+          />
+        </DashboardLayout>
+      </SubscriptionGuard>
+    );
+  }
 
   return (
     <SubscriptionGuard feature="financial">
@@ -31,6 +44,8 @@ export default function Vendas() {
           ) : (
             <BookingList
               bookings={bookings}
+              paymentsByBooking={paymentsByBooking}
+              commissionsByBooking={commissionsByBooking}
               onNew={() => setShowCreate(true)}
               onSelect={(id) => setSelectedId(id)}
               onDelete={(id) => deleteBooking.mutate(id)}
@@ -41,18 +56,15 @@ export default function Vendas() {
             open={showCreate}
             onOpenChange={setShowCreate}
             onSubmit={(values) => {
-              createBooking.mutate(values, { onSuccess: () => setShowCreate(false) });
+              createBooking.mutate(values, {
+                onSuccess: (data) => {
+                  setShowCreate(false);
+                  if (data?.id) setSelectedId(data.id);
+                },
+              });
             }}
             isLoading={createBooking.isPending}
           />
-
-          {selectedId && (
-            <BookingDetailDialog
-              bookingId={selectedId}
-              open={!!selectedId}
-              onOpenChange={(open) => { if (!open) setSelectedId(null); }}
-            />
-          )}
         </div>
       </DashboardLayout>
     </SubscriptionGuard>

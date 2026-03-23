@@ -61,12 +61,29 @@ export interface BookingCommission {
   supplier?: { id: string; name: string } | null;
 }
 
+export interface BookingDocument {
+  id: string;
+  booking_id: string;
+  user_id: string;
+  doc_type: string;
+  file_url: string | null;
+  created_at: string;
+}
+
 export const BOOKING_STATUSES: Record<string, string> = {
   lead: "Lead",
   negociacao: "Negociação",
   confirmado: "Confirmado",
   concluido: "Concluído",
   cancelado: "Cancelado",
+};
+
+export const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
+  lead: { bg: "bg-muted", text: "text-muted-foreground" },
+  negociacao: { bg: "bg-amber-100 dark:bg-amber-900/30", text: "text-amber-700 dark:text-amber-400" },
+  confirmado: { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-400" },
+  concluido: { bg: "bg-emerald-100 dark:bg-emerald-900/30", text: "text-emerald-700 dark:text-emerald-400" },
+  cancelado: { bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-700 dark:text-red-400" },
 };
 
 export const SERVICE_TYPES: Record<string, string> = {
@@ -80,6 +97,17 @@ export const SERVICE_TYPES: Record<string, string> = {
   outro: "Outro",
 };
 
+export const SERVICE_ICONS: Record<string, string> = {
+  hotel: "🏨",
+  voo: "✈️",
+  seguro: "🛡️",
+  passeio: "🎭",
+  transfer: "🚗",
+  cruzeiro: "🚢",
+  locacao: "🚙",
+  outro: "📦",
+};
+
 export const PAYMENT_METHODS: Record<string, string> = {
   pix: "PIX",
   cartao: "Cartão de Crédito",
@@ -87,6 +115,24 @@ export const PAYMENT_METHODS: Record<string, string> = {
   dinheiro: "Dinheiro",
   transferencia: "Transferência",
 };
+
+export function useClients() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["clients-list", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("clients")
+        .select("id, name")
+        .eq("user_id", user!.id)
+        .order("name");
+      if (error) throw error;
+      return data as { id: string; name: string }[];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+}
 
 export function useBookings() {
   const { user } = useAuth();
@@ -103,6 +149,66 @@ export function useBookings() {
       return data as Booking[];
     },
     enabled: !!user,
+  });
+
+  // Fetch summary data for list view (payments per booking)
+  const paymentsQuery = useQuery({
+    queryKey: ["all-booking-payments", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("booking_payments")
+        .select("booking_id, amount, status");
+      if (error) throw error;
+      return data as { booking_id: string; amount: number; status: string }[];
+    },
+    enabled: !!user,
+  });
+
+  const commissionsQuery = useQuery({
+    queryKey: ["all-booking-commissions-summary", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("booking_commissions")
+        .select("booking_service_id, commission_amount, status");
+      if (error) throw error;
+      return data as { booking_service_id: string; commission_amount: number; status: string }[];
+    },
+    enabled: !!user,
+  });
+
+  const servicesQuery = useQuery({
+    queryKey: ["all-booking-services-summary", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("booking_services")
+        .select("id, booking_id");
+      if (error) throw error;
+      return data as { id: string; booking_id: string }[];
+    },
+    enabled: !!user,
+  });
+
+  // Build summary map
+  const paymentsByBooking = new Map<string, { paid: number; pending: number }>();
+  paymentsQuery.data?.forEach((p) => {
+    const entry = paymentsByBooking.get(p.booking_id) || { paid: 0, pending: 0 };
+    if (p.status === "pago") entry.paid += Number(p.amount);
+    else entry.pending += Number(p.amount);
+    paymentsByBooking.set(p.booking_id, entry);
+  });
+
+  // Map service IDs to booking IDs
+  const serviceToBooking = new Map<string, string>();
+  servicesQuery.data?.forEach((s) => serviceToBooking.set(s.id, s.booking_id));
+
+  const commissionsByBooking = new Map<string, { received: number; pending: number }>();
+  commissionsQuery.data?.forEach((c) => {
+    const bookingId = serviceToBooking.get(c.booking_service_id);
+    if (!bookingId) return;
+    const entry = commissionsByBooking.get(bookingId) || { received: 0, pending: 0 };
+    if (c.status === "recebido") entry.received += Number(c.commission_amount);
+    else entry.pending += Number(c.commission_amount);
+    commissionsByBooking.set(bookingId, entry);
   });
 
   const createBooking = useMutation({
@@ -136,6 +242,7 @@ export function useBookings() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["bookings"] });
+      qc.invalidateQueries({ queryKey: ["booking"] });
       toast.success("Venda atualizada");
     },
     onError: () => toast.error("Erro ao atualizar venda"),
@@ -153,7 +260,15 @@ export function useBookings() {
     onError: () => toast.error("Erro ao remover venda"),
   });
 
-  return { bookings: bookingsQuery.data ?? [], isLoading: bookingsQuery.isLoading, createBooking, updateBooking, deleteBooking };
+  return {
+    bookings: bookingsQuery.data ?? [],
+    isLoading: bookingsQuery.isLoading,
+    paymentsByBooking,
+    commissionsByBooking,
+    createBooking,
+    updateBooking,
+    deleteBooking,
+  };
 }
 
 export function useBookingDetail(bookingId: string | undefined) {
@@ -218,7 +333,20 @@ export function useBookingDetail(bookingId: string | undefined) {
     enabled: !!bookingId && !!user && !!servicesQuery.data,
   });
 
-  // Mutations
+  const documentsQuery = useQuery({
+    queryKey: ["booking-documents", bookingId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("booking_documents")
+        .select("*")
+        .eq("booking_id", bookingId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as BookingDocument[];
+    },
+    enabled: !!bookingId && !!user,
+  });
+
   const addService = useMutation({
     mutationFn: async (values: Omit<BookingService, "id" | "user_id" | "created_at" | "supplier">) => {
       const { error } = await supabase.from("booking_services").insert({ ...values, user_id: user!.id });
@@ -227,9 +355,24 @@ export function useBookingDetail(bookingId: string | undefined) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["booking-services", bookingId] });
       qc.invalidateQueries({ queryKey: ["booking", bookingId] });
+      qc.invalidateQueries({ queryKey: ["bookings"] });
       toast.success("Serviço adicionado");
     },
     onError: () => toast.error("Erro ao adicionar serviço"),
+  });
+
+  const updateService = useMutation({
+    mutationFn: async ({ id, ...values }: { id: string } & Partial<BookingService>) => {
+      const { error } = await supabase.from("booking_services").update(values).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["booking-services", bookingId] });
+      qc.invalidateQueries({ queryKey: ["booking", bookingId] });
+      qc.invalidateQueries({ queryKey: ["bookings"] });
+      toast.success("Serviço atualizado");
+    },
+    onError: () => toast.error("Erro ao atualizar serviço"),
   });
 
   const deleteService = useMutation({
@@ -240,6 +383,7 @@ export function useBookingDetail(bookingId: string | undefined) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["booking-services", bookingId] });
       qc.invalidateQueries({ queryKey: ["booking", bookingId] });
+      qc.invalidateQueries({ queryKey: ["bookings"] });
       toast.success("Serviço removido");
     },
   });
@@ -251,6 +395,7 @@ export function useBookingDetail(bookingId: string | undefined) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["booking-payments", bookingId] });
+      qc.invalidateQueries({ queryKey: ["all-booking-payments"] });
       toast.success("Pagamento registrado");
     },
     onError: () => toast.error("Erro ao registrar pagamento"),
@@ -263,7 +408,20 @@ export function useBookingDetail(bookingId: string | undefined) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["booking-payments", bookingId] });
+      qc.invalidateQueries({ queryKey: ["all-booking-payments"] });
       toast.success("Pagamento atualizado");
+    },
+  });
+
+  const deletePayment = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("booking_payments").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["booking-payments", bookingId] });
+      qc.invalidateQueries({ queryKey: ["all-booking-payments"] });
+      toast.success("Pagamento removido");
     },
   });
 
@@ -274,6 +432,7 @@ export function useBookingDetail(bookingId: string | undefined) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["booking-commissions", bookingId] });
+      qc.invalidateQueries({ queryKey: ["all-booking-commissions-summary"] });
       toast.success("Comissão registrada");
     },
     onError: () => toast.error("Erro ao registrar comissão"),
@@ -286,6 +445,7 @@ export function useBookingDetail(bookingId: string | undefined) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["booking-commissions", bookingId] });
+      qc.invalidateQueries({ queryKey: ["all-booking-commissions-summary"] });
       toast.success("Comissão atualizada");
     },
   });
@@ -295,11 +455,14 @@ export function useBookingDetail(bookingId: string | undefined) {
     services: servicesQuery.data ?? [],
     payments: paymentsQuery.data ?? [],
     commissions: commissionsQuery.data ?? [],
+    documents: documentsQuery.data ?? [],
     isLoading: bookingQuery.isLoading,
     addService,
+    updateService,
     deleteService,
     addPayment,
     updatePayment,
+    deletePayment,
     addCommission,
     updateCommission,
   };
