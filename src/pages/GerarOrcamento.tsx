@@ -193,6 +193,13 @@ export default function GerarOrcamento() {
       setEntryPercentage((quote as any).entry_percentage || 30);
       setPaymentMethodLabel((quote as any).payment_method_label || "");
       setFullPaymentDiscountPercent((quote as any).full_payment_discount_percent || 0);
+      setUseServicePayment((quote as any).use_service_payment ?? false);
+      // Build per-service payment configs from loaded services
+      const configs: Record<string, ServicePaymentConfig> = {};
+      (quote.services || []).forEach((s: any) => {
+        configs[s.id] = extractServicePaymentConfig(s);
+      });
+      setServicePaymentConfigs(configs);
       // Mark that quote data has been loaded — auto-save effects below
       // will skip their first run to avoid saving the initial values right back.
       setTimeout(() => { quoteLoadedRef.current = true; }, 2500);
