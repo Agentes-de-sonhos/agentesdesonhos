@@ -627,6 +627,7 @@ export type Database = {
           installment_number: number | null
           payment_date: string | null
           payment_method: string
+          receipt_type: string
           status: string
           total_installments: number | null
           user_id: string
@@ -640,6 +641,7 @@ export type Database = {
           installment_number?: number | null
           payment_date?: string | null
           payment_method: string
+          receipt_type?: string
           status?: string
           total_installments?: number | null
           user_id: string
@@ -653,6 +655,7 @@ export type Database = {
           installment_number?: number | null
           payment_date?: string | null
           payment_method?: string
+          receipt_type?: string
           status?: string
           total_installments?: number | null
           user_id?: string
