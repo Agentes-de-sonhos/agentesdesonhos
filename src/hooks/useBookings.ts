@@ -45,6 +45,7 @@ export interface BookingPayment {
   due_date: string | null;
   payment_date: string | null;
   status: string;
+  receipt_type: string;
   created_at: string;
 }
 
