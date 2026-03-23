@@ -6198,6 +6198,100 @@ export type Database = {
         }
         Relationships: []
       }
+      traveler_documents: {
+        Row: {
+          arquivo_url: string
+          created_at: string
+          id: string
+          nome_arquivo: string
+          tipo_documento: string
+          traveler_id: string
+          user_id: string
+        }
+        Insert: {
+          arquivo_url: string
+          created_at?: string
+          id?: string
+          nome_arquivo: string
+          tipo_documento?: string
+          traveler_id: string
+          user_id: string
+        }
+        Update: {
+          arquivo_url?: string
+          created_at?: string
+          id?: string
+          nome_arquivo?: string
+          tipo_documento?: string
+          traveler_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traveler_documents_traveler_id_fkey"
+            columns: ["traveler_id"]
+            isOneToOne: false
+            referencedRelation: "travelers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travelers: {
+        Row: {
+          client_id: string
+          cpf: string | null
+          created_at: string
+          data_nascimento: string | null
+          id: string
+          is_responsavel: boolean
+          nacionalidade: string | null
+          nome_completo: string
+          observacoes: string | null
+          passaporte: string | null
+          updated_at: string
+          user_id: string
+          validade_passaporte: string | null
+        }
+        Insert: {
+          client_id: string
+          cpf?: string | null
+          created_at?: string
+          data_nascimento?: string | null
+          id?: string
+          is_responsavel?: boolean
+          nacionalidade?: string | null
+          nome_completo: string
+          observacoes?: string | null
+          passaporte?: string | null
+          updated_at?: string
+          user_id: string
+          validade_passaporte?: string | null
+        }
+        Update: {
+          client_id?: string
+          cpf?: string | null
+          created_at?: string
+          data_nascimento?: string | null
+          id?: string
+          is_responsavel?: boolean
+          nacionalidade?: string | null
+          nome_completo?: string
+          observacoes?: string | null
+          passaporte?: string | null
+          updated_at?: string
+          user_id?: string
+          validade_passaporte?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travelers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_edit_history: {
         Row: {
           created_at: string
