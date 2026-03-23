@@ -1076,6 +1076,7 @@ export type Database = {
       }
       crm_contacts: {
         Row: {
+          category_id: string | null
           created_at: string
           email: string
           empresa: string | null
@@ -1083,10 +1084,12 @@ export type Database = {
           nome: string
           origem: string | null
           status: string
+          subcategory_id: string | null
           telefone: string | null
           updated_at: string
         }
         Insert: {
+          category_id?: string | null
           created_at?: string
           email: string
           empresa?: string | null
@@ -1094,10 +1097,12 @@ export type Database = {
           nome: string
           origem?: string | null
           status?: string
+          subcategory_id?: string | null
           telefone?: string | null
           updated_at?: string
         }
         Update: {
+          category_id?: string | null
           created_at?: string
           email?: string
           empresa?: string | null
@@ -1105,10 +1110,26 @@ export type Database = {
           nome?: string
           origem?: string | null
           status?: string
+          subcategory_id?: string | null
           telefone?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "crm_contacts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "client_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contacts_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "client_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_email_logs: {
         Row: {
