@@ -1,3 +1,18 @@
+export interface ClientCategory {
+  id: string;
+  name: string;
+  is_active: boolean;
+  order_index: number;
+  created_at: string;
+}
+
+export interface ClientSubcategory {
+  id: string;
+  name: string;
+  category_id: string;
+  created_at: string;
+}
+
 export interface Client {
   id: string;
   user_id: string;
@@ -12,12 +27,16 @@ export interface Client {
   birthday_day: number | null;
   birthday_month: number | null;
   birthday_year: number | null;
+  category_id: string | null;
+  subcategory_id: string | null;
   last_interaction_at: string;
   created_at: string;
   updated_at: string;
   opportunities?: Opportunity[];
   total_spent?: number;
   trips_count?: number;
+  category?: ClientCategory;
+  subcategory?: ClientSubcategory;
 }
 
 export type ClientStatus = 'lead' | 'em_negociacao' | 'cliente_ativo' | 'fidelizado';
