@@ -431,7 +431,7 @@ export function AdminCrmContacts() {
       </CardContent>
 
       {/* Add Contact Dialog */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+      <Dialog open={addOpen} onOpenChange={setAddOpen} modal={false}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Novo Contato</DialogTitle>
@@ -510,7 +510,7 @@ export function AdminCrmContacts() {
       </Dialog>
 
       {/* Edit Contact Dialog */}
-      <Dialog open={editOpen} onOpenChange={(open) => { setEditOpen(open); if (!open) setEditContact(null); }}>
+      <Dialog open={editOpen} onOpenChange={(open) => { setEditOpen(open); if (!open) setEditContact(null); }} modal={false}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar Contato</DialogTitle>
