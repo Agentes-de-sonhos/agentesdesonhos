@@ -31,6 +31,11 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const displayEnd = parseLocalDate(quote.end_date);
   const days = Math.ceil((displayEnd.getTime() - displayStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
+  // Compute total from services to ensure accuracy
+  const computedTotal = quote.services && quote.services.length > 0
+    ? quote.services.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
+    : quote.total_amount;
+
   return (
     <Card>
       <CardHeader className="pb-3">

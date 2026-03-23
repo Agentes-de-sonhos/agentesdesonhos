@@ -205,6 +205,15 @@ export function useQuote(id: string | undefined) {
     enabled: !!id,
   });
 
+  async function recalcQuoteTotal(quoteId: string) {
+    const { data: allServices } = await supabase
+      .from("quote_services")
+      .select("amount")
+      .eq("quote_id", quoteId);
+    const total = (allServices || []).reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+    await supabase.from("quotes").update({ total_amount: total }).eq("id", quoteId);
+  }
+
   const addServiceMutation = useMutation({
     mutationFn: async ({
       service_type, service_data, amount, option_label, description, image_url, image_urls,
