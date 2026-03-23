@@ -85,12 +85,10 @@ type ClientFormData = z.infer<typeof clientSchema>;
 
 export function ClientsModule() {
   const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
-  const { categories, subcategories, createSubcategory } = useClientCategories();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
