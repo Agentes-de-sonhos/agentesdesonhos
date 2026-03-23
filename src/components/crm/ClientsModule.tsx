@@ -59,10 +59,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useClients } from "@/hooks/useCRM";
-import { useClientCategories } from "@/hooks/useClientCategories";
 import { useAuth } from "@/hooks/useAuth";
 import { ClientProfile } from "./ClientProfile";
-import { SubcategoryCombobox } from "./SubcategoryCombobox";
 import type { Client, ClientStatus } from "@/types/crm";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
 import { cn } from "@/lib/utils";
