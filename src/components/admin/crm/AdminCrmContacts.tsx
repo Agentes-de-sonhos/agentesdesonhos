@@ -9,12 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Plus, Send, Trash2, Search, Loader2, Tag } from "lucide-react";
+import { Upload, Plus, Send, Trash2, Search, Loader2, Tag, Check, ChevronsUpDown } from "lucide-react";
 import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 import { useClientCategories } from "@/hooks/useClientCategories";
 import { SubcategoryCombobox } from "@/components/crm/SubcategoryCombobox";
+import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
 
 interface CrmContact {
