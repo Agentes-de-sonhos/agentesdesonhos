@@ -171,7 +171,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="dados">Dados</TabsTrigger>
           <TabsTrigger value="viajantes">
-            <Users className="mr-1 h-3.5 w-3.5" /> Documentos
+            <Users className="mr-1 h-3.5 w-3.5" /> Acompanhantes / Documentos
           </TabsTrigger>
           <TabsTrigger value="historico">
             Viagens {sales.length > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{sales.length}</Badge>}
