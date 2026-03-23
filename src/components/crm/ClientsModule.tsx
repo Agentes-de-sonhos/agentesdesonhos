@@ -380,61 +380,6 @@ export function ClientsModule() {
                   />
                 </div>
 
-                {/* Category & Subcategory */}
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="category_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-1.5">
-                          <Tag className="h-4 w-4" />
-                          Categoria
-                        </FormLabel>
-                        <Select
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                            // Clear subcategory when category changes
-                            form.setValue("subcategory_id", "");
-                          }}
-                          value={field.value || ""}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione a categoria" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.id}>
-                                {cat.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="subcategory_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subcategoria</FormLabel>
-                        <SubcategoryCombobox
-                          categoryId={watchedCategoryId || null}
-                          subcategories={subcategories}
-                          value={field.value || null}
-                          onChange={(id) => field.onChange(id || "")}
-                          onCreateNew={(name, categoryId) => createSubcategory({ name, category_id: categoryId })}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
                 <div className="space-y-2">
                   <FormLabel className="flex items-center gap-1.5">
                     <Cake className="h-4 w-4" />
