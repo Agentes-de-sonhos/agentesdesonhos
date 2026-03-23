@@ -10,6 +10,7 @@ import { MonthlyCalendar } from "@/components/agenda/MonthlyCalendar";
 import { WeeklyCalendar } from "@/components/agenda/WeeklyCalendar";
 import { DailyCalendar } from "@/components/agenda/DailyCalendar";
 import { EventModal } from "@/components/agenda/EventModal";
+import { GoogleCalendarSyncButton } from "@/components/agenda/GoogleCalendarSyncButton";
 
 import { EventTypeFilter } from "@/components/agenda/EventTypeFilter";
 import { CalendarEvent, ViewMode, AgencyEventType } from "@/types/agenda";
