@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional';
+export type SubscriptionPlan = 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'fundador';
 
 export interface Subscription {
   id: string;
@@ -14,7 +14,6 @@ export interface Subscription {
 }
 
 export type Feature = 
-  // Essencial features
   | 'news'
   | 'tourism_map'
   | 'materials'
@@ -22,15 +21,12 @@ export type Feature =
   | 'crm_basic'
   | 'trainings_recorded'
   | 'financial'
-  // Cartão Digital Pass feature
   | 'business_card'
-  // Features available in Essencial (some with daily limits)
   | 'qa_forum'
   | 'qa_comment'
   | 'itinerary'
   | 'quote_generator'
   | 'flight_blocks'
-  // Profissional-only features
   | 'ai_tools'
   | 'trip_wallet'
   | 'reminders'
@@ -44,66 +40,40 @@ export type Feature =
   | 'community'
   | 'content_creator';
 
+const ALL_FEATURES: Feature[] = [
+  'news', 'tourism_map', 'materials', 'agenda', 'crm_basic',
+  'trainings_recorded', 'financial', 'business_card', 'flight_blocks',
+  'qa_forum', 'qa_comment', 'itinerary', 'quote_generator',
+  'ai_tools', 'trip_wallet', 'reminders', 'trainings_live',
+  'ai_unlimited', 'trails_premium', 'certificates', 'ranking',
+  'premium_group', 'fam_tours', 'community', 'content_creator',
+];
+
 export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
-  educa_pass: [
-    'trainings_recorded',
-  ],
-  cartao_digital: [
-    'business_card',
-  ],
+  educa_pass: ['trainings_recorded'],
+  cartao_digital: ['business_card'],
   essencial: [
-    'news',
-    'tourism_map',
-    'materials',
-    'agenda',
-    'trainings_recorded',
-    'business_card',
-    'flight_blocks',
-    'qa_forum',
-    'itinerary',
-    'quote_generator',
+    'news', 'tourism_map', 'materials', 'agenda', 'trainings_recorded',
+    'business_card', 'flight_blocks', 'qa_forum', 'itinerary', 'quote_generator',
   ],
-  profissional: [
-    'news',
-    'tourism_map',
-    'materials',
-    'agenda',
-    'crm_basic',
-    'trainings_recorded',
-    'financial',
-    'business_card',
-    'flight_blocks',
-    'qa_forum',
-    'qa_comment',
-    'itinerary',
-    'quote_generator',
-    'ai_tools',
-    'trip_wallet',
-    'reminders',
-    'trainings_live',
-    'ai_unlimited',
-    'trails_premium',
-    'certificates',
-    'ranking',
-    'premium_group',
-    'fam_tours',
-    'community',
-    'content_creator',
-  ],
+  profissional: ALL_FEATURES,
+  fundador: ALL_FEATURES,
 };
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   educa_pass: 'EducaTravel Pass',
   cartao_digital: 'Cartão Digital Pass',
   essencial: 'Essencial',
-  profissional: 'Plano Fundador',
+  profissional: 'Plano Profissional',
+  fundador: 'Plano Fundador',
 };
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   educa_pass: 'Acesso gratuito à EducaTravel Academy',
   cartao_digital: 'Acesso exclusivo ao Cartão de Visita Digital',
   essencial: 'Acesso básico com dashboard, materiais, agenda, roteiros e orçamentos limitados',
-  profissional: 'Acesso completo ao Agentes de Sonhos por R$ 85,90/mês',
+  profissional: 'Acesso completo ao Agentes de Sonhos por R$ 97,90/mês',
+  fundador: 'Acesso vitalício completo — plano exclusivo dos primeiros membros',
 };
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
@@ -111,6 +81,7 @@ export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   cartao_digital: 0,
   essencial: 0,
   profissional: 1000,
+  fundador: 1000,
 };
 
 export const FEATURE_LABELS: Record<Feature, string> = {
@@ -169,11 +140,9 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   content_creator: 'profissional',
 };
 
-/** Daily usage limits for Essencial plan (profissional has unlimited) */
 export const ESSENCIAL_DAILY_LIMITS: Partial<Record<Feature, number>> = {
   itinerary: 1,
   quote_generator: 1,
 };
 
-// Launch date for countdown
 export const LAUNCH_DATE = new Date('2026-03-16T00:00:00-03:00');
