@@ -40,8 +40,6 @@ export function useClients() {
       birthday_day?: number | null;
       birthday_month?: number | null;
       birthday_year?: number | null;
-      category_id?: string | null;
-      subcategory_id?: string | null;
     }) => {
       if (!user) throw new Error("Not authenticated");
       const { data: result, error } = await supabase

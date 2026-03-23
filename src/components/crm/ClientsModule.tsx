@@ -20,7 +20,6 @@ import {
   Clock,
   Cake,
   Upload,
-  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,10 +59,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useClients } from "@/hooks/useCRM";
-import { useClientCategories } from "@/hooks/useClientCategories";
 import { useAuth } from "@/hooks/useAuth";
 import { ClientProfile } from "./ClientProfile";
-import { SubcategoryCombobox } from "./SubcategoryCombobox";
 import type { Client, ClientStatus } from "@/types/crm";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
 import { cn } from "@/lib/utils";
@@ -82,20 +79,16 @@ const clientSchema = z.object({
   birthday_day: z.string().optional(),
   birthday_month: z.string().optional(),
   birthday_year: z.string().optional(),
-  category_id: z.string().optional(),
-  subcategory_id: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
 export function ClientsModule() {
   const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
-  const { categories, subcategories, createSubcategory } = useClientCategories();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -116,17 +109,6 @@ export function ClientsModule() {
     return map;
   }, [clients]);
 
-  const categoryMap = useMemo(() => {
-    const m = new Map<string, string>();
-    categories.forEach((c) => m.set(c.id, c.name));
-    return m;
-  }, [categories]);
-
-  const subcategoryMap = useMemo(() => {
-    const m = new Map<string, string>();
-    subcategories.forEach((s) => m.set(s.id, s.name));
-    return m;
-  }, [subcategories]);
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -142,26 +124,17 @@ export function ClientsModule() {
       birthday_day: "",
       birthday_month: "",
       birthday_year: "",
-      category_id: "",
-      subcategory_id: "",
     },
   });
 
-  const watchedCategoryId = form.watch("category_id");
-
   const filteredClients = clients
     .filter((c) => {
-      const catName = c.category_id ? categoryMap.get(c.category_id) || "" : "";
-      const subName = c.subcategory_id ? subcategoryMap.get(c.subcategory_id) || "" : "";
       const matchesSearch =
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.email?.toLowerCase().includes(search.toLowerCase()) ||
-        c.city?.toLowerCase().includes(search.toLowerCase()) ||
-        catName.toLowerCase().includes(search.toLowerCase()) ||
-        subName.toLowerCase().includes(search.toLowerCase());
+        c.city?.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-      const matchesCategory = categoryFilter === "all" || c.category_id === categoryFilter;
-      return matchesSearch && matchesStatus && matchesCategory;
+      return matchesSearch && matchesStatus;
     })
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
@@ -180,8 +153,6 @@ export function ClientsModule() {
         birthday_day: client.birthday_day?.toString() || "",
         birthday_month: client.birthday_month?.toString() || "",
         birthday_year: client.birthday_year?.toString() || "",
-        category_id: client.category_id || "",
-        subcategory_id: client.subcategory_id || "",
       });
     } else {
       setEditingClient(null);
@@ -197,8 +168,6 @@ export function ClientsModule() {
         birthday_day: "",
         birthday_month: "",
         birthday_year: "",
-        category_id: "",
-        subcategory_id: "",
       });
     }
     setIsDialogOpen(true);
@@ -245,8 +214,6 @@ export function ClientsModule() {
       birthday_day: bDay,
       birthday_month: bMonth,
       birthday_year: bYear,
-      category_id: data.category_id || null,
-      subcategory_id: data.subcategory_id || null,
     };
 
     let clientId: string | undefined;
@@ -313,19 +280,6 @@ export function ClientsModule() {
             {Object.entries(CLIENT_STATUS_LABELS).map(([value, label]) => (
               <SelectItem key={value} value={value}>
                 {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filtrar categoria" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as categorias</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -420,61 +374,6 @@ export function ClientsModule() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Category & Subcategory */}
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="category_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-1.5">
-                          <Tag className="h-4 w-4" />
-                          Categoria
-                        </FormLabel>
-                        <Select
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                            // Clear subcategory when category changes
-                            form.setValue("subcategory_id", "");
-                          }}
-                          value={field.value || ""}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione a categoria" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.id}>
-                                {cat.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="subcategory_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subcategoria</FormLabel>
-                        <SubcategoryCombobox
-                          categoryId={watchedCategoryId || null}
-                          subcategories={subcategories}
-                          value={field.value || null}
-                          onChange={(id) => field.onChange(id || "")}
-                          onCreateNew={(name, categoryId) => createSubcategory({ name, category_id: categoryId })}
-                        />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -614,9 +513,7 @@ export function ClientsModule() {
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Nome</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden sm:table-cell">Contato</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden md:table-cell">Cidade</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">Categoria</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">Subcategoria</th>
+                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden xl:table-cell">Última interação</th>
                 <th className="text-right py-3 px-4 font-medium text-muted-foreground">Ações</th>
               </tr>
@@ -656,24 +553,6 @@ export function ClientsModule() {
                     >
                       {CLIENT_STATUS_LABELS[client.status as ClientStatus] || "Lead"}
                     </Badge>
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs hidden lg:table-cell">
-                    {client.category_id ? (
-                      <Badge variant="outline" className="text-xs">
-                        {categoryMap.get(client.category_id) || "—"}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground/50">—</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs hidden lg:table-cell">
-                    {client.subcategory_id ? (
-                      <Badge variant="secondary" className="text-xs">
-                        {subcategoryMap.get(client.subcategory_id) || "—"}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground/50">—</span>
-                    )}
                   </td>
                   <td className="py-3 px-4 text-muted-foreground text-xs hidden xl:table-cell">
                     {formatDistanceToNow(new Date(client.last_interaction_at), {

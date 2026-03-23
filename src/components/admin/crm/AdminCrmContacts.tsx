@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,8 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Plus, Send, Trash2, Search, Loader2 } from "lucide-react";
+import { Upload, Plus, Send, Trash2, Search, Loader2, Tag } from "lucide-react";
 import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
+import { useClientCategories } from "@/hooks/useClientCategories";
+import { SubcategoryCombobox } from "@/components/crm/SubcategoryCombobox";
 import * as XLSX from "xlsx";
 
 interface CrmContact {
@@ -23,6 +25,8 @@ interface CrmContact {
   empresa: string | null;
   status: string;
   origem: string | null;
+  category_id: string | null;
+  subcategory_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -55,15 +59,30 @@ export function AdminCrmContacts() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [addOpen, setAddOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<CrmContact | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
-  const [newContact, setNewContact] = useState({ nome: "", email: "", telefone: "", empresa: "" });
+  const [newContact, setNewContact] = useState({ nome: "", email: "", telefone: "", empresa: "", category_id: "", subcategory_id: "" });
   const [editOpen, setEditOpen] = useState(false);
   const [editContact, setEditContact] = useState<CrmContact | null>(null);
+
+  const { categories, subcategories, createSubcategory } = useClientCategories();
+
+  const categoryMap = useMemo(() => {
+    const m = new Map<string, string>();
+    categories.forEach((c) => m.set(c.id, c.name));
+    return m;
+  }, [categories]);
+
+  const subcategoryMap = useMemo(() => {
+    const m = new Map<string, string>();
+    subcategories.forEach((s) => m.set(s.id, s.name));
+    return m;
+  }, [subcategories]);
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["crm-contacts"],
@@ -96,6 +115,8 @@ export function AdminCrmContacts() {
         email: contact.email,
         telefone: contact.telefone || null,
         empresa: contact.empresa || null,
+        category_id: contact.category_id || null,
+        subcategory_id: contact.subcategory_id || null,
       });
       if (error) throw error;
     },
@@ -103,7 +124,7 @@ export function AdminCrmContacts() {
       queryClient.invalidateQueries({ queryKey: ["crm-contacts"] });
       toast({ title: "Contato adicionado!" });
       setAddOpen(false);
-      setNewContact({ nome: "", email: "", telefone: "", empresa: "" });
+      setNewContact({ nome: "", email: "", telefone: "", empresa: "", category_id: "", subcategory_id: "" });
     },
     onError: (err: Error) => toast({ title: "Erro", description: err.message, variant: "destructive" }),
   });
@@ -119,6 +140,8 @@ export function AdminCrmContacts() {
           empresa: contact.empresa || null,
           status: contact.status,
           origem: contact.origem || null,
+          category_id: contact.category_id || null,
+          subcategory_id: contact.subcategory_id || null,
         })
         .eq("id", contact.id);
       if (error) throw error;
@@ -224,11 +247,61 @@ export function AdminCrmContacts() {
     });
   };
 
-  const filtered = contacts.filter(
-    (c) =>
+  const filtered = contacts.filter((c) => {
+    const catName = c.category_id ? categoryMap.get(c.category_id) || "" : "";
+    const subName = c.subcategory_id ? subcategoryMap.get(c.subcategory_id) || "" : "";
+    const matchesSearch =
       c.nome.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase()) ||
-      (c.empresa || "").toLowerCase().includes(search.toLowerCase())
+      (c.empresa || "").toLowerCase().includes(search.toLowerCase()) ||
+      catName.toLowerCase().includes(search.toLowerCase()) ||
+      subName.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || c.category_id === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  const renderCategoryFields = (
+    categoryId: string | null,
+    subcategoryId: string | null,
+    onCategoryChange: (val: string) => void,
+    onSubcategoryChange: (val: string | null) => void
+  ) => (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div>
+        <Label className="flex items-center gap-1.5">
+          <Tag className="h-4 w-4" />
+          Categoria
+        </Label>
+        <Select
+          value={categoryId || ""}
+          onValueChange={(val) => {
+            onCategoryChange(val);
+            onSubcategoryChange(null);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione a categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label>Subcategoria</Label>
+        <SubcategoryCombobox
+          categoryId={categoryId}
+          subcategories={subcategories}
+          value={subcategoryId}
+          onChange={onSubcategoryChange}
+          onCreateNew={(name, catId) => createSubcategory({ name, category_id: catId })}
+        />
+      </div>
+    </div>
   );
 
   return (
@@ -256,14 +329,29 @@ export function AdminCrmContacts() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome, email ou empresa..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+        <div className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome, email, empresa ou categoria..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filtrar categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {isLoading ? (
@@ -276,9 +364,11 @@ export function AdminCrmContacts() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Empresa</TableHead>
+                <TableHead className="hidden md:table-cell">Empresa</TableHead>
+                <TableHead className="hidden lg:table-cell">Categoria</TableHead>
+                <TableHead className="hidden lg:table-cell">Subcategoria</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Origem</TableHead>
+                <TableHead className="hidden md:table-cell">Origem</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -287,13 +377,31 @@ export function AdminCrmContacts() {
                 <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50" onClick={() => { setEditContact({ ...contact }); setEditOpen(true); }}>
                   <TableCell className="font-medium">{contact.nome}</TableCell>
                   <TableCell>{contact.email}</TableCell>
-                  <TableCell>{contact.empresa || "—"}</TableCell>
+                  <TableCell className="hidden md:table-cell">{contact.empresa || "—"}</TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {contact.category_id ? (
+                      <Badge variant="outline" className="text-xs">
+                        {categoryMap.get(contact.category_id) || "—"}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground/50">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {contact.subcategory_id ? (
+                      <Badge variant="secondary" className="text-xs">
+                        {subcategoryMap.get(contact.subcategory_id) || "—"}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground/50">—</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className={`${STATUS_COLORS[contact.status] || ""} text-white`}>
                       {STATUS_LABELS[contact.status] || contact.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="capitalize">{contact.origem || "manual"}</TableCell>
+                  <TableCell className="capitalize hidden md:table-cell">{contact.origem || "manual"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); openSendModal(contact); }} title="Enviar email">
@@ -310,7 +418,7 @@ export function AdminCrmContacts() {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                     Nenhum contato encontrado
                   </TableCell>
                 </TableRow>
@@ -343,6 +451,12 @@ export function AdminCrmContacts() {
               <Label>Empresa</Label>
               <Input value={newContact.empresa} onChange={(e) => setNewContact({ ...newContact, empresa: e.target.value })} />
             </div>
+            {renderCategoryFields(
+              newContact.category_id || null,
+              newContact.subcategory_id || null,
+              (val) => setNewContact({ ...newContact, category_id: val, subcategory_id: "" }),
+              (val) => setNewContact({ ...newContact, subcategory_id: val || "" })
+            )}
           </div>
           <DialogFooter>
             <Button onClick={() => addContactMutation.mutate(newContact)} disabled={!newContact.nome || !newContact.email || addContactMutation.isPending}>
@@ -417,6 +531,12 @@ export function AdminCrmContacts() {
                 <Label>Empresa</Label>
                 <Input value={editContact.empresa || ""} onChange={(e) => setEditContact({ ...editContact, empresa: e.target.value })} />
               </div>
+              {renderCategoryFields(
+                editContact.category_id,
+                editContact.subcategory_id,
+                (val) => setEditContact({ ...editContact, category_id: val, subcategory_id: null }),
+                (val) => setEditContact({ ...editContact, subcategory_id: val })
+              )}
               <div>
                 <Label>Status</Label>
                 <Select value={editContact.status} onValueChange={(v) => setEditContact({ ...editContact, status: v })}>
