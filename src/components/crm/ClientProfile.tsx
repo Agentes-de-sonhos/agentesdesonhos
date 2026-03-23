@@ -413,6 +413,10 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
           </Card>
         </TabsContent>
 
+        <TabsContent value="viajantes" className="mt-4">
+          <TravelersSection clientId={client.id} clientName={client.name} />
+        </TabsContent>
+
         <TabsContent value="financeiro" className="mt-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
