@@ -77,6 +77,7 @@ export function AdminUserManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [planFilter, setPlanFilter] = useState<string>("all");
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
   const [editingUser, setEditingUser] = useState<UserWithDetails | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
