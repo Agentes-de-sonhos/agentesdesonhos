@@ -336,10 +336,11 @@ export function AdminUserManager() {
 
       const matchesRole = roleFilter === "all" || user.role === roleFilter;
       const matchesPlan = planFilter === "all" || user.plan === planFilter;
+      const matchesPayment = paymentFilter === "all" || (paymentFilter === "sim" ? user.monthly_paid : !user.monthly_paid);
 
-      return matchesSearch && matchesRole && matchesPlan;
+      return matchesSearch && matchesRole && matchesPlan && matchesPayment;
     });
-  }, [users, searchTerm, roleFilter, planFilter]);
+  }, [users, searchTerm, roleFilter, planFilter, paymentFilter]);
 
   const stats = {
     total: users.length,
