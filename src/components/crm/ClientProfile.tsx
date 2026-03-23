@@ -185,7 +185,6 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
           <TabsTrigger value="viajantes">
             <Users className="mr-1 h-3.5 w-3.5" /> Documentos
           </TabsTrigger>
-          </TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
         </TabsList>
 

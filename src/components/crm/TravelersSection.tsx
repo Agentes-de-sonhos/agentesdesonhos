@@ -74,7 +74,7 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Viajantes / Acompanhantes
+          Documentos / Acompanhantes
         </CardTitle>
         <Dialog open={formOpen} onOpenChange={setFormOpen}>
           <DialogTrigger asChild>
