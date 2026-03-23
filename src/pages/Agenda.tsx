@@ -32,6 +32,7 @@ export default function Agenda() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const agenda = useAgenda(currentYear);
   const {
     allEvents,
     customEventTypes,
@@ -51,7 +52,11 @@ export default function Agenda() {
     isUpdating,
     isDeleting,
     isCreatingCustomType,
-  } = useAgenda(currentYear);
+  } = agenda;
+
+  const handleSyncComplete = useCallback(() => {
+    agenda.refetch?.();
+  }, [agenda]);
 
   const handleDayClick = useCallback((date: string) => {
     setSelectedDate(date);
