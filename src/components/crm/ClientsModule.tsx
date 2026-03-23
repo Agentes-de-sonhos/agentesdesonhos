@@ -513,9 +513,7 @@ export function ClientsModule() {
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Nome</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden sm:table-cell">Contato</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden md:table-cell">Cidade</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">Categoria</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">Subcategoria</th>
+                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden xl:table-cell">Última interação</th>
                 <th className="text-right py-3 px-4 font-medium text-muted-foreground">Ações</th>
               </tr>
