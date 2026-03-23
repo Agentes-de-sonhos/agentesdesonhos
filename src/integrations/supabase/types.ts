@@ -665,11 +665,65 @@ export type Database = {
         }
         Relationships: []
       }
+      client_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          order_index: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          order_index?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          order_index?: number
+        }
+        Relationships: []
+      }
+      client_subcategories: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "client_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           birthday_day: number | null
           birthday_month: number | null
           birthday_year: number | null
+          category_id: string | null
           city: string | null
           created_at: string
           email: string | null
@@ -680,6 +734,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           status: string | null
+          subcategory_id: string | null
           travel_preferences: string | null
           updated_at: string
           user_id: string
@@ -688,6 +743,7 @@ export type Database = {
           birthday_day?: number | null
           birthday_month?: number | null
           birthday_year?: number | null
+          category_id?: string | null
           city?: string | null
           created_at?: string
           email?: string | null
@@ -698,6 +754,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           status?: string | null
+          subcategory_id?: string | null
           travel_preferences?: string | null
           updated_at?: string
           user_id: string
@@ -706,6 +763,7 @@ export type Database = {
           birthday_day?: number | null
           birthday_month?: number | null
           birthday_year?: number | null
+          category_id?: string | null
           city?: string | null
           created_at?: string
           email?: string | null
@@ -716,11 +774,27 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           status?: string | null
+          subcategory_id?: string | null
           travel_preferences?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "client_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "client_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       community_highlights: {
         Row: {
