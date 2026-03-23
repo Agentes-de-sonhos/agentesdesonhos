@@ -18,6 +18,7 @@ import { WorkshopsSection } from "@/components/community/WorkshopsSection";
 import { PaidTrainingsSection } from "@/components/community/PaidTrainingsSection";
 import { WhatsAppSection } from "@/components/community/WhatsAppSection";
 import { HighlightsSection } from "@/components/community/HighlightsSection";
+import { EditCommunityProfileDialog } from "@/components/community/EditCommunityProfileDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, ShieldX } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -35,8 +36,9 @@ export default function Community() {
 
 function CommunityContent() {
   const isMobile = useIsMobile();
-  const { membership, isLoading: memberLoading, isMember, isBlocked, join, isJoining } =
+  const { membership, isLoading: memberLoading, isMember, isBlocked, join, isJoining, updateProfile, isUpdating } =
     useCommunityMembership();
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("feed");
   const {
     famTrips, upcomingMeetings, pastMeetings, inPersonEvents,
@@ -135,6 +137,7 @@ function CommunityContent() {
                 onNavigate={handleNavigate}
                 filterSpecialty={filterSpecialty}
                 onFilterSpecialty={setFilterSpecialty}
+                onEditProfile={() => setEditProfileOpen(true)}
               />
             </aside>
           )}
@@ -205,6 +208,14 @@ function CommunityContent() {
         member={selectedMember}
         open={!!selectedMember}
         onOpenChange={(open) => !open && setSelectedMember(null)}
+      />
+
+      <EditCommunityProfileDialog
+        open={editProfileOpen}
+        onOpenChange={setEditProfileOpen}
+        membership={membership as CommunityMember}
+        onSave={updateProfile}
+        isSaving={isUpdating}
       />
     </DashboardLayout>
   );
