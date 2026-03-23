@@ -127,21 +127,14 @@ export function ClientsModule() {
     },
   });
 
-  const watchedCategoryId = form.watch("category_id");
-
   const filteredClients = clients
     .filter((c) => {
-      const catName = c.category_id ? categoryMap.get(c.category_id) || "" : "";
-      const subName = c.subcategory_id ? subcategoryMap.get(c.subcategory_id) || "" : "";
       const matchesSearch =
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.email?.toLowerCase().includes(search.toLowerCase()) ||
-        c.city?.toLowerCase().includes(search.toLowerCase()) ||
-        catName.toLowerCase().includes(search.toLowerCase()) ||
-        subName.toLowerCase().includes(search.toLowerCase());
+        c.city?.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-      const matchesCategory = categoryFilter === "all" || c.category_id === categoryFilter;
-      return matchesSearch && matchesStatus && matchesCategory;
+      return matchesSearch && matchesStatus;
     })
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
