@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Plus, Send, Trash2, Search, Loader2 } from "lucide-react";
+import { Upload, Plus, Send, Trash2, Search, Loader2, RefreshCw } from "lucide-react";
 import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 import * as XLSX from "xlsx";
 
@@ -83,6 +83,24 @@ export function AdminCrmContacts() {
   const [newContact, setNewContact] = useState({ ...EMPTY_FORM });
   const [editOpen, setEditOpen] = useState(false);
   const [editContact, setEditContact] = useState<CrmContact | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncUsers = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-users-to-crm");
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["crm-contacts"] });
+      toast({
+        title: "Sincronização concluída!",
+        description: `${data.imported} contatos importados/atualizados, ${data.skipped} ignorados.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Erro na sincronização", description: err.message, variant: "destructive" });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["crm-contacts"],
@@ -295,6 +313,10 @@ export function AdminCrmContacts() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle>Contatos ({contacts.length})</CardTitle>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleSyncUsers} disabled={syncing}>
+              {syncing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              Importar Usuários para CRM
+            </Button>
             <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFileImport} />
             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
               <Upload className="h-4 w-4 mr-2" /> Importar CSV/Excel
