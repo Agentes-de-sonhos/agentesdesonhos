@@ -1325,6 +1325,7 @@ export type Database = {
       }
       crm_contacts: {
         Row: {
+          category: string | null
           category_id: string | null
           created_at: string
           email: string
@@ -1333,11 +1334,13 @@ export type Database = {
           nome: string
           origem: string | null
           status: string
+          subcategory: string | null
           subcategory_id: string | null
           telefone: string | null
           updated_at: string
         }
         Insert: {
+          category?: string | null
           category_id?: string | null
           created_at?: string
           email: string
@@ -1346,11 +1349,13 @@ export type Database = {
           nome: string
           origem?: string | null
           status?: string
+          subcategory?: string | null
           subcategory_id?: string | null
           telefone?: string | null
           updated_at?: string
         }
         Update: {
+          category?: string | null
           category_id?: string | null
           created_at?: string
           email?: string
@@ -1359,6 +1364,7 @@ export type Database = {
           nome?: string
           origem?: string | null
           status?: string
+          subcategory?: string | null
           subcategory_id?: string | null
           telefone?: string | null
           updated_at?: string
