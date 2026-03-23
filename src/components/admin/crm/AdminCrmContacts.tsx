@@ -313,6 +313,10 @@ export function AdminCrmContacts() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle>Contatos ({contacts.length})</CardTitle>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleSyncUsers} disabled={syncing}>
+              {syncing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              Importar Usuários para CRM
+            </Button>
             <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFileImport} />
             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
               <Upload className="h-4 w-4 mr-2" /> Importar CSV/Excel
