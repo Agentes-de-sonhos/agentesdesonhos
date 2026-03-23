@@ -195,6 +195,19 @@ function CollapsibleServiceCard({
               {service.description}
             </p>
           )}
+          {/* Per-service payment display */}
+          {isOpen && showPaymentPerService && (() => {
+            const payConfig = extractServicePaymentConfig(service);
+            if (!payConfig.is_custom_payment) return null;
+            const display = getServicePaymentDisplay(service.amount, payConfig);
+            if (!display) return null;
+            return (
+              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30">
+                <CreditCard className="h-4 w-4 text-primary/70" />
+                <span className="text-sm font-medium text-primary">{display}</span>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
