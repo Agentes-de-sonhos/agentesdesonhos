@@ -102,7 +102,8 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
   const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
   const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
   const details = getServiceDetails(service);
-  const hasExpandableContent = details.length > 0 || service.description || service.image_url;
+  const images = service.image_urls?.length ? service.image_urls : (service.image_url ? [service.image_url] : []);
+  const hasExpandableContent = details.length > 0 || service.description || images.length > 0;
 
   return (
     <Card>
