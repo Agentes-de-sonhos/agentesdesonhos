@@ -127,7 +127,7 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
                     </Badge>
                   )}
                 </div>
-                <p className="font-medium truncate">{getServiceDescription(service)}</p>
+                <p className="font-medium break-words whitespace-pre-wrap">{getServiceDescription(service)}</p>
               </div>
             </div>
             <div className="flex items-center gap-1 shrink-0">
@@ -168,7 +168,7 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
                     </div>
                   )}
                   {service.description && (
-                    <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 italic">
+                    <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 italic whitespace-pre-wrap break-words">
                       {service.description}
                     </p>
                   )}

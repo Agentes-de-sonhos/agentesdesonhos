@@ -186,8 +186,8 @@ export function generateQuotePDF(quote: Quote, profile?: AgentProfile | null) {
             </div>
             <span style="font-size:18px;font-weight:700;color:#0f766e;">${formatCurrency(service.amount)}</span>
           </div>
-          <div style="padding-left:34px;">
-            ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;">${d}</p>`).join("")}
+          <div style="padding-left:34px;word-wrap:break-word;overflow-wrap:break-word;">
+            ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
           </div>
         </div>
       `;

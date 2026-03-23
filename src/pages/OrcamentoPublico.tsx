@@ -164,7 +164,7 @@ function CollapsibleServiceCard({
                 </Badge>
               )}
             </div>
-            <span className="text-xs opacity-70 font-medium truncate max-w-[250px] sm:max-w-none">
+            <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
               {summary}
             </span>
           </div>
@@ -178,7 +178,7 @@ function CollapsibleServiceCard({
       </button>
       {/* Collapsible body */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-none opacity-100" : "max-h-0 opacity-0"}`}
       >
         <div className="px-5 py-4 space-y-3">
           {isOpen && (() => {
@@ -191,7 +191,7 @@ function CollapsibleServiceCard({
             <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
           ))}
           {isOpen && service.description && (
-            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic">
+            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic whitespace-pre-wrap break-words overflow-wrap-anywhere">
               {service.description}
             </p>
           )}
