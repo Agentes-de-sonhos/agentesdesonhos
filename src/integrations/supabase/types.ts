@@ -4777,11 +4777,18 @@ export type Database = {
           amount: number
           created_at: string
           description: string | null
+          discount_type: string | null
+          discount_value: number | null
+          entry_value: number | null
           id: string
           image_url: string | null
           image_urls: string[] | null
+          installments: number | null
+          is_custom_payment: boolean
           option_label: string | null
           order_index: number
+          payment_method: string | null
+          payment_type: string | null
           quote_id: string
           service_data: Json
           service_type: string
@@ -4791,11 +4798,18 @@ export type Database = {
           amount?: number
           created_at?: string
           description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          entry_value?: number | null
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
+          installments?: number | null
+          is_custom_payment?: boolean
           option_label?: string | null
           order_index?: number
+          payment_method?: string | null
+          payment_type?: string | null
           quote_id: string
           service_data?: Json
           service_type: string
@@ -4805,11 +4819,18 @@ export type Database = {
           amount?: number
           created_at?: string
           description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          entry_value?: number | null
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
+          installments?: number | null
+          is_custom_payment?: boolean
           option_label?: string | null
           order_index?: number
+          payment_method?: string | null
+          payment_type?: string | null
           quote_id?: string
           service_data?: Json
           service_type?: string
@@ -4848,6 +4869,7 @@ export type Database = {
           status: string
           total_amount: number
           updated_at: string
+          use_service_payment: boolean
           user_id: string
           valid_until: string | null
           validity_disclaimer: string
@@ -4874,6 +4896,7 @@ export type Database = {
           status?: string
           total_amount?: number
           updated_at?: string
+          use_service_payment?: boolean
           user_id: string
           valid_until?: string | null
           validity_disclaimer?: string
@@ -4900,6 +4923,7 @@ export type Database = {
           status?: string
           total_amount?: number
           updated_at?: string
+          use_service_payment?: boolean
           user_id?: string
           valid_until?: string | null
           validity_disclaimer?: string
