@@ -31,8 +31,14 @@ export function CommunityGate({ onJoin, isJoining }: CommunityGateProps) {
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
 
   const toggleSpecialty = (s: string) => {
-    setSelectedSpecialties((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : prev.length < 5 ? [...prev, s] : prev
+    setSelectedSpecialties((prev) => {
+      if (prev.includes(s)) return prev.filter((x) => x !== s);
+      if (prev.length >= 10) {
+        toast.error("Máximo de 10 especialidades atingido");
+        return prev;
+      }
+      return [...prev, s];
+    }
     );
   };
 
