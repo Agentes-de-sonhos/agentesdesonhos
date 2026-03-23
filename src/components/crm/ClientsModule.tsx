@@ -554,24 +554,6 @@ export function ClientsModule() {
                       {CLIENT_STATUS_LABELS[client.status as ClientStatus] || "Lead"}
                     </Badge>
                   </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs hidden lg:table-cell">
-                    {client.category_id ? (
-                      <Badge variant="outline" className="text-xs">
-                        {categoryMap.get(client.category_id) || "—"}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground/50">—</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs hidden lg:table-cell">
-                    {client.subcategory_id ? (
-                      <Badge variant="secondary" className="text-xs">
-                        {subcategoryMap.get(client.subcategory_id) || "—"}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground/50">—</span>
-                    )}
-                  </td>
                   <td className="py-3 px-4 text-muted-foreground text-xs hidden xl:table-cell">
                     {formatDistanceToNow(new Date(client.last_interaction_at), {
                       addSuffix: true,
