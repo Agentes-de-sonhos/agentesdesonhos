@@ -206,7 +206,7 @@ export function useQuote(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type, service_data, amount, option_label, description, image_url,
+      service_type, service_data, amount, option_label, description, image_url, image_urls,
     }: {
       service_type: ServiceType;
       service_data: ServiceData;
@@ -214,6 +214,7 @@ export function useQuote(id: string | undefined) {
       option_label?: string;
       description?: string;
       image_url?: string;
+      image_urls?: string[];
     }) => {
       if (!id) throw new Error("Quote ID is required");
       const currentServices = quote?.services || [];
@@ -230,6 +231,7 @@ export function useQuote(id: string | undefined) {
           option_label: option_label || null,
           description: description || null,
           image_url: image_url || null,
+          image_urls: image_urls && image_urls.length > 0 ? image_urls : [],
         } as any)
         .select()
         .single();
