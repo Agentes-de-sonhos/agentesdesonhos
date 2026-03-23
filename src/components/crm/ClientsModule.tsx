@@ -79,8 +79,6 @@ const clientSchema = z.object({
   birthday_day: z.string().optional(),
   birthday_month: z.string().optional(),
   birthday_year: z.string().optional(),
-  category_id: z.string().optional(),
-  subcategory_id: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
