@@ -425,6 +425,16 @@ export function AdminUserManager() {
               <SelectItem value="essencial">Essencial</SelectItem>
               <SelectItem value="profissional">Plano Fundador</SelectItem>
             </SelectContent>
+           </Select>
+          <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+              <SelectValue placeholder="Pagamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="sim">Pago</SelectItem>
+              <SelectItem value="nao">Não pago</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </CardHeader>
