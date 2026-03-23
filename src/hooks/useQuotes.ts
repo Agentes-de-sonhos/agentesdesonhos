@@ -238,8 +238,7 @@ export function useQuote(id: string | undefined) {
         .single();
       if (error) throw error;
 
-      const newTotal = (quote?.total_amount || 0) + amount;
-      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
+      await recalcQuoteTotal(id);
       return data;
     },
     onSuccess: () => {
