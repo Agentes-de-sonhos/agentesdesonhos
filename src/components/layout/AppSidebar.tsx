@@ -63,6 +63,7 @@ interface MenuItem {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   requiredFeature?: Feature;
+  adminOnly?: boolean;
   isPremium?: boolean;
   isHighlighted?: boolean;
   key?: string;
@@ -174,7 +175,7 @@ const clientesSection: MenuSection = {
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
     { title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
     { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
-    { title: "Financeiro & Vendas", url: "/vendas", icon: Briefcase, requiredFeature: "financial" },
+    { title: "Financeiro & Vendas", url: "/vendas", icon: Briefcase, requiredFeature: "financial", adminOnly: true },
   ],
 };
 
@@ -370,7 +371,7 @@ export function AppSidebar() {
                 {section.title}
               </p>
               <nav className="flex flex-col gap-0.5 mt-1">
-                {section.items.map((item) => {
+                {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => {
                   const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
                   const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
                   const isLockedByCartao = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
@@ -431,7 +432,7 @@ export function AppSidebar() {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.map((item) => renderSingleItem(item, section.bgColor, section.textColor, section.borderColor))}
+            {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => renderSingleItem(item, section.bgColor, section.textColor, section.borderColor))}
           </nav>
         )}
       </div>
