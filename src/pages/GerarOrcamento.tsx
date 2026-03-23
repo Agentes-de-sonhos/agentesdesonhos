@@ -268,6 +268,25 @@ export default function GerarOrcamento() {
     await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
   };
 
+  const handleToggleServicePayment = async (checked: boolean) => {
+    if (!quote) return;
+    setUseServicePayment(checked);
+    await supabase.from("quotes").update({ use_service_payment: checked } as any).eq("id", quote.id);
+  };
+
+  const handleServicePaymentChange = async (serviceId: string, config: ServicePaymentConfig) => {
+    setServicePaymentConfigs((prev) => ({ ...prev, [serviceId]: config }));
+    await supabase.from("quote_services").update({
+      is_custom_payment: config.is_custom_payment,
+      payment_type: config.payment_type,
+      installments: config.installments,
+      entry_value: config.entry_value,
+      discount_type: config.discount_type,
+      discount_value: config.discount_value,
+      payment_method: config.payment_method,
+    } as any).eq("id", serviceId);
+  };
+
   const handleSavePaymentConfig = useCallback(async () => {
     if (!quote) return;
     await supabase.from("quotes").update({
