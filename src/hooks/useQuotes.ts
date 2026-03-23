@@ -110,6 +110,7 @@ export function useQuotes() {
           payment_terms: (source as any).payment_terms,
           valid_until: (source as any).valid_until,
           validity_disclaimer: (source as any).validity_disclaimer,
+          use_service_payment: (source as any).use_service_payment ?? false,
         } as any)
         .select()
         .single();
