@@ -103,7 +103,7 @@ export function generateContractPdf(data: ContractData) {
   // Services list
   for (const svc of data.services) {
     checkPage(6);
-    const label = SERVICE_TYPE_LABELS[svc.service_type || svc.type] || svc.type;
+    const label = SERVICE_TYPE_LABELS[svc.type] || svc.type;
     const desc = svc.description ? ` – ${svc.description}` : "";
     doc.text(`•  ${label}${desc} – ${fmt(svc.salePrice)}`, mL + 4, y);
     y += 5;
