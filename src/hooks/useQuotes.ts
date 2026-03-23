@@ -291,12 +291,9 @@ export function useQuote(id: string | undefined) {
 
   const deleteServiceMutation = useMutation({
     mutationFn: async (serviceId: string) => {
-      const service = quote?.services?.find((s) => s.id === serviceId);
-      const amount = service?.amount || 0;
       const { error } = await supabase.from("quote_services").delete().eq("id", serviceId);
       if (error) throw error;
-      const newTotal = Math.max(0, (quote?.total_amount || 0) - amount);
-      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
+      await recalcQuoteTotal(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });
