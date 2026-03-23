@@ -77,6 +77,7 @@ export function AdminUserManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [planFilter, setPlanFilter] = useState<string>("all");
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
   const [editingUser, setEditingUser] = useState<UserWithDetails | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -335,10 +336,11 @@ export function AdminUserManager() {
 
       const matchesRole = roleFilter === "all" || user.role === roleFilter;
       const matchesPlan = planFilter === "all" || user.plan === planFilter;
+      const matchesPayment = paymentFilter === "all" || (paymentFilter === "sim" ? user.monthly_paid : !user.monthly_paid);
 
-      return matchesSearch && matchesRole && matchesPlan;
+      return matchesSearch && matchesRole && matchesPlan && matchesPayment;
     });
-  }, [users, searchTerm, roleFilter, planFilter]);
+  }, [users, searchTerm, roleFilter, planFilter, paymentFilter]);
 
   const stats = {
     total: users.length,
@@ -422,6 +424,16 @@ export function AdminUserManager() {
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="essencial">Essencial</SelectItem>
               <SelectItem value="profissional">Plano Fundador</SelectItem>
+            </SelectContent>
+           </Select>
+          <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+              <SelectValue placeholder="Pagamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="sim">Pago</SelectItem>
+              <SelectItem value="nao">Não pago</SelectItem>
             </SelectContent>
           </Select>
         </div>
