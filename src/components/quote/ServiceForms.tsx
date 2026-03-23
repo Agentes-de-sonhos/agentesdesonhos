@@ -43,7 +43,7 @@ interface ServiceFormProps {
   adultsCount?: number;
   childrenCount?: number;
   /** When editing, pass the existing service data to pre-fill the form */
-  initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null };
+  initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null; image_urls?: string[] };
 }
 
 /** Helper: disable dates outside trip range */
