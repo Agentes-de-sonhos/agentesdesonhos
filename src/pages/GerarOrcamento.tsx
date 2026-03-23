@@ -207,7 +207,7 @@ export default function GerarOrcamento() {
   // Track pending add calls so round-trip transfers can fire two submits sequentially
   const addQueueRef = useRef<Promise<void>>(Promise.resolve());
 
-  const handleAddService = async (serviceData: ServiceData, amount: number, optionLabel?: string, description?: string, imageUrl?: string) => {
+  const handleAddService = async (serviceData: ServiceData, amount: number, optionLabel?: string, description?: string, imageUrl?: string, imageUrls?: string[]) => {
     if (editingService) {
       await updateService({
         serviceId: editingService.id,
@@ -217,6 +217,7 @@ export default function GerarOrcamento() {
         option_label: optionLabel,
         description,
         image_url: imageUrl,
+        image_urls: imageUrls || [],
       });
       setEditingService(null);
       setSelectedServiceType(null);
@@ -226,7 +227,7 @@ export default function GerarOrcamento() {
     if (!sType) return;
     // Queue add calls so round-trip transfers (2 rapid submits) are processed sequentially
     addQueueRef.current = addQueueRef.current.then(async () => {
-      await addService({ service_type: sType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl });
+      await addService({ service_type: sType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl, image_urls: imageUrls || [] });
     });
     // Clear service type after a micro-delay so a second synchronous call can still use it
     setTimeout(() => setSelectedServiceType(null), 100);

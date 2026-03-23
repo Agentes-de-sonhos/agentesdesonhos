@@ -156,11 +156,18 @@ function CollapsibleServiceCard({
         className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}
       >
         <div className="px-5 py-4 space-y-3">
-          {isOpen && service.image_url && (
-            <div className="rounded-xl overflow-hidden border border-border/30">
-              <img src={service.image_url} alt={SERVICE_LABELS[type]} className="w-full h-48 sm:h-56 object-cover" />
-            </div>
-          )}
+          {isOpen && (() => {
+            const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
+            return imgs.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {imgs.map((url: string, i: number) => (
+                  <div key={i} className="rounded-xl overflow-hidden border border-border/30">
+                    <img src={url} alt={`${SERVICE_LABELS[type]} ${i + 1}`} className="w-full max-w-[280px] h-48 sm:h-56 object-cover" />
+                  </div>
+                ))}
+              </div>
+            ) : null;
+          })()}
           {isOpen && details.map((d, i) => (
             <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
           ))}

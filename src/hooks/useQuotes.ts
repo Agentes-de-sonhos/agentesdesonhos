@@ -128,6 +128,7 @@ export function useQuotes() {
           option_label: s.option_label,
           description: s.description,
           image_url: s.image_url,
+          image_urls: s.image_urls || [],
         }));
         await supabase.from("quote_services").insert(newServices as any);
       }
