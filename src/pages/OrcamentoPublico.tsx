@@ -9,6 +9,7 @@ import type { QuoteService, ServiceType } from "@/types/quote";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -182,13 +183,7 @@ function CollapsibleServiceCard({
           {isOpen && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {imgs.map((url: string, i: number) => (
-                  <div key={i} className="rounded-xl overflow-hidden border border-border/30">
-                    <img src={url} alt={`${SERVICE_LABELS[type]} ${i + 1}`} className="w-full max-w-[280px] h-48 sm:h-56 object-cover" />
-                  </div>
-                ))}
-              </div>
+              <ServiceImageCarousel images={imgs} alt={SERVICE_LABELS[type]} />
             ) : null;
           })()}
           {isOpen && details.map((d, i) => (
