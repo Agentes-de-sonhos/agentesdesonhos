@@ -127,7 +127,7 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
                     </Badge>
                   )}
                 </div>
-                <p className="font-medium truncate">{getServiceDescription(service)}</p>
+                <p className="font-medium break-words whitespace-pre-wrap">{getServiceDescription(service)}</p>
               </div>
             </div>
             <div className="flex items-center gap-1 shrink-0">
