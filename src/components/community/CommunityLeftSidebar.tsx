@@ -61,8 +61,17 @@ export function CommunityLeftSidebar({
   return (
     <div className="space-y-4">
       {/* User Profile Card */}
-      <Card className="border-border/50">
+      <Card className="border-border/50 relative group">
         <CardContent className="pt-5 pb-4">
+          {onEditProfile && (
+            <button
+              onClick={onEditProfile}
+              className="absolute top-3 right-3 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
+              title="Editar perfil"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
           <div className="flex items-center gap-3">
             <div className="relative">
               <Avatar className="h-12 w-12">
