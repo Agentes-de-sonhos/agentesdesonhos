@@ -4699,6 +4699,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
           option_label: string | null
           order_index: number
           quote_id: string
@@ -4712,6 +4713,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           option_label?: string | null
           order_index?: number
           quote_id: string
@@ -4725,6 +4727,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           option_label?: string | null
           order_index?: number
           quote_id?: string
