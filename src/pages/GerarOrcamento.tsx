@@ -41,8 +41,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import type { ServiceType, QuoteFormData, ServiceData, Quote } from "@/types/quote";
+import type { ServiceType, QuoteFormData, ServiceData, Quote, QuoteService } from "@/types/quote";
 import { SERVICE_TYPE_LABELS, MULTI_OPTION_TYPES } from "@/types/quote";
+import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
+import type { ServicePaymentConfig } from "@/lib/servicePayment";
+import { extractServicePaymentConfig } from "@/lib/servicePayment";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
