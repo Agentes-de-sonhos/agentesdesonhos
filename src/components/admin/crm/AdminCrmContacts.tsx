@@ -272,26 +272,21 @@ export function AdminCrmContacts() {
           <Tag className="h-4 w-4" />
           Categoria
         </Label>
-        <Select
-          value={categoryId || "none"}
-          onValueChange={(val) => {
-            const newVal = val === "none" ? "" : val;
-            onCategoryChange(newVal);
+        <select
+          value={categoryId || ""}
+          onChange={(e) => {
+            onCategoryChange(e.target.value);
             onSubcategoryChange(null);
           }}
+          className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione a categoria" />
-          </SelectTrigger>
-          <SelectContent position="popper" className="z-[9999]">
-            <SelectItem value="none">Selecione a categoria</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <option value="">Selecione a categoria</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <Label>Subcategoria</Label>
