@@ -73,6 +73,24 @@ function getServiceDetails(service: QuoteService): string[] {
     case "flight":
       details.push(`Companhia: ${data.airline}`);
       details.push(`Ida: ${formatDateShort(data.departure_date)} | Volta: ${formatDateShort(data.return_date)}`);
+      if (data.outbound_detail) {
+        const ob = data.outbound_detail;
+        const parts: string[] = [];
+        if (ob.flight_number) parts.push(`Voo ${ob.flight_number}`);
+        if (ob.airport_origin && ob.airport_destination) parts.push(`${ob.airport_origin} → ${ob.airport_destination}`);
+        if (ob.departure_time) parts.push(`Saída ${ob.departure_time}`);
+        if (ob.arrival_time) parts.push(`Chegada ${ob.arrival_time}`);
+        if (parts.length) details.push(`✈ Ida: ${parts.join(" | ")}`);
+      }
+      if (data.return_detail) {
+        const rt = data.return_detail;
+        const parts: string[] = [];
+        if (rt.flight_number) parts.push(`Voo ${rt.flight_number}`);
+        if (rt.airport_origin && rt.airport_destination) parts.push(`${rt.airport_origin} → ${rt.airport_destination}`);
+        if (rt.departure_time) parts.push(`Saída ${rt.departure_time}`);
+        if (rt.arrival_time) parts.push(`Chegada ${rt.arrival_time}`);
+        if (parts.length) details.push(`✈ Volta: ${parts.join(" | ")}`);
+      }
       if (data.includes_baggage) details.push("✓ Bagagem incluída");
       if (data.includes_boarding_fee) details.push("✓ Taxa de embarque incluída");
       if (data.notes) details.push(data.notes);
@@ -88,20 +106,25 @@ function getServiceDetails(service: QuoteService): string[] {
       if (data.notes) details.push(data.notes);
       break;
     case "transfer":
+      details.push(`Local: ${data.location}`);
       details.push(`Data: ${formatDateShort(data.date)}`);
       break;
     case "attraction":
       details.push(`Data: ${formatDateShort(data.date)} | Qtd: ${data.quantity}`);
       break;
     case "insurance":
+      details.push(`Seguradora: ${data.provider}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
-      details.push(data.coverage);
+      details.push(`Cobertura: ${data.coverage}`);
       break;
     case "cruise":
+      details.push(`Navio: ${data.ship_name}`);
+      details.push(`Rota: ${data.route}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
       details.push(`Cabine: ${data.cabin_type}`);
       break;
     case "other":
+      if (data.description) details.push(data.description);
       break;
   }
   return details;
