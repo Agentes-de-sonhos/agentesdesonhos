@@ -34,7 +34,7 @@ function parseLocalDate(dateStr: string): Date {
 
 interface ServiceFormProps {
   serviceType: ServiceType;
-  onSubmit: (data: any, amount: number, optionLabel?: string, description?: string, imageUrl?: string) => void;
+  onSubmit: (data: any, amount: number, optionLabel?: string, description?: string, imageUrl?: string, imageUrls?: string[]) => void;
   onCancel: () => void;
   isLoading?: boolean;
   showOptionLabel?: boolean;
