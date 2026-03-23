@@ -41,6 +41,7 @@ const Agenda = lazy(() => import("./pages/Agenda"));
 const BlocoNotas = lazy(() => import("./pages/BlocoNotas"));
 const CRM = lazy(() => import("./pages/CRM"));
 const Financeiro = lazy(() => import("./pages/Financeiro"));
+const Vendas = lazy(() => import("./pages/Vendas"));
 const GestaoClientes = lazy(() => import("./pages/GestaoClientes"));
 const EducaAcademy = lazy(() => import("./pages/EducaAcademy"));
 const Community = lazy(() => import("./pages/Community"));
