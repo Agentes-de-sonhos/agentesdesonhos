@@ -71,6 +71,7 @@ export function AdminCrmContacts() {
   const [newContact, setNewContact] = useState({ nome: "", email: "", telefone: "", empresa: "", category_id: "", subcategory_id: "" });
   const [editOpen, setEditOpen] = useState(false);
   const [editContact, setEditContact] = useState<CrmContact | null>(null);
+  const [catPopoverOpen, setCatPopoverOpen] = useState(false);
 
   const { categories, subcategories, createSubcategory } = useClientCategories();
 
@@ -277,7 +278,7 @@ export function AdminCrmContacts() {
             <Tag className="h-4 w-4" />
             Categoria
           </Label>
-          <Popover>
+          <Popover open={catPopoverOpen} onOpenChange={setCatPopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 type="button"
@@ -307,6 +308,7 @@ export function AdminCrmContacts() {
                       onClick={() => {
                         onCategoryChange(cat.id);
                         onSubcategoryChange(null);
+                        setCatPopoverOpen(false);
                       }}
                     >
                       <span>{cat.name}</span>
