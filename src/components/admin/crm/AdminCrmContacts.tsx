@@ -6,17 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Plus, Send, Trash2, Search, Loader2, Tag, Check, ChevronsUpDown } from "lucide-react";
+import { Upload, Plus, Send, Trash2, Search, Loader2 } from "lucide-react";
 import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
-import { useClientCategories } from "@/hooks/useClientCategories";
-import { SubcategoryCombobox } from "@/components/crm/SubcategoryCombobox";
-import { cn } from "@/lib/utils";
 import * as XLSX from "xlsx";
 
 interface CrmContact {
@@ -27,8 +23,8 @@ interface CrmContact {
   empresa: string | null;
   status: string;
   origem: string | null;
-  category_id: string | null;
-  subcategory_id: string | null;
+  category: string | null;
+  subcategory: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -39,6 +35,20 @@ interface CrmTemplate {
   assunto: string;
   mensagem: string;
 }
+
+const CATEGORIES = [
+  "Agente de Viagens",
+  "Operadora de Turismo",
+  "Consolidadora",
+  "Companhia Aérea",
+  "Hotelaria",
+  "Locadora de Veículos",
+  "Cruzeiros",
+  "Seguro Viagem",
+  "Parques e Atrações",
+  "Receptivo",
+  "Guias",
+];
 
 const STATUS_LABELS: Record<string, string> = {
   novo: "Novo",
@@ -56,6 +66,8 @@ const STATUS_COLORS: Record<string, string> = {
   inativo: "bg-muted",
 };
 
+const EMPTY_FORM = { nome: "", email: "", telefone: "", empresa: "", category: "", subcategory: "" };
+
 export function AdminCrmContacts() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -68,24 +80,9 @@ export function AdminCrmContacts() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
-  const [newContact, setNewContact] = useState({ nome: "", email: "", telefone: "", empresa: "", category_id: "", subcategory_id: "" });
+  const [newContact, setNewContact] = useState({ ...EMPTY_FORM });
   const [editOpen, setEditOpen] = useState(false);
   const [editContact, setEditContact] = useState<CrmContact | null>(null);
-  const [catPopoverOpen, setCatPopoverOpen] = useState(false);
-
-  const { categories, subcategories, createSubcategory } = useClientCategories();
-
-  const categoryMap = useMemo(() => {
-    const m = new Map<string, string>();
-    categories.forEach((c) => m.set(c.id, c.name));
-    return m;
-  }, [categories]);
-
-  const subcategoryMap = useMemo(() => {
-    const m = new Map<string, string>();
-    subcategories.forEach((s) => m.set(s.id, s.name));
-    return m;
-  }, [subcategories]);
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["crm-contacts"],
@@ -95,7 +92,11 @@ export function AdminCrmContacts() {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as CrmContact[];
+      return (data as any[]).map((c) => ({
+        ...c,
+        category: c.category ?? null,
+        subcategory: c.subcategory ?? null,
+      })) as CrmContact[];
     },
   });
 
@@ -112,22 +113,22 @@ export function AdminCrmContacts() {
   });
 
   const addContactMutation = useMutation({
-    mutationFn: async (contact: typeof newContact) => {
+    mutationFn: async (contact: typeof EMPTY_FORM) => {
       const { error } = await supabase.from("crm_contacts").insert({
         nome: contact.nome,
         email: contact.email,
         telefone: contact.telefone || null,
         empresa: contact.empresa || null,
-        category_id: contact.category_id || null,
-        subcategory_id: contact.subcategory_id || null,
-      });
+        category: contact.category || null,
+        subcategory: contact.subcategory || null,
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["crm-contacts"] });
       toast({ title: "Contato adicionado!" });
       setAddOpen(false);
-      setNewContact({ nome: "", email: "", telefone: "", empresa: "", category_id: "", subcategory_id: "" });
+      setNewContact({ ...EMPTY_FORM });
     },
     onError: (err: Error) => toast({ title: "Erro", description: err.message, variant: "destructive" }),
   });
@@ -143,9 +144,9 @@ export function AdminCrmContacts() {
           empresa: contact.empresa || null,
           status: contact.status,
           origem: contact.origem || null,
-          category_id: contact.category_id || null,
-          subcategory_id: contact.subcategory_id || null,
-        })
+          category: contact.category || null,
+          subcategory: contact.subcategory || null,
+        } as any)
         .eq("id", contact.id);
       if (error) throw error;
     },
@@ -188,14 +189,12 @@ export function AdminCrmContacts() {
   const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet);
-
-      const contacts = rows
+      const importedContacts = rows
         .filter((r) => r.email || r.Email)
         .map((r) => ({
           nome: r.nome || r.Nome || r.name || r.Name || "",
@@ -204,21 +203,17 @@ export function AdminCrmContacts() {
           empresa: r.empresa || r.Empresa || r.company || r.Company || null,
           origem: "importacao",
         }));
-
-      if (contacts.length === 0) {
+      if (importedContacts.length === 0) {
         toast({ title: "Nenhum contato válido encontrado", variant: "destructive" });
         return;
       }
-
-      const { error } = await supabase.from("crm_contacts").insert(contacts);
+      const { error } = await supabase.from("crm_contacts").insert(importedContacts);
       if (error) throw error;
-
       queryClient.invalidateQueries({ queryKey: ["crm-contacts"] });
-      toast({ title: `${contacts.length} contatos importados!` });
+      toast({ title: `${importedContacts.length} contatos importados!` });
     } catch (err: any) {
       toast({ title: "Erro na importação", description: err.message, variant: "destructive" });
     }
-
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -251,88 +246,48 @@ export function AdminCrmContacts() {
   };
 
   const filtered = contacts.filter((c) => {
-    const catName = c.category_id ? categoryMap.get(c.category_id) || "" : "";
-    const subName = c.subcategory_id ? subcategoryMap.get(c.subcategory_id) || "" : "";
     const matchesSearch =
       c.nome.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase()) ||
       (c.empresa || "").toLowerCase().includes(search.toLowerCase()) ||
-      catName.toLowerCase().includes(search.toLowerCase()) ||
-      subName.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || c.category_id === categoryFilter;
+      (c.category || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.subcategory || "").toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || c.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
+  // Reusable category/subcategory fields
   const renderCategoryFields = (
-    categoryId: string | null,
-    subcategoryId: string | null,
+    category: string,
+    subcategory: string,
     onCategoryChange: (val: string) => void,
-    onSubcategoryChange: (val: string | null) => void
-  ) => {
-    const selectedCategory = categories.find((cat) => cat.id === categoryId);
-
-    return (
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <Label className="flex items-center gap-1.5">
-            <Tag className="h-4 w-4" />
-            Categoria
-          </Label>
-          <Popover open={catPopoverOpen} onOpenChange={setCatPopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                role="combobox"
-                className="w-full justify-between font-normal"
-              >
-                <span className={cn("truncate", !selectedCategory && "text-muted-foreground")}>
-                  {selectedCategory?.name || "Selecione a categoria"}
-                </span>
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1" align="start">
-              <div className="max-h-64 overflow-y-auto">
-                {categories.map((cat) => {
-                  const isSelected = cat.id === categoryId;
-
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      className={cn(
-                        "flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                        isSelected && "bg-accent text-accent-foreground"
-                      )}
-                      onClick={() => {
-                        onCategoryChange(cat.id);
-                        onSubcategoryChange(null);
-                        setCatPopoverOpen(false);
-                      }}
-                    >
-                      <span>{cat.name}</span>
-                      <Check className={cn("h-4 w-4", isSelected ? "opacity-100" : "opacity-0")} />
-                    </button>
-                  );
-                })}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div>
-          <Label>Subcategoria</Label>
-          <SubcategoryCombobox
-            categoryId={categoryId}
-            subcategories={subcategories}
-            value={subcategoryId}
-            onChange={onSubcategoryChange}
-            onCreateNew={(name, catId) => createSubcategory({ name, category_id: catId })}
-          />
-        </div>
+    onSubcategoryChange: (val: string) => void
+  ) => (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div>
+        <Label>Categoria *</Label>
+        <select
+          value={category}
+          onChange={(e) => onCategoryChange(e.target.value)}
+          className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <option value="">Selecione a categoria</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
       </div>
-    );
-  };
+      <div>
+        <Label>Subcategoria</Label>
+        <Input
+          value={subcategory}
+          onChange={(e) => onSubcategoryChange(e.target.value)}
+          placeholder="Ex: Luxo, Corporativo, Regional..."
+          className="mt-1"
+        />
+      </div>
+    </div>
+  );
 
   return (
     <Card>
@@ -340,20 +295,12 @@ export function AdminCrmContacts() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle>Contatos ({contacts.length})</CardTitle>
           <div className="flex gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              className="hidden"
-              onChange={handleFileImport}
-            />
+            <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFileImport} />
             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="h-4 w-4 mr-2" />
-              Importar CSV/Excel
+              <Upload className="h-4 w-4 mr-2" /> Importar CSV/Excel
             </Button>
             <Button size="sm" onClick={() => setAddOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Contato
+              <Plus className="h-4 w-4 mr-2" /> Novo Contato
             </Button>
           </div>
         </div>
@@ -362,26 +309,18 @@ export function AdminCrmContacts() {
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome, email, empresa ou categoria..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
+            <Input placeholder="Buscar por nome, email, empresa ou categoria..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
           </div>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filtrar categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as categorias</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm w-[200px]"
+          >
+            <option value="all">Todas as categorias</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
         </div>
 
         {isLoading ? (
@@ -409,19 +348,15 @@ export function AdminCrmContacts() {
                   <TableCell>{contact.email}</TableCell>
                   <TableCell className="hidden md:table-cell">{contact.empresa || "—"}</TableCell>
                   <TableCell className="hidden lg:table-cell">
-                    {contact.category_id ? (
-                      <Badge variant="outline" className="text-xs">
-                        {categoryMap.get(contact.category_id) || "—"}
-                      </Badge>
+                    {contact.category ? (
+                      <Badge variant="outline" className="text-xs">{contact.category}</Badge>
                     ) : (
                       <span className="text-muted-foreground/50">—</span>
                     )}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
-                    {contact.subcategory_id ? (
-                      <Badge variant="secondary" className="text-xs">
-                        {subcategoryMap.get(contact.subcategory_id) || "—"}
-                      </Badge>
+                    {contact.subcategory ? (
+                      <Badge variant="secondary" className="text-xs">{contact.subcategory}</Badge>
                     ) : (
                       <span className="text-muted-foreground/50">—</span>
                     )}
@@ -463,6 +398,7 @@ export function AdminCrmContacts() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Novo Contato</DialogTitle>
+            <DialogDescription>Preencha os dados do novo contato.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -482,14 +418,14 @@ export function AdminCrmContacts() {
               <Input value={newContact.empresa} onChange={(e) => setNewContact({ ...newContact, empresa: e.target.value })} />
             </div>
             {renderCategoryFields(
-              newContact.category_id || null,
-              newContact.subcategory_id || null,
-              (val) => setNewContact({ ...newContact, category_id: val, subcategory_id: "" }),
-              (val) => setNewContact({ ...newContact, subcategory_id: val || "" })
+              newContact.category,
+              newContact.subcategory,
+              (val) => setNewContact({ ...newContact, category: val }),
+              (val) => setNewContact({ ...newContact, subcategory: val })
             )}
           </div>
           <DialogFooter>
-            <Button onClick={() => addContactMutation.mutate(newContact)} disabled={!newContact.nome || !newContact.email || addContactMutation.isPending}>
+            <Button onClick={() => addContactMutation.mutate(newContact)} disabled={!newContact.nome || !newContact.email || !newContact.category || addContactMutation.isPending}>
               {addContactMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Salvar
             </Button>
@@ -502,6 +438,7 @@ export function AdminCrmContacts() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Enviar Email para {selectedContact?.nome}</DialogTitle>
+            <DialogDescription>Selecione um template ou escreva a mensagem.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -512,9 +449,7 @@ export function AdminCrmContacts() {
                 </SelectTrigger>
                 <SelectContent>
                   {templates.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.nome_template}
-                    </SelectItem>
+                    <SelectItem key={t.id} value={t.id}>{t.nome_template}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -542,6 +477,7 @@ export function AdminCrmContacts() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar Contato</DialogTitle>
+            <DialogDescription>Atualize os dados do contato.</DialogDescription>
           </DialogHeader>
           {editContact && (
             <div className="space-y-4">
@@ -562,23 +498,22 @@ export function AdminCrmContacts() {
                 <Input value={editContact.empresa || ""} onChange={(e) => setEditContact({ ...editContact, empresa: e.target.value })} />
               </div>
               {renderCategoryFields(
-                editContact.category_id,
-                editContact.subcategory_id,
-                (val) => setEditContact({ ...editContact, category_id: val, subcategory_id: null }),
-                (val) => setEditContact({ ...editContact, subcategory_id: val })
+                editContact.category || "",
+                editContact.subcategory || "",
+                (val) => setEditContact({ ...editContact, category: val }),
+                (val) => setEditContact({ ...editContact, subcategory: val })
               )}
               <div>
                 <Label>Status</Label>
-                <Select value={editContact.status} onValueChange={(v) => setEditContact({ ...editContact, status: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  value={editContact.status}
+                  onChange={(e) => setEditContact({ ...editContact, status: e.target.value })}
+                  className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <Label>Origem</Label>
@@ -588,7 +523,10 @@ export function AdminCrmContacts() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => { setEditOpen(false); setEditContact(null); }}>Cancelar</Button>
-            <Button onClick={() => editContact && updateContactMutation.mutate(editContact)} disabled={!editContact?.nome || !editContact?.email || updateContactMutation.isPending}>
+            <Button
+              onClick={() => editContact && updateContactMutation.mutate(editContact)}
+              disabled={!editContact?.nome || !editContact?.email || !editContact?.category || updateContactMutation.isPending}
+            >
               {updateContactMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Salvar
             </Button>
