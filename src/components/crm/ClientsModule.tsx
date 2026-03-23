@@ -214,8 +214,6 @@ export function ClientsModule() {
       birthday_day: bDay,
       birthday_month: bMonth,
       birthday_year: bYear,
-      category_id: data.category_id || null,
-      subcategory_id: data.subcategory_id || null,
     };
 
     let clientId: string | undefined;
