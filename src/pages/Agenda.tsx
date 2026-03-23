@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { MonthlyCalendar } from "@/components/agenda/MonthlyCalendar";
 import { WeeklyCalendar } from "@/components/agenda/WeeklyCalendar";
 import { DailyCalendar } from "@/components/agenda/DailyCalendar";
 import { EventModal } from "@/components/agenda/EventModal";
+import { GoogleCalendarSyncButton } from "@/components/agenda/GoogleCalendarSyncButton";
 
 import { EventTypeFilter } from "@/components/agenda/EventTypeFilter";
 import { CalendarEvent, ViewMode, AgencyEventType } from "@/types/agenda";
@@ -31,6 +33,7 @@ export default function Agenda() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const agenda = useAgenda(currentYear);
   const {
     allEvents,
     customEventTypes,
@@ -50,7 +53,13 @@ export default function Agenda() {
     isUpdating,
     isDeleting,
     isCreatingCustomType,
-  } = useAgenda(currentYear);
+  } = agenda;
+
+  const queryClient = useQueryClient();
+
+  const handleSyncComplete = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["agency-events"] });
+  }, [queryClient]);
 
   const handleDayClick = useCallback((date: string) => {
     setSelectedDate(date);
@@ -158,6 +167,11 @@ export default function Agenda() {
               Ano
             </Button>
           </div>
+        </div>
+
+        {/* Google Calendar Sync */}
+        <div className="flex justify-end">
+          <GoogleCalendarSyncButton onSyncComplete={handleSyncComplete} />
         </div>
 
         {/* Filter Bar */}
