@@ -83,6 +83,24 @@ export function AdminCrmContacts() {
   const [newContact, setNewContact] = useState({ ...EMPTY_FORM });
   const [editOpen, setEditOpen] = useState(false);
   const [editContact, setEditContact] = useState<CrmContact | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncUsers = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-users-to-crm");
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["crm-contacts"] });
+      toast({
+        title: "Sincronização concluída!",
+        description: `${data.imported} contatos importados/atualizados, ${data.skipped} ignorados.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Erro na sincronização", description: err.message, variant: "destructive" });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["crm-contacts"],
