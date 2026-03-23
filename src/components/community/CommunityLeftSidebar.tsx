@@ -31,6 +31,7 @@ export function CommunityLeftSidebar({
   onNavigate,
   filterSpecialty,
   onFilterSpecialty,
+  onEditProfile,
 }: CommunityLeftSidebarProps) {
   const { user } = useAuth();
 
