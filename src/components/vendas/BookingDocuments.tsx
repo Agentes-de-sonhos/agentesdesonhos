@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { generateReceiptPdf, ReceiptData } from "@/lib/generateReceiptPdf";
+import { generateContractPdf, ContractData } from "@/lib/generateContractPdf";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
@@ -87,8 +88,59 @@ export function BookingDocuments({ bookingId, documents, booking, services, paym
     }
   };
 
-  const handleGenerateContract = () => {
-    toast.info("Geração de Contrato será implementada em breve.");
+  const handleGenerateContract = async () => {
+    setGenerating(true);
+    try {
+      let agencyName = "";
+      let agencyPhone = "";
+      let agencyEmail = "";
+      let agencyCnpj = "";
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("name, phone, agency_name")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        agencyName = profile?.agency_name || profile?.name || "Agência";
+        agencyPhone = profile?.phone || "";
+        agencyEmail = user.email || "";
+      }
+
+      const paidPayments = payments.filter((p) => p.status === "pago");
+      const allPayments = payments.length > 0 ? payments : [];
+      const methodCounts: Record<string, number> = {};
+      allPayments.forEach((p) => {
+        methodCounts[p.payment_method] = (methodCounts[p.payment_method] || 0) + 1;
+      });
+      const topMethod = Object.entries(methodCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+      const paymentMethodLabel = topMethod ? (PAYMENT_METHODS[topMethod] || topMethod) : undefined;
+
+      generateContractPdf({
+        agencyName,
+        agencyCnpj: agencyCnpj || undefined,
+        agencyEmail: agencyEmail || undefined,
+        agencyPhone: agencyPhone || undefined,
+        clientName: booking.client?.name || "Cliente",
+        tripName: booking.trip_name,
+        startDate: booking.start_date,
+        endDate: booking.end_date,
+        services: services.map((s) => ({
+          type: s.service_type,
+          description: s.description,
+          salePrice: Number(s.sale_price),
+        })),
+        totalAmount: Number(booking.total_amount),
+        paymentMethod: paymentMethodLabel,
+      });
+      toast.success("Contrato gerado com sucesso!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao gerar contrato");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
