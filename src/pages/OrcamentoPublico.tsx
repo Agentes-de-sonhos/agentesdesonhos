@@ -164,7 +164,7 @@ function CollapsibleServiceCard({
                 </Badge>
               )}
             </div>
-            <span className="text-xs opacity-70 font-medium truncate max-w-[250px] sm:max-w-none">
+            <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
               {summary}
             </span>
           </div>
