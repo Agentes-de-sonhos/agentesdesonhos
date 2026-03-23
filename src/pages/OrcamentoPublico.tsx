@@ -374,6 +374,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
                   showPrice={showDetailedPrices}
                   isOpen={openServiceIndex === index}
                   onToggle={() => handleToggleService(index)}
+                  showPaymentPerService={useServicePayment}
                 />
               ))}
             </div>
