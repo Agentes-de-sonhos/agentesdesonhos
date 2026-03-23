@@ -90,7 +90,7 @@ function AgentAvatar({
 export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
   const { onlineUsers, onlineCount, isOnline, isOnlineLoading, toggleOnline } =
     usePresence();
-  const { plan } = useSubscription();
+  const { hasFeature } = useSubscription();
   const isMobile = useIsMobile();
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -103,7 +103,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
     }
   };
 
-  if (plan !== "profissional") return null;
+  if (!hasFeature("community")) return null;
 
   const maxVisible = isMobile ? 4 : 6;
   const visibleAgents = onlineUsers.slice(0, maxVisible);
@@ -112,7 +112,6 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
 
   return (
     <div className="flex items-center gap-3 bg-card rounded-xl px-4 py-2.5 border border-border shadow-sm">
-      {/* Counter */}
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
         <div className="relative">
           <Users className="h-4 w-4 text-primary" />
@@ -123,7 +122,6 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
         </span>
       </div>
 
-      {/* Stacked avatars */}
       {onlineUsers.length > 0 && (
         <>
           <div className="h-5 w-px bg-border" />
@@ -138,7 +136,6 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
               />
             ))}
 
-            {/* +N overflow button */}
             {overflowCount > 0 && (
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
@@ -209,7 +206,6 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
 
       <div className="h-5 w-px bg-border" />
 
-      {/* Online/Offline toggle */}
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1.5">
