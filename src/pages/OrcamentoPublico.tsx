@@ -133,9 +133,9 @@ function getServiceDetails(service: QuoteService): string[] {
 }
 
 function CollapsibleServiceCard({
-  service, showPrice, isOpen, onToggle,
+  service, showPrice, isOpen, onToggle, showPaymentPerService = false,
 }: {
-  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void;
+  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean;
 }) {
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
