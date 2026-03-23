@@ -531,6 +531,252 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_commissions: {
+        Row: {
+          booking_service_id: string
+          commission_amount: number
+          created_at: string
+          expected_date: string | null
+          id: string
+          received_date: string | null
+          status: string
+          supplier_id: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_service_id: string
+          commission_amount?: number
+          created_at?: string
+          expected_date?: string | null
+          id?: string
+          received_date?: string | null
+          status?: string
+          supplier_id?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_service_id?: string
+          commission_amount?: number
+          created_at?: string
+          expected_date?: string | null
+          id?: string
+          received_date?: string | null
+          status?: string
+          supplier_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_commissions_booking_service_id_fkey"
+            columns: ["booking_service_id"]
+            isOneToOne: false
+            referencedRelation: "booking_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_commissions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_documents: {
+        Row: {
+          booking_id: string
+          created_at: string
+          doc_type: string
+          file_url: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          doc_type: string
+          file_url?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          doc_type?: string
+          file_url?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_documents_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_payments: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          due_date: string | null
+          id: string
+          installment_number: number | null
+          payment_date: string | null
+          payment_method: string
+          status: string
+          total_installments: number | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          booking_id: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          installment_number?: number | null
+          payment_date?: string | null
+          payment_method: string
+          status?: string
+          total_installments?: number | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          installment_number?: number | null
+          payment_date?: string | null
+          payment_method?: string
+          status?: string
+          total_installments?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_services: {
+        Row: {
+          booking_id: string
+          cost_price: number
+          created_at: string
+          description: string | null
+          expected_commission: number
+          expected_commission_date: string | null
+          id: string
+          sale_price: number
+          service_type: string
+          status: string
+          supplier_id: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          cost_price?: number
+          created_at?: string
+          description?: string | null
+          expected_commission?: number
+          expected_commission_date?: string | null
+          id?: string
+          sale_price?: number
+          service_type: string
+          status?: string
+          supplier_id?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          cost_price?: number
+          created_at?: string
+          description?: string | null
+          expected_commission?: number
+          expected_commission_date?: string | null
+          id?: string
+          sale_price?: number
+          service_type?: string
+          status?: string
+          supplier_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_services_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_services_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          start_date: string | null
+          status: string
+          total_amount: number
+          trip_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string
+          total_amount?: number
+          trip_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string
+          total_amount?: number
+          trip_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_card_stats: {
         Row: {
           card_id: string
