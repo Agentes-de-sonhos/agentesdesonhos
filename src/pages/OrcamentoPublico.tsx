@@ -264,6 +264,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
   const paymentTerms = (quote as any).payment_terms as string | null;
   const validUntil = (quote as any).valid_until as string | null;
   const validityDisclaimer = (quote as any).validity_disclaimer as string | null;
+  const useServicePayment = (quote as any).use_service_payment ?? false;
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
