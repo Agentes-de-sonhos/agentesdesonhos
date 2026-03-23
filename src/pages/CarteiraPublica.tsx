@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState, lazy, Suspense } from "react";
+import { useParams } from "react-router-dom";
 import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Trip, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+
+const ViagemPublica = lazy(() => import("@/pages/ViagemPublica"));
 
 async function verifyTripBySlug(slug: string, password: string) {
   const { data, error } = await supabase.rpc('verify_trip_access_by_slug', {
@@ -73,7 +75,6 @@ function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: strin
 
 export default function CarteiraPublica() {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const [tripData, setTripData] = useState<{ trip: Trip; agentProfile: AgentProfile | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -81,7 +82,6 @@ export default function CarteiraPublica() {
 
   useEffect(() => {
     if (!slug) return;
-    // Try accessing without password first
     verifyTripBySlug(slug, "")
       .then((result) => {
         setTripData(result);
@@ -147,22 +147,18 @@ export default function CarteiraPublica() {
 
   if (!tripData) return null;
 
-  // Redirect to ViagemPublica with pre-authenticated state to avoid double password prompt
-  if (tripData.trip.share_token) {
-    navigate(`/viagem/${tripData.trip.share_token}`, {
-      replace: true,
-      state: {
-        preAuthenticated: true,
-        tripData: tripData.trip,
-        agentProfile: tripData.agentProfile,
-      },
-    });
-    return (
+  // Render ViagemPublica directly with pre-loaded data instead of redirecting
+  // This avoids React Router state loss issues that could cause attachments to not display
+  return (
+    <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    );
-  }
-
-  return null;
+    }>
+      <ViagemPublica 
+        preLoadedTrip={tripData.trip} 
+        preLoadedAgent={tripData.agentProfile} 
+      />
+    </Suspense>
+  );
 }
