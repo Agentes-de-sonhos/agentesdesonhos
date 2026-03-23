@@ -23,10 +23,24 @@ export function BookingDetail({ bookingId, onBack }: Props) {
     const totalCost = services.reduce((s, sv) => s + Number(sv.cost_price), 0);
     const totalCommission = commissions.reduce((s, c) => s + Number(c.commission_amount), 0);
     const commissionReceived = commissions.filter((c) => c.status === "recebido").reduce((s, c) => s + Number(c.commission_amount), 0);
+    const commissionPending = totalCommission - commissionReceived;
     const totalPaid = payments.filter((p) => p.status === "pago").reduce((s, p) => s + Number(p.amount), 0);
     const totalPayments = payments.reduce((s, p) => s + Number(p.amount), 0);
     const profit = totalSold - totalCost;
-    return { totalSold, totalCost, totalCommission, commissionReceived, totalPaid, totalPayments, profit };
+
+    const agencyPayments = payments.filter((p) => p.receipt_type !== "direto_fornecedor");
+    const directPayments = payments.filter((p) => p.receipt_type === "direto_fornecedor");
+    const receivedByAgency = agencyPayments.filter((p) => p.status === "pago").reduce((s, p) => s + Number(p.amount), 0);
+    const paidDirectToSupplier = directPayments.reduce((s, p) => s + Number(p.amount), 0);
+
+    const today = new Date().toISOString().slice(0, 10);
+    const overdueCommissions = commissions.filter((c) => c.status !== "recebido" && c.expected_date && c.expected_date < today).length;
+    const serviceIdsWithCommission = new Set(commissions.map((c) => c.booking_service_id));
+    const servicesWithoutCommission = services.filter((s) => !serviceIdsWithCommission.has(s.id)).length;
+    const threeDaysLater = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+    const upcomingPayments = payments.filter((p) => p.status !== "pago" && p.due_date && p.due_date <= threeDaysLater && p.due_date >= today).length;
+
+    return { totalSold, totalCost, totalCommission, commissionReceived, commissionPending, totalPaid, totalPayments, profit, receivedByAgency, paidDirectToSupplier, overdueCommissions, servicesWithoutCommission, upcomingPayments };
   }, [services, payments, commissions]);
 
   if (isLoading) {

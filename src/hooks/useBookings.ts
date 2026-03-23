@@ -45,6 +45,7 @@ export interface BookingPayment {
   due_date: string | null;
   payment_date: string | null;
   status: string;
+  receipt_type: string;
   created_at: string;
 }
 
@@ -157,9 +158,9 @@ export function useBookings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("booking_payments")
-        .select("booking_id, amount, status");
+        .select("booking_id, amount, status, receipt_type");
       if (error) throw error;
-      return data as { booking_id: string; amount: number; status: string }[];
+      return data as { booking_id: string; amount: number; status: string; receipt_type: string }[];
     },
     enabled: !!user,
   });

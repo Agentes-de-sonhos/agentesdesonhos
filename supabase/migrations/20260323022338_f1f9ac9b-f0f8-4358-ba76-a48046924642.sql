@@ -1,0 +1,1 @@
+ALTER TABLE public.booking_payments ADD COLUMN receipt_type text NOT NULL DEFAULT 'via_agencia';
