@@ -264,8 +264,6 @@ export function useQuote(id: string | undefined) {
       image_url?: string;
       image_urls?: string[];
     }) => {
-      const oldService = quote?.services?.find((s) => s.id === serviceId);
-      const oldAmount = oldService?.amount || 0;
       const { error } = await supabase
         .from("quote_services")
         .update({
@@ -279,8 +277,7 @@ export function useQuote(id: string | undefined) {
         } as any)
         .eq("id", serviceId);
       if (error) throw error;
-      const newTotal = (quote?.total_amount || 0) - oldAmount + amount;
-      await supabase.from("quotes").update({ total_amount: newTotal }).eq("id", id);
+      await recalcQuoteTotal(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });
