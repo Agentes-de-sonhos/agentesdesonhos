@@ -182,6 +182,9 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
           <TabsTrigger value="carteiras">
             Carteiras {clientTrips.length > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{clientTrips.length}</Badge>}
           </TabsTrigger>
+          <TabsTrigger value="viajantes">
+            <Users className="mr-1 h-3.5 w-3.5" /> Viajantes
+          </TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
         </TabsList>
 
