@@ -137,6 +137,7 @@ function CommunityContent() {
                 onNavigate={handleNavigate}
                 filterSpecialty={filterSpecialty}
                 onFilterSpecialty={setFilterSpecialty}
+                onEditProfile={() => setEditProfileOpen(true)}
               />
             </aside>
           )}
