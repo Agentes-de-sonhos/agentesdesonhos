@@ -140,7 +140,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const canUseAI = useCallback((): boolean => {
     if (plan === "educa_pass" || plan === "cartao_digital" || plan === "essencial") return false;
-    if (plan === "profissional") return true;
+    if (plan === "profissional" || plan === "fundador") return true;
     return aiUsageCount < aiLimit;
   }, [plan, aiUsageCount, aiLimit]);
 

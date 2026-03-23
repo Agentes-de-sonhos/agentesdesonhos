@@ -300,20 +300,7 @@ export default function LandingPage() {
   if (user) return null;
 
   const goLogin = () => navigate("/auth");
-  const goSignup = async () => {
-    if (checkoutLoading) return;
-    setCheckoutLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-public-checkout");
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      console.error("Checkout error:", err);
-      setCheckoutLoading(false);
-    }
-  };
+  const goSignup = () => navigate("/planos");
 
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);

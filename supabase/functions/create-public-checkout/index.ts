@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const FUNDADOR_PRICE_ID = "price_1TBXqzFkGdVt5nieafKR9POR";
+const PROFISSIONAL_PRICE_ID = "price_1TE4lRFkGdVt5nieLz51QfLV";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -27,10 +27,10 @@ Deno.serve(async (req) => {
     const origin = req.headers.get("origin") || "https://agentesdesonhos.lovable.app";
 
     const session = await stripe.checkout.sessions.create({
-      line_items: [{ price: FUNDADOR_PRICE_ID, quantity: 1 }],
+      line_items: [{ price: PROFISSIONAL_PRICE_ID, quantity: 1 }],
       mode: "subscription",
       success_url: `${origin}/auth?checkout=success`,
-      cancel_url: `${origin}/?checkout=cancelled`,
+      cancel_url: `${origin}/planos?checkout=cancelled`,
       metadata: { plan: "profissional" },
     });
 
