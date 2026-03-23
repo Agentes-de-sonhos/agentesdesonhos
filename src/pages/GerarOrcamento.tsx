@@ -164,6 +164,8 @@ export default function GerarOrcamento() {
   const [autoSaved, setAutoSaved] = useState(false);
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
   const [headerEditDates, setHeaderEditDates] = useState(false);
+  const [useServicePayment, setUseServicePayment] = useState(false);
+  const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
 
   // Persist selectedServiceType & editingService to sessionStorage
   useEffect(() => {
