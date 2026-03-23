@@ -507,6 +507,26 @@ export default function GerarOrcamento() {
           </CardContent>
         </Card>
 
+        {/* Toggle de pagamento por serviço */}
+        <Card>
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="service-payment" className="text-sm font-medium cursor-pointer">
+                  Definir forma de pagamento por serviço
+                </Label>
+              </div>
+              <Switch id="service-payment" checked={useServicePayment} onCheckedChange={handleToggleServicePayment} />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 ml-6">
+              {useServicePayment
+                ? "Cada serviço pode ter sua própria forma de pagamento personalizada."
+                : "Todos os serviços usam a forma de pagamento global."}
+            </p>
+          </CardContent>
+        </Card>
+
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-4">
             {/* Serviços */}
