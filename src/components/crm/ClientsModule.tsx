@@ -109,17 +109,6 @@ export function ClientsModule() {
     return map;
   }, [clients]);
 
-  const categoryMap = useMemo(() => {
-    const m = new Map<string, string>();
-    categories.forEach((c) => m.set(c.id, c.name));
-    return m;
-  }, [categories]);
-
-  const subcategoryMap = useMemo(() => {
-    const m = new Map<string, string>();
-    subcategories.forEach((s) => m.set(s.id, s.name));
-    return m;
-  }, [subcategories]);
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
