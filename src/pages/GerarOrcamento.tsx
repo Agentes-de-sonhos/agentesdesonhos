@@ -515,6 +515,7 @@ export default function GerarOrcamento() {
                         option_label: editingService.option_label,
                         description: editingService.description,
                         image_url: editingService.image_url,
+                        image_urls: editingService.image_urls || [],
                       } : undefined}
                     />
                   </div>
