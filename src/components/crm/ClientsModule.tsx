@@ -153,8 +153,6 @@ export function ClientsModule() {
         birthday_day: client.birthday_day?.toString() || "",
         birthday_month: client.birthday_month?.toString() || "",
         birthday_year: client.birthday_year?.toString() || "",
-        category_id: client.category_id || "",
-        subcategory_id: client.subcategory_id || "",
       });
     } else {
       setEditingClient(null);
