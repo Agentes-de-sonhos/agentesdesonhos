@@ -764,7 +764,7 @@ export default function GerarOrcamento() {
                   />
                 </div>
 
-                <Button variant="outline" size="sm" onClick={handleSavePaymentConfig}>
+                <Button variant="outline" size="sm" onClick={() => handleSavePaymentConfig(true)}>
                   Salvar Configuração
                 </Button>
               </CardContent>
