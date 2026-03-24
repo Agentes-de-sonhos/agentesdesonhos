@@ -372,6 +372,18 @@ export default function HotelRaioX() {
                         </span>
                         <ConfidenceBadge level={result.confidence} />
                       </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2 sm:mt-0"
+                        onClick={() => {
+                          generateHotelRaioXPdf(result);
+                          toast.success("PDF gerado com sucesso!");
+                        }}
+                      >
+                        <FileDown className="h-4 w-4 mr-1" />
+                        Gerar PDF
+                      </Button>
                     </div>
                   </div>
 
