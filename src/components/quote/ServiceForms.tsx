@@ -1,10 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2 } from "lucide-react";
+import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -388,7 +390,7 @@ const hotelSchema = z.object({
   notes: z.string().optional(),
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof hotelSchema>>({
@@ -401,6 +403,54 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
       check_out: init?.check_out ? parseLocalDate(init.check_out) : tripEndDate,
     },
   });
+
+  // Hotel autocomplete state
+  const [predictions, setPredictions] = useState<Array<{ place_id: string; name: string; secondary: string; is_hotel: boolean }>>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setShowDropdown(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const fetchAutocomplete = useCallback(async (input: string) => {
+    if (input.trim().length < 3) { setPredictions([]); setShowDropdown(false); return; }
+    setIsSearching(true);
+    try {
+      const cityVal = form.getValues("city");
+      const { data } = await supabase.functions.invoke("hotel-autocomplete", {
+        body: { input: input.trim(), city: cityVal?.trim() || undefined },
+      });
+      if (data?.predictions) { setPredictions(data.predictions); setShowDropdown(data.predictions.length > 0); }
+    } catch {} finally { setIsSearching(false); }
+  }, [form]);
+
+  const handleHotelNameInput = useCallback((value: string, formOnChange: (v: string) => void) => {
+    formOnChange(value);
+    setSelectedPlaceId(null);
+    onPlaceIdChange?.(null);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchAutocomplete(value), 300);
+  }, [fetchAutocomplete, onPlaceIdChange]);
+
+  const handleSelectPrediction = useCallback((p: { place_id: string; name: string; secondary: string }) => {
+    form.setValue("hotel_name", p.name);
+    setSelectedPlaceId(p.place_id);
+    onPlaceIdChange?.(p.place_id);
+    setShowDropdown(false);
+    setPredictions([]);
+    if (!form.getValues("city") && p.secondary) {
+      const parts = p.secondary.split(",");
+      if (parts.length > 0) form.setValue("city", parts[0].trim());
+    }
+  }, [form, onPlaceIdChange]);
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
     const data = {
@@ -427,7 +477,40 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         )}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
-            <FormItem><FormLabel>Nome do Hotel</FormLabel><FormControl><Input placeholder="Hotel Marriott" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem>
+              <FormLabel>Nome do Hotel</FormLabel>
+              <div className="relative" ref={dropdownRef}>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      placeholder="Hotel Marriott"
+                      value={field.value}
+                      onChange={(e) => handleHotelNameInput(e.target.value, field.onChange)}
+                      onFocus={() => predictions.length > 0 && setShowDropdown(true)}
+                      autoComplete="off"
+                    />
+                    {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                    {selectedPlaceId && !isSearching && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500" />}
+                  </div>
+                </FormControl>
+                {showDropdown && predictions.length > 0 && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
+                    {predictions.map((p) => (
+                      <button key={p.place_id} type="button" className="w-full flex items-start gap-3 px-3 py-2 hover:bg-accent/50 transition-colors text-left"
+                        onClick={() => handleSelectPrediction(p)}>
+                        <div className="mt-0.5 shrink-0">{p.is_hotel ? <Hotel className="h-4 w-4 text-primary" /> : <MapPin className="h-4 w-4 text-muted-foreground" />}</div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                          {p.secondary && <p className="text-xs text-muted-foreground truncate">{p.secondary}</p>}
+                        </div>
+                        {p.is_hotel && <Badge variant="secondary" className="text-[10px] shrink-0 mt-0.5">Hotel</Badge>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <FormMessage />
+            </FormItem>
           )} />
           <FormField control={form.control} name="city" render={({ field }) => (
             <FormItem><FormLabel>Cidade</FormLabel><FormControl><Input placeholder="Paris" {...field} /></FormControl><FormMessage /></FormItem>
@@ -1067,7 +1150,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ IMAGE UPLOAD BLOCK ━━━━━━━━━━━━━━━━━━━ */
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -1089,6 +1172,10 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading }: { ima
 
   const removeImage = (index: number) => {
     onImageUrlsChange(imageUrls.filter((_, i) => i !== index));
+  };
+
+  const handleGooglePhotosSelected = (urls: string[]) => {
+    onImageUrlsChange([...imageUrls, ...urls]);
   };
 
   return (
@@ -1114,6 +1201,13 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading }: { ima
         </button>
       </div>
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      {placeId && (
+        <GoogleHotelPhotos
+          placeId={placeId}
+          onPhotosSelected={handleGooglePhotosSelected}
+          existingUrls={imageUrls}
+        />
+      )}
     </div>
   );
 }
@@ -1123,14 +1217,26 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
+  const [hotelPlaceId, setHotelPlaceId] = useState<string | null>(null);
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
     onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
-  const photoSlotElement = <ServiceImageUpload imageUrls={serviceImageUrls} onImageUrlsChange={setServiceImageUrls} isUploading={isImgUploading} />;
-  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement };
+  const photoSlotElement = (
+    <ServiceImageUpload
+      imageUrls={serviceImageUrls}
+      onImageUrlsChange={setServiceImageUrls}
+      isUploading={isImgUploading}
+      placeId={serviceType === 'hotel' ? hotelPlaceId : undefined}
+    />
+  );
+  const formProps = {
+    onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions,
+    tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement,
+    ...(serviceType === 'hotel' ? { onPlaceIdChange: setHotelPlaceId } : {}),
+  };
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
