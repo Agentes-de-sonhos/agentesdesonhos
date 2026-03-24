@@ -52,18 +52,21 @@ function getServiceDetails(service: QuoteService): string[] {
     case "flight":
       details.push(`Ida: ${formatDate(data.departure_date)}`);
       details.push(`Volta: ${formatDate(data.return_date)}`);
-      if (data.outbound_detail) {
-        const ob = data.outbound_detail;
-        if (ob.flight_number) details.push(`Voo ida: ${ob.flight_number}`);
+      // Multi-leg support (with backward compat for single outbound_detail/return_detail)
+      const outLegs = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
+      const retLegs = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
+      outLegs.forEach((ob: any, i: number) => {
+        const label = outLegs.length > 1 ? `Voo ida (trecho ${i + 1})` : `Voo ida`;
+        if (ob.flight_number) details.push(`${label}: ${ob.flight_number}`);
         if (ob.airport_origin || ob.airport_destination) details.push(`${ob.airport_origin || ''} → ${ob.airport_destination || ''}`);
         if (ob.departure_time || ob.arrival_time) details.push(`Saída: ${ob.departure_time || '-'} | Chegada: ${ob.arrival_time || '-'}`);
-      }
-      if (data.return_detail) {
-        const rt = data.return_detail;
-        if (rt.flight_number) details.push(`Voo volta: ${rt.flight_number}`);
+      });
+      retLegs.forEach((rt: any, i: number) => {
+        const label = retLegs.length > 1 ? `Voo volta (trecho ${i + 1})` : `Voo volta`;
+        if (rt.flight_number) details.push(`${label}: ${rt.flight_number}`);
         if (rt.airport_origin || rt.airport_destination) details.push(`${rt.airport_origin || ''} → ${rt.airport_destination || ''}`);
         if (rt.departure_time || rt.arrival_time) details.push(`Saída: ${rt.departure_time || '-'} | Chegada: ${rt.arrival_time || '-'}`);
-      }
+      });
       if (data.includes_baggage) details.push("✓ Bagagem");
       if (data.includes_boarding_fee) details.push("✓ Taxa de embarque");
       break;
