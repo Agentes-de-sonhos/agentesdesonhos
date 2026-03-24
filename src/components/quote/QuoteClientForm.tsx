@@ -4,7 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Users, Baby, MapPin, DollarSign } from "lucide-react";
+import { CalendarIcon, Users, Baby, MapPin, DollarSign, Settings2, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -246,7 +247,16 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
         />
 
         {/* ─── Currency Selection ─── */}
-        <div className="space-y-3 rounded-lg border border-border p-4">
+        <Collapsible className="rounded-lg border border-border">
+          <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/30 transition-colors rounded-lg">
+            <div className="flex items-center gap-2">
+              <Settings2 className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Configuração avançada</span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]_&]:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+        <div className="space-y-3 px-4 pb-4">
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-muted-foreground" />
             <Label className="text-sm font-medium">Moeda do orçamento</Label>
@@ -344,6 +354,8 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
             </Badge>
           </div>
         </div>
+          </CollapsibleContent>
+        </Collapsible>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Criando..." : "Criar Orçamento"}
