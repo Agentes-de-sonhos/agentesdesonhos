@@ -234,20 +234,22 @@ export default function GerarOrcamento() {
     if (!quote) return;
 
     const nextSnapshot = buildPaymentSnapshot();
-    if (nextSnapshot === paymentSnapshotRef.current) return;
+    const hasChanges = nextSnapshot !== paymentSnapshotRef.current;
 
-    const payload = JSON.parse(nextSnapshot);
-    const { error } = await supabase.from("quotes").update(payload as any).eq("id", quote.id);
-    if (error) {
-      toast({ title: "Erro ao salvar configuração", description: error.message, variant: "destructive" });
-      return;
+    if (hasChanges) {
+      const payload = JSON.parse(nextSnapshot);
+      const { error } = await supabase.from("quotes").update(payload as any).eq("id", quote.id);
+      if (error) {
+        toast({ title: "Erro ao salvar configuração", description: error.message, variant: "destructive" });
+        return;
+      }
+      paymentSnapshotRef.current = nextSnapshot;
+      showAutoSavedFeedback();
     }
 
-    paymentSnapshotRef.current = nextSnapshot;
     if (showToast) {
       toast({ title: "Configuração salva", description: "As configurações de pagamento foram salvas com sucesso." });
     }
-    showAutoSavedFeedback();
   }, [quote, buildPaymentSnapshot, toast, showAutoSavedFeedback]);
 
   const handleSaveValidity = useCallback(async (showToast = false) => {
