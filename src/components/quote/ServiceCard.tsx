@@ -99,11 +99,9 @@ interface ServiceCardProps {
   onDelete: (id: string) => void;
   onEdit: (service: QuoteService) => void;
   isDeleting?: boolean;
-  paymentConfig?: ServicePaymentConfig;
-  onPaymentChange?: (config: ServicePaymentConfig) => void;
 }
 
-export function ServiceCard({ service, onDelete, onEdit, isDeleting, paymentConfig, onPaymentChange }: ServiceCardProps) {
+export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCardProps) {
   const [open, setOpen] = useState(false);
   const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
   const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
