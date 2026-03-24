@@ -457,7 +457,6 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
             mainDisplay = (
               <>
                 <span className="text-5xl sm:text-6xl font-black tracking-tight">{formatCurrency(discountedTotal)}</span>
-                <span className="text-xl sm:text-2xl font-bold opacity-80">à vista</span>
               </>
             );
             if (discountPct > 0) {
