@@ -337,7 +337,7 @@ const hotelSchema = z.object({
   notes: z.string().optional(),
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData }: Omit<ServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof hotelSchema>>({
