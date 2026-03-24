@@ -102,6 +102,8 @@ export interface AttractionData {
   date: string;
   quantity: number;
   price: number;
+  adult_price?: number;
+  child_price?: number;
 }
 
 export interface InsuranceData {

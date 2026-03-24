@@ -37,7 +37,7 @@ function getServiceDescription(service: QuoteService): string {
     case "hotel": return `${data.hotel_name} - ${data.city}`;
     case "car_rental": return `${data.car_type} - ${data.days} diária(s)`;
     case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
-    case "attraction": return `${data.name} (${data.quantity}x)`;
+    case "attraction": return `${data.name} (${data.quantity || 1}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
     case "cruise": return `${data.ship_name} - ${data.route}`;
     case "other": return data.description;
@@ -78,7 +78,11 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Devolução: ${data.dropoff_location}`);
       break;
     case "transfer": details.push(`Data: ${formatDate(data.date)}`); break;
-    case "attraction": details.push(`Data: ${formatDate(data.date)}`); break;
+    case "attraction":
+      details.push(`Data: ${formatDate(data.date)}`);
+      if (data.adult_price > 0) details.push(`Adulto: R$ ${data.adult_price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      if (data.child_price > 0) details.push(`Criança: R$ ${data.child_price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      break;
     case "insurance":
       details.push(`${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
       break;
