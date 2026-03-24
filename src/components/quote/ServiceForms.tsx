@@ -1164,7 +1164,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ IMAGE UPLOAD BLOCK ━━━━━━━━━━━━━━━━━━━ */
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -1191,6 +1191,39 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
   const handleGooglePhotosSelected = (urls: string[]) => {
     onImageUrlsChange([...imageUrls, ...urls]);
   };
+
+  // Hotel mode: only Google photos, no manual upload
+  if (hotelMode) {
+    return (
+      <div className="space-y-2">
+        {imageUrls.length > 0 && (
+          <>
+            <p className="text-sm font-medium">Fotos selecionadas</p>
+            <div className="flex flex-wrap gap-2">
+              {imageUrls.map((url, i) => (
+                <div key={i} className="relative inline-block">
+                  <img src={url} alt={`Hotel ${i + 1}`} className="h-24 w-36 rounded-lg border border-border object-cover" />
+                  <button type="button" onClick={() => removeImage(i)} className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        {placeId && (
+          <GoogleHotelPhotos
+            placeId={placeId}
+            onPhotosSelected={handleGooglePhotosSelected}
+            existingUrls={imageUrls}
+          />
+        )}
+        {!placeId && imageUrls.length === 0 && (
+          <p className="text-xs text-muted-foreground italic">Selecione um hotel acima para carregar fotos automaticamente</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
