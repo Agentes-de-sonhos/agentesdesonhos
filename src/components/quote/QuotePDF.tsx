@@ -47,8 +47,7 @@ function getServiceDetails(service: QuoteService): string[] {
   const details: string[] = [];
   switch (service.service_type) {
     case "flight":
-      details.push(`${data.origin_city} → ${data.destination_city}`);
-      details.push(`Companhia: ${data.airline}`);
+      details.push(`${data.airline} — ${data.origin_city} → ${data.destination_city}`);
       details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
       if (data.outbound_detail) {
         const ob = data.outbound_detail;
@@ -225,7 +224,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         </div>
 
         <!-- Overview -->
-        <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:36px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+        <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
           <div>
             <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Destino</p>
             <p style="font-size:14px;font-weight:600;">${quote.destination}</p>
@@ -236,12 +235,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             <p style="font-size:12px;color:#94a3b8;">${days} dias</p>
           </div>
           <div>
-            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Adultos</p>
-            <p style="font-size:14px;font-weight:600;">${quote.adults_count}</p>
-          </div>
-          <div>
-            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Crianças</p>
-            <p style="font-size:14px;font-weight:600;">${quote.children_count}</p>
+            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Viajantes</p>
+            <p style="font-size:14px;font-weight:600;">${quote.adults_count} adulto${quote.adults_count > 1 ? "s" : ""}${quote.children_count > 0 ? ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}` : ""}</p>
           </div>
         </div>
 

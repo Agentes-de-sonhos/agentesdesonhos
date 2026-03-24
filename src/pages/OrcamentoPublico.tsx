@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Baby, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { useQuery } from "@tanstack/react-query";
@@ -56,7 +56,7 @@ function formatDateShort(dateStr: string) {
 function getServiceSummary(service: QuoteService): string {
   const data = service.service_data as any;
   switch (service.service_type) {
-    case "flight": return `${data.origin_city} → ${data.destination_city}`;
+    case "flight": return `${data.airline} | ${data.origin_city} → ${data.destination_city}`;
     case "hotel": return `${data.hotel_name} — ${data.city}`;
     case "car_rental": return `${data.car_type} | ${data.days} diária(s)`;
     case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} — ${data.location}`;
@@ -68,12 +68,27 @@ function getServiceSummary(service: QuoteService): string {
   }
 }
 
+function getServiceName(service: QuoteService): string {
+  const data = service.service_data as any;
+  switch (service.service_type) {
+    case "flight": return `${data.airline} — ${data.origin_city} → ${data.destination_city}`;
+    case "hotel": return data.hotel_name;
+    case "car_rental": return data.car_type;
+    case "transfer": return data.location;
+    case "attraction": return data.name;
+    case "insurance": return data.provider;
+    case "cruise": return data.ship_name;
+    case "other": return data.description || "Outros Serviços";
+    default: return "Serviço";
+  }
+}
+
 function getServiceDetails(service: QuoteService): string[] {
   const data = service.service_data as any;
   const details: string[] = [];
   switch (service.service_type) {
     case "flight":
-      details.push(`Companhia: ${data.airline}`);
+      details.push(`${data.airline} — ${data.origin_city} → ${data.destination_city}`);
       details.push(`Ida: ${formatDateShort(data.departure_date)} | Volta: ${formatDateShort(data.return_date)}`);
       // Multi-leg support (backward compat)
       const outLegs = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
@@ -193,6 +208,9 @@ function CollapsibleServiceCard({
               <ServiceImageCarousel images={imgs} alt={SERVICE_LABELS[type]} />
             ) : null;
           })()}
+          {isOpen && (
+            <p className="text-base font-semibold text-foreground">{getServiceName(service)}</p>
+          )}
           {isOpen && details.map((d, i) => (
             <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
           ))}
@@ -327,7 +345,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
 
         {/* ─── Trip Overview ─── */}
         <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
-          <div className={`grid grid-cols-2 ${quote.children_count > 0 ? "sm:grid-cols-4" : "sm:grid-cols-3"} gap-6`}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <MapPin className="h-4 w-4" />
@@ -355,15 +373,6 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
                 {quote.children_count > 0 && ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}`}
               </p>
             </div>
-            {quote.children_count > 0 && (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Baby className="h-4 w-4" />
-                  <span className="text-xs font-semibold uppercase tracking-wider">Crianças</span>
-                </div>
-                <p className="text-sm font-bold text-foreground">{quote.children_count}</p>
-              </div>
-            )}
           </div>
         </div>
 
