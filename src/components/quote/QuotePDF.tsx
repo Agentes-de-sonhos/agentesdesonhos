@@ -196,7 +196,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           </div>
           <div style="padding-left:34px;word-wrap:break-word;overflow-wrap:break-word;">
             ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
-            ${descText ? `<p style="margin:8px 0 3px;font-size:13px;color:#64748b;line-height:1.6;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${descText}</p>` : ""}
+            ${descText ? `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${descText}</p>` : ""}
             ${notesText ? `<p style="margin:8px 0 3px;font-size:13px;color:#64748b;line-height:1.6;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>` : ""}
           </div>
         </div>

@@ -220,7 +220,7 @@ function CollapsibleServiceCard({
             <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
           ))}
           {isOpen && service.description && (
-            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic whitespace-pre-wrap break-words overflow-wrap-anywhere">
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
               {service.description}
             </p>
           )}
