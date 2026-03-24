@@ -187,7 +187,6 @@ export default function GerarOrcamento() {
       setTimeout(() => { quoteLoadedRef.current = true; }, 2500);
     }
   }, [quote]);
-...
   const handleSavePaymentConfig = useCallback(async (showToast = false) => {
     if (!quote) return;
 
