@@ -63,8 +63,12 @@ export interface FlightData {
   adult_price: number;
   child_price: number;
   notes: string;
+  /** @deprecated Use outbound_legs instead */
   outbound_detail?: FlightLegDetail;
+  /** @deprecated Use return_legs instead */
   return_detail?: FlightLegDetail;
+  outbound_legs?: FlightLegDetail[];
+  return_legs?: FlightLegDetail[];
 }
 
 export interface HotelData {
