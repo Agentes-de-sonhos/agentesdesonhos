@@ -63,7 +63,7 @@ function getServiceSummary(service: QuoteService): string {
     case "attraction": return data.name;
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
-    case "other": return data.description;
+    case "other": return data.description || "Outros Serviços";
     default: return "Serviço";
   }
 }
