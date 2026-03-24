@@ -601,35 +601,13 @@ export default function GerarOrcamento() {
                         </Button>
                       ))}
                     </div>
-                    <ServiceList services={quote.services || []} onDeleteService={deleteService} onEditService={handleEditService} />
-
-                    {/* Per-service payment forms — only when toggle is ON */}
-                    {useServicePayment && (quote.services || []).length > 0 && (
-                      <div className="mt-4 space-y-3">
-                        <Separator />
-                        <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                          <CreditCard className="h-4 w-4" />
-                          Pagamento por serviço
-                        </p>
-                        {(quote.services || []).map((s) => {
-                          const sData = s.service_data as any;
-                          const label = SERVICE_TYPE_LABELS[s.service_type] || 'Serviço';
-                          const desc = s.service_type === 'flight' ? `${sData.origin_city} → ${sData.destination_city}` :
-                                       s.service_type === 'hotel' ? sData.hotel_name :
-                                       label;
-                          return (
-                            <div key={s.id} className="space-y-1.5">
-                              <p className="text-sm font-medium">{label}: {desc} — {formatCurrency(s.amount)}</p>
-                              <ServicePaymentForm
-                                amount={s.amount}
-                                config={servicePaymentConfigs[s.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
-                                onChange={(config) => handleServicePaymentChange(s.id, config)}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                    <ServiceList
+                      services={quote.services || []}
+                      onDeleteService={deleteService}
+                      onEditService={handleEditService}
+                      paymentConfigs={servicePaymentConfigs}
+                      onPaymentChange={handleServicePaymentChange}
+                    />
                   </>
                 )}
               </CardContent>
