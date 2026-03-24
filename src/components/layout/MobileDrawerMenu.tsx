@@ -79,7 +79,7 @@ const recursosVendasSection: MenuSection = {
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
+    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, adminOnly: true },
   ],
 };
 
