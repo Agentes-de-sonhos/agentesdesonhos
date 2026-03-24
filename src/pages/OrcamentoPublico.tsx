@@ -37,8 +37,10 @@ const SERVICE_COLORS: Record<ServiceType, string> = {
   other: "from-muted to-muted/50 text-muted-foreground",
 };
 
-function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
-  return formatQuoteCurrency(value, currency);
+let quoteCurrency: QuoteCurrency = 'BRL';
+
+function formatCurrency(value: number, currency?: QuoteCurrency) {
+  return formatQuoteCurrency(value, currency ?? quoteCurrency);
 }
 
 function formatLabel(value: string) {
