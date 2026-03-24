@@ -593,6 +593,14 @@ export default function GerarOrcamento() {
                         image_urls: editingService.image_urls || [],
                       } : undefined}
                     />
+                    {/* Payment config — only when editing an existing service */}
+                    {editingService && (
+                      <ServicePaymentForm
+                        amount={editingService.amount}
+                        config={servicePaymentConfigs[editingService.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
+                        onChange={(config) => handleServicePaymentChange(editingService.id, config)}
+                      />
+                    )}
                   </div>
                 ) : (
                   <>
