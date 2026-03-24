@@ -287,9 +287,9 @@ export default function GerarOrcamento() {
     } as any).eq("id", serviceId);
   };
 
-  const handleSavePaymentConfig = useCallback(async () => {
+  const handleSavePaymentConfig = useCallback(async (showToast = false) => {
     if (!quote) return;
-    await supabase.from("quotes").update({
+    const { error } = await supabase.from("quotes").update({
       payment_terms: paymentTerms || null,
       payment_display_mode: paymentDisplayMode,
       installments_count: installmentsCount,
@@ -297,9 +297,17 @@ export default function GerarOrcamento() {
       payment_method_label: paymentMethodLabel || null,
       full_payment_discount_percent: fullPaymentDiscountPercent,
     } as any).eq("id", quote.id);
+    if (error) {
+      toast({ title: "Erro ao salvar configuração", description: error.message, variant: "destructive" });
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["quote", id] });
+    if (showToast) {
+      toast({ title: "Configuração salva", description: "As configurações de pagamento foram salvas com sucesso." });
+    }
     setAutoSaved(true);
     setTimeout(() => setAutoSaved(false), 2500);
-  }, [quote, paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
+  }, [quote, paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, id, queryClient, toast]);
 
   const handleSaveValidity = useCallback(async () => {
     if (!quote) return;
