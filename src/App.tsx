@@ -76,6 +76,7 @@ const CursosMarketplace = lazy(() => import("./pages/CursosMarketplace"));
 const CursoDetalhe = lazy(() => import("./pages/CursoDetalhe"));
 const CursoEditar = lazy(() => import("./pages/CursoEditar"));
 const Planos = lazy(() => import("./pages/Planos"));
+const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
