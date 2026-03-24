@@ -184,6 +184,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         const details = getServiceDetails(service);
         const data = service.service_data as any;
         const notesText = service.service_type === "attraction" ? data?.notes : null;
+        const descText = service.description || null;
         return `
         <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:12px;page-break-inside:avoid;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -195,6 +196,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           </div>
           <div style="padding-left:34px;word-wrap:break-word;overflow-wrap:break-word;">
             ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+            ${descText ? `<p style="margin:8px 0 3px;font-size:13px;color:#64748b;line-height:1.6;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${descText}</p>` : ""}
             ${notesText ? `<p style="margin:8px 0 3px;font-size:13px;color:#64748b;line-height:1.6;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>` : ""}
           </div>
         </div>
