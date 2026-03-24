@@ -716,6 +716,7 @@ const attractionSchema = z.object({
   date: z.date({ required_error: "Data é obrigatória" }),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
+  notes: z.string().optional(),
 });
 
 function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
@@ -734,6 +735,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
       adult_price: defaultAdultPrice,
       child_price: defaultChildPrice,
       date: init?.date ? parseLocalDate(init.date) : tripStartDate,
+      notes: init?.notes || "",
     },
   });
 
@@ -761,6 +763,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         adult_price: values.adult_price,
         child_price: values.child_price,
         price: total,
+        notes: values.notes || "",
       },
       total
     );
@@ -833,6 +836,10 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
             </p>
           </div>
         )}
+
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem><FormLabel>Descrição / Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Informações adicionais sobre o ingresso..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
 
         {paymentSlot}
         <div className="flex gap-2 justify-end">
