@@ -125,6 +125,39 @@ export default function HotelRaioX() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // History state
+  const [historySearch, setHistorySearch] = useState("");
+  const debouncedHistorySearch = useDebounce(historySearch, 300);
+  const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  // Load history
+  const loadHistory = useCallback(async () => {
+    setIsLoadingHistory(true);
+    try {
+      let query = supabase
+        .from("hotel_rx_cache")
+        .select("id, hotel_name, city, country, place_id, result, created_at, updated_at")
+        .order("updated_at", { ascending: false, nullsFirst: false })
+        .limit(50);
+
+      if (debouncedHistorySearch.trim()) {
+        query = query.ilike("hotel_name", `%${debouncedHistorySearch.trim()}%`);
+      }
+
+      const { data } = await query;
+      setHistoryItems(data || []);
+    } catch {
+      // silent
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [debouncedHistorySearch]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
