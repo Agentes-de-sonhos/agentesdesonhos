@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
