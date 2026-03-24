@@ -769,9 +769,14 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField control={form.control} name="name" render={({ field }) => (
-          <FormItem><FormLabel>Nome da Atração/Ingresso</FormLabel><FormControl><Input placeholder="Universal Orlando, Disney Magic Kingdom..." {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="product_name" render={({ field }) => (
+            <FormItem><FormLabel>Nome do Produto</FormLabel><FormControl><Input placeholder="Universal Orlando, Disney..." {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="ticket_type" render={({ field }) => (
+            <FormItem><FormLabel>Tipo de Ingresso <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Input placeholder="2day-2park, Park Hopper..." {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        </div>
         <FormField control={form.control} name="date" render={({ field }) => (
           <FormItem className="flex flex-col"><FormLabel>Data</FormLabel>
             <Popover><PopoverTrigger asChild><FormControl>
