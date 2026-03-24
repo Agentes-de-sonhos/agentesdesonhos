@@ -178,7 +178,7 @@ const clientesSection: MenuSection = {
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
     { title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
     { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
-    { title: "Financeiro & Vendas", url: "/vendas", icon: Briefcase, requiredFeature: "financial", adminOnly: true },
+    { title: "Financeiro & Vendas", url: "/vendas", icon: Briefcase, requiredFeature: "financial", adminOnly: true, key: "financeiro_vendas" },
   ],
 };
 
