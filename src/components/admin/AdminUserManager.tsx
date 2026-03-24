@@ -49,6 +49,7 @@ import {
   KeyRound,
   Trash2,
   Eye,
+  Settings2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
