@@ -728,7 +728,7 @@ export default function GerarOrcamento() {
                         return (
                           <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                             <p className="text-sm font-medium text-primary">
-                              Destaque: <span className="font-bold">Entrada de {formatCurrency(entry)} + {installmentsCount}x de {formatCurrency(installmentValue)}</span>
+                              Destaque: <span className="font-bold">Entrada de {fmt(entry)} + {installmentsCount}x de {fmt(installmentValue)}</span>
                             </p>
                           </div>
                         );
