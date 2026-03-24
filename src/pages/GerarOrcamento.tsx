@@ -696,7 +696,7 @@ export default function GerarOrcamento() {
                       {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
-                            Destaque: <span className="font-bold">{installmentsCount}x de {formatCurrency(quote.total_amount / (installmentsCount || 1))}</span>
+                            Destaque: <span className="font-bold">{installmentsCount}x de {fmt(quote.total_amount / (installmentsCount || 1))}</span>
                             {paymentMethodLabel && <span className="text-muted-foreground font-normal"> no {paymentMethodLabel}</span>}
                           </p>
                         </div>
