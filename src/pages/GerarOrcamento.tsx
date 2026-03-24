@@ -311,15 +311,23 @@ export default function GerarOrcamento() {
     setTimeout(() => setAutoSaved(false), 2500);
   }, [quote, paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, id, queryClient, toast]);
 
-  const handleSaveValidity = useCallback(async () => {
+  const handleSaveValidity = useCallback(async (showToast = false) => {
     if (!quote) return;
-    await supabase.from("quotes").update({
+    const { error } = await supabase.from("quotes").update({
       valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
       validity_disclaimer: validityDisclaimer,
     } as any).eq("id", quote.id);
+    if (error) {
+      toast({ title: "Erro ao salvar validade", description: error.message, variant: "destructive" });
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["quote", id] });
+    if (showToast) {
+      toast({ title: "Validade salva", description: "As configurações de validade e termos foram salvas." });
+    }
     setAutoSaved(true);
     setTimeout(() => setAutoSaved(false), 2500);
-  }, [quote, validUntil, validityDisclaimer]);
+  }, [quote, validUntil, validityDisclaimer, id, queryClient, toast]);
 
   // Debounced auto-save for payment config
   useEffect(() => {
