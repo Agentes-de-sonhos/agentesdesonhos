@@ -1271,12 +1271,14 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
+  const isHotel = serviceType === 'hotel';
   const photoSlotElement = (
     <ServiceImageUpload
       imageUrls={serviceImageUrls}
       onImageUrlsChange={setServiceImageUrls}
       isUploading={isImgUploading}
-      placeId={serviceType === 'hotel' ? hotelPlaceId : undefined}
+      placeId={isHotel ? hotelPlaceId : undefined}
+      hotelMode={isHotel}
     />
   );
   const formProps = {
