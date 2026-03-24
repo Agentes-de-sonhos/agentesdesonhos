@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel } from "lucide-react";
+import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel, RefreshCw, Clock, CalendarDays } from "lucide-react";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,14 @@ interface CriteriaItem {
   comment: string;
 }
 
+interface CacheInfo {
+  from_cache: boolean;
+  analysis_date: string;
+  is_recent: boolean;
+  days_since: number;
+  can_update: boolean;
+}
+
 interface HotelAnalysis {
   hotel_name: string;
   address: string;
@@ -44,6 +52,7 @@ interface HotelAnalysis {
   ideal_for: string;
   alerts: string[];
   confidence: string;
+  _cache?: CacheInfo;
 }
 
 const criteriaLabels: Record<string, { label: string; icon: string }> = {
@@ -170,9 +179,7 @@ export default function HotelRaioX() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const generateRaioX = async (forceUpdate = false) => {
     if (!hotelName.trim()) {
       toast.error("Preencha o nome do hotel.");
       return;
@@ -184,16 +191,15 @@ export default function HotelRaioX() {
     }
 
     setIsLoading(true);
-    setResult(null);
+    if (!forceUpdate) setResult(null);
 
     try {
-      const body: Record<string, string> = {};
-      if (selectedPlaceId) {
-        body.place_id = selectedPlaceId;
-      }
+      const body: Record<string, string | boolean> = {};
+      if (selectedPlaceId) body.place_id = selectedPlaceId;
       body.hotel_name = hotelName.trim();
       body.city = city.trim();
       body.country = country.trim() || "Brasil";
+      if (forceUpdate) body.force_update = true;
 
       const { data, error } = await supabase.functions.invoke("hotel-rx", { body });
 
@@ -204,13 +210,22 @@ export default function HotelRaioX() {
       }
 
       setResult(data as HotelAnalysis);
-      toast.success("Raio-X gerado com sucesso!");
+      if (data?._cache?.from_cache) {
+        toast.info("Raio-X carregado do histórico salvo.");
+      } else {
+        toast.success(forceUpdate ? "Raio-X atualizado com sucesso!" : "Raio-X gerado com sucesso!");
+      }
     } catch (err: any) {
       console.error(err);
       toast.error("Erro ao gerar Raio-X. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    generateRaioX(false);
   };
 
   return (
@@ -358,6 +373,49 @@ export default function HotelRaioX() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Cache info bar */}
+                  {result._cache && (
+                    <div className="mt-4 pt-3 border-t border-border/50 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        <span>
+                          Análise gerada em: {new Date(result._cache.analysis_date).toLocaleDateString("pt-BR")}
+                        </span>
+                        {result._cache.is_recent ? (
+                          <Badge className="bg-emerald-100 text-emerald-700 text-[10px]">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Análise recente
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-amber-600 border-amber-300 text-[10px]">
+                            Há {result._cache.days_since} dias
+                          </Badge>
+                        )}
+                      </div>
+                      {result._cache.can_update && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => generateRaioX(true)}
+                          disabled={isLoading}
+                          className="text-xs h-7"
+                        >
+                          {isLoading ? (
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                          ) : (
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                          )}
+                          Atualizar análise
+                        </Button>
+                      )}
+                      {result._cache.is_recent && result._cache.from_cache && (
+                        <p className="text-[10px] text-muted-foreground w-full">
+                          Este Raio-X foi gerado em {new Date(result._cache.analysis_date).toLocaleDateString("pt-BR")}. Para otimizar performance, atualizações estão disponíveis a cada 30 dias.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </Card>
 
