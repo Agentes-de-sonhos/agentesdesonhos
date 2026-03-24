@@ -1121,7 +1121,8 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
-  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot };
+  const photoSlotElement = <ServiceImageUpload imageUrls={serviceImageUrls} onImageUrlsChange={setServiceImageUrls} isUploading={isImgUploading} />;
+  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement };
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
@@ -1138,6 +1139,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
 
   return (
     <div className="space-y-4">
+      {!(serviceType === 'flight' || serviceType === 'hotel') && photoSlotElement}
       {formElement}
     </div>
   );
