@@ -752,7 +752,7 @@ export default function GerarOrcamento() {
                       {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
-                            Destaque: <span className="font-bold">{formatCurrency(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
+                            Destaque: <span className="font-bold">{fmt(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
                             {fullPaymentDiscountPercent > 0 && (
                               <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethodLabel ? ` via ${paymentMethodLabel}` : ""})</span>
                             )}
