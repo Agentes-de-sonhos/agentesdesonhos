@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel, RefreshCw, Clock, CalendarDays, FileDown } from "lucide-react";
+import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel, RefreshCw, Clock, CalendarDays, FileDown, History } from "lucide-react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,39 @@ export default function HotelRaioX() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // History state
+  const [historySearch, setHistorySearch] = useState("");
+  const debouncedHistorySearch = useDebounce(historySearch, 300);
+  const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  // Load history
+  const loadHistory = useCallback(async () => {
+    setIsLoadingHistory(true);
+    try {
+      let query = supabase
+        .from("hotel_rx_cache")
+        .select("id, hotel_name, city, country, place_id, result, created_at, updated_at")
+        .order("updated_at", { ascending: false, nullsFirst: false })
+        .limit(50);
+
+      if (debouncedHistorySearch.trim()) {
+        query = query.ilike("hotel_name", `%${debouncedHistorySearch.trim()}%`);
+      }
+
+      const { data } = await query;
+      setHistoryItems(data || []);
+    } catch {
+      // silent
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [debouncedHistorySearch]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -211,6 +245,7 @@ export default function HotelRaioX() {
       }
 
       setResult(data as HotelAnalysis);
+      loadHistory(); // Refresh history
       if (data?._cache?.from_cache) {
         toast.info("Raio-X carregado do histórico salvo.");
       } else {
@@ -342,6 +377,90 @@ export default function HotelRaioX() {
                   <p className="font-semibold text-foreground">Gerando Raio-X do hotel…</p>
                   <p className="text-sm text-muted-foreground">Buscando dados e analisando avaliações</p>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* History Section - visible when no result is shown */}
+          {!result && !isLoading && (
+            <Card className="border-0 shadow-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <History className="h-4 w-4 text-primary" />
+                  Histórico de Raio-X
+                </CardTitle>
+                <div className="relative mt-2">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar hotel no histórico..."
+                    value={historySearch}
+                    onChange={(e) => setHistorySearch(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoadingHistory ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : historyItems.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    {debouncedHistorySearch ? "Nenhum Raio-X encontrado para essa busca." : "Nenhum Raio-X gerado ainda. Comece buscando um hotel acima!"}
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {historyItems.map((item) => {
+                      const analysisDate = item.updated_at || item.created_at;
+                      const score = (item.result as any)?.score;
+                      const daysSince = Math.floor((Date.now() - new Date(analysisDate).getTime()) / (1000 * 60 * 60 * 24));
+                      const isRecent = daysSince < 30;
+                      const scoreColor = score >= 8 ? "text-emerald-700 bg-emerald-100" : score >= 6 ? "text-amber-700 bg-amber-100" : "text-red-700 bg-red-100";
+
+                      return (
+                        <button
+                          key={item.id}
+                          className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors text-left"
+                          onClick={() => {
+                            const cached: HotelAnalysis = {
+                              ...(item.result as any),
+                              _cache: {
+                                from_cache: true,
+                                analysis_date: analysisDate,
+                                is_recent: isRecent,
+                                days_since: daysSince,
+                                can_update: !isRecent,
+                              },
+                            };
+                            setResult(cached);
+                            setHotelName(item.hotel_name || "");
+                            setCity(item.city || "");
+                            setCountry(item.country || "Brasil");
+                            setSelectedPlaceId(item.place_id || null);
+                            toast.info("Raio-X carregado do histórico.");
+                          }}
+                        >
+                          <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm ${scoreColor}`}>
+                            {score != null ? score.toFixed(1) : "—"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{item.hotel_name}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {item.city}{item.country && item.country !== "Brasil" ? `, ${item.country}` : ""}
+                              {" · "}
+                              {new Date(analysisDate).toLocaleDateString("pt-BR")}
+                            </p>
+                          </div>
+                          {isRecent ? (
+                            <Badge className="bg-emerald-100 text-emerald-700 text-[10px] shrink-0">Recente</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground text-[10px] shrink-0">Há {daysSince}d</Badge>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
