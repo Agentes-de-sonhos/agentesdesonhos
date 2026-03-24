@@ -126,6 +126,7 @@ const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transfe
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function GerarOrcamento() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { id } = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
