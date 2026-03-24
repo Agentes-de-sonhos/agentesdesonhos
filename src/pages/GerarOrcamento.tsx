@@ -290,6 +290,97 @@ export default function GerarOrcamento() {
     return () => clearTimeout(timer);
   }, [quote, buildValiditySnapshot, handleSaveValidity]);
 
+  const handleToggleDetailedPrices = async (checked: boolean) => {
+    if (!quote) return;
+    setShowDetailedLocal(checked);
+    await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
+  };
+
+  const handleToggleServicePayment = async (checked: boolean) => {
+    if (!quote) return;
+    setUseServicePayment(checked);
+    await supabase.from("quotes").update({ use_service_payment: checked } as any).eq("id", quote.id);
+  };
+
+  const handleServicePaymentChange = async (serviceId: string, config: ServicePaymentConfig) => {
+    setServicePaymentConfigs((prev) => ({ ...prev, [serviceId]: config }));
+    await supabase.from("quote_services").update({
+      is_custom_payment: config.is_custom_payment,
+      payment_type: config.payment_type,
+      installments: config.installments,
+      entry_value: config.entry_value,
+      discount_type: config.discount_type,
+      discount_value: config.discount_value,
+      payment_method: config.payment_method,
+    } as any).eq("id", serviceId);
+  };
+
+  const handleCreateQuote = async (formData: QuoteFormData) => {
+    const newQuote = await createQuote(formData);
+    incrementUsage();
+    navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
+  };
+
+  const handleGeneratePDF = () => {
+    if (!quote) return;
+    generateQuotePDF(quote, agentProfile);
+  };
+
+  const handlePublish = async () => {
+    if (!quote) return;
+
+    const token = quote.share_token || await publishQuote(quote.id);
+    const publicUrl = `${PUBLIC_DOMAIN}/orcamento/${token}`;
+
+    await navigator.clipboard.writeText(publicUrl);
+    toast({
+      title: quote.share_token ? "Link copiado" : "Orçamento publicado",
+      description: quote.share_token ? "O link foi copiado para a área de transferência." : "O link do orçamento foi copiado para a área de transferência.",
+    });
+  };
+
+  const handleEditService = (service: QuoteService) => {
+    setSelectedServiceType(service.service_type);
+    setEditingService(service);
+  };
+
+  const handleAddService = async (
+    service_data: ServiceData,
+    amount: number,
+    option_label?: string,
+    description?: string,
+    image_url?: string,
+    image_urls?: string[],
+  ) => {
+    if (!selectedServiceType) return;
+
+    if (editingService) {
+      await updateService({
+        serviceId: editingService.id,
+        service_type: selectedServiceType,
+        service_data,
+        amount,
+        option_label,
+        description,
+        image_url,
+        image_urls,
+      });
+    } else {
+      await addService({
+        service_type: selectedServiceType,
+        service_data,
+        amount,
+        option_label,
+        description,
+        image_url,
+        image_urls,
+      });
+    }
+
+    setSelectedServiceType(null);
+    setEditingService(null);
+  };
+
   const handleDeleteQuote = async (qId: string) => {
     await deleteQuote(qId);
     setDeleteConfirmId(null);
