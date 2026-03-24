@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -125,6 +126,7 @@ const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transfe
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function GerarOrcamento() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { id } = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -287,9 +289,9 @@ export default function GerarOrcamento() {
     } as any).eq("id", serviceId);
   };
 
-  const handleSavePaymentConfig = useCallback(async () => {
+  const handleSavePaymentConfig = useCallback(async (showToast = false) => {
     if (!quote) return;
-    await supabase.from("quotes").update({
+    const { error } = await supabase.from("quotes").update({
       payment_terms: paymentTerms || null,
       payment_display_mode: paymentDisplayMode,
       installments_count: installmentsCount,
@@ -297,9 +299,17 @@ export default function GerarOrcamento() {
       payment_method_label: paymentMethodLabel || null,
       full_payment_discount_percent: fullPaymentDiscountPercent,
     } as any).eq("id", quote.id);
+    if (error) {
+      toast({ title: "Erro ao salvar configuração", description: error.message, variant: "destructive" });
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["quote", id] });
+    if (showToast) {
+      toast({ title: "Configuração salva", description: "As configurações de pagamento foram salvas com sucesso." });
+    }
     setAutoSaved(true);
     setTimeout(() => setAutoSaved(false), 2500);
-  }, [quote, paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
+  }, [quote, paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, id, queryClient, toast]);
 
   const handleSaveValidity = useCallback(async () => {
     if (!quote) return;
@@ -755,7 +765,7 @@ export default function GerarOrcamento() {
                   />
                 </div>
 
-                <Button variant="outline" size="sm" onClick={handleSavePaymentConfig}>
+                <Button variant="outline" size="sm" onClick={() => handleSavePaymentConfig(true)}>
                   Salvar Configuração
                 </Button>
               </CardContent>
