@@ -26,14 +26,14 @@ const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
-  flight: "from-blue-500/15 to-blue-600/5 text-blue-600",
+  flight: "from-primary/15 to-primary/5 text-primary",
   hotel: "from-amber-500/15 to-amber-600/5 text-amber-600",
   car_rental: "from-emerald-500/15 to-emerald-600/5 text-emerald-600",
   transfer: "from-violet-500/15 to-violet-600/5 text-violet-600",
   attraction: "from-pink-500/15 to-pink-600/5 text-pink-600",
   insurance: "from-cyan-500/15 to-cyan-600/5 text-cyan-600",
-  cruise: "from-indigo-500/15 to-indigo-600/5 text-indigo-600",
-  other: "from-slate-500/15 to-slate-600/5 text-slate-600",
+  cruise: "from-primary/10 to-primary/5 text-primary",
+  other: "from-muted to-muted/50 text-muted-foreground",
 };
 
 function formatCurrency(value: number) {
