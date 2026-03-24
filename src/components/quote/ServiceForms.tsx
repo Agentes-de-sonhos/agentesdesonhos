@@ -246,6 +246,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         )}
+        {photoSlot}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="origin_city" render={({ field }) => (
             <FormItem><FormLabel>Cidade de Origem</FormLabel><FormControl><Input placeholder="São Paulo" {...field} /></FormControl><FormMessage /></FormItem>
