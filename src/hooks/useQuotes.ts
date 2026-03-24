@@ -111,6 +111,11 @@ export function useQuotes() {
           valid_until: (source as any).valid_until,
           validity_disclaimer: (source as any).validity_disclaimer,
           use_service_payment: (source as any).use_service_payment ?? false,
+          payment_display_mode: (source as any).payment_display_mode ?? "full_payment",
+          installments_count: (source as any).installments_count ?? null,
+          entry_percentage: (source as any).entry_percentage ?? null,
+          full_payment_discount_percent: (source as any).full_payment_discount_percent ?? null,
+          payment_method_label: (source as any).payment_method_label ?? null,
         } as any)
         .select()
         .single();
