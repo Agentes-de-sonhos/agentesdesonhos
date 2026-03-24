@@ -182,16 +182,6 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
           )}
         </Collapsible>
 
-        {/* Per-service payment config — always visible below the card */}
-        {onPaymentChange && paymentConfig && (
-          <div className="px-4 pb-4 pt-0">
-            <ServicePaymentForm
-              amount={service.amount}
-              config={paymentConfig}
-              onChange={onPaymentChange}
-            />
-          </div>
-        )}
       </CardContent>
     </Card>
   );
