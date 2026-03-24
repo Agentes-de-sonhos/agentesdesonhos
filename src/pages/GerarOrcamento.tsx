@@ -265,7 +265,7 @@ export default function GerarOrcamento() {
 
     validitySnapshotRef.current = nextSnapshot;
     if (showToast) {
-      toast({ title: "Validade salva", description: "As configurações de validade e termos foram salvas." });
+      toast({ title: "Configuração salva", description: "As configurações de validade e termos foram salvas com sucesso." });
     }
     showAutoSavedFeedback();
   }, [quote, buildValiditySnapshot, toast, showAutoSavedFeedback]);
