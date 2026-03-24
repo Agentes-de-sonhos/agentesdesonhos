@@ -510,18 +510,18 @@ export default function GerarOrcamento() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <Button variant="ghost" size="icon" className="shrink-0 mt-0.5" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="font-display text-2xl font-bold">Orçamento: {quote.client_name}</h1>
-              <p className="text-muted-foreground text-sm flex items-center gap-2">
-                <MapPin className="h-3.5 w-3.5" />{quote.destination}
+            <div className="min-w-0">
+              <h1 className="font-display text-lg sm:text-2xl font-bold truncate">Orçamento: {quote.client_name}</h1>
+              <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1 sm:gap-2 flex-wrap">
+                <MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{quote.destination}</span>
                 <span className="text-xs">•</span>
-                {formatDateShort(quote.start_date)} — {formatDateShort(quote.end_date)}
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-0.5" onClick={() => setHeaderEditDates(true)} title="Editar datas">
+                <span className="whitespace-nowrap">{formatDateShort(quote.start_date)} — {formatDateShort(quote.end_date)}</span>
+                <Button variant="ghost" size="icon" className="h-6 w-6 ml-0.5 shrink-0" onClick={() => setHeaderEditDates(true)} title="Editar datas">
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
               </p>
