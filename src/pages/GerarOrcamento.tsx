@@ -648,14 +648,14 @@ export default function GerarOrcamento() {
                 {/* Mode selector */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
-                  <div className="grid gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {PAYMENT_MODE_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
                         type="button"
                         onClick={() => setPaymentDisplayMode(opt.value)}
                         className={cn(
-                          "flex items-start gap-3 rounded-xl border p-3 text-left transition-all",
+                          "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
                           paymentDisplayMode === opt.value
                             ? "border-primary bg-primary/5 ring-1 ring-primary/30"
                             : "border-border hover:border-border/80 hover:bg-muted/30"
