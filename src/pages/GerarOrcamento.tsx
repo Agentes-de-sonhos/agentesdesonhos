@@ -185,8 +185,10 @@ export default function GerarOrcamento() {
   }, [user?.id]);
 
   const quoteLoadedRef = useRef(false);
+  const quoteInitializedRef = useRef(false);
   useEffect(() => {
-    if (quote) {
+    if (quote && !quoteInitializedRef.current) {
+      quoteInitializedRef.current = true;
       setPaymentTerms((quote as any).payment_terms || "");
       setValidUntil((quote as any).valid_until ? new Date((quote as any).valid_until) : undefined);
       setValidityDisclaimer((quote as any).validity_disclaimer || "Valores sujeitos à alteração sem aviso prévio devido à variação cambial e disponibilidade de tarifas.");
