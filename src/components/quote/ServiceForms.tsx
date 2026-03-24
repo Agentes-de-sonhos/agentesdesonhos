@@ -46,6 +46,8 @@ interface ServiceFormProps {
   initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null; image_urls?: string[] };
   /** Optional slot rendered between total/notes and action buttons */
   paymentSlot?: React.ReactNode;
+  /** Optional slot for photo upload */
+  photoSlot?: React.ReactNode;
 }
 
 /** Helper: disable dates outside trip range */
@@ -168,7 +170,7 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
   );
 }
 
-function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
@@ -240,15 +242,11 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {showOptionLabel && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField control={form.control} name="option_label" render={({ field }) => (
-              <FormItem><FormLabel>Nome da Opção (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="service_description" render={({ field }) => (
-              <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Input placeholder="Detalhes, diferenciais..." {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-          </div>
+          <FormField control={form.control} name="option_label" render={({ field }) => (
+            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
         )}
+        {photoSlot}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="origin_city" render={({ field }) => (
             <FormItem><FormLabel>Cidade de Origem</FormLabel><FormControl><Input placeholder="São Paulo" {...field} /></FormControl><FormMessage /></FormItem>
@@ -311,6 +309,11 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             </div>
           )}
         </div>
+
+        <FormField control={form.control} name="service_description" render={({ field }) => (
+          <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+
         {/* Pricing is always per-person — multiplication is automatic */}
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -385,7 +388,7 @@ const hotelSchema = z.object({
   notes: z.string().optional(),
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof hotelSchema>>({
@@ -412,14 +415,15 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {showOptionLabel && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField control={form.control} name="option_label" render={({ field }) => (
-              <FormItem><FormLabel>Nome da Opção (opcional)</FormLabel><FormControl><Input placeholder="Ex: Hotel mais próximo do parque" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="service_description" render={({ field }) => (
-              <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Input placeholder="Detalhes, diferenciais..." {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-          </div>
+          <FormField control={form.control} name="option_label" render={({ field }) => (
+            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Hotel mais próximo do parque" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        )}
+        {photoSlot}
+        {showOptionLabel && (
+          <FormField control={form.control} name="service_description" render={({ field }) => (
+            <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
         )}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
@@ -1117,7 +1121,8 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
-  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot };
+  const photoSlotElement = <ServiceImageUpload imageUrls={serviceImageUrls} onImageUrlsChange={setServiceImageUrls} isUploading={isImgUploading} />;
+  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement };
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
@@ -1134,7 +1139,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
 
   return (
     <div className="space-y-4">
-      <ServiceImageUpload imageUrls={serviceImageUrls} onImageUrlsChange={setServiceImageUrls} isUploading={isImgUploading} />
+      {!(serviceType === 'flight' || serviceType === 'hotel') && photoSlotElement}
       {formElement}
     </div>
   );
