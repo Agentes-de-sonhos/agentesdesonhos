@@ -322,7 +322,6 @@ export default function GerarOrcamento() {
       toast({ title: "Erro ao salvar validade", description: error.message, variant: "destructive" });
       return;
     }
-    queryClient.invalidateQueries({ queryKey: ["quote", id] });
     if (showToast) {
       toast({ title: "Validade salva", description: "As configurações de validade e termos foram salvas." });
     }
