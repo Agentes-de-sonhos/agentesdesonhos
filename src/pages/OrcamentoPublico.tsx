@@ -321,7 +321,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
 
         {/* ─── Trip Overview ─── */}
         <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          <div className={`grid grid-cols-2 ${quote.children_count > 0 ? "sm:grid-cols-4" : "sm:grid-cols-3"} gap-6`}>
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <MapPin className="h-4 w-4" />
@@ -342,9 +342,12 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Users className="h-4 w-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Adultos</span>
+                <span className="text-xs font-semibold uppercase tracking-wider">Viajantes</span>
               </div>
-              <p className="text-sm font-bold text-foreground">{quote.adults_count}</p>
+              <p className="text-sm font-bold text-foreground">
+                {quote.adults_count} adulto{quote.adults_count > 1 ? "s" : ""}
+                {quote.children_count > 0 && ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}`}
+              </p>
             </div>
             {quote.children_count > 0 && (
               <div className="space-y-1.5">
