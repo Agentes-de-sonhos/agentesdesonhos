@@ -523,7 +523,14 @@ export default function GerarOrcamento() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="min-w-0">
-              <h1 className="font-display text-lg sm:text-2xl font-bold truncate">Orçamento: {quote.client_name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-display text-lg sm:text-2xl font-bold truncate">Orçamento: {quote.client_name}</h1>
+                {quoteCurrencyCode !== 'BRL' && (
+                  <Badge variant="secondary" className="text-xs shrink-0">
+                    {getCurrencySymbol(quoteCurrencyCode)} {(quote as any).currency_mode === 'conversion' ? 'Conversão' : 'Fixa'}
+                  </Badge>
+                )}
+              </div>
               <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1 sm:gap-2 flex-wrap">
                 <MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{quote.destination}</span>
                 <span className="text-xs">•</span>
