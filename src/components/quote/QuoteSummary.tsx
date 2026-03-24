@@ -5,19 +5,14 @@ import { Users, Baby, MapPin, Calendar as CalendarIcon, DollarSign, Pencil } fro
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { QuoteDateEditor } from "./QuoteDateEditor";
 import type { Quote } from "@/types/quote";
+import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencyFlag } from "@/lib/quoteCurrency";
 
 function parseLocalDate(dateStr: string) {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d);
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
 }
 
 interface QuoteSummaryProps {
