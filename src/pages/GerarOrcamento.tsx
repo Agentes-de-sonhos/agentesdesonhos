@@ -47,9 +47,10 @@ import { SERVICE_TYPE_LABELS, MULTI_OPTION_TYPES } from "@/types/quote";
 import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
 import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
+import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
+  return formatQuoteCurrency(value, currency);
 }
 
 function parseDateOnly(dateStr?: string | null) {
