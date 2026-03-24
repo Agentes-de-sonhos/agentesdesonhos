@@ -1216,6 +1216,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
             placeId={placeId}
             onPhotosSelected={handleGooglePhotosSelected}
             existingUrls={imageUrls}
+            autoShow
           />
         )}
         {!placeId && imageUrls.length === 0 && (
