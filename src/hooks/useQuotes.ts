@@ -43,6 +43,9 @@ export function useQuotes() {
           start_date: formData.start_date,
           end_date: formData.end_date,
           status: "draft",
+          currency: formData.currency || "BRL",
+          currency_mode: formData.currency_mode || "fixed",
+          exchange_rate: formData.exchange_rate ?? null,
         } as any)
         .select()
         .single();
@@ -116,6 +119,9 @@ export function useQuotes() {
           entry_percentage: (source as any).entry_percentage ?? null,
           full_payment_discount_percent: (source as any).full_payment_discount_percent ?? null,
           payment_method_label: (source as any).payment_method_label ?? null,
+          currency: (source as any).currency ?? 'BRL',
+          currency_mode: (source as any).currency_mode ?? 'fixed',
+          exchange_rate: (source as any).exchange_rate ?? null,
         } as any)
         .select()
         .single();

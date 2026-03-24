@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea",
@@ -24,10 +25,6 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
   cruise: "🚢",
   other: "📦",
 };
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function formatLabel(value: string) {
   if (!value) return value;
@@ -95,8 +92,8 @@ function getServiceDetails(service: QuoteService): string[] {
     case "attraction":
       details.push([data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name);
       details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity || 1}`);
-      if (data.adult_price > 0) details.push(`Adulto: R$ ${Number(data.adult_price).toFixed(2)}`);
-      if (data.child_price > 0) details.push(`Criança: R$ ${Number(data.child_price).toFixed(2)}`);
+      if (data.adult_price > 0) details.push(`Adulto: ${Number(data.adult_price).toFixed(2)}`);
+      if (data.child_price > 0) details.push(`Criança: ${Number(data.child_price).toFixed(2)}`);
       break;
     case "insurance":
       details.push(`Seguradora: ${data.provider}`);
@@ -172,6 +169,9 @@ function generateAgentSignature(profile: AgentProfile | null): string {
 }
 
 export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
+  const { currency } = getQuoteCurrencyInfo(quote);
+  const formatCurrency = (v: number) => formatQuoteCurrency(v, currency);
+
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;

@@ -47,9 +47,10 @@ import { SERVICE_TYPE_LABELS, MULTI_OPTION_TYPES } from "@/types/quote";
 import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
 import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
+import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
+  return formatQuoteCurrency(value, currency);
 }
 
 function parseDateOnly(dateStr?: string | null) {
@@ -504,6 +505,8 @@ export default function GerarOrcamento() {
   }
 
   const showDetailed = showDetailedLocal !== null ? showDetailedLocal : (quote as any).show_detailed_prices !== false;
+  const { currency: quoteCurrencyCode } = getQuoteCurrencyInfo(quote);
+  const fmt = (v: number) => formatCurrency(v, quoteCurrencyCode);
   const serviceCountByType: Record<string, number> = {};
   (quote.services || []).forEach(s => {
     serviceCountByType[s.service_type] = (serviceCountByType[s.service_type] || 0) + 1;
@@ -520,7 +523,14 @@ export default function GerarOrcamento() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="min-w-0">
-              <h1 className="font-display text-lg sm:text-2xl font-bold truncate">Orçamento: {quote.client_name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-display text-lg sm:text-2xl font-bold truncate">Orçamento: {quote.client_name}</h1>
+                {quoteCurrencyCode !== 'BRL' && (
+                  <Badge variant="secondary" className="text-xs shrink-0">
+                    {getCurrencySymbol(quoteCurrencyCode)} {(quote as any).currency_mode === 'conversion' ? 'Conversão' : 'Fixa'}
+                  </Badge>
+                )}
+              </div>
               <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1 sm:gap-2 flex-wrap">
                 <MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{quote.destination}</span>
                 <span className="text-xs">•</span>
@@ -693,7 +703,7 @@ export default function GerarOrcamento() {
                       {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
-                            Destaque: <span className="font-bold">{installmentsCount}x de {formatCurrency(quote.total_amount / (installmentsCount || 1))}</span>
+                            Destaque: <span className="font-bold">{installmentsCount}x de {fmt(quote.total_amount / (installmentsCount || 1))}</span>
                             {paymentMethodLabel && <span className="text-muted-foreground font-normal"> no {paymentMethodLabel}</span>}
                           </p>
                         </div>
@@ -725,7 +735,7 @@ export default function GerarOrcamento() {
                         return (
                           <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                             <p className="text-sm font-medium text-primary">
-                              Destaque: <span className="font-bold">Entrada de {formatCurrency(entry)} + {installmentsCount}x de {formatCurrency(installmentValue)}</span>
+                              Destaque: <span className="font-bold">Entrada de {fmt(entry)} + {installmentsCount}x de {fmt(installmentValue)}</span>
                             </p>
                           </div>
                         );
@@ -749,7 +759,7 @@ export default function GerarOrcamento() {
                       {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
-                            Destaque: <span className="font-bold">{formatCurrency(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
+                            Destaque: <span className="font-bold">{fmt(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
                             {fullPaymentDiscountPercent > 0 && (
                               <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethodLabel ? ` via ${paymentMethodLabel}` : ""})</span>
                             )}

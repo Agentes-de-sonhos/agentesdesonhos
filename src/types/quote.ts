@@ -152,6 +152,9 @@ export interface QuoteFormData {
   destination: string;
   start_date: string;
   end_date: string;
+  currency?: string;
+  currency_mode?: string;
+  exchange_rate?: number | null;
 }
 
 export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {

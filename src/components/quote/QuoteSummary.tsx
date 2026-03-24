@@ -5,19 +5,14 @@ import { Users, Baby, MapPin, Calendar as CalendarIcon, DollarSign, Pencil } fro
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { QuoteDateEditor } from "./QuoteDateEditor";
 import type { Quote } from "@/types/quote";
+import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencyFlag } from "@/lib/quoteCurrency";
 
 function parseLocalDate(dateStr: string) {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d);
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
 }
 
 interface QuoteSummaryProps {
@@ -93,21 +88,36 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
 
         <Separator />
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-primary" />
-            <span className="font-medium">Total Geral</span>
-          </div>
-          <span className="text-2xl font-bold text-primary">
-            {formatCurrency(computedTotal)}
-          </span>
-        </div>
+        {(() => {
+          const { currency } = getQuoteCurrencyInfo(quote);
+          return (
+            <>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                  <span className="font-medium">Total Geral</span>
+                </div>
+                <span className="text-2xl font-bold text-primary">
+                  {formatQuoteCurrency(computedTotal, currency)}
+                </span>
+              </div>
 
-        {quote.services && quote.services.length > 0 && (
-          <p className="text-xs text-muted-foreground text-center">
-            {quote.services.length} serviço(s) incluído(s)
-          </p>
-        )}
+              {currency !== 'BRL' && (
+                <div className="flex justify-center">
+                  <Badge variant="secondary" className="text-xs">
+                    {getCurrencyFlag(currency)} Moeda: {currency}
+                  </Badge>
+                </div>
+              )}
+
+              {quote.services && quote.services.length > 0 && (
+                <p className="text-xs text-muted-foreground text-center">
+                  {quote.services.length} serviço(s) incluído(s)
+                </p>
+              )}
+            </>
+          );
+        })()}
       </CardContent>
     </Card>
   );

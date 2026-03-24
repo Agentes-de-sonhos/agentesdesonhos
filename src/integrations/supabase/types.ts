@@ -4889,9 +4889,12 @@ export type Database = {
           client_id: string | null
           client_name: string
           created_at: string
+          currency: string
+          currency_mode: string
           destination: string
           end_date: string
           entry_percentage: number | null
+          exchange_rate: number | null
           full_payment_discount_percent: number | null
           id: string
           installments_count: number | null
@@ -4916,9 +4919,12 @@ export type Database = {
           client_id?: string | null
           client_name: string
           created_at?: string
+          currency?: string
+          currency_mode?: string
           destination: string
           end_date: string
           entry_percentage?: number | null
+          exchange_rate?: number | null
           full_payment_discount_percent?: number | null
           id?: string
           installments_count?: number | null
@@ -4943,9 +4949,12 @@ export type Database = {
           client_id?: string | null
           client_name?: string
           created_at?: string
+          currency?: string
+          currency_mode?: string
           destination?: string
           end_date?: string
           entry_percentage?: number | null
+          exchange_rate?: number | null
           full_payment_discount_percent?: number | null
           id?: string
           installments_count?: number | null

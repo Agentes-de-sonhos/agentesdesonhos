@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
+import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -36,8 +37,10 @@ const SERVICE_COLORS: Record<ServiceType, string> = {
   other: "from-muted to-muted/50 text-muted-foreground",
 };
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+let quoteCurrency: QuoteCurrency = 'BRL';
+
+function formatCurrency(value: number, currency?: QuoteCurrency) {
+  return formatQuoteCurrency(value, currency ?? quoteCurrency);
 }
 
 function formatLabel(value: string) {
@@ -136,8 +139,8 @@ function getServiceDetails(service: QuoteService): string[] {
     case "attraction":
       if (data.ticket_type) details.push(`Tipo: ${data.ticket_type}`);
       details.push(`Data: ${formatDateShort(data.date)} | Qtd: ${data.quantity || 1}`);
-      if (data.adult_price > 0) details.push(`Adulto: R$ ${Number(data.adult_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
-      if (data.child_price > 0) details.push(`Criança: R$ ${Number(data.child_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      if (data.adult_price > 0) details.push(`Adulto: ${getCurrencySymbol(quoteCurrency)} ${Number(data.adult_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      if (data.child_price > 0) details.push(`Criança: ${getCurrencySymbol(quoteCurrency)} ${Number(data.child_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
       break;
     case "insurance":
       details.push(`Seguradora: ${data.provider}`);
@@ -293,6 +296,10 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
       </div>
     );
   }
+
+  // Set module-level currency for helper functions
+  const { currency: qCurrency } = getQuoteCurrencyInfo(quote);
+  quoteCurrency = qCurrency;
 
   const showDetailedPrices = (quote as any).show_detailed_prices !== false;
   const paymentTerms = (quote as any).payment_terms as string | null;

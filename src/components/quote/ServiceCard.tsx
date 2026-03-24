@@ -21,9 +21,10 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
   cruise: "Cruzeiro", other: "Outros Serviços",
 };
+import { formatQuoteCurrency, type QuoteCurrency } from "@/lib/quoteCurrency";
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
+  return formatQuoteCurrency(value, currency);
 }
 
 function formatDate(dateStr: string) {

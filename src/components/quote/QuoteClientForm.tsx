@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Users, Baby, MapPin } from "lucide-react";
+import { CalendarIcon, Users, Baby, MapPin, DollarSign } from "lucide-react";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { QuoteFormData } from "@/types/quote";
 import type { DateRange } from "react-day-picker";
+import { Badge } from "@/components/ui/badge";
+import { CURRENCY_OPTIONS, type QuoteCurrency, type CurrencyMode, getCurrencySymbol } from "@/lib/quoteCurrency";
 
 const formSchema = z.object({
   client_name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -53,6 +55,9 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
   const [clientError, setClientError] = useState("");
+  const [currency, setCurrency] = useState<QuoteCurrency>("BRL");
+  const [currencyMode, setCurrencyMode] = useState<CurrencyMode>("fixed");
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("quote-client");
 
   const draft = loadDraft();
@@ -98,8 +103,13 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
       destination: values.destination,
       start_date: format(values.dateRange.from, "yyyy-MM-dd"),
       end_date: format(values.dateRange.to, "yyyy-MM-dd"),
+      currency,
+      currency_mode: currencyMode,
+      exchange_rate: currencyMode === "conversion" ? exchangeRate : null,
     });
   };
+
+  const showConversionFields = currency !== "BRL" && currencyMode === "conversion";
 
   return (
     <Form {...form}>
@@ -234,6 +244,106 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
             </FormItem>
           )}
         />
+
+        {/* ─── Currency Selection ─── */}
+        <div className="space-y-3 rounded-lg border border-border p-4">
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-sm font-medium">Moeda do orçamento</Label>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {CURRENCY_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  setCurrency(opt.value);
+                  if (opt.value === "BRL") setCurrencyMode("fixed");
+                }}
+                className={cn(
+                  "flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-all",
+                  currency === opt.value
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/30 text-primary"
+                    : "border-border hover:border-border/80 hover:bg-muted/30 text-foreground"
+                )}
+              >
+                <span>{opt.flag}</span>
+                <span>{opt.label} ({opt.symbol})</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Currency Mode — only shown when not BRL */}
+          {currency !== "BRL" && (
+            <div className="space-y-2 pt-2">
+              <Label className="text-xs text-muted-foreground">Modo de cálculo</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrencyMode("fixed")}
+                  className={cn(
+                    "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
+                    currencyMode === "fixed"
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                      : "border-border hover:border-border/80 hover:bg-muted/30"
+                  )}
+                >
+                  <div className={cn("mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0", currencyMode === "fixed" ? "border-primary" : "border-muted-foreground/40")}>
+                    {currencyMode === "fixed" && <div className="h-2 w-2 rounded-full bg-primary" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Moeda fixa ⭐</p>
+                    <p className="text-xs text-muted-foreground">Valores inseridos direto em {getCurrencySymbol(currency)}</p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrencyMode("conversion")}
+                  className={cn(
+                    "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
+                    currencyMode === "conversion"
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                      : "border-border hover:border-border/80 hover:bg-muted/30"
+                  )}
+                >
+                  <div className={cn("mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0", currencyMode === "conversion" ? "border-primary" : "border-muted-foreground/40")}>
+                    {currencyMode === "conversion" && <div className="h-2 w-2 rounded-full bg-primary" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Conversão automática</p>
+                    <p className="text-xs text-muted-foreground">Base em R$, convertido para {getCurrencySymbol(currency)}</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Exchange rate — only for conversion mode */}
+          {showConversionFields && (
+            <div className="space-y-1.5 pt-1">
+              <Label className="text-xs">Taxa de câmbio (1 {getCurrencySymbol(currency)} = ? R$)</Label>
+              <Input
+                type="number"
+                min={0.01}
+                step="0.01"
+                placeholder="Ex: 5.20"
+                value={exchangeRate ?? ""}
+                onChange={(e) => setExchangeRate(parseFloat(e.target.value) || null)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Informe a taxa de câmbio para conversão. Valores base serão em BRL.
+              </p>
+            </div>
+          )}
+
+          {/* Active mode indicator */}
+          <div className="flex items-center gap-2 pt-1">
+            <Badge variant="secondary" className="text-xs">
+              {CURRENCY_OPTIONS.find((c) => c.value === currency)?.flag}{" "}
+              {currencyMode === "fixed" ? "Moeda fixa" : "Conversão ativa"} — {getCurrencySymbol(currency)}
+            </Badge>
+          </div>
+        </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Criando..." : "Criar Orçamento"}
