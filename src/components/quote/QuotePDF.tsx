@@ -166,7 +166,7 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   `;
 }
 
-export function generateQuotePDF(quote: Quote, profile?: AgentProfile | null) {
+export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -250,15 +250,65 @@ export function generateQuotePDF(quote: Quote, profile?: AgentProfile | null) {
         </div>
 
         <!-- Total -->
-        <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
-          <p style="font-size:13px;opacity:0.85;margin-bottom:8px;font-weight:500;">Investimento Total</p>
-          <p style="font-size:40px;font-weight:800;letter-spacing:-1px;">${formatCurrency(quote.total_amount)}</p>
-          ${quote.services && quote.services.length > 0 ? `<p style="font-size:13px;opacity:0.7;margin-top:6px;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
-        </div>
+        ${(() => {
+          const total = quote.services && quote.services.length > 0
+            ? quote.services.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0)
+            : quote.total_amount;
+          const mode = quote.payment_display_mode || "full_payment";
+          const installments = quote.installments_count || 10;
+          const entryPct = quote.entry_percentage || 0;
+          const discountPct = quote.full_payment_discount_percent || 0;
+          const methodLabel = quote.payment_method_label || "";
+
+          let paymentHtml = "";
+          if (mode === "installments") {
+            const iv = total / (installments || 1);
+            paymentHtml = `
+              <p style="font-size:13px;opacity:0.85;margin-bottom:8px;font-weight:500;">Investimento Total</p>
+              <p style="font-size:22px;font-weight:700;opacity:0.9;">${installments}x de</p>
+              <p style="font-size:40px;font-weight:800;letter-spacing:-1px;">${formatCurrency(iv)}</p>
+              <p style="font-size:13px;opacity:0.7;margin-top:6px;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
+            `;
+          } else if (mode === "installments_with_entry") {
+            const entryValue = total * (entryPct / 100);
+            const remainder = total - entryValue;
+            const iv = remainder / (installments || 1);
+            paymentHtml = `
+              <p style="font-size:13px;opacity:0.85;margin-bottom:8px;font-weight:500;">Investimento Total</p>
+              <p style="font-size:20px;font-weight:700;opacity:0.9;">Entrada de ${formatCurrency(entryValue)}</p>
+              <p style="font-size:36px;font-weight:800;letter-spacing:-1px;">+ ${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:13px;opacity:0.7;margin-top:6px;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
+            `;
+          } else {
+            const discountedTotal = total * (1 - discountPct / 100);
+            paymentHtml = `
+              <p style="font-size:13px;opacity:0.85;margin-bottom:8px;font-weight:500;">Investimento Total</p>
+              <p style="font-size:40px;font-weight:800;letter-spacing:-1px;">${formatCurrency(discountedTotal)}</p>
+              ${discountPct > 0 ? `<p style="font-size:13px;opacity:0.7;margin-top:6px;text-decoration:line-through;">${formatCurrency(total)}</p><p style="font-size:13px;opacity:0.85;">🎉 ${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
+              ${discountPct === 0 && methodLabel ? `<p style="font-size:13px;opacity:0.7;margin-top:6px;">${methodLabel}</p>` : ""}
+            `;
+          }
+
+          return `
+            <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
+              ${paymentHtml}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:13px;opacity:0.7;margin-top:6px;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
+            </div>
+          `;
+        })()}
+
+        <!-- Payment Terms -->
+        ${quote.payment_terms ? `
+          <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px;">
+            <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px;">💳 Condições de Pagamento</p>
+            <p style="font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
+          </div>
+        ` : ""}
 
         <!-- Validity -->
         <p style="text-align:center;font-size:12px;color:#94a3b8;margin-bottom:16px;">
-          Este orçamento é válido por 7 dias. Valores sujeitos a alteração conforme disponibilidade.
+          ${quote.valid_until ? `Proposta válida até ${formatDate(quote.valid_until)}` : "Este orçamento é válido por 7 dias."}
+          ${quote.validity_disclaimer ? `<br/>${quote.validity_disclaimer}` : " Valores sujeitos a alteração conforme disponibilidade."}
         </p>
 
         <!-- Agent Signature -->
