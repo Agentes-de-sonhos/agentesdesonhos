@@ -191,29 +191,22 @@ interface ServiceListProps {
   services: QuoteService[];
   onDeleteService: (id: string) => void;
   onEditService: (service: QuoteService) => void;
-  paymentConfigs?: Record<string, ServicePaymentConfig>;
-  onPaymentChange?: (serviceId: string, config: ServicePaymentConfig) => void;
 }
 
-export function ServiceList({ services, onDeleteService, onEditService, paymentConfigs, onPaymentChange }: ServiceListProps) {
+export function ServiceList({ services, onDeleteService, onEditService }: ServiceListProps) {
   if (services.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">Nenhum serviço adicionado ainda</div>;
   }
   return (
     <div className="space-y-3">
-      {services.map((service) => {
-        const defaultConfig: ServicePaymentConfig = { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null };
-        return (
-          <ServiceCard
-            key={service.id}
-            service={service}
-            onDelete={onDeleteService}
-            onEdit={onEditService}
-            paymentConfig={onPaymentChange ? (paymentConfigs?.[service.id] || defaultConfig) : undefined}
-            onPaymentChange={onPaymentChange ? (config) => onPaymentChange(service.id, config) : undefined}
-          />
-        );
-      })}
+      {services.map((service) => (
+        <ServiceCard
+          key={service.id}
+          service={service}
+          onDelete={onDeleteService}
+          onEdit={onEditService}
+        />
+      ))}
     </div>
   );
 }
