@@ -2385,7 +2385,9 @@ export type Database = {
           created_at: string
           hotel_name: string
           id: string
+          place_id: string | null
           result: Json
+          updated_at: string | null
         }
         Insert: {
           cache_key: string
@@ -2394,7 +2396,9 @@ export type Database = {
           created_at?: string
           hotel_name: string
           id?: string
+          place_id?: string | null
           result: Json
+          updated_at?: string | null
         }
         Update: {
           cache_key?: string
@@ -2403,7 +2407,9 @@ export type Database = {
           created_at?: string
           hotel_name?: string
           id?: string
+          place_id?: string | null
           result?: Json
+          updated_at?: string | null
         }
         Relationships: []
       }
