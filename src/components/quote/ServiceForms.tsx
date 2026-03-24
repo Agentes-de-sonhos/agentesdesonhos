@@ -447,8 +447,10 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     setShowDropdown(false);
     setPredictions([]);
     if (!form.getValues("city") && p.secondary) {
-      const parts = p.secondary.split(",");
-      if (parts.length > 0) form.setValue("city", parts[0].trim());
+      const parts = p.secondary.split(",").map(s => s.trim());
+      // secondary format: "Street, City, State, Country" — city is typically the second part
+      const cityPart = parts.length >= 3 ? parts[1] : parts[0];
+      if (cityPart) form.setValue("city", cityPart);
     }
   }, [form, onPlaceIdChange]);
 
