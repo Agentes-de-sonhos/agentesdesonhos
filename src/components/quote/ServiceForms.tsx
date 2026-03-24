@@ -795,7 +795,7 @@ const insuranceSchema = z.object({
   is_unit_price: z.boolean(),
 });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0 }: Omit<ServiceFormProps, "serviceType">) {
+function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const totalPax = adultsCount + childrenCount;
