@@ -297,6 +297,10 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
     );
   }
 
+  // Set module-level currency for helper functions
+  const { currency: qCurrency } = getQuoteCurrencyInfo(quote);
+  quoteCurrency = qCurrency;
+
   const showDetailedPrices = (quote as any).show_detailed_prices !== false;
   const paymentTerms = (quote as any).payment_terms as string | null;
   const validUntil = (quote as any).valid_until as string | null;
