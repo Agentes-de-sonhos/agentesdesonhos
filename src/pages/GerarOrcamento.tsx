@@ -510,18 +510,18 @@ export default function GerarOrcamento() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <Button variant="ghost" size="icon" className="shrink-0 mt-0.5" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="font-display text-2xl font-bold">Orçamento: {quote.client_name}</h1>
-              <p className="text-muted-foreground text-sm flex items-center gap-2">
-                <MapPin className="h-3.5 w-3.5" />{quote.destination}
+            <div className="min-w-0">
+              <h1 className="font-display text-lg sm:text-2xl font-bold truncate">Orçamento: {quote.client_name}</h1>
+              <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1 sm:gap-2 flex-wrap">
+                <MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{quote.destination}</span>
                 <span className="text-xs">•</span>
-                {formatDateShort(quote.start_date)} — {formatDateShort(quote.end_date)}
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-0.5" onClick={() => setHeaderEditDates(true)} title="Editar datas">
+                <span className="whitespace-nowrap">{formatDateShort(quote.start_date)} — {formatDateShort(quote.end_date)}</span>
+                <Button variant="ghost" size="icon" className="h-6 w-6 ml-0.5 shrink-0" onClick={() => setHeaderEditDates(true)} title="Editar datas">
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
               </p>
@@ -537,23 +537,23 @@ export default function GerarOrcamento() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0 flex-wrap">
             {autoSaved && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Salvo automaticamente
+                Salvo
               </span>
             )}
-            <Button variant="outline" onClick={handleGeneratePDF}>
-              <FileText className="mr-2 h-4 w-4" /> PDF
+            <Button variant="outline" size="sm" className="sm:size-default" onClick={handleGeneratePDF}>
+              <FileText className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">PDF</span><span className="sm:hidden">PDF</span>
             </Button>
-            <Button onClick={handlePublish} disabled={isPublishing}>
-              <LinkIcon className="mr-2 h-4 w-4" /> {quote.share_token ? "Copiar Link" : "Publicar"}
+            <Button size="sm" className="sm:size-default" onClick={handlePublish} disabled={isPublishing}>
+              <LinkIcon className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">{quote.share_token ? "Copiar Link" : "Publicar"}</span><span className="sm:hidden">{quote.share_token ? "Link" : "Publicar"}</span>
             </Button>
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-4">
             {/* Serviços */}
             <Card>
@@ -605,11 +605,11 @@ export default function GerarOrcamento() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((type) => (
-                        <Button key={type} variant="outline" size="sm" onClick={() => setSelectedServiceType(type)}>
-                          <Plus className="mr-1 h-3 w-3" />
-                          {SERVICE_TYPE_LABELS[type]}
+                        <Button key={type} variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9" onClick={() => setSelectedServiceType(type)}>
+                          <Plus className="mr-1 h-3 w-3 shrink-0" />
+                          <span className="truncate">{SERVICE_TYPE_LABELS[type]}</span>
                           {MULTI_OPTION_TYPES.includes(type) && serviceCountByType[type] ? (
                             <span className="ml-1 text-xs text-muted-foreground">({serviceCountByType[type]})</span>
                           ) : null}
