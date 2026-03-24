@@ -313,6 +313,12 @@ export default function GerarOrcamento() {
       discount_value: config.discount_value,
       payment_method: config.payment_method,
     } as any).eq("id", serviceId);
+
+    // Auto-enable use_service_payment on the quote when any service gets custom payment
+    if (config.is_custom_payment && !useServicePayment && quote) {
+      setUseServicePayment(true);
+      await supabase.from("quotes").update({ use_service_payment: true } as any).eq("id", quote.id);
+    }
   };
 
   const handleCreateQuote = async (formData: QuoteFormData) => {
@@ -601,78 +607,35 @@ export default function GerarOrcamento() {
                         </Button>
                       ))}
                     </div>
-                    <ServiceList services={quote.services || []} onDeleteService={deleteService} onEditService={handleEditService} />
-
-                    {/* Per-service payment forms — only when toggle is ON */}
-                    {useServicePayment && (quote.services || []).length > 0 && (
-                      <div className="mt-4 space-y-3">
-                        <Separator />
-                        <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                          <CreditCard className="h-4 w-4" />
-                          Pagamento por serviço
-                        </p>
-                        {(quote.services || []).map((s) => {
-                          const sData = s.service_data as any;
-                          const label = SERVICE_TYPE_LABELS[s.service_type] || 'Serviço';
-                          const desc = s.service_type === 'flight' ? `${sData.origin_city} → ${sData.destination_city}` :
-                                       s.service_type === 'hotel' ? sData.hotel_name :
-                                       label;
-                          return (
-                            <div key={s.id} className="space-y-1.5">
-                              <p className="text-sm font-medium">{label}: {desc} — {formatCurrency(s.amount)}</p>
-                              <ServicePaymentForm
-                                amount={s.amount}
-                                config={servicePaymentConfigs[s.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
-                                onChange={(config) => handleServicePaymentChange(s.id, config)}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                    <ServiceList
+                      services={quote.services || []}
+                      onDeleteService={deleteService}
+                      onEditService={handleEditService}
+                      paymentConfigs={servicePaymentConfigs}
+                      onPaymentChange={handleServicePaymentChange}
+                    />
                   </>
                 )}
               </CardContent>
             </Card>
 
             {/* Configurações de exibição */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardContent className="py-3 px-4 h-full">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {showDetailed ? <Eye className="h-4 w-4 text-muted-foreground" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-                      <Label htmlFor="show-prices" className="text-sm font-medium cursor-pointer">
-                        Exibir valores detalhados por serviço
-                      </Label>
-                    </div>
-                    <Switch id="show-prices" checked={showDetailed} onCheckedChange={handleToggleDetailedPrices} />
+            <Card>
+              <CardContent className="py-3 px-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {showDetailed ? <Eye className="h-4 w-4 text-muted-foreground" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                    <Label htmlFor="show-prices" className="text-sm font-medium cursor-pointer">
+                      Exibir valores detalhados por serviço
+                    </Label>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-6">
-                    {showDetailed ? "O cliente verá o valor de cada serviço e o total." : "O cliente verá apenas o valor total do pacote."}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="py-3 px-4 h-full">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="service-payment" className="text-sm font-medium cursor-pointer">
-                        Definir forma de pagamento por serviço
-                      </Label>
-                    </div>
-                    <Switch id="service-payment" checked={useServicePayment} onCheckedChange={handleToggleServicePayment} />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-6">
-                    {useServicePayment
-                      ? "Cada serviço pode ter sua própria forma de pagamento personalizada."
-                      : "Todos os serviços usam a forma de pagamento global."}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                  <Switch id="show-prices" checked={showDetailed} onCheckedChange={handleToggleDetailedPrices} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 ml-6">
+                  {showDetailed ? "O cliente verá o valor de cada serviço e o total." : "O cliente verá apenas o valor total do pacote."}
+                </p>
+              </CardContent>
+            </Card>
 
             {/* Apresentação do Investimento */}
             <Card>
