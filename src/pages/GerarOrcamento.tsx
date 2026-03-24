@@ -611,8 +611,6 @@ export default function GerarOrcamento() {
                       services={quote.services || []}
                       onDeleteService={deleteService}
                       onEditService={handleEditService}
-                      paymentConfigs={servicePaymentConfigs}
-                      onPaymentChange={handleServicePaymentChange}
                     />
                   </>
                 )}
