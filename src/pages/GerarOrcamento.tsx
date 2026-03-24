@@ -537,18 +537,18 @@ export default function GerarOrcamento() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0 flex-wrap">
             {autoSaved && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Salvo automaticamente
+                Salvo
               </span>
             )}
-            <Button variant="outline" onClick={handleGeneratePDF}>
-              <FileText className="mr-2 h-4 w-4" /> PDF
+            <Button variant="outline" size="sm" className="sm:size-default" onClick={handleGeneratePDF}>
+              <FileText className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">PDF</span><span className="sm:hidden">PDF</span>
             </Button>
-            <Button onClick={handlePublish} disabled={isPublishing}>
-              <LinkIcon className="mr-2 h-4 w-4" /> {quote.share_token ? "Copiar Link" : "Publicar"}
+            <Button size="sm" className="sm:size-default" onClick={handlePublish} disabled={isPublishing}>
+              <LinkIcon className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">{quote.share_token ? "Copiar Link" : "Publicar"}</span><span className="sm:hidden">{quote.share_token ? "Link" : "Publicar"}</span>
             </Button>
           </div>
         </div>
