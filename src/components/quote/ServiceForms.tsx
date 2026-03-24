@@ -717,6 +717,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 const attractionSchema = z.object({
   product_name: z.string().min(2, "Nome do produto é obrigatório"),
   ticket_type: z.string().optional(),
+  service_description: z.string().optional(),
   date: z.date({ required_error: "Data é obrigatória" }),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
@@ -736,6 +737,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
     defaultValues: {
       product_name: init?.product_name || init?.name || "",
       ticket_type: init?.ticket_type || "",
+      service_description: initialData?.description || "",
       adult_price: defaultAdultPrice,
       child_price: defaultChildPrice,
       date: init?.date ? parseLocalDate(init.date) : tripStartDate,
@@ -769,7 +771,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         price: total,
         notes: values.notes || "",
       },
-      total
+      total,
+      undefined,
+      values.service_description || undefined
     );
   };
 
@@ -794,6 +798,10 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
                 <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
               </PopoverContent>
             </Popover><FormMessage /></FormItem>
+        )} />
+
+        <FormField control={form.control} name="service_description" render={({ field }) => (
+          <FormItem><FormLabel>Descrição <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -842,7 +850,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         )}
 
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Descrição / Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Informações adicionais sobre o ingresso..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Observações sobre o ingresso..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
         {paymentSlot}
