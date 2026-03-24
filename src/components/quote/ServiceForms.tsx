@@ -306,6 +306,11 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             </div>
           )}
         </div>
+
+        <FormField control={form.control} name="service_description" render={({ field }) => (
+          <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+
         {/* Pricing is always per-person — multiplication is automatic */}
 
         <div className="grid gap-4 sm:grid-cols-2">
