@@ -943,6 +943,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
+        {paymentSlot}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
