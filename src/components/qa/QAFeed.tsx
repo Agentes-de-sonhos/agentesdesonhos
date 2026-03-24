@@ -322,7 +322,7 @@ export function QAFeed() {
           </div>
           <p className="text-sm font-medium text-muted-foreground">Nenhuma pergunta encontrada</p>
           <p className="text-xs text-muted-foreground/60 mt-1">
-            Seja o primeiro a perguntar!
+            Bora movimentar isso? Escreva a primeira pergunta! 🚀
           </p>
         </div>
       ) : (
