@@ -46,6 +46,8 @@ interface ServiceFormProps {
   initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null; image_urls?: string[] };
   /** Optional slot rendered between total/notes and action buttons */
   paymentSlot?: React.ReactNode;
+  /** Optional slot for photo upload */
+  photoSlot?: React.ReactNode;
 }
 
 /** Helper: disable dates outside trip range */
