@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2 } from "lucide-react";
+import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel } from "lucide-react";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+interface PlacePrediction {
+  place_id: string;
+  name: string;
+  secondary: string;
+  description: string;
+  is_hotel: boolean;
+}
 
 interface CriteriaItem {
   score: number;
@@ -98,11 +106,80 @@ export default function HotelRaioX() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<HotelAnalysis | null>(null);
 
+  // Autocomplete state
+  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const fetchAutocomplete = useCallback(async (input: string) => {
+    if (input.trim().length < 3) {
+      setPredictions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("hotel-autocomplete", {
+        body: { input: input.trim(), city: city.trim() || undefined },
+      });
+
+      if (!error && data?.predictions) {
+        setPredictions(data.predictions);
+        setShowDropdown(data.predictions.length > 0);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setIsSearching(false);
+    }
+  }, [city]);
+
+  const handleHotelNameChange = (value: string) => {
+    setHotelName(value);
+    setSelectedPlaceId(null); // Clear selection when typing
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchAutocomplete(value), 300);
+  };
+
+  const handleSelectPrediction = (prediction: PlacePrediction) => {
+    setHotelName(prediction.name);
+    setSelectedPlaceId(prediction.place_id);
+    setShowDropdown(false);
+    setPredictions([]);
+
+    // Auto-fill city from secondary text if empty
+    if (!city.trim() && prediction.secondary) {
+      const parts = prediction.secondary.split(",");
+      if (parts.length > 0) setCity(parts[0].trim());
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!hotelName.trim() || !city.trim()) {
-      toast.error("Preencha o nome do hotel e a cidade.");
+    if (!hotelName.trim()) {
+      toast.error("Preencha o nome do hotel.");
+      return;
+    }
+
+    if (!selectedPlaceId && !city.trim()) {
+      toast.error("Selecione um hotel da lista ou preencha a cidade.");
       return;
     }
 
@@ -110,9 +187,15 @@ export default function HotelRaioX() {
     setResult(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("hotel-rx", {
-        body: { hotel_name: hotelName.trim(), city: city.trim(), country: country.trim() || "Brasil" },
-      });
+      const body: Record<string, string> = {};
+      if (selectedPlaceId) {
+        body.place_id = selectedPlaceId;
+      }
+      body.hotel_name = hotelName.trim();
+      body.city = city.trim();
+      body.country = country.trim() || "Brasil";
+
+      const { data, error } = await supabase.functions.invoke("hotel-rx", { body });
 
       if (error) throw error;
       if (data?.error) {
@@ -146,15 +229,55 @@ export default function HotelRaioX() {
             <CardContent className="pt-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative" ref={dropdownRef}>
                     <Label htmlFor="hotel-name">Nome do Hotel *</Label>
-                    <Input
-                      id="hotel-name"
-                      placeholder="Ex: Copacabana Palace"
-                      value={hotelName}
-                      onChange={(e) => setHotelName(e.target.value)}
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="hotel-name"
+                        placeholder="Ex: Copacabana Palace"
+                        value={hotelName}
+                        onChange={(e) => handleHotelNameChange(e.target.value)}
+                        onFocus={() => predictions.length > 0 && setShowDropdown(true)}
+                        disabled={isLoading}
+                        autoComplete="off"
+                      />
+                      {isSearching && (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                      )}
+                      {selectedPlaceId && !isSearching && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500" />
+                      )}
+                    </div>
+                    {/* Autocomplete dropdown */}
+                    {showDropdown && predictions.length > 0 && (
+                      <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
+                        {predictions.map((p) => (
+                          <button
+                            key={p.place_id}
+                            type="button"
+                            className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-accent/50 transition-colors text-left"
+                            onClick={() => handleSelectPrediction(p)}
+                          >
+                            <div className="mt-0.5 shrink-0">
+                              {p.is_hotel ? (
+                                <Hotel className="h-4 w-4 text-primary" />
+                              ) : (
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                              {p.secondary && (
+                                <p className="text-xs text-muted-foreground truncate">{p.secondary}</p>
+                              )}
+                            </div>
+                            {p.is_hotel && (
+                              <Badge variant="secondary" className="text-[10px] shrink-0 mt-0.5">Hotel</Badge>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city">Cidade *</Label>

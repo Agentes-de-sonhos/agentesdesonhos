@@ -13,18 +13,19 @@ serve(async (req) => {
   }
 
   try {
-    const { hotel_name, city, country } = await req.json();
+    const { hotel_name, city, country, place_id: inputPlaceId } = await req.json();
 
-    if (!hotel_name || !city) {
+    if (!inputPlaceId && (!hotel_name || !city)) {
       return new Response(
-        JSON.stringify({ error: "hotel_name e city são obrigatórios" }),
+        JSON.stringify({ error: "place_id ou hotel_name + city são obrigatórios" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const finalCountry = country || "Brasil";
-    const cacheKey = `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
-
+    const cacheKey = inputPlaceId
+      ? `pid:${inputPlaceId}`
+      : `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
     // Check cache
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -46,7 +47,7 @@ serve(async (req) => {
       });
     }
 
-    // Step 1: Find Place
+    // Step 1: Find Place (skip if place_id provided)
     const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
     if (!GOOGLE_PLACES_API_KEY) {
       return new Response(
@@ -55,20 +56,24 @@ serve(async (req) => {
       );
     }
 
-    const searchQuery = `${hotel_name} ${city} ${finalCountry}`;
-    const findUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id,name&key=${GOOGLE_PLACES_API_KEY}`;
+    let placeId = inputPlaceId;
 
-    const findResp = await fetch(findUrl);
-    const findData = await findResp.json();
+    if (!placeId) {
+      const searchQuery = `${hotel_name} ${city} ${finalCountry}`;
+      const findUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id,name&key=${GOOGLE_PLACES_API_KEY}`;
 
-    if (!findData.candidates || findData.candidates.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Hotel não encontrado no Google Places. Verifique o nome e a cidade." }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      const findResp = await fetch(findUrl);
+      const findData = await findResp.json();
+
+      if (!findData.candidates || findData.candidates.length === 0) {
+        return new Response(
+          JSON.stringify({ error: "Hotel não encontrado no Google Places. Verifique o nome e a cidade." }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      placeId = findData.candidates[0].place_id;
     }
-
-    const placeId = findData.candidates[0].place_id;
 
     // Step 2: Get Place Details
     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,rating,user_ratings_total,reviews,formatted_address&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR`;
