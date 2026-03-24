@@ -178,7 +178,8 @@ function CollapsibleServiceCard({
       </button>
       {/* Collapsible body */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-none opacity-100" : "max-h-0 opacity-0"}`}
+        className={`overflow-hidden transition-all duration-300 ease-in-out`}
+        style={{ maxHeight: isOpen ? "2000px" : "0px", opacity: isOpen ? 1 : 0 }}
       >
         <div className="px-5 py-4 space-y-3">
           {isOpen && (() => {
