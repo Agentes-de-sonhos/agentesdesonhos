@@ -464,17 +464,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {showOptionLabel && (
-          <FormField control={form.control} name="option_label" render={({ field }) => (
-            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Hotel mais próximo do parque" {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-        )}
-        {photoSlot}
-        {showOptionLabel && (
-          <FormField control={form.control} name="service_description" render={({ field }) => (
-            <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-        )}
+        {/* 1. Hotel name (principal) */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
             <FormItem>
@@ -516,6 +506,11 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
             <FormItem><FormLabel>Cidade</FormLabel><FormControl><Input placeholder="Paris" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
+
+        {/* 2. Google photos (auto after hotel selection) */}
+        {photoSlot}
+
+        {/* 3. Dates */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="check_in" render={({ field }) => (
             <FormItem className="flex flex-col"><FormLabel>Check-in</FormLabel>
@@ -540,6 +535,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
               </Popover><FormMessage /></FormItem>
           )} />
         </div>
+
+        {/* 4. Room & Meal */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="room_type" render={({ field }) => (
             <FormItem><FormLabel>Tipo de Quarto</FormLabel>
@@ -562,10 +559,27 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
               </Select><FormMessage /></FormItem>
           )} />
         </div>
+
+        {/* 5. Description */}
+        {showOptionLabel && (
+          <FormField control={form.control} name="service_description" render={({ field }) => (
+            <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        )}
+
+        {/* 6. Price */}
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
         {paymentSlot}
+
+        {/* 7. Label (optional) */}
+        {showOptionLabel && (
+          <FormField control={form.control} name="option_label" render={({ field }) => (
+            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Hotel mais próximo do parque" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        )}
+
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
