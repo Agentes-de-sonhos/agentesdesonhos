@@ -568,6 +568,13 @@ export function AdminUserManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title="Permissões especiais"
+                          onClick={() => setFeatureAccessUser(user)}
+                        >
+                          <Settings2 className="h-4 w-4" />
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           title="Resetar senha"
                           onClick={() => resetPasswordMutation.mutate(user.user_id)}
                           disabled={resetPasswordMutation.isPending}
