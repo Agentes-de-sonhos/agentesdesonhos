@@ -36,7 +36,8 @@ export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = []
       setPhotos(cached);
       fetchedRef.current = placeId;
       setSelected(new Set());
-      setShowGallery(false);
+      if (autoShow && cached.length > 0) setShowGallery(true);
+      else setShowGallery(false);
       return;
     }
 
