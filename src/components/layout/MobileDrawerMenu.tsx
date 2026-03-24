@@ -141,6 +141,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
+  const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
