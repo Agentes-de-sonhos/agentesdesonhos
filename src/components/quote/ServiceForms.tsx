@@ -711,7 +711,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 
 /* ━━━━━━━━━━━━━━━━━━━ ATTRACTION FORM ━━━━━━━━━━━━━━━━━━━ */
 const attractionSchema = z.object({
-  name: z.string().min(2, "Nome é obrigatório"),
+  product_name: z.string().min(2, "Nome do produto é obrigatório"),
+  ticket_type: z.string().optional(),
   date: z.date({ required_error: "Data é obrigatória" }),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
