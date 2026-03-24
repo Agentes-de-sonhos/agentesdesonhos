@@ -771,7 +771,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         price: total,
         notes: values.notes || "",
       },
-      total
+      total,
+      undefined,
+      values.service_description || undefined
     );
   };
 
