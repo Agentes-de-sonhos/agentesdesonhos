@@ -373,6 +373,49 @@ export default function HotelRaioX() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Cache info bar */}
+                  {result._cache && (
+                    <div className="mt-4 pt-3 border-t border-border/50 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        <span>
+                          Análise gerada em: {new Date(result._cache.analysis_date).toLocaleDateString("pt-BR")}
+                        </span>
+                        {result._cache.is_recent ? (
+                          <Badge className="bg-emerald-100 text-emerald-700 text-[10px]">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Análise recente
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-amber-600 border-amber-300 text-[10px]">
+                            Há {result._cache.days_since} dias
+                          </Badge>
+                        )}
+                      </div>
+                      {result._cache.can_update && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => generateRaioX(true)}
+                          disabled={isLoading}
+                          className="text-xs h-7"
+                        >
+                          {isLoading ? (
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                          ) : (
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                          )}
+                          Atualizar análise
+                        </Button>
+                      )}
+                      {result._cache.is_recent && result._cache.from_cache && (
+                        <p className="text-[10px] text-muted-foreground w-full">
+                          Este Raio-X foi gerado em {new Date(result._cache.analysis_date).toLocaleDateString("pt-BR")}. Para otimizar performance, atualizações estão disponíveis a cada 30 dias.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </Card>
 
