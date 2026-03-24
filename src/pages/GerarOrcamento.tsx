@@ -813,7 +813,7 @@ export default function GerarOrcamento() {
                     placeholder="Valores sujeitos à alteração..."
                   />
                 </div>
-                <Button variant="outline" size="sm" onClick={handleSaveValidity}>
+                <Button variant="outline" size="sm" onClick={() => handleSaveValidity(true)}>
                   Salvar
                 </Button>
               </CardContent>
