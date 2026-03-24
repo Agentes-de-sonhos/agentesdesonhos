@@ -313,6 +313,12 @@ export default function GerarOrcamento() {
       discount_value: config.discount_value,
       payment_method: config.payment_method,
     } as any).eq("id", serviceId);
+
+    // Auto-enable use_service_payment on the quote when any service gets custom payment
+    if (config.is_custom_payment && !useServicePayment && quote) {
+      setUseServicePayment(true);
+      await supabase.from("quotes").update({ use_service_payment: true } as any).eq("id", quote.id);
+    }
   };
 
   const handleCreateQuote = async (formData: QuoteFormData) => {
