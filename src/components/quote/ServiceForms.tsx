@@ -729,7 +729,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
     defaultValues: {
-      name: init?.name || "",
+      product_name: init?.product_name || init?.name || "",
+      ticket_type: init?.ticket_type || "",
       adult_price: defaultAdultPrice,
       child_price: defaultChildPrice,
       date: init?.date ? parseLocalDate(init.date) : tripStartDate,
