@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane } from "lucide-react";
+import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,6 +72,27 @@ const flightLegSchema = z.object({
   flight_number: z.string().optional(),
 });
 
+const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
+
+/** Normalize old single-leg data to multi-leg arrays */
+function normalizeLegs(init: any): { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] } {
+  let outbound: z.infer<typeof flightLegSchema>[] = [];
+  let return_: z.infer<typeof flightLegSchema>[] = [];
+  if (init?.outbound_legs?.length) {
+    outbound = init.outbound_legs;
+  } else if (init?.outbound_detail) {
+    outbound = [init.outbound_detail];
+  }
+  if (init?.return_legs?.length) {
+    return_ = init.return_legs;
+  } else if (init?.return_detail) {
+    return_ = [init.return_detail];
+  }
+  if (!outbound.length) outbound = [emptyLeg()];
+  if (!return_.length) return_ = [emptyLeg()];
+  return { outbound, return_ };
+}
+
 const flightSchema = z.object({
   option_label: z.string().optional(),
   service_description: z.string().optional(),
@@ -86,16 +107,77 @@ const flightSchema = z.object({
   child_price: z.number().min(0),
   is_unit_price: z.boolean(),
   notes: z.string().optional(),
-  outbound_detail: flightLegSchema.optional(),
-  return_detail: flightLegSchema.optional(),
+  outbound_legs: z.array(flightLegSchema),
+  return_legs: z.array(flightLegSchema),
 });
+
+function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string }) {
+  const updateLeg = (idx: number, field: string, value: string) => {
+    const updated = legs.map((l, i) => i === idx ? { ...l, [field]: value } : l);
+    onChange(updated);
+  };
+  const addLeg = () => onChange([...legs, emptyLeg()]);
+  const removeLeg = (idx: number) => {
+    if (legs.length <= 1) return;
+    onChange(legs.filter((_, i) => i !== idx));
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">✈ {label}</p>
+      {legs.map((leg, idx) => (
+        <div key={idx} className="relative border border-border/30 rounded-md p-3 space-y-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-medium text-muted-foreground">Trecho {idx + 1}</span>
+            {legs.length > 1 && (
+              <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeLeg(idx)}>
+                <Trash2 className="h-3 w-3 text-destructive" />
+              </Button>
+            )}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="text-xs text-muted-foreground">Aeroporto de origem</label>
+              <Input placeholder="GRU" value={leg.airport_origin || ""} onChange={e => updateLeg(idx, "airport_origin", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Aeroporto de destino</label>
+              <Input placeholder="CDG" value={leg.airport_destination || ""} onChange={e => updateLeg(idx, "airport_destination", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Horário de saída</label>
+              <Input type="time" value={leg.departure_time || ""} onChange={e => updateLeg(idx, "departure_time", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Horário de chegada</label>
+              <Input type="time" value={leg.arrival_time || ""} onChange={e => updateLeg(idx, "arrival_time", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Nº do voo</label>
+              <Input placeholder="LA8084" value={leg.flight_number || ""} onChange={e => updateLeg(idx, "flight_number", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+          </div>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={addLeg} className="text-xs">
+        <Plus className="h-3 w-3 mr-1" /> Adicionar trecho
+      </Button>
+    </div>
+  );
+}
 
 function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
+  const normalizedLegs = normalizeLegs(init);
   const [showFlightDetails, setShowFlightDetails] = useState(
-    !!(init?.outbound_detail || init?.return_detail)
+    !!(init?.outbound_detail || init?.return_detail || init?.outbound_legs?.length || init?.return_legs?.length)
   );
+  const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
+  const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
+
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
     defaultValues: {
@@ -108,8 +190,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       notes: init?.notes || "",
       departure_date: init?.departure_date ? parseLocalDate(init.departure_date) : tripStartDate,
       return_date: init?.return_date ? parseLocalDate(init.return_date) : tripEndDate,
-      outbound_detail: init?.outbound_detail || { airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" },
-      return_detail: init?.return_detail || { airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" },
+      outbound_legs: normalizedLegs.outbound,
+      return_legs: normalizedLegs.return_,
     },
   });
 
@@ -121,14 +203,17 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const totalChildren = childPrice * childrenCount;
   const totalAmount = totalAdults + totalChildren;
 
+  const hasNonEmptyLegs = (legs: z.infer<typeof flightLegSchema>[]) =>
+    legs.some(l => Object.values(l).some(v => v && String(v).length > 0));
+
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
     const computedTotalAdults = values.adult_price * adultsCount;
     const computedTotalChildren = values.child_price * childrenCount;
-    
-    const hasOutbound = showFlightDetails && values.outbound_detail && Object.values(values.outbound_detail).some(v => v && v.length > 0);
-    const hasReturn = showFlightDetails && values.return_detail && Object.values(values.return_detail).some(v => v && v.length > 0);
-    
-    const data = {
+
+    const hasOutbound = showFlightDetails && hasNonEmptyLegs(outboundLegs);
+    const hasReturn = showFlightDetails && hasNonEmptyLegs(returnLegs);
+
+    const data: any = {
       origin_city: values.origin_city, destination_city: values.destination_city,
       airline: values.airline, departure_date: format(values.departure_date, "yyyy-MM-dd"),
       return_date: format(values.return_date, "yyyy-MM-dd"),
@@ -136,9 +221,18 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       adult_price: values.adult_price, child_price: values.child_price,
       is_unit_price: true,
       notes: values.notes || "",
-      ...(hasOutbound ? { outbound_detail: values.outbound_detail } : {}),
-      ...(hasReturn ? { return_detail: values.return_detail } : {}),
     };
+
+    if (hasOutbound) {
+      data.outbound_legs = outboundLegs;
+      // backward compat: keep first leg as outbound_detail
+      data.outbound_detail = outboundLegs[0];
+    }
+    if (hasReturn) {
+      data.return_legs = returnLegs;
+      data.return_detail = returnLegs[0];
+    }
+
     onSubmit(data, computedTotalAdults + computedTotalChildren, values.option_label || undefined, values.service_description || undefined);
   };
 
@@ -199,7 +293,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
         </div>
 
-        {/* Flight Details - Expandable */}
+        {/* Flight Details - Expandable with multi-leg support */}
         <div className="border border-border/60 rounded-lg">
           <button
             type="button"
@@ -211,58 +305,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showFlightDetails && "rotate-180")} />
           </button>
           {showFlightDetails && (
-            <div className="px-4 pb-4 space-y-4 border-t border-border/40">
-              {/* Outbound Leg */}
-              <div className="pt-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">✈ Ida</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <FormField control={form.control} name="outbound_detail.airport_origin" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Aeroporto de origem</FormLabel><FormControl><Input placeholder="GRU" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                  <FormField control={form.control} name="outbound_detail.airport_destination" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Aeroporto de destino</FormLabel><FormControl><Input placeholder="CDG" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-3 mt-2">
-                  <FormField control={form.control} name="outbound_detail.departure_time" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Horário de saída</FormLabel><FormControl><Input type="time" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                  <FormField control={form.control} name="outbound_detail.arrival_time" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Horário de chegada</FormLabel><FormControl><Input type="time" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                  <FormField control={form.control} name="outbound_detail.flight_number" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Nº do voo</FormLabel><FormControl><Input placeholder="LA8084" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                </div>
-              </div>
-
-              {/* Return Leg */}
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">✈ Volta</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <FormField control={form.control} name="return_detail.airport_origin" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Aeroporto de origem</FormLabel><FormControl><Input placeholder="CDG" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                  <FormField control={form.control} name="return_detail.airport_destination" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Aeroporto de destino</FormLabel><FormControl><Input placeholder="GRU" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-3 mt-2">
-                  <FormField control={form.control} name="return_detail.departure_time" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Horário de saída</FormLabel><FormControl><Input type="time" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                  <FormField control={form.control} name="return_detail.arrival_time" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Horário de chegada</FormLabel><FormControl><Input type="time" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                  <FormField control={form.control} name="return_detail.flight_number" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs">Nº do voo</FormLabel><FormControl><Input placeholder="LA8085" {...field} className="h-8 text-sm" /></FormControl></FormItem>
-                  )} />
-                </div>
-              </div>
+            <div className="px-4 pb-4 space-y-5 border-t border-border/40 pt-3">
+              <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" />
+              <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" />
             </div>
           )}
         </div>
-
         {/* Pricing is always per-person — multiplication is automatic */}
 
         <div className="grid gap-4 sm:grid-cols-2">
