@@ -179,9 +179,7 @@ export default function HotelRaioX() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const generateRaioX = async (forceUpdate = false) => {
     if (!hotelName.trim()) {
       toast.error("Preencha o nome do hotel.");
       return;
@@ -193,16 +191,15 @@ export default function HotelRaioX() {
     }
 
     setIsLoading(true);
-    setResult(null);
+    if (!forceUpdate) setResult(null);
 
     try {
-      const body: Record<string, string> = {};
-      if (selectedPlaceId) {
-        body.place_id = selectedPlaceId;
-      }
+      const body: Record<string, string | boolean> = {};
+      if (selectedPlaceId) body.place_id = selectedPlaceId;
       body.hotel_name = hotelName.trim();
       body.city = city.trim();
       body.country = country.trim() || "Brasil";
+      if (forceUpdate) body.force_update = true;
 
       const { data, error } = await supabase.functions.invoke("hotel-rx", { body });
 
@@ -213,13 +210,22 @@ export default function HotelRaioX() {
       }
 
       setResult(data as HotelAnalysis);
-      toast.success("Raio-X gerado com sucesso!");
+      if (data?._cache?.from_cache) {
+        toast.info("Raio-X carregado do histórico salvo.");
+      } else {
+        toast.success(forceUpdate ? "Raio-X atualizado com sucesso!" : "Raio-X gerado com sucesso!");
+      }
     } catch (err: any) {
       console.error(err);
       toast.error("Erro ao gerar Raio-X. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    generateRaioX(false);
   };
 
   return (
