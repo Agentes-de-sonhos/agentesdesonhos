@@ -1134,7 +1134,6 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
 
   return (
     <div className="space-y-4">
-      <ServiceImageUpload imageUrls={serviceImageUrls} onImageUrlsChange={setServiceImageUrls} isUploading={isImgUploading} />
       {formElement}
     </div>
   );
