@@ -26,14 +26,14 @@ const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
-  flight: "from-blue-500/15 to-blue-600/5 text-blue-600",
+  flight: "from-primary/15 to-primary/5 text-primary",
   hotel: "from-amber-500/15 to-amber-600/5 text-amber-600",
   car_rental: "from-emerald-500/15 to-emerald-600/5 text-emerald-600",
   transfer: "from-violet-500/15 to-violet-600/5 text-violet-600",
   attraction: "from-pink-500/15 to-pink-600/5 text-pink-600",
   insurance: "from-cyan-500/15 to-cyan-600/5 text-cyan-600",
-  cruise: "from-indigo-500/15 to-indigo-600/5 text-indigo-600",
-  other: "from-slate-500/15 to-slate-600/5 text-slate-600",
+  cruise: "from-primary/10 to-primary/5 text-primary",
+  other: "from-muted to-muted/50 text-muted-foreground",
 };
 
 function formatCurrency(value: number) {
@@ -63,7 +63,7 @@ function getServiceSummary(service: QuoteService): string {
     case "attraction": return data.name;
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
-    case "other": return data.description;
+    case "other": return data.description || "Outros Serviços";
     default: return "Serviço";
   }
 }
@@ -178,7 +178,8 @@ function CollapsibleServiceCard({
       </button>
       {/* Collapsible body */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-none opacity-100" : "max-h-0 opacity-0"}`}
+        className={`overflow-hidden transition-all duration-300 ease-in-out`}
+        style={{ maxHeight: isOpen ? "2000px" : "0px", opacity: isOpen ? 1 : 0 }}
       >
         <div className="px-5 py-4 space-y-3">
           {isOpen && (() => {
@@ -321,7 +322,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
 
         {/* ─── Trip Overview ─── */}
         <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          <div className={`grid grid-cols-2 ${quote.children_count > 0 ? "sm:grid-cols-4" : "sm:grid-cols-3"} gap-6`}>
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <MapPin className="h-4 w-4" />
@@ -342,9 +343,12 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Users className="h-4 w-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Adultos</span>
+                <span className="text-xs font-semibold uppercase tracking-wider">Viajantes</span>
               </div>
-              <p className="text-sm font-bold text-foreground">{quote.adults_count}</p>
+              <p className="text-sm font-bold text-foreground">
+                {quote.adults_count} adulto{quote.adults_count > 1 ? "s" : ""}
+                {quote.children_count > 0 && ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}`}
+              </p>
             </div>
             {quote.children_count > 0 && (
               <div className="space-y-1.5">
