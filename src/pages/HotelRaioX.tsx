@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel, RefreshCw, Clock, CalendarDays } from "lucide-react";
+import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel, RefreshCw, Clock, CalendarDays, FileDown } from "lucide-react";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { generateHotelRaioXPdf } from "@/lib/generateHotelRaioXPdf";
 
 interface PlacePrediction {
   place_id: string;
@@ -371,6 +372,18 @@ export default function HotelRaioX() {
                         </span>
                         <ConfidenceBadge level={result.confidence} />
                       </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2 sm:mt-0"
+                        onClick={() => {
+                          generateHotelRaioXPdf(result);
+                          toast.success("PDF gerado com sucesso!");
+                        }}
+                      >
+                        <FileDown className="h-4 w-4 mr-1" />
+                        Gerar PDF
+                      </Button>
                     </div>
                   </div>
 
