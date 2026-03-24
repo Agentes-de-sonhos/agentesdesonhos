@@ -245,6 +245,7 @@ export default function HotelRaioX() {
       }
 
       setResult(data as HotelAnalysis);
+      loadHistory(); // Refresh history
       if (data?._cache?.from_cache) {
         toast.info("Raio-X carregado do histórico salvo.");
       } else {
