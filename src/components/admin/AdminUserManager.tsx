@@ -57,6 +57,7 @@ import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { setImpersonationData, type ImpersonationData } from "./ImpersonationBanner";
+import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
 
 interface UserWithDetails {
   id: string;
