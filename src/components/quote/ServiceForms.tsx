@@ -711,7 +711,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 
 /* ━━━━━━━━━━━━━━━━━━━ ATTRACTION FORM ━━━━━━━━━━━━━━━━━━━ */
 const attractionSchema = z.object({
-  name: z.string().min(2, "Nome é obrigatório"),
+  product_name: z.string().min(2, "Nome do produto é obrigatório"),
+  ticket_type: z.string().optional(),
   date: z.date({ required_error: "Data é obrigatória" }),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
@@ -728,7 +729,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
     defaultValues: {
-      name: init?.name || "",
+      product_name: init?.product_name || init?.name || "",
+      ticket_type: init?.ticket_type || "",
       adult_price: defaultAdultPrice,
       child_price: defaultChildPrice,
       date: init?.date ? parseLocalDate(init.date) : tripStartDate,
@@ -747,10 +749,13 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
     const computedTotalAdults = values.adult_price * adultsCount;
     const computedTotalChildren = values.child_price * childrenCount;
     const total = computedTotalAdults + computedTotalChildren;
+    const displayName = [values.product_name, values.ticket_type].filter(Boolean).join(" | ");
 
     onSubmit(
       {
-        name: values.name,
+        name: displayName,
+        product_name: values.product_name,
+        ticket_type: values.ticket_type || "",
         date: format(values.date, "yyyy-MM-dd"),
         quantity: totalQuantity,
         adult_price: values.adult_price,
@@ -764,9 +769,14 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField control={form.control} name="name" render={({ field }) => (
-          <FormItem><FormLabel>Nome da Atração/Ingresso</FormLabel><FormControl><Input placeholder="Universal Orlando, Disney Magic Kingdom..." {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="product_name" render={({ field }) => (
+            <FormItem><FormLabel>Nome do Produto</FormLabel><FormControl><Input placeholder="Universal Orlando, Disney..." {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="ticket_type" render={({ field }) => (
+            <FormItem><FormLabel>Tipo de Ingresso <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Input placeholder="2day-2park, Park Hopper..." {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        </div>
         <FormField control={form.control} name="date" render={({ field }) => (
           <FormItem className="flex flex-col"><FormLabel>Data</FormLabel>
             <Popover><PopoverTrigger asChild><FormControl>

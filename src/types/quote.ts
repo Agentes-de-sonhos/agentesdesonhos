@@ -103,6 +103,8 @@ export type TransferFormType = 'arrival' | 'departure' | 'round_trip';
 
 export interface AttractionData {
   name: string;
+  product_name?: string;
+  ticket_type?: string;
   date: string;
   quantity: number;
   price: number;
