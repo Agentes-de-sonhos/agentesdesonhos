@@ -1136,14 +1136,26 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
+  const [hotelPlaceId, setHotelPlaceId] = useState<string | null>(null);
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
     onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
-  const photoSlotElement = <ServiceImageUpload imageUrls={serviceImageUrls} onImageUrlsChange={setServiceImageUrls} isUploading={isImgUploading} />;
-  const formProps = { onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement };
+  const photoSlotElement = (
+    <ServiceImageUpload
+      imageUrls={serviceImageUrls}
+      onImageUrlsChange={setServiceImageUrls}
+      isUploading={isImgUploading}
+      placeId={serviceType === 'hotel' ? hotelPlaceId : undefined}
+    />
+  );
+  const formProps = {
+    onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions,
+    tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement,
+    ...(serviceType === 'hotel' ? { onPlaceIdChange: setHotelPlaceId } : {}),
+  };
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
