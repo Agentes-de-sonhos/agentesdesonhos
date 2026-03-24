@@ -40,6 +40,11 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+function formatLabel(value: string) {
+  if (!value) return value;
+  return value.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
+}
+
 function parseLocalDate(dateStr: string) {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d);
