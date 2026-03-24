@@ -763,6 +763,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         adult_price: values.adult_price,
         child_price: values.child_price,
         price: total,
+        notes: values.notes || "",
       },
       total
     );
