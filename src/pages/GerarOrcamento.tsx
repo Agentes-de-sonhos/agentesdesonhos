@@ -66,6 +66,47 @@ function formatDateShort(dateStr: string) {
   } catch { return dateStr; }
 }
 
+type PaymentDisplayMode = "installments" | "installments_with_entry" | "full_payment";
+
+const PAYMENT_MODE_OPTIONS: { value: PaymentDisplayMode; label: string; description: string }[] = [
+  { value: "installments", label: "Parcelado (sem entrada)", description: "Ex: 10x de R$ 2.400" },
+  { value: "installments_with_entry", label: "Parcelado com entrada", description: "Ex: Entrada + 9x de R$ 2.400" },
+  { value: "full_payment", label: "À vista", description: "Ex: R$ 24.000 à vista" },
+];
+
+const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
+
+function QuoteHistoryRow({
+  q,
+  onEdit,
+  onDuplicate,
+  onDelete,
+}: {
+  q: Quote;
+  onEdit: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
+      <div className="min-w-0 flex-1">
+        <p className="font-medium truncate">{q.client_name}</p>
+        <p className="text-sm text-muted-foreground truncate">
+          {q.destination} • {formatDateShort(q.start_date)} — {formatDateShort(q.end_date)}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <Badge variant={q.status === "published" ? "default" : "secondary"} className="capitalize">
+          {q.status === "published" ? "Publicado" : "Rascunho"}
+        </Badge>
+        <Button variant="ghost" size="sm" onClick={onEdit}>Editar</Button>
+        <Button variant="ghost" size="sm" onClick={onDuplicate}>Duplicar</Button>
+        <Button variant="ghost" size="sm" onClick={onDelete}>Excluir</Button>
+      </div>
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function GerarOrcamento() {
   const navigate = useNavigate();
