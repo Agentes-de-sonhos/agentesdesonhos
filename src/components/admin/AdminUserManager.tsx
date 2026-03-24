@@ -774,6 +774,16 @@ export function AdminUserManager() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Feature Access Dialog */}
+        {featureAccessUser && (
+          <UserFeatureAccessDialog
+            open={!!featureAccessUser}
+            onOpenChange={(open) => !open && setFeatureAccessUser(null)}
+            userId={featureAccessUser.user_id}
+            userName={featureAccessUser.name}
+          />
+        )}
       </CardContent>
     </Card>
   );
