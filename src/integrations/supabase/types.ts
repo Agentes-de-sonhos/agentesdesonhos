@@ -6847,6 +6847,30 @@ export type Database = {
           },
         ]
       }
+      user_feature_access: {
+        Row: {
+          created_at: string
+          feature_key: string
+          granted_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature_key: string
+          granted_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feature_key?: string
+          granted_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_feedback: {
         Row: {
           comment: string | null

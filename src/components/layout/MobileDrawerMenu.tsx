@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
@@ -80,7 +81,7 @@ const recursosVendasSection: MenuSection = {
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, adminOnly: true },
+    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, adminOnly: true, key: "hotel_raio_x" },
   ],
 };
 
@@ -140,6 +141,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
+  const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
@@ -247,7 +249,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => renderMenuItem(item, section.bgColor, section.textColor, section.borderColor))}
+            {section.items.filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key))).map((item) => renderMenuItem(item, section.bgColor, section.textColor, section.borderColor))}
           </nav>
         )}
       </div>

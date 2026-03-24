@@ -49,6 +49,7 @@ import {
   KeyRound,
   Trash2,
   Eye,
+  Settings2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +57,7 @@ import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { setImpersonationData, type ImpersonationData } from "./ImpersonationBanner";
+import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
 
 interface UserWithDetails {
   id: string;
@@ -83,6 +85,7 @@ export function AdminUserManager() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [deletingUser, setDeletingUser] = useState<UserWithDetails | null>(null);
   const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
+  const [featureAccessUser, setFeatureAccessUser] = useState<UserWithDetails | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -565,6 +568,14 @@ export function AdminUserManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title="Permissões especiais"
+                          onClick={() => setFeatureAccessUser(user)}
+                        >
+                          <Settings2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           title="Resetar senha"
                           onClick={() => resetPasswordMutation.mutate(user.user_id)}
                           disabled={resetPasswordMutation.isPending}
@@ -763,6 +774,16 @@ export function AdminUserManager() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Feature Access Dialog */}
+        {featureAccessUser && (
+          <UserFeatureAccessDialog
+            open={!!featureAccessUser}
+            onOpenChange={(open) => !open && setFeatureAccessUser(null)}
+            userId={featureAccessUser.user_id}
+            userName={featureAccessUser.name}
+          />
+        )}
       </CardContent>
     </Card>
   );
