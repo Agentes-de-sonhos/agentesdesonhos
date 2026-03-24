@@ -1069,7 +1069,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ IMAGE UPLOAD BLOCK ━━━━━━━━━━━━━━━━━━━ */
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -1091,6 +1091,10 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading }: { ima
 
   const removeImage = (index: number) => {
     onImageUrlsChange(imageUrls.filter((_, i) => i !== index));
+  };
+
+  const handleGooglePhotosSelected = (urls: string[]) => {
+    onImageUrlsChange([...imageUrls, ...urls]);
   };
 
   return (
@@ -1116,6 +1120,13 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading }: { ima
         </button>
       </div>
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      {placeId && (
+        <GoogleHotelPhotos
+          placeId={placeId}
+          onPhotosSelected={handleGooglePhotosSelected}
+          existingUrls={imageUrls}
+        />
+      )}
     </div>
   );
 }
