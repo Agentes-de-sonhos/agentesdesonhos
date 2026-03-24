@@ -134,6 +134,7 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Data: ${formatDateShort(data.date)}`);
       break;
     case "attraction":
+      if (data.ticket_type) details.push(`Tipo: ${data.ticket_type}`);
       details.push(`Data: ${formatDateShort(data.date)} | Qtd: ${data.quantity || 1}`);
       if (data.adult_price > 0) details.push(`Adulto: R$ ${Number(data.adult_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
       if (data.child_price > 0) details.push(`Criança: R$ ${Number(data.child_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
