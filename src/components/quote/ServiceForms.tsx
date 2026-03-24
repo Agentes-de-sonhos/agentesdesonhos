@@ -956,7 +956,7 @@ const otherSchema = z.object({
   price: z.number().min(0),
 });
 
-function OtherForm({ onSubmit, onCancel, isLoading, initialData }: Omit<ServiceFormProps, "serviceType">) {
+function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
