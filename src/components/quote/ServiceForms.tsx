@@ -716,6 +716,7 @@ const attractionSchema = z.object({
   date: z.date({ required_error: "Data é obrigatória" }),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
+  notes: z.string().optional(),
 });
 
 function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
