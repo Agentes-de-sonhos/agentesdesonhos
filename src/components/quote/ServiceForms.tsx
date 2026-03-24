@@ -735,6 +735,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
       adult_price: defaultAdultPrice,
       child_price: defaultChildPrice,
       date: init?.date ? parseLocalDate(init.date) : tripStartDate,
+      notes: init?.notes || "",
     },
   });
 
