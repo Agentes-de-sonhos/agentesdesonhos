@@ -97,7 +97,6 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity || 1}`);
       if (data.adult_price > 0) details.push(`Adulto: R$ ${Number(data.adult_price).toFixed(2)}`);
       if (data.child_price > 0) details.push(`Criança: R$ ${Number(data.child_price).toFixed(2)}`);
-      if (data.notes) details.push(data.notes);
       break;
     case "insurance":
       details.push(`Seguradora: ${data.provider}`);
@@ -183,6 +182,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
         const emoji = SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
         const details = getServiceDetails(service);
+        const data = service.service_data as any;
+        const notesText = service.service_type === "attraction" ? data?.notes : null;
         return `
         <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:12px;page-break-inside:avoid;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -194,6 +195,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           </div>
           <div style="padding-left:34px;word-wrap:break-word;overflow-wrap:break-word;">
             ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+            ${notesText ? `<p style="margin:8px 0 3px;font-size:13px;color:#64748b;line-height:1.6;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>` : ""}
           </div>
         </div>
       `;
