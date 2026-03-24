@@ -56,13 +56,28 @@ function formatDateShort(dateStr: string) {
 function getServiceSummary(service: QuoteService): string {
   const data = service.service_data as any;
   switch (service.service_type) {
-    case "flight": return `${data.origin_city} → ${data.destination_city}`;
+    case "flight": return `${data.airline} | ${data.origin_city} → ${data.destination_city}`;
     case "hotel": return `${data.hotel_name} — ${data.city}`;
     case "car_rental": return `${data.car_type} | ${data.days} diária(s)`;
     case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} — ${data.location}`;
     case "attraction": return data.name;
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
+    case "other": return data.description || "Outros Serviços";
+    default: return "Serviço";
+  }
+}
+
+function getServiceName(service: QuoteService): string {
+  const data = service.service_data as any;
+  switch (service.service_type) {
+    case "flight": return `${data.airline} — ${data.origin_city} → ${data.destination_city}`;
+    case "hotel": return data.hotel_name;
+    case "car_rental": return data.car_type;
+    case "transfer": return data.location;
+    case "attraction": return data.name;
+    case "insurance": return data.provider;
+    case "cruise": return data.ship_name;
     case "other": return data.description || "Outros Serviços";
     default: return "Serviço";
   }
