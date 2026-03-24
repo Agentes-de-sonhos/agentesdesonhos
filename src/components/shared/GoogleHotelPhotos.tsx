@@ -21,7 +21,7 @@ interface GoogleHotelPhotosProps {
 // In-memory cache to avoid re-fetching
 const photoCache = new Map<string, GooglePhoto[]>();
 
-export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = [] }: GoogleHotelPhotosProps) {
+export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = [], autoShow = false }: GoogleHotelPhotosProps) {
   const [photos, setPhotos] = useState<GooglePhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
