@@ -1276,7 +1276,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
     }
   };
 
-  if (!token) {
+  if (!token && !hasPreData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30">
         <Card className="max-w-md">
