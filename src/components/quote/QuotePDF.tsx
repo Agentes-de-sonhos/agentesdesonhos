@@ -47,8 +47,7 @@ function getServiceDetails(service: QuoteService): string[] {
   const details: string[] = [];
   switch (service.service_type) {
     case "flight":
-      details.push(`${data.origin_city} → ${data.destination_city}`);
-      details.push(`Companhia: ${data.airline}`);
+      details.push(`${data.airline} — ${data.origin_city} → ${data.destination_city}`);
       details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
       if (data.outbound_detail) {
         const ob = data.outbound_detail;
