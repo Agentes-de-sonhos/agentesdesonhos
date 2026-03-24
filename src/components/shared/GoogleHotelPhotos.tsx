@@ -15,12 +15,13 @@ interface GoogleHotelPhotosProps {
   placeId: string | null;
   onPhotosSelected: (urls: string[]) => void;
   existingUrls?: string[];
+  autoShow?: boolean;
 }
 
 // In-memory cache to avoid re-fetching
 const photoCache = new Map<string, GooglePhoto[]>();
 
-export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = [] }: GoogleHotelPhotosProps) {
+export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = [], autoShow = false }: GoogleHotelPhotosProps) {
   const [photos, setPhotos] = useState<GooglePhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
@@ -35,7 +36,8 @@ export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = []
       setPhotos(cached);
       fetchedRef.current = placeId;
       setSelected(new Set());
-      setShowGallery(false);
+      if (autoShow && cached.length > 0) setShowGallery(true);
+      else setShowGallery(false);
       return;
     }
 
@@ -50,6 +52,7 @@ export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = []
         const fetched = data?.photos || [];
         setPhotos(fetched);
         photoCache.set(placeId, fetched);
+        if (autoShow && fetched.length > 0) setShowGallery(true);
       })
       .catch(() => setPhotos([]))
       .finally(() => setLoading(false));

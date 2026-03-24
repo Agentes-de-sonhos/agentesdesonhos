@@ -464,17 +464,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {showOptionLabel && (
-          <FormField control={form.control} name="option_label" render={({ field }) => (
-            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Hotel mais próximo do parque" {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-        )}
-        {photoSlot}
-        {showOptionLabel && (
-          <FormField control={form.control} name="service_description" render={({ field }) => (
-            <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-        )}
+        {/* 1. Hotel name (principal) */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
             <FormItem>
@@ -516,6 +506,11 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
             <FormItem><FormLabel>Cidade</FormLabel><FormControl><Input placeholder="Paris" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
+
+        {/* 2. Google photos (auto after hotel selection) */}
+        {photoSlot}
+
+        {/* 3. Dates */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="check_in" render={({ field }) => (
             <FormItem className="flex flex-col"><FormLabel>Check-in</FormLabel>
@@ -540,6 +535,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
               </Popover><FormMessage /></FormItem>
           )} />
         </div>
+
+        {/* 4. Room & Meal */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="room_type" render={({ field }) => (
             <FormItem><FormLabel>Tipo de Quarto</FormLabel>
@@ -562,10 +559,27 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
               </Select><FormMessage /></FormItem>
           )} />
         </div>
+
+        {/* 5. Description */}
+        {showOptionLabel && (
+          <FormField control={form.control} name="service_description" render={({ field }) => (
+            <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        )}
+
+        {/* 6. Price */}
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
         {paymentSlot}
+
+        {/* 7. Label (optional) */}
+        {showOptionLabel && (
+          <FormField control={form.control} name="option_label" render={({ field }) => (
+            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Hotel mais próximo do parque" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        )}
+
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -1150,7 +1164,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ IMAGE UPLOAD BLOCK ━━━━━━━━━━━━━━━━━━━ */
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -1177,6 +1191,40 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
   const handleGooglePhotosSelected = (urls: string[]) => {
     onImageUrlsChange([...imageUrls, ...urls]);
   };
+
+  // Hotel mode: only Google photos, no manual upload
+  if (hotelMode) {
+    return (
+      <div className="space-y-2">
+        {imageUrls.length > 0 && (
+          <>
+            <p className="text-sm font-medium">Fotos selecionadas</p>
+            <div className="flex flex-wrap gap-2">
+              {imageUrls.map((url, i) => (
+                <div key={i} className="relative inline-block">
+                  <img src={url} alt={`Hotel ${i + 1}`} className="h-24 w-36 rounded-lg border border-border object-cover" />
+                  <button type="button" onClick={() => removeImage(i)} className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        {placeId && (
+          <GoogleHotelPhotos
+            placeId={placeId}
+            onPhotosSelected={handleGooglePhotosSelected}
+            existingUrls={imageUrls}
+            autoShow
+          />
+        )}
+        {!placeId && imageUrls.length === 0 && (
+          <p className="text-xs text-muted-foreground italic">Selecione um hotel acima para carregar fotos automaticamente</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -1224,12 +1272,14 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
+  const isHotel = serviceType === 'hotel';
   const photoSlotElement = (
     <ServiceImageUpload
       imageUrls={serviceImageUrls}
       onImageUrlsChange={setServiceImageUrls}
       isUploading={isImgUploading}
-      placeId={serviceType === 'hotel' ? hotelPlaceId : undefined}
+      placeId={isHotel ? hotelPlaceId : undefined}
+      hotelMode={isHotel}
     />
   );
   const formProps = {
