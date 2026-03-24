@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -52,6 +51,14 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+function parseDateOnly(dateStr?: string | null) {
+  if (!dateStr) return undefined;
+  const [y, m, d] = dateStr.split("-").map(Number);
+  if (y && m && d) return new Date(y, m - 1, d);
+  const parsed = new Date(dateStr);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
 function formatDateShort(dateStr: string) {
   try {
     const [y, m, d] = dateStr.split("-").map(Number);
@@ -59,74 +66,9 @@ function formatDateShort(dateStr: string) {
   } catch { return dateStr; }
 }
 
-/* ──────────────────────── Quote History Row ──────────────────────── */
-function QuoteHistoryRow({
-  q, onEdit, onDuplicate, onDelete,
-}: {
-  q: Quote;
-  onEdit: () => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <div className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/40 transition-colors group">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-semibold text-sm truncate">{q.client_name}</span>
-          <Badge variant={q.status === "published" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
-            {q.status === "published" ? "Enviado" : "Rascunho"}
-          </Badge>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{q.destination}</span>
-          <span>{formatDateShort(q.start_date)} — {formatDateShort(q.end_date)}</span>
-        </div>
-      </div>
-      <span className="font-bold text-sm text-primary whitespace-nowrap">{formatCurrency(q.total_amount)}</span>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onEdit}>
-            <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
-          </DropdownMenuItem>
-          {q.share_token && (
-            <DropdownMenuItem onClick={() => {
-              navigator.clipboard.writeText(`${PUBLIC_DOMAIN}/orcamento/${q.share_token}`);
-            }}>
-              <ExternalLink className="mr-2 h-3.5 w-3.5" /> Copiar Link
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuItem onClick={onDuplicate}>
-            <Copy className="mr-2 h-3.5 w-3.5" /> Duplicar
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
-            <Trash2 className="mr-2 h-3.5 w-3.5" /> Excluir
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-}
-
-/* ──────────────────────── Payment Display Modes ──────────────────────── */
-type PaymentDisplayMode = "installments" | "installments_with_entry" | "full_payment";
-
-const PAYMENT_MODE_OPTIONS: { value: PaymentDisplayMode; label: string; description: string }[] = [
-  { value: "installments", label: "Parcelado (sem entrada)", description: "Ex: 10x de R$ 2.400" },
-  { value: "installments_with_entry", label: "Parcelado com entrada", description: "Ex: Entrada + 9x de R$ 2.400" },
-  { value: "full_payment", label: "À vista", description: "Ex: R$ 24.000 à vista" },
-];
-
-const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
-
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function GerarOrcamento() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { id } = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -169,179 +111,144 @@ export default function GerarOrcamento() {
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
 
-  // Persist selectedServiceType & editingService to sessionStorage
-  useEffect(() => {
-    if (!storageKey) return;
-    try {
-      sessionStorage.setItem(storageKey, JSON.stringify({
-        selectedServiceType,
-        editingService,
-      }));
-    } catch { /* quota exceeded — ignore */ }
-  }, [storageKey, selectedServiceType, editingService]);
+  const quoteLoadedRef = useRef(false);
+  const quoteInitializedRef = useRef(false);
+  const autoSavedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const paymentSnapshotRef = useRef("");
+  const validitySnapshotRef = useRef("");
+
+  const showAutoSavedFeedback = useCallback(() => {
+    setAutoSaved(true);
+    if (autoSavedTimeoutRef.current) clearTimeout(autoSavedTimeoutRef.current);
+    autoSavedTimeoutRef.current = setTimeout(() => setAutoSaved(false), 2500);
+  }, []);
+
+  const buildPaymentSnapshot = useCallback(() => JSON.stringify({
+    payment_terms: paymentTerms || null,
+    payment_display_mode: paymentDisplayMode,
+    installments_count: installmentsCount,
+    entry_percentage: entryPercentage,
+    payment_method_label: paymentMethodLabel || null,
+    full_payment_discount_percent: fullPaymentDiscountPercent,
+  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
+
+  const buildValiditySnapshot = useCallback(() => JSON.stringify({
+    valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
+    validity_disclaimer: validityDisclaimer || "",
+  }), [validUntil, validityDisclaimer]);
 
   useEffect(() => {
     if (user?.id) { fetchAgentProfile(user.id, supabase).then(setAgentProfile); }
   }, [user?.id]);
 
-  const quoteLoadedRef = useRef(false);
-  const quoteInitializedRef = useRef(false);
   useEffect(() => {
     if (quote && !quoteInitializedRef.current) {
       quoteInitializedRef.current = true;
-      setPaymentTerms((quote as any).payment_terms || "");
-      setValidUntil((quote as any).valid_until ? new Date((quote as any).valid_until) : undefined);
-      setValidityDisclaimer((quote as any).validity_disclaimer || "Valores sujeitos à alteração sem aviso prévio devido à variação cambial e disponibilidade de tarifas.");
-      setPaymentDisplayMode(((quote as any).payment_display_mode as PaymentDisplayMode) || "full_payment");
-      setInstallmentsCount((quote as any).installments_count || 10);
-      setEntryPercentage((quote as any).entry_percentage || 30);
-      setPaymentMethodLabel((quote as any).payment_method_label || "");
-      setFullPaymentDiscountPercent((quote as any).full_payment_discount_percent || 0);
+
+      const initialPaymentTerms = (quote as any).payment_terms || "";
+      const initialValidUntil = parseDateOnly((quote as any).valid_until);
+      const initialValidityDisclaimer = (quote as any).validity_disclaimer || "Valores sujeitos à alteração sem aviso prévio devido à variação cambial e disponibilidade de tarifas.";
+      const initialPaymentDisplayMode = ((quote as any).payment_display_mode as PaymentDisplayMode) || "full_payment";
+      const initialInstallmentsCount = (quote as any).installments_count || 10;
+      const initialEntryPercentage = (quote as any).entry_percentage || 30;
+      const initialPaymentMethodLabel = (quote as any).payment_method_label || "";
+      const initialFullPaymentDiscountPercent = (quote as any).full_payment_discount_percent || 0;
+
+      setPaymentTerms(initialPaymentTerms);
+      setValidUntil(initialValidUntil);
+      setValidityDisclaimer(initialValidityDisclaimer);
+      setPaymentDisplayMode(initialPaymentDisplayMode);
+      setInstallmentsCount(initialInstallmentsCount);
+      setEntryPercentage(initialEntryPercentage);
+      setPaymentMethodLabel(initialPaymentMethodLabel);
+      setFullPaymentDiscountPercent(initialFullPaymentDiscountPercent);
       setUseServicePayment((quote as any).use_service_payment ?? false);
-      // Build per-service payment configs from loaded services
+
+      paymentSnapshotRef.current = JSON.stringify({
+        payment_terms: initialPaymentTerms || null,
+        payment_display_mode: initialPaymentDisplayMode,
+        installments_count: initialInstallmentsCount,
+        entry_percentage: initialEntryPercentage,
+        payment_method_label: initialPaymentMethodLabel || null,
+        full_payment_discount_percent: initialFullPaymentDiscountPercent,
+      });
+
+      validitySnapshotRef.current = JSON.stringify({
+        valid_until: initialValidUntil ? format(initialValidUntil, "yyyy-MM-dd") : null,
+        validity_disclaimer: initialValidityDisclaimer || "",
+      });
+
       const configs: Record<string, ServicePaymentConfig> = {};
       (quote.services || []).forEach((s: any) => {
         configs[s.id] = extractServicePaymentConfig(s);
       });
       setServicePaymentConfigs(configs);
-      // Mark that quote data has been loaded — auto-save effects below
-      // will skip their first run to avoid saving the initial values right back.
+
       setTimeout(() => { quoteLoadedRef.current = true; }, 2500);
     }
   }, [quote]);
-
-  const handleCreateQuote = async (data: QuoteFormData) => {
-    if (!canCreateQuote) {
-      toast({ title: "Limite diário atingido", description: "Faça upgrade para criar orçamentos ilimitados.", variant: "destructive" });
-      return;
-    }
-    const newQuote = await createQuote(data);
-    await incrementUsage();
-    navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
-  };
-
-  // Track pending add calls so round-trip transfers can fire two submits sequentially
-  const addQueueRef = useRef<Promise<void>>(Promise.resolve());
-
-  const handleAddService = async (serviceData: ServiceData, amount: number, optionLabel?: string, description?: string, imageUrl?: string, imageUrls?: string[]) => {
-    if (editingService) {
-      await updateService({
-        serviceId: editingService.id,
-        service_type: editingService.service_type,
-        service_data: serviceData,
-        amount,
-        option_label: optionLabel,
-        description,
-        image_url: imageUrl,
-        image_urls: imageUrls || [],
-      });
-      setEditingService(null);
-      setSelectedServiceType(null);
-      return;
-    }
-    const sType = selectedServiceType;
-    if (!sType) return;
-    // Queue add calls so round-trip transfers (2 rapid submits) are processed sequentially
-    addQueueRef.current = addQueueRef.current.then(async () => {
-      await addService({ service_type: sType, service_data: serviceData, amount, option_label: optionLabel, description, image_url: imageUrl, image_urls: imageUrls || [] });
-    });
-    // Clear service type after a micro-delay so a second synchronous call can still use it
-    setTimeout(() => setSelectedServiceType(null), 100);
-  };
-
-  const handleEditService = (service: import("@/types/quote").QuoteService) => {
-    setEditingService(service);
-    setSelectedServiceType(service.service_type);
-  };
-
-  const handlePublish = async () => {
-    if (!id) return;
-    const token = await publishQuote(id);
-    const url = `${PUBLIC_DOMAIN}/orcamento/${token}`;
-    await navigator.clipboard.writeText(url);
-    toast({ title: "Link copiado!", description: "O link do orçamento foi copiado para a área de transferência." });
-  };
-
-  const handleGeneratePDF = () => {
-    if (quote) generateQuotePDF(quote, agentProfile);
-  };
-
-  const handleToggleDetailedPrices = async (checked: boolean) => {
-    if (!quote) return;
-    setShowDetailedLocal(checked);
-    await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
-  };
-
-  const handleToggleServicePayment = async (checked: boolean) => {
-    if (!quote) return;
-    setUseServicePayment(checked);
-    await supabase.from("quotes").update({ use_service_payment: checked } as any).eq("id", quote.id);
-  };
-
-  const handleServicePaymentChange = async (serviceId: string, config: ServicePaymentConfig) => {
-    setServicePaymentConfigs((prev) => ({ ...prev, [serviceId]: config }));
-    await supabase.from("quote_services").update({
-      is_custom_payment: config.is_custom_payment,
-      payment_type: config.payment_type,
-      installments: config.installments,
-      entry_value: config.entry_value,
-      discount_type: config.discount_type,
-      discount_value: config.discount_value,
-      payment_method: config.payment_method,
-    } as any).eq("id", serviceId);
-  };
-
+...
   const handleSavePaymentConfig = useCallback(async (showToast = false) => {
     if (!quote) return;
-    const { error } = await supabase.from("quotes").update({
-      payment_terms: paymentTerms || null,
-      payment_display_mode: paymentDisplayMode,
-      installments_count: installmentsCount,
-      entry_percentage: entryPercentage,
-      payment_method_label: paymentMethodLabel || null,
-      full_payment_discount_percent: fullPaymentDiscountPercent,
-    } as any).eq("id", quote.id);
+
+    const nextSnapshot = buildPaymentSnapshot();
+    if (nextSnapshot === paymentSnapshotRef.current) return;
+
+    const payload = JSON.parse(nextSnapshot);
+    const { error } = await supabase.from("quotes").update(payload as any).eq("id", quote.id);
     if (error) {
       toast({ title: "Erro ao salvar configuração", description: error.message, variant: "destructive" });
       return;
     }
+
+    paymentSnapshotRef.current = nextSnapshot;
     if (showToast) {
       toast({ title: "Configuração salva", description: "As configurações de pagamento foram salvas com sucesso." });
     }
-    setAutoSaved(true);
-    setTimeout(() => setAutoSaved(false), 2500);
-  }, [quote, paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, id, queryClient, toast]);
+    showAutoSavedFeedback();
+  }, [quote, buildPaymentSnapshot, toast, showAutoSavedFeedback]);
 
   const handleSaveValidity = useCallback(async (showToast = false) => {
     if (!quote) return;
-    const { error } = await supabase.from("quotes").update({
-      valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
-      validity_disclaimer: validityDisclaimer,
-    } as any).eq("id", quote.id);
+
+    const nextSnapshot = buildValiditySnapshot();
+    if (nextSnapshot === validitySnapshotRef.current) return;
+
+    const payload = JSON.parse(nextSnapshot);
+    const { error } = await supabase.from("quotes").update(payload as any).eq("id", quote.id);
     if (error) {
       toast({ title: "Erro ao salvar validade", description: error.message, variant: "destructive" });
       return;
     }
+
+    validitySnapshotRef.current = nextSnapshot;
     if (showToast) {
       toast({ title: "Validade salva", description: "As configurações de validade e termos foram salvas." });
     }
-    setAutoSaved(true);
-    setTimeout(() => setAutoSaved(false), 2500);
-  }, [quote, validUntil, validityDisclaimer, id, queryClient, toast]);
+    showAutoSavedFeedback();
+  }, [quote, buildValiditySnapshot, toast, showAutoSavedFeedback]);
+
+  useEffect(() => {
+    return () => {
+      if (autoSavedTimeoutRef.current) clearTimeout(autoSavedTimeoutRef.current);
+    };
+  }, []);
 
   // Debounced auto-save for payment config
   useEffect(() => {
     if (!quote || !quoteLoadedRef.current) return;
+    if (buildPaymentSnapshot() === paymentSnapshotRef.current) return;
     const timer = setTimeout(() => { handleSavePaymentConfig(); }, 2000);
     return () => clearTimeout(timer);
-  }, [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
+  }, [quote, buildPaymentSnapshot, handleSavePaymentConfig]);
 
   // Debounced auto-save for validity config
   useEffect(() => {
     if (!quote || !quoteLoadedRef.current) return;
+    if (buildValiditySnapshot() === validitySnapshotRef.current) return;
     const timer = setTimeout(() => { handleSaveValidity(); }, 2000);
     return () => clearTimeout(timer);
-  }, [validUntil, validityDisclaimer]);
+  }, [quote, buildValiditySnapshot, handleSaveValidity]);
 
   const handleDeleteQuote = async (qId: string) => {
     await deleteQuote(qId);
