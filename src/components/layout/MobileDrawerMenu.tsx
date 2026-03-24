@@ -23,6 +23,7 @@ interface MenuItem {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   requiredFeature?: Feature;
+  adminOnly?: boolean;
   isPremium?: boolean;
   isHighlighted?: boolean;
   key?: string;
