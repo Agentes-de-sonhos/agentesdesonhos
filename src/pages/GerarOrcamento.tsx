@@ -625,25 +625,7 @@ export default function GerarOrcamento() {
               </CardContent>
             </Card>
 
-            {/* Configurações de exibição */}
-            <Card>
-              <CardContent className="py-3 px-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {showDetailed ? <Eye className="h-4 w-4 text-muted-foreground" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-                    <Label htmlFor="show-prices" className="text-sm font-medium cursor-pointer">
-                      Exibir valores detalhados por serviço
-                    </Label>
-                  </div>
-                  <Switch id="show-prices" checked={showDetailed} onCheckedChange={handleToggleDetailedPrices} />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1 ml-6">
-                  {showDetailed ? "O cliente verá o valor de cada serviço e o total." : "O cliente verá apenas o valor total do pacote."}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Apresentação do Investimento */}
+            {/* Apresentação do Investimento - Collapsible */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
