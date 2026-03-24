@@ -837,6 +837,10 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
           </div>
         )}
 
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem><FormLabel>Descrição / Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Informações adicionais sobre o ingresso..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+
         {paymentSlot}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
