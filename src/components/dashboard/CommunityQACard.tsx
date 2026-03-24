@@ -317,6 +317,17 @@ export function CommunityQACard() {
           </h2>
           <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
         </div>
+        {/* Engagement banner */}
+        <div className="rounded-xl bg-[hsl(var(--section-community))]/5 border border-[hsl(var(--section-community))]/15 p-3.5 space-y-1.5">
+          <p className="text-sm font-semibold text-foreground">🚀 Essa é a sua comunidade!</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Tem dúvida, ideia ou dica? Joga aqui 👇 Pode ser simples: destino, fornecedor, cliente difícil…
+          </p>
+          <p className="text-[11px] text-muted-foreground/80 italic">
+            👉 Quem pergunta aprende. Quem responde cresce.
+          </p>
+        </div>
+
         {/* Quick Ask Bar */}
         {!showAskForm ? (
           <div
@@ -327,7 +338,7 @@ export function CommunityQACard() {
               <MessageCircleQuestion className="h-4 w-4 text-[hsl(var(--section-community))]" />
             </div>
             <span className="text-sm text-muted-foreground flex-1">
-              Pergunte algo para a comunidade...
+              Bora movimentar isso? Escreva a primeira pergunta!
             </span>
             <Button size="sm" variant="default" className="bg-[hsl(var(--section-community))] hover:bg-[hsl(var(--section-community))]/90 text-white">
               Perguntar

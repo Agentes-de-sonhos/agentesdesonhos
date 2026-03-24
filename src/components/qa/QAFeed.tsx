@@ -118,6 +118,18 @@ export function QAFeed() {
   return (
     <div className="space-y-4">
       {/* ── Compose Box ── */}
+      {/* Engagement banner */}
+      <div className="rounded-2xl bg-primary/5 border border-primary/10 p-4 space-y-2">
+        <p className="text-sm font-semibold text-foreground">🚀 Essa é a sua comunidade!</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Tem dúvida, ideia ou dica? Joga aqui 👇<br />
+          💡 Pode ser simples: destino, fornecedor, cliente difícil…
+        </p>
+        <p className="text-xs text-muted-foreground/80 italic">
+          👉 Quem pergunta aprende. Quem responde cresce.
+        </p>
+      </div>
+
       <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden">
         <CardContent className="p-0">
           {!canComment ? (
@@ -137,7 +149,7 @@ export function QAFeed() {
               </Avatar>
               <div className="flex-1 h-10 rounded-full bg-muted/40 border border-border/40 flex items-center px-4 text-sm text-muted-foreground">
                 <MessageSquarePlus className="h-4 w-4 mr-2.5 text-primary/50" />
-                Faça uma pergunta para a comunidade...
+                Bora movimentar isso? Escreva a primeira pergunta!
               </div>
             </button>
           ) : (
