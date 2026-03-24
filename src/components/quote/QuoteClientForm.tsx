@@ -354,6 +354,8 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
             </Badge>
           </div>
         </div>
+          </CollapsibleContent>
+        </Collapsible>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Criando..." : "Criar Orçamento"}
