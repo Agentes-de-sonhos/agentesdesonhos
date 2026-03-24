@@ -659,48 +659,117 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 const attractionSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
   date: z.date({ required_error: "Data é obrigatória" }),
-  quantity: z.number().min(1, "Mínimo 1 ingresso"),
-  price: z.number().min(0),
+  adult_price: z.number().min(0),
+  child_price: z.number().min(0),
 });
 
 function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0 }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
-  const totalPax = adultsCount + childrenCount;
+
+  // Retrocompatibilidade: se o dado antigo só tem price/quantity, mapeia para adult_price
+  const defaultAdultPrice = init?.adult_price ?? init?.price ?? initialData?.amount ?? 0;
+  const defaultChildPrice = init?.child_price ?? 0;
+
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
-    defaultValues: { name: init?.name || "", quantity: init?.quantity || totalPax, price: init?.price || initialData?.amount || 0, date: init?.date ? parseLocalDate(init.date) : tripStartDate },
+    defaultValues: {
+      name: init?.name || "",
+      adult_price: defaultAdultPrice,
+      child_price: defaultChildPrice,
+      date: init?.date ? parseLocalDate(init.date) : tripStartDate,
+    },
   });
 
+  const adultPrice = form.watch("adult_price");
+  const childPrice = form.watch("child_price");
+
+  const totalAdults = adultPrice * adultsCount;
+  const totalChildren = childPrice * childrenCount;
+  const totalAmount = totalAdults + totalChildren;
+  const totalQuantity = adultsCount + childrenCount;
+
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
-    onSubmit({ name: values.name, date: format(values.date, "yyyy-MM-dd"), quantity: values.quantity, price: values.price }, values.price);
+    const computedTotalAdults = values.adult_price * adultsCount;
+    const computedTotalChildren = values.child_price * childrenCount;
+    const total = computedTotalAdults + computedTotalChildren;
+
+    onSubmit(
+      {
+        name: values.name,
+        date: format(values.date, "yyyy-MM-dd"),
+        quantity: totalQuantity,
+        adult_price: values.adult_price,
+        child_price: values.child_price,
+        price: total,
+      },
+      total
+    );
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField control={form.control} name="name" render={({ field }) => (
-          <FormItem><FormLabel>Nome da Atração/Ingresso</FormLabel><FormControl><Input placeholder="Torre Eiffel, Museu do Louvre..." {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Nome da Atração/Ingresso</FormLabel><FormControl><Input placeholder="Universal Orlando, Disney Magic Kingdom..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
+        <FormField control={form.control} name="date" render={({ field }) => (
+          <FormItem className="flex flex-col"><FormLabel>Data</FormLabel>
+            <Popover><PopoverTrigger asChild><FormControl>
+              <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+              </Button></FormControl></PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
+              </PopoverContent>
+            </Popover><FormMessage /></FormItem>
+        )} />
+
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="date" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Data</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
+          <FormField control={form.control} name="adult_price" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Valor por adulto (R$)</FormLabel>
+              <FormControl>
+                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
+              </FormControl>
+              {adultsCount > 0 && adultPrice > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {adultsCount} adulto{adultsCount > 1 ? "s" : ""} × {formatCurrencyInline(adultPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalAdults)}</span>
+                </p>
+              )}
+              <FormMessage />
+            </FormItem>
           )} />
-          <FormField control={form.control} name="quantity" render={({ field }) => (
-            <FormItem><FormLabel>Quantidade</FormLabel><FormControl><Input type="number" min={1} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 1)} /></FormControl><FormMessage /></FormItem>
+          <FormField control={form.control} name="child_price" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Valor por criança (R$)</FormLabel>
+              <FormControl>
+                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
+              </FormControl>
+              {childrenCount > 0 && childPrice > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {childrenCount} criança{childrenCount > 1 ? "s" : ""} × {formatCurrencyInline(childPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalChildren)}</span>
+                </p>
+              )}
+              <FormMessage />
+            </FormItem>
           )} />
         </div>
-        <FormField control={form.control} name="price" render={({ field }) => (
-          <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-        )} />
+
+        {/* Total breakdown */}
+        {(adultPrice > 0 || childPrice > 0) && (
+          <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Total Ingressos</span>
+              <span className="text-lg font-bold text-primary">{formatCurrencyInline(totalAmount)}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {adultsCount} adulto{adultsCount > 1 ? "s" : ""}
+              {childrenCount > 0 ? ` + ${childrenCount} criança${childrenCount > 1 ? "s" : ""}` : ""}
+            </p>
+          </div>
+        )}
+
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>

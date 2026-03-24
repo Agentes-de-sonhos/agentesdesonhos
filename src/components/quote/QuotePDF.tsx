@@ -91,7 +91,9 @@ function getServiceDetails(service: QuoteService): string[] {
       break;
     case "attraction":
       details.push(data.name);
-      details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity}`);
+      details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity || 1}`);
+      if (data.adult_price > 0) details.push(`Adulto: R$ ${Number(data.adult_price).toFixed(2)}`);
+      if (data.child_price > 0) details.push(`Criança: R$ ${Number(data.child_price).toFixed(2)}`);
       break;
     case "insurance":
       details.push(`Seguradora: ${data.provider}`);
