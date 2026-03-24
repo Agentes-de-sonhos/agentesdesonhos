@@ -717,6 +717,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 const attractionSchema = z.object({
   product_name: z.string().min(2, "Nome do produto é obrigatório"),
   ticket_type: z.string().optional(),
+  service_description: z.string().optional(),
   date: z.date({ required_error: "Data é obrigatória" }),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
