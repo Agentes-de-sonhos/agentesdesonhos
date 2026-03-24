@@ -219,9 +219,9 @@ function CollapsibleServiceCard({
           {isOpen && details.map((d, i) => (
             <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
           ))}
-          {isOpen && service.description && (
+          {isOpen && (service.description || (service.service_type === "attraction" && (service.service_data as any)?.notes)) && (
             <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic whitespace-pre-wrap break-words overflow-wrap-anywhere">
-              {service.description}
+              {service.description || (service.service_data as any)?.notes}
             </p>
           )}
           {/* Per-service payment display */}
