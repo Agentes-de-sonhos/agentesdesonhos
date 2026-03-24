@@ -43,6 +43,9 @@ export function useQuotes() {
           start_date: formData.start_date,
           end_date: formData.end_date,
           status: "draft",
+          currency: formData.currency || "BRL",
+          currency_mode: formData.currency_mode || "fixed",
+          exchange_rate: formData.exchange_rate ?? null,
         } as any)
         .select()
         .single();
