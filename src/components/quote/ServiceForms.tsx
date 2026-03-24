@@ -749,10 +749,13 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
     const computedTotalAdults = values.adult_price * adultsCount;
     const computedTotalChildren = values.child_price * childrenCount;
     const total = computedTotalAdults + computedTotalChildren;
+    const displayName = [values.product_name, values.ticket_type].filter(Boolean).join(" | ");
 
     onSubmit(
       {
-        name: values.name,
+        name: displayName,
+        product_name: values.product_name,
+        ticket_type: values.ticket_type || "",
         date: format(values.date, "yyyy-MM-dd"),
         quantity: totalQuantity,
         adult_price: values.adult_price,
