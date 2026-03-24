@@ -185,8 +185,10 @@ export default function GerarOrcamento() {
   }, [user?.id]);
 
   const quoteLoadedRef = useRef(false);
+  const quoteInitializedRef = useRef(false);
   useEffect(() => {
-    if (quote) {
+    if (quote && !quoteInitializedRef.current) {
+      quoteInitializedRef.current = true;
       setPaymentTerms((quote as any).payment_terms || "");
       setValidUntil((quote as any).valid_until ? new Date((quote as any).valid_until) : undefined);
       setValidityDisclaimer((quote as any).validity_disclaimer || "Valores sujeitos à alteração sem aviso prévio devido à variação cambial e disponibilidade de tarifas.");
@@ -303,7 +305,6 @@ export default function GerarOrcamento() {
       toast({ title: "Erro ao salvar configuração", description: error.message, variant: "destructive" });
       return;
     }
-    queryClient.invalidateQueries({ queryKey: ["quote", id] });
     if (showToast) {
       toast({ title: "Configuração salva", description: "As configurações de pagamento foram salvas com sucesso." });
     }
@@ -321,7 +322,6 @@ export default function GerarOrcamento() {
       toast({ title: "Erro ao salvar validade", description: error.message, variant: "destructive" });
       return;
     }
-    queryClient.invalidateQueries({ queryKey: ["quote", id] });
     if (showToast) {
       toast({ title: "Validade salva", description: "As configurações de validade e termos foram salvas." });
     }
