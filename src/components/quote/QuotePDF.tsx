@@ -185,6 +185,19 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         const data = service.service_data as any;
         const notesText = service.service_type === "attraction" ? data?.notes : null;
         const descText = service.description || null;
+        const allImages = [
+          ...(service.image_urls || []),
+          ...(service.image_url && !(service.image_urls || []).includes(service.image_url) ? [service.image_url] : []),
+        ].slice(0, 6);
+        const extraCount = ((service.image_urls || []).length + (service.image_url && !(service.image_urls || []).includes(service.image_url) ? 1 : 0)) - 6;
+
+        const photosHtml = allImages.length > 0 ? `
+          <div style="padding-left:34px;margin:12px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            ${allImages.map((url: string) => `<img src="${url}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;" />`).join("")}
+          </div>
+          ${extraCount > 0 ? `<p style="padding-left:34px;font-size:11px;color:#94a3b8;margin:4px 0 8px;">+${extraCount} foto(s) disponíveis no link completo</p>` : ""}
+        ` : "";
+
         return `
         <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:12px;page-break-inside:avoid;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -194,6 +207,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             </div>
             <span style="font-size:18px;font-weight:700;color:#0f766e;">${formatCurrency(service.amount)}</span>
           </div>
+          ${photosHtml}
           <div style="padding-left:34px;word-wrap:break-word;overflow-wrap:break-word;">
             ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
             ${descText ? `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${descText}</p>` : ""}
