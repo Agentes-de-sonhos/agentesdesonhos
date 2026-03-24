@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
-import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import type { QuoteService, ServiceType } from "@/types/quote";
 
 const SERVICE_ICONS: Record<ServiceType, any> = {
@@ -101,11 +99,9 @@ interface ServiceCardProps {
   onDelete: (id: string) => void;
   onEdit: (service: QuoteService) => void;
   isDeleting?: boolean;
-  paymentConfig?: ServicePaymentConfig;
-  onPaymentChange?: (config: ServicePaymentConfig) => void;
 }
 
-export function ServiceCard({ service, onDelete, onEdit, isDeleting, paymentConfig, onPaymentChange }: ServiceCardProps) {
+export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCardProps) {
   const [open, setOpen] = useState(false);
   const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
   const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
@@ -186,16 +182,6 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, paymentConf
           )}
         </Collapsible>
 
-        {/* Per-service payment config — always visible below the card */}
-        {onPaymentChange && paymentConfig && (
-          <div className="px-4 pb-4 pt-0">
-            <ServicePaymentForm
-              amount={service.amount}
-              config={paymentConfig}
-              onChange={onPaymentChange}
-            />
-          </div>
-        )}
       </CardContent>
     </Card>
   );
@@ -205,29 +191,22 @@ interface ServiceListProps {
   services: QuoteService[];
   onDeleteService: (id: string) => void;
   onEditService: (service: QuoteService) => void;
-  paymentConfigs?: Record<string, ServicePaymentConfig>;
-  onPaymentChange?: (serviceId: string, config: ServicePaymentConfig) => void;
 }
 
-export function ServiceList({ services, onDeleteService, onEditService, paymentConfigs, onPaymentChange }: ServiceListProps) {
+export function ServiceList({ services, onDeleteService, onEditService }: ServiceListProps) {
   if (services.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">Nenhum serviço adicionado ainda</div>;
   }
   return (
     <div className="space-y-3">
-      {services.map((service) => {
-        const defaultConfig: ServicePaymentConfig = { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null };
-        return (
-          <ServiceCard
-            key={service.id}
-            service={service}
-            onDelete={onDeleteService}
-            onEdit={onEditService}
-            paymentConfig={onPaymentChange ? (paymentConfigs?.[service.id] || defaultConfig) : undefined}
-            onPaymentChange={onPaymentChange ? (config) => onPaymentChange(service.id, config) : undefined}
-          />
-        );
-      })}
+      {services.map((service) => (
+        <ServiceCard
+          key={service.id}
+          service={service}
+          onDelete={onDeleteService}
+          onEdit={onEditService}
+        />
+      ))}
     </div>
   );
 }
