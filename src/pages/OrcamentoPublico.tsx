@@ -80,7 +80,7 @@ function getServiceName(service: QuoteService): string {
     case "hotel": return data.hotel_name;
     case "car_rental": return data.car_type;
     case "transfer": return data.location;
-    case "attraction": return data.name;
+    case "attraction": return data.product_name || data.name;
     case "insurance": return data.provider;
     case "cruise": return data.ship_name;
     case "other": return data.description || "Outros Serviços";
