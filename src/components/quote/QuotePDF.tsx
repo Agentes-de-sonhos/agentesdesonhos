@@ -169,6 +169,9 @@ function generateAgentSignature(profile: AgentProfile | null): string {
 }
 
 export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
+  const { currency } = getQuoteCurrencyInfo(quote);
+  const formatCurrency = (v: number) => formatQuoteCurrency(v, currency);
+
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
