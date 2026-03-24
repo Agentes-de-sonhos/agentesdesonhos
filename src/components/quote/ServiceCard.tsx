@@ -228,8 +228,6 @@ export function ServiceList({ services, onDeleteService, onEditService, paymentC
           />
         );
       })}
-        />
-      ))}
     </div>
   );
 }
