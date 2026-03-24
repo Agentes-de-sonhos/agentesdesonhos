@@ -85,6 +85,7 @@ export function AdminUserManager() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [deletingUser, setDeletingUser] = useState<UserWithDetails | null>(null);
   const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
+  const [featureAccessUser, setFeatureAccessUser] = useState<UserWithDetails | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
