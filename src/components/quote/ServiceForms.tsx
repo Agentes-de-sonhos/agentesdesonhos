@@ -44,6 +44,8 @@ interface ServiceFormProps {
   childrenCount?: number;
   /** When editing, pass the existing service data to pre-fill the form */
   initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null; image_urls?: string[] };
+  /** Optional slot rendered between total/notes and action buttons */
+  paymentSlot?: React.ReactNode;
 }
 
 /** Helper: disable dates outside trip range */
