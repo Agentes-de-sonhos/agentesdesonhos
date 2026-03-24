@@ -505,6 +505,8 @@ export default function GerarOrcamento() {
   }
 
   const showDetailed = showDetailedLocal !== null ? showDetailedLocal : (quote as any).show_detailed_prices !== false;
+  const { currency: quoteCurrencyCode } = getQuoteCurrencyInfo(quote);
+  const fmt = (v: number) => formatCurrency(v, quoteCurrencyCode);
   const serviceCountByType: Record<string, number> = {};
   (quote.services || []).forEach(s => {
     serviceCountByType[s.service_type] = (serviceCountByType[s.service_type] || 0) + 1;
