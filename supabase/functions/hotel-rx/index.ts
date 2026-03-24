@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { hotel_name, city, country, place_id: inputPlaceId } = await req.json();
+    const { hotel_name, city, country, place_id: inputPlaceId, force_update } = await req.json();
 
     if (!inputPlaceId && (!hotel_name || !city)) {
       return new Response(
@@ -23,31 +23,58 @@ serve(async (req) => {
     }
 
     const finalCountry = country || "Brasil";
-    const cacheKey = inputPlaceId
-      ? `pid:${inputPlaceId}`
-      : `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
-    // Check cache
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: cached } = await supabase
-      .from("hotel_rx_cache")
-      .select("result")
-      .eq("cache_key", cacheKey)
-      .gte("created_at", sevenDaysAgo)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+    // Check cache by place_id first (30-day window), then by cache_key
+    if (!force_update) {
+      let cached = null;
 
-    if (cached) {
-      return new Response(JSON.stringify(cached.result), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      if (inputPlaceId) {
+        const { data } = await supabase
+          .from("hotel_rx_cache")
+          .select("result, created_at, updated_at")
+          .eq("place_id", inputPlaceId)
+          .order("updated_at", { ascending: false, nullsFirst: false })
+          .limit(1)
+          .single();
+        cached = data;
+      }
+
+      if (!cached && hotel_name && city) {
+        const cacheKey = `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
+        const { data } = await supabase
+          .from("hotel_rx_cache")
+          .select("result, created_at, updated_at")
+          .eq("cache_key", cacheKey)
+          .order("updated_at", { ascending: false, nullsFirst: false })
+          .limit(1)
+          .single();
+        cached = data;
+      }
+
+      if (cached) {
+        const analysisDate = cached.updated_at || cached.created_at;
+        const daysSince = (Date.now() - new Date(analysisDate).getTime()) / (1000 * 60 * 60 * 24);
+        const isRecent = daysSince < 30;
+
+        return new Response(JSON.stringify({
+          ...cached.result,
+          _cache: {
+            from_cache: true,
+            analysis_date: analysisDate,
+            is_recent: isRecent,
+            days_since: Math.floor(daysSince),
+            can_update: !isRecent,
+          },
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
-    // Step 1: Find Place (skip if place_id provided)
+    // Step 1: Find Place
     const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
     if (!GOOGLE_PLACES_API_KEY) {
       return new Response(
@@ -61,7 +88,6 @@ serve(async (req) => {
     if (!placeId) {
       const searchQuery = `${hotel_name} ${city} ${finalCountry}`;
       const findUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id,name&key=${GOOGLE_PLACES_API_KEY}`;
-
       const findResp = await fetch(findUrl);
       const findData = await findResp.json();
 
@@ -71,13 +97,11 @@ serve(async (req) => {
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-
       placeId = findData.candidates[0].place_id;
     }
 
     // Step 2: Get Place Details
     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,rating,user_ratings_total,reviews,formatted_address&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR`;
-
     const detailsResp = await fetch(detailsUrl);
     const detailsData = await detailsResp.json();
 
@@ -93,12 +117,11 @@ serve(async (req) => {
     const totalReviews = place.user_ratings_total || 0;
     const reviews = (place.reviews || []).slice(0, 10);
 
-    // Step 3: Format reviews for AI
     const reviewsText = reviews
       .map((r: any, i: number) => `Review ${i + 1} (nota ${r.rating}/5): ${r.text || "Sem comentário"}`)
       .join("\n");
 
-    // Step 4: AI Analysis
+    // Step 3: AI Analysis
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(
@@ -233,16 +256,61 @@ ${reviewsText || "Nenhum comentário disponível"}`;
       ...analysis,
     };
 
-    // Save to cache
-    await supabase.from("hotel_rx_cache").insert({
-      cache_key: cacheKey,
-      hotel_name: place.name,
-      city,
-      country: finalCountry,
-      result,
-    });
+    const now = new Date().toISOString();
+    const cacheKey = inputPlaceId
+      ? `pid:${inputPlaceId}`
+      : `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
 
-    return new Response(JSON.stringify(result), {
+    // Upsert: if force_update and place_id exists, update existing row
+    if (force_update && placeId) {
+      const { data: existing } = await supabase
+        .from("hotel_rx_cache")
+        .select("id")
+        .eq("place_id", placeId)
+        .limit(1)
+        .single();
+
+      if (existing) {
+        await supabase.from("hotel_rx_cache").update({
+          result,
+          hotel_name: place.name,
+          city,
+          country: finalCountry,
+          updated_at: now,
+        }).eq("id", existing.id);
+      } else {
+        await supabase.from("hotel_rx_cache").insert({
+          cache_key: cacheKey,
+          place_id: placeId,
+          hotel_name: place.name,
+          city,
+          country: finalCountry,
+          result,
+          updated_at: now,
+        });
+      }
+    } else {
+      await supabase.from("hotel_rx_cache").insert({
+        cache_key: cacheKey,
+        place_id: placeId,
+        hotel_name: place.name,
+        city,
+        country: finalCountry,
+        result,
+        updated_at: now,
+      });
+    }
+
+    return new Response(JSON.stringify({
+      ...result,
+      _cache: {
+        from_cache: false,
+        analysis_date: now,
+        is_recent: true,
+        days_since: 0,
+        can_update: false,
+      },
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
