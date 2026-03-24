@@ -116,7 +116,7 @@ function getServiceDetails(service: QuoteService): string[] {
       break;
     case "hotel":
       details.push(`Check-in: ${formatDateShort(data.check_in)} | Check-out: ${formatDateShort(data.check_out)}`);
-      details.push(`Quarto: ${data.room_type} | Regime: ${data.meal_plan}`);
+      details.push(`Quarto: ${formatLabel(data.room_type)} | Regime: ${formatLabel(data.meal_plan)}`);
       if (data.notes) details.push(data.notes);
       break;
     case "car_rental":
