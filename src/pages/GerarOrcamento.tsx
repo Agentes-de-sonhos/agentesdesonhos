@@ -605,11 +605,11 @@ export default function GerarOrcamento() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((type) => (
-                        <Button key={type} variant="outline" size="sm" onClick={() => setSelectedServiceType(type)}>
-                          <Plus className="mr-1 h-3 w-3" />
-                          {SERVICE_TYPE_LABELS[type]}
+                        <Button key={type} variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9" onClick={() => setSelectedServiceType(type)}>
+                          <Plus className="mr-1 h-3 w-3 shrink-0" />
+                          <span className="truncate">{SERVICE_TYPE_LABELS[type]}</span>
                           {MULTI_OPTION_TYPES.includes(type) && serviceCountByType[type] ? (
                             <span className="ml-1 text-xs text-muted-foreground">({serviceCountByType[type]})</span>
                           ) : null}
