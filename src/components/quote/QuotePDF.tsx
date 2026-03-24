@@ -29,6 +29,11 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+function formatLabel(value: string) {
+  if (!value) return value;
+  return value.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
+}
+
 function parseLocalDate(dateStr: string) {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d);
@@ -73,7 +78,7 @@ function getServiceDetails(service: QuoteService): string[] {
     case "hotel":
       details.push(`${data.hotel_name} — ${data.city}`);
       details.push(`Check-in: ${formatDate(data.check_in)} | Check-out: ${formatDate(data.check_out)}`);
-      details.push(`Quarto: ${data.room_type} | Regime: ${data.meal_plan}`);
+      details.push(`Quarto: ${formatLabel(data.room_type)} | Regime: ${formatLabel(data.meal_plan)}`);
       if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
     case "car_rental":
