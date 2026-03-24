@@ -256,20 +256,22 @@ export default function GerarOrcamento() {
     if (!quote) return;
 
     const nextSnapshot = buildValiditySnapshot();
-    if (nextSnapshot === validitySnapshotRef.current) return;
+    const hasChanges = nextSnapshot !== validitySnapshotRef.current;
 
-    const payload = JSON.parse(nextSnapshot);
-    const { error } = await supabase.from("quotes").update(payload as any).eq("id", quote.id);
-    if (error) {
-      toast({ title: "Erro ao salvar validade", description: error.message, variant: "destructive" });
-      return;
+    if (hasChanges) {
+      const payload = JSON.parse(nextSnapshot);
+      const { error } = await supabase.from("quotes").update(payload as any).eq("id", quote.id);
+      if (error) {
+        toast({ title: "Erro ao salvar validade", description: error.message, variant: "destructive" });
+        return;
+      }
+      validitySnapshotRef.current = nextSnapshot;
+      showAutoSavedFeedback();
     }
 
-    validitySnapshotRef.current = nextSnapshot;
     if (showToast) {
       toast({ title: "Configuração salva", description: "As configurações de validade e termos foram salvas com sucesso." });
     }
-    showAutoSavedFeedback();
   }, [quote, buildValiditySnapshot, toast, showAutoSavedFeedback]);
 
   useEffect(() => {
