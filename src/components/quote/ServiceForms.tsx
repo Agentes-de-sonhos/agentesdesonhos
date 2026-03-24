@@ -800,6 +800,10 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
             </Popover><FormMessage /></FormItem>
         )} />
 
+        <FormField control={form.control} name="service_description" render={({ field }) => (
+          <FormItem><FormLabel>Descrição <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adult_price" render={({ field }) => (
             <FormItem>
