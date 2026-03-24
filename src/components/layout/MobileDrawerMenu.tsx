@@ -5,7 +5,7 @@ import {
   GraduationCap, Lock, Calculator, Heart, ChevronDown, MessageCircleQuestion,
   Store, CreditCard, Wallet, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
-  X,
+  X, Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -79,6 +79,7 @@ const recursosVendasSection: MenuSection = {
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
+    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
   ],
 };
 

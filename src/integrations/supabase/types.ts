@@ -2377,6 +2377,36 @@ export type Database = {
           },
         ]
       }
+      hotel_rx_cache: {
+        Row: {
+          cache_key: string
+          city: string
+          country: string
+          created_at: string
+          hotel_name: string
+          id: string
+          result: Json
+        }
+        Insert: {
+          cache_key: string
+          city: string
+          country: string
+          created_at?: string
+          hotel_name: string
+          id?: string
+          result: Json
+        }
+        Update: {
+          cache_key?: string
+          city?: string
+          country?: string
+          created_at?: string
+          hotel_name?: string
+          id?: string
+          result?: Json
+        }
+        Relationships: []
+      }
       hotels: {
         Row: {
           accessible: boolean
