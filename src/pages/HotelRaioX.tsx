@@ -25,6 +25,14 @@ interface CriteriaItem {
   comment: string;
 }
 
+interface CacheInfo {
+  from_cache: boolean;
+  analysis_date: string;
+  is_recent: boolean;
+  days_since: number;
+  can_update: boolean;
+}
+
 interface HotelAnalysis {
   hotel_name: string;
   address: string;
@@ -44,6 +52,7 @@ interface HotelAnalysis {
   ideal_for: string;
   alerts: string[];
   confidence: string;
+  _cache?: CacheInfo;
 }
 
 const criteriaLabels: Record<string, { label: string; icon: string }> = {
