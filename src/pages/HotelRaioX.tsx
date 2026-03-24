@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { generateHotelRaioXPdf } from "@/lib/generateHotelRaioXPdf";
 
 interface PlacePrediction {
   place_id: string;
