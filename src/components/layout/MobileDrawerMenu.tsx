@@ -23,6 +23,7 @@ interface MenuItem {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   requiredFeature?: Feature;
+  adminOnly?: boolean;
   isPremium?: boolean;
   isHighlighted?: boolean;
   key?: string;
@@ -79,7 +80,7 @@ const recursosVendasSection: MenuSection = {
   items: [
     { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
     { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
+    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, adminOnly: true },
   ],
 };
 
@@ -246,7 +247,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.map((item) => renderMenuItem(item, section.bgColor, section.textColor, section.borderColor))}
+            {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => renderMenuItem(item, section.bgColor, section.textColor, section.borderColor))}
           </nav>
         )}
       </div>
