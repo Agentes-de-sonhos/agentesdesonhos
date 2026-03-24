@@ -215,14 +215,19 @@ export function ServiceList({ services, onDeleteService, onEditService, paymentC
   }
   return (
     <div className="space-y-3">
-      {services.map((service) => (
-        <ServiceCard
-          key={service.id}
-          service={service}
-          onDelete={onDeleteService}
-          onEdit={onEditService}
-          paymentConfig={paymentConfigs?.[service.id]}
-          onPaymentChange={onPaymentChange ? (config) => onPaymentChange(service.id, config) : undefined}
+      {services.map((service) => {
+        const defaultConfig: ServicePaymentConfig = { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null };
+        return (
+          <ServiceCard
+            key={service.id}
+            service={service}
+            onDelete={onDeleteService}
+            onEdit={onEditService}
+            paymentConfig={onPaymentChange ? (paymentConfigs?.[service.id] || defaultConfig) : undefined}
+            onPaymentChange={onPaymentChange ? (config) => onPaymentChange(service.id, config) : undefined}
+          />
+        );
+      })}
         />
       ))}
     </div>
