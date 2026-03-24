@@ -13,18 +13,19 @@ serve(async (req) => {
   }
 
   try {
-    const { hotel_name, city, country } = await req.json();
+    const { hotel_name, city, country, place_id: inputPlaceId } = await req.json();
 
-    if (!hotel_name || !city) {
+    if (!inputPlaceId && (!hotel_name || !city)) {
       return new Response(
-        JSON.stringify({ error: "hotel_name e city são obrigatórios" }),
+        JSON.stringify({ error: "place_id ou hotel_name + city são obrigatórios" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const finalCountry = country || "Brasil";
-    const cacheKey = `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
-
+    const cacheKey = inputPlaceId
+      ? `pid:${inputPlaceId}`
+      : `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
     // Check cache
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
