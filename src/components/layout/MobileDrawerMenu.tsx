@@ -249,7 +249,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => renderMenuItem(item, section.bgColor, section.textColor, section.borderColor))}
+            {section.items.filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key))).map((item) => renderMenuItem(item, section.bgColor, section.textColor, section.borderColor))}
           </nav>
         )}
       </div>
