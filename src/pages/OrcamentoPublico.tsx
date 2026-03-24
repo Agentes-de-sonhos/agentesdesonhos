@@ -208,6 +208,9 @@ function CollapsibleServiceCard({
               <ServiceImageCarousel images={imgs} alt={SERVICE_LABELS[type]} />
             ) : null;
           })()}
+          {isOpen && (
+            <p className="text-base font-semibold text-foreground">{getServiceName(service)}</p>
+          )}
           {isOpen && details.map((d, i) => (
             <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
           ))}
