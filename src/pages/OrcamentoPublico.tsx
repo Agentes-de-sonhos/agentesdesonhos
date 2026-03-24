@@ -37,8 +37,8 @@ const SERVICE_COLORS: Record<ServiceType, string> = {
   other: "from-muted to-muted/50 text-muted-foreground",
 };
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
+  return formatQuoteCurrency(value, currency);
 }
 
 function formatLabel(value: string) {
