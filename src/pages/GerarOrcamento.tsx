@@ -627,189 +627,218 @@ export default function GerarOrcamento() {
 
             {/* Apresentação do Investimento - Collapsible */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" />
-                  Apresentação do Investimento
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Mode selector */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {PAYMENT_MODE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setPaymentDisplayMode(opt.value)}
-                        className={cn(
-                          "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
-                          paymentDisplayMode === opt.value
-                            ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                            : "border-border hover:border-border/80 hover:bg-muted/30"
-                        )}
-                      >
-                        <div className={cn(
-                          "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
-                          paymentDisplayMode === opt.value ? "border-primary" : "border-muted-foreground/40"
-                        )}>
-                          {paymentDisplayMode === opt.value && <div className="h-2 w-2 rounded-full bg-primary" />}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{opt.label}</p>
-                          <p className="text-xs text-muted-foreground">{opt.description}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+              <button
+                type="button"
+                onClick={() => setOpenSection(openSection === "payment" ? null : "payment")}
+                className="w-full flex items-center justify-between px-6 py-4 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-base font-semibold">Apresentação do Investimento</span>
                 </div>
-
-                <Separator />
-
-                {/* Dynamic fields based on mode */}
-                {paymentDisplayMode === "installments" && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label className="text-sm">Nº de parcelas</Label>
-                      <Input type="number" min={2} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSection === "payment" && "rotate-180")} />
+              </button>
+              {openSection === "payment" && (
+                <CardContent className="space-y-4 pt-0">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {PAYMENT_MODE_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setPaymentDisplayMode(opt.value)}
+                          className={cn(
+                            "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
+                            paymentDisplayMode === opt.value
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                              : "border-border hover:border-border/80 hover:bg-muted/30"
+                          )}
+                        >
+                          <div className={cn(
+                            "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                            paymentDisplayMode === opt.value ? "border-primary" : "border-muted-foreground/40"
+                          )}>
+                            {paymentDisplayMode === opt.value && <div className="h-2 w-2 rounded-full bg-primary" />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{opt.label}</p>
+                            <p className="text-xs text-muted-foreground">{opt.description}</p>
+                          </div>
+                        </button>
+                      ))}
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-sm">Meio de pagamento</Label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                        <option value="">Selecione...</option>
-                        {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                    </div>
-                    {quote && (
-                      <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
-                        <p className="text-sm font-medium text-primary">
-                          Destaque: <span className="font-bold">{installmentsCount}x de {formatCurrency(quote.total_amount / (installmentsCount || 1))}</span>
-                          {paymentMethodLabel && <span className="text-muted-foreground font-normal"> no {paymentMethodLabel}</span>}
-                        </p>
-                      </div>
-                    )}
                   </div>
-                )}
 
-                {paymentDisplayMode === "installments_with_entry" && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label className="text-sm">% da entrada</Label>
-                      <Input type="number" min={1} max={90} value={entryPercentage} onChange={(e) => setEntryPercentage(Number(e.target.value))} />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-sm">Nº de parcelas (saldo)</Label>
-                      <Input type="number" min={1} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-sm">Meio de pagamento</Label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                        <option value="">Selecione...</option>
-                        {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                    </div>
-                    {quote && (() => {
-                      const entry = quote.total_amount * (entryPercentage / 100);
-                      const remainder = quote.total_amount - entry;
-                      const installmentValue = remainder / (installmentsCount || 1);
-                      return (
+                  <Separator />
+
+                  {paymentDisplayMode === "installments" && (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm">Nº de parcelas</Label>
+                        <Input type="number" min={2} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm">Meio de pagamento</Label>
+                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
+                          <option value="">Selecione...</option>
+                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                      </div>
+                      {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
-                            Destaque: <span className="font-bold">Entrada de {formatCurrency(entry)} + {installmentsCount}x de {formatCurrency(installmentValue)}</span>
+                            Destaque: <span className="font-bold">{installmentsCount}x de {formatCurrency(quote.total_amount / (installmentsCount || 1))}</span>
+                            {paymentMethodLabel && <span className="text-muted-foreground font-normal"> no {paymentMethodLabel}</span>}
                           </p>
                         </div>
-                      );
-                    })()}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
 
-                {paymentDisplayMode === "full_payment" && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label className="text-sm">Desconto à vista (%)</Label>
-                      <Input type="number" min={0} max={50} value={fullPaymentDiscountPercent} onChange={(e) => setFullPaymentDiscountPercent(Number(e.target.value))} />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-sm">Meio de pagamento</Label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                        <option value="">Selecione...</option>
-                        {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                    </div>
-                    {quote && (
-                      <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
-                        <p className="text-sm font-medium text-primary">
-                          Destaque: <span className="font-bold">{formatCurrency(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
-                          {fullPaymentDiscountPercent > 0 && (
-                            <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethodLabel ? ` via ${paymentMethodLabel}` : ""})</span>
-                          )}
-                        </p>
+                  {paymentDisplayMode === "installments_with_entry" && (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm">% da entrada</Label>
+                        <Input type="number" min={1} max={90} value={entryPercentage} onChange={(e) => setEntryPercentage(Number(e.target.value))} />
                       </div>
-                    )}
+                      <div className="space-y-1.5">
+                        <Label className="text-sm">Nº de parcelas (saldo)</Label>
+                        <Input type="number" min={1} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm">Meio de pagamento</Label>
+                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
+                          <option value="">Selecione...</option>
+                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                      </div>
+                      {quote && (() => {
+                        const entry = quote.total_amount * (entryPercentage / 100);
+                        const remainder = quote.total_amount - entry;
+                        const installmentValue = remainder / (installmentsCount || 1);
+                        return (
+                          <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
+                            <p className="text-sm font-medium text-primary">
+                              Destaque: <span className="font-bold">Entrada de {formatCurrency(entry)} + {installmentsCount}x de {formatCurrency(installmentValue)}</span>
+                            </p>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {paymentDisplayMode === "full_payment" && (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm">Desconto à vista (%)</Label>
+                        <Input type="number" min={0} max={50} value={fullPaymentDiscountPercent} onChange={(e) => setFullPaymentDiscountPercent(Number(e.target.value))} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm">Meio de pagamento</Label>
+                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
+                          <option value="">Selecione...</option>
+                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                      </div>
+                      {quote && (
+                        <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
+                          <p className="text-sm font-medium text-primary">
+                            Destaque: <span className="font-bold">{formatCurrency(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
+                            {fullPaymentDiscountPercent > 0 && (
+                              <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethodLabel ? ` via ${paymentMethodLabel}` : ""})</span>
+                            )}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <Separator />
+
+                  <div className="space-y-1.5">
+                    <Label className="text-sm">Observações adicionais de pagamento</Label>
+                    <Textarea
+                      placeholder="Ex: Parcelamento sem juros. Desconto especial para pagamento via Pix."
+                      value={paymentTerms}
+                      onChange={(e) => setPaymentTerms(e.target.value)}
+                      rows={3}
+                    />
                   </div>
-                )}
 
-                <Separator />
-
-                {/* Additional payment notes */}
-                <div className="space-y-1.5">
-                  <Label className="text-sm">Observações adicionais de pagamento</Label>
-                  <Textarea
-                    placeholder="Ex: Parcelamento sem juros. Desconto especial para pagamento via Pix."
-                    value={paymentTerms}
-                    onChange={(e) => setPaymentTerms(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-
-                <Button variant="outline" size="sm" onClick={() => handleSavePaymentConfig(true)}>
-                  Salvar Configuração
-                </Button>
-              </CardContent>
+                  <Button variant="outline" size="sm" onClick={() => handleSavePaymentConfig(true)}>
+                    Salvar Configuração
+                  </Button>
+                </CardContent>
+              )}
             </Card>
 
-            {/* Validade e Termos */}
+            {/* Validade e Termos - Collapsible */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  Validade e Termos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-sm">Válido até</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !validUntil && "text-muted-foreground")}>
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {validUntil ? format(validUntil, "dd/MM/yyyy", { locale: ptBR }) : "Selecione uma data"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={validUntil} onSelect={setValidUntil} initialFocus className="p-3 pointer-events-auto" />
-                      </PopoverContent>
-                    </Popover>
+              <button
+                type="button"
+                onClick={() => setOpenSection(openSection === "validity" ? null : "validity")}
+                className="w-full flex items-center justify-between px-6 py-4 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-base font-semibold">Validade e Termos</span>
+                </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSection === "validity" && "rotate-180")} />
+              </button>
+              {openSection === "validity" && (
+                <CardContent className="space-y-3 pt-0">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm">Válido até</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !validUntil && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {validUntil ? format(validUntil, "dd/MM/yyyy", { locale: ptBR }) : "Selecione uma data"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar mode="single" selected={validUntil} onSelect={setValidUntil} initialFocus className="p-3 pointer-events-auto" />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm">Termos e condições</Label>
+                    <Textarea
+                      value={validityDisclaimer}
+                      onChange={(e) => setValidityDisclaimer(e.target.value)}
+                      rows={3}
+                      placeholder="Valores sujeitos à alteração..."
+                    />
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => handleSaveValidity(true)}>
+                    Salvar
+                  </Button>
+                </CardContent>
+              )}
+            </Card>
+          </div>
+          <div className="space-y-4">
+            <QuoteSummary quote={quote} />
+            <Card>
+              <CardContent className="py-3 px-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {showDetailed ? <Eye className="h-4 w-4 text-muted-foreground" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                    <Label htmlFor="show-prices" className="text-sm font-medium cursor-pointer">
+                      Exibir valores detalhados
+                    </Label>
+                  </div>
+                  <Switch id="show-prices" checked={showDetailed} onCheckedChange={handleToggleDetailedPrices} />
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-sm">Termos e condições</Label>
-                  <Textarea
-                    value={validityDisclaimer}
-                    onChange={(e) => setValidityDisclaimer(e.target.value)}
-                    rows={3}
-                    placeholder="Valores sujeitos à alteração..."
-                  />
-                </div>
-                <Button variant="outline" size="sm" onClick={() => handleSaveValidity(true)}>
-                  Salvar
-                </Button>
+                <p className="text-xs text-muted-foreground mt-1 ml-6">
+                  {showDetailed ? "O cliente verá o valor de cada serviço." : "O cliente verá apenas o total."}
+                </p>
               </CardContent>
             </Card>
           </div>
-          <div><QuoteSummary quote={quote} /></div>
         </div>
       </div>
     </DashboardLayout>
