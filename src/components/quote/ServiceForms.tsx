@@ -453,7 +453,7 @@ const carRentalSchema = z.object({
   notes: z.string().optional(),
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, initialData }: Omit<ServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof carRentalSchema>>({
     resolver: zodResolver(carRentalSchema),
