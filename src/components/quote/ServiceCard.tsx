@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
-import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import type { QuoteService, ServiceType } from "@/types/quote";
 
 const SERVICE_ICONS: Record<ServiceType, any> = {
