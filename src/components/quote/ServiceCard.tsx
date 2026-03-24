@@ -37,7 +37,7 @@ function getServiceDescription(service: QuoteService): string {
     case "hotel": return `${data.hotel_name} - ${data.city}`;
     case "car_rental": return `${data.car_type} - ${data.days} diária(s)`;
     case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
-    case "attraction": return `${data.name} (${data.quantity}x)`;
+    case "attraction": return `${data.name} (${data.quantity || 1}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
     case "cruise": return `${data.ship_name} - ${data.route}`;
     case "other": return data.description;
