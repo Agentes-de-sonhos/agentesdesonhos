@@ -106,11 +106,80 @@ export default function HotelRaioX() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<HotelAnalysis | null>(null);
 
+  // Autocomplete state
+  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const fetchAutocomplete = useCallback(async (input: string) => {
+    if (input.trim().length < 3) {
+      setPredictions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("hotel-autocomplete", {
+        body: { input: input.trim(), city: city.trim() || undefined },
+      });
+
+      if (!error && data?.predictions) {
+        setPredictions(data.predictions);
+        setShowDropdown(data.predictions.length > 0);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setIsSearching(false);
+    }
+  }, [city]);
+
+  const handleHotelNameChange = (value: string) => {
+    setHotelName(value);
+    setSelectedPlaceId(null); // Clear selection when typing
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchAutocomplete(value), 300);
+  };
+
+  const handleSelectPrediction = (prediction: PlacePrediction) => {
+    setHotelName(prediction.name);
+    setSelectedPlaceId(prediction.place_id);
+    setShowDropdown(false);
+    setPredictions([]);
+
+    // Auto-fill city from secondary text if empty
+    if (!city.trim() && prediction.secondary) {
+      const parts = prediction.secondary.split(",");
+      if (parts.length > 0) setCity(parts[0].trim());
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!hotelName.trim() || !city.trim()) {
-      toast.error("Preencha o nome do hotel e a cidade.");
+    if (!hotelName.trim()) {
+      toast.error("Preencha o nome do hotel.");
+      return;
+    }
+
+    if (!selectedPlaceId && !city.trim()) {
+      toast.error("Selecione um hotel da lista ou preencha a cidade.");
       return;
     }
 
@@ -118,9 +187,15 @@ export default function HotelRaioX() {
     setResult(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("hotel-rx", {
-        body: { hotel_name: hotelName.trim(), city: city.trim(), country: country.trim() || "Brasil" },
-      });
+      const body: Record<string, string> = {};
+      if (selectedPlaceId) {
+        body.place_id = selectedPlaceId;
+      }
+      body.hotel_name = hotelName.trim();
+      body.city = city.trim();
+      body.country = country.trim() || "Brasil";
+
+      const { data, error } = await supabase.functions.invoke("hotel-rx", { body });
 
       if (error) throw error;
       if (data?.error) {
