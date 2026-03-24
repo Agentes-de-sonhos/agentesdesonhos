@@ -51,6 +51,7 @@ export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = []
         const fetched = data?.photos || [];
         setPhotos(fetched);
         photoCache.set(placeId, fetched);
+        if (autoShow && fetched.length > 0) setShowGallery(true);
       })
       .catch(() => setPhotos([]))
       .finally(() => setLoading(false));
