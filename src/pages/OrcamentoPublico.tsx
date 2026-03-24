@@ -88,7 +88,7 @@ function getServiceDetails(service: QuoteService): string[] {
   const details: string[] = [];
   switch (service.service_type) {
     case "flight":
-      details.push(`Companhia: ${data.airline}`);
+      details.push(`${data.airline} — ${data.origin_city} → ${data.destination_city}`);
       details.push(`Ida: ${formatDateShort(data.departure_date)} | Volta: ${formatDateShort(data.return_date)}`);
       // Multi-leg support (backward compat)
       const outLegs = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
