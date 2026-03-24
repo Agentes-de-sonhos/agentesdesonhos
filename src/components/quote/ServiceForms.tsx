@@ -648,6 +648,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
           </div>
         )}
 
+        {paymentSlot}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
