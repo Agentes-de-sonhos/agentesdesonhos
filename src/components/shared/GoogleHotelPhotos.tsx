@@ -15,6 +15,7 @@ interface GoogleHotelPhotosProps {
   placeId: string | null;
   onPhotosSelected: (urls: string[]) => void;
   existingUrls?: string[];
+  autoShow?: boolean;
 }
 
 // In-memory cache to avoid re-fetching
