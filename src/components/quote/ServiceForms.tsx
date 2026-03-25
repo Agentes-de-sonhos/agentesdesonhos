@@ -808,7 +808,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
             {initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
-            {initialData ? "Salvar" : isRoundTrip ? "Adicionar 2 trechos" : "Adicionar"}
+            {initialData ? "Salvar" : isRoundTrip ? "Salvar 2 trechos" : "Salvar"}
           </Button>
         </div>
       </form>
