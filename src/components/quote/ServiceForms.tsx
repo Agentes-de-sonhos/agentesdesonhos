@@ -663,6 +663,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
 
 /* ━━━━━━━━━━━━━━━━━━━ TRANSFER FORM ━━━━━━━━━━━━━━━━━━━ */
 const transferSchema = z.object({
+  company_name: z.string().optional(),
   transfer_mode: z.enum(["arrival", "departure", "round_trip"]),
   location: z.string().min(2, "Local é obrigatório"),
   arrival_date: z.date({ required_error: "Data de chegada é obrigatória" }),
@@ -676,6 +677,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
   const form = useForm<z.infer<typeof transferSchema>>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
+      company_name: init?.company_name || "",
       transfer_mode: init?.transfer_type || "round_trip",
       location: init?.location || "",
       price: init?.price || initialData?.amount || 0,
