@@ -692,21 +692,20 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 
   const handleSubmit = async (values: z.infer<typeof transferSchema>) => {
     if (values.transfer_mode === "round_trip") {
-      // Submit arrival first, then departure sequentially to avoid race condition
       await onSubmit(
-        { transfer_type: "arrival" as const, location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        { transfer_type: "arrival" as const, company_name: values.company_name || "", location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
         values.price
       );
       if (values.departure_date) {
         await onSubmit(
-          { transfer_type: "departure" as const, location: values.location, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
+          { transfer_type: "departure" as const, company_name: values.company_name || "", location: values.location, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
           values.price
         );
       }
     } else {
       const mappedType = values.transfer_mode === "arrival" ? "arrival" : "departure";
       await onSubmit(
-        { transfer_type: mappedType, location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        { transfer_type: mappedType, company_name: values.company_name || "", location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
         values.price
       );
     }
