@@ -134,6 +134,7 @@ export interface CruiseData {
 }
 
 export interface OtherServiceData {
+  company_name?: string;
   description: string;
   price: number;
 }
