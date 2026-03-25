@@ -610,7 +610,7 @@ export default function GerarOrcamento() {
                       key={editingService?.id || "new"}
                       serviceType={selectedServiceType}
                       onSubmit={handleAddService}
-                      onCancel={() => { setSelectedServiceType(null); setEditingService(null); }}
+                      onCancel={() => { setSelectedServiceType(null); setEditingService(null); setNewServicePaymentConfig({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }); }}
                       isLoading={isAddingService}
                       showOptionLabel={MULTI_OPTION_TYPES.includes(selectedServiceType)}
                       tripStartDate={tripStartDate}
