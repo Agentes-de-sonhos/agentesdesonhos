@@ -596,6 +596,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
 
 /* ━━━━━━━━━━━━━━━━━━━ CAR RENTAL FORM ━━━━━━━━━━━━━━━━━━━ */
 const carRentalSchema = z.object({
+  rental_company: z.string().optional(),
   pickup_location: z.string().min(2, "Local de retirada é obrigatório"),
   dropoff_location: z.string().min(2, "Local de devolução é obrigatório"),
   car_type: z.string().min(1, "Tipo de carro é obrigatório"),
@@ -608,16 +609,19 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof carRentalSchema>>({
     resolver: zodResolver(carRentalSchema),
-    defaultValues: { pickup_location: init?.pickup_location || "", dropoff_location: init?.dropoff_location || "", car_type: init?.car_type || "", days: init?.days || 1, price: init?.price || initialData?.amount || 0, notes: init?.notes || "" },
+    defaultValues: { rental_company: init?.rental_company || "", pickup_location: init?.pickup_location || "", dropoff_location: init?.dropoff_location || "", car_type: init?.car_type || "", days: init?.days || 1, price: init?.price || initialData?.amount || 0, notes: init?.notes || "" },
   });
 
   const handleSubmit = (values: z.infer<typeof carRentalSchema>) => {
-    onSubmit({ pickup_location: values.pickup_location, dropoff_location: values.dropoff_location, car_type: values.car_type, days: values.days, price: values.price, notes: values.notes || "" }, values.price);
+    onSubmit({ rental_company: values.rental_company || "", pickup_location: values.pickup_location, dropoff_location: values.dropoff_location, car_type: values.car_type, days: values.days, price: values.price, notes: values.notes || "" }, values.price);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField control={form.control} name="rental_company" render={({ field }) => (
+          <FormItem><FormLabel>Nome da Locadora</FormLabel><FormControl><Input placeholder="Ex: Localiza, Hertz, Movida..." {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_location" render={({ field }) => (
             <FormItem><FormLabel>Local de Retirada</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
