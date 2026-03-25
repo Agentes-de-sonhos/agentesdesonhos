@@ -804,6 +804,14 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
           </div>
         )}
 
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descrição</FormLabel>
+            <FormControl><Textarea placeholder="Detalhes adicionais do transfer..." className="min-h-[80px]" {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
         {paymentSlot}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
