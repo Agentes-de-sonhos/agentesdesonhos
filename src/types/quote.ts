@@ -120,6 +120,7 @@ export interface InsuranceData {
   end_date: string;
   coverage: string;
   price: number;
+  notes?: string;
 }
 
 export interface CruiseData {
