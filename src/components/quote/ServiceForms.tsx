@@ -714,9 +714,6 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField control={form.control} name="company_name" render={({ field }) => (
-          <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl><Input placeholder="Ex: Wemoov, TourTransfer..." {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
         <FormField control={form.control} name="transfer_mode" render={({ field }) => (
           <FormItem><FormLabel>Tipo de Transfer</FormLabel>
             <div className="grid grid-cols-3 gap-2">
