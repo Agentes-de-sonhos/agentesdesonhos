@@ -130,6 +130,7 @@ export interface CruiseData {
   end_date: string;
   cabin_type: string;
   price: number;
+  notes?: string;
 }
 
 export interface OtherServiceData {
