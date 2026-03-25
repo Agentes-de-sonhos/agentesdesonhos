@@ -587,7 +587,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}{initialData ? "Salvar" : "Adicionar"}</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
         </div>
       </form>
     </Form>
