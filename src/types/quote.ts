@@ -94,6 +94,7 @@ export interface CarRentalData {
 
 export interface TransferData {
   transfer_type: 'arrival' | 'departure';
+  company_name?: string;
   location: string;
   date: string;
   price: number;
