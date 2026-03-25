@@ -79,6 +79,8 @@ export default function Auth() {
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const inactivityMessage = (location.state as any)?.message as string | undefined;
   const { sendOtp, signIn, user, loading: authLoading, isNewUser } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { plan, loading: subLoading } = useSubscription();
