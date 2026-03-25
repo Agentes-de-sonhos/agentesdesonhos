@@ -1083,7 +1083,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
     onSubmit({
       ship_name: values.ship_name, route: values.route,
       start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"),
-      cabin_type: values.cabin_type, price: values.price,
+      cabin_type: values.cabin_type, price: values.price, notes: values.notes || "",
     }, values.price);
   };
 
