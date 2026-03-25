@@ -153,6 +153,7 @@ export default function GerarOrcamento() {
   const [headerEditDates, setHeaderEditDates] = useState(false);
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
+  const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
   const [openSection, setOpenSection] = useState<"payment" | "validity" | null>(null);
 
   const quoteLoadedRef = useRef(false);
