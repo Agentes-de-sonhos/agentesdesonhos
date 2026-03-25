@@ -1147,6 +1147,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
 
 /* ━━━━━━━━━━━━━━━━━━━ OTHER FORM ━━━━━━━━━━━━━━━━━━━ */
 const otherSchema = z.object({
+  company_name: z.string().optional(),
   description: z.string().min(5, "Descrição é obrigatória"),
   price: z.number().min(0),
 });
@@ -1155,16 +1156,19 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
-    defaultValues: { description: init?.description || "", price: init?.price || initialData?.amount || 0 },
+    defaultValues: { company_name: init?.company_name || "", description: init?.description || "", price: init?.price || initialData?.amount || 0 },
   });
 
   const handleSubmit = (values: z.infer<typeof otherSchema>) => {
-    onSubmit({ description: values.description, price: values.price }, values.price);
+    onSubmit({ company_name: values.company_name || "", description: values.description, price: values.price }, values.price);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField control={form.control} name="company_name" render={({ field }) => (
+          <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl><Input placeholder="Nome da empresa..." {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
         <FormField control={form.control} name="description" render={({ field }) => (
           <FormItem><FormLabel>Descrição do Serviço</FormLabel><FormControl><Textarea placeholder="Descreva o serviço..." rows={3} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
