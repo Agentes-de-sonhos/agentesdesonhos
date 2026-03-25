@@ -1068,6 +1068,7 @@ const cruiseSchema = z.object({
   end_date: z.date({ required_error: "Data fim é obrigatória" }),
   cabin_type: z.string().min(1, "Tipo de cabine é obrigatório"),
   price: z.number().min(0),
+  notes: z.string().optional(),
 });
 
 function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
@@ -1075,7 +1076,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof cruiseSchema>>({
     resolver: zodResolver(cruiseSchema),
-    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate },
+    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
   });
 
   const handleSubmit = (values: z.infer<typeof cruiseSchema>) => {
