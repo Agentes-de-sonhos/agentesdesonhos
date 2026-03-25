@@ -4,6 +4,7 @@ import { BottomNavBar } from "./BottomNavBar";
 import { Footer } from "./Footer";
 import { GlobalPopupModal } from "@/components/popup/GlobalPopupModal";
 import { ChatFloatingButton } from "@/components/community-chat/ChatFloatingButton";
+import { SessionTimeoutModal } from "@/components/session/SessionTimeoutModal";
 import { isImpersonating } from "@/components/admin/ImpersonationBanner";
 
 interface DashboardLayoutProps {
@@ -26,6 +27,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       
       {/* Community Chat Floating Button (Premium only) */}
       <ChatFloatingButton />
+      
+      {/* Session Timeout Warning */}
+      <SessionTimeoutModal />
       
       {/* Main content area */}
       <main className="transition-all duration-300 pl-0 lg:pl-16 flex-1 flex flex-col w-full overflow-x-hidden">

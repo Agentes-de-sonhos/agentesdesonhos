@@ -13,7 +13,7 @@ const translateAuthError = (msg: string): string => {
   if (/timeout/i.test(msg)) return "Tempo de resposta esgotado. Tente novamente.";
   return msg;
 };
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,6 +79,8 @@ export default function Auth() {
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const inactivityMessage = (location.state as any)?.message as string | undefined;
   const { sendOtp, signIn, user, loading: authLoading, isNewUser } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { plan, loading: subLoading } = useSubscription();
@@ -398,6 +400,11 @@ export default function Auth() {
         </CardHeader>
 
         <CardContent className={`space-y-5 ${view === "password-signup" ? "px-6 pb-8" : "px-8 pb-10"}`}>
+          {inactivityMessage && (
+            <Alert className="rounded-xl border-amber-500/50 bg-amber-50 dark:bg-amber-950/30">
+              <AlertDescription className="text-amber-700 dark:text-amber-400">{inactivityMessage}</AlertDescription>
+            </Alert>
+          )}
           {error && (
             <Alert variant="destructive" className="rounded-xl">
               <AlertDescription>{error}</AlertDescription>
