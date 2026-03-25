@@ -1288,10 +1288,14 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
   const [hotelPlaceId, setHotelPlaceId] = useState<string | null>(null);
+  const [transferCompanyName, setTransferCompanyName] = useState(
+    initialData?.service_data?.company_name || ""
+  );
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
-    onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
+    const finalData = serviceType === 'transfer' ? { ...data, company_name: transferCompanyName } : data;
+    onSubmit(finalData, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
   const isHotel = serviceType === 'hotel';
@@ -1321,20 +1325,6 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     case "cruise": formElement = <CruiseForm {...formProps} />; break;
     case "other": formElement = <OtherForm {...formProps} />; break;
     default: return null;
-  }
-
-  // For transfer, company_name must appear before photos
-  // We extract it from the form and render it here
-  const [transferCompanyName, setTransferCompanyName] = useState(
-    serviceType === 'transfer' ? (initialData?.service_data?.company_name || "") : ""
-  );
-
-  // Re-wrap formProps for transfer to pass company name
-  if (serviceType === 'transfer') {
-    const origSubmit = formProps.onSubmit;
-    formProps.onSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
-      origSubmit({ ...data, company_name: transferCompanyName }, amount, optionLabel, description);
-    };
   }
 
   return (
