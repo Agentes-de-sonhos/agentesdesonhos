@@ -669,6 +669,7 @@ const transferSchema = z.object({
   arrival_date: z.date({ required_error: "Data de chegada é obrigatória" }),
   departure_date: z.date().optional(),
   price: z.number().min(0),
+  description: z.string().optional(),
 });
 
 function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
@@ -683,6 +684,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
       price: init?.price || initialData?.amount || 0,
       arrival_date: init?.date ? parseLocalDate(init.date) : tripStartDate,
       departure_date: tripEndDate,
+      description: initialData?.description || "",
     },
   });
 
@@ -803,6 +805,14 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
             </p>
           </div>
         )}
+
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descrição</FormLabel>
+            <FormControl><Textarea placeholder="Detalhes adicionais do transfer..." className="min-h-[80px]" {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
         {paymentSlot}
         <div className="flex gap-2 justify-end">
