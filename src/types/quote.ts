@@ -83,6 +83,7 @@ export interface HotelData {
 }
 
 export interface CarRentalData {
+  rental_company?: string;
   pickup_location: string;
   dropoff_location: string;
   car_type: string;
