@@ -380,7 +380,7 @@ export default function GerarOrcamento() {
         image_urls,
       });
     } else {
-      await addService({
+      const newSvc = await addService({
         service_type: selectedServiceType,
         service_data,
         amount,
@@ -389,6 +389,22 @@ export default function GerarOrcamento() {
         image_url,
         image_urls,
       });
+
+      // Save payment config for the newly created service
+      if (newSvc?.id && newServicePaymentConfig.is_custom_payment) {
+        await supabase.from("quote_services").update({
+          is_custom_payment: newServicePaymentConfig.is_custom_payment,
+          payment_type: newServicePaymentConfig.payment_type,
+          installments: newServicePaymentConfig.installments,
+          entry_value: newServicePaymentConfig.entry_value,
+          discount_type: newServicePaymentConfig.discount_type,
+          discount_value: newServicePaymentConfig.discount_value,
+          payment_method: newServicePaymentConfig.payment_method,
+        }).eq("id", newSvc.id);
+        setServicePaymentConfigs((prev) => ({ ...prev, [newSvc.id]: newServicePaymentConfig }));
+        if (!useServicePayment) setUseServicePayment(true);
+      }
+      setNewServicePaymentConfig({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
     }
 
     setSelectedServiceType(null);
