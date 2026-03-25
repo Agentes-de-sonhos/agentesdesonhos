@@ -978,6 +978,7 @@ const insuranceSchema = z.object({
   coverage: z.string().min(2, "Cobertura é obrigatória"),
   price: z.number().min(0),
   is_unit_price: z.boolean(),
+  notes: z.string().optional(),
 });
 
 function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
