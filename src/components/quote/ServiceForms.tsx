@@ -1323,8 +1323,28 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     default: return null;
   }
 
+  // For transfer, company_name must appear before photos
+  // We extract it from the form and render it here
+  const [transferCompanyName, setTransferCompanyName] = useState(
+    serviceType === 'transfer' ? (initialData?.service_data?.company_name || "") : ""
+  );
+
+  // Re-wrap formProps for transfer to pass company name
+  if (serviceType === 'transfer') {
+    const origSubmit = formProps.onSubmit;
+    formProps.onSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
+      origSubmit({ ...data, company_name: transferCompanyName }, amount, optionLabel, description);
+    };
+  }
+
   return (
     <div className="space-y-4">
+      {serviceType === 'transfer' && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Nome da Empresa</label>
+          <Input placeholder="Ex: Wemoov, TourTransfer..." value={transferCompanyName} onChange={(e) => setTransferCompanyName(e.target.value)} />
+        </div>
+      )}
       {!(serviceType === 'flight' || serviceType === 'hotel') && photoSlotElement}
       {formElement}
     </div>
