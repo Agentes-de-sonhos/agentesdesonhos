@@ -94,6 +94,7 @@ export interface CarRentalData {
 
 export interface TransferData {
   transfer_type: 'arrival' | 'departure';
+  company_name?: string;
   location: string;
   date: string;
   price: number;
@@ -119,6 +120,7 @@ export interface InsuranceData {
   end_date: string;
   coverage: string;
   price: number;
+  notes?: string;
 }
 
 export interface CruiseData {
@@ -128,9 +130,11 @@ export interface CruiseData {
   end_date: string;
   cabin_type: string;
   price: number;
+  notes?: string;
 }
 
 export interface OtherServiceData {
+  company_name?: string;
   description: string;
   price: number;
 }

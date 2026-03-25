@@ -663,6 +663,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
 
 /* ━━━━━━━━━━━━━━━━━━━ TRANSFER FORM ━━━━━━━━━━━━━━━━━━━ */
 const transferSchema = z.object({
+  company_name: z.string().optional(),
   transfer_mode: z.enum(["arrival", "departure", "round_trip"]),
   location: z.string().min(2, "Local é obrigatório"),
   arrival_date: z.date({ required_error: "Data de chegada é obrigatória" }),
@@ -676,6 +677,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
   const form = useForm<z.infer<typeof transferSchema>>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
+      company_name: init?.company_name || "",
       transfer_mode: init?.transfer_type || "round_trip",
       location: init?.location || "",
       price: init?.price || initialData?.amount || 0,
@@ -690,21 +692,20 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 
   const handleSubmit = async (values: z.infer<typeof transferSchema>) => {
     if (values.transfer_mode === "round_trip") {
-      // Submit arrival first, then departure sequentially to avoid race condition
       await onSubmit(
-        { transfer_type: "arrival" as const, location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        { transfer_type: "arrival" as const, company_name: values.company_name || "", location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
         values.price
       );
       if (values.departure_date) {
         await onSubmit(
-          { transfer_type: "departure" as const, location: values.location, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
+          { transfer_type: "departure" as const, company_name: values.company_name || "", location: values.location, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
           values.price
         );
       }
     } else {
       const mappedType = values.transfer_mode === "arrival" ? "arrival" : "departure";
       await onSubmit(
-        { transfer_type: mappedType, location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        { transfer_type: mappedType, company_name: values.company_name || "", location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
         values.price
       );
     }
@@ -974,6 +975,7 @@ const insuranceSchema = z.object({
   coverage: z.string().min(2, "Cobertura é obrigatória"),
   price: z.number().min(0),
   is_unit_price: z.boolean(),
+  notes: z.string().optional(),
 });
 
 function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
@@ -982,7 +984,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
   const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: true, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate },
+    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: true, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
   });
 
   const isUnitPrice = true;
@@ -991,7 +993,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
     const computed = values.price * totalPax;
-    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: true }, computed);
+    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: true, notes: values.notes || "" }, computed);
   };
 
   return (
@@ -1043,6 +1045,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
           </FormItem>
         )} />
         {paymentSlot}
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -1060,6 +1065,7 @@ const cruiseSchema = z.object({
   end_date: z.date({ required_error: "Data fim é obrigatória" }),
   cabin_type: z.string().min(1, "Tipo de cabine é obrigatório"),
   price: z.number().min(0),
+  notes: z.string().optional(),
 });
 
 function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
@@ -1067,14 +1073,14 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof cruiseSchema>>({
     resolver: zodResolver(cruiseSchema),
-    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate },
+    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
   });
 
   const handleSubmit = (values: z.infer<typeof cruiseSchema>) => {
     onSubmit({
       ship_name: values.ship_name, route: values.route,
       start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"),
-      cabin_type: values.cabin_type, price: values.price,
+      cabin_type: values.cabin_type, price: values.price, notes: values.notes || "",
     }, values.price);
   };
 
@@ -1124,6 +1130,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
         {paymentSlot}
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -1135,6 +1144,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
 
 /* ━━━━━━━━━━━━━━━━━━━ OTHER FORM ━━━━━━━━━━━━━━━━━━━ */
 const otherSchema = z.object({
+  company_name: z.string().optional(),
   description: z.string().min(5, "Descrição é obrigatória"),
   price: z.number().min(0),
 });
@@ -1143,16 +1153,19 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
-    defaultValues: { description: init?.description || "", price: init?.price || initialData?.amount || 0 },
+    defaultValues: { company_name: init?.company_name || "", description: init?.description || "", price: init?.price || initialData?.amount || 0 },
   });
 
   const handleSubmit = (values: z.infer<typeof otherSchema>) => {
-    onSubmit({ description: values.description, price: values.price }, values.price);
+    onSubmit({ company_name: values.company_name || "", description: values.description, price: values.price }, values.price);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField control={form.control} name="company_name" render={({ field }) => (
+          <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl><Input placeholder="Nome da empresa..." {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
         <FormField control={form.control} name="description" render={({ field }) => (
           <FormItem><FormLabel>Descrição do Serviço</FormLabel><FormControl><Textarea placeholder="Descreva o serviço..." rows={3} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -1272,10 +1285,14 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
   const [hotelPlaceId, setHotelPlaceId] = useState<string | null>(null);
+  const [transferCompanyName, setTransferCompanyName] = useState(
+    initialData?.service_data?.company_name || ""
+  );
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
-    onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
+    const finalData = serviceType === 'transfer' ? { ...data, company_name: transferCompanyName } : data;
+    onSubmit(finalData, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
   const isHotel = serviceType === 'hotel';
@@ -1309,6 +1326,12 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
 
   return (
     <div className="space-y-4">
+      {serviceType === 'transfer' && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Nome da Empresa</label>
+          <Input placeholder="Ex: Wemoov, TourTransfer..." value={transferCompanyName} onChange={(e) => setTransferCompanyName(e.target.value)} />
+        </div>
+      )}
       {!(serviceType === 'flight' || serviceType === 'hotel') && photoSlotElement}
       {formElement}
     </div>
