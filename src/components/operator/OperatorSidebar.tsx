@@ -93,8 +93,11 @@ export function OperatorSidebar({ operator }: OperatorSidebarProps) {
     },
   ].filter(Boolean) as { icon: React.ElementType; label: string; value: string }[];
 
+  // Only show company info if there's meaningful data beyond an empty category
+  const hasCompanyInfo = infoItems.some(item => item.value && item.value.trim() !== "");
+
   return (
-    <div className="space-y-5 lg:sticky lg:top-6">
+    <div className="space-y-5">
       {/* Specialties */}
       {tags.length > 0 && (
         <Card className="rounded-2xl border-border/60 shadow-sm bg-card">
@@ -152,32 +155,34 @@ export function OperatorSidebar({ operator }: OperatorSidebarProps) {
         </Card>
       )}
 
-      {/* Company Info */}
-      <Card className="rounded-2xl border-border/60 shadow-sm bg-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2.5 text-base font-semibold">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Info className="h-4 w-4 text-primary" />
-            </div>
-            Informações da Empresa
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {infoItems.map(({ icon: Icon, label, value }, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="h-8 w-8 shrink-0 rounded-lg bg-muted/80 flex items-center justify-center mt-0.5">
-                  <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="text-sm font-medium text-foreground whitespace-pre-wrap">{value}</p>
-                </div>
+      {/* Company Info — rendered only once, only if there's data */}
+      {hasCompanyInfo && (
+        <Card className="rounded-2xl border-border/60 shadow-sm bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2.5 text-base font-semibold">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Info className="h-4 w-4 text-primary" />
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              Informações da Empresa
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {infoItems.map(({ icon: Icon, label, value }, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="h-8 w-8 shrink-0 rounded-lg bg-muted/80 flex items-center justify-center mt-0.5">
+                    <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="text-sm font-medium text-foreground whitespace-pre-wrap">{value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
