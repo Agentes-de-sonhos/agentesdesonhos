@@ -4,11 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Search, FileText, CheckCircle2, Plane } from "lucide-react";
+import { Loader2, Search, FileText, CheckCircle2, Plane, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
-interface FlightImportResult {
+interface FlightSegment {
   airline?: string;
   flight_number?: string;
   origin_airport?: string;
@@ -18,6 +19,10 @@ interface FlightImportResult {
   departure_time?: string;
   arrival_time?: string;
   flight_status?: string;
+}
+
+interface FlightImportResult extends FlightSegment {
+  segments?: FlightSegment[];
 }
 
 interface FlightAutoImportProps {
@@ -41,7 +46,8 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
     setIsSearching(true);
     setResult(null);
     try {
-      const params = new URLSearchParams({ flight_number: flightNumber.trim() });
+      const normalized = flightNumber.replace(/\s+/g, "").toUpperCase();
+      const params = new URLSearchParams({ flight_number: normalized });
       if (flightDate) params.set("flight_date", flightDate);
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const session = await supabase.auth.getSession();
@@ -61,14 +67,21 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
       if (!resp.ok) {
         toast({
           title: "Voo não encontrado",
-          description: json.error || "Verifique o número do voo ou insira os dados manualmente.",
+          description: json.error || "Não foi possível encontrar os dados deste voo. Preencha manualmente.",
           variant: "destructive",
         });
         return;
       }
 
       setResult(json);
-      toast({ title: "✈️ Voo detectado!", description: `${json.origin_airport} → ${json.destination_airport}` });
+      const segments = json.segments || [json];
+      const segCount = segments.length;
+      toast({
+        title: "✈️ Voo detectado!",
+        description: segCount > 1
+          ? `${segCount} trechos: ${segments[0].origin_airport} → ${segments[segCount - 1].destination_airport}`
+          : `${json.origin_airport} → ${json.destination_airport}`,
+      });
     } catch (err) {
       toast({ title: "Erro ao buscar voo", description: "Tente novamente.", variant: "destructive" });
     } finally {
@@ -121,7 +134,6 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
         );
         if (lookupResp.ok) {
           const enriched = await lookupResp.json();
-          // Merge: prefer enriched data, but keep parsed times if enriched doesn't have them
           const merged = {
             ...parsed,
             ...enriched,
@@ -132,7 +144,7 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
           toast({ title: "✈️ Voo detectado e enriquecido!", description: `${merged.origin_airport} → ${merged.destination_airport}` });
           return;
         } else {
-          await lookupResp.text(); // consume body
+          await lookupResp.text();
         }
       }
 
@@ -160,14 +172,31 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
     }
   };
 
+  const formatDateTime = (dt: string) => {
+    if (!dt) return "";
+    try {
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return dt;
+      return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }) +
+        " " +
+        d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return dt;
+    }
+  };
+
   const formatTime = (dt: string) => {
     if (!dt) return "";
-    if (dt.includes("T")) {
-      try { return new Date(dt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
-      catch { return dt; }
+    try {
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return dt;
+      return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return dt;
     }
-    return dt;
   };
+
+  const segments = result?.segments || (result ? [result] : []);
 
   return (
     <Card className="border-primary/20 bg-primary/5">
@@ -247,30 +276,16 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
 
         {/* Result preview */}
         {result && (
-          <div className="rounded-lg border border-primary/30 bg-background p-3 space-y-2">
+          <div className="rounded-lg border border-primary/30 bg-background p-3 space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-primary">
               <CheckCircle2 className="h-4 w-4" />
-              Voo detectado
+              {segments.length > 1 ? `${segments.length} trechos detectados` : 'Voo detectado'}
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="font-semibold">{result.airline || ''}</span>
-              {result.flight_number && (
-                <span className="text-muted-foreground">{result.flight_number}</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-lg font-bold">
-              <span>{result.origin_airport || '???'}</span>
-              <span className="text-muted-foreground">→</span>
-              <span>{result.destination_airport || '???'}</span>
-            </div>
-            {(result.departure_time || result.arrival_time) && (
-              <div className="text-sm text-muted-foreground">
-                {formatTime(result.departure_time)} → {formatTime(result.arrival_time)}
-              </div>
-            )}
-            {result.flight_status && (
-              <FlightStatusBadge status={result.flight_status} />
-            )}
+
+            {segments.map((seg, idx) => (
+              <SegmentCard key={idx} segment={seg} index={idx} total={segments.length} formatDateTime={formatDateTime} formatTime={formatTime} />
+            ))}
+
             <Button type="button" size="sm" onClick={handleApply} className="w-full mt-2">
               Preencher Campos Automaticamente
             </Button>
@@ -278,6 +293,57 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function SegmentCard({
+  segment,
+  index,
+  total,
+  formatDateTime,
+  formatTime,
+}: {
+  segment: FlightSegment;
+  index: number;
+  total: number;
+  formatDateTime: (dt: string) => string;
+  formatTime: (dt: string) => string;
+}) {
+  return (
+    <div className={cn(
+      "rounded-md border p-3 space-y-1.5",
+      total > 1 ? "border-muted bg-muted/30" : "border-transparent"
+    )}>
+      {total > 1 && (
+        <div className="text-xs font-medium text-muted-foreground mb-1">
+          Trecho {index + 1} de {total}
+        </div>
+      )}
+      <div className="flex items-center gap-3 text-sm">
+        <span className="font-semibold">{segment.airline || ''}</span>
+        {segment.flight_number && (
+          <span className="text-muted-foreground">{segment.flight_number}</span>
+        )}
+      </div>
+      <div className="flex items-center gap-2 text-lg font-bold">
+        <span>{segment.origin_airport || '???'}</span>
+        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+        <span>{segment.destination_airport || '???'}</span>
+      </div>
+      {(segment.origin_city || segment.destination_city) && (
+        <div className="text-xs text-muted-foreground">
+          {segment.origin_city} → {segment.destination_city}
+        </div>
+      )}
+      {(segment.departure_time || segment.arrival_time) && (
+        <div className="text-sm text-muted-foreground">
+          {formatDateTime(segment.departure_time || '')} → {formatDateTime(segment.arrival_time || '')}
+        </div>
+      )}
+      {segment.flight_status && (
+        <FlightStatusBadge status={segment.flight_status} />
+      )}
+    </div>
   );
 }
 
