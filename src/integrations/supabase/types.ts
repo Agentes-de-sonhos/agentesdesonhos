@@ -5479,6 +5479,30 @@ export type Database = {
           },
         ]
       }
+      supplier_likes: {
+        Row: {
+          created_at: string
+          id: string
+          supplier_id: string
+          supplier_source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          supplier_id: string
+          supplier_source?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          supplier_id?: string
+          supplier_source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       supplier_payments: {
         Row: {
           amount: number
