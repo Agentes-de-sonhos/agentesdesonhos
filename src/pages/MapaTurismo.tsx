@@ -166,18 +166,33 @@ export default function MapaTurismo() {
 
   // Merge DB specialties + operator specialties for complete filter list
   const allSpecialties = useMemo(() => {
-    const names = new Set(dbSpecialties.map((s) => s.name));
-    // Also collect specialties from operators that might not be in the DB table
+    const namesMap = new Map<string, string>(); // lowercased → original casing
+    // Add from DB specialties table
+    dbSpecialties.forEach((s) => {
+      const key = s.name.trim().toLowerCase();
+      if (key && !namesMap.has(key)) namesMap.set(key, s.name.trim());
+    });
+    // Add from supplier_specialties (already structured)
+    (suppliers || []).forEach((sup: any) => {
+      (sup.specialties || []).forEach((s: any) => {
+        if (!s?.name) return;
+        const key = s.name.trim().toLowerCase();
+        if (key && !namesMap.has(key)) namesMap.set(key, s.name.trim());
+      });
+    });
+    // Add from tour_operators CSV field
     (tourOperators || []).forEach((op: any) => {
       if (op.specialties) {
         op.specialties.split(",").forEach((s: string) => {
           const trimmed = s.trim();
-          if (trimmed) names.add(trimmed);
+          if (!trimmed) return;
+          const key = trimmed.toLowerCase();
+          if (!namesMap.has(key)) namesMap.set(key, trimmed);
         });
       }
     });
-    return Array.from(names).sort();
-  }, [dbSpecialties, tourOperators]);
+    return Array.from(namesMap.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [dbSpecialties, suppliers, tourOperators]);
 
   const specialtyOptions = allSpecialties.map((name) => ({
     value: name,
@@ -191,11 +206,12 @@ export default function MapaTurismo() {
       ? allItems.filter((item) => {
           const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
           const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+          const selectedLower = selectedSpecialties.map((s) => s.toLowerCase());
           const matchesSpecialties =
-            selectedSpecialties.length === 0 ||
-            selectedSpecialties.some((specialtyName) =>
+            selectedLower.length === 0 ||
+            selectedLower.some((specLower) =>
               item.specialties?.some(
-                (s: Specialty) => s.name.toLowerCase() === specialtyName.toLowerCase()
+                (s: Specialty) => s.name.trim().toLowerCase() === specLower
               )
             );
           return matchesSearch && matchesCategory && matchesSpecialties;
