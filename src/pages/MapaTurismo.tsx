@@ -44,19 +44,20 @@ interface CategoryDef {
   title: string;
   icon: LucideIcon;
   category: string;
+  color: string;
 }
 
 const CATEGORIES_DATA: CategoryDef[] = [
-  { title: "Operadoras de turismo", icon: Plane, category: "Operadoras de turismo" },
-  { title: "Consolidadoras", icon: Building2, category: "Consolidadoras" },
-  { title: "Companhias aéreas", icon: Plane, category: "Companhias aéreas" },
-  { title: "Hospedagem", icon: Hotel, category: "Hospedagem" },
-  { title: "Locadoras de veículos", icon: Car, category: "Locadoras de veículos" },
-  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros" },
-  { title: "Seguros viagem", icon: Shield, category: "Seguros viagem" },
-  { title: "Parques e atrações", icon: Ticket, category: "Parques e atrações" },
-  { title: "Receptivos", icon: MapPin, category: "Receptivos" },
-  { title: "Guias", icon: Users, category: "Guias" },
+  { title: "Operadoras", icon: Plane, category: "Operadoras de turismo", color: "bg-blue-500" },
+  { title: "Consolidadoras", icon: Building2, category: "Consolidadoras", color: "bg-indigo-500" },
+  { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-500" },
+  { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-500" },
+  { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-500" },
+  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-500" },
+  { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-500" },
+  { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-purple-500" },
+  { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-500" },
+  { title: "Guias", icon: Users, category: "Guias", color: "bg-teal-500" },
 ];
 
 const CATEGORY_NAMES = CATEGORIES_DATA.map((c) => c.category);
@@ -123,7 +124,7 @@ export default function MapaTurismo() {
   };
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
-  const { data: allSpecialties = [] } = useAllSpecialties();
+  const { data: dbSpecialties = [] } = useAllSpecialties();
 
   const { data: tourOperators, isLoading: loadingOperators } = useQuery({
     queryKey: ["tour-operators-listing"],
@@ -161,9 +162,24 @@ export default function MapaTurismo() {
     return [...fromSuppliers, ...fromOperators];
   }, [suppliers, tourOperators]);
 
-  const specialtyOptions = allSpecialties.map((s) => ({
-    value: s.name,
-    label: s.name,
+  // Merge DB specialties + operator specialties for complete filter list
+  const allSpecialties = useMemo(() => {
+    const names = new Set(dbSpecialties.map((s) => s.name));
+    // Also collect specialties from operators that might not be in the DB table
+    (tourOperators || []).forEach((op: any) => {
+      if (op.specialties) {
+        op.specialties.split(",").forEach((s: string) => {
+          const trimmed = s.trim();
+          if (trimmed) names.add(trimmed);
+        });
+      }
+    });
+    return Array.from(names).sort();
+  }, [dbSpecialties, tourOperators]);
+
+  const specialtyOptions = allSpecialties.map((name) => ({
+    value: name,
+    label: name,
   }));
 
   const hasActiveFilter = categoryFilter !== "all" || search.length > 0 || selectedSpecialties.length > 0;
@@ -242,7 +258,7 @@ export default function MapaTurismo() {
         />
 
         {/* Category horizontal scroll */}
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
           {CATEGORIES_DATA.map((cat) => {
             const Icon = cat.icon;
             const isActive = categoryFilter === cat.category;
@@ -251,14 +267,14 @@ export default function MapaTurismo() {
                 key={cat.category}
                 onClick={() => handleCategoryChange(cat.category)}
                 className={cn(
-                  "group flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium transition-all duration-200 flex-shrink-0 border",
+                  "group flex flex-col items-center justify-center gap-1.5 rounded-xl p-3 text-center transition-all duration-200 aspect-square",
                   isActive
-                    ? "bg-primary text-primary-foreground border-primary shadow-md ring-2 ring-primary/30"
-                    : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground hover:bg-accent/50"
+                    ? `${cat.color} text-white shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-105`
+                    : "bg-card text-muted-foreground border border-border hover:shadow-md hover:scale-[1.03]"
                 )}
               >
-                <Icon className={cn("h-4 w-4 transition-colors", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
-                {cat.title}
+                <Icon className={cn("h-5 w-5 sm:h-6 sm:w-6 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-foreground")} />
+                <span className="text-[10px] sm:text-xs font-medium leading-tight">{cat.title}</span>
               </button>
             );
           })}
