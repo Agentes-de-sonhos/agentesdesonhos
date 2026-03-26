@@ -306,7 +306,7 @@ export default function MapaTurismo() {
         </div>
 
         {/* Filters row: search + specialties inline */}
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-wrap">
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -329,6 +329,19 @@ export default function MapaTurismo() {
               />
             </div>
           )}
+          <div className="flex items-center gap-2 shrink-0">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground hidden sm:block" />
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+              <SelectTrigger className="w-[180px] h-10 text-sm bg-card">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alpha">Ordem alfabética</SelectItem>
+                <SelectItem value="rating">Melhor avaliadas</SelectItem>
+                <SelectItem value="likes">Mais curtidas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {(search || selectedSpecialties.length > 0) && (
             <Button variant="ghost" size="sm" className="h-10 gap-1 shrink-0" onClick={clearAllFilters}>
               <X className="h-3.5 w-3.5" />
@@ -337,26 +350,13 @@ export default function MapaTurismo() {
           )}
         </div>
 
-        {/* Sort + count bar */}
+        {/* Count bar */}
         {hasActiveFilter && filteredSuppliers.length > 0 && (
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <p className="text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">{filteredSuppliers.length}</span>{" "}
               fornecedor{filteredSuppliers.length !== 1 ? "es" : ""}
             </p>
-            <div className="flex items-center gap-2">
-              <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                <SelectTrigger className="w-[180px] h-9 text-sm bg-card">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alpha">Ordem alfabética</SelectItem>
-                  <SelectItem value="rating">Melhor avaliadas</SelectItem>
-                  <SelectItem value="likes">Mais curtidas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         )}
 
