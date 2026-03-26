@@ -258,7 +258,7 @@ export default function MapaTurismo() {
         />
 
         {/* Category horizontal scroll */}
-        <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+        <div className="flex flex-wrap gap-2 justify-center">
           {CATEGORIES_DATA.map((cat) => {
             const Icon = cat.icon;
             const isActive = categoryFilter === cat.category;
@@ -267,14 +267,14 @@ export default function MapaTurismo() {
                 key={cat.category}
                 onClick={() => handleCategoryChange(cat.category)}
                 className={cn(
-                  "group flex flex-col items-center justify-center gap-1.5 rounded-xl p-3 text-center transition-all duration-200 aspect-square",
+                  "group flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 whitespace-nowrap",
                   isActive
-                    ? `${cat.color} text-white shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-105`
-                    : "bg-card text-muted-foreground border border-border hover:shadow-md hover:scale-[1.03]"
+                    ? `${cat.color} text-white shadow-md scale-105`
+                    : `${cat.color}/10 text-foreground/70 hover:${cat.color}/20 hover:scale-[1.02]`
                 )}
               >
-                <Icon className={cn("h-5 w-5 sm:h-6 sm:w-6 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-foreground")} />
-                <span className="text-[10px] sm:text-xs font-medium leading-tight">{cat.title}</span>
+                <Icon className={cn("h-4 w-4 transition-colors", isActive ? "text-white" : `${cat.color.replace('bg-', 'text-')}`)} />
+                <span>{cat.title}</span>
               </button>
             );
           })}
