@@ -621,7 +621,14 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField control={form.control} name="rental_company" render={({ field }) => (
-          <FormItem><FormLabel>Nome da Locadora</FormLabel><FormControl><Input placeholder="Ex: Localiza, Hertz, Movida..." {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Nome da Locadora</FormLabel><FormControl>
+            <PlacesAutocomplete
+              value={field.value || ""}
+              onChange={field.onChange}
+              placeType="car_rental"
+              placeholder="Ex: Localiza, Hertz, Movida..."
+            />
+          </FormControl><FormMessage /></FormItem>
         )} />
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_location" render={({ field }) => (
@@ -897,7 +904,14 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="product_name" render={({ field }) => (
-            <FormItem><FormLabel>Nome do Produto</FormLabel><FormControl><Input placeholder="Universal Orlando, Disney..." {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Nome do Produto</FormLabel><FormControl>
+              <PlacesAutocomplete
+                value={field.value}
+                onChange={field.onChange}
+                placeType="attraction"
+                placeholder="Universal Orlando, Disney..."
+              />
+            </FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="ticket_type" render={({ field }) => (
             <FormItem><FormLabel>Tipo de Ingresso <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Input placeholder="2day-2park, Park Hopper..." {...field} /></FormControl><FormMessage /></FormItem>
@@ -1175,7 +1189,14 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField control={form.control} name="company_name" render={({ field }) => (
-          <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl><Input placeholder="Nome da empresa..." {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl>
+            <PlacesAutocomplete
+              value={field.value || ""}
+              onChange={field.onChange}
+              placeType="general"
+              placeholder="Nome da empresa..."
+            />
+          </FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="description" render={({ field }) => (
           <FormItem><FormLabel>Descrição do Serviço</FormLabel><FormControl><Textarea placeholder="Descreva o serviço..." rows={3} {...field} /></FormControl><FormMessage /></FormItem>
