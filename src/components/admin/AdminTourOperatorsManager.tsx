@@ -50,19 +50,140 @@ import { useNavigate } from "react-router-dom";
 import { SupplierLogoUpload } from "./SupplierLogoUpload";
 
 const TEMPLATE_HEADERS = [
-  "name",
-  "category",
-  "specialties",
-  "how_to_sell",
-  "sales_channels",
-  "commercial_contacts",
-  "website",
-  "instagram",
-  "founded_year",
-  "annual_revenue",
-  "employees",
-  "executive_team",
+  "Operator Name",
+  "Category",
+  "Description",
+  "How to Sell",
+  "Sales Channels",
+  "Commercial Contacts",
+  "Business Hours",
+  "Specialties",
+  "Competitive Advantages",
+  "Certifications",
+  "Instagram",
+  "Facebook",
+  "LinkedIn",
+  "YouTube",
+  "TikTok",
+  "Telegram",
+  "Website",
+  "Founding Year",
+  "Annual Revenue",
+  "Number of Employees",
+  "Executive Team",
 ];
+
+const HEADER_ALIASES = {
+  name: ["name", "operator name", "nome da operadora", "operator_name"],
+  category: ["category", "categoria"],
+  description: ["description", "descrição", "descricao"],
+  how_to_sell: ["how to sell", "how_to_sell", "como vender"],
+  sales_channels: ["sales channels", "sales_channels", "canais de venda"],
+  commercial_contacts: ["commercial contacts", "commercial_contacts", "contatos comerciais"],
+  business_hours: ["business hours", "business_hours", "horários e suporte", "horarios e suporte"],
+  specialties: ["specialties", "especialidades"],
+  competitive_advantages: ["competitive advantages", "competitive_advantages", "diferenciais competitivos"],
+  certifications: ["certifications", "certifications and associations", "associações e certificações", "associacoes e certificacoes"],
+  instagram: ["instagram"],
+  facebook: ["facebook"],
+  linkedin: ["linkedin", "linked in"],
+  youtube: ["youtube", "you tube"],
+  tiktok: ["tiktok", "tik tok"],
+  telegram: ["telegram"],
+  website: ["website", "site"],
+  founded_year: ["founding year", "founded year", "founding_year", "founded_year", "ano de fundação", "ano de fundacao"],
+  annual_revenue: ["annual revenue", "annual_revenue", "faturamento anual"],
+  employees: ["number of employees", "employees", "number_of_employees", "funcionários", "funcionarios"],
+  executive_team: ["executive team", "executive_team", "equipe executiva"],
+} as const;
+
+const normalizeHeader = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const toText = (value: unknown) => {
+  if (value == null) return "";
+  return String(value).trim();
+};
+
+const toInteger = (value: unknown) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.trunc(value);
+  }
+
+  const text = toText(value)
+    .replace(/^=/, "")
+    .replace(/\s+/g, "")
+    .replace(/,(?=\d{3}(\D|$))/g, "");
+
+  if (!text) return null;
+
+  const match = text.match(/-?\d+/);
+  return match ? Number(match[0]) : null;
+};
+
+const normalizeCategory = (value: unknown) => {
+  const raw = toText(value);
+  const normalized = normalizeHeader(raw);
+
+  if (!normalized) return "Operadoras de turismo";
+
+  const categoryMap: Record<string, string> = {
+    operadora: "Operadoras de turismo",
+    operadoras: "Operadoras de turismo",
+    "operadoras de turismo": "Operadoras de turismo",
+    consolidadora: "Consolidadoras",
+    consolidadoras: "Consolidadoras",
+    "companhia aerea": "Companhias aéreas",
+    "companhias aereas": "Companhias aéreas",
+    hospedagem: "Hospedagem",
+    hotel: "Hospedagem",
+    hoteis: "Hospedagem",
+    locadora: "Locadoras de veículos",
+    "locadoras de veiculos": "Locadoras de veículos",
+    cruzeiro: "Cruzeiros",
+    cruzeiros: "Cruzeiros",
+    "seguro viagem": "Seguros viagem",
+    "seguros viagem": "Seguros viagem",
+    "parque e atracao": "Parques e atrações",
+    "parques e atracoes": "Parques e atrações",
+    receptivo: "Receptivos",
+    receptivos: "Receptivos",
+    guia: "Guias",
+    guias: "Guias",
+  };
+
+  return categoryMap[normalized] || raw;
+};
+
+const normalizeOperatorName = (value: string) => normalizeHeader(value);
+
+const buildRowLookup = (row: Record<string, unknown>) => {
+  return Object.entries(row).reduce<Record<string, unknown>>((acc, [key, value]) => {
+    acc[normalizeHeader(key)] = value;
+    return acc;
+  }, {});
+};
+
+const getMappedValue = (
+  lookup: Record<string, unknown>,
+  aliases: readonly string[]
+) => {
+  for (const alias of aliases) {
+    const value = lookup[normalizeHeader(alias)];
+    if (value !== undefined) return value;
+  }
+  return "";
+};
+
+const appendSection = (label: string, value: unknown) => {
+  const text = toText(value);
+  return text ? `${label}: ${text}` : null;
+};
 
 const CATEGORIES = [
   "Operadoras de turismo",
@@ -260,7 +381,7 @@ export function AdminTourOperatorsManager() {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows: any[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
       if (rows.length === 0) {
         toast.error("Planilha vazia");
@@ -268,44 +389,90 @@ export function AdminTourOperatorsManager() {
         return;
       }
 
+      const { data: existingOperators, error: existingError } = await supabase
+        .from("tour_operators")
+        .select("name");
+
+      if (existingError) throw existingError;
+
+      const existingNames = new Set(
+        (existingOperators || [])
+          .map((operator) => normalizeOperatorName(operator.name || ""))
+          .filter(Boolean)
+      );
+
       // Process each row independently, in order
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         const lineNum = i + 2; // +2 because row 1 is the header
 
         try {
-          const name = String(row.name || "").trim();
+          const lookup = buildRowLookup(row);
+          const name = toText(getMappedValue(lookup, HEADER_ALIASES.name));
+
           if (!name) {
             result.errors.push(`Linha ${lineNum}: nome vazio`);
             continue;
           }
 
-          const payload = {
-            name,
-            category: String(row.category || "Operadoras de turismo").trim(),
-            specialties: String(row.specialties || "").trim() || null,
-            how_to_sell: String(row.how_to_sell || "").trim() || null,
-            sales_channels: String(row.sales_channels || "").trim() || null,
-            commercial_contacts: String(row.commercial_contacts || "").trim() || null,
-            website: String(row.website || "").trim() || null,
-            instagram: String(row.instagram || "").trim() || null,
-            founded_year: row.founded_year ? Number(row.founded_year) || null : null,
-            annual_revenue: String(row.annual_revenue || "").trim() || null,
-            employees: row.employees ? Number(row.employees) || null : null,
-            executive_team: String(row.executive_team || "").trim() || null,
-          };
-
-          // Check if already exists by name
-          const { data: existing } = await supabase
-            .from("tour_operators")
-            .select("id")
-            .eq("name", name)
-            .maybeSingle();
-
-          if (existing) {
+          const normalizedName = normalizeOperatorName(name);
+          if (existingNames.has(normalizedName)) {
             result.skipped++;
             continue;
           }
+
+          const description = appendSection(
+            "Descrição",
+            getMappedValue(lookup, HEADER_ALIASES.description)
+          );
+          const businessHours = appendSection(
+            "Horários e suporte",
+            getMappedValue(lookup, HEADER_ALIASES.business_hours)
+          );
+          const competitiveAdvantages = appendSection(
+            "Diferenciais competitivos",
+            getMappedValue(lookup, HEADER_ALIASES.competitive_advantages)
+          );
+          const certifications = appendSection(
+            "Certificações",
+            getMappedValue(lookup, HEADER_ALIASES.certifications)
+          );
+
+          const howToSellParts = [
+            toText(getMappedValue(lookup, HEADER_ALIASES.how_to_sell)),
+            description,
+            businessHours,
+            competitiveAdvantages,
+            certifications,
+          ].filter(Boolean);
+
+          const socialLinks = {
+            facebook: toText(getMappedValue(lookup, HEADER_ALIASES.facebook)),
+            linkedin: toText(getMappedValue(lookup, HEADER_ALIASES.linkedin)),
+            youtube: toText(getMappedValue(lookup, HEADER_ALIASES.youtube)),
+            tiktok: toText(getMappedValue(lookup, HEADER_ALIASES.tiktok)),
+            telegram: toText(getMappedValue(lookup, HEADER_ALIASES.telegram)),
+          };
+
+          const filteredSocialLinks = Object.fromEntries(
+            Object.entries(socialLinks).filter(([, value]) => Boolean(value))
+          );
+
+          const payload = {
+            name,
+            category: normalizeCategory(getMappedValue(lookup, HEADER_ALIASES.category)),
+            specialties: toText(getMappedValue(lookup, HEADER_ALIASES.specialties)) || null,
+            how_to_sell: howToSellParts.join("\n\n") || null,
+            sales_channels: toText(getMappedValue(lookup, HEADER_ALIASES.sales_channels)) || null,
+            commercial_contacts: toText(getMappedValue(lookup, HEADER_ALIASES.commercial_contacts)) || null,
+            website: toText(getMappedValue(lookup, HEADER_ALIASES.website)) || null,
+            instagram: toText(getMappedValue(lookup, HEADER_ALIASES.instagram)) || null,
+            founded_year: toInteger(getMappedValue(lookup, HEADER_ALIASES.founded_year)),
+            annual_revenue: toText(getMappedValue(lookup, HEADER_ALIASES.annual_revenue)) || null,
+            employees: toInteger(getMappedValue(lookup, HEADER_ALIASES.employees)),
+            executive_team: toText(getMappedValue(lookup, HEADER_ALIASES.executive_team)) || null,
+            social_links: Object.keys(filteredSocialLinks).length > 0 ? filteredSocialLinks : null,
+          };
 
           const { error: insertErr } = await supabase
             .from("tour_operators")
@@ -318,6 +485,7 @@ export function AdminTourOperatorsManager() {
               result.errors.push(`Linha ${lineNum}: ${insertErr.message}`);
             }
           } else {
+            existingNames.add(normalizedName);
             result.created++;
           }
         } catch (rowErr: any) {
