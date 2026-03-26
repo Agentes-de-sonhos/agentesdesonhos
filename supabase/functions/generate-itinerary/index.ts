@@ -61,10 +61,14 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
-
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const token = authHeader.replace("Bearer ", "");
+
+    const supabase = createClient(supabaseUrl, anonKey, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: authHeader } },
+    });
+
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData?.user) {
       console.error("Auth error:", userError?.message);
@@ -75,9 +79,12 @@ serve(async (req) => {
 
     const userId = userData.user.id;
 
-    const { data: hasAccess, error: accessError } = await supabase.rpc('has_feature_access', { _user_id: userId, _feature: 'ai_tools' });
+    const { data: hasAccess, error: accessError } = await supabase.rpc("has_feature_access", { _user_id: userId, _feature: "ai_tools" });
     if (accessError) {
       console.error("has_feature_access error:", accessError.message);
+      return new Response(JSON.stringify({ error: "Erro ao validar acesso ao recurso." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
     if (!hasAccess) {
       return new Response(JSON.stringify({ error: "Faça upgrade para o plano Profissional para acessar ferramentas de IA.", upgrade_required: true }), {
@@ -85,9 +92,12 @@ serve(async (req) => {
       });
     }
 
-    const { data: canUse, error: usageError } = await supabase.rpc('check_ai_usage', { _user_id: userId });
+    const { data: canUse, error: usageError } = await supabase.rpc("check_ai_usage", { _user_id: userId });
     if (usageError) {
       console.error("check_ai_usage error:", usageError.message);
+      return new Response(JSON.stringify({ error: "Erro ao validar sua cota de IA." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
     if (!canUse) {
       return new Response(JSON.stringify({ error: "Cota mensal de IA esgotada.", quota_exceeded: true }), {
