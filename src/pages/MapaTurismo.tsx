@@ -162,9 +162,24 @@ export default function MapaTurismo() {
     return [...fromSuppliers, ...fromOperators];
   }, [suppliers, tourOperators]);
 
-  const specialtyOptions = allSpecialties.map((s) => ({
-    value: s.name,
-    label: s.name,
+  // Merge DB specialties + operator specialties for complete filter list
+  const allSpecialties = useMemo(() => {
+    const names = new Set(dbSpecialties.map((s) => s.name));
+    // Also collect specialties from operators that might not be in the DB table
+    (tourOperators || []).forEach((op: any) => {
+      if (op.specialties) {
+        op.specialties.split(",").forEach((s: string) => {
+          const trimmed = s.trim();
+          if (trimmed) names.add(trimmed);
+        });
+      }
+    });
+    return Array.from(names).sort();
+  }, [dbSpecialties, tourOperators]);
+
+  const specialtyOptions = allSpecialties.map((name) => ({
+    value: name,
+    label: name,
   }));
 
   const hasActiveFilter = categoryFilter !== "all" || search.length > 0 || selectedSpecialties.length > 0;
