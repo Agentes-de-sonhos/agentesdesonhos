@@ -12,7 +12,9 @@ interface TrainingPlayerProps {
 
 function toEmbedUrl(url: string): string {
   try {
-    const u = new URL(url);
+    // Add protocol if missing so new URL() can parse it
+    const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    const u = new URL(normalized);
     if ((u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) && !u.pathname.includes('/embed/')) {
       const videoId = u.hostname.includes('youtu.be')
         ? u.pathname.slice(1)
