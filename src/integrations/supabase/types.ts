@@ -5918,6 +5918,7 @@ export type Database = {
           instagram: string | null
           is_active: boolean | null
           logo_url: string | null
+          materials: Json | null
           name: string
           sales_channels: string | null
           social_links: Json | null
@@ -5938,6 +5939,7 @@ export type Database = {
           instagram?: string | null
           is_active?: boolean | null
           logo_url?: string | null
+          materials?: Json | null
           name: string
           sales_channels?: string | null
           social_links?: Json | null
@@ -5958,6 +5960,7 @@ export type Database = {
           instagram?: string | null
           is_active?: boolean | null
           logo_url?: string | null
+          materials?: Json | null
           name?: string
           sales_channels?: string | null
           social_links?: Json | null
