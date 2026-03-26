@@ -45,19 +45,21 @@ interface CategoryDef {
   icon: LucideIcon;
   category: string;
   color: string;
+  activeColor: string;
+  iconColor: string;
 }
 
 const CATEGORIES_DATA: CategoryDef[] = [
-  { title: "Operadoras", icon: Plane, category: "Operadoras de turismo", color: "bg-blue-500" },
-  { title: "Consolidadoras", icon: Building2, category: "Consolidadoras", color: "bg-indigo-500" },
-  { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-500" },
-  { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-500" },
-  { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-500" },
-  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-500" },
-  { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-500" },
-  { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-purple-500" },
-  { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-500" },
-  { title: "Guias", icon: Users, category: "Guias", color: "bg-teal-500" },
+  { title: "Operadoras", icon: Plane, category: "Operadoras de turismo", color: "bg-blue-100 text-blue-700", activeColor: "bg-blue-500 text-white", iconColor: "text-blue-500" },
+  { title: "Consolidadoras", icon: Building2, category: "Consolidadoras", color: "bg-violet-100 text-violet-700", activeColor: "bg-violet-500 text-white", iconColor: "text-violet-500" },
+  { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-100 text-sky-700", activeColor: "bg-sky-500 text-white", iconColor: "text-sky-500" },
+  { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-100 text-amber-700", activeColor: "bg-amber-500 text-white", iconColor: "text-amber-500" },
+  { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-100 text-emerald-700", activeColor: "bg-emerald-500 text-white", iconColor: "text-emerald-500" },
+  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500" },
+  { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-100 text-rose-700", activeColor: "bg-rose-500 text-white", iconColor: "text-rose-500" },
+  { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-pink-100 text-pink-700", activeColor: "bg-pink-500 text-white", iconColor: "text-pink-500" },
+  { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", activeColor: "bg-orange-500 text-white", iconColor: "text-orange-500" },
+  { title: "Guias", icon: Users, category: "Guias", color: "bg-teal-100 text-teal-700", activeColor: "bg-teal-500 text-white", iconColor: "text-teal-500" },
 ];
 
 const CATEGORY_NAMES = CATEGORIES_DATA.map((c) => c.category);
@@ -258,7 +260,7 @@ export default function MapaTurismo() {
         />
 
         {/* Category grid */}
-        <div className="flex flex-wrap gap-3 justify-center">
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-3 justify-items-center">
           {CATEGORIES_DATA.map((cat) => {
             const Icon = cat.icon;
             const isActive = categoryFilter === cat.category;
@@ -267,14 +269,14 @@ export default function MapaTurismo() {
                 key={cat.category}
                 onClick={() => handleCategoryChange(cat.category)}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1.5 rounded-xl w-[110px] h-[110px] text-xs font-medium transition-all duration-200",
+                  "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
                   isActive
-                    ? `${cat.color} text-white shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-105`
-                    : `${cat.color}/15 text-foreground/80 hover:scale-110 hover:shadow-md`
+                    ? `${cat.activeColor} shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-[1.02] border-transparent`
+                    : `${cat.color} border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/50`
                 )}
               >
-                <Icon className={cn("h-6 w-6 transition-colors", isActive ? "text-white" : `${cat.color.replace('bg-', 'text-')}`)} />
-                <span className="text-center leading-tight">{cat.title}</span>
+                <Icon className={cn("h-6 w-6", isActive ? "text-white" : cat.iconColor)} />
+                <span className="text-center leading-tight px-1">{cat.title}</span>
               </button>
             );
           })}
