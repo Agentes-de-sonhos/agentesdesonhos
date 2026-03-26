@@ -260,7 +260,7 @@ export default function MapaTurismo() {
         />
 
         {/* Category grid */}
-        <div className="flex flex-wrap gap-3 justify-center">
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-3 justify-items-center">
           {CATEGORIES_DATA.map((cat) => {
             const Icon = cat.icon;
             const isActive = categoryFilter === cat.category;
@@ -269,14 +269,14 @@ export default function MapaTurismo() {
                 key={cat.category}
                 onClick={() => handleCategoryChange(cat.category)}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1.5 rounded-xl w-[110px] h-[110px] text-xs font-medium transition-all duration-200",
+                  "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
                   isActive
-                    ? `${cat.color} text-white shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-105`
-                    : `${cat.color}/15 text-foreground/80 hover:scale-110 hover:shadow-md`
+                    ? `${cat.activeColor} shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-[1.02] border-transparent`
+                    : `${cat.color} border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/50`
                 )}
               >
-                <Icon className={cn("h-6 w-6 transition-colors", isActive ? "text-white" : `${cat.color.replace('bg-', 'text-')}`)} />
-                <span className="text-center leading-tight">{cat.title}</span>
+                <Icon className={cn("h-6 w-6", isActive ? "text-white" : cat.iconColor)} />
+                <span className="text-center leading-tight px-1">{cat.title}</span>
               </button>
             );
           })}
