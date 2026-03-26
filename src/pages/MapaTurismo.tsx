@@ -206,11 +206,12 @@ export default function MapaTurismo() {
       ? allItems.filter((item) => {
           const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
           const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+          const selectedLower = selectedSpecialties.map((s) => s.toLowerCase());
           const matchesSpecialties =
-            selectedSpecialties.length === 0 ||
-            selectedSpecialties.some((specialtyName) =>
+            selectedLower.length === 0 ||
+            selectedLower.some((specLower) =>
               item.specialties?.some(
-                (s: Specialty) => s.name.toLowerCase() === specialtyName.toLowerCase()
+                (s: Specialty) => s.name.trim().toLowerCase() === specLower
               )
             );
           return matchesSearch && matchesCategory && matchesSpecialties;
