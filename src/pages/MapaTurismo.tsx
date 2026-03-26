@@ -38,6 +38,7 @@ import { cn } from "@/lib/utils";
 import { useSuppliersWithSpecialties, useAllSpecialties } from "@/hooks/useSupplierSpecialties";
 import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
 import { useSupplierReviews } from "@/hooks/useSupplierReviews";
+import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { toast } from "sonner";
 
 interface CategoryDef {
@@ -87,7 +88,8 @@ export default function MapaTurismo() {
   const { data: reviewStatsMap = {} } = useSupplierReviewStats();
 
   // Review submission hook for the dialog target
-  const { submitReview } = useSupplierReviews(reviewTarget?.id || "");
+  const { submitReview: submitSupplierReview } = useSupplierReviews(reviewTarget?.source === "supplier" ? reviewTarget.id : "");
+  const { submitReview: submitOperatorReview } = useOperatorReviews(reviewTarget?.source === "operator" ? reviewTarget.id : "");
 
   useEffect(() => {
     const categoria = searchParams.get("categoria");
@@ -250,7 +252,8 @@ export default function MapaTurismo() {
 
   const queryClient = useQueryClient();
   const handleSubmitReview = (data: { rating: number; comment?: string }) => {
-    submitReview.mutate(data, {
+    const mutation = reviewTarget?.source === "operator" ? submitOperatorReview : submitSupplierReview;
+    mutation.mutate(data, {
       onSuccess: () => {
         setReviewDialogOpen(false);
         queryClient.invalidateQueries({ queryKey: ["supplier-review-stats-all"] });
@@ -377,11 +380,12 @@ export default function MapaTurismo() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredSuppliers.map((supplier) => {
-              const stats = reviewStatsMap[supplier.id];
-              const avgRating = stats ? (stats.total / stats.count).toFixed(1) : null;
+              const stats = reviewStatsMap[`${supplier._source}:${supplier.id}`];
+              const avgRating = stats?.count ? (stats.total / stats.count).toFixed(1).replace(".", ",") : null;
               const reviewCount = stats?.count || 0;
               const likeCount = getLikeCount(supplier.id, supplier._source);
               const liked = hasLiked(supplier.id, supplier._source);
+              const fullStars = stats?.count ? Math.round(stats.total / stats.count) : 0;
 
               return (
                 <Card
@@ -434,13 +438,23 @@ export default function MapaTurismo() {
                     <div className="mt-4 pt-3 border-t border-border/50">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         {/* Rating */}
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                          <span className="font-semibold text-foreground">
-                            {avgRating ? `${avgRating} / 5` : "— / 5"}
+                        <div className="flex items-center gap-1.5 text-sm min-w-0">
+                          <span className="font-semibold text-foreground whitespace-nowrap">
+                            {avgRating ?? "—"}
                           </span>
-                          <span className="text-muted-foreground text-xs">
-                            ({reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"})
+                          <div className="flex items-center gap-0.5 text-amber-400 shrink-0" aria-label={`${reviewCount} avaliações`}>
+                            {Array.from({ length: 5 }).map((_, index) => (
+                              <Star
+                                key={index}
+                                className={cn(
+                                  "h-3.5 w-3.5",
+                                  index < fullStars ? "fill-current text-amber-400" : "text-muted-foreground/30"
+                                )}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-muted-foreground text-xs whitespace-nowrap">
+                            {reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"}
                           </span>
                         </div>
 
@@ -487,7 +501,7 @@ export default function MapaTurismo() {
         onOpenChange={setReviewDialogOpen}
         supplierName={reviewTarget?.name || ""}
         onSubmit={handleSubmitReview}
-        isSubmitting={submitReview.isPending}
+          isSubmitting={submitSupplierReview.isPending || submitOperatorReview.isPending}
       />
     </DashboardLayout>
   );
