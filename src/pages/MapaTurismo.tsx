@@ -257,8 +257,8 @@ export default function MapaTurismo() {
           adminTab="trade-suppliers"
         />
 
-        {/* Category horizontal scroll */}
-        <div className="flex flex-wrap gap-2 justify-center">
+        {/* Category grid */}
+        <div className="flex flex-wrap gap-3 justify-center">
           {CATEGORIES_DATA.map((cat) => {
             const Icon = cat.icon;
             const isActive = categoryFilter === cat.category;
@@ -267,14 +267,14 @@ export default function MapaTurismo() {
                 key={cat.category}
                 onClick={() => handleCategoryChange(cat.category)}
                 className={cn(
-                  "group flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 whitespace-nowrap",
+                  "flex flex-col items-center justify-center gap-1.5 rounded-xl w-[110px] h-[110px] text-xs font-medium transition-all duration-200",
                   isActive
-                    ? `${cat.color} text-white shadow-md scale-105`
-                    : `${cat.color}/10 text-foreground/70 hover:${cat.color}/20 hover:scale-[1.02]`
+                    ? `${cat.color} text-white shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-105`
+                    : `${cat.color}/15 text-foreground/80 hover:scale-110 hover:shadow-md`
                 )}
               >
-                <Icon className={cn("h-4 w-4 transition-colors", isActive ? "text-white" : `${cat.color.replace('bg-', 'text-')}`)} />
-                <span>{cat.title}</span>
+                <Icon className={cn("h-6 w-6 transition-colors", isActive ? "text-white" : `${cat.color.replace('bg-', 'text-')}`)} />
+                <span className="text-center leading-tight">{cat.title}</span>
               </button>
             );
           })}
@@ -409,14 +409,14 @@ export default function MapaTurismo() {
                     )}
 
                     {/* Social interaction bar */}
-                    <div className="mt-4 pt-3 border-t border-border/50 space-y-2">
-                      <div className="flex items-center gap-4">
+                    <div className="mt-4 pt-3 border-t border-border/50">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
                         {/* Rating */}
                         <div className="flex items-center gap-1.5 text-sm">
                           <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                           <span className="font-semibold text-foreground">{avgRating || "—"}</span>
                           <span className="text-muted-foreground text-xs">
-                            ({reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"})
+                            ({reviewCount})
                           </span>
                         </div>
 
@@ -433,9 +433,8 @@ export default function MapaTurismo() {
                           <ThumbsUp className={cn("h-3.5 w-3.5", liked && "fill-primary")} />
                           <span>{likeCount}</span>
                         </button>
-                      </div>
 
-                      <div className="flex items-center justify-between">
+                        {/* Avaliar */}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -448,9 +447,6 @@ export default function MapaTurismo() {
                           <Star className="h-3 w-3" />
                           Avaliar
                         </Button>
-                        <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">
-                          Ver detalhes →
-                        </span>
                       </div>
                     </div>
                   </CardContent>
