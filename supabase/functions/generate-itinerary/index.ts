@@ -79,29 +79,23 @@ serve(async (req) => {
 
     const userId = userData.user.id;
 
-    const { data: hasAccess, error: accessError } = await supabase.rpc("has_feature_access", { _user_id: userId, _feature: "ai_tools" });
+    const { data: hasAccess, error: accessError } = await supabase.rpc("has_feature_access", {
+      _user_id: userId,
+      _feature: "itinerary",
+    });
+
     if (accessError) {
       console.error("has_feature_access error:", accessError.message);
       return new Response(JSON.stringify({ error: "Erro ao validar acesso ao recurso." }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!hasAccess) {
-      return new Response(JSON.stringify({ error: "Faça upgrade para o plano Profissional para acessar ferramentas de IA.", upgrade_required: true }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data: canUse, error: usageError } = await supabase.rpc("check_ai_usage", { _user_id: userId });
-    if (usageError) {
-      console.error("check_ai_usage error:", usageError.message);
-      return new Response(JSON.stringify({ error: "Erro ao validar sua cota de IA." }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!canUse) {
-      return new Response(JSON.stringify({ error: "Cota mensal de IA esgotada.", quota_exceeded: true }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!hasAccess) {
+      return new Response(JSON.stringify({ error: "Seu plano atual não inclui a criação de roteiros.", upgrade_required: true }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
