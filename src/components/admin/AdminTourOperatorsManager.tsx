@@ -268,19 +268,19 @@ export function AdminTourOperatorsManager() {
         return;
       }
 
-      const BATCH_SIZE = 50;
-      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-        const batch = rows.slice(i, i + BATCH_SIZE);
-        const toInsert = [];
+      // Process each row independently, in order
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const lineNum = i + 2; // +2 because row 1 is the header
 
-        for (const row of batch) {
+        try {
           const name = String(row.name || "").trim();
           if (!name) {
-            result.errors.push(`Linha ${i + batch.indexOf(row) + 2}: nome vazio`);
+            result.errors.push(`Linha ${lineNum}: nome vazio`);
             continue;
           }
 
-          toInsert.push({
+          const payload = {
             name,
             category: String(row.category || "Operadoras de turismo").trim(),
             specialties: String(row.specialties || "").trim() || null,
@@ -293,33 +293,35 @@ export function AdminTourOperatorsManager() {
             annual_revenue: String(row.annual_revenue || "").trim() || null,
             employees: row.employees ? Number(row.employees) || null : null,
             executive_team: String(row.executive_team || "").trim() || null,
-          });
-        }
+          };
 
-        if (toInsert.length === 0) continue;
+          // Check if already exists by name
+          const { data: existing } = await supabase
+            .from("tour_operators")
+            .select("id")
+            .eq("name", name)
+            .maybeSingle();
 
-        const { data: inserted, error } = await supabase
-          .from("tour_operators")
-          .upsert(toInsert as any, { onConflict: "name", ignoreDuplicates: true })
-          .select();
-
-        if (error) {
-          for (const item of toInsert) {
-            const { error: singleErr } = await supabase
-              .from("tour_operators")
-              .upsert(item as any, { onConflict: "name", ignoreDuplicates: true });
-            if (singleErr) {
-              if (singleErr.message.includes("duplicate") || singleErr.code === "23505") {
-                result.skipped++;
-              } else {
-                result.errors.push(`${item.name}: ${singleErr.message}`);
-              }
-            } else {
-              result.created++;
-            }
+          if (existing) {
+            result.skipped++;
+            continue;
           }
-        } else {
-          result.created += inserted?.length || toInsert.length;
+
+          const { error: insertErr } = await supabase
+            .from("tour_operators")
+            .insert(payload as any);
+
+          if (insertErr) {
+            if (insertErr.message.includes("duplicate") || insertErr.code === "23505") {
+              result.skipped++;
+            } else {
+              result.errors.push(`Linha ${lineNum}: ${insertErr.message}`);
+            }
+          } else {
+            result.created++;
+          }
+        } catch (rowErr: any) {
+          result.errors.push(`Linha ${lineNum}: ${rowErr.message || "erro desconhecido"}`);
         }
       }
 
