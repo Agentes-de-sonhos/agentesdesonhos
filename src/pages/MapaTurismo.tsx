@@ -248,9 +248,13 @@ export default function MapaTurismo() {
     setReviewDialogOpen(true);
   };
 
+  const queryClient = useQueryClient();
   const handleSubmitReview = (data: { rating: number; comment?: string }) => {
     submitReview.mutate(data, {
-      onSuccess: () => setReviewDialogOpen(false),
+      onSuccess: () => {
+        setReviewDialogOpen(false);
+        queryClient.invalidateQueries({ queryKey: ["supplier-review-stats-all"] });
+      },
     });
   };
 
