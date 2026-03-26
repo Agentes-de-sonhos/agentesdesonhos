@@ -432,9 +432,11 @@ export default function MapaTurismo() {
                         {/* Rating */}
                         <div className="flex items-center gap-1.5 text-sm">
                           <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                          <span className="font-semibold text-foreground">{avgRating || "—"}</span>
+                          <span className="font-semibold text-foreground">
+                            {avgRating ? `${avgRating} / 5` : "— / 5"}
+                          </span>
                           <span className="text-muted-foreground text-xs">
-                            ({reviewCount})
+                            ({reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"})
                           </span>
                         </div>
 
