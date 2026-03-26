@@ -4212,6 +4212,51 @@ export type Database = {
         }
         Relationships: []
       }
+      place_cache: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          photo_url: string | null
+          photo_urls: string[] | null
+          place_id: string
+          place_type: string | null
+          raw_data: Json | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          photo_url?: string | null
+          photo_urls?: string[] | null
+          place_id: string
+          place_type?: string | null
+          raw_data?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          photo_url?: string | null
+          photo_urls?: string[] | null
+          place_id?: string
+          place_type?: string | null
+          raw_data?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_updates: {
         Row: {
           created_at: string
