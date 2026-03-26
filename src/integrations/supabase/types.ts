@@ -1957,6 +1957,30 @@ export type Database = {
         }
         Relationships: []
       }
+      flight_cache: {
+        Row: {
+          created_at: string
+          flight_date: string | null
+          flight_number: string
+          id: string
+          response_data: Json
+        }
+        Insert: {
+          created_at?: string
+          flight_date?: string | null
+          flight_number: string
+          id?: string
+          response_data: Json
+        }
+        Update: {
+          created_at?: string
+          flight_date?: string | null
+          flight_number?: string
+          id?: string
+          response_data?: Json
+        }
+        Relationships: []
+      }
       fun_trips: {
         Row: {
           available_spots: number
