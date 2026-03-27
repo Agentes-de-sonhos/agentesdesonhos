@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF } from "@/components/trip/TripPDF";
 import { verifyTripAccess } from "@/hooks/useTrips";
@@ -354,10 +355,17 @@ function PublicServiceCard({ service }: { service: TripService }) {
                     </div>
                   )}
                   <div className="border-l-2 border-primary/30 pl-3 py-1">
-                    <div className="flex items-center gap-2 text-xs">
+                    <div className="flex items-center gap-2 text-xs flex-wrap">
                       <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">{segTypeLabel}</span>
                       {seg.airline && <span className="text-muted-foreground">{seg.airline}</span>}
                       {seg.flight_number && <span className="font-mono text-muted-foreground">{seg.flight_number}</span>}
+                      {seg.flight_number && seg.flight_date && (
+                        <FlightStatusBadge
+                          tripServiceId={service.id}
+                          flightNumber={seg.flight_number}
+                          flightDate={seg.flight_date}
+                        />
+                      )}
                     </div>
                     <p className="text-sm font-medium mt-0.5">
                       {seg.origin_airport || seg.origin_city} → {seg.destination_airport || seg.destination_city}
