@@ -93,14 +93,17 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    const token = authHeader.replace('Bearer ', '');
+
+    // Service role client for auth.getUser
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false },
     });
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
     
     if (userError || !userData?.user) {
       return new Response(
@@ -111,6 +114,12 @@ serve(async (req) => {
 
     const userId = userData.user.id;
     console.log('Authenticated user:', userId);
+
+    // User-context client for RPC calls that use auth.uid()
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
 
     // Check subscription feature access
     const { data: hasAccess } = await supabase.rpc('has_feature_access', { _user_id: userId, _feature: 'ai_tools' });
