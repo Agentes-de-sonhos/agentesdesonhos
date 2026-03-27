@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -106,7 +107,14 @@ export function TripEditForm({ trip, onSubmit, onCancel, isLoading }: TripEditFo
                 Destino Principal
               </FormLabel>
               <FormControl>
-                <Input placeholder="Ex: Paris, França" {...field} />
+                <PlacesAutocomplete
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  onPlaceSelect={(pred) => field.onChange(pred.name)}
+                  placeType="city"
+                  placeholder="Ex: Paris, França"
+                  fetchDetailsOnSelect={false}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
