@@ -43,13 +43,13 @@ export default function Financeiro() {
                   <ShoppingBag className="h-4 w-4" />
                   <span className="hidden sm:inline">Vendas</span>
                 </TabsTrigger>
-                <TabsTrigger value="despesas" className="gap-1.5">
-                  <ArrowDownCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">Despesas</span>
-                </TabsTrigger>
                 <TabsTrigger value="entradas" className="gap-1.5">
                   <ArrowUpCircle className="h-4 w-4" />
                   <span className="hidden sm:inline">Entradas</span>
+                </TabsTrigger>
+                <TabsTrigger value="despesas" className="gap-1.5">
+                  <ArrowDownCircle className="h-4 w-4" />
+                  <span className="hidden sm:inline">Despesas</span>
                 </TabsTrigger>
                 <TabsTrigger value="dashboard" className="gap-1.5">
                   <LayoutDashboard className="h-4 w-4" />
