@@ -140,6 +140,68 @@ const emptyPassenger = (): FlightPassengerInput => ({
   name: '', passenger_type: 'adulto', document: '', seat: '', notes: '',
 });
 
+// ── Inline flight lookup per segment ──
+function SegmentFlightLookup({ segmentIndex, onFlightData }: { segmentIndex: number; onFlightData: (data: any) => void }) {
+  const { toast } = useToast();
+  const [fn, setFn] = useState("");
+  const [fd, setFd] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const lookup = async () => {
+    if (!fn.trim()) { toast({ title: "Informe o número do voo", variant: "destructive" }); return; }
+    setLoading(true);
+    try {
+      const normalized = fn.replace(/\s+/g, "").toUpperCase();
+      const params = new URLSearchParams({ flight_number: normalized });
+      if (fd) params.set("flight_date", fd);
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const resp = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/flight-lookup?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } }
+      );
+      const json = await resp.json();
+      if (!resp.ok) {
+        toast({ title: "Voo não encontrado", description: json.error || "Preencha manualmente.", variant: "destructive" });
+        return;
+      }
+      // Use first segment data
+      const seg = json.segments?.[0] || json;
+      onFlightData({ ...seg, flight_date: fd });
+      toast({ title: "✈️ Dados preenchidos!", description: `${seg.origin_airport || ''} → ${seg.destination_airport || ''}` });
+    } catch {
+      toast({ title: "Erro ao buscar voo", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
+      <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+        <Plane className="h-3.5 w-3.5" /> Buscar dados do voo automaticamente
+      </div>
+      <div className="grid gap-2 sm:grid-cols-3">
+        <div>
+          <label className="text-xs text-muted-foreground">Nº do Voo</label>
+          <Input className="mt-1 h-8 text-sm" placeholder="LA3849" value={fn} onChange={(e) => setFn(e.target.value.toUpperCase())} />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground">Data do Voo</label>
+          <Input className="mt-1 h-8 text-sm" type="date" value={fd} onChange={(e) => setFd(e.target.value)} />
+        </div>
+        <div className="flex items-end">
+          <Button type="button" size="sm" className="w-full h-8 text-xs" onClick={lookup} disabled={loading}>
+            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Search className="h-3.5 w-3.5 mr-1" />}
+            Buscar Dados
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
