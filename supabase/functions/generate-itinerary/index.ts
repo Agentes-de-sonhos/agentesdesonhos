@@ -99,6 +99,15 @@ serve(async (req) => {
       });
     }
 
+    // Check and increment AI usage quota
+    const { data: canUse } = await supabase.rpc("check_ai_usage", { _user_id: userId });
+    if (!canUse) {
+      return new Response(JSON.stringify({ error: "Cota mensal de IA esgotada.", quota_exceeded: true }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
     const { destination, startDate, endDate, travelersCount, tripType, budgetLevel, interests, travelPace, additionalPreferences } = body;
 
