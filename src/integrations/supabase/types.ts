@@ -5074,6 +5074,8 @@ export type Database = {
           currency: string
           currency_mode: string
           destination: string
+          destination_intro_images: string[] | null
+          destination_intro_text: string | null
           end_date: string
           entry_percentage: number | null
           exchange_rate: number | null
@@ -5085,6 +5087,7 @@ export type Database = {
           payment_terms: string | null
           share_expires_at: string | null
           share_token: string | null
+          show_destination_intro: boolean
           show_detailed_prices: boolean
           start_date: string
           status: string
@@ -5104,6 +5107,8 @@ export type Database = {
           currency?: string
           currency_mode?: string
           destination: string
+          destination_intro_images?: string[] | null
+          destination_intro_text?: string | null
           end_date: string
           entry_percentage?: number | null
           exchange_rate?: number | null
@@ -5115,6 +5120,7 @@ export type Database = {
           payment_terms?: string | null
           share_expires_at?: string | null
           share_token?: string | null
+          show_destination_intro?: boolean
           show_detailed_prices?: boolean
           start_date: string
           status?: string
@@ -5134,6 +5140,8 @@ export type Database = {
           currency?: string
           currency_mode?: string
           destination?: string
+          destination_intro_images?: string[] | null
+          destination_intro_text?: string | null
           end_date?: string
           entry_percentage?: number | null
           exchange_rate?: number | null
@@ -5145,6 +5153,7 @@ export type Database = {
           payment_terms?: string | null
           share_expires_at?: string | null
           share_token?: string | null
+          show_destination_intro?: boolean
           show_detailed_prices?: boolean
           start_date?: string
           status?: string
