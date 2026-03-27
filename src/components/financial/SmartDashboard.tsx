@@ -67,7 +67,7 @@ export function SmartDashboard() {
   const monthlyExpenses = expenseEntries.filter(e => e.entry_date >= monthStart && e.entry_date < `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-01`);
   const totalExpensesMonth = monthlyExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const fixedExpenses = monthlyExpenses.filter(e => e.expense_type === 'fixed').reduce((sum, e) => sum + Number(e.amount), 0);
-  const variableExpenses = monthlyExpenses.filter(e => e.expense_type === 'variable').reduce((sum, e) => sum + Number(e.amount), 0);
+  const variableExpenses = monthlyExpenses.filter(e => e.expense_type !== 'fixed').reduce((sum, e) => sum + Number(e.amount), 0);
 
   // Monthly customer payments
   const monthlyCustomerPayments = customerPayments.filter(p => p.payment_date >= monthStart);
