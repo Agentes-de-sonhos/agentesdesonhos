@@ -8,7 +8,7 @@ import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager"
 import { SalesManager } from "@/components/financial/SalesManager";
 import { EntradasManager } from "@/components/financial/EntradasManager";
 import { useFinancial } from "@/hooks/useFinancial";
-import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
+
 
 const VALID_TABS = ["vendas", "despesas", "entradas", "dashboard"] as const;
 
@@ -23,8 +23,7 @@ export default function Financeiro() {
   };
 
   return (
-    <SubscriptionGuard feature="financial">
-      <DashboardLayout>
+    <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
           <PageHeader
             pageKey="financeiro"
@@ -76,7 +75,6 @@ export default function Financeiro() {
             </Tabs>
           )}
         </div>
-      </DashboardLayout>
-    </SubscriptionGuard>
+    </DashboardLayout>
   );
 }
