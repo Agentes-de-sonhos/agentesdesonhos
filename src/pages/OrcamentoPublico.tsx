@@ -12,6 +12,7 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
+import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -392,6 +393,15 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
             </div>
           </div>
         </div>
+
+        {/* ─── Destination Intro ─── */}
+        {(quote as any).show_destination_intro !== false && (
+          <DestinationIntroPublic
+            text={(quote as any).destination_intro_text || null}
+            images={(quote as any).destination_intro_images || []}
+            destination={quote.destination}
+          />
+        )}
 
         {/* ─── Collapsible Services (accordion — one open at a time) ─── */}
         {quote.services && quote.services.length > 0 && (
