@@ -63,12 +63,6 @@ export default function CampanhaIndicacao() {
               De <span className="line-through">R$129,70</span> por{" "}
               <span className="text-primary font-bold text-xl">R$97,90</span>
             </p>
-            <div className="inline-flex items-center gap-2 bg-background border border-border rounded-lg px-4 py-2">
-              <span className="font-mono font-bold text-lg tracking-wider">{CUPOM}</span>
-              <Button size="sm" variant="ghost" onClick={() => copiar(CUPOM, "Cupom")}>
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
           </CardContent>
         </Card>
 
@@ -133,20 +127,10 @@ export default function CampanhaIndicacao() {
             </CardContent>
           </Card>
 
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => copiar(MENSAGEM_WHATSAPP, "Mensagem")} className="flex-1 min-w-[140px]">
-              <Copy className="h-4 w-4 mr-2" />
-              Copiar mensagem
-            </Button>
-            <Button variant="outline" onClick={() => copiar(CUPOM, "Cupom")} className="flex-1 min-w-[140px]">
-              <Copy className="h-4 w-4 mr-2" />
-              Copiar cupom
-            </Button>
-            <Button variant="outline" onClick={() => copiar(LINK_PLATAFORMA, "Link")} className="flex-1 min-w-[140px]">
-              <Copy className="h-4 w-4 mr-2" />
-              Copiar link
-            </Button>
-          </div>
+          <Button onClick={() => copiar(MENSAGEM_WHATSAPP, "Mensagem")} className="w-full">
+            <Copy className="h-4 w-4 mr-2" />
+            Copiar mensagem
+          </Button>
         </div>
       </div>
     </DashboardLayout>
