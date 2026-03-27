@@ -244,12 +244,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {showOptionLabel && (
-          <FormField control={form.control} name="option_label" render={({ field }) => (
-            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-        )}
-        {photoSlot}
+        {/* BLOCO 1 — Informações Principais */}
+        <FormField control={form.control} name="airline" render={({ field }) => (
+          <FormItem><FormLabel>Companhia Aérea</FormLabel><FormControl><Input placeholder="LATAM, GOL, Air France..." {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="origin_city" render={({ field }) => (
             <FormItem><FormLabel>Cidade de Origem</FormLabel><FormControl><Input placeholder="São Paulo" {...field} /></FormControl><FormMessage /></FormItem>
@@ -258,9 +256,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             <FormItem><FormLabel>Cidade de Destino</FormLabel><FormControl><Input placeholder="Paris" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
-        <FormField control={form.control} name="airline" render={({ field }) => (
-          <FormItem><FormLabel>Companhia Aérea</FormLabel><FormControl><Input placeholder="LATAM, GOL, Air France..." {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
+
+        {/* BLOCO 2 — Datas */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="departure_date" render={({ field }) => (
             <FormItem className="flex flex-col"><FormLabel>Data de Ida</FormLabel>
@@ -285,6 +282,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
               </Popover><FormMessage /></FormItem>
           )} />
         </div>
+
+        {/* BLOCO 3 — Inclusões */}
         <div className="flex gap-6">
           <FormField control={form.control} name="includes_baggage" render={({ field }) => (
             <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel className="font-normal">Inclui bagagem</FormLabel></FormItem>
@@ -294,7 +293,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
         </div>
 
-        {/* Flight Details - Expandable with multi-leg support */}
+        {/* BLOCO 4 — Detalhes do Voo (expandível) */}
         <div className="border border-border/60 rounded-lg">
           <button
             type="button"
@@ -313,6 +312,13 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )}
         </div>
 
+        {/* BLOCO 5 — Apresentação do Serviço */}
+        {showOptionLabel && (
+          <FormField control={form.control} name="option_label" render={({ field }) => (
+            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        )}
+        {photoSlot}
         <FormField control={form.control} name="service_description" render={({ field }) => (
           <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
         )} />
