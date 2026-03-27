@@ -4,22 +4,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Gift, Rocket, Users, CheckCircle, Share2 } from "lucide-react";
 
-const CUPOM = "AGENTES30";
-const LINK_PLATAFORMA = "https://agentesdesonhos.lovable.app/planos";
+const MENSAGEM_WHATSAPP = `Oi! Tudo bem? 😊
 
-const MENSAGEM_WHATSAPP = `Oi! Tudo bem?
+Queria te indicar uma plataforma que estou usando para agentes de viagens. Está bem legal e ainda em pré-lançamento.
 
-Estou usando uma plataforma muito legal para agentes de viagens e eles liberaram uma condição especial de pré-lançamento.
+Eles liberaram uma condição especial com 30% de desconto, de R$129,70 por R$97,90.
 
-Você consegue entrar com 30% de desconto (de R$129,70 por R$97,90).
+E tem um detalhe importante. Você pode testar sem risco. São 7 dias de garantia, com devolução do valor caso não queira continuar.
 
-Se fizer sentido pra você, dá uma olhada no link abaixo 👇
+Se fizer sentido pra você, vale a pena dar uma olhada 👇
+https://app.agentesdesonhos.com.br/desconto30off
 
-${LINK_PLATAFORMA}
-
-E usa esse cupom na hora de entrar:
-
-${CUPOM}`;
+Se for entrar, usa esse cupom pra garantir o desconto:
+AGENTES30
+(Todas as letras em caixa alta)`;
 
 export default function CampanhaIndicacao() {
   const { toast } = useToast();
