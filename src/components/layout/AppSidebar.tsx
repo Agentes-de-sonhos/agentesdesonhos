@@ -192,7 +192,10 @@ const financeiroSection: MenuSection = {
   textColor: "text-emerald-700",
   borderColor: "border-emerald-600",
   items: [
-    { title: "Gestão Financeira", url: "/financeiro", icon: DollarSign, requiredFeature: "financial" },
+    { title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial" },
+    { title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial" },
+    { title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial" },
+    { title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
   ],
 };
 
