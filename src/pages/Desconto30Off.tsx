@@ -43,7 +43,6 @@ const planFeatures = [
   { icon: Newspaper, label: "Notícias do Trade com curadoria inteligente" },
   { icon: MessageCircleQuestion, label: "Comunidade exclusiva e Perguntas & Respostas" },
   { icon: CalendarDays, label: "Agenda de Eventos, Fam Trips e Workshops" },
-  { icon: Sparkles, label: "Cursos e Mentorias exclusivas" },
 ];
 
 const STRIPE_LINK = "https://buy.stripe.com/cNicN5gqe99k4mEelF9sk01";
