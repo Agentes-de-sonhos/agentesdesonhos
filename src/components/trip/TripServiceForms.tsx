@@ -345,6 +345,33 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
                 </Button>
               )}
             </div>
+
+            {/* Flight lookup - top of each segment */}
+            <SegmentFlightLookup
+              segmentIndex={i}
+              onFlightData={(data) => {
+                const updated = [...segments];
+                const s = updated[i];
+                if (data.airline) { s.airline = data.airline; form.setValue("main_airline", data.airline); }
+                if (data.flight_number) s.flight_number = data.flight_number;
+                if (data.origin_airport) s.origin_airport = data.origin_airport;
+                if (data.origin_city) { s.origin_city = data.origin_city; if (i === 0) form.setValue("origin_city", data.origin_city); }
+                if (data.destination_airport) s.destination_airport = data.destination_airport;
+                if (data.destination_city) { s.destination_city = data.destination_city; form.setValue("destination_city", data.destination_city); }
+                if (data.departure_time) {
+                  const t = data.departure_time;
+                  s.departure_time = t.includes("T") ? new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : t;
+                  if (t.includes("T")) s.flight_date = t.split("T")[0];
+                }
+                if (data.arrival_time) {
+                  const t = data.arrival_time;
+                  s.arrival_time = t.includes("T") ? new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : t;
+                }
+                if (data.flight_date && !s.flight_date) s.flight_date = data.flight_date;
+                setSegments(updated);
+              }}
+            />
+
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Tipo do Trecho</label>
