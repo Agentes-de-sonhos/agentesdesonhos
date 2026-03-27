@@ -48,6 +48,7 @@ import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
 import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
+import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
@@ -860,6 +861,14 @@ export default function GerarOrcamento() {
           </div>
           <div className="space-y-4">
             <QuoteSummary quote={quote} />
+            <DestinationIntroEditor
+              quoteId={quote.id}
+              destination={quote.destination}
+              showIntro={(quote as any).show_destination_intro !== false}
+              introText={(quote as any).destination_intro_text || null}
+              introImages={(quote as any).destination_intro_images || []}
+              onUpdate={() => {}}
+            />
             <Card>
               <CardContent className="py-3 px-4">
                 <div className="flex items-center justify-between">
