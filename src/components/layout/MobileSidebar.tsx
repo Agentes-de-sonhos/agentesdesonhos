@@ -35,6 +35,10 @@ import {
   UserPlus,
   Headset,
   DollarSign,
+  ArrowDownCircle,
+  ShoppingBag,
+  ArrowUpCircle,
+  LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
@@ -182,7 +186,10 @@ const financeiroSection: MenuSection = {
   textColor: "text-emerald-700",
   borderColor: "border-emerald-600",
   items: [
-    { title: "Gestão Financeira", url: "/financeiro", icon: DollarSign, requiredFeature: "financial" },
+    { title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial" },
+    { title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial" },
+    { title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial" },
+    { title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
   ],
 };
 
@@ -246,8 +253,16 @@ export function MobileSidebar() {
     });
   };
 
+  const isItemActive = (itemUrl: string) => {
+    const [pathname, search] = itemUrl.split("?");
+    if (search) {
+      return location.pathname === pathname && location.search === `?${search}`;
+    }
+    return location.pathname === itemUrl || location.pathname.startsWith(itemUrl);
+  };
+
   const isSectionActive = (section: MenuSection) =>
-    section.items.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
+    section.items.some((i) => isItemActive(i.url));
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
@@ -275,7 +290,7 @@ export function MobileSidebar() {
 
   const renderMenuItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
     const isActive =
-      location.pathname === item.url ||
+      isItemActive(item.url) ||
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
