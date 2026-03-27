@@ -73,8 +73,8 @@ export function SmartExpenseManager() {
   const monthStartStr = monthStart.toISOString().split("T")[0];
   const monthlyExpenses = expenseEntries.filter(e => e.entry_date >= monthStartStr);
   const totalMonth = monthlyExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  const fixedTotal = monthlyExpenses.filter(e => (e as any).expense_type === "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
-  const variableTotal = monthlyExpenses.filter(e => (e as any).expense_type !== "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
+  const fixedTotal = monthlyExpenses.filter(e => e.expense_type === "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
+  const variableTotal = monthlyExpenses.filter(e => e.expense_type !== "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
 
   // Auto-suggest category
   const suggestCategory = (desc: string) => {
@@ -188,7 +188,7 @@ export function SmartExpenseManager() {
                   <TableCell>{format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                   <TableCell className="flex items-center gap-2">
                     {entry.description}
-                    {(entry as any).is_recurring && <Repeat className="h-3 w-3 text-muted-foreground" />}
+                    {entry.is_recurring && <Repeat className="h-3 w-3 text-muted-foreground" />}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="gap-1">
@@ -199,9 +199,9 @@ export function SmartExpenseManager() {
                   <TableCell>
                     <Badge variant="outline" className={cn(
                       "text-xs",
-                      (entry as any).expense_type === "fixed" ? "border-blue-500/30 text-blue-600 dark:text-blue-400" : ""
+                      entry.expense_type === "fixed" ? "border-blue-500/30 text-blue-600 dark:text-blue-400" : ""
                     )}>
-                      {(entry as any).expense_type === "fixed" ? "Fixa" : "Variável"}
+                      {entry.expense_type === "fixed" ? "Fixa" : "Variável"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right font-medium text-destructive">
