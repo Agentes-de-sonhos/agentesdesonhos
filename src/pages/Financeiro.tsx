@@ -10,13 +10,13 @@ import { EntradasManager } from "@/components/financial/EntradasManager";
 import { useFinancial } from "@/hooks/useFinancial";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
-const VALID_TABS = ["dashboard", "despesas", "vendas", "entradas"] as const;
+const VALID_TABS = ["vendas", "despesas", "entradas", "dashboard"] as const;
 
 export default function Financeiro() {
   const { isLoading } = useFinancial();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const activeTab = VALID_TABS.includes(tabParam as any) ? tabParam! : "despesas";
+  const activeTab = VALID_TABS.includes(tabParam as any) ? tabParam! : "vendas";
 
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value }, { replace: true });
@@ -40,13 +40,13 @@ export default function Financeiro() {
           ) : (
             <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
               <TabsList className="grid w-full grid-cols-4 max-w-lg">
-                <TabsTrigger value="despesas" className="gap-1.5">
-                  <ArrowDownCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">Despesas</span>
-                </TabsTrigger>
                 <TabsTrigger value="vendas" className="gap-1.5">
                   <ShoppingBag className="h-4 w-4" />
                   <span className="hidden sm:inline">Vendas</span>
+                </TabsTrigger>
+                <TabsTrigger value="despesas" className="gap-1.5">
+                  <ArrowDownCircle className="h-4 w-4" />
+                  <span className="hidden sm:inline">Despesas</span>
                 </TabsTrigger>
                 <TabsTrigger value="entradas" className="gap-1.5">
                   <ArrowUpCircle className="h-4 w-4" />
@@ -58,12 +58,12 @@ export default function Financeiro() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="despesas">
-                <SmartExpenseManager />
-              </TabsContent>
-
               <TabsContent value="vendas">
                 <SalesManager />
+              </TabsContent>
+
+              <TabsContent value="despesas">
+                <SmartExpenseManager />
               </TabsContent>
 
               <TabsContent value="entradas">
