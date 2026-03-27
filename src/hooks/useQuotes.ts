@@ -122,6 +122,9 @@ export function useQuotes() {
           currency: (source as any).currency ?? 'BRL',
           currency_mode: (source as any).currency_mode ?? 'fixed',
           exchange_rate: (source as any).exchange_rate ?? null,
+          show_destination_intro: (source as any).show_destination_intro ?? true,
+          destination_intro_text: (source as any).destination_intro_text ?? null,
+          destination_intro_images: (source as any).destination_intro_images ?? [],
         } as any)
         .select()
         .single();
