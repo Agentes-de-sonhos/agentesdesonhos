@@ -265,8 +265,7 @@ export default function HotelRaioX() {
   };
 
   return (
-    <SubscriptionGuard feature="financial">
-      <DashboardLayout>
+    <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
           <PageHeader
             pageKey="hotel-raio-x"
@@ -664,7 +663,6 @@ export default function HotelRaioX() {
             </div>
           )}
         </div>
-      </DashboardLayout>
-    </SubscriptionGuard>
+    </DashboardLayout>
   );
 }

@@ -23,8 +23,7 @@ export default function Financeiro() {
   };
 
   return (
-    <SubscriptionGuard feature="financial">
-      <DashboardLayout>
+    <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
           <PageHeader
             pageKey="financeiro"
@@ -76,7 +75,6 @@ export default function Financeiro() {
             </Tabs>
           )}
         </div>
-      </DashboardLayout>
-    </SubscriptionGuard>
+    </DashboardLayout>
   );
 }
