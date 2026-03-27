@@ -1793,7 +1793,9 @@ export type Database = {
           created_at: string
           description: string
           entry_date: string
+          expense_type: string
           id: string
+          is_recurring: boolean
           notes: string | null
           updated_at: string
           user_id: string
@@ -1804,7 +1806,9 @@ export type Database = {
           created_at?: string
           description: string
           entry_date?: string
+          expense_type?: string
           id?: string
+          is_recurring?: boolean
           notes?: string | null
           updated_at?: string
           user_id: string
@@ -1815,7 +1819,9 @@ export type Database = {
           created_at?: string
           description?: string
           entry_date?: string
+          expense_type?: string
           id?: string
+          is_recurring?: boolean
           notes?: string | null
           updated_at?: string
           user_id?: string
@@ -1915,6 +1921,39 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: string | null
+        }
+        Relationships: []
+      }
+      financial_goals: {
+        Row: {
+          commission_margin: number
+          created_at: string
+          id: string
+          month: number
+          profit_goal: number
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          commission_margin?: number
+          created_at?: string
+          id?: string
+          month: number
+          profit_goal?: number
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          commission_margin?: number
+          created_at?: string
+          id?: string
+          month?: number
+          profit_goal?: number
+          updated_at?: string
+          user_id?: string
+          year?: number
         }
         Relationships: []
       }
