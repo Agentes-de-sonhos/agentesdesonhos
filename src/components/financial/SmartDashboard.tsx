@@ -27,7 +27,7 @@ const MONTH_NAMES = [
 ];
 
 export function SmartDashboard() {
-  const { sales, saleProducts, expenseEntries, customerPayments, supplierPayments } = useFinancial();
+  const { sales, saleProducts, expenseEntries, customerPayments, supplierPayments, incomeEntries } = useFinancial();
   const { commissionsByBooking } = useBookings();
   const { goal, upsertGoal, currentMonth, currentYear, isLoading: goalLoading } = useFinancialGoals();
   const [showGoalDialog, setShowGoalDialog] = useState(false);
