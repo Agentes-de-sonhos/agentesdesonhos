@@ -1981,6 +1981,71 @@ export type Database = {
         }
         Relationships: []
       }
+      flight_status_updates: {
+        Row: {
+          arrival_actual: string | null
+          arrival_scheduled: string | null
+          created_at: string
+          delay_minutes: number | null
+          departure_actual: string | null
+          departure_scheduled: string | null
+          flight_date: string
+          flight_number: string
+          gate: string | null
+          id: string
+          last_checked_at: string
+          status: string
+          status_label: string
+          terminal: string | null
+          trip_service_id: string
+          updated_at: string
+        }
+        Insert: {
+          arrival_actual?: string | null
+          arrival_scheduled?: string | null
+          created_at?: string
+          delay_minutes?: number | null
+          departure_actual?: string | null
+          departure_scheduled?: string | null
+          flight_date: string
+          flight_number: string
+          gate?: string | null
+          id?: string
+          last_checked_at?: string
+          status?: string
+          status_label?: string
+          terminal?: string | null
+          trip_service_id: string
+          updated_at?: string
+        }
+        Update: {
+          arrival_actual?: string | null
+          arrival_scheduled?: string | null
+          created_at?: string
+          delay_minutes?: number | null
+          departure_actual?: string | null
+          departure_scheduled?: string | null
+          flight_date?: string
+          flight_number?: string
+          gate?: string | null
+          id?: string
+          last_checked_at?: string
+          status?: string
+          status_label?: string
+          terminal?: string | null
+          trip_service_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flight_status_updates_trip_service_id_fkey"
+            columns: ["trip_service_id"]
+            isOneToOne: false
+            referencedRelation: "trip_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fun_trips: {
         Row: {
           available_spots: number
