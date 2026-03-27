@@ -95,17 +95,26 @@ export interface ExpenseEntry {
   amount: number;
   entry_date: string;
   notes: string | null;
+  expense_type: string;
+  is_recurring: boolean;
   created_at: string;
   updated_at: string;
 }
 
-export type ExpenseCategory = 'fornecedor' | 'comissao' | 'taxas' | 'marketing' | 'outros';
+export type ExpenseCategory = 'fornecedor' | 'comissao' | 'taxas' | 'marketing' | 'sistema' | 'internet' | 'aluguel' | 'salarios' | 'cafe_reuniao' | 'presente_fornecedor' | 'transporte' | 'outros';
 
-export const EXPENSE_CATEGORIES: Record<ExpenseCategory, string> = {
+export const EXPENSE_CATEGORIES: Record<string, string> = {
+  sistema: 'Sistema / Software',
+  marketing: 'Marketing',
+  internet: 'Internet / Telefone',
+  aluguel: 'Aluguel',
+  salarios: 'Salários',
+  cafe_reuniao: 'Café / Reunião',
+  presente_fornecedor: 'Presente Fornecedor',
+  taxas: 'Taxas / Impostos',
   fornecedor: 'Fornecedor',
   comissao: 'Comissão',
-  taxas: 'Taxas',
-  marketing: 'Marketing',
+  transporte: 'Transporte',
   outros: 'Outros',
 };
 
