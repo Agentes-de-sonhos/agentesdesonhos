@@ -27,7 +27,7 @@ const MONTH_NAMES = [
 ];
 
 export function SmartDashboard() {
-  const { sales, saleProducts, expenseEntries, customerPayments, supplierPayments } = useFinancial();
+  const { sales, saleProducts, expenseEntries, customerPayments, supplierPayments, incomeEntries } = useFinancial();
   const { commissionsByBooking } = useBookings();
   const { goal, upsertGoal, currentMonth, currentYear, isLoading: goalLoading } = useFinancialGoals();
   const [showGoalDialog, setShowGoalDialog] = useState(false);
@@ -328,33 +328,60 @@ export function SmartDashboard() {
         </CardContent>
       </Card>
 
-      {/* Recebimentos */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Recebido no Mês</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(totalReceivedMonth)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Comissões Recebidas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(bookingCommissionsReceived)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Comissões Pendentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(bookingCommissionsPending)}</div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Entradas */}
+      {(() => {
+        const today = new Date().toISOString().split("T")[0];
+        const incomeReceived = incomeEntries
+          .filter(e => ((e as any).status === "received" || !(e as any).status) && e.entry_date >= monthStart)
+          .reduce((sum, e) => sum + Number(e.amount), 0);
+        const incomePending = incomeEntries
+          .filter(e => (e as any).status === "pending")
+          .reduce((sum, e) => sum + Number(e.amount), 0);
+        const incomeOverdue = incomeEntries
+          .filter(e => (e as any).status === "pending" && (e as any).expected_date && (e as any).expected_date < today)
+          .reduce((sum, e) => sum + Number(e.amount), 0);
+
+        return (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-emerald-500" />
+                  💰 Já no bolso
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(incomeReceived + totalReceivedMonth)}</div>
+                <p className="text-xs text-muted-foreground">recebido este mês</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <ArrowRight className="h-4 w-4 text-amber-500" />
+                  ⏳ A caminho
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(incomePending + bookingCommissionsPending)}</div>
+                <p className="text-xs text-muted-foreground">previsto para entrar</p>
+              </CardContent>
+            </Card>
+            <Card className={cn(incomeOverdue > 0 && "ring-1 ring-destructive/30")}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  🚨 Atrasadas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={cn("text-xl font-bold", incomeOverdue > 0 ? "text-destructive" : "text-muted-foreground")}>{formatCurrency(incomeOverdue)}</div>
+                <p className="text-xs text-muted-foreground">cobrar urgente</p>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })()}
 
       {/* Goal Dialog */}
       <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
