@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.hotel-rx]
 verify_jwt = false
+
+[functions.flight-status-monitor]
+verify_jwt = false
