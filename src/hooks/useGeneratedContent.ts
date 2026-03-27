@@ -35,6 +35,45 @@ interface AIResponse {
   error?: string;
 }
 
+const parseFunctionErrorMessage = async (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return 'Erro ao gerar conteúdo';
+  }
+
+  const errorWithContext = error as Error & {
+    context?: {
+      clone?: () => { json: () => Promise<unknown>; text: () => Promise<string> };
+      json?: () => Promise<unknown>;
+      text?: () => Promise<string>;
+    };
+  };
+
+  const context = errorWithContext.context;
+
+  if (context) {
+    try {
+      const response = typeof context.clone === 'function' ? context.clone() : context;
+      const body = typeof response.json === 'function'
+        ? await response.json()
+        : JSON.parse(await response.text?.() ?? '{}');
+
+      if (body && typeof body === 'object' && 'error' in body && typeof body.error === 'string') {
+        return body.error;
+      }
+    } catch {
+      try {
+        const response = typeof context.clone === 'function' ? context.clone() : context;
+        const text = await response.text?.();
+        if (text) return text;
+      } catch {
+        // ignore parsing fallback errors
+      }
+    }
+  }
+
+  return error.message || 'Erro ao gerar conteúdo';
+};
+
 export function useGeneratedContent() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -73,7 +112,7 @@ export function useGeneratedContent() {
 
       if (error) {
         console.error('Edge function error:', error);
-        throw new Error(error.message || 'Erro ao gerar conteúdo');
+        throw new Error(await parseFunctionErrorMessage(error));
       }
 
       if (data?.error) {
