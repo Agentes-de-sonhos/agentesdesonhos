@@ -76,6 +76,7 @@ const CursosMarketplace = lazy(() => import("./pages/CursosMarketplace"));
 const CursoDetalhe = lazy(() => import("./pages/CursoDetalhe"));
 const CursoEditar = lazy(() => import("./pages/CursoEditar"));
 const Planos = lazy(() => import("./pages/Planos"));
+const Desconto30Off = lazy(() => import("./pages/Desconto30Off"));
 const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
 const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
 // ── Fallback spinner ───────────────────────────────────────
@@ -126,6 +127,7 @@ const App = () => (
               }
             />
             <Route path="/planos" element={<Planos />} />
+            <Route path="/desconto30off" element={<Desconto30Off />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/crm" element={<AdminRoute><AdminCRM /></AdminRoute>} />
