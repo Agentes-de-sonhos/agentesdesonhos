@@ -77,6 +77,7 @@ const CursoDetalhe = lazy(() => import("./pages/CursoDetalhe"));
 const CursoEditar = lazy(() => import("./pages/CursoEditar"));
 const Planos = lazy(() => import("./pages/Planos"));
 const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
+const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -155,6 +156,7 @@ const App = () => (
             <Route path="/financeiro" element={<ProtectedRoute><Financeiro /></ProtectedRoute>} />
             
             <Route path="/hotel-raio-x" element={<ProtectedRoute><HotelRaioX /></ProtectedRoute>} />
+            <Route path="/campanha-indicacao" element={<ProtectedRoute><CampanhaIndicacao /></ProtectedRoute>} />
             <Route path="/gestao-clientes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/gestao-clientes/clientes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/gestao-clientes/funil" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
