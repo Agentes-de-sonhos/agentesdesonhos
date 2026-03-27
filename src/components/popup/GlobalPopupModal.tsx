@@ -81,7 +81,7 @@ export function GlobalPopupModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md p-0 overflow-hidden gap-0 border-0">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md p-0 overflow-hidden gap-0 border-0">
         {/* Close button */}
         <button
           onClick={handleClose}
@@ -122,7 +122,10 @@ export function GlobalPopupModal() {
           </h2>
 
           {currentPopup.description && (
-            <div className="text-muted-foreground text-sm leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: currentPopup.description }} />
+            <div 
+              className="text-muted-foreground text-sm leading-relaxed prose prose-sm max-w-none break-words overflow-x-hidden [&_a]:break-all [&_p]:mb-2 [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:mb-1 [&_br]:block [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_strong]:font-semibold [&_em]:italic" 
+              dangerouslySetInnerHTML={{ __html: currentPopup.description }} 
+            />
           )}
 
           {/* Action Button */}
