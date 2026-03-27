@@ -34,6 +34,7 @@ import {
   Paintbrush,
   UserPlus,
   Headset,
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
@@ -171,6 +172,20 @@ const clientesSection: MenuSection = {
   ],
 };
 
+const financeiroSection: MenuSection = {
+  title: "Financeiro",
+  icon: DollarSign,
+  hoverColor: "hover:bg-emerald-600 hover:text-white",
+  headerBg: "bg-emerald-600 text-white",
+  headerHoverBg: "hover:bg-emerald-700",
+  bgColor: "bg-emerald-50",
+  textColor: "text-emerald-700",
+  borderColor: "border-emerald-600",
+  items: [
+    { title: "Gestão Financeira", url: "/financeiro", icon: DollarSign, requiredFeature: "financial" },
+  ],
+};
+
 const marketingSection: MenuSection = {
   title: "Marketing",
   icon: Megaphone,
@@ -213,7 +228,7 @@ export function MobileSidebar() {
 
   // Same order as desktop
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, comunidadeSection],
     []
   );
 

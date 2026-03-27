@@ -35,6 +35,7 @@ import {
   Headset,
   Briefcase,
   Building2,
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -178,7 +179,20 @@ const clientesSection: MenuSection = {
     { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
     { title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
     { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
-    { title: "Financeiro & Vendas", url: "/vendas", icon: Briefcase, requiredFeature: "financial", adminOnly: true, key: "financeiro_vendas" },
+  ],
+};
+
+const financeiroSection: MenuSection = {
+  title: "Financeiro",
+  icon: DollarSign,
+  hoverColor: "hover:bg-emerald-600 hover:text-white",
+  headerBg: "bg-emerald-600 text-white",
+  headerHoverBg: "hover:bg-emerald-700",
+  bgColor: "bg-emerald-50",
+  textColor: "text-emerald-700",
+  borderColor: "border-emerald-600",
+  items: [
+    { title: "Gestão Financeira", url: "/financeiro", icon: DollarSign, requiredFeature: "financial" },
   ],
 };
 
@@ -225,7 +239,7 @@ export function AppSidebar() {
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, comunidadeSection],
     []
   );
 
