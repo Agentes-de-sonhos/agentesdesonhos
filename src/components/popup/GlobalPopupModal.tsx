@@ -81,7 +81,7 @@ export function GlobalPopupModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md p-0 overflow-hidden gap-0 border-0">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md max-h-[90vh] p-0 overflow-y-auto gap-0 border-0">
         {/* Close button */}
         <button
           onClick={handleClose}
