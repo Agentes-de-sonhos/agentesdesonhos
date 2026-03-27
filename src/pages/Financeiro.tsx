@@ -2,15 +2,15 @@ import { Loader2, DollarSign } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FinancialDashboard } from "@/components/financial/FinancialDashboard";
+import { SmartDashboard } from "@/components/financial/SmartDashboard";
+import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager";
 import { SalesManager } from "@/components/financial/SalesManager";
 import { CashFlowManager } from "@/components/financial/CashFlowManager";
-import { FinancialReports } from "@/components/financial/FinancialReports";
 import { useFinancial } from "@/hooks/useFinancial";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
 export default function Financeiro() {
-  const { summary, isLoading } = useFinancial();
+  const { isLoading } = useFinancial();
 
   return (
     <SubscriptionGuard feature="financial">
@@ -19,7 +19,7 @@ export default function Financeiro() {
           <PageHeader
             pageKey="financeiro"
             title="Financeiro"
-            subtitle="Gerencie vendas, produtos, custos e fluxo de caixa"
+            subtitle="Controle mensal inteligente com metas, break-even e projeções"
             icon={DollarSign}
           />
 
@@ -29,14 +29,18 @@ export default function Financeiro() {
             </div>
           ) : (
             <>
-              <FinancialDashboard summary={summary} />
+              <SmartDashboard />
 
-              <Tabs defaultValue="vendas" className="space-y-6">
+              <Tabs defaultValue="despesas" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-3 max-w-md">
+                  <TabsTrigger value="despesas">Despesas</TabsTrigger>
                   <TabsTrigger value="vendas">Vendas</TabsTrigger>
                   <TabsTrigger value="caixa">Fluxo de Caixa</TabsTrigger>
-                  <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="despesas">
+                  <SmartExpenseManager />
+                </TabsContent>
 
                 <TabsContent value="vendas">
                   <SalesManager />
@@ -44,10 +48,6 @@ export default function Financeiro() {
 
                 <TabsContent value="caixa">
                   <CashFlowManager />
-                </TabsContent>
-
-                <TabsContent value="relatorios">
-                  <FinancialReports />
                 </TabsContent>
               </Tabs>
             </>
