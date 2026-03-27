@@ -2732,10 +2732,13 @@ export type Database = {
           amount: number
           created_at: string
           entry_date: string
+          expected_date: string | null
           id: string
           notes: string | null
           payment_method: string
           sale_id: string | null
+          source: string | null
+          status: string
           updated_at: string
           user_id: string
         }
@@ -2743,10 +2746,13 @@ export type Database = {
           amount?: number
           created_at?: string
           entry_date?: string
+          expected_date?: string | null
           id?: string
           notes?: string | null
           payment_method?: string
           sale_id?: string | null
+          source?: string | null
+          status?: string
           updated_at?: string
           user_id: string
         }
@@ -2754,10 +2760,13 @@ export type Database = {
           amount?: number
           created_at?: string
           entry_date?: string
+          expected_date?: string | null
           id?: string
           notes?: string | null
           payment_method?: string
           sale_id?: string | null
+          source?: string | null
+          status?: string
           updated_at?: string
           user_id?: string
         }
