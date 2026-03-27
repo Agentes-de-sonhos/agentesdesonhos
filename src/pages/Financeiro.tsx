@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import { Loader2, DollarSign, LayoutDashboard, ArrowDownCircle, ShoppingBag, ArrowUpCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -9,8 +10,17 @@ import { EntradasManager } from "@/components/financial/EntradasManager";
 import { useFinancial } from "@/hooks/useFinancial";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
+const VALID_TABS = ["dashboard", "despesas", "vendas", "entradas"] as const;
+
 export default function Financeiro() {
   const { isLoading } = useFinancial();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab = VALID_TABS.includes(tabParam as any) ? tabParam! : "despesas";
+
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value }, { replace: true });
+  };
 
   return (
     <SubscriptionGuard feature="financial">
@@ -28,12 +38,8 @@ export default function Financeiro() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <Tabs defaultValue="dashboard" className="space-y-6">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
               <TabsList className="grid w-full grid-cols-4 max-w-lg">
-                <TabsTrigger value="dashboard" className="gap-1.5">
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
-                </TabsTrigger>
                 <TabsTrigger value="despesas" className="gap-1.5">
                   <ArrowDownCircle className="h-4 w-4" />
                   <span className="hidden sm:inline">Despesas</span>
@@ -46,11 +52,11 @@ export default function Financeiro() {
                   <ArrowUpCircle className="h-4 w-4" />
                   <span className="hidden sm:inline">Entradas</span>
                 </TabsTrigger>
+                <TabsTrigger value="dashboard" className="gap-1.5">
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </TabsTrigger>
               </TabsList>
-
-              <TabsContent value="dashboard">
-                <SmartDashboard />
-              </TabsContent>
 
               <TabsContent value="despesas">
                 <SmartExpenseManager />
@@ -62,6 +68,10 @@ export default function Financeiro() {
 
               <TabsContent value="entradas">
                 <EntradasManager />
+              </TabsContent>
+
+              <TabsContent value="dashboard">
+                <SmartDashboard />
               </TabsContent>
             </Tabs>
           )}

@@ -35,6 +35,10 @@ import {
   UserPlus,
   Headset,
   DollarSign,
+  ArrowDownCircle,
+  ShoppingBag,
+  ArrowUpCircle,
+  LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
