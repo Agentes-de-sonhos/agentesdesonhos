@@ -124,7 +124,9 @@ export function useFinancial() {
       if (error) throw error;
       return data.map(e => ({
         ...e,
-        category: e.category as ExpenseCategory
+        category: e.category as ExpenseCategory,
+        expense_type: (e as any).expense_type || 'variable',
+        is_recurring: (e as any).is_recurring || false,
       })) as ExpenseEntry[];
     },
     enabled: !!user,
