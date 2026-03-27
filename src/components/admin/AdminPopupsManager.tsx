@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { PopupRichTextEditor } from "./PopupRichTextEditor";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -450,13 +450,10 @@ export function AdminPopupsManager() {
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                placeholder="Texto descritivo do comunicado..."
-                rows={4}
+              <Label>Descrição</Label>
+              <PopupRichTextEditor
+                content={formData.description}
+                onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
               />
             </div>
 
@@ -577,7 +574,7 @@ export function AdminPopupsManager() {
               <div className="p-6 space-y-4">
                 <h3 className="text-xl font-semibold">{previewPopup.title}</h3>
                 {previewPopup.description && (
-                  <p className="text-muted-foreground">{previewPopup.description}</p>
+                  <div className="text-muted-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: previewPopup.description }} />
                 )}
                 {previewPopup.has_button && previewPopup.button_text && (
                   <Button className="w-full" size="lg">

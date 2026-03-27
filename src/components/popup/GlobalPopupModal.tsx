@@ -122,9 +122,7 @@ export function GlobalPopupModal() {
           </h2>
 
           {currentPopup.description && (
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {currentPopup.description}
-            </p>
+            <div className="text-muted-foreground text-sm leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: currentPopup.description }} />
           )}
 
           {/* Action Button */}
