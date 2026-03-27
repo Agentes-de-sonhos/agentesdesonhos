@@ -41,7 +41,7 @@ const Agenda = lazy(() => import("./pages/Agenda"));
 const BlocoNotas = lazy(() => import("./pages/BlocoNotas"));
 const CRM = lazy(() => import("./pages/CRM"));
 const Financeiro = lazy(() => import("./pages/Financeiro"));
-const Vendas = lazy(() => import("./pages/Vendas"));
+
 const GestaoClientes = lazy(() => import("./pages/GestaoClientes"));
 const EducaAcademy = lazy(() => import("./pages/EducaAcademy"));
 const Community = lazy(() => import("./pages/Community"));
@@ -153,7 +153,7 @@ const App = () => (
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
             <Route path="/financeiro" element={<ProtectedRoute><Financeiro /></ProtectedRoute>} />
-            <Route path="/vendas" element={<AdminRoute><Vendas /></AdminRoute>} />
+            
             <Route path="/hotel-raio-x" element={<ProtectedRoute><HotelRaioX /></ProtectedRoute>} />
             <Route path="/gestao-clientes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/gestao-clientes/clientes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />

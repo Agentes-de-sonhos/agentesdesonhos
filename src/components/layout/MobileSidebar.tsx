@@ -213,7 +213,7 @@ export function MobileSidebar() {
 
   // Same order as desktop
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, comunidadeSection],
     []
   );
 
