@@ -8,7 +8,7 @@ import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager"
 import { SalesManager } from "@/components/financial/SalesManager";
 import { EntradasManager } from "@/components/financial/EntradasManager";
 import { useFinancial } from "@/hooks/useFinancial";
-import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
+
 
 const VALID_TABS = ["vendas", "despesas", "entradas", "dashboard"] as const;
 
