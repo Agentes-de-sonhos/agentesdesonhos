@@ -2,6 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Plus } from "lucide-react";
+import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -110,7 +111,14 @@ export function AddTripDialog({ onSubmit, isSubmitting, initialData, trigger }: 
           {/* Destination */}
           <div className="space-y-1.5">
             <Label>Destino *</Label>
-            <Input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Ex: Paris, França" />
+            <PlacesAutocomplete
+              value={destination}
+              onChange={setDestination}
+              onPlaceSelect={(pred) => setDestination(pred.name)}
+              placeType="city"
+              placeholder="Ex: Paris, França"
+              fetchDetailsOnSelect={false}
+            />
           </div>
 
           {/* Dates */}

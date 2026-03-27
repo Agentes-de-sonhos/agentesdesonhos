@@ -5,6 +5,7 @@ import * as z from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Users, MapPin, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -133,15 +134,14 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
         {/* Destination */}
         <div className="space-y-2">
           <Label htmlFor="destination">Destino</Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="destination"
-              placeholder="Ex: Paris, França"
-              className="pl-10"
-              {...form.register("destination")}
-            />
-          </div>
+          <PlacesAutocomplete
+            value={form.watch("destination") || ""}
+            onChange={(val) => form.setValue("destination", val)}
+            onPlaceSelect={(pred) => form.setValue("destination", pred.name)}
+            placeType="city"
+            placeholder="Ex: Paris, França"
+            fetchDetailsOnSelect={false}
+          />
           {form.formState.errors.destination && (
             <p className="text-sm text-destructive">
               {form.formState.errors.destination.message}
