@@ -282,7 +282,7 @@ export function MobileSidebar() {
 
   const renderMenuItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
     const isActive =
-      location.pathname === item.url ||
+      isItemActive(item.url) ||
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";

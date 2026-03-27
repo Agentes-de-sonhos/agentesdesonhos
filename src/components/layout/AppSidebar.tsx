@@ -262,8 +262,16 @@ export function AppSidebar() {
     });
   };
 
+  const isItemActive = (itemUrl: string) => {
+    const [pathname, search] = itemUrl.split("?");
+    if (search) {
+      return location.pathname === pathname && location.search === `?${search}`;
+    }
+    return location.pathname === itemUrl || location.pathname.startsWith(itemUrl);
+  };
+
   const isSectionActive = (section: MenuSection) =>
-    section.items.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
+    section.items.some((i) => isItemActive(i.url));
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
@@ -294,7 +302,7 @@ export function AppSidebar() {
 
   const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string, forceShowLock?: boolean) => {
     const isActive =
-      location.pathname === item.url ||
+      isItemActive(item.url) ||
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
