@@ -101,7 +101,7 @@ export default function Desconto30Off() {
             {/* Price */}
             <div className="text-center mb-8">
               <p className="text-muted-foreground line-through text-lg mb-1">
-                De R$ 127,90/mês
+                De R$ 129,70/mês
               </p>
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-muted-foreground text-lg">R$</span>

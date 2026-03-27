@@ -107,7 +107,7 @@ export default function Planos() {
             <div className="text-center mb-8">
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-muted-foreground text-lg">R$</span>
-                <span className="text-5xl font-bold tracking-tight">97</span>
+                <span className="text-5xl font-bold tracking-tight">127</span>
                 <span className="text-2xl font-bold">,90</span>
                 <span className="text-muted-foreground text-lg">/mês</span>
               </div>

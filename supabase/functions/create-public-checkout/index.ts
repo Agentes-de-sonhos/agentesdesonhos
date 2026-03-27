@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PROFISSIONAL_PRICE_ID = "price_1TE4lRFkGdVt5nieLz51QfLV";
+const PROFISSIONAL_PRICE_ID = "price_1TBPu8FkGdVt5nieGrSjI4yp";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
