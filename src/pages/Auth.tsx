@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Eye, EyeOff, Mail, Lock } from "lucide-react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useAuth } from "@/hooks/useAuth";
+import { useLoginProtection } from "@/hooks/useLoginProtection";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
