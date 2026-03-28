@@ -22,8 +22,11 @@ import { useToast } from "@/hooks/use-toast";
 
 const resetSchema = z
   .object({
-    password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-    confirmPassword: z.string().min(6, "Confirme sua senha"),
+    password: z.string()
+      .min(8, "Senha deve ter no mínimo 8 caracteres")
+      .regex(/[a-zA-Z]/, "Senha deve conter pelo menos 1 letra")
+      .regex(/[0-9]/, "Senha deve conter pelo menos 1 número"),
+    confirmPassword: z.string().min(1, "Confirme sua senha"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem",

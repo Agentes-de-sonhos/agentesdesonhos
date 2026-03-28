@@ -5,10 +5,11 @@ const translateAuthError = (msg: string): string => {
   if (/rate.?limit|too.?many|exceeded|over.?request|request.?limit|aguarde|security.?purposes.*after/i.test(msg)) 
     return "Muitas tentativas seguidas. Aguarde 1-2 minutos e tente novamente.";
   if (/invalid.login/i.test(msg)) return "E-mail ou senha incorretos.";
-  if (/user.not.found/i.test(msg)) return "Usuário não encontrado.";
+  if (/user.not.found/i.test(msg)) return "E-mail ou senha inválidos.";
   if (/email.not.confirmed/i.test(msg)) return "Por favor, confirme seu e-mail antes de fazer login.";
   if (/already.registered/i.test(msg)) return "Este e-mail já está cadastrado.";
-  if (/weak.password/i.test(msg)) return "A senha deve ter pelo menos 6 caracteres.";
+  if (/weak.password|leaked|compromised|hibp/i.test(msg)) return "Essa senha não é segura. Escolha uma senha diferente.";
+  if (/password.*short|too.short/i.test(msg)) return "A senha deve ter pelo menos 8 caracteres.";
   if (/network|fetch|failed/i.test(msg)) return "Erro de conexão. Verifique sua internet.";
   if (/timeout/i.test(msg)) return "Tempo de resposta esgotado. Tente novamente.";
   return msg;
@@ -45,7 +46,7 @@ const emailSchema = z.object({
 
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Email inválido" }),
-  password: z.string().min(6, { message: "Senha deve ter no mínimo 6 caracteres" }),
+  password: z.string().min(1, { message: "Senha é obrigatória" }),
 });
 
 const resetSchema = z.object({

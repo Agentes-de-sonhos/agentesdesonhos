@@ -22,7 +22,10 @@ import { useToast } from "@/hooks/use-toast";
 // Step 1: Login info
 const step1Schema = z.object({
   email: z.string().trim().email({ message: "Email inválido" }),
-  password: z.string().min(6, { message: "Senha deve ter no mínimo 6 caracteres" }),
+  password: z.string()
+    .min(8, { message: "Senha deve ter no mínimo 8 caracteres" })
+    .regex(/[a-zA-Z]/, { message: "Senha deve conter pelo menos 1 letra" })
+    .regex(/[0-9]/, { message: "Senha deve conter pelo menos 1 número" }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
