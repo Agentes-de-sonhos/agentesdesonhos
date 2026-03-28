@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,10 +21,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardPaste, Loader2, Check, AlertCircle, Trash2, Search } from "lucide-react";
+import { ClipboardPaste, Loader2, Check, AlertCircle, Trash2, Search, FileSpreadsheet, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAirports } from "@/hooks/useAirports";
+import * as XLSX from "xlsx";
 import {
   Tooltip,
   TooltipContent,
