@@ -7278,6 +7278,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_user_role: {
+        Args: {
+          _new_role: Database["public"]["Enums"]["app_role"]
+          _target_user_id: string
+        }
+        Returns: boolean
+      }
       can_use_feature: {
         Args: { _feature: string; _user_id: string }
         Returns: boolean
