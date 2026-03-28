@@ -59,6 +59,7 @@ import { AdminBenefitsManager } from "@/components/admin/AdminBenefitsManager";
 import { AdminRegistrationLinksManager } from "@/components/admin/AdminRegistrationLinksManager";
 import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
 import { AdminFeedbackManager } from "@/components/admin/AdminFeedbackManager";
+import { AdminUserAnalytics } from "@/components/admin/AdminUserAnalytics";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
