@@ -1,7 +1,7 @@
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Gift, Rocket, Users, CheckCircle, Share2 } from "lucide-react";
 
 const MENSAGEM_WHATSAPP = `Oi! Tudo bem? 😊
 
@@ -39,7 +39,7 @@ export default function CampanhaIndicacao() {
   ];
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <DashboardLayout>
       <div className="max-w-2xl mx-auto space-y-8 pb-12">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -130,6 +130,6 @@ export default function CampanhaIndicacao() {
           </Button>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
