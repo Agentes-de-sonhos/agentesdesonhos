@@ -1478,5 +1478,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
         </div>
       </div>
     </div>
+    </VoucherAccessCtx.Provider>
   );
 }
