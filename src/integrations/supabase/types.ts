@@ -7275,36 +7275,7 @@ export type Database = {
       }
     }
     Views: {
-      profiles_public: {
-        Row: {
-          agency_logo_url: string | null
-          agency_name: string | null
-          avatar_url: string | null
-          city: string | null
-          name: string | null
-          state: string | null
-          user_id: string | null
-        }
-        Insert: {
-          agency_logo_url?: string | null
-          agency_name?: string | null
-          avatar_url?: string | null
-          city?: string | null
-          name?: string | null
-          state?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          agency_logo_url?: string | null
-          agency_name?: string | null
-          avatar_url?: string | null
-          city?: string | null
-          name?: string | null
-          state?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       admin_update_user_role: {
@@ -7378,6 +7349,30 @@ export type Database = {
           avatar_url: string
           city: string
           name: string
+          user_id: string
+        }[]
+      }
+      get_public_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          agency_logo_url: string
+          agency_name: string
+          avatar_url: string
+          city: string
+          name: string
+          state: string
+          user_id: string
+        }[]
+      }
+      get_public_profiles: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          agency_logo_url: string
+          agency_name: string
+          avatar_url: string
+          city: string
+          name: string
+          state: string
           user_id: string
         }[]
       }
