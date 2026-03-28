@@ -215,16 +215,20 @@ function parseLegacyFormat(text: string): ParsedBlock[] {
   return blocks;
 }
 
-// ===== EXCEL FORMAT PARSER (13 columns) =====
+// ===== EXCEL FORMAT PARSER (13 or 14 columns) =====
 
 function parseExcelRows(rows: any[][]): ParsedBlock[] {
   const blocks: ParsedBlock[] = [];
-  // Skip header row
   let startIdx = 0;
   if (rows.length > 0) {
     const firstCell = String(rows[0][0] || "").toLowerCase();
     if (firstCell.includes("origem") || firstCell.includes("partida")) startIdx = 1;
   }
+
+  // Detect if header has "Cia Aérea" column (14-col format)
+  const header = rows[0] || [];
+  const hasAirlineCol = header.length >= 14 && 
+    String(header[12] || "").toLowerCase().includes("cia");
 
   for (let i = startIdx; i < rows.length; i++) {
     const r = rows[i];
@@ -236,14 +240,25 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
     const destination = String(r[3] || "").trim().toUpperCase();
     const dataChegada = String(r[4] || "").trim();
     const horaChegada = String(r[5] || "").trim().replace(/h$/i, "");
-    const origemVolta = String(r[6] || "").trim().toUpperCase();
     const dataVolta = String(r[7] || "").trim();
     const horaSaidaVolta = String(r[8] || "").trim().replace(/h$/i, "");
-    const destinoVolta = String(r[9] || "").trim().toUpperCase();
     const dataChegadaVolta = String(r[10] || "").trim();
     const horaChegadaVolta = String(r[11] || "").trim().replace(/h$/i, "");
-    const operadora = String(r[12] || "").trim();
 
+    let airline = "";
+    let operadora = "";
+
+    if (hasAirlineCol) {
+      // 14 columns: col 12 = Cia Aérea, col 13 = Operadora
+      airline = String(r[12] || "").trim().toUpperCase();
+      operadora = String(r[13] || "").trim().toUpperCase();
+    } else {
+      // 13 columns: col 12 = Operadora (airline unknown)
+      operadora = String(r[12] || "").trim().toUpperCase();
+      airline = "";
+    }
+
+    if (!airline) airline = "NÃO INFORMADO";
     if (!origin || !destination) continue;
 
     blocks.push({
@@ -257,7 +272,7 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
       return_departure_time: horaSaidaVolta,
       return_arrival_date: parseDate(dataChegadaVolta),
       return_arrival_time: horaChegadaVolta,
-      airline: operadora,
+      airline,
       block_code: "",
       price: "",
       currency: "BRL",
