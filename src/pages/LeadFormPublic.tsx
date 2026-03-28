@@ -75,11 +75,9 @@ export default function LeadFormPublic() {
       setFormData(form as FormData);
 
       // Load agent profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("name, phone, avatar_url, agency_name")
-        .eq("user_id", (form as FormData).user_id)
-        .maybeSingle();
+      const { data: profileArr } = await supabase
+        .rpc("get_public_profile", { _user_id: (form as FormData).user_id });
+      const profile = profileArr?.[0] ? { name: profileArr[0].name, phone: profileArr[0].phone, avatar_url: profileArr[0].avatar_url, agency_name: profileArr[0].agency_name } as AgentProfile : null;
 
       if (profile) setAgent(profile as AgentProfile);
 

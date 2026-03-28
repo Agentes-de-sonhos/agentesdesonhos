@@ -10,12 +10,9 @@ export interface AgentProfile {
 
 export async function fetchAgentProfile(userId: string, supabase: any): Promise<AgentProfile | null> {
   const { data, error } = await supabase
-    .from("profiles")
-    .select("name, phone, avatar_url, agency_name, agency_logo_url, city, state")
-    .eq("user_id", userId)
-    .maybeSingle();
+    .rpc("get_public_profile", { _user_id: userId });
   
-  if (error || !data) return null;
+  if (error || !data || data.length === 0) return null;
   
-  return data as AgentProfile;
+  return data[0] as AgentProfile;
 }

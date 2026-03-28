@@ -299,12 +299,9 @@ export function usePublicShowcase(slug: string | undefined) {
     queryKey: ["public-showcase-profile", showcase?.user_id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("profiles")
-        .select("name, phone, avatar_url, agency_name, agency_logo_url, city, state")
-        .eq("user_id", showcase!.user_id)
-        .maybeSingle();
+        .rpc("get_public_profile", { _user_id: showcase!.user_id });
       if (error) throw error;
-      return data;
+      return data?.[0] || null;
     },
     enabled: !!showcase?.user_id,
   });

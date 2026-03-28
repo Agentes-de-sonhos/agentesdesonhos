@@ -7352,6 +7352,32 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          agency_logo_url: string
+          agency_name: string
+          avatar_url: string
+          city: string
+          name: string
+          phone: string
+          state: string
+          user_id: string
+        }[]
+      }
+      get_public_profiles: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          agency_logo_url: string
+          agency_name: string
+          avatar_url: string
+          city: string
+          name: string
+          phone: string
+          state: string
+          user_id: string
+        }[]
+      }
       get_user_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["subscription_plan"]
