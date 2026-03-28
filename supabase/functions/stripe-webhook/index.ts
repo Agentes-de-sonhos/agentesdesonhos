@@ -45,6 +45,9 @@ Deno.serve(async (req) => {
     });
   }
 
+  const traceId = event.id; // Use Stripe event ID as trace
+  console.log(`[${traceId}] Processing ${event.type}`);
+
   // Extract customer email based on event type
   let customerEmail: string | null = null;
   let sessionId: string | null = null;

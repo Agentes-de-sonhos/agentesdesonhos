@@ -87,6 +87,8 @@ Retorne um JSON com:
 };
 
 serve(async (req) => {
+  const traceId = crypto.randomUUID().slice(0, 8);
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -185,7 +187,7 @@ serve(async (req) => {
       }
     }
 
-    // Validate image URL
+    // Validate image URL (with anti-SSRF)
     if (imageUrl) {
       if (typeof imageUrl !== 'string' || imageUrl.length > MAX_IMAGE_URL_LENGTH) {
         return validationError('URL da imagem inválida.', corsHeaders);
@@ -193,7 +195,20 @@ serve(async (req) => {
       try {
         const parsed = new URL(imageUrl);
         if (!['http:', 'https:'].includes(parsed.protocol)) {
-          return validationError('URL da imagem deve usar HTTPS.', corsHeaders);
+          return validationError('URL inválida. Use um link público válido.', corsHeaders);
+        }
+        // Anti-SSRF: block internal/private IPs
+        const hostname = parsed.hostname.toLowerCase();
+        const ssrfBlocked = [
+          'localhost', '127.0.0.1', '0.0.0.0', '[::1]', '169.254.169.254',
+          'metadata.google.internal',
+        ];
+        if (ssrfBlocked.includes(hostname) ||
+            hostname.endsWith('.local') ||
+            hostname.startsWith('10.') ||
+            hostname.startsWith('192.168.') ||
+            /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)) {
+          return validationError('URL inválida. Use um link público válido.', corsHeaders);
         }
       } catch {
         return validationError('URL da imagem inválida.', corsHeaders);
@@ -226,7 +241,7 @@ serve(async (req) => {
       text: 'Analise esta lâmina de divulgação e gere o conteúdo solicitado. Retorne APENAS o JSON, sem markdown ou explicações.'
     });
 
-    console.log('Calling AI with vision model for user:', userId);
+    console.log(`[${traceId}] Calling AI with vision model for user:`, userId);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -298,9 +313,9 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Generate content error:', error);
+    console.error(`[${traceId}] Generate content error:`, error);
     return new Response(
-      JSON.stringify({ error: 'Erro ao gerar conteúdo. Tente novamente em alguns instantes.' }),
+      JSON.stringify({ success: false, error: 'Não foi possível processar sua solicitação. Tente novamente.', code: 'GENERIC_ERROR' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
