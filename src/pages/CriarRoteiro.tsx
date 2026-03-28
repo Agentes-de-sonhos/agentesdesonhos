@@ -37,7 +37,6 @@ export default function CriarRoteiro() {
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
-  const [pendingItineraryId, setPendingItineraryId] = useState<string | null>(null);
 
   const {
     itineraries,
@@ -76,6 +75,8 @@ export default function CriarRoteiro() {
   };
 
   const handleCreateItinerary = async (data: ItineraryFormData) => {
+    let createdItineraryId: string | null = null;
+
     if (!canCreateItinerary) {
       toast.error("Limite diário atingido. Faça upgrade para o Plano Fundador para criar roteiros ilimitados.");
       return;
@@ -86,7 +87,7 @@ export default function CriarRoteiro() {
     try {
       // Create itinerary record
       const itinerary = await createItinerary.mutateAsync(data);
-      setPendingItineraryId(itinerary.id);
+      createdItineraryId = itinerary.id;
 
       // Generate with AI
       const generatedData = await generateWithAI(data);
@@ -101,19 +102,15 @@ export default function CriarRoteiro() {
       // Only increment usage AFTER successful creation
       await incrementUsage();
 
-      setPendingItineraryId(null);
-
       toast.success("Roteiro gerado com sucesso!");
     } catch (error) {
       console.error("Error creating itinerary:", error);
 
-      if (pendingItineraryId) {
+      if (createdItineraryId) {
         try {
-          await deleteItinerary.mutateAsync(pendingItineraryId);
+          await deleteItinerary.mutateAsync(createdItineraryId);
         } catch (cleanupError) {
           console.error("Error cleaning up failed itinerary:", cleanupError);
-        } finally {
-          setPendingItineraryId(null);
         }
       }
 
