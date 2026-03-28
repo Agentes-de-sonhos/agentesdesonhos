@@ -207,18 +207,19 @@ export function AdminUserManager() {
   });
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
-      const { error } = await supabase
-        .from("subscriptions")
-        .update({ is_active: isActive })
-        .eq("user_id", userId);
-      if (error) throw error;
+      const resp = await supabase.functions.invoke("admin-toggle-user-status", {
+        body: { user_id: userId, is_active: isActive },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao alterar status");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, { isActive }) => {
       queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
-      toast({ title: "Status da conta atualizado!" });
+      toast({ title: isActive ? "Usuário ativado com sucesso!" : "Usuário desativado. Sessões encerradas." });
     },
-    onError: () => {
-      toast({ title: "Erro ao atualizar status", variant: "destructive" });
+    onError: (err: Error) => {
+      toast({ title: "Erro ao atualizar status", description: err.message, variant: "destructive" });
     },
   });
   const resetPasswordMutation = useMutation({

@@ -179,8 +179,10 @@ export default function Auth() {
     if (signInError) {
       setIsLoading(false);
       recordFailedAttempt();
-      // Generic message to prevent user enumeration
-      if (signInError.message.includes("Invalid login credentials") || signInError.message.includes("user not found")) {
+      // Inactive user message
+      if (signInError.message.includes("Usuário inativo")) {
+        setError("Usuário inativo. Entre em contato com o suporte.");
+      } else if (signInError.message.includes("Invalid login credentials") || signInError.message.includes("user not found")) {
         setError("E-mail ou senha inválidos.");
       } else if (signInError.message.includes("Email not confirmed")) {
         setError("Por favor, confirme seu email antes de fazer login.");

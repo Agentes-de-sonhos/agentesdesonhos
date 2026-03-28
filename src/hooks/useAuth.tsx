@@ -110,11 +110,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Password-based methods
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    return { error: error as Error | null };
+    if (error) return { error: error as Error | null };
+
+    // Check if user is active
+    if (data.user) {
+      const { data: isActive } = await supabase.rpc("is_user_active", {
+        _user_id: data.user.id,
+      });
+      if (isActive === false) {
+        await supabase.auth.signOut();
+        return {
+          error: new Error("Usuário inativo. Entre em contato com o suporte.") as Error,
+        };
+      }
+    }
+
+    return { error: null };
   };
 
   const signUp = async (email: string, password: string, name: string) => {
