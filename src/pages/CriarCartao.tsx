@@ -88,30 +88,32 @@ export default function CriarCartao() {
 
     setSaving(true);
     try {
-      const { error } = await supabase.from("business_cards").insert({
-        slug,
-        name: form.name,
-        title: form.title || null,
-        agency_name: form.agency_name || null,
-        phone: form.phone || null,
-        whatsapp: form.whatsapp || null,
-        email: form.email || null,
-        website: form.website || null,
-        primary_color: form.primary_color,
-        secondary_color: form.secondary_color,
-        cover_url: form.cover_url || null,
-        buttons: buttons.filter((b) => b.text && b.url) as any,
-        social_links: socialLinks as any,
-        logos: logoUrl ? [logoUrl] as any : [],
-      } as any);
+      const { data, error } = await supabase.functions.invoke("create-business-card", {
+        body: {
+          slug,
+          name: form.name,
+          title: form.title || null,
+          agency_name: form.agency_name || null,
+          phone: form.phone || null,
+          whatsapp: form.whatsapp || null,
+          email: form.email || null,
+          website: form.website || null,
+          primary_color: form.primary_color,
+          secondary_color: form.secondary_color,
+          cover_url: form.cover_url || null,
+          buttons: buttons.filter((b) => b.text && b.url),
+          social_links: socialLinks,
+          logos: logoUrl ? [logoUrl] : [],
+        },
+      });
 
       if (error) {
-        console.error("Business card creation error:", error);
-        if (error.message?.includes("duplicate") || error.message?.includes("unique")) {
-          toast.error("Esse slug já está em uso. Escolha outro.");
-        } else {
-          toast.error("Erro ao criar cartão: " + error.message);
-        }
+        toast.error("Erro ao criar cartão. Tente novamente.");
+        return;
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
         return;
       }
 

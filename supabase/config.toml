@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.get-secure-voucher]
 verify_jwt = false
+
+[functions.create-business-card]
+verify_jwt = false
