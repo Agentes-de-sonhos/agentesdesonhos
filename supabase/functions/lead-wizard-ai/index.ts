@@ -9,6 +9,13 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Rate limiting: 30 requests per minute for lead wizard
+  const clientIP = getClientIP(req);
+  const rateCheck = await checkRateLimit(clientIP, 'lead-wizard-ai', 30, 60);
+  if (!rateCheck.allowed) {
+    return rateLimitResponse(corsHeaders, rateCheck.retryAfterMs);
+  }
+
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");

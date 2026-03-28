@@ -53,6 +53,13 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limiting: 10 requests per minute for itinerary generation
+  const clientIP = getClientIP(req);
+  const rateCheck = await checkRateLimit(clientIP, 'generate-itinerary', 10, 60);
+  if (!rateCheck.allowed) {
+    return rateLimitResponse(corsHeaders, rateCheck.retryAfterMs);
+  }
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
