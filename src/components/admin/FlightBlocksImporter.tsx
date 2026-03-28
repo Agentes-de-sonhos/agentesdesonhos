@@ -299,6 +299,7 @@ export function FlightBlocksImporter() {
   const [importFormat, setImportFormat] = useState<"auto" | "table" | "legacy">("auto");
   const [parsedBlocks, setParsedBlocks] = useState<ParsedBlock[]>([]);
   const [importResult, setImportResult] = useState({ success: 0, errors: 0, skipped: 0 });
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { formatAirportLabel, getAirport } = useAirports();
