@@ -75,6 +75,8 @@ export default function CriarRoteiro() {
   };
 
   const handleCreateItinerary = async (data: ItineraryFormData) => {
+    let createdItineraryId: string | null = null;
+
     if (!canCreateItinerary) {
       toast.error("Limite diário atingido. Faça upgrade para o Plano Fundador para criar roteiros ilimitados.");
       return;
@@ -85,6 +87,7 @@ export default function CriarRoteiro() {
     try {
       // Create itinerary record
       const itinerary = await createItinerary.mutateAsync(data);
+      createdItineraryId = itinerary.id;
 
       // Generate with AI
       const generatedData = await generateWithAI(data);
@@ -102,6 +105,15 @@ export default function CriarRoteiro() {
       toast.success("Roteiro gerado com sucesso!");
     } catch (error) {
       console.error("Error creating itinerary:", error);
+
+      if (createdItineraryId) {
+        try {
+          await deleteItinerary.mutateAsync(createdItineraryId);
+        } catch (cleanupError) {
+          console.error("Error cleaning up failed itinerary:", cleanupError);
+        }
+      }
+
       toast.error(error instanceof Error ? error.message : "Erro ao gerar roteiro");
     } finally {
       setIsGenerating(false);
