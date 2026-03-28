@@ -66,6 +66,8 @@ const paceLabels: Record<string, string> = {
 };
 
 serve(async (req) => {
+  const traceId = crypto.randomUUID().slice(0, 8);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -291,7 +293,7 @@ Datas dos dias: ${datesInfo.join(', ')}
 
 Use a função generate_itinerary para retornar o roteiro completo.`;
 
-    console.log("Calling AI for destination:", destination, "days:", days, "user:", userId);
+    console.log(`[${traceId}] Calling AI for destination:`, destination, "days:", days, "user:", userId);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -443,8 +445,8 @@ Use a função generate_itinerary para retornar o roteiro completo.`;
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("generate-itinerary error:", e);
-    return new Response(JSON.stringify({ error: "Erro ao gerar roteiro. Tente novamente em alguns instantes." }), {
+    console.error(`[${traceId}] generate-itinerary error:`, e);
+    return new Response(JSON.stringify({ success: false, error: "Não foi possível processar sua solicitação. Tente novamente.", code: "GENERIC_ERROR" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

@@ -45,6 +45,10 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Idempotency: skip already-processed events
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseServiceKey2 = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
   // Extract customer email based on event type
   let customerEmail: string | null = null;
   let sessionId: string | null = null;
