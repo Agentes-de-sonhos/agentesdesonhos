@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Gift, Rocket, Users, CheckCircle, Share2 } from "lucide-react";
