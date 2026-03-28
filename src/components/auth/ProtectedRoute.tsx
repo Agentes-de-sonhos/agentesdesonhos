@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useSessionTracker } from "@/hooks/useSessionTracker";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { plan, loading: subLoading } = useSubscription();
   const location = useLocation();
   const checkInterval = useRef<ReturnType<typeof setInterval>>();
+  useSessionTracker();
 
   // Periodically check if user is still active (every 60s)
   useEffect(() => {
