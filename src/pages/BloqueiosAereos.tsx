@@ -15,14 +15,11 @@ import { BlockEmptyState } from "@/components/bloqueios/BlockEmptyState";
 export default function BloqueiosAereos() {
   const { getAirport } = useAirports();
 
-  // Search state
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Filter state
   const [selectedOperator, setSelectedOperator] = useState("Todas");
   const [selectedAirline, setSelectedAirline] = useState("Todas");
   const [sortBy, setSortBy] = useState("date_asc");
@@ -44,14 +41,32 @@ export default function BloqueiosAereos() {
     return info ? `${info.city} (${code})` : code;
   };
 
-  const matchesCode = (code: string, term: string) => {
+  /**
+   * Smart match: checks if a given airport code matches the search term
+   * by code, city name, or airport name (partial, case-insensitive)
+   */
+  const matchesSearch = (code: string, term: string) => {
     if (!term) return true;
     const lower = term.toLowerCase();
+    if (code.toLowerCase().includes(lower)) return true;
     const info = getAirport(code);
+    if (!info) return false;
     return (
-      code.toLowerCase().includes(lower) ||
-      info?.city?.toLowerCase().includes(lower) ||
-      info?.name?.toLowerCase().includes(lower)
+      info.city?.toLowerCase().includes(lower) ||
+      info.name?.toLowerCase().includes(lower)
+    );
+  };
+
+  /**
+   * Check if any of the block's airports (origin/destination, ida/volta) match
+   */
+  const blockMatchesSearch = (block: any, term: string) => {
+    if (!term) return true;
+    return (
+      matchesSearch(block.origin, term) ||
+      matchesSearch(block.destination, term) ||
+      (block.return_departure_date && matchesSearch(block.destination, term)) ||
+      (block.return_arrival_date && matchesSearch(block.origin, term))
     );
   };
 
@@ -63,30 +78,25 @@ export default function BloqueiosAereos() {
     return true;
   };
 
-  // Main filtered results
   const filteredBlocks = useMemo(() => {
     if (!blocks || !hasSearched) return [];
     return blocks.filter((b) => {
-      if (!matchesCode(b.origin, origin)) return false;
-      if (destination && !matchesCode(b.destination, destination)) return false;
+      if (!blockMatchesSearch(b, searchTerm)) return false;
       if (!matchesDateRange(b.departure_date)) return false;
       if (selectedOperator !== "Todas" && b.operator !== selectedOperator) return false;
       if (selectedAirline !== "Todas" && b.airline !== selectedAirline) return false;
       return true;
     });
-  }, [blocks, origin, destination, dateFrom, dateTo, selectedOperator, selectedAirline, hasSearched]);
+  }, [blocks, searchTerm, dateFrom, dateTo, selectedOperator, selectedAirline, hasSearched]);
 
-  // Fallback: same origin + period, different destinations
   const fallbackBlocks = useMemo(() => {
     if (!blocks || filteredBlocks.length > 0) return [];
     return blocks.filter((b) => {
-      if (origin && !matchesCode(b.origin, origin)) return false;
       if (!matchesDateRange(b.departure_date)) return false;
       return true;
     });
-  }, [blocks, filteredBlocks, origin, dateFrom, dateTo]);
+  }, [blocks, filteredBlocks, dateFrom, dateTo]);
 
-  // Sorted results
   const sortedBlocks = useMemo(() => {
     const arr = [...filteredBlocks];
     if (sortBy === "price_asc") arr.sort((a, b) => (a.price ?? 999999) - (b.price ?? 999999));
@@ -111,16 +121,13 @@ export default function BloqueiosAereos() {
     return `${symbol} ${price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
   };
 
-  const handleSearch = () => {
-    setHasSearched(true);
-  };
+  const handleSearch = () => setHasSearched(true);
 
   const handleSuggestionClick = (dest: string) => {
-    setDestination(dest);
+    setSearchTerm(dest);
     setHasSearched(true);
   };
 
-  // Show all blocks initially (before search)
   const initialBlocks = useMemo(() => {
     if (hasSearched || !blocks) return [];
     return [...blocks].sort((a, b) => a.departure_date.localeCompare(b.departure_date));
@@ -141,12 +148,10 @@ export default function BloqueiosAereos() {
         <EducationalSection />
 
         <BlockSearchForm
-          origin={origin}
-          destination={destination}
+          searchTerm={searchTerm}
           dateFrom={dateFrom}
           dateTo={dateTo}
-          onOriginChange={(v) => { setOrigin(v); setHasSearched(false); }}
-          onDestinationChange={(v) => { setDestination(v); setHasSearched(false); }}
+          onSearchTermChange={(v) => { setSearchTerm(v); setHasSearched(false); }}
           onDateFromChange={(d) => { setDateFrom(d); setHasSearched(false); }}
           onDateToChange={(d) => { setDateTo(d); setHasSearched(false); }}
           onSearch={handleSearch}
@@ -165,18 +170,12 @@ export default function BloqueiosAereos() {
                     {sortedBlocks.length} bloqueio{sortedBlocks.length !== 1 ? "s" : ""} encontrado{sortedBlocks.length !== 1 ? "s" : ""}
                   </p>
                   <BlockFilters
-                    operators={operators}
-                    airlines={airlines}
-                    selectedOperator={selectedOperator}
-                    selectedAirline={selectedAirline}
-                    sortBy={sortBy}
-                    onOperatorChange={setSelectedOperator}
-                    onAirlineChange={setSelectedAirline}
-                    onSortChange={setSortBy}
+                    operators={operators} airlines={airlines}
+                    selectedOperator={selectedOperator} selectedAirline={selectedAirline} sortBy={sortBy}
+                    onOperatorChange={setSelectedOperator} onAirlineChange={setSelectedAirline} onSortChange={setSortBy}
                   />
                 </div>
 
-                {/* Disclaimer */}
                 <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-700 dark:text-amber-400">
                   <Info className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>Os valores e disponibilidade apresentados não refletem o estoque em tempo real. Consulte a operadora para confirmar disponibilidade e condições.</span>
@@ -184,13 +183,7 @@ export default function BloqueiosAereos() {
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {sortedBlocks.map((block) => (
-                    <BlockResultCard
-                      key={block.id}
-                      block={block}
-                      getCityLabel={getCityLabel}
-                      formatShortDate={formatShortDate}
-                      formatPrice={formatPrice}
-                    />
+                    <BlockResultCard key={block.id} block={block} getCityLabel={getCityLabel} formatShortDate={formatShortDate} formatPrice={formatPrice} />
                   ))}
                 </div>
               </>
@@ -198,17 +191,13 @@ export default function BloqueiosAereos() {
 
             {sortedBlocks.length === 0 && (
               <BlockEmptyState
-                hasSearched={hasSearched}
-                fallbackBlocks={fallbackBlocks}
-                origin={origin}
-                getCityLabel={getCityLabel}
-                onSuggestionClick={handleSuggestionClick}
+                hasSearched={hasSearched} fallbackBlocks={fallbackBlocks} origin={searchTerm}
+                getCityLabel={getCityLabel} onSuggestionClick={handleSuggestionClick}
               />
             )}
           </>
         ) : (
           <>
-            {/* Initial view: show all available blocks */}
             {initialBlocks.length > 0 && (
               <>
                 <div className="flex items-center justify-between flex-wrap gap-3">
@@ -216,14 +205,9 @@ export default function BloqueiosAereos() {
                     {initialBlocks.length} bloqueio{initialBlocks.length !== 1 ? "s" : ""} disponíve{initialBlocks.length !== 1 ? "is" : "l"}
                   </p>
                   <BlockFilters
-                    operators={operators}
-                    airlines={airlines}
-                    selectedOperator={selectedOperator}
-                    selectedAirline={selectedAirline}
-                    sortBy={sortBy}
-                    onOperatorChange={setSelectedOperator}
-                    onAirlineChange={setSelectedAirline}
-                    onSortChange={setSortBy}
+                    operators={operators} airlines={airlines}
+                    selectedOperator={selectedOperator} selectedAirline={selectedAirline} sortBy={sortBy}
+                    onOperatorChange={setSelectedOperator} onAirlineChange={setSelectedAirline} onSortChange={setSortBy}
                   />
                 </div>
 
@@ -240,13 +224,7 @@ export default function BloqueiosAereos() {
                       return true;
                     })
                     .map((block) => (
-                      <BlockResultCard
-                        key={block.id}
-                        block={block}
-                        getCityLabel={getCityLabel}
-                        formatShortDate={formatShortDate}
-                        formatPrice={formatPrice}
-                      />
+                      <BlockResultCard key={block.id} block={block} getCityLabel={getCityLabel} formatShortDate={formatShortDate} formatPrice={formatPrice} />
                     ))}
                 </div>
               </>
