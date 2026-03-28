@@ -118,11 +118,16 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("create-course-checkout error:", error);
+    const isUserError = error instanceof Error && (
+      error.message.includes("não encontrado") ||
+      error.message.includes("já está matriculado")
+    );
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Erro interno" }),
+      JSON.stringify({ error: isUserError ? error.message : "Erro ao processar pagamento. Tente novamente." }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
+        status: isUserError ? 400 : 500,
       }
     );
   }

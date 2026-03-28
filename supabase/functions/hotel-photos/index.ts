@@ -23,8 +23,9 @@ serve(async (req) => {
 
     const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
     if (!GOOGLE_PLACES_API_KEY) {
+      console.error("GOOGLE_PLACES_API_KEY not configured");
       return new Response(
-        JSON.stringify({ error: "GOOGLE_PLACES_API_KEY não configurada" }),
+        JSON.stringify({ error: "Serviço temporariamente indisponível." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

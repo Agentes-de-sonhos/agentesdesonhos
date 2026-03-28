@@ -111,7 +111,7 @@ Telefone do agente: ${agentPhone || ""}`;
     });
   } catch (e) {
     console.error("lead-wizard-ai error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Erro ao processar sugestão. Tente novamente." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

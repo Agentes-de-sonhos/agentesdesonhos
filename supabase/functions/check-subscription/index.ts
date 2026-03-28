@@ -88,7 +88,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("check-subscription error:", error);
+    return new Response(JSON.stringify({ error: "Erro ao verificar assinatura." }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

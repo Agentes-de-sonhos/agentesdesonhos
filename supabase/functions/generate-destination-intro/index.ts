@@ -80,7 +80,7 @@ Regras:
     });
   } catch (e) {
     console.error("generate-destination-intro error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }), {
+    return new Response(JSON.stringify({ error: "Erro ao gerar introdução. Tente novamente." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

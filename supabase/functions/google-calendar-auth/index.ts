@@ -31,7 +31,8 @@ Deno.serve(async (req) => {
 
     const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
     if (!clientId) {
-      return new Response(JSON.stringify({ error: "GOOGLE_CLIENT_ID not configured" }), { status: 500, headers: corsHeaders });
+      console.error("GOOGLE_CLIENT_ID not configured");
+      return new Response(JSON.stringify({ error: "Serviço temporariamente indisponível." }), { status: 500, headers: corsHeaders });
     }
 
     const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-calendar-callback`;

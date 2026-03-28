@@ -71,9 +71,10 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
-      const msg = createError.message.includes("already been registered")
+      console.error("Create user error:", createError);
+      const msg = /already\s+been\s+registered/i.test(createError.message)
         ? "Este e-mail já está cadastrado"
-        : createError.message;
+        : "Erro ao criar usuário. Verifique os dados e tente novamente.";
       return new Response(JSON.stringify({ error: msg }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -111,7 +112,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("admin-create-user error:", err);
+    return new Response(JSON.stringify({ error: "Erro ao processar solicitação." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

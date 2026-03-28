@@ -97,7 +97,8 @@ Deno.serve(async (req) => {
     }
 
     if (!resendRes.ok) {
-      return new Response(JSON.stringify({ error: resendData?.message || "Erro ao enviar email" }), {
+      console.error("Resend API error:", resendData);
+      return new Response(JSON.stringify({ error: "Erro ao enviar email. Tente novamente." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -108,7 +109,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("send-crm-email error:", err);
+    return new Response(JSON.stringify({ error: "Erro ao processar envio de email." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

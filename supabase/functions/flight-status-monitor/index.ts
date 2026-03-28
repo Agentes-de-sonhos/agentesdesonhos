@@ -41,7 +41,8 @@ Deno.serve(async (req) => {
 
     const flightAwareKey = Deno.env.get('FLIGHTAWARE_API_KEY');
     if (!flightAwareKey) {
-      return new Response(JSON.stringify({ error: 'FLIGHTAWARE_API_KEY not configured' }), {
+      console.error('FLIGHTAWARE_API_KEY not configured');
+      return new Response(JSON.stringify({ error: 'Serviço temporariamente indisponível.' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -61,7 +62,7 @@ Deno.serve(async (req) => {
 
     if (fetchErr) {
       console.error('Error fetching flight services:', fetchErr);
-      return new Response(JSON.stringify({ error: fetchErr.message }), {
+      return new Response(JSON.stringify({ error: 'Erro ao buscar serviços de voo.' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -156,8 +157,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: msg }), {
+    console.error("flight-status-monitor error:", err);
+    return new Response(JSON.stringify({ error: 'Erro ao monitorar voos.' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
