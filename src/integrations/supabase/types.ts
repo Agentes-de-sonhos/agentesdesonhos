@@ -7275,7 +7275,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          agency_logo_url: string | null
+          agency_name: string | null
+          avatar_url: string | null
+          city: string | null
+          name: string | null
+          state: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agency_logo_url?: string | null
+          agency_name?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          name?: string | null
+          state?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agency_logo_url?: string | null
+          agency_name?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          name?: string | null
+          state?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_update_user_role: {
