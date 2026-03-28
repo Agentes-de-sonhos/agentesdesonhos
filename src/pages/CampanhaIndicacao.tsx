@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Button } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -40,7 +40,7 @@ export default function CampanhaIndicacao() {
   ];
 
   return (
-    <DashboardLayout>
+    <div className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-2xl mx-auto space-y-8 pb-12">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -131,6 +131,6 @@ export default function CampanhaIndicacao() {
           </Button>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }
