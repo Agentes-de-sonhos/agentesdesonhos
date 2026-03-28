@@ -421,6 +421,7 @@ export function FlightBlocksImporter() {
         }
         setParsedBlocks(blocks);
         setStep("preview");
+        setIsOpen(true);
         toast({ title: `${blocks.length} bloqueio(s) detectados no Excel` });
       } catch (err) {
         console.error("Error parsing Excel:", err);
