@@ -129,7 +129,15 @@ export function GlobalPopupModal() {
           {currentPopup.description && (
             <div 
               className="text-muted-foreground text-sm leading-relaxed prose prose-sm max-w-none break-words overflow-x-hidden [&_a]:break-all [&_p]:mb-2 [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:mb-1 [&_br]:block [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_strong]:font-semibold [&_em]:italic" 
-              dangerouslySetInnerHTML={{ __html: currentPopup.description }} 
+              dangerouslySetInnerHTML={{ __html: (() => {
+                let html = currentPopup.description!;
+                // Fix double-escaped HTML entities
+                if (html.includes('&lt;') || html.includes('&gt;')) {
+                  const doc = new DOMParser().parseFromString(html, 'text/html');
+                  html = doc.body.textContent || html;
+                }
+                return html;
+              })() }} 
             />
           )}
 
