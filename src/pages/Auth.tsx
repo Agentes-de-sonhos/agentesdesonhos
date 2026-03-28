@@ -159,16 +159,31 @@ export default function Auth() {
   // Password login (primary)
   const handleLogin = async (data: LoginFormData) => {
     setError(null);
+
+    // Check brute force protection
+    const attempt = checkCanAttempt();
+    if (!attempt.allowed) {
+      setError(attempt.message || "Muitas tentativas. Aguarde e tente novamente.");
+      return;
+    }
+
     setIsLoading(true);
+
+    // Apply progressive delay if needed
+    if (attempt.waitMs && attempt.waitMs > 0) {
+      await new Promise((r) => setTimeout(r, attempt.waitMs));
+    }
 
     const { error: signInError } = await signIn(data.email, data.password);
 
     if (signInError) {
       setIsLoading(false);
-      if (signInError.message.includes("Invalid login credentials")) {
-        setError("Email ou senha incorretos");
+      recordFailedAttempt();
+      // Generic message to prevent user enumeration
+      if (signInError.message.includes("Invalid login credentials") || signInError.message.includes("user not found")) {
+        setError("E-mail ou senha inválidos.");
       } else if (signInError.message.includes("Email not confirmed")) {
-        setError("Por favor, confirme seu email antes de fazer login");
+        setError("Por favor, confirme seu email antes de fazer login.");
       } else {
         setError(translateAuthError(signInError.message));
       }
@@ -176,6 +191,7 @@ export default function Auth() {
     }
 
     setIsLoading(false);
+    recordSuccess();
     toast({
       title: "Bem-vindo de volta!",
       description: "Login realizado com sucesso.",
