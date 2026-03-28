@@ -382,6 +382,40 @@ export function FlightBlocksImporter() {
     }
     const blocks = parseRawText(rawText, importFormat);
     if (blocks.length === 0) {
+      toast({ title: "Nenhum bloqueio válido detectado", description: "Verifique o formato ou tente selecionar o tipo manualmente.", variant: "destructive" });
+      return;
+    }
+    setParsedBlocks(blocks);
+    setStep("preview");
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const blocks = parseExcelRows(rows);
+        if (blocks.length === 0) {
+          toast({ title: "Nenhum bloqueio encontrado no arquivo", variant: "destructive" });
+          return;
+        }
+        setParsedBlocks(blocks);
+        setStep("preview");
+        toast({ title: `${blocks.length} bloqueio(s) detectados no Excel` });
+      } catch (err) {
+        console.error("Error parsing Excel:", err);
+        toast({ title: "Erro ao ler arquivo Excel", variant: "destructive" });
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+    if (blocks.length === 0) {
       toast({
         title: "Nenhum bloqueio válido detectado",
         description: "Verifique o formato ou tente selecionar o tipo manualmente.",
