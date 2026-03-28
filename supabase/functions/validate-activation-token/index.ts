@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
 
     return jsonResponse({ valid: true, email: activation.email });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro inesperado.";
-    return jsonResponse({ error: message }, 500);
+    console.error("validate-activation-token error:", error);
+    return jsonResponse({ error: "Erro ao validar token." }, 500);
   }
 });

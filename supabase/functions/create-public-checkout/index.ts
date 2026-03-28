@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error("Public checkout error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "Erro ao processar pagamento. Tente novamente." }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

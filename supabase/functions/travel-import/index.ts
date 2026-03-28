@@ -350,7 +350,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ services }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    console.error("travel-import error:", err);
+    return new Response(JSON.stringify({ error: 'Erro ao importar dados de viagem.' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

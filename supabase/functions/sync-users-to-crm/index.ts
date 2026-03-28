@@ -107,7 +107,8 @@ Deno.serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("sync-users-to-crm error:", err);
+    return new Response(JSON.stringify({ error: "Erro ao sincronizar usuários." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

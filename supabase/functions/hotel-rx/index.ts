@@ -316,7 +316,7 @@ ${reviewsText || "Nenhum comentário disponível"}`;
   } catch (e) {
     console.error("hotel-rx error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }),
+      JSON.stringify({ error: "Erro ao processar cotação de hotel." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

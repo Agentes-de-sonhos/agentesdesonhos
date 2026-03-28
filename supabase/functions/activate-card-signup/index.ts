@@ -107,10 +107,11 @@ Deno.serve(async (req) => {
     });
 
     if (createUserError) {
+      console.error("Activate card signup - create user error:", createUserError);
       const isAlreadyRegistered = /already\s+been\s+registered/i.test(createUserError.message);
       const message = isAlreadyRegistered
         ? "Este e-mail já está cadastrado. Faça login no app."
-        : createUserError.message;
+        : "Erro ao criar conta. Verifique os dados e tente novamente.";
 
       return jsonResponse({ error: message }, isAlreadyRegistered ? 409 : 400);
     }
@@ -163,7 +164,7 @@ Deno.serve(async (req) => {
 
     return jsonResponse({ success: true, user_id: userId });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro inesperado.";
-    return jsonResponse({ error: message }, 500);
+    console.error("activate-card-signup error:", error);
+    return jsonResponse({ error: "Erro ao processar ativação." }, 500);
   }
 });

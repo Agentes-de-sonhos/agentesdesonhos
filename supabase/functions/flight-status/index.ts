@@ -32,7 +32,8 @@ Deno.serve(async (req) => {
 
     const apiKey = Deno.env.get('AVIATIONSTACK_API_KEY');
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'AVIATIONSTACK_API_KEY not configured' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      console.error('AVIATIONSTACK_API_KEY not configured');
+      return new Response(JSON.stringify({ error: 'Serviço temporariamente indisponível.' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const params = new URLSearchParams({
@@ -77,7 +78,7 @@ Deno.serve(async (req) => {
       delay: flight.departure?.delay || 0,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    console.error("flight-status error:", err);
+    return new Response(JSON.stringify({ error: 'Erro ao consultar status do voo.' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify(parsed), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    console.error("parse-flight-text error:", err);
+    return new Response(JSON.stringify({ error: 'Erro ao processar dados de voo.' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

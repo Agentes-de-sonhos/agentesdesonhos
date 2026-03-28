@@ -70,9 +70,10 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
-      const msg = createError.message.includes("already been registered")
+      console.error("Register via link error:", createError);
+      const msg = /already\s+been\s+registered/i.test(createError.message)
         ? "Este e-mail já está cadastrado"
-        : createError.message;
+        : "Erro ao criar conta. Verifique os dados e tente novamente.";
       return new Response(JSON.stringify({ error: msg }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -115,7 +116,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("register-via-link error:", err);
+    return new Response(JSON.stringify({ error: "Erro ao processar cadastro." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
