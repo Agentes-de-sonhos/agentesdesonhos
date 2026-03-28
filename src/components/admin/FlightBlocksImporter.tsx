@@ -215,6 +215,61 @@ function parseLegacyFormat(text: string): ParsedBlock[] {
   return blocks;
 }
 
+// ===== EXCEL FORMAT PARSER (13 columns) =====
+
+function parseExcelRows(rows: any[][]): ParsedBlock[] {
+  const blocks: ParsedBlock[] = [];
+  // Skip header row
+  let startIdx = 0;
+  if (rows.length > 0) {
+    const firstCell = String(rows[0][0] || "").toLowerCase();
+    if (firstCell.includes("origem") || firstCell.includes("partida")) startIdx = 1;
+  }
+
+  for (let i = startIdx; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || r.length < 4) continue;
+
+    const origin = String(r[0] || "").trim().toUpperCase();
+    const dataIda = String(r[1] || "").trim();
+    const horaSaida = String(r[2] || "").trim().replace(/h$/i, "");
+    const destination = String(r[3] || "").trim().toUpperCase();
+    const dataChegada = String(r[4] || "").trim();
+    const horaChegada = String(r[5] || "").trim().replace(/h$/i, "");
+    const origemVolta = String(r[6] || "").trim().toUpperCase();
+    const dataVolta = String(r[7] || "").trim();
+    const horaSaidaVolta = String(r[8] || "").trim().replace(/h$/i, "");
+    const destinoVolta = String(r[9] || "").trim().toUpperCase();
+    const dataChegadaVolta = String(r[10] || "").trim();
+    const horaChegadaVolta = String(r[11] || "").trim().replace(/h$/i, "");
+    const operadora = String(r[12] || "").trim();
+
+    if (!origin || !destination) continue;
+
+    blocks.push({
+      origin,
+      destination,
+      departure_date: parseDate(dataIda),
+      departure_time: horaSaida,
+      arrival_date: parseDate(dataChegada),
+      arrival_time: horaChegada,
+      return_departure_date: parseDate(dataVolta),
+      return_departure_time: horaSaidaVolta,
+      return_arrival_date: parseDate(dataChegadaVolta),
+      return_arrival_time: horaChegadaVolta,
+      airline: operadora,
+      block_code: "",
+      price: "",
+      currency: "BRL",
+      price_text: "",
+      deadline: "",
+      seats_available: "0",
+      operator: operadora,
+    });
+  }
+  return blocks;
+}
+
 // ===== AUTO-DETECT FORMAT =====
 
 function parseRawText(text: string, format: "auto" | "table" | "legacy"): ParsedBlock[] {
