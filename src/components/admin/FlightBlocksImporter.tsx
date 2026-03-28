@@ -664,5 +664,7 @@ export function FlightBlocksImporter() {
         )}
       </DialogContent>
     </Dialog>
+      </div>
+    </>
   );
 }
