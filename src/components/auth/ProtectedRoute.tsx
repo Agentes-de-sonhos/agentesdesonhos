@@ -1,17 +1,45 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const { plan, loading: subLoading } = useSubscription();
   const location = useLocation();
+  const checkInterval = useRef<ReturnType<typeof setInterval>>();
+
+  // Periodically check if user is still active (every 60s)
+  useEffect(() => {
+    if (!user) return;
+
+    const checkActive = async () => {
+      const { data: isActive } = await supabase.rpc("is_user_active", {
+        _user_id: user.id,
+      });
+      if (isActive === false) {
+        toast.error("Sua conta foi desativada. Entre em contato com o suporte.");
+        await signOut();
+      }
+    };
+
+    // Check immediately on mount
+    checkActive();
+
+    // Then every 60 seconds
+    checkInterval.current = setInterval(checkActive, 60_000);
+
+    return () => {
+      if (checkInterval.current) clearInterval(checkInterval.current);
+    };
+  }, [user, signOut]);
 
   if (loading || subLoading) {
     return (
