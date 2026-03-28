@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -261,16 +262,11 @@ export function TripServiceCard({
                 <div className="mt-2 space-y-1">
                   {attachments.map((att, idx) => (
                     <div key={idx} className="flex items-center gap-2 flex-wrap">
-                      <a
-                        href={att.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                      >
-                        <Download className="h-3 w-3" />
-                        {att.name}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <SecureFileLink
+                        filePath={att.url}
+                        fileName={att.name}
+                        mode="authenticated"
+                      />
                       {showActions && onRemoveAttachment && (
                         <Button
                           variant="ghost"
@@ -289,16 +285,11 @@ export function TripServiceCard({
               {/* Legacy single voucher (if no attachments but has voucher) */}
               {attachments.length === 0 && service.voucher_name && (
                 <div className="mt-2 flex items-center gap-2 flex-wrap">
-                  <a
-                    href={service.voucher_url || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                  >
-                    <Download className="h-3 w-3" />
-                    {service.voucher_name}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                  <SecureFileLink
+                    filePath={service.voucher_url || ""}
+                    fileName={service.voucher_name}
+                    mode="authenticated"
+                  />
                 </div>
               )}
 
