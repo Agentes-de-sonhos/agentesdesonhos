@@ -88,6 +88,8 @@ export default function Auth() {
   const { plan, loading: subLoading } = useSubscription();
   const { toast } = useToast();
 
+  const { checkCanAttempt, recordFailedAttempt, recordSuccess } = useLoginProtection();
+
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "" },
