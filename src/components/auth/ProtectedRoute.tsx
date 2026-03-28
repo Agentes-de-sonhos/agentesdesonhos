@@ -16,6 +16,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { plan, loading: subLoading } = useSubscription();
   const location = useLocation();
   const checkInterval = useRef<ReturnType<typeof setInterval>>();
+  useSessionTracker();
 
   // Periodically check if user is still active (every 60s)
   useEffect(() => {

@@ -27,6 +27,7 @@ import {
   Link2,
   Headset,
   Star,
+  BarChart3,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
