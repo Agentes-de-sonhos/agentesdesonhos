@@ -77,8 +77,9 @@ serve(async (req) => {
     // Step 1: Find Place
     const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
     if (!GOOGLE_PLACES_API_KEY) {
+      console.error("GOOGLE_PLACES_API_KEY not configured");
       return new Response(
-        JSON.stringify({ error: "GOOGLE_PLACES_API_KEY não configurada" }),
+        JSON.stringify({ error: "Serviço temporariamente indisponível." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -124,8 +125,9 @@ serve(async (req) => {
     // Step 3: AI Analysis
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY not configured");
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY não configurada" }),
+        JSON.stringify({ error: "Serviço temporariamente indisponível." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
