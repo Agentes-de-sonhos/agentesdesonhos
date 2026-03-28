@@ -206,12 +206,12 @@ serve(async (req) => {
       prefs.dietaryRestrictions = drCheck.value;
     }
     if (rawPrefs.localOrTouristy) {
-      const ltCheck = validateEnum(rawPrefs.localOrTouristy, "Preferência local/turístico", ["local", "touristy"]);
+      const ltCheck = validateEnum(rawPrefs.localOrTouristy, "Preferência local/turístico", ["local", "touristy", "mix"]);
       if (!ltCheck.valid) return validationError(ltCheck.error, corsHeaders);
       prefs.localOrTouristy = ltCheck.value;
     }
     if (rawPrefs.exclusiveOrPopular) {
-      const epCheck = validateEnum(rawPrefs.exclusiveOrPopular, "Preferência exclusivo/popular", ["exclusive", "popular"]);
+      const epCheck = validateEnum(rawPrefs.exclusiveOrPopular, "Preferência exclusivo/popular", ["exclusive", "popular", "mix"]);
       if (!epCheck.valid) return validationError(epCheck.error, corsHeaders);
       prefs.exclusiveOrPopular = epCheck.value;
     }
