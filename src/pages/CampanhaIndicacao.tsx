@@ -129,6 +129,14 @@ export default function CampanhaIndicacao() {
             Copiar mensagem
           </Button>
         </div>
+
+        {/* Regras e condições */}
+        <div className="space-y-2 pt-4 border-t border-border">
+          <h3 className="text-sm font-semibold text-muted-foreground">Regras e condições:</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            O benefício de 1 mês grátis por indicação será concedido apenas após a conversão do indicado, ou seja, quando houver a confirmação do pagamento e a permanência ativa na plataforma após o período de 7 dias de garantia. Em caso de cancelamento ou solicitação de reembolso dentro desses 7 dias, a indicação não será considerada válida para fins de bonificação.
+          </p>
+        </div>
       </div>
     </DashboardLayout>
   );
