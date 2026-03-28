@@ -45,9 +45,8 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Idempotency: skip already-processed events
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const supabaseServiceKey2 = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const traceId = event.id; // Use Stripe event ID as trace
+  console.log(`[${traceId}] Processing ${event.type}`);
 
   // Extract customer email based on event type
   let customerEmail: string | null = null;
