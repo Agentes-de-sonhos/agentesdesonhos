@@ -312,6 +312,7 @@ function CollapsibleServiceSection({
 function PublicServiceCard({ service }: { service: TripService }) {
   const { title, details, dates } = getServiceDetails(service);
   const data = service.service_data as any;
+  const voucherAccess = useContext(VoucherAccessCtx);
   const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
   const isCruise = service.service_type === 'cruise';
   const isFlight = service.service_type === 'flight';
