@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-
+import { Copy, Gift, Rocket, Users, CheckCircle, Share2 } from "lucide-react";
 const MENSAGEM_WHATSAPP = `Oi! Tudo bem? 😊
 
 Queria te indicar uma plataforma que estou usando para agentes de viagens. Está bem legal e ainda em pré-lançamento.
