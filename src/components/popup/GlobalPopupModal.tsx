@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useActivePopup, useForcedPopupListener, GlobalPopup } from "@/hooks/useGlobalPopups";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -34,23 +34,28 @@ function hasViewedPopup(popupId: string): boolean {
 
 export function GlobalPopupModal() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: activePopup, isLoading } = useActivePopup();
+
+  const BLOCKED_PATHS = ["/campanha-indicacao"];
   const [isOpen, setIsOpen] = useState(false);
   const [currentPopup, setCurrentPopup] = useState<GlobalPopup | null>(null);
 
   // Normal popup on load
   useEffect(() => {
+    if (BLOCKED_PATHS.includes(location.pathname)) return;
     if (!isLoading && activePopup && !hasViewedPopup(activePopup.id)) {
       setCurrentPopup(activePopup);
       setIsOpen(true);
     }
-  }, [activePopup, isLoading]);
+  }, [activePopup, isLoading, location.pathname]);
 
   // Force-pushed popup via realtime — always opens, ignores session viewed state
   const handleForcedPopup = useCallback((popup: GlobalPopup) => {
+    if (BLOCKED_PATHS.includes(location.pathname)) return;
     setCurrentPopup(popup);
     setIsOpen(true);
-  }, []);
+  }, [location.pathname]);
 
   useForcedPopupListener(handleForcedPopup);
 
