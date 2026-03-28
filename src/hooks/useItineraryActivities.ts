@@ -148,8 +148,7 @@ export function useItineraryActivities(tripId: string | undefined) {
     const path = `itinerary/${tripId}/${Date.now()}_${sanitizedName}.${ext}`;
     const { error } = await supabase.storage.from("vouchers").upload(path, file);
     if (error) throw error;
-    const { data: urlData } = supabase.storage.from("vouchers").getPublicUrl(path);
-    return urlData.publicUrl;
+    return path; // Store path only, signed URLs generated on demand
   };
 
   const uploadDocument = async (file: File): Promise<{ url: string; name: string }> => {
@@ -166,8 +165,7 @@ export function useItineraryActivities(tripId: string | undefined) {
     const path = `itinerary-docs/${tripId}/${Date.now()}_${sanitizedName}.${ext}`;
     const { error } = await supabase.storage.from("vouchers").upload(path, file);
     if (error) throw error;
-    const { data: urlData } = supabase.storage.from("vouchers").getPublicUrl(path);
-    return { url: urlData.publicUrl, name: file.name };
+    return { url: path, name: file.name }; // Store path only
   };
 
   return {

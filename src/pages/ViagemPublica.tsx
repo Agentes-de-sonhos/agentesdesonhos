@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF } from "@/components/trip/TripPDF";
@@ -32,6 +33,14 @@ const SERVICE_LABELS: Record<TripServiceType, string> = {
 };
 
 const TAB_ORDER: TripServiceType[] = ["flight", "train", "hotel", "attraction", "insurance", "car_rental", "transfer", "cruise", "other"];
+
+// Context for passing voucher access credentials to nested components
+interface VoucherAccessContext {
+  slug?: string | null;
+  shareToken?: string | null;
+  password?: string;
+}
+const VoucherAccessCtx = createContext<VoucherAccessContext>({});
 
 function formatDate(dateStr: string) {
   try { const [y,m,d] = dateStr.split('-').map(Number); return format(new Date(y, m-1, d), "dd/MM/yyyy", { locale: ptBR }); }
@@ -303,6 +312,7 @@ function CollapsibleServiceSection({
 function PublicServiceCard({ service }: { service: TripService }) {
   const { title, details, dates } = getServiceDetails(service);
   const data = service.service_data as any;
+  const voucherAccess = useContext(VoucherAccessCtx);
   const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
   const isCruise = service.service_type === 'cruise';
   const isFlight = service.service_type === 'flight';
@@ -1192,29 +1202,27 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-3 space-y-1">
             {service.attachments?.length > 0 ? (
               service.attachments.map((att: any, idx: number) => (
-                <a
+                <SecureFileLink
                   key={idx}
-                  href={att.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline mr-3"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  {att.name}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
+                  filePath={att.url}
+                  fileName={att.name}
+                  mode="public"
+                  slug={voucherAccess.slug || undefined}
+                  shareToken={voucherAccess.shareToken || undefined}
+                  password={voucherAccess.password}
+                  className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline mr-3 cursor-pointer"
+                />
               ))
             ) : service.voucher_url ? (
-              <a
-                href={service.voucher_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
-              >
-                <Download className="h-3.5 w-3.5" />
-                {service.voucher_name || "Baixar documento"}
-                <ExternalLink className="h-3 w-3" />
-              </a>
+              <SecureFileLink
+                filePath={service.voucher_url}
+                fileName={service.voucher_name || "Baixar documento"}
+                mode="public"
+                slug={voucherAccess.slug || undefined}
+                shareToken={voucherAccess.shareToken || undefined}
+                password={voucherAccess.password}
+                className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline cursor-pointer"
+              />
             ) : null}
           </div>
         )}
@@ -1241,6 +1249,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [usedPassword, setUsedPassword] = useState("");
 
   const scrollToSection = useCallback((type: TripServiceType) => {
     const el = sectionRefs.current[type];
@@ -1277,6 +1286,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
       setTripData(result.trip);
       setAgentProfile(result.agentProfile);
       setAuthenticated(true);
+      setUsedPassword(password);
     } catch (err: any) {
       setError(err.message || "Senha incorreta");
     } finally {
@@ -1348,7 +1358,14 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
 
   const availableTabs = TAB_ORDER.filter(t => grouped[t]?.length > 0);
 
+  const voucherCtx: VoucherAccessContext = {
+    slug: tripData.slug,
+    shareToken: tripData.share_token,
+    password: usedPassword,
+  };
+
   return (
+    <VoucherAccessCtx.Provider value={voucherCtx}>
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-primary/5">
       {/* Agency Header */}
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
@@ -1461,5 +1478,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
         </div>
       </div>
     </div>
+    </VoucherAccessCtx.Provider>
   );
 }

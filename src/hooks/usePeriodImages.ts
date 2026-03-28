@@ -47,8 +47,7 @@ export function usePeriodImages(tripId: string | undefined) {
     const path = `itinerary-periods/${tripId}/${Date.now()}_${sanitizedName}.${ext}`;
     const { error } = await supabase.storage.from("vouchers").upload(path, file);
     if (error) throw error;
-    const { data: urlData } = supabase.storage.from("vouchers").getPublicUrl(path);
-    return urlData.publicUrl;
+    return path; // Store path only, signed URLs generated on demand
   };
 
   const setPeriodImage = useMutation({
