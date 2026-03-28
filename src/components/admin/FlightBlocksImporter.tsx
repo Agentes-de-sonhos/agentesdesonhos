@@ -470,13 +470,26 @@ export function FlightBlocksImporter() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setIsOpen(true)}>
-          <ClipboardPaste className="h-4 w-4 mr-2" />
-          Importar Texto
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".xlsx,.xls"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          Importar Excel
         </Button>
-      </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" onClick={() => setIsOpen(true)}>
+              <ClipboardPaste className="h-4 w-4 mr-2" />
+              Importar Texto
+            </Button>
+          </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
