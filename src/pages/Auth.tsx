@@ -5,10 +5,11 @@ const translateAuthError = (msg: string): string => {
   if (/rate.?limit|too.?many|exceeded|over.?request|request.?limit|aguarde|security.?purposes.*after/i.test(msg)) 
     return "Muitas tentativas seguidas. Aguarde 1-2 minutos e tente novamente.";
   if (/invalid.login/i.test(msg)) return "E-mail ou senha incorretos.";
-  if (/user.not.found/i.test(msg)) return "Usuário não encontrado.";
+  if (/user.not.found/i.test(msg)) return "E-mail ou senha inválidos.";
   if (/email.not.confirmed/i.test(msg)) return "Por favor, confirme seu e-mail antes de fazer login.";
   if (/already.registered/i.test(msg)) return "Este e-mail já está cadastrado.";
-  if (/weak.password/i.test(msg)) return "A senha deve ter pelo menos 6 caracteres.";
+  if (/weak.password|leaked|compromised|hibp/i.test(msg)) return "Essa senha não é segura. Escolha uma senha diferente.";
+  if (/password.*short|too.short/i.test(msg)) return "A senha deve ter pelo menos 8 caracteres.";
   if (/network|fetch|failed/i.test(msg)) return "Erro de conexão. Verifique sua internet.";
   if (/timeout/i.test(msg)) return "Tempo de resposta esgotado. Tente novamente.";
   return msg;
@@ -20,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Eye, EyeOff, Mail, Lock } from "lucide-react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useAuth } from "@/hooks/useAuth";
+import { useLoginProtection } from "@/hooks/useLoginProtection";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,7 +47,7 @@ const emailSchema = z.object({
 
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Email inválido" }),
-  password: z.string().min(6, { message: "Senha deve ter no mínimo 6 caracteres" }),
+  password: z.string().min(1, { message: "Senha é obrigatória" }),
 });
 
 const resetSchema = z.object({
@@ -85,6 +87,8 @@ export default function Auth() {
   const { role, loading: roleLoading } = useUserRole();
   const { plan, loading: subLoading } = useSubscription();
   const { toast } = useToast();
+
+  const { checkCanAttempt, recordFailedAttempt, recordSuccess } = useLoginProtection();
 
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
@@ -155,16 +159,31 @@ export default function Auth() {
   // Password login (primary)
   const handleLogin = async (data: LoginFormData) => {
     setError(null);
+
+    // Check brute force protection
+    const attempt = checkCanAttempt();
+    if (!attempt.allowed) {
+      setError(attempt.message || "Muitas tentativas. Aguarde e tente novamente.");
+      return;
+    }
+
     setIsLoading(true);
+
+    // Apply progressive delay if needed
+    if (attempt.waitMs && attempt.waitMs > 0) {
+      await new Promise((r) => setTimeout(r, attempt.waitMs));
+    }
 
     const { error: signInError } = await signIn(data.email, data.password);
 
     if (signInError) {
       setIsLoading(false);
-      if (signInError.message.includes("Invalid login credentials")) {
-        setError("Email ou senha incorretos");
+      recordFailedAttempt();
+      // Generic message to prevent user enumeration
+      if (signInError.message.includes("Invalid login credentials") || signInError.message.includes("user not found")) {
+        setError("E-mail ou senha inválidos.");
       } else if (signInError.message.includes("Email not confirmed")) {
-        setError("Por favor, confirme seu email antes de fazer login");
+        setError("Por favor, confirme seu email antes de fazer login.");
       } else {
         setError(translateAuthError(signInError.message));
       }
@@ -172,6 +191,7 @@ export default function Auth() {
     }
 
     setIsLoading(false);
+    recordSuccess();
     toast({
       title: "Bem-vindo de volta!",
       description: "Login realizado com sucesso.",

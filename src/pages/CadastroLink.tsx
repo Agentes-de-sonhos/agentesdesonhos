@@ -81,8 +81,13 @@ export default function CadastroLink() {
       return;
     }
 
-    if (form.password.length < 6) {
-      toast({ title: "A senha deve ter pelo menos 6 caracteres", variant: "destructive" });
+    if (form.password.length < 8) {
+      toast({ title: "A senha deve ter pelo menos 8 caracteres", variant: "destructive" });
+      return;
+    }
+
+    if (!/[a-zA-Z]/.test(form.password) || !/[0-9]/.test(form.password)) {
+      toast({ title: "A senha deve conter pelo menos 1 letra e 1 número", variant: "destructive" });
       return;
     }
 
