@@ -35,6 +35,7 @@ import { AdminSuppliersManager } from "@/components/admin/AdminSuppliersManager"
 import { AdminTradeSuppliersManager } from "@/components/admin/AdminTradeSuppliersManager";
 import { AdminMaterialsManager } from "@/components/admin/AdminMaterialsManager";
 import { AdminFlightBlocksManager } from "@/components/admin/AdminFlightBlocksManager";
+import { AdminAirBlocksTable } from "@/components/admin/AdminAirBlocksTable";
 import { AdminAgendaEventsManager } from "@/components/admin/AdminAgendaEventsManager";
 import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
 import { AdminCommunityManager } from "@/components/admin/AdminCommunityManager";
@@ -275,8 +276,9 @@ export default function Admin() {
             <AdminMaterialsManager />
           </TabsContent>
 
-          <TabsContent value="flight-blocks">
+          <TabsContent value="flight-blocks" className="space-y-6">
             <AdminFlightBlocksManager />
+            <AdminAirBlocksTable />
           </TabsContent>
 
           <TabsContent value="agenda-events">
