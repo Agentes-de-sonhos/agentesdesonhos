@@ -67,8 +67,26 @@ serve(async (req) => {
     }
 
     const subscription = subscriptions.data[0];
-    const productId = subscription.items.data[0].price.product as string;
+    const firstItem = subscription.items.data[0];
+    const productId = firstItem?.price?.product as string;
     const plan = PLAN_MAP[productId] || "profissional";
+
+    const rawPeriodEnd =
+      (firstItem as { current_period_end?: number | string | null } | undefined)?.current_period_end ??
+      (subscription as { current_period_end?: number | string | null }).current_period_end ??
+      null;
+
+    const parsedPeriodEnd =
+      typeof rawPeriodEnd === "number"
+        ? new Date(rawPeriodEnd * 1000)
+        : typeof rawPeriodEnd === "string"
+          ? new Date(rawPeriodEnd)
+          : null;
+
+    const subscriptionEnd =
+      parsedPeriodEnd && !Number.isNaN(parsedPeriodEnd.getTime())
+        ? parsedPeriodEnd.toISOString()
+        : null;
 
     // Update the user's subscription plan in the database
     const { error: updateError } = await supabaseClient
@@ -83,7 +101,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       subscribed: true,
       plan,
-      subscription_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      subscription_end: subscriptionEnd,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
