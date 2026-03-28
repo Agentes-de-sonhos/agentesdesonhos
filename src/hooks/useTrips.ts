@@ -335,7 +335,7 @@ export function useTrip(id: string | undefined) {
       const fileName = `${user.id}/${id}/${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from("vouchers").upload(fileName, file);
       if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from("vouchers").getPublicUrl(fileName);
+      const publicUrl = fileName; // Store path only, not public URL
 
       // Update service
       const { error } = await supabase.from("trip_services").update({
@@ -433,8 +433,7 @@ export function useTrip(id: string | undefined) {
     const fileName = `${user.id}/${id}/${crypto.randomUUID()}.${fileExt}`;
     const { error } = await supabase.storage.from("vouchers").upload(fileName, file);
     if (error) throw error;
-    const { data: { publicUrl } } = supabase.storage.from("vouchers").getPublicUrl(fileName);
-    return { url: publicUrl, name: file.name };
+    return { url: fileName, name: file.name }; // Store path only
   };
 
   return {
