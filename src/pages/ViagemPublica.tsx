@@ -1249,6 +1249,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [usedPassword, setUsedPassword] = useState("");
 
   const scrollToSection = useCallback((type: TripServiceType) => {
     const el = sectionRefs.current[type];
