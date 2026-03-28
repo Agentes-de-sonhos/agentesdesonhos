@@ -46,15 +46,17 @@ export function BlockResultCard({ block, getCityLabel, formatShortDate, formatPr
           </div>
         </div>
 
-        {/* Airline + Operator */}
+        {/* Operator + Airline */}
         <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary" className="text-xs">{block.airline}</Badge>
           {block.operator && (
-            <Badge variant="outline" className="text-xs flex items-center gap-1">
-              <Building2 className="h-3 w-3" />
+            <Badge variant="secondary" className="text-xs">
               {block.operator}
             </Badge>
           )}
+          <Badge variant="outline" className="text-xs flex items-center gap-1 bg-primary/5">
+            <Plane className="h-3 w-3" />
+            {block.airline || "Não informado"}
+          </Badge>
         </div>
 
         {/* Dates */}
