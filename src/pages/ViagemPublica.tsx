@@ -1286,6 +1286,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
       setTripData(result.trip);
       setAgentProfile(result.agentProfile);
       setAuthenticated(true);
+      setUsedPassword(password);
     } catch (err: any) {
       setError(err.message || "Senha incorreta");
     } finally {
