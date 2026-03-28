@@ -415,17 +415,8 @@ export function FlightBlocksImporter() {
     reader.readAsArrayBuffer(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
-    if (blocks.length === 0) {
-      toast({
-        title: "Nenhum bloqueio válido detectado",
-        description: "Verifique o formato ou tente selecionar o tipo manualmente.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setParsedBlocks(blocks);
-    setStep("preview");
-  };
+
+
 
   const updateBlock = (index: number, field: keyof ParsedBlock, value: string) => {
     setParsedBlocks((prev) => prev.map((b, i) => (i === index ? { ...b, [field]: value } : b)));
