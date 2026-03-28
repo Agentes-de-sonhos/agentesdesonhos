@@ -136,7 +136,20 @@ export function useItineraries() {
 
     if (response.error) {
       console.error("Edge function invoke error:", response.error);
-      throw new Error(response.error.message || "Erro ao gerar roteiro");
+      // Try to extract the real error message from the response body
+      let errorMessage = "Erro ao gerar roteiro. Tente novamente.";
+      try {
+        const ctx = (response.error as any)?.context;
+        if (ctx && typeof ctx.json === "function") {
+          const body = await ctx.json();
+          if (body?.error) errorMessage = body.error;
+        } else if (response.data?.error) {
+          errorMessage = response.data.error;
+        }
+      } catch {
+        // fallback to generic message
+      }
+      throw new Error(errorMessage);
     }
 
     const data = response.data;
