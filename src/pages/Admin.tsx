@@ -244,6 +244,10 @@ export default function Admin() {
               <Star className="h-4 w-4" />
               <span className="hidden sm:inline">Feedback</span>
             </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
           </TabsList>
 
 
@@ -361,6 +365,10 @@ export default function Admin() {
 
           <TabsContent value="feedback">
             <AdminFeedbackManager />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AdminUserAnalytics />
           </TabsContent>
         </Tabs>
       </div>
