@@ -35,9 +35,7 @@ export default function CadastroLink() {
       }
 
       const { data, error } = await supabase
-        .from("registration_links")
-        .select("plan, role, max_uses, uses_count, expires_at")
-        .eq("token", token)
+        .rpc("get_registration_link", { _token: token })
         .single();
 
       if (error || !data) {
