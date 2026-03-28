@@ -409,7 +409,7 @@ export function CommunityQACard() {
                       <MessageCircleQuestion className="h-4 w-4 text-[hsl(var(--section-community))]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold leading-snug line-clamp-2 text-foreground">{q.title}</p>
+                      <p className={`text-sm font-semibold leading-snug text-foreground ${isExpanded ? '' : 'line-clamp-2'}`}>{q.title}</p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap text-xs text-muted-foreground">
                         <span className="font-medium text-foreground/70">{q.author_name}</span>
                         <span>•</span>
@@ -440,9 +440,9 @@ export function CommunityQACard() {
                         )}
                       </div>
                     </div>
-                    <div className="flex-shrink-0 pt-1 flex items-center gap-2">
-                      <span className="text-xs text-[hsl(var(--section-community))] font-medium opacity-0 group-hover/question:opacity-100 transition-opacity whitespace-nowrap flex items-center gap-1">
-                        {q.answers_count > 0 ? "Ver respostas" : "Responder"} <ArrowRight className="h-3 w-3" />
+                    <div className="flex-shrink-0 pt-1 flex items-center gap-1.5">
+                      <span className="hidden sm:flex text-xs text-[hsl(var(--section-community))] font-medium opacity-0 group-hover/question:opacity-100 transition-opacity whitespace-nowrap items-center gap-1">
+                        {q.answers_count > 0 ? "Responder" : "Responder"} <ArrowRight className="h-3 w-3" />
                       </span>
                       {isAdmin && (
                         <AlertDialog>
