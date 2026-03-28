@@ -7232,6 +7232,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          last_heartbeat_at: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          last_heartbeat_at?: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          last_heartbeat_at?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_training_progress: {
         Row: {
           completed_at: string | null
@@ -7413,6 +7443,20 @@ export type Database = {
           plan: string
           role: string
           uses_count: number
+        }[]
+      }
+      get_user_analytics: {
+        Args: { _end_date?: string; _start_date?: string }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          avg_session_minutes: number
+          first_access: string
+          last_access: string
+          total_duration_minutes: number
+          total_sessions: number
+          user_id: string
+          user_name: string
         }[]
       }
       get_user_plan: {
