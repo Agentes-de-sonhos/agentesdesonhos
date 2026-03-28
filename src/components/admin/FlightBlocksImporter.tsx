@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,10 +21,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardPaste, Loader2, Check, AlertCircle, Trash2, Search } from "lucide-react";
+import { ClipboardPaste, Loader2, Check, AlertCircle, Trash2, Search, FileSpreadsheet, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAirports } from "@/hooks/useAirports";
+import * as XLSX from "xlsx";
 import {
   Tooltip,
   TooltipContent,
@@ -214,6 +215,61 @@ function parseLegacyFormat(text: string): ParsedBlock[] {
   return blocks;
 }
 
+// ===== EXCEL FORMAT PARSER (13 columns) =====
+
+function parseExcelRows(rows: any[][]): ParsedBlock[] {
+  const blocks: ParsedBlock[] = [];
+  // Skip header row
+  let startIdx = 0;
+  if (rows.length > 0) {
+    const firstCell = String(rows[0][0] || "").toLowerCase();
+    if (firstCell.includes("origem") || firstCell.includes("partida")) startIdx = 1;
+  }
+
+  for (let i = startIdx; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || r.length < 4) continue;
+
+    const origin = String(r[0] || "").trim().toUpperCase();
+    const dataIda = String(r[1] || "").trim();
+    const horaSaida = String(r[2] || "").trim().replace(/h$/i, "");
+    const destination = String(r[3] || "").trim().toUpperCase();
+    const dataChegada = String(r[4] || "").trim();
+    const horaChegada = String(r[5] || "").trim().replace(/h$/i, "");
+    const origemVolta = String(r[6] || "").trim().toUpperCase();
+    const dataVolta = String(r[7] || "").trim();
+    const horaSaidaVolta = String(r[8] || "").trim().replace(/h$/i, "");
+    const destinoVolta = String(r[9] || "").trim().toUpperCase();
+    const dataChegadaVolta = String(r[10] || "").trim();
+    const horaChegadaVolta = String(r[11] || "").trim().replace(/h$/i, "");
+    const operadora = String(r[12] || "").trim();
+
+    if (!origin || !destination) continue;
+
+    blocks.push({
+      origin,
+      destination,
+      departure_date: parseDate(dataIda),
+      departure_time: horaSaida,
+      arrival_date: parseDate(dataChegada),
+      arrival_time: horaChegada,
+      return_departure_date: parseDate(dataVolta),
+      return_departure_time: horaSaidaVolta,
+      return_arrival_date: parseDate(dataChegadaVolta),
+      return_arrival_time: horaChegadaVolta,
+      airline: operadora,
+      block_code: "",
+      price: "",
+      currency: "BRL",
+      price_text: "",
+      deadline: "",
+      seats_available: "0",
+      operator: operadora,
+    });
+  }
+  return blocks;
+}
+
 // ===== AUTO-DETECT FORMAT =====
 
 function parseRawText(text: string, format: "auto" | "table" | "legacy"): ParsedBlock[] {
@@ -243,6 +299,7 @@ export function FlightBlocksImporter() {
   const [importFormat, setImportFormat] = useState<"auto" | "table" | "legacy">("auto");
   const [parsedBlocks, setParsedBlocks] = useState<ParsedBlock[]>([]);
   const [importResult, setImportResult] = useState({ success: 0, errors: 0, skipped: 0 });
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { formatAirportLabel, getAirport } = useAirports();
@@ -325,16 +382,41 @@ export function FlightBlocksImporter() {
     }
     const blocks = parseRawText(rawText, importFormat);
     if (blocks.length === 0) {
-      toast({
-        title: "Nenhum bloqueio válido detectado",
-        description: "Verifique o formato ou tente selecionar o tipo manualmente.",
-        variant: "destructive",
-      });
+      toast({ title: "Nenhum bloqueio válido detectado", description: "Verifique o formato ou tente selecionar o tipo manualmente.", variant: "destructive" });
       return;
     }
     setParsedBlocks(blocks);
     setStep("preview");
   };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const blocks = parseExcelRows(rows);
+        if (blocks.length === 0) {
+          toast({ title: "Nenhum bloqueio encontrado no arquivo", variant: "destructive" });
+          return;
+        }
+        setParsedBlocks(blocks);
+        setStep("preview");
+        toast({ title: `${blocks.length} bloqueio(s) detectados no Excel` });
+      } catch (err) {
+        console.error("Error parsing Excel:", err);
+        toast({ title: "Erro ao ler arquivo Excel", variant: "destructive" });
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+
 
   const updateBlock = (index: number, field: keyof ParsedBlock, value: string) => {
     setParsedBlocks((prev) => prev.map((b, i) => (i === index ? { ...b, [field]: value } : b)));
@@ -388,13 +470,26 @@ export function FlightBlocksImporter() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setIsOpen(true)}>
-          <ClipboardPaste className="h-4 w-4 mr-2" />
-          Importar Texto
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".xlsx,.xls"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          Importar Excel
         </Button>
-      </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" onClick={() => setIsOpen(true)}>
+              <ClipboardPaste className="h-4 w-4 mr-2" />
+              Importar Texto
+            </Button>
+          </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -569,5 +664,7 @@ export function FlightBlocksImporter() {
         )}
       </DialogContent>
     </Dialog>
+      </div>
+    </>
   );
 }
