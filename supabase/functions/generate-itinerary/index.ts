@@ -1,11 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import {
+  validateString,
+  validateEnum,
+  validateNumber,
+  validateStringArray,
+  sanitizeText,
+  detectPromptInjection,
+  whitelistKeys,
+  validationError,
+} from "../_shared/input-validator.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "familia_adolescentes", "grupo_amigos", "solo", "lua_de_mel", "melhor_idade", "corporativo"];
+const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
+const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis"];
+const ALLOWED_PACES = ["leve", "moderado", "intenso"];
+const ALLOWED_BODY_KEYS = ["destination", "startDate", "endDate", "travelersCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences"];
+const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations"];
 
 const tripTypeLabels: Record<string, string> = {
   casal: "viagem de casal",
@@ -53,7 +70,6 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Rate limiting: 10 requests per minute for itinerary generation
   const clientIP = getClientIP(req);
   const rateCheck = await checkRateLimit(clientIP, 'generate-itinerary', 10, 60);
   if (!rateCheck.allowed) {
@@ -79,7 +95,6 @@ serve(async (req) => {
 
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData?.user) {
-      console.error("Auth error:", userError?.message);
       return new Response(JSON.stringify({ error: "Token inválido ou expirado." }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -88,79 +103,138 @@ serve(async (req) => {
     const userId = userData.user.id;
 
     const { data: hasAccess, error: accessError } = await supabase.rpc("has_feature_access", {
-      _user_id: userId,
-      _feature: "itinerary",
+      _user_id: userId, _feature: "itinerary",
     });
-
     if (accessError) {
       console.error("has_feature_access error:", accessError.message);
       return new Response(JSON.stringify({ error: "Erro ao validar acesso ao recurso." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
     if (!hasAccess) {
       return new Response(JSON.stringify({ error: "Seu plano atual não inclui a criação de roteiros.", upgrade_required: true }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Check and increment AI usage quota
     const { data: canUse } = await supabase.rpc("check_ai_usage", { _user_id: userId });
     if (!canUse) {
       return new Response(JSON.stringify({ error: "Cota mensal de IA esgotada.", quota_exceeded: true }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const body = await req.json();
-    const { destination, startDate, endDate, travelersCount, tripType, budgetLevel, interests, travelPace, additionalPreferences } = body;
-
-    // Validation
-    if (!destination || typeof destination !== 'string' || destination.length > 200) {
-      return new Response(JSON.stringify({ error: "Destino inválido." }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const travelers = Number(travelersCount);
-    if (isNaN(travelers) || travelers < 1 || travelers > 50) {
-      return new Response(JSON.stringify({ error: "Número de viajantes deve ser entre 1 e 50." }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // --- INPUT VALIDATION ---
+    let rawBody: unknown;
+    try {
+      rawBody = await req.json();
+    } catch {
+      return validationError("Corpo da requisição inválido.", corsHeaders);
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
-      throw new Error("AI key not configured");
+    if (!rawBody || typeof rawBody !== "object" || Array.isArray(rawBody)) {
+      return validationError("Corpo da requisição inválido.", corsHeaders);
     }
 
+    // Whitelist fields
+    const body = whitelistKeys<Record<string, unknown>>(rawBody, ALLOWED_BODY_KEYS);
+
+    // Validate destination (1-200 chars, injection check)
+    const destCheck = validateString(body.destination, "Destino", 1, 200);
+    if (!destCheck.valid) return validationError(destCheck.error, corsHeaders);
+    const destination = destCheck.value;
+
+    // Validate dates
+    if (typeof body.startDate !== "string" || typeof body.endDate !== "string") {
+      return validationError("Datas de início e fim são obrigatórias.", corsHeaders);
+    }
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(body.startDate as string) || !dateRegex.test(body.endDate as string)) {
+      return validationError("Formato de data inválido. Use AAAA-MM-DD.", corsHeaders);
+    }
+    const startDate = body.startDate as string;
+    const endDate = body.endDate as string;
     const start = new Date(startDate);
     const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return validationError("Datas inválidas.", corsHeaders);
+    }
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
     if (days < 1 || days > 30) {
-      return new Response(JSON.stringify({ error: "Duração da viagem deve ser entre 1 e 30 dias." }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return validationError("Duração da viagem deve ser entre 1 e 30 dias.", corsHeaders);
+    }
+
+    // Validate travelersCount
+    const tcCheck = validateNumber(body.travelersCount, "Número de viajantes", 1, 50);
+    if (!tcCheck.valid) return validationError(tcCheck.error, corsHeaders);
+    const travelersCount = tcCheck.value;
+
+    // Validate tripType
+    const ttCheck = validateEnum(body.tripType, "Tipo de viagem", ALLOWED_TRIP_TYPES);
+    if (!ttCheck.valid) return validationError(ttCheck.error, corsHeaders);
+    const tripType = ttCheck.value;
+
+    // Validate budgetLevel
+    const blCheck = validateEnum(body.budgetLevel, "Nível de orçamento", ALLOWED_BUDGET_LEVELS);
+    if (!blCheck.valid) return validationError(blCheck.error, corsHeaders);
+    const budgetLevel = blCheck.value;
+
+    // Validate interests (optional array)
+    let interests: string[] = [];
+    if (body.interests !== undefined) {
+      const intCheck = validateStringArray(body.interests, "Interesses", ALLOWED_INTERESTS, 14);
+      if (!intCheck.valid) return validationError(intCheck.error, corsHeaders);
+      interests = intCheck.value;
+    }
+
+    // Validate travelPace (optional)
+    let travelPace: string | undefined;
+    if (body.travelPace !== undefined) {
+      const paceCheck = validateEnum(body.travelPace, "Ritmo de viagem", ALLOWED_PACES);
+      if (!paceCheck.valid) return validationError(paceCheck.error, corsHeaders);
+      travelPace = paceCheck.value;
+    }
+
+    // Validate additionalPreferences (optional, whitelist + sanitize)
+    const rawPrefs = whitelistKeys<Record<string, unknown>>(body.additionalPreferences, ALLOWED_PREF_KEYS);
+    const prefs: Record<string, string | undefined> = {};
+    if (rawPrefs.dietaryRestrictions) {
+      const drCheck = validateString(rawPrefs.dietaryRestrictions, "Restrições alimentares", 0, 300);
+      if (!drCheck.valid) return validationError(drCheck.error, corsHeaders);
+      prefs.dietaryRestrictions = drCheck.value;
+    }
+    if (rawPrefs.localOrTouristy) {
+      const ltCheck = validateEnum(rawPrefs.localOrTouristy, "Preferência local/turístico", ["local", "touristy"]);
+      if (!ltCheck.valid) return validationError(ltCheck.error, corsHeaders);
+      prefs.localOrTouristy = ltCheck.value;
+    }
+    if (rawPrefs.exclusiveOrPopular) {
+      const epCheck = validateEnum(rawPrefs.exclusiveOrPopular, "Preferência exclusivo/popular", ["exclusive", "popular"]);
+      if (!epCheck.valid) return validationError(epCheck.error, corsHeaders);
+      prefs.exclusiveOrPopular = epCheck.value;
+    }
+    if (rawPrefs.mobilityLimitations) {
+      const mlCheck = validateString(rawPrefs.mobilityLimitations, "Limitações de mobilidade", 0, 500);
+      if (!mlCheck.valid) return validationError(mlCheck.error, corsHeaders);
+      prefs.mobilityLimitations = mlCheck.value;
+    }
+
+    // --- BUILD AI REQUEST ---
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY not configured");
+      return new Response(JSON.stringify({ error: "Erro de configuração do servidor." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Build interest string
-    const interestsList = (interests || [])
-      .map((i: string) => interestLabels[i] || i)
-      .filter(Boolean);
+    const interestsList = interests.map((i) => interestLabels[i] || i).filter(Boolean);
     const interestsText = interestsList.length > 0
-      ? `\n- Interesses prioritários: ${interestsList.join(", ")}`
-      : "";
+      ? `\n- Interesses prioritários: ${interestsList.join(", ")}` : "";
 
-    // Build pace string
     const paceText = travelPace ? `\n- Ritmo da viagem: ${paceLabels[travelPace] || travelPace}` : "";
 
-    // Build additional preferences
-    const prefs = additionalPreferences || {};
     const additionalLines: string[] = [];
     if (prefs.dietaryRestrictions) {
       additionalLines.push(`- Restrições alimentares: ${prefs.dietaryRestrictions}. Sugira restaurantes adequados.`);
@@ -179,13 +253,10 @@ serve(async (req) => {
       additionalLines.push(`- IMPORTANTE — Limitações de mobilidade: ${prefs.mobilityLimitations}. Evite atividades incompatíveis e garanta acessibilidade.`);
     }
     const additionalText = additionalLines.length > 0
-      ? "\n\nPREFERÊNCIAS ADICIONAIS:\n" + additionalLines.join("\n")
-      : "";
+      ? "\n\nPREFERÊNCIAS ADICIONAIS:\n" + additionalLines.join("\n") : "";
 
-    // Build profile-specific rules
     const profileRules = buildProfileRules(tripType);
 
-    // Build dates array for the tool schema description
     const datesInfo: string[] = [];
     for (let i = 0; i < days; i++) {
       const d = new Date(start);
@@ -220,7 +291,7 @@ Datas dos dias: ${datesInfo.join(', ')}
 
 Use a função generate_itinerary para retornar o roteiro completo.`;
 
-    console.log("Calling AI gateway for destination:", destination, "days:", days);
+    console.log("Calling AI for destination:", destination, "days:", days, "user:", userId);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -285,14 +356,14 @@ Use a função generate_itinerary para retornar o roteiro completo.`;
     });
 
     if (!response.ok) {
-      const errBody = await response.text();
-      console.error("AI gateway error:", response.status, errBody);
-      if (response.status === 429) {
+      const errStatus = response.status;
+      console.error("AI gateway error:", errStatus);
+      if (errStatus === 429) {
         return new Response(JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns minutos." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
+      if (errStatus === 402) {
         return new Response(JSON.stringify({ error: "Créditos de IA insuficientes. Entre em contato com o suporte." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -304,43 +375,45 @@ Use a função generate_itinerary para retornar o roteiro completo.`;
 
     const responseText = await response.text();
     if (!responseText || responseText.trim().length === 0) {
-      console.error("AI gateway returned empty response body, status:", response.status);
-      throw new Error("AI gateway returned empty response");
+      console.error("AI gateway returned empty response");
+      return new Response(JSON.stringify({ error: "Erro ao gerar roteiro. Tente novamente." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     let data;
     try {
       data = JSON.parse(responseText);
-    } catch (parseErr) {
-      console.error("Failed to parse AI gateway response:", responseText.substring(0, 500));
-      throw new Error("AI gateway returned invalid JSON");
+    } catch {
+      console.error("Failed to parse AI response");
+      return new Response(JSON.stringify({ error: "Erro ao gerar roteiro. Tente novamente." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-    console.log("AI response received, choices:", data.choices?.length);
 
-    // Extract from tool call response
     let itinerary;
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    
+
     if (toolCall?.function?.arguments) {
-      // Tool calling response (preferred path)
       try {
-        const args = typeof toolCall.function.arguments === 'string' 
-          ? JSON.parse(toolCall.function.arguments) 
+        const args = typeof toolCall.function.arguments === 'string'
+          ? JSON.parse(toolCall.function.arguments)
           : toolCall.function.arguments;
         itinerary = args;
-        console.log("Parsed tool call response, days:", itinerary?.days?.length);
-      } catch (e) {
-        console.error("Failed to parse tool call arguments:", e, toolCall.function.arguments?.substring?.(0, 200));
-        throw new Error("Parse error from tool call");
+      } catch {
+        console.error("Failed to parse tool call arguments");
+        return new Response(JSON.stringify({ error: "Erro ao processar roteiro. Tente novamente." }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     } else {
-      // Fallback: try content as JSON
       const content = data.choices?.[0]?.message?.content;
       if (!content) {
-        console.error("Empty AI response, no tool_calls and no content:", JSON.stringify(data).substring(0, 500));
-        throw new Error("Empty AI response");
+        console.error("Empty AI response content");
+        return new Response(JSON.stringify({ error: "Erro ao gerar roteiro. Tente novamente." }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
-      
       try {
         itinerary = JSON.parse(content.trim());
       } catch {
@@ -349,16 +422,19 @@ Use a função generate_itinerary para retornar o roteiro completo.`;
           const jsonString = jsonMatch ? jsonMatch[1] : content;
           itinerary = JSON.parse(jsonString.trim());
         } catch {
-          console.error("Failed to parse AI content response:", content.substring(0, 500));
-          throw new Error("Parse error");
+          console.error("Failed to parse AI content");
+          return new Response(JSON.stringify({ error: "Erro ao processar roteiro. Tente novamente." }), {
+            status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
       }
     }
 
-    // Validate structure
     if (!itinerary?.days || !Array.isArray(itinerary.days) || itinerary.days.length === 0) {
-      console.error("Invalid itinerary structure:", JSON.stringify(itinerary).substring(0, 500));
-      throw new Error("Invalid itinerary structure");
+      console.error("Invalid itinerary structure");
+      return new Response(JSON.stringify({ error: "Erro ao gerar roteiro. Tente novamente." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     console.log("Successfully generated itinerary with", itinerary.days.length, "days");
@@ -406,9 +482,10 @@ function buildProfileRules(tripType: string): string {
 - Priorize locais de fácil acesso e com boa infraestrutura`,
     solo: `REGRAS PARA VIAGEM SOLO:
 - Sugira atividades que funcionem bem para uma pessoa
-- Inclua locais onde é fácil socializar (cafés, food tours em grupo, walking tours)
-- Considere segurança e praticidade para viajante solo
-- Inclua dicas de locais com Wi-Fi para trabalho remoto se aplicável`,
+- Inclua locais sociais onde seja fácil conhecer outros viajantes
+- Considere segurança e praticidade
+- Priorize experiências imersivas e autênticas`,
   };
+
   return rules[tripType] || "";
 }
