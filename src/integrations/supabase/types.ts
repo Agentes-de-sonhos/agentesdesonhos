@@ -7360,6 +7360,7 @@ export type Database = {
           avatar_url: string
           city: string
           name: string
+          phone: string
           state: string
           user_id: string
         }[]
@@ -7372,6 +7373,7 @@ export type Database = {
           avatar_url: string
           city: string
           name: string
+          phone: string
           state: string
           user_id: string
         }[]
