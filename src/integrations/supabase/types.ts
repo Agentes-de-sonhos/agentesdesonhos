@@ -65,6 +65,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_action_logs: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       advisor_suggestions: {
         Row: {
           advisor_type: string
@@ -7416,6 +7443,7 @@ export type Database = {
         Returns: boolean
       }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
+      is_user_active: { Args: { _user_id: string }; Returns: boolean }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
       unaccent: { Args: { "": string }; Returns: string }
       verify_trip_access: {
