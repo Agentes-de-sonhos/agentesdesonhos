@@ -15,7 +15,8 @@ import { BlockEmptyState } from "@/components/bloqueios/BlockEmptyState";
 export default function BloqueiosAereos() {
   const { getAirport } = useAirports();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [originTerm, setOriginTerm] = useState("");
+  const [destinationTerm, setDestinationTerm] = useState("");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [hasSearched, setHasSearched] = useState(false);
@@ -41,10 +42,6 @@ export default function BloqueiosAereos() {
     return info ? `${info.city} (${code})` : code;
   };
 
-  /**
-   * Smart match: checks if a given airport code matches the search term
-   * by code, city name, or airport name (partial, case-insensitive)
-   */
   const matchesSearch = (code: string, term: string) => {
     if (!term) return true;
     const lower = term.toLowerCase();
@@ -54,19 +51,6 @@ export default function BloqueiosAereos() {
     return (
       info.city?.toLowerCase().includes(lower) ||
       info.name?.toLowerCase().includes(lower)
-    );
-  };
-
-  /**
-   * Check if any of the block's airports (origin/destination, ida/volta) match
-   */
-  const blockMatchesSearch = (block: any, term: string) => {
-    if (!term) return true;
-    return (
-      matchesSearch(block.origin, term) ||
-      matchesSearch(block.destination, term) ||
-      (block.return_departure_date && matchesSearch(block.destination, term)) ||
-      (block.return_arrival_date && matchesSearch(block.origin, term))
     );
   };
 
@@ -81,21 +65,26 @@ export default function BloqueiosAereos() {
   const filteredBlocks = useMemo(() => {
     if (!blocks || !hasSearched) return [];
     return blocks.filter((b) => {
-      if (!blockMatchesSearch(b, searchTerm)) return false;
+      // Origin: match block's origin field
+      if (originTerm && !matchesSearch(b.origin, originTerm)) return false;
+      // Destination: match block's destination field
+      if (destinationTerm && !matchesSearch(b.destination, destinationTerm)) return false;
       if (!matchesDateRange(b.departure_date)) return false;
       if (selectedOperator !== "Todas" && b.operator !== selectedOperator) return false;
       if (selectedAirline !== "Todas" && b.airline !== selectedAirline) return false;
       return true;
     });
-  }, [blocks, searchTerm, dateFrom, dateTo, selectedOperator, selectedAirline, hasSearched]);
+  }, [blocks, originTerm, destinationTerm, dateFrom, dateTo, selectedOperator, selectedAirline, hasSearched]);
 
+  // Fallback: same origin + date range, any destination
   const fallbackBlocks = useMemo(() => {
-    if (!blocks || filteredBlocks.length > 0) return [];
+    if (!blocks || filteredBlocks.length > 0 || !hasSearched) return [];
     return blocks.filter((b) => {
+      if (originTerm && !matchesSearch(b.origin, originTerm)) return false;
       if (!matchesDateRange(b.departure_date)) return false;
       return true;
     });
-  }, [blocks, filteredBlocks, dateFrom, dateTo]);
+  }, [blocks, filteredBlocks, originTerm, dateFrom, dateTo, hasSearched]);
 
   const sortedBlocks = useMemo(() => {
     const arr = [...filteredBlocks];
@@ -124,7 +113,7 @@ export default function BloqueiosAereos() {
   const handleSearch = () => setHasSearched(true);
 
   const handleSuggestionClick = (dest: string) => {
-    setSearchTerm(dest);
+    setDestinationTerm(dest);
     setHasSearched(true);
   };
 
@@ -148,10 +137,12 @@ export default function BloqueiosAereos() {
         <EducationalSection />
 
         <BlockSearchForm
-          searchTerm={searchTerm}
+          originTerm={originTerm}
+          destinationTerm={destinationTerm}
           dateFrom={dateFrom}
           dateTo={dateTo}
-          onSearchTermChange={(v) => { setSearchTerm(v); setHasSearched(false); }}
+          onOriginChange={(v) => { setOriginTerm(v); setHasSearched(false); }}
+          onDestinationChange={(v) => { setDestinationTerm(v); setHasSearched(false); }}
           onDateFromChange={(d) => { setDateFrom(d); setHasSearched(false); }}
           onDateToChange={(d) => { setDateTo(d); setHasSearched(false); }}
           onSearch={handleSearch}
@@ -191,8 +182,11 @@ export default function BloqueiosAereos() {
 
             {sortedBlocks.length === 0 && (
               <BlockEmptyState
-                hasSearched={hasSearched} fallbackBlocks={fallbackBlocks} origin={searchTerm}
-                getCityLabel={getCityLabel} onSuggestionClick={handleSuggestionClick}
+                hasSearched={hasSearched}
+                fallbackBlocks={fallbackBlocks}
+                origin={originTerm}
+                getCityLabel={getCityLabel}
+                onSuggestionClick={handleSuggestionClick}
               />
             )}
           </>
