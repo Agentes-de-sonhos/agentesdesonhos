@@ -34,11 +34,11 @@ export default function CadastroLink() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("registration_links")
-        .select("plan, role, max_uses, uses_count, expires_at")
-        .eq("token", token)
+      const { data: rawData, error } = await supabase
+        .rpc("get_registration_link" as any, { _token: token })
         .single();
+
+      const data = rawData as { plan: string; role: string; max_uses: number; uses_count: number; expires_at: string | null } | null;
 
       if (error || !data) {
         setErrorMessage("Link de cadastro não encontrado ou inválido.");
@@ -46,7 +46,7 @@ export default function CadastroLink() {
         return;
       }
 
-      if (data.uses_count >= data.max_uses) {
+      if (data.max_uses && data.uses_count >= data.max_uses) {
         setErrorMessage("Este link de cadastro já foi utilizado.");
         setLoading(false);
         return;
