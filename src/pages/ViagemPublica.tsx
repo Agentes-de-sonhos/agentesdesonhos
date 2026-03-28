@@ -1358,7 +1358,14 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
 
   const availableTabs = TAB_ORDER.filter(t => grouped[t]?.length > 0);
 
+  const voucherCtx: VoucherAccessContext = {
+    slug: tripData.slug,
+    shareToken: tripData.share_token,
+    password: usedPassword,
+  };
+
   return (
+    <VoucherAccessCtx.Provider value={voucherCtx}>
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-primary/5">
       {/* Agency Header */}
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
