@@ -7378,6 +7378,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_registration_link: {
+        Args: { _token: string }
+        Returns: {
+          expires_at: string
+          max_uses: number
+          plan: string
+          role: string
+          uses_count: number
+        }[]
+      }
       get_user_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["subscription_plan"]
