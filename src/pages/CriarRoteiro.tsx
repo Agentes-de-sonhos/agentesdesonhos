@@ -37,6 +37,7 @@ export default function CriarRoteiro() {
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
+  const [pendingItineraryId, setPendingItineraryId] = useState<string | null>(null);
 
   const {
     itineraries,
@@ -85,6 +86,7 @@ export default function CriarRoteiro() {
     try {
       // Create itinerary record
       const itinerary = await createItinerary.mutateAsync(data);
+      setPendingItineraryId(itinerary.id);
 
       // Generate with AI
       const generatedData = await generateWithAI(data);
@@ -99,9 +101,22 @@ export default function CriarRoteiro() {
       // Only increment usage AFTER successful creation
       await incrementUsage();
 
+      setPendingItineraryId(null);
+
       toast.success("Roteiro gerado com sucesso!");
     } catch (error) {
       console.error("Error creating itinerary:", error);
+
+      if (pendingItineraryId) {
+        try {
+          await deleteItinerary.mutateAsync(pendingItineraryId);
+        } catch (cleanupError) {
+          console.error("Error cleaning up failed itinerary:", cleanupError);
+        } finally {
+          setPendingItineraryId(null);
+        }
+      }
+
       toast.error(error instanceof Error ? error.message : "Erro ao gerar roteiro");
     } finally {
       setIsGenerating(false);
