@@ -54,17 +54,21 @@ export function useSupplierReviewStats() {
   return useQuery({
     queryKey: ["supplier-review-stats-all"],
     queryFn: async () => {
-      const [{ data: supplierData, error: supplierError }, { data: operatorData, error: operatorError }] = await Promise.all([
+      const [{ data: supplierData, error: supplierError }, { data: operatorData, error: operatorError }, { data: cruiseData, error: cruiseError }] = await Promise.all([
         supabase
           .from("supplier_reviews")
           .select("supplier_id, rating"),
         supabase
           .from("operator_reviews")
           .select("operator_id, rating"),
+        supabase
+          .from("cruise_reviews")
+          .select("cruise_id, rating"),
       ]);
 
       if (supplierError) throw supplierError;
       if (operatorError) throw operatorError;
+      if (cruiseError) throw cruiseError;
 
       const map: Record<string, { total: number; count: number }> = {};
 
@@ -77,6 +81,13 @@ export function useSupplierReviewStats() {
 
       for (const r of operatorData || []) {
         const key = `operator:${r.operator_id}`;
+        if (!map[key]) map[key] = { total: 0, count: 0 };
+        map[key].total += r.rating;
+        map[key].count += 1;
+      }
+
+      for (const r of (cruiseData || []) as any[]) {
+        const key = `cruise:${r.cruise_id}`;
         if (!map[key]) map[key] = { total: 0, count: 0 };
         map[key].total += r.rating;
         map[key].count += 1;

@@ -1354,11 +1354,16 @@ export type Database = {
         Row: {
           ativo: boolean
           categoria: string
+          commercial_contacts: string | null
           created_at: string
           descricao_curta: string | null
+          how_to_sell: string | null
           id: string
           logo_url: string | null
           nome: string
+          sales_channels: string | null
+          social_links: Json | null
+          specialties: string | null
           subtipo: string | null
           tipo: string
           updated_at: string
@@ -1367,11 +1372,16 @@ export type Database = {
         Insert: {
           ativo?: boolean
           categoria?: string
+          commercial_contacts?: string | null
           created_at?: string
           descricao_curta?: string | null
+          how_to_sell?: string | null
           id?: string
           logo_url?: string | null
           nome: string
+          sales_channels?: string | null
+          social_links?: Json | null
+          specialties?: string | null
           subtipo?: string | null
           tipo?: string
           updated_at?: string
@@ -1380,11 +1390,16 @@ export type Database = {
         Update: {
           ativo?: boolean
           categoria?: string
+          commercial_contacts?: string | null
           created_at?: string
           descricao_curta?: string | null
+          how_to_sell?: string | null
           id?: string
           logo_url?: string | null
           nome?: string
+          sales_channels?: string | null
+          social_links?: Json | null
+          specialties?: string | null
           subtipo?: string | null
           tipo?: string
           updated_at?: string
@@ -1592,6 +1607,86 @@ export type Database = {
           nome_template?: string
         }
         Relationships: []
+      }
+      cruise_review_moderation_log: {
+        Row: {
+          comment: string | null
+          created_at: string
+          cruise_id: string
+          id: string
+          moderated_by: string
+          rating: number
+          reaction: string | null
+          reason: string | null
+          review_id: string
+          reviewer_user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          cruise_id: string
+          id?: string
+          moderated_by: string
+          rating: number
+          reaction?: string | null
+          reason?: string | null
+          review_id: string
+          reviewer_user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          cruise_id?: string
+          id?: string
+          moderated_by?: string
+          rating?: number
+          reaction?: string | null
+          reason?: string | null
+          review_id?: string
+          reviewer_user_id?: string
+        }
+        Relationships: []
+      }
+      cruise_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          cruise_id: string
+          id: string
+          rating: number
+          reaction: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          cruise_id: string
+          id?: string
+          rating: number
+          reaction?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          cruise_id?: string
+          id?: string
+          rating?: number
+          reaction?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cruise_reviews_cruise_id_fkey"
+            columns: ["cruise_id"]
+            isOneToOne: false
+            referencedRelation: "companhias_maritimas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       custom_event_types: {
         Row: {
