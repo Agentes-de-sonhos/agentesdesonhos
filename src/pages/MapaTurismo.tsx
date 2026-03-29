@@ -295,7 +295,7 @@ export default function MapaTurismo() {
             return (
               <button
                 key={cat.category}
-                onClick={() => handleCategoryChange(cat.category)}
+                onClick={() => handleCategoryChange(cat)}
                 className={cn(
                   "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
                   isActive
