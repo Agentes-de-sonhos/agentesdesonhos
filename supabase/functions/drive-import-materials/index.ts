@@ -183,6 +183,7 @@ Deno.serve(async (req) => {
       imported: 0,
       skipped_duplicate: 0,
       skipped_unsupported: 0,
+      skipped_no_supplier: 0,
       errors: 0,
       details: [] as any[],
     };
@@ -190,21 +191,28 @@ Deno.serve(async (req) => {
     for (const opFolder of operatorFolders) {
       const operatorName = opFolder.name.trim();
       
-      // Find or create supplier
-      let supplier = supplierMap.get(operatorName.toLowerCase());
+      // STRICT MATCH: only use pre-registered suppliers, never create automatically
+      const supplier = supplierMap.get(operatorName.toLowerCase());
       if (!supplier) {
-        const { data: newSupplier, error: createErr } = await supabase
-          .from("trade_suppliers")
-          .insert({ name: operatorName, is_active: true })
-          .select("id, name")
-          .single();
+        console.warn(`Pasta "${operatorName}" não corresponde a nenhuma operadora cadastrada. Ignorando.`);
+        results.skipped_no_supplier++;
+        results.details.push({
+          folder: operatorName,
+          status: "skipped_no_supplier",
+          message: `Operadora "${operatorName}" não encontrada no sistema. Cadastre-a primeiro no admin.`,
+        });
 
-        if (createErr) {
-          console.error(`Erro ao criar fornecedor ${operatorName}:`, createErr);
-          continue;
-        }
-        supplier = newSupplier;
-        supplierMap.set(operatorName.toLowerCase(), supplier!);
+        // Log the skip
+        await supabase.from("drive_import_logs").insert({
+          drive_file_id: `folder_${opFolder.id}`,
+          drive_file_name: operatorName,
+          drive_folder_name: operatorName,
+          supplier_name: operatorName,
+          status: "error",
+          error_message: `Operadora "${operatorName}" não cadastrada no sistema. Pasta ignorada.`,
+        }).catch(() => {});
+
+        continue;
       }
 
       // Check for category subfolders (level 2)
