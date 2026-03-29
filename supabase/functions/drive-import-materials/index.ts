@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const SUPPORTED_MIME_TYPES: Record<string, string> = {
@@ -40,7 +40,6 @@ async function getValidAccessToken(supabase: any, userId: string): Promise<strin
     return tokenRow.access_token;
   }
 
-  // Refresh token
   const clientId = Deno.env.get("GOOGLE_CLIENT_ID")!;
   const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET")!;
 
@@ -95,10 +94,6 @@ async function listDriveFiles(accessToken: string, folderId: string): Promise<Dr
   return data.files || [];
 }
 
-async function listSubSubfolders(accessToken: string, folderId: string): Promise<DriveFolder[]> {
-  return listDriveSubfolders(accessToken, folderId);
-}
-
 async function downloadDriveFile(accessToken: string, fileId: string): Promise<ArrayBuffer> {
   const res = await fetch(
     `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
@@ -116,7 +111,9 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Unauthorized: token não fornecido" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabaseAnon = createClient(
@@ -127,7 +124,9 @@ Deno.serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabaseAnon.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: `Unauthorized: ${userError?.message || "usuário não encontrado"}` }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabase = createClient(
@@ -140,21 +139,31 @@ Deno.serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
-      .single();
+      .eq("role", "admin");
 
-    if (roleData?.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Acesso negado" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const isAdmin = roleData && roleData.length > 0;
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: "Acesso negado: apenas administradores" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const body = await req.json();
     const rootFolderId = body.folder_id;
 
     if (!rootFolderId || typeof rootFolderId !== "string") {
-      return new Response(JSON.stringify({ error: "folder_id é obrigatório" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "folder_id é obrigatório" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+
+    console.log("=== DRIVE IMPORT START ===");
+    console.log("Root folder ID:", rootFolderId);
+    console.log("User ID:", user.id);
 
     // Get valid access token
     const accessToken = await getValidAccessToken(supabase, user.id);
+    console.log("Access token obtained successfully");
 
     // Get already imported file IDs
     const { data: existingImports } = await supabase
@@ -163,8 +172,9 @@ Deno.serve(async (req) => {
       .in("status", ["success"]);
 
     const importedFileIds = new Set((existingImports || []).map((i: any) => i.drive_file_id));
+    console.log("Already imported files:", importedFileIds.size);
 
-    // Get or create supplier mapping
+    // Get supplier mapping
     const { data: existingSuppliers } = await supabase
       .from("trade_suppliers")
       .select("id, name")
@@ -174,9 +184,11 @@ Deno.serve(async (req) => {
     (existingSuppliers || []).forEach((s: any) => {
       supplierMap.set(s.name.toLowerCase().trim(), s);
     });
+    console.log("Registered suppliers:", supplierMap.size);
 
-    // List operator subfolders (level 1: operator name)
+    // List operator subfolders
     const operatorFolders = await listDriveSubfolders(accessToken, rootFolderId);
+    console.log("Operator folders found:", operatorFolders.length, operatorFolders.map(f => f.name));
 
     const results = {
       total_files_found: 0,
@@ -191,7 +203,6 @@ Deno.serve(async (req) => {
     for (const opFolder of operatorFolders) {
       const operatorName = opFolder.name.trim();
       
-      // STRICT MATCH: only use pre-registered suppliers, never create automatically
       const supplier = supplierMap.get(operatorName.toLowerCase());
       if (!supplier) {
         console.warn(`Pasta "${operatorName}" não corresponde a nenhuma operadora cadastrada. Ignorando.`);
@@ -199,50 +210,44 @@ Deno.serve(async (req) => {
         results.details.push({
           folder: operatorName,
           status: "skipped_no_supplier",
-          message: `Operadora "${operatorName}" não encontrada no sistema. Cadastre-a primeiro no admin.`,
+          message: `Operadora "${operatorName}" não encontrada no sistema.`,
         });
 
-        // Log the skip
         await supabase.from("drive_import_logs").insert({
           drive_file_id: `folder_${opFolder.id}`,
           drive_file_name: operatorName,
           drive_folder_name: operatorName,
           supplier_name: operatorName,
           status: "error",
-          error_message: `Operadora "${operatorName}" não cadastrada no sistema. Pasta ignorada.`,
-        }).catch(() => {});
+          error_message: `Operadora "${operatorName}" não cadastrada no sistema.`,
+        }).catch((e: any) => console.error("Log insert error:", e));
 
         continue;
       }
 
-      // Check for category subfolders (level 2)
-      const categoryFolders = await listSubSubfolders(accessToken, opFolder.id);
+      console.log(`Processing operator: ${operatorName} (${supplier.id})`);
+
+      // Check for category subfolders
+      const categoryFolders = await listDriveSubfolders(accessToken, opFolder.id);
       
       if (categoryFolders.length > 0) {
-        // Has category subfolders
         for (const catFolder of categoryFolders) {
           const category = catFolder.name.trim();
           const files = await listDriveFiles(accessToken, catFolder.id);
+          console.log(`  Category "${category}": ${files.length} files`);
           
           for (const file of files) {
             results.total_files_found++;
-            await processFile(
-              supabase, accessToken, file, supplier!, category, 
-              opFolder.name, importedFileIds, results
-            );
+            await processFile(supabase, accessToken, file, supplier, category, opFolder.name, importedFileIds, results);
           }
         }
       } else {
-        // No category subfolders, files directly in operator folder
         const files = await listDriveFiles(accessToken, opFolder.id);
-        const category = "Geral";
+        console.log(`  No categories, direct files: ${files.length}`);
         
         for (const file of files) {
           results.total_files_found++;
-          await processFile(
-            supabase, accessToken, file, supplier!, category, 
-            opFolder.name, importedFileIds, results
-          );
+          await processFile(supabase, accessToken, file, supplier, "Geral", opFolder.name, importedFileIds, results);
         }
       }
     }
@@ -257,16 +262,20 @@ Deno.serve(async (req) => {
         updated_at: new Date().toISOString(),
       }, { onConflict: "root_folder_id" });
 
-    console.log(`Drive import completed: ${JSON.stringify(results)}`);
+    console.log("=== DRIVE IMPORT COMPLETE ===", JSON.stringify(results));
 
     return new Response(JSON.stringify(results), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Drive import error:", error);
+    console.error("=== DRIVE IMPORT FATAL ERROR ===");
+    console.error("Error:", error instanceof Error ? error.message : error);
+    console.error("Stack:", error instanceof Error ? error.stack : "N/A");
+    
     const message = error instanceof Error ? error.message : "Erro ao importar materiais do Drive.";
     return new Response(JSON.stringify({ error: message }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
@@ -282,13 +291,11 @@ async function processFile(
   importedFileIds: Set<string>,
   results: any
 ) {
-  // Skip already imported
   if (importedFileIds.has(file.id)) {
     results.skipped_duplicate++;
     return;
   }
 
-  // Check supported type
   const ext = SUPPORTED_MIME_TYPES[file.mimeType];
   if (!ext) {
     results.skipped_unsupported++;
@@ -306,11 +313,9 @@ async function processFile(
   }
 
   try {
-    // Download file from Drive
     const fileData = await downloadDriveFile(accessToken, file.id);
     const fileBytes = new Uint8Array(fileData);
 
-    // Upload to Supabase Storage
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const storagePath = `drive-imports/${supplier.name}/${timestamp}_${sanitizedName}`;
@@ -324,17 +329,13 @@ async function processFile(
 
     if (uploadError) throw uploadError;
 
-    // Get public URL
     const { data: urlData } = supabase.storage
       .from("materials")
       .getPublicUrl(storagePath);
 
     const fileUrl = urlData.publicUrl;
-
-    // Extract title from filename (without extension)
     const title = file.name.replace(/\.[^.]+$/, "").trim();
 
-    // Create material record (same as manual upload)
     const { data: material, error: insertError } = await supabase
       .from("materials")
       .insert({
@@ -353,7 +354,6 @@ async function processFile(
 
     if (insertError) throw insertError;
 
-    // Log the import
     await supabase.from("drive_import_logs").insert({
       drive_file_id: file.id,
       drive_file_name: file.name,
