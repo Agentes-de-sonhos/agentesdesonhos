@@ -282,17 +282,21 @@ export default function CruisesPage() {
 }
 
 function CruiseCard({ company, onProfileClick }: { company: CompanhiaMaritima; onProfileClick: (id: string) => void }) {
+  const navigate = useNavigate();
   const isLuxo = company.categoria === "Luxo";
   const displayRegioes = company.regioes.slice(0, 3);
   const extraRegioes = company.regioes.length - 3;
 
   return (
-    <Card className={cn(
-      "group border-0 overflow-hidden transition-all duration-300 hover:-translate-y-1.5",
-      isLuxo
-        ? "bg-gradient-to-br from-amber-50/80 via-card to-card dark:from-amber-950/30 dark:via-card dark:to-card ring-1 ring-amber-200/60 dark:ring-amber-800/40 shadow-[0_4px_24px_-4px_rgba(217,169,78,0.15)] hover:shadow-[0_12px_32px_-8px_rgba(217,169,78,0.25)]"
-        : "bg-card/90 backdrop-blur-sm ring-1 ring-border/40 shadow-card hover:shadow-card-hover"
-    )}>
+    <Card
+      className={cn(
+        "group border-0 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 cursor-pointer",
+        isLuxo
+          ? "bg-gradient-to-br from-amber-50/80 via-card to-card dark:from-amber-950/30 dark:via-card dark:to-card ring-1 ring-amber-200/60 dark:ring-amber-800/40 shadow-[0_4px_24px_-4px_rgba(217,169,78,0.15)] hover:shadow-[0_12px_32px_-8px_rgba(217,169,78,0.25)]"
+          : "bg-card/90 backdrop-blur-sm ring-1 ring-border/40 shadow-card hover:shadow-card-hover"
+      )}
+      onClick={() => navigate(`/mapa-turismo/cruzeiros/${company.id}`)}
+    >
       {/* Luxury accent bar */}
       {isLuxo && (
         <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
@@ -397,7 +401,7 @@ function CruiseCard({ company, onProfileClick }: { company: CompanhiaMaritima; o
                 "h-8 text-xs gap-1 font-medium",
                 isLuxo ? "text-amber-700 hover:text-amber-800 hover:bg-amber-100/50 dark:text-amber-400 dark:hover:bg-amber-950/50" : "text-primary"
               )}
-              onClick={() => company.website && window.open(company.website, "_blank")}
+              onClick={(e) => { e.stopPropagation(); navigate(`/mapa-turismo/cruzeiros/${company.id}`); }}
             >
               Ver mais <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
