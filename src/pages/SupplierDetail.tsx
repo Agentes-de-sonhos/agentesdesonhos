@@ -69,7 +69,7 @@ export default function SupplierDetail() {
     enabled: !!id,
   });
 
-  const updateMutation = useOperatorUpdate(id || "", "tour_operators");
+  const updateMutation = useOperatorUpdate(id || "", "trade_suppliers");
 
   const { reviews, isLoading: reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview } = useSupplierReviews(id || "");
 

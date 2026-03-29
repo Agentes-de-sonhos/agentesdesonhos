@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export function useOperatorUpdate(id: string, table: "tour_operators" | "tour_operators") {
+export function useOperatorUpdate(id: string, table: "tour_operators" | "trade_suppliers") {
   const queryClient = useQueryClient();
   const queryKey = table === "tour_operators" ? "tour-operator" : "trade-supplier";
 
