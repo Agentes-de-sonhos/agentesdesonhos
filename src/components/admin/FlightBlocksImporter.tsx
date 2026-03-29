@@ -2,14 +2,12 @@ import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
@@ -21,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardPaste, Loader2, Check, AlertCircle, Trash2, Search, FileSpreadsheet, Upload } from "lucide-react";
+import { Loader2, Check, AlertCircle, Trash2, FileSpreadsheet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAirports } from "@/hooks/useAirports";
@@ -32,7 +30,6 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ParsedBlock {
   origin: string;
@@ -88,230 +85,9 @@ function parseSegment(segment: string): { airport: string; date: string; time: s
   return { airport: "", date: "", time: "" };
 }
 
-// ===== TABLE FORMAT PARSER (Partida | Chegada | Cia Aérea | Disp) =====
-
-function parseTableFormat(text: string): ParsedBlock[] {
-  const allLines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-  const lines = allLines.map(l => l.trim()).filter(l => l.length > 0);
-  
-  // Skip header if present
-  let startIdx = 0;
-  if (lines.length > 0 && /partida|chegada|cia|disp/i.test(lines[0])) {
-    startIdx = 1;
-  }
-
-  const blocks: ParsedBlock[] = [];
-
-  // Each block is 2 lines: line1 = ida, line2 = volta
-  // Format per line: Partida<tab>Chegada<tab>Cia Aérea<tab>Disp
-  // Line 1 (ida): has airline + disp values
-  // Line 2 (volta): usually empty airline/disp cells
-  for (let i = startIdx; i < lines.length; i += 2) {
-    const line1 = lines[i];
-    const line2 = i + 1 < lines.length ? lines[i + 1] : "";
-
-    const cols1 = line1.split(/\t/);
-    const cols2 = line2.split(/\t/);
-
-    // Parse ida (outbound)
-    const outDep = parseSegment(cols1[0] || "");
-    const outArr = parseSegment(cols1[1] || "");
-    const airline = (cols1[2] || "").trim();
-    const seats = (cols1[3] || "").trim();
-
-    // Parse volta (return)
-    const retDep = parseSegment(cols2[0] || "");
-    const retArr = parseSegment(cols2[1] || "");
-
-    if (!outDep.airport && !outArr.airport) continue;
-
-    const block: ParsedBlock = {
-      origin: outDep.airport,
-      destination: outArr.airport,
-      departure_date: outDep.date,
-      departure_time: outDep.time,
-      arrival_date: outArr.date,
-      arrival_time: outArr.time,
-      return_departure_date: retDep.date,
-      return_departure_time: retDep.time,
-      return_arrival_date: retArr.date,
-      return_arrival_time: retArr.time,
-      airline,
-      block_code: "",
-      price: "",
-      currency: "BRL",
-      price_text: "",
-      deadline: "",
-      seats_available: seats.replace(/\D/g, "") || "0",
-      operator: "",
-    };
-
-    if (parseInt(block.seats_available || "0") > 0) {
-      blocks.push(block);
-    }
-  }
-
-  return blocks;
-}
-
-// ===== LEGACY 5-LINE FORMAT PARSER =====
-
-function parseFiveLines(
-  line1: string, line2: string, line3: string, line4: string, line5: string
-): ParsedBlock | null {
-  const outDep = parseSegment(line1);
-  const parts2 = line2.split(/\t+/);
-  const returnDep = parseSegment(parts2[0] || "");
-  const outArr = parseSegment(parts2[1] || parts2[0] || "");
-  const parts3 = line3.split(/\t+/);
-  const returnArr = parseSegment(parts3[0] || "");
-  const airline = (parts3[1] || "").trim();
-  const parts4 = line4.split(/\t+/);
-  const blockCode = (parts4[0] || "").trim();
-  const priceRaw = (parts4.slice(1).join(" ") || "").trim();
-  let price = "";
-  let currency = "BRL";
-  let priceText = priceRaw;
-  const priceMatch = priceRaw.match(/(BRL|USD|EUR|R\$|US\$)\s*([\d.,]+)/i);
-  if (priceMatch) {
-    const curr = priceMatch[1].toUpperCase();
-    currency = curr === "R$" ? "BRL" : curr === "US$" ? "USD" : curr;
-    price = priceMatch[2].replace(/\./g, "").replace(",", ".");
-  }
-  const parts5 = line5.split(/\t+/);
-  let deadline = "";
-  let seatsAvailable = "0";
-  for (const part of parts5) {
-    const deadlineMatch = part.trim().match(/^(\d{2}\/\d{2}\/\d{2,4})\s+(\d{1,2}:\d{2})h?$/i);
-    if (deadlineMatch) deadline = parseDate(deadlineMatch[1]) + " " + deadlineMatch[2];
-    if (/^\d+$/.test(part.trim())) seatsAvailable = part.trim();
-  }
-  const origin = outDep.airport;
-  const destination = outArr.airport || returnDep.airport;
-  if (!origin && !destination && !airline) return null;
-  return {
-    origin, destination,
-    departure_date: outDep.date, departure_time: outDep.time,
-    arrival_date: outArr.date, arrival_time: outArr.time,
-    return_departure_date: returnDep.date, return_departure_time: returnDep.time,
-    return_arrival_date: returnArr.date, return_arrival_time: returnArr.time,
-    airline, block_code: blockCode, price, currency, price_text: priceText,
-    deadline, seats_available: seatsAvailable, operator: "",
-  };
-}
-
-function parseLegacyFormat(text: string): ParsedBlock[] {
-  const allLines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-  const lines = allLines.map(l => l.trim()).filter(l => l.length > 0);
-  const blocks: ParsedBlock[] = [];
-  for (let i = 0; i + 4 < lines.length; i += 5) {
-    try {
-      const block = parseFiveLines(lines[i], lines[i+1], lines[i+2], lines[i+3], lines[i+4]);
-      if (block && parseInt(block.seats_available || "0") > 0) blocks.push(block);
-    } catch (err) {
-      console.warn("Failed to parse block at line", i, err);
-    }
-  }
-  return blocks;
-}
-
-// ===== EXCEL FORMAT PARSER (13 or 14 columns) =====
-
-function parseExcelRows(rows: any[][]): ParsedBlock[] {
-  const blocks: ParsedBlock[] = [];
-  let startIdx = 0;
-  if (rows.length > 0) {
-    const firstCell = String(rows[0][0] || "").toLowerCase();
-    if (firstCell.includes("origem") || firstCell.includes("partida")) startIdx = 1;
-  }
-
-  // Detect if header has "Cia Aérea" column (14-col format)
-  const header = rows[0] || [];
-  const hasAirlineCol = header.length >= 14 && 
-    String(header[12] || "").toLowerCase().includes("cia");
-
-  for (let i = startIdx; i < rows.length; i++) {
-    const r = rows[i];
-    if (!r || r.length < 4) continue;
-
-    const origin = String(r[0] || "").trim().toUpperCase();
-    const dataIda = String(r[1] || "").trim();
-    const horaSaida = String(r[2] || "").trim().replace(/h$/i, "");
-    const destination = String(r[3] || "").trim().toUpperCase();
-    const dataChegada = String(r[4] || "").trim();
-    const horaChegada = String(r[5] || "").trim().replace(/h$/i, "");
-    const dataVolta = String(r[7] || "").trim();
-    const horaSaidaVolta = String(r[8] || "").trim().replace(/h$/i, "");
-    const dataChegadaVolta = String(r[10] || "").trim();
-    const horaChegadaVolta = String(r[11] || "").trim().replace(/h$/i, "");
-
-    let airline = "";
-    let operadora = "";
-
-    if (hasAirlineCol) {
-      // 14 columns: col 12 = Cia Aérea, col 13 = Operadora
-      airline = String(r[12] || "").trim().toUpperCase();
-      operadora = String(r[13] || "").trim().toUpperCase();
-    } else {
-      // 13 columns: col 12 = Operadora (airline unknown)
-      operadora = String(r[12] || "").trim().toUpperCase();
-      airline = "";
-    }
-
-    if (!airline) airline = "NÃO INFORMADO";
-    if (!origin || !destination) continue;
-
-    blocks.push({
-      origin,
-      destination,
-      departure_date: parseDate(dataIda),
-      departure_time: horaSaida,
-      arrival_date: parseDate(dataChegada),
-      arrival_time: horaChegada,
-      return_departure_date: parseDate(dataVolta),
-      return_departure_time: horaSaidaVolta,
-      return_arrival_date: parseDate(dataChegadaVolta),
-      return_arrival_time: horaChegadaVolta,
-      airline,
-      block_code: "",
-      price: "",
-      currency: "BRL",
-      price_text: "",
-      deadline: "",
-      seats_available: "0",
-      operator: operadora,
-    });
-  }
-  return blocks;
-}
-
-// ===== AUTO-DETECT FORMAT =====
-
-function parseRawText(text: string, format: "auto" | "table" | "legacy"): ParsedBlock[] {
-  if (format === "table") return parseTableFormat(text);
-  if (format === "legacy") return parseLegacyFormat(text);
-
-  // Auto-detect: if first non-header line has exactly 4 tab-separated columns, it's table format
-  const lines = text.replace(/\r\n/g, "\n").split("\n").map(l => l.trim()).filter(l => l.length > 0);
-  let firstDataLine = lines[0] || "";
-  if (/partida|chegada|cia|disp/i.test(firstDataLine) && lines.length > 1) {
-    firstDataLine = lines[1];
-  }
-  const tabCount = (firstDataLine.match(/\t/g) || []).length;
-  
-  if (tabCount >= 2 && tabCount <= 4) {
-    const tableResult = parseTableFormat(text);
-    if (tableResult.length > 0) return tableResult;
-  }
-  
-  return parseLegacyFormat(text);
-}
-
 export function FlightBlocksImporter() {
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState<"paste" | "preview" | "done">("paste");
-  const [rawText, setRawText] = useState("");
-  const [importFormat, setImportFormat] = useState<"auto" | "table" | "legacy">("auto");
+  const [step, setStep] = useState<"preview" | "done">("preview");
   const [parsedBlocks, setParsedBlocks] = useState<ParsedBlock[]>([]);
   const [importResult, setImportResult] = useState({ success: 0, errors: 0, skipped: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
