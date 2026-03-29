@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCruises, useRegioes, usePerfisCliente } from "@/hooks/useCruises";
+import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
   Ship, Search, X, Loader2, Globe, Anchor, Compass, ChevronRight,
-  Building2, Waves, Sailboat, MapPin
+  Waves, Sailboat, MapPin, Star, ThumbsUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const TIPO_OPTIONS = [
   { value: "all", label: "Todos", icon: Ship },
@@ -42,9 +45,12 @@ const TIPO_COLORS: Record<string, string> = {
 
 export default function CruisesPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: companies = [], isLoading } = useCruises();
   const { data: regioes = [] } = useRegioes();
   const { data: perfis = [] } = usePerfisCliente();
+  const { getLikeCount, hasLiked, toggleLike } = useSupplierLikes();
+  const { data: reviewStatsMap = {} } = useSupplierReviewStats();
 
   const [filters, setFilters] = useState<CruiseFilters>({
     search: "",
@@ -106,6 +112,12 @@ export default function CruisesPage() {
       onRemove: () => toggleFilter("perfis", pId),
     });
   });
+
+  const handleLike = (e: React.MouseEvent, companyId: string) => {
+    e.stopPropagation();
+    if (!user) { toast.error("Faça login para curtir"); return; }
+    toggleLike.mutate({ supplierId: companyId, source: "cruise" });
+  };
 
   return (
     <DashboardLayout>
@@ -271,9 +283,26 @@ export default function CruisesPage() {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((company) => (
-              <CruiseCard key={company.id} company={company} onProfileClick={(id) => toggleFilter("perfis", id)} />
-            ))}
+            {filtered.map((company) => {
+              const stats = reviewStatsMap[`cruise:${company.id}`];
+              const avgRating = stats ? stats.total / stats.count : 0;
+              const reviewCount = stats?.count || 0;
+              const likeCount = getLikeCount(company.id, "cruise");
+              const liked = hasLiked(company.id, "cruise");
+
+              return (
+                <CruiseCard
+                  key={company.id}
+                  company={company}
+                  onProfileClick={(id) => toggleFilter("perfis", id)}
+                  averageRating={avgRating}
+                  reviewCount={reviewCount}
+                  likeCount={likeCount}
+                  liked={liked}
+                  onLike={(e) => handleLike(e, company.id)}
+                />
+              );
+            })}
           </div>
         )}
       </div>
@@ -281,7 +310,23 @@ export default function CruisesPage() {
   );
 }
 
-function CruiseCard({ company, onProfileClick }: { company: CompanhiaMaritima; onProfileClick: (id: string) => void }) {
+function CruiseCard({
+  company,
+  onProfileClick,
+  averageRating,
+  reviewCount,
+  likeCount,
+  liked,
+  onLike,
+}: {
+  company: CompanhiaMaritima;
+  onProfileClick: (id: string) => void;
+  averageRating: number;
+  reviewCount: number;
+  likeCount: number;
+  liked: boolean;
+  onLike: (e: React.MouseEvent) => void;
+}) {
   const navigate = useNavigate();
   const isLuxo = company.categoria === "Luxo";
   const displayRegioes = company.regioes.slice(0, 3);
@@ -341,9 +386,30 @@ function CruiseCard({ company, onProfileClick }: { company: CompanhiaMaritima; o
           </div>
         </div>
 
+        {/* Rating & Likes row */}
+        <div className="mt-3 flex items-center gap-3">
+          {reviewCount > 0 && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              <span className="font-semibold text-foreground">{averageRating.toFixed(1)}</span>
+              <span>({reviewCount})</span>
+            </div>
+          )}
+          <button
+            onClick={onLike}
+            className={cn(
+              "flex items-center gap-1 text-xs transition-colors",
+              liked ? "text-primary font-medium" : "text-muted-foreground hover:text-primary"
+            )}
+          >
+            <ThumbsUp className={cn("h-3.5 w-3.5", liked && "fill-primary")} />
+            {likeCount > 0 && <span>{likeCount}</span>}
+          </button>
+        </div>
+
         {/* Regions */}
         {displayRegioes.length > 0 && (
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-3 flex items-center gap-2">
             <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <div className="flex flex-wrap gap-1.5">
               {displayRegioes.map((r) => (
