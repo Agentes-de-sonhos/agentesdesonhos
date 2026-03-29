@@ -1765,6 +1765,96 @@ export type Database = {
           },
         ]
       }
+      drive_import_config: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          root_folder_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          root_folder_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          root_folder_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      drive_import_logs: {
+        Row: {
+          category: string | null
+          deleted_at: string | null
+          drive_file_id: string
+          drive_file_name: string
+          drive_folder_name: string
+          error_message: string | null
+          expires_at: string
+          id: string
+          imported_at: string
+          material_id: string | null
+          status: string
+          supplier_id: string | null
+          supplier_name: string | null
+        }
+        Insert: {
+          category?: string | null
+          deleted_at?: string | null
+          drive_file_id: string
+          drive_file_name: string
+          drive_folder_name: string
+          error_message?: string | null
+          expires_at?: string
+          id?: string
+          imported_at?: string
+          material_id?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_name?: string | null
+        }
+        Update: {
+          category?: string | null
+          deleted_at?: string | null
+          drive_file_id?: string
+          drive_file_name?: string
+          drive_folder_name?: string
+          error_message?: string | null
+          expires_at?: string
+          id?: string
+          imported_at?: string
+          material_id?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drive_import_logs_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drive_import_logs_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "trade_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -2425,6 +2515,36 @@ export type Database = {
           sync_token?: string | null
           token_expires_at?: string
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_drive_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          id: string
+          refresh_token: string | null
+          token_expires_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          id?: string
+          refresh_token?: string | null
+          token_expires_at: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          id?: string
+          refresh_token?: string | null
+          token_expires_at?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

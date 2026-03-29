@@ -28,6 +28,7 @@ import {
   Headset,
   Star,
   BarChart3,
+  HardDrive,
 } from "lucide-react";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -61,6 +62,7 @@ import { AdminRegistrationLinksManager } from "@/components/admin/AdminRegistrat
 import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
 import { AdminFeedbackManager } from "@/components/admin/AdminFeedbackManager";
 import { AdminUserAnalytics } from "@/components/admin/AdminUserAnalytics";
+import { AdminDriveImportManager } from "@/components/admin/AdminDriveImportManager";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -249,6 +251,10 @@ export default function Admin() {
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
+            <TabsTrigger value="drive-import" className="flex items-center gap-2">
+              <HardDrive className="h-4 w-4" />
+              <span className="hidden sm:inline">Drive</span>
+            </TabsTrigger>
           </TabsList>
 
 
@@ -371,6 +377,10 @@ export default function Admin() {
 
           <TabsContent value="analytics">
             <AdminUserAnalytics />
+          </TabsContent>
+
+          <TabsContent value="drive-import">
+            <AdminDriveImportManager />
           </TabsContent>
         </Tabs>
       </div>
