@@ -64,14 +64,14 @@ export function useMaterials() {
       .trim();
   };
 
-  // Group materials into galleries by normalized title + supplier + destination
+  // Group materials into galleries by import date + supplier + category
   const groupIntoGalleries = (materials: Material[]): MaterialGallery[] => {
     const galleryMap = new Map<string, Material[]>();
     
     materials?.forEach((material) => {
-      // Create a unique key based on normalized title, supplier, and destination
-      const normalizedTitle = normalizeTitle(material.title);
-      const key = `${normalizedTitle}|${material.supplier_id || 'none'}|${(material.destination || '').trim().toLowerCase()}`;
+      // Create a unique key based on import date (day), supplier, and category
+      const importDate = startOfDay(new Date(material.published_at)).toISOString().slice(0, 10);
+      const key = `${importDate}|${material.supplier_id || 'none'}|${(material.category || '').trim().toLowerCase()}`;
       
       if (!galleryMap.has(key)) {
         galleryMap.set(key, []);
@@ -104,12 +104,14 @@ export function useMaterials() {
         }
       }
 
-      // Use clean display title (without numbering)
-      const displayTitle = getDisplayTitle(firstMaterial.title);
+      // Build gallery title: OperatorName - Category
+      const operatorName = firstMaterial.tour_operators?.name || '';
+      const category = firstMaterial.category || '';
+      const galleryTitle = [operatorName, category].filter(Boolean).join(' • ') || getDisplayTitle(firstMaterial.title);
 
       return {
         id: key,
-        title: displayTitle || firstMaterial.title,
+        title: galleryTitle,
         category: firstMaterial.category,
         destination: firstMaterial.destination,
         supplier_id: firstMaterial.supplier_id,
