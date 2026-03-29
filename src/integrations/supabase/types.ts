@@ -1350,6 +1350,114 @@ export type Database = {
           },
         ]
       }
+      companhias_maritimas: {
+        Row: {
+          ativo: boolean
+          categoria: string
+          created_at: string
+          descricao_curta: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          subtipo: string | null
+          tipo: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          descricao_curta?: string | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          subtipo?: string | null
+          tipo?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          descricao_curta?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          subtipo?: string | null
+          tipo?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      companhias_maritimas_perfis: {
+        Row: {
+          companhia_id: string
+          id: string
+          perfil_id: string
+        }
+        Insert: {
+          companhia_id: string
+          id?: string
+          perfil_id: string
+        }
+        Update: {
+          companhia_id?: string
+          id?: string
+          perfil_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companhias_maritimas_perfis_companhia_id_fkey"
+            columns: ["companhia_id"]
+            isOneToOne: false
+            referencedRelation: "companhias_maritimas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companhias_maritimas_perfis_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfis_cliente"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companhias_maritimas_regioes: {
+        Row: {
+          companhia_id: string
+          id: string
+          regiao_id: string
+        }
+        Insert: {
+          companhia_id: string
+          id?: string
+          regiao_id: string
+        }
+        Update: {
+          companhia_id?: string
+          id?: string
+          regiao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companhias_maritimas_regioes_companhia_id_fkey"
+            columns: ["companhia_id"]
+            isOneToOne: false
+            referencedRelation: "companhias_maritimas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companhias_maritimas_regioes_regiao_id_fkey"
+            columns: ["regiao_id"]
+            isOneToOne: false
+            referencedRelation: "regioes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contacts: {
         Row: {
           category: string | null
@@ -4475,6 +4583,33 @@ export type Database = {
         }
         Relationships: []
       }
+      perfis_cliente: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          nome: string
+          ordem_exibicao: number
+          slug: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          ordem_exibicao?: number
+          slug: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem_exibicao?: number
+          slug?: string
+        }
+        Relationships: []
+      }
       place_cache: {
         Row: {
           address: string | null
@@ -5323,6 +5458,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      regioes: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          nome: string
+          ordem_exibicao: number
+          slug: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          ordem_exibicao?: number
+          slug: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem_exibicao?: number
+          slug?: string
+        }
+        Relationships: []
       }
       registration_links: {
         Row: {
