@@ -116,7 +116,7 @@ export function useSuppliersWithSpecialties() {
     queryKey: ["suppliers-with-specialties"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("tour_operators")
+        .from("trade_suppliers")
         .select(`
           *,
           supplier_specialties (
