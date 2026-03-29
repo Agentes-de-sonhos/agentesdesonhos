@@ -38,6 +38,7 @@ import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
 import { AdminFeedbackManager } from "@/components/admin/AdminFeedbackManager";
 import { AdminUserAnalytics } from "@/components/admin/AdminUserAnalytics";
 import { AdminDriveImportManager } from "@/components/admin/AdminDriveImportManager";
+import { AdminCruisesManager } from "@/components/admin/AdminCruisesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,6 +84,7 @@ function AdminContent({ tab }: { tab: string }) {
         <>
           <AdminTourOperatorsManager />
           <div className="mt-6"><AdminTradeSuppliersManager /></div>
+          <div className="mt-6"><AdminCruisesManager /></div>
         </>
       );
     case "materials":

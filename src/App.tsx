@@ -30,6 +30,7 @@ const ShortCodeRedirect = lazy(() => import("./pages/ShortCodeRedirect"));
 const MapaTurismo = lazy(() => import("./pages/MapaTurismo"));
 const SupplierDetail = lazy(() => import("./pages/SupplierDetail"));
 const OperadoraDetail = lazy(() => import("./pages/OperadoraDetail"));
+const CruisesPage = lazy(() => import("./pages/CruisesPage"));
 const Noticias = lazy(() => import("./pages/Noticias"));
 const Perfil = lazy(() => import("./pages/Perfil"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -144,6 +145,7 @@ const App = () => (
             <Route path="/c/:slug" element={<CarteiraPublica />} />
             <Route path="/v/:code" element={<ShortCodeRedirect />} />
             <Route path="/mapa-turismo" element={<ProtectedRoute><MapaTurismo /></ProtectedRoute>} />
+            <Route path="/mapa-turismo/cruzeiros" element={<ProtectedRoute><CruisesPage /></ProtectedRoute>} />
             <Route path="/mapa-turismo/operadora/:id" element={<ProtectedRoute><OperadoraDetail /></ProtectedRoute>} />
             <Route path="/mapa-turismo/:id" element={<ProtectedRoute><SupplierDetail /></ProtectedRoute>} />
             <Route path="/noticias" element={<ProtectedRoute><Noticias /></ProtectedRoute>} />

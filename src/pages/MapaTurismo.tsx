@@ -48,6 +48,7 @@ interface CategoryDef {
   color: string;
   activeColor: string;
   iconColor: string;
+  link?: string;
 }
 
 const CATEGORIES_DATA: CategoryDef[] = [
@@ -56,7 +57,7 @@ const CATEGORIES_DATA: CategoryDef[] = [
   { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-100 text-sky-700", activeColor: "bg-sky-500 text-white", iconColor: "text-sky-500" },
   { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-100 text-amber-700", activeColor: "bg-amber-500 text-white", iconColor: "text-amber-500" },
   { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-100 text-emerald-700", activeColor: "bg-emerald-500 text-white", iconColor: "text-emerald-500" },
-  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500" },
+  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500", link: "/mapa-turismo/cruzeiros" },
   { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-100 text-rose-700", activeColor: "bg-rose-500 text-white", iconColor: "text-rose-500" },
   { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-pink-100 text-pink-700", activeColor: "bg-pink-500 text-white", iconColor: "text-pink-500" },
   { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", activeColor: "bg-orange-500 text-white", iconColor: "text-orange-500" },
@@ -109,8 +110,12 @@ export default function MapaTurismo() {
     setSearchParams(params);
   };
 
-  const handleCategoryChange = (cat: string) => {
-    const newCat = categoryFilter === cat ? "all" : cat;
+  const handleCategoryChange = (cat: CategoryDef) => {
+    if (cat.link) {
+      navigate(cat.link);
+      return;
+    }
+    const newCat = categoryFilter === cat.category ? "all" : cat.category;
     setCategoryFilter(newCat);
     updateUrlParams(newCat, selectedSpecialties);
   };
@@ -290,7 +295,7 @@ export default function MapaTurismo() {
             return (
               <button
                 key={cat.category}
-                onClick={() => handleCategoryChange(cat.category)}
+                onClick={() => handleCategoryChange(cat)}
                 className={cn(
                   "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
                   isActive
