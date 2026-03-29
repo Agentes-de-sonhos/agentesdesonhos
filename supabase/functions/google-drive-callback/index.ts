@@ -54,6 +54,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Fetch user info (email) from Google
+    let googleEmail: string | null = null;
+    try {
+      const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      });
+      if (userInfoRes.ok) {
+        const userInfo = await userInfoRes.json();
+        googleEmail = userInfo.email || null;
+      }
+    } catch (e) {
+      console.warn("Could not fetch Google user info:", e);
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -61,7 +75,6 @@ Deno.serve(async (req) => {
 
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
 
-    // Store tokens in a dedicated table for Drive
     const { error: upsertError } = await supabase
       .from("google_drive_tokens")
       .upsert({
@@ -69,6 +82,7 @@ Deno.serve(async (req) => {
         access_token: tokenData.access_token,
         refresh_token: tokenData.refresh_token,
         token_expires_at: expiresAt,
+        google_email: googleEmail,
         updated_at: new Date().toISOString(),
       }, { onConflict: "user_id" });
 
