@@ -168,10 +168,10 @@ export function AdminDriveImportManager() {
 
       const { data, error } = await supabase.functions.invoke("drive-import-materials", {
         body: { folder_id: folderIdToSync },
-        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       return data;
     },
     onSuccess: (data) => {
