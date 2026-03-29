@@ -1,0 +1,1 @@
+DELETE FROM drive_import_logs WHERE status IN ('error', 'skipped');

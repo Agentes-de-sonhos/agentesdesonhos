@@ -15,7 +15,7 @@ export interface Material {
   order_index?: number;
   canva_url?: string | null;
   trail_id?: string | null;
-  trade_suppliers?: {
+  tour_operators?: {
     id: string;
     name: string;
   } | null;
@@ -31,7 +31,7 @@ export interface MaterialGallery {
   category: string;
   destination?: string | null;
   supplier_id?: string | null;
-  trade_suppliers?: {
+  tour_operators?: {
     id: string;
     name: string;
   } | null;

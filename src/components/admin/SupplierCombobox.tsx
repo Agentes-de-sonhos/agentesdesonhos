@@ -58,7 +58,7 @@ export function SupplierCombobox({
   const createSupplierMutation = useMutation({
     mutationFn: async (name: string) => {
       const { data, error } = await supabase
-        .from("trade_suppliers")
+        .from("tour_operators")
         .insert({
           name: name.trim(),
           category: category || "Outros",

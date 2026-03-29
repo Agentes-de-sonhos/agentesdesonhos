@@ -1850,7 +1850,7 @@ export type Database = {
             foreignKeyName: "drive_import_logs_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
-            referencedRelation: "trade_suppliers"
+            referencedRelation: "tour_operators"
             referencedColumns: ["id"]
           },
         ]
@@ -3602,7 +3602,7 @@ export type Database = {
             foreignKeyName: "materials_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
-            referencedRelation: "trade_suppliers"
+            referencedRelation: "tour_operators"
             referencedColumns: ["id"]
           },
           {

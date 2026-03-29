@@ -152,7 +152,7 @@ export function AdminMaterialsManager() {
         .from("materials")
         .select(`
           *,
-          trade_suppliers (
+          tour_operators (
             id,
             name
           ),
@@ -171,7 +171,7 @@ export function AdminMaterialsManager() {
     queryKey: ["trade-suppliers-for-materials"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("trade_suppliers")
+        .from("tour_operators")
         .select("id, name")
         .eq("is_active", true)
         .order("name");
@@ -213,7 +213,7 @@ export function AdminMaterialsManager() {
       return {
         key,
         title: getDisplayTitle(first.title),
-        supplier_name: first.trade_suppliers?.name || null,
+        supplier_name: first.tour_operators?.name || null,
         supplier_id: first.supplier_id || null,
         category: first.category,
         destination: first.destination || null,
@@ -509,7 +509,7 @@ export function AdminMaterialsManager() {
     setEditingId(material.id);
     setForm({
       supplier_id: material.supplier_id || "",
-      supplier_name: material.trade_suppliers?.name || "",
+      supplier_name: material.tour_operators?.name || "",
       category: material.category,
       material_type: material.material_type,
       title: material.title,
