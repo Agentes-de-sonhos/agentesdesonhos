@@ -53,7 +53,8 @@ Deno.serve(async (req) => {
     const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
     const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const redirectUri = `${supabaseUrl}/functions/v1/google-drive-callback`;
+    // Hardcode exact redirect_uri to match Google Cloud Console config
+    const redirectUri = "https://mlwwpckahhfsixplxwif.supabase.co/functions/v1/google-drive-callback";
 
     console.log("=== TOKEN EXCHANGE CONFIG ===");
     console.log("Client ID present:", !!clientId);
@@ -90,7 +91,7 @@ Deno.serve(async (req) => {
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: tokenBody,
+      body: tokenBody.toString(),
     });
 
     const tokenText = await tokenRes.text();

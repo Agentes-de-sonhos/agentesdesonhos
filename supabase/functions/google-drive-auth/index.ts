@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Google Client ID não configurado." }), { status: 500, headers: corsHeaders });
     }
 
-    const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-drive-callback`;
+    const redirectUri = "https://mlwwpckahhfsixplxwif.supabase.co/functions/v1/google-drive-callback";
     const state = btoa(JSON.stringify({ user_id: user.id }));
 
     const params = new URLSearchParams({
