@@ -61,29 +61,7 @@ function parseDate(raw: string): string {
   return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }
 
-function formatDisplayDate(isoDate: string): string {
-  if (!isoDate) return "";
-  const parts = isoDate.split("-");
-  if (parts.length !== 3) return isoDate;
-  return `${parts[2]}/${parts[1]}`;
-}
-
-/**
- * Parse a segment like "GRU 19/06/26 17:35h" or "GRU19/06/26 17:35h"
- */
-function parseSegment(segment: string): { airport: string; date: string; time: string } {
-  const trimmed = segment.trim();
-  // Pattern: 3 letters + optional space + dd/mm/yy + space + hh:mmh
-  const match = trimmed.match(/^([A-Z]{3})\s*(\d{2}\/\d{2}\/\d{2,4})\s+(\d{1,2}:\d{2})h?$/i);
-  if (match) {
-    return {
-      airport: match[1].toUpperCase(),
-      date: parseDate(match[2]),
-      time: match[3],
-    };
-  }
-  return { airport: "", date: "", time: "" };
-}
+// ===== EXCEL FORMAT PARSER =====
 
 export function FlightBlocksImporter() {
   const [isOpen, setIsOpen] = useState(false);
@@ -166,19 +144,6 @@ export function FlightBlocksImporter() {
     },
   });
 
-  const handleParse = () => {
-    if (!rawText.trim()) {
-      toast({ title: "Cole o texto dos bloqueios aéreos", variant: "destructive" });
-      return;
-    }
-    const blocks = parseRawText(rawText, importFormat);
-    if (blocks.length === 0) {
-      toast({ title: "Nenhum bloqueio válido detectado", description: "Verifique o formato ou tente selecionar o tipo manualmente.", variant: "destructive" });
-      return;
-    }
-    setParsedBlocks(blocks);
-    setStep("preview");
-  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
