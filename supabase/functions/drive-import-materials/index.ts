@@ -174,17 +174,17 @@ Deno.serve(async (req) => {
     const importedFileIds = new Set((existingImports || []).map((i: any) => i.drive_file_id));
     console.log("Already imported files:", importedFileIds.size);
 
-    // Get supplier mapping
-    const { data: existingSuppliers } = await supabase
-      .from("trade_suppliers")
+    // Get operator mapping from tour_operators table
+    const { data: existingOperators } = await supabase
+      .from("tour_operators")
       .select("id, name")
       .eq("is_active", true);
 
     const supplierMap = new Map<string, { id: string; name: string }>();
-    (existingSuppliers || []).forEach((s: any) => {
+    (existingOperators || []).forEach((s: any) => {
       supplierMap.set(s.name.toLowerCase().trim(), s);
     });
-    console.log("Registered suppliers:", supplierMap.size);
+    console.log("Registered operators:", supplierMap.size);
 
     // List operator subfolders
     const operatorFolders = await listDriveSubfolders(accessToken, rootFolderId);

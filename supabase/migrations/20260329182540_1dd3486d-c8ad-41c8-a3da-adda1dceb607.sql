@@ -1,0 +1,1 @@
+DELETE FROM drive_import_logs WHERE status = 'error' AND error_message LIKE '%não cadastrada no sistema%';
