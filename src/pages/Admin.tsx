@@ -1,35 +1,10 @@
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Users, 
-  Shield,
-  UserCheck,
-  Newspaper,
-  TrendingUp,
-  Building2,
-  FileText,
-  Plane,
-  CalendarDays,
-  GraduationCap,
-  Heart,
-  Gift,
-  Megaphone,
-  BookOpen,
-  Sparkles,
-  Menu,
-  Image,
-  MessageCircle,
-  CreditCard,
-  Mail,
-  Link2,
-  Headset,
-  Star,
-  BarChart3,
-  HardDrive,
-} from "lucide-react";
+import { Users, Shield, UserCheck, Mail } from "lucide-react";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
 import { AdminSuppliersManager } from "@/components/admin/AdminSuppliersManager";
@@ -63,326 +38,205 @@ import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
 import { AdminFeedbackManager } from "@/components/admin/AdminFeedbackManager";
 import { AdminUserAnalytics } from "@/components/admin/AdminUserAnalytics";
 import { AdminDriveImportManager } from "@/components/admin/AdminDriveImportManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+const TAB_LABELS: Record<string, string> = {
+  users: "Usuários",
+  crm: "CRM",
+  "agenda-events": "Agenda",
+  "business-cards": "Cartões",
+  materials: "Materiais",
+  mentorships: "Cursos",
+  academy: "Academy",
+  playbooks: "Playbooks",
+  curadoria: "Notícias",
+  "menu-order": "Menu",
+  popups: "Pop-ups",
+  suppliers: "Links",
+  "registration-links": "Links Cadastro",
+  "page-banners": "Capas",
+  "trade-suppliers": "Diretório",
+  hotels: "Hotéis",
+  trade: "Trade",
+  "flight-blocks": "Bloqueios",
+  benefits: "Benefícios",
+  community: "Comunidade",
+  feedback: "Feedback",
+  tickets: "Suporte",
+  analytics: "Analytics",
+  surveys: "Pesquisas",
+  "drive-import": "Drive",
+};
+
+function AdminContent({ tab }: { tab: string }) {
+  switch (tab) {
+    case "users":
+      return <AdminUserManager />;
+    case "menu-order":
+      return <AdminMenuOrderManager />;
+    case "popups":
+      return <AdminPopupsManager />;
+    case "trade-suppliers":
+      return (
+        <>
+          <AdminTourOperatorsManager />
+          <div className="mt-6"><AdminTradeSuppliersManager /></div>
+        </>
+      );
+    case "materials":
+      return <AdminMaterialsManager />;
+    case "flight-blocks":
+      return (
+        <div className="space-y-6">
+          <AdminFlightBlocksManager />
+          <AdminAirBlocksTable />
+        </div>
+      );
+    case "agenda-events":
+      return <AdminAgendaEventsManager />;
+    case "trade":
+      return <AdminTradeUpdatesManager />;
+    case "suppliers":
+      return <AdminSuppliersManager />;
+    case "academy":
+      return <AdminAcademyManager />;
+    case "community":
+      return (
+        <div className="space-y-6">
+          <AdminCommunityRoomsManager />
+          <AdminCommunityManager />
+        </div>
+      );
+    case "mentorships":
+      return (
+        <Tabs defaultValue="marketplace">
+          <TabsList className="mb-4">
+            <TabsTrigger value="marketplace">Marketplace de Cursos</TabsTrigger>
+            <TabsTrigger value="admin-mentorships">Mentorias (Admin)</TabsTrigger>
+          </TabsList>
+          <TabsContent value="marketplace"><AdminMarketplaceManager /></TabsContent>
+          <TabsContent value="admin-mentorships"><AdminMentorshipsManager /></TabsContent>
+        </Tabs>
+      );
+    case "playbooks":
+      return <AdminPlaybookManager />;
+    case "curadoria":
+      return <AdminNewsCurationManager />;
+    case "hotels":
+      return (
+        <div className="space-y-6">
+          <AdminHotelRecommendationsManager />
+          <AdminHotelsManager />
+        </div>
+      );
+    case "page-banners":
+      return <AdminPageBannersManager />;
+    case "surveys":
+      return <AdminSurveyManager />;
+    case "business-cards":
+      return <AdminBusinessCardsManager />;
+    case "crm":
+      return (
+        <div className="space-y-6">
+          <AdminCrmContacts />
+          <AdminCrmTemplates />
+          <AdminCrmLogs />
+        </div>
+      );
+    case "benefits":
+      return <AdminBenefitsManager />;
+    case "registration-links":
+      return <AdminRegistrationLinksManager />;
+    case "tickets":
+      return <AdminTicketsManager />;
+    case "feedback":
+      return <AdminFeedbackManager />;
+    case "analytics":
+      return <AdminUserAnalytics />;
+    case "drive-import":
+      return <AdminDriveImportManager />;
+    default:
+      return <AdminUserManager />;
+  }
+}
+
 export default function Admin() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "users";
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "users");
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
+
   const { data: userStats } = useQuery({
     queryKey: ["admin-user-stats"],
     queryFn: async () => {
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id");
-      
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role");
-      
-      const { data: subscriptions } = await supabase
-        .from("subscriptions")
-        .select("plan");
-
+      const { data: profiles } = await supabase.from("profiles").select("user_id");
+      const { data: roles } = await supabase.from("user_roles").select("role");
+      const { data: subscriptions } = await supabase.from("subscriptions").select("plan");
       const total = profiles?.length || 0;
-      const admins = roles?.filter(r => r.role === "admin").length || 0;
-      const fundadores = subscriptions?.filter(s => s.plan === "profissional").length || 0;
-
+      const admins = roles?.filter((r) => r.role === "admin").length || 0;
+      const fundadores = subscriptions?.filter((s) => s.plan === "profissional").length || 0;
       return { total, admins, premium: fundadores };
     },
   });
 
   const stats = [
-    {
-      title: "Total de Usuários",
-      value: userStats?.total || 0,
-      icon: Users,
-      color: "text-primary",
-    },
-    {
-      title: "Administradores",
-      value: userStats?.admins || 0,
-      icon: Shield,
-      color: "text-accent",
-    },
-    {
-      title: "Plano Fundador",
-      value: userStats?.premium || 0,
-      icon: UserCheck,
-      color: "text-green-500",
-    },
+    { title: "Total de Usuários", value: userStats?.total || 0, icon: Users, color: "text-primary" },
+    { title: "Administradores", value: userStats?.admins || 0, icon: Shield, color: "text-accent" },
+    { title: "Plano Fundador", value: userStats?.premium || 0, icon: UserCheck, color: "text-green-500" },
   ];
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-display font-bold text-foreground">
-              Painel Administrativo
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Gerencie usuários, conteúdo, cursos e toda a plataforma
-            </p>
-          </div>
-          <Button onClick={() => navigate("/admin/crm")} className="gap-2">
-            <Mail className="h-4 w-4" />
-            CRM / Emails
-          </Button>
-        </div>
+      <div className="flex gap-6 min-h-[calc(100vh-8rem)]">
+        {/* Sidebar */}
+        <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {stats.map((stat) => (
-            <Card key={stat.title} className="border-0 shadow-md">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                  </div>
-                  <div className={`p-3 rounded-xl bg-muted ${stat.color}`}>
-                    <stat.icon className="h-6 w-6" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Tabs for Content Management */}
-        <Tabs defaultValue={initialTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-16">
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Usuários</span>
-            </TabsTrigger>
-            <TabsTrigger value="menu-order" className="flex items-center gap-2">
-              <Menu className="h-4 w-4" />
-              <span className="hidden sm:inline">Menu</span>
-            </TabsTrigger>
-            <TabsTrigger value="popups" className="flex items-center gap-2">
-              <Megaphone className="h-4 w-4" />
-              <span className="hidden sm:inline">Pop-ups</span>
-            </TabsTrigger>
-            <TabsTrigger value="trade-suppliers" className="flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Diretório</span>
-            </TabsTrigger>
-            <TabsTrigger value="materials" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Materiais</span>
-            </TabsTrigger>
-            <TabsTrigger value="flight-blocks" className="flex items-center gap-2">
-              <Plane className="h-4 w-4" />
-              <span className="hidden sm:inline">Bloqueios</span>
-            </TabsTrigger>
-            <TabsTrigger value="agenda-events" className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4" />
-              <span className="hidden sm:inline">Agenda</span>
-            </TabsTrigger>
-            <TabsTrigger value="trade" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              <span className="hidden sm:inline">Trade</span>
-            </TabsTrigger>
-            <TabsTrigger value="suppliers" className="flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Links</span>
-            </TabsTrigger>
-            <TabsTrigger value="academy" className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              <span className="hidden sm:inline">Academy</span>
-            </TabsTrigger>
-            <TabsTrigger value="community" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              <span className="hidden sm:inline">Comunidade</span>
-            </TabsTrigger>
-            <TabsTrigger value="mentorships" className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              <span className="hidden sm:inline">Cursos</span>
-            </TabsTrigger>
-            <TabsTrigger value="playbooks" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">Playbooks</span>
-            </TabsTrigger>
-            <TabsTrigger value="curadoria" className="flex items-center gap-2">
-              <Newspaper className="h-4 w-4" />
-              <span className="hidden sm:inline">Notícias</span>
-            </TabsTrigger>
-            <TabsTrigger value="hotels" className="flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Hotéis</span>
-            </TabsTrigger>
-            <TabsTrigger value="page-banners" className="flex items-center gap-2">
-              <Image className="h-4 w-4" />
-              <span className="hidden sm:inline">Capas</span>
-            </TabsTrigger>
-            <TabsTrigger value="surveys" className="flex items-center gap-2">
-              <MessageCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">Pesquisas</span>
-            </TabsTrigger>
-            <TabsTrigger value="business-cards" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              <span className="hidden sm:inline">Cartões</span>
-            </TabsTrigger>
-            <TabsTrigger value="crm" className="flex items-center gap-2">
+        {/* Main content */}
+        <div className="flex-1 space-y-6 min-w-0">
+          {/* Header */}
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-2xl font-display font-bold text-foreground">
+                Painel Administrativo
+              </h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {TAB_LABELS[activeTab] || "Gestão"}
+              </p>
+            </div>
+            <Button onClick={() => navigate("/admin/crm")} size="sm" className="gap-2">
               <Mail className="h-4 w-4" />
-              <span className="hidden sm:inline">CRM</span>
-            </TabsTrigger>
-            <TabsTrigger value="benefits" className="flex items-center gap-2">
-              <Gift className="h-4 w-4" />
-              <span className="hidden sm:inline">Benefícios</span>
-            </TabsTrigger>
-            <TabsTrigger value="registration-links" className="flex items-center gap-2">
-              <Link2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Links Cadastro</span>
-            </TabsTrigger>
-            <TabsTrigger value="tickets" className="flex items-center gap-2">
-              <Headset className="h-4 w-4" />
-              <span className="hidden sm:inline">Suporte</span>
-            </TabsTrigger>
-            <TabsTrigger value="feedback" className="flex items-center gap-2">
-              <Star className="h-4 w-4" />
-              <span className="hidden sm:inline">Feedback</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="drive-import" className="flex items-center gap-2">
-              <HardDrive className="h-4 w-4" />
-              <span className="hidden sm:inline">Drive</span>
-            </TabsTrigger>
-          </TabsList>
+              CRM / Emails
+            </Button>
+          </div>
 
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {stats.map((stat) => (
+              <Card key={stat.title} className="border-0 shadow-sm">
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">{stat.title}</p>
+                      <p className="text-2xl font-bold mt-0.5">{stat.value}</p>
+                    </div>
+                    <div className={`p-2.5 rounded-xl bg-muted ${stat.color}`}>
+                      <stat.icon className="h-5 w-5" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-
-          <TabsContent value="users">
-            <AdminUserManager />
-          </TabsContent>
-
-          <TabsContent value="menu-order">
-            <AdminMenuOrderManager />
-          </TabsContent>
-
-          <TabsContent value="popups">
-            <AdminPopupsManager />
-          </TabsContent>
-
-          <TabsContent value="trade-suppliers">
-            <AdminTourOperatorsManager />
-            <div className="mt-6">
-              <AdminTradeSuppliersManager />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="materials">
-            <AdminMaterialsManager />
-          </TabsContent>
-
-          <TabsContent value="flight-blocks" className="space-y-6">
-            <AdminFlightBlocksManager />
-            <AdminAirBlocksTable />
-          </TabsContent>
-
-          <TabsContent value="agenda-events">
-            <AdminAgendaEventsManager />
-          </TabsContent>
-
-
-          <TabsContent value="trade">
-            <AdminTradeUpdatesManager />
-          </TabsContent>
-
-          <TabsContent value="suppliers">
-            <AdminSuppliersManager />
-          </TabsContent>
-
-          <TabsContent value="academy">
-            <AdminAcademyManager />
-          </TabsContent>
-
-          <TabsContent value="community">
-            <div className="space-y-6">
-              <AdminCommunityRoomsManager />
-              <AdminCommunityManager />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="mentorships">
-            <Tabs defaultValue="marketplace">
-              <TabsList className="mb-4">
-                <TabsTrigger value="marketplace">Marketplace de Cursos</TabsTrigger>
-                <TabsTrigger value="admin-mentorships">Mentorias (Admin)</TabsTrigger>
-              </TabsList>
-              <TabsContent value="marketplace">
-                <AdminMarketplaceManager />
-              </TabsContent>
-              <TabsContent value="admin-mentorships">
-                <AdminMentorshipsManager />
-              </TabsContent>
-            </Tabs>
-          </TabsContent>
-
-          <TabsContent value="playbooks">
-            <AdminPlaybookManager />
-          </TabsContent>
-
-          <TabsContent value="curadoria">
-            <AdminNewsCurationManager />
-          </TabsContent>
-
-          <TabsContent value="hotels" className="space-y-6">
-            <AdminHotelRecommendationsManager />
-            <AdminHotelsManager />
-          </TabsContent>
-
-          <TabsContent value="page-banners">
-            <AdminPageBannersManager />
-          </TabsContent>
-
-          <TabsContent value="surveys">
-            <AdminSurveyManager />
-          </TabsContent>
-
-          <TabsContent value="business-cards">
-            <AdminBusinessCardsManager />
-          </TabsContent>
-
-          <TabsContent value="crm">
-            <div className="space-y-6">
-              <AdminCrmContacts />
-              <AdminCrmTemplates />
-              <AdminCrmLogs />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="benefits">
-            <AdminBenefitsManager />
-          </TabsContent>
-
-          <TabsContent value="registration-links">
-            <AdminRegistrationLinksManager />
-          </TabsContent>
-
-          <TabsContent value="tickets">
-            <AdminTicketsManager />
-          </TabsContent>
-
-          <TabsContent value="feedback">
-            <AdminFeedbackManager />
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <AdminUserAnalytics />
-          </TabsContent>
-
-          <TabsContent value="drive-import">
-            <AdminDriveImportManager />
-          </TabsContent>
-        </Tabs>
+          {/* Tab content */}
+          <AdminContent tab={activeTab} />
+        </div>
       </div>
     </DashboardLayout>
   );
