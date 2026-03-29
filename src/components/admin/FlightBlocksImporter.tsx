@@ -52,13 +52,36 @@ interface ParsedBlock {
   operator: string;
 }
 
-function parseDate(raw: string): string {
+function parseDate(raw: any): string {
   if (!raw) return "";
-  const parts = raw.split("/");
-  if (parts.length !== 3) return "";
-  let [day, month, year] = parts;
-  if (year.length === 2) year = `20${year}`;
-  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  // Handle JS Date objects (from Excel date cells)
+  if (raw instanceof Date || (typeof raw === 'object' && raw.getFullYear)) {
+    const d = new Date(raw);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+  // Handle Excel serial date numbers
+  if (typeof raw === 'number') {
+    const epoch = new Date(1899, 11, 30);
+    const d = new Date(epoch.getTime() + raw * 86400000);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+  const str = String(raw).trim();
+  // Try DD/MM/YY or DD/MM/YYYY
+  const parts = str.split("/");
+  if (parts.length === 3) {
+    let [day, month, year] = parts;
+    if (year.length === 2) year = `20${year}`;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+  // Already ISO format
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+  return "";
 }
 
 function formatDisplayDate(isoDate: string): string {
