@@ -40,32 +40,73 @@ function AirportInput({
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [displayValue, setDisplayValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const { loaded } = useAirports();
+  const isSelectingRef = useRef(false);
+
+  // Sync display value from parent code (e.g. initial value)
+  useEffect(() => {
+    if (isSelectingRef.current) return;
+    if (value && loaded) {
+      getAirportsMap().then((map) => {
+        const info = map.get(value.toUpperCase());
+        setDisplayValue(info ? `${value.toUpperCase()} — ${info.city}` : value);
+      });
+    } else if (!value) {
+      setDisplayValue("");
+    }
+  }, [value, loaded]);
 
   useEffect(() => {
-    if (!value || value.length < 2 || !loaded) {
+    if (isSelectingRef.current) {
+      isSelectingRef.current = false;
+      return;
+    }
+    const raw = displayValue;
+    if (!raw || raw.length < 2 || !loaded) {
       setSuggestions([]);
       return;
     }
-    const lower = value.toLowerCase();
+
+    const searchTerm = raw.includes("—") ? raw.split("—")[0].trim() : raw.trim();
+    if (searchTerm.length < 2) { setSuggestions([]); return; }
+
+    const upper = searchTerm.toUpperCase();
+    const lower = searchTerm.toLowerCase();
+    const isLikelyIATA = /^[A-Za-z]{3}$/.test(searchTerm);
+
     getAirportsMap().then((map) => {
-      const results: Suggestion[] = [];
-      map.forEach((info, code) => {
-        if (
-          code.toLowerCase().includes(lower) ||
-          info.city.toLowerCase().includes(lower) ||
-          info.name.toLowerCase().includes(lower)
-        ) {
-          results.push({ code, city: info.city, name: info.name });
+      if (isLikelyIATA) {
+        if (map.has(upper)) {
+          const info = map.get(upper)!;
+          setSuggestions([{ code: upper, city: info.city, name: info.name }]);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
         }
-        if (results.length >= 8) return;
+        return;
+      }
+
+      const exact: Suggestion[] = [];
+      const partial: Suggestion[] = [];
+      map.forEach((info, code) => {
+        if (exact.length + partial.length >= 8) return;
+        const cityL = info.city.toLowerCase();
+        const nameL = info.name.toLowerCase();
+        if (cityL === lower || nameL === lower) {
+          exact.push({ code, city: info.city, name: info.name });
+        } else if (cityL.includes(lower) || nameL.includes(lower) || code.toLowerCase().includes(lower)) {
+          partial.push({ code, city: info.city, name: info.name });
+        }
       });
-      setSuggestions(results.slice(0, 8));
+      const results = [...exact, ...partial].slice(0, 8);
+      setSuggestions(results);
       setShowSuggestions(results.length > 0);
     });
-  }, [value, loaded]);
+  }, [displayValue, loaded]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -80,20 +121,36 @@ function AirportInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleSelect = (s: Suggestion) => {
+    isSelectingRef.current = true;
+    onChange(s.code);
+    setDisplayValue(`${s.code} — ${s.city}`);
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
+
   return (
     <div className="relative">
       <Icon className={cn("absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2", iconColor || "text-[hsl(var(--section-flights))]")} />
       <Input
         ref={inputRef}
         placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+        value={displayValue}
+        onChange={(e) => {
+          setDisplayValue(e.target.value);
+          if (!e.target.value) onChange("");
+        }}
+        onFocus={() => {
+          if (displayValue.includes("—")) {
+            setTimeout(() => inputRef.current?.select(), 0);
+          }
+          if (suggestions.length > 0) setShowSuggestions(true);
+        }}
         className="pl-10 pr-8"
       />
-      {value && (
+      {displayValue && (
         <button
-          onClick={() => onChange("")}
+          onClick={() => { onChange(""); setDisplayValue(""); setSuggestions([]); }}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
         >
           <X className="h-4 w-4" />
@@ -107,10 +164,7 @@ function AirportInput({
           {suggestions.map((s) => (
             <button
               key={s.code}
-              onClick={() => {
-                onChange(s.code);
-                setShowSuggestions(false);
-              }}
+              onClick={() => handleSelect(s)}
               className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-2 text-sm"
             >
               <span className="font-mono font-semibold text-[hsl(var(--section-flights))]">{s.code}</span>
