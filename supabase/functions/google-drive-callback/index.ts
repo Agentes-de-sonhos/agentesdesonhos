@@ -9,28 +9,31 @@ Deno.serve(async (req) => {
     const errorDescription = url.searchParams.get("error_description");
 
     console.log("=== GOOGLE DRIVE CALLBACK START ===");
-    console.log("Full URL:", req.url);
     console.log("Code present:", !!code);
     console.log("State present:", !!stateParam);
     console.log("Error param:", error);
-    console.log("Error description:", errorDescription);
 
+    // Google returned an error (user denied, etc.)
     if (error) {
-      const msg = `Google OAuth Error: ${error} - ${errorDescription || 'sem descrição'}`;
+      const msg = `Google OAuth Error: ${error} - ${errorDescription || "sem descrição"}`;
       console.error(msg);
-      return new Response(redirectHtml(msg, false), {
-        headers: { "Content-Type": "text/html" },
-      });
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
     }
 
-    if (!code || !stateParam) {
-      const msg = `Parâmetros inválidos. code=${!!code}, state=${!!stateParam}`;
+    // Missing code or state
+    if (!code) {
+      const msg = "Authorization code não recebido no callback";
       console.error(msg);
-      return new Response(redirectHtml(msg, false), {
-        headers: { "Content-Type": "text/html" },
-      });
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
     }
 
+    if (!stateParam) {
+      const msg = "Parâmetro state não recebido no callback";
+      console.error(msg);
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
+    }
+
+    // Decode state to get user_id
     let userId: string;
     try {
       const state = JSON.parse(atob(stateParam));
@@ -39,9 +42,7 @@ Deno.serve(async (req) => {
     } catch (e) {
       const msg = `Erro ao decodificar state: ${e.message}`;
       console.error(msg);
-      return new Response(redirectHtml(msg, false), {
-        headers: { "Content-Type": "text/html" },
-      });
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
     }
 
     if (!userId) {
@@ -50,43 +51,45 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Read secrets
     const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
     const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    // Hardcode exact redirect_uri to match Google Cloud Console config
-    const redirectUri = "https://mlwwpckahhfsixplxwif.supabase.co/functions/v1/google-drive-callback";
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    console.log("=== TOKEN EXCHANGE CONFIG ===");
-    console.log("Client ID present:", !!clientId);
-    console.log("Client ID value:", clientId ? clientId.substring(0, 20) + "..." : "MISSING");
-    console.log("Client Secret present:", !!clientSecret);
-    console.log("Redirect URI:", redirectUri);
-    console.log("Code length:", code.length);
+    console.log("=== SECRETS CHECK ===");
+    console.log("GOOGLE_CLIENT_ID present:", !!clientId);
+    console.log("GOOGLE_CLIENT_SECRET present:", !!clientSecret);
+    console.log("SUPABASE_URL present:", !!supabaseUrl);
+    console.log("SERVICE_ROLE_KEY present:", !!serviceRoleKey);
 
     if (!clientId || !clientSecret) {
-      const msg = `Credenciais ausentes. CLIENT_ID=${!!clientId}, CLIENT_SECRET=${!!clientSecret}`;
+      const msg = `GOOGLE_CLIENT_ID ou GOOGLE_CLIENT_SECRET não configurado. CLIENT_ID=${!!clientId}, CLIENT_SECRET=${!!clientSecret}`;
       console.error(msg);
-      return new Response(redirectHtml(msg, false), {
-        headers: { "Content-Type": "text/html" },
-      });
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
     }
 
+    if (!supabaseUrl || !serviceRoleKey) {
+      const msg = "SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurado";
+      console.error(msg);
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
+    }
+
+    // Token exchange - MUST use exact redirect_uri
+    const redirectUri = "https://mlwwpckahhfsixplxwif.supabase.co/functions/v1/google-drive-callback";
+
     const tokenBody = new URLSearchParams({
-      code,
+      code: code,
       client_id: clientId,
       client_secret: clientSecret,
       redirect_uri: redirectUri,
       grant_type: "authorization_code",
     });
 
-    console.log("=== SENDING TOKEN REQUEST ===");
-    console.log("Token endpoint: https://oauth2.googleapis.com/token");
-    console.log("Request body params:", {
-      code: code.substring(0, 20) + "...",
-      client_id: clientId.substring(0, 20) + "...",
-      redirect_uri: redirectUri,
-      grant_type: "authorization_code",
-    });
+    console.log("=== TOKEN EXCHANGE REQUEST ===");
+    console.log("Endpoint: https://oauth2.googleapis.com/token");
+    console.log("redirect_uri:", redirectUri);
+    console.log("code length:", code.length);
 
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -95,7 +98,7 @@ Deno.serve(async (req) => {
     });
 
     const tokenText = await tokenRes.text();
-    console.log("=== TOKEN RESPONSE ===");
+    console.log("=== TOKEN EXCHANGE RESPONSE ===");
     console.log("HTTP Status:", tokenRes.status);
     console.log("Response body:", tokenText);
 
@@ -105,18 +108,15 @@ Deno.serve(async (req) => {
     } catch (e) {
       const msg = `Resposta inválida do Google (não é JSON). Status: ${tokenRes.status}. Body: ${tokenText.substring(0, 500)}`;
       console.error(msg);
-      return new Response(redirectHtml(msg, false), {
-        headers: { "Content-Type": "text/html" },
-      });
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
     }
 
     if (!tokenRes.ok || !tokenData.access_token) {
-      const errorDetail = tokenData.error_description || tokenData.error || "Erro desconhecido";
-      const msg = `Falha na troca do token (HTTP ${tokenRes.status}): ${errorDetail}. Detalhes: ${JSON.stringify(tokenData)}`;
-      console.error(msg);
-      return new Response(redirectHtml(msg, false), {
-        headers: { "Content-Type": "text/html" },
-      });
+      const errorCode = tokenData.error || "unknown_error";
+      const errorDetail = tokenData.error_description || "sem detalhes";
+      const msg = `Erro ao conectar: ${errorCode} — ${errorDetail} (HTTP ${tokenRes.status})`;
+      console.error("Token exchange failed:", JSON.stringify(tokenData));
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
     }
 
     console.log("=== TOKEN SUCCESS ===");
@@ -132,20 +132,19 @@ Deno.serve(async (req) => {
       });
       const userInfoText = await userInfoRes.text();
       console.log("UserInfo status:", userInfoRes.status);
-      console.log("UserInfo body:", userInfoText);
       if (userInfoRes.ok) {
         const userInfo = JSON.parse(userInfoText);
         googleEmail = userInfo.email || null;
+        console.log("Google email:", googleEmail);
+      } else {
+        console.warn("UserInfo fetch failed:", userInfoText);
       }
     } catch (e) {
       console.warn("Could not fetch Google user info:", e.message);
     }
 
-    const supabase = createClient(
-      supabaseUrl!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
+    // Save tokens
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
 
     const { error: upsertError } = await supabase
@@ -160,11 +159,9 @@ Deno.serve(async (req) => {
       }, { onConflict: "user_id" });
 
     if (upsertError) {
-      const msg = `Erro ao salvar no banco: ${JSON.stringify(upsertError)}`;
+      const msg = `Erro ao salvar tokens no banco: ${upsertError.message || JSON.stringify(upsertError)}`;
       console.error(msg);
-      return new Response(redirectHtml(msg, false), {
-        headers: { "Content-Type": "text/html" },
-      });
+      return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
     }
 
     console.log("=== SUCCESS - Tokens saved ===");
@@ -174,9 +171,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     const msg = `Erro inesperado: ${err.message}\nStack: ${err.stack}`;
     console.error(msg);
-    return new Response(redirectHtml(msg, false), {
-      headers: { "Content-Type": "text/html" },
-    });
+    return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
   }
 });
 
