@@ -1,12 +1,25 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCruises } from "@/hooks/useCruises";
+import { useCruiseReviews } from "@/hooks/useCruiseReviews";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { OperatorHero } from "@/components/operator/OperatorHero";
+import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
+import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
+import { ContactCards } from "@/components/operator/ContactCards";
+import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
+import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
+import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
+import { toast } from "sonner";
 import {
-  Ship, ArrowLeft, Globe, MapPin, Users, Anchor, Waves, Compass,
-  ExternalLink, Loader2, Info
+  Ship, ArrowLeft, MapPin, Users, Anchor, Waves, Compass,
+  ShoppingCart, Phone, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,18 +38,36 @@ const TIPO_META: Record<string, { icon: typeof Ship; color: string; label: strin
 export default function CruiseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const { data: companies = [], isLoading } = useCruises();
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const company = companies.find((c) => c.id === id);
-  const tipoMeta = company ? TIPO_META[company.tipo] : null;
-  const TipoIcon = tipoMeta?.icon || Ship;
-  const isLuxo = company?.categoria === "Luxo";
+
+  const {
+    reviews, isLoading: reviewsLoading, userReview,
+    averageRating, totalReviews, submitReview, deleteReview,
+  } = useCruiseReviews(id || "");
+
+  const handleReviewClick = () => {
+    if (!user) { toast.error("Você precisa estar logado para avaliar"); return; }
+    setReviewModalOpen(true);
+  };
 
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="space-y-6 max-w-6xl mx-auto">
+          <Skeleton className="h-10 w-32 rounded-xl" />
+          <Skeleton className="h-44 w-full rounded-2xl" />
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-48 w-full rounded-2xl" />
+              <Skeleton className="h-48 w-full rounded-2xl" />
+            </div>
+            <Skeleton className="h-72 w-full rounded-2xl" />
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -45,101 +76,101 @@ export default function CruiseDetailPage() {
   if (!company) {
     return (
       <DashboardLayout>
-        <div className="py-24 text-center space-y-4">
-          <Ship className="h-16 w-16 mx-auto text-muted-foreground/30" />
-          <p className="text-muted-foreground text-lg">Companhia não encontrada</p>
-          <Button variant="outline" onClick={() => navigate("/mapa-turismo/cruzeiros")}>
-            <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
+        <div className="text-center py-20">
+          <div className="h-20 w-20 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-6">
+            <Ship className="h-10 w-10 text-muted-foreground/40" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground">Companhia não encontrada</h2>
+          <p className="text-muted-foreground mt-2 mb-8">A companhia que você está procurando não existe ou foi removida.</p>
+          <Button variant="outline" className="rounded-xl" onClick={() => navigate("/mapa-turismo/cruzeiros")}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
           </Button>
         </div>
       </DashboardLayout>
     );
   }
 
+  const tipoMeta = TIPO_META[company.tipo];
+  const TipoIcon = tipoMeta?.icon || Ship;
+  const isLuxo = company.categoria === "Luxo";
+
+  // Build social links for sidebar
+  const socialLinks: Record<string, string> = {};
+  if (company.website) socialLinks.website = company.website;
+  if (company.social_links && typeof company.social_links === "object") {
+    Object.entries(company.social_links).forEach(([k, v]) => {
+      if (v) socialLinks[k] = String(v);
+    });
+  }
+
+  // Build category label with tipo info
+  const categoryLabel = `Companhia Marítima • ${tipoMeta?.label || company.tipo} • ${company.categoria === "Contemporaneo" ? "Contemporâneo" : company.categoria}`;
+
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-        {/* Back */}
-        <Button variant="ghost" size="sm" onClick={() => navigate("/mapa-turismo/cruzeiros")} className="gap-1.5 text-muted-foreground">
-          <ArrowLeft className="h-4 w-4" /> Companhias Marítimas
+      <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+        <Button variant="ghost" onClick={() => navigate("/mapa-turismo/cruzeiros")} className="rounded-xl text-muted-foreground hover:text-foreground -ml-2">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Companhias Marítimas
         </Button>
 
-        {/* Hero Header */}
-        <Card className={cn(
-          "border-0 overflow-hidden",
-          isLuxo
-            ? "bg-gradient-to-br from-amber-50 via-card to-card dark:from-amber-950/40 dark:via-card ring-1 ring-amber-200/60 dark:ring-amber-800/40"
-            : "bg-card ring-1 ring-border/40"
-        )}>
-          {isLuxo && <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />}
-          <CardContent className="p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row items-start gap-5">
-              {/* Logo */}
-              <div className={cn(
-                "h-20 w-20 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 ring-1",
-                isLuxo
-                  ? "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/60 dark:to-amber-950 ring-amber-200/50"
-                  : "bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-cyan-950 dark:to-cyan-900 ring-border/50"
-              )}>
-                {company.logo_url ? (
-                  <img src={company.logo_url} alt={company.nome} className="h-full w-full object-contain p-2" />
-                ) : (
-                  <Ship className={cn("h-10 w-10", isLuxo ? "text-amber-600 dark:text-amber-400" : "text-cyan-600 dark:text-cyan-400")} />
-                )}
-              </div>
+        {/* Hero - same pattern as operators */}
+        <OperatorHero
+          name={company.nome}
+          category={categoryLabel}
+          logoUrl={company.logo_url}
+          averageRating={averageRating}
+          totalReviews={totalReviews}
+          onReviewClick={handleReviewClick}
+        />
 
-              <div className="flex-1 min-w-0 space-y-3">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{company.nome}</h1>
-                  {company.descricao_curta && (
-                    <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{company.descricao_curta}</p>
-                  )}
-                </div>
+        {/* Cruise-specific badges */}
+        <div className="flex flex-wrap gap-2 -mt-4">
+          <Badge className={cn("gap-1.5 px-3 py-1.5 text-xs font-semibold border", CATEGORIA_COLORS[company.categoria] || "")}>
+            {isLuxo && <span>✦</span>}
+            {company.categoria === "Contemporaneo" ? "Contemporâneo" : company.categoria}
+          </Badge>
+          <Badge variant="outline" className="gap-1.5 px-3 py-1.5 text-xs font-medium">
+            <TipoIcon className={cn("h-3.5 w-3.5", tipoMeta?.color)} />
+            {tipoMeta?.label || company.tipo}
+          </Badge>
+          {company.subtipo && (
+            <Badge variant="outline" className="px-3 py-1.5 text-xs">{company.subtipo}</Badge>
+          )}
+        </div>
 
-                <div className="flex flex-wrap gap-2">
-                  <Badge className={cn("gap-1.5 px-3 py-1 text-xs font-semibold border", CATEGORIA_COLORS[company.categoria] || "")}>
-                    {isLuxo && <span>✦</span>}
-                    {company.categoria === "Contemporaneo" ? "Contemporâneo" : company.categoria}
-                  </Badge>
-                  <Badge variant="outline" className="gap-1.5 px-3 py-1 text-xs font-medium">
-                    <TipoIcon className={cn("h-3.5 w-3.5", tipoMeta?.color)} />
-                    {tipoMeta?.label || company.tipo}
-                  </Badge>
-                  {company.subtipo && (
-                    <Badge variant="outline" className="px-3 py-1 text-xs">{company.subtipo}</Badge>
-                  )}
-                </div>
+        <div className="grid gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            {/* About / Description */}
+            {company.descricao_curta && (
+              <OperatorInfoCard icon={Ship} title="Sobre a Companhia">
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{company.descricao_curta}</p>
+              </OperatorInfoCard>
+            )}
 
-                {company.website && (
-                  <a
-                    href={company.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline mt-1"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" /> {company.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
-                  </a>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            {/* How to sell */}
+            {company.how_to_sell && (
+              <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{company.how_to_sell}</p>
+              </OperatorInfoCard>
+            )}
 
-        {/* Sections */}
-        <div className="grid gap-5 sm:grid-cols-2">
-          {/* Regiões */}
-          <Card className="border-0 ring-1 ring-border/40 bg-card">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <MapPin className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-foreground text-sm">Regiões Atendidas</h2>
-                  <p className="text-xs text-muted-foreground">{company.regioes.length} {company.regioes.length === 1 ? "região" : "regiões"}</p>
-                </div>
-              </div>
-              {company.regioes.length > 0 ? (
+            {/* Sales channels */}
+            {company.sales_channels && (
+              <OperatorInfoCard icon={Users} title="Canais de Venda">
+                <SalesChannelCards salesChannels={company.sales_channels} />
+              </OperatorInfoCard>
+            )}
+
+            {/* Contacts */}
+            {company.commercial_contacts && (
+              <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
+                <ContactCards contacts={company.commercial_contacts} />
+              </OperatorInfoCard>
+            )}
+
+            {/* Regions */}
+            {company.regioes.length > 0 && (
+              <OperatorInfoCard icon={MapPin} title="Regiões Atendidas">
                 <div className="flex flex-wrap gap-2">
                   {company.regioes.map((r) => (
                     <Badge key={r.id} variant="outline" className="px-3 py-1.5 text-xs font-medium bg-muted/50 hover:bg-muted transition-colors">
@@ -148,25 +179,12 @@ export default function CruiseDetailPage() {
                     </Badge>
                   ))}
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Nenhuma região cadastrada</p>
-              )}
-            </CardContent>
-          </Card>
+              </OperatorInfoCard>
+            )}
 
-          {/* Perfis */}
-          <Card className="border-0 ring-1 ring-border/40 bg-card">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-accent/50 flex items-center justify-center">
-                  <Users className="h-4 w-4 text-accent-foreground" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-foreground text-sm">Perfil do Viajante</h2>
-                  <p className="text-xs text-muted-foreground">{company.perfis.length} {company.perfis.length === 1 ? "perfil" : "perfis"}</p>
-                </div>
-              </div>
-              {company.perfis.length > 0 ? (
+            {/* Client profiles */}
+            {company.perfis.length > 0 && (
+              <OperatorInfoCard icon={Users} title="Perfil do Viajante" iconColor="text-violet-600">
                 <div className="flex flex-wrap gap-2">
                   {company.perfis.map((p) => (
                     <span
@@ -177,26 +195,56 @@ export default function CruiseDetailPage() {
                     </span>
                   ))}
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Nenhum perfil cadastrado</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </OperatorInfoCard>
+            )}
 
-        {/* Info tip */}
-        {company.descricao_curta && (
-          <Card className="border-0 ring-1 ring-border/40 bg-muted/30">
-            <CardContent className="p-5 flex gap-3">
-              <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-1">Sobre a companhia</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{company.descricao_curta}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            {/* Reviews list */}
+            <OperatorReviewsList
+              reviews={reviews}
+              isLoading={reviewsLoading}
+              isAdmin={isAdmin}
+              onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })}
+              isDeleting={deleteReview.isPending}
+            />
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-5 lg:sticky lg:top-6">
+            {/* Specialties */}
+            {company.specialties && (
+              <OperatorSidebar operator={{ specialties: company.specialties, category: "", social_links: null }} />
+            )}
+
+            {/* Social links */}
+            {Object.keys(socialLinks).length > 0 && (
+              <OperatorSidebar operator={{
+                specialties: null,
+                category: "",
+                social_links: socialLinks,
+                website: company.website,
+              }} />
+            )}
+
+            {/* Company info */}
+            <OperatorSidebar operator={{
+              specialties: null,
+              social_links: null,
+              category: "Companhia Marítima",
+            }} />
+          </div>
+        </div>
       </div>
+
+      <OperatorReviewModal
+        open={reviewModalOpen}
+        onOpenChange={setReviewModalOpen}
+        onSubmit={(data: any) => {
+          submitReview.mutate(data, { onSuccess: () => setReviewModalOpen(false) });
+        }}
+        isSubmitting={submitReview.isPending}
+        existingReview={userReview}
+        operatorName={company.nome}
+      />
     </DashboardLayout>
   );
 }
