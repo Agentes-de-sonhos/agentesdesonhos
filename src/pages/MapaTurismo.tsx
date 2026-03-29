@@ -110,8 +110,12 @@ export default function MapaTurismo() {
     setSearchParams(params);
   };
 
-  const handleCategoryChange = (cat: string) => {
-    const newCat = categoryFilter === cat ? "all" : cat;
+  const handleCategoryChange = (cat: CategoryDef) => {
+    if (cat.link) {
+      navigate(cat.link);
+      return;
+    }
+    const newCat = categoryFilter === cat.category ? "all" : cat.category;
     setCategoryFilter(newCat);
     updateUrlParams(newCat, selectedSpecialties);
   };
