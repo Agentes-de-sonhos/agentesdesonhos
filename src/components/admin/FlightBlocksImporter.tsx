@@ -69,19 +69,30 @@ function formatDisplayDate(isoDate: string): string {
 }
 
 // ===== EXCEL FORMAT PARSER =====
-// Standard mapping (A-O):
-// A: Origem Ida | B: Data Ida | C: Hora Saída | D: Destino Ida
-// E: Data Chegada | F: Hora Chegada | G: Origem Volta | H: Data Volta
-// I: Hora Saída Volta | J: Destino Volta | K: Data Chegada Volta | L: Hora Chegada Volta
-// M: Cia Aérea | N: Disp | O: Operadora
+// Supports multiple formats:
+// 13-col: A-M (no Cia Aérea, no Disp) → col 12 = Operadora
+// 14-col: A-N (has Cia Aérea) → col 12 = Cia, col 13 = Operadora
+// 15-col: A-O (full) → col 12 = Cia, col 13 = Disp, col 14 = Operadora
 
 function extractAirportCode(raw: string): string {
   if (!raw) return "";
   const str = raw.trim().toUpperCase();
-  // Extract IATA code: first 3 uppercase letters, or text before " ("
   const match = str.match(/^([A-Z]{3})\b/);
   if (match) return match[1];
   return str.split(/[\s(]/)[0] || str;
+}
+
+function detectFormat(header: any[]): "13" | "14" | "15" {
+  const colCount = header.filter((c) => c != null && String(c).trim() !== "").length;
+  // Check if any header contains "cia"
+  const hasCia = header.some((c) => String(c || "").toLowerCase().includes("cia"));
+  // Check if any header contains "disp"
+  const hasDisp = header.some((c) => String(c || "").toLowerCase().includes("disp"));
+  if (hasCia && hasDisp) return "15";
+  if (hasCia) return "14";
+  if (colCount >= 15) return "15";
+  if (colCount >= 14) return "14";
+  return "13";
 }
 
 function parseExcelRows(rows: any[][]): ParsedBlock[] {
@@ -92,38 +103,41 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
     if (firstCell.includes("origem") || firstCell.includes("partida") || firstCell.includes("coluna")) startIdx = 1;
   }
 
+  const header = rows[0] || [];
+  const fmt = detectFormat(header);
+
   for (let i = startIdx; i < rows.length; i++) {
     const r = rows[i];
     if (!r || r.length < 4) continue;
 
-    // A(0): Origem Ida
     const origin = extractAirportCode(String(r[0] || ""));
-    // B(1): Data Ida
     const dataIda = String(r[1] || "").trim();
-    // C(2): Hora Saída
     const horaSaida = String(r[2] || "").trim().replace(/h$/i, "");
-    // D(3): Destino Ida
     const destination = extractAirportCode(String(r[3] || ""));
-    // E(4): Data Chegada Ida
     const dataChegadaIda = String(r[4] || "").trim();
-    // F(5): Hora Chegada Ida
     const horaChegadaIda = String(r[5] || "").trim().replace(/h$/i, "");
-    // G(6): Origem Volta (ignored, it's the return origin)
-    // H(7): Data Volta
     const dataVolta = String(r[7] || "").trim();
-    // I(8): Hora Saída Volta
     const horaSaidaVolta = String(r[8] || "").trim().replace(/h$/i, "");
-    // J(9): Destino Volta (ignored, same as origin)
-    // K(10): Data Chegada Volta
     const dataChegadaVolta = String(r[10] || "").trim();
-    // L(11): Hora Chegada Volta
     const horaChegadaVolta = String(r[11] || "").trim().replace(/h$/i, "");
-    // M(12): Cia Aérea
-    const airline = String(r[12] || "").trim().toUpperCase() || "NÃO INFORMADO";
-    // N(13): Disponibilidade
-    const seats = String(r[13] || "0").trim();
-    // O(14): Operadora
-    const operadora = String(r[14] || "").trim().toUpperCase();
+
+    let airline = "NÃO INFORMADO";
+    let seats = "0";
+    let operadora = "";
+
+    if (fmt === "15") {
+      // M(12)=Cia, N(13)=Disp, O(14)=Operadora
+      airline = String(r[12] || "").trim().toUpperCase() || "NÃO INFORMADO";
+      seats = String(r[13] || "0").trim();
+      operadora = String(r[14] || "").trim().toUpperCase();
+    } else if (fmt === "14") {
+      // M(12)=Cia, N(13)=Operadora
+      airline = String(r[12] || "").trim().toUpperCase() || "NÃO INFORMADO";
+      operadora = String(r[13] || "").trim().toUpperCase();
+    } else {
+      // M(12)=Operadora only
+      operadora = String(r[12] || "").trim().toUpperCase();
+    }
 
     if (!origin || !destination) continue;
 
