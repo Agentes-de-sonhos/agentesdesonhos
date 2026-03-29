@@ -55,11 +55,12 @@ Deno.serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
-      .single();
+      .eq("role", "admin");
 
     console.log("Role data:", roleData, "Role error:", roleError?.message);
 
-    if (roleError || roleData?.role !== "admin") {
+    const isAdmin = !roleError && roleData && roleData.length > 0;
+    if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Acesso negado: apenas administradores" }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
