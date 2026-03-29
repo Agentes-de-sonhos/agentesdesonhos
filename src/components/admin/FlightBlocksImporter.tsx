@@ -68,47 +68,63 @@ function formatDisplayDate(isoDate: string): string {
   return `${parts[2]}/${parts[1]}`;
 }
 
-// ===== EXCEL FORMAT PARSER (13 or 14 columns) =====
+// ===== EXCEL FORMAT PARSER =====
+// Standard mapping (A-O):
+// A: Origem Ida | B: Data Ida | C: Hora Saída | D: Destino Ida
+// E: Data Chegada | F: Hora Chegada | G: Origem Volta | H: Data Volta
+// I: Hora Saída Volta | J: Destino Volta | K: Data Chegada Volta | L: Hora Chegada Volta
+// M: Cia Aérea | N: Disp | O: Operadora
+
+function extractAirportCode(raw: string): string {
+  if (!raw) return "";
+  const str = raw.trim().toUpperCase();
+  // Extract IATA code: first 3 uppercase letters, or text before " ("
+  const match = str.match(/^([A-Z]{3})\b/);
+  if (match) return match[1];
+  return str.split(/[\s(]/)[0] || str;
+}
 
 function parseExcelRows(rows: any[][]): ParsedBlock[] {
   const blocks: ParsedBlock[] = [];
   let startIdx = 0;
   if (rows.length > 0) {
     const firstCell = String(rows[0][0] || "").toLowerCase();
-    if (firstCell.includes("origem") || firstCell.includes("partida")) startIdx = 1;
+    if (firstCell.includes("origem") || firstCell.includes("partida") || firstCell.includes("coluna")) startIdx = 1;
   }
-
-  const header = rows[0] || [];
-  const hasAirlineCol = header.length >= 14 &&
-    String(header[12] || "").toLowerCase().includes("cia");
 
   for (let i = startIdx; i < rows.length; i++) {
     const r = rows[i];
     if (!r || r.length < 4) continue;
 
-    const origin = String(r[0] || "").trim().toUpperCase();
+    // A(0): Origem Ida
+    const origin = extractAirportCode(String(r[0] || ""));
+    // B(1): Data Ida
     const dataIda = String(r[1] || "").trim();
+    // C(2): Hora Saída
     const horaSaida = String(r[2] || "").trim().replace(/h$/i, "");
-    const destination = String(r[3] || "").trim().toUpperCase();
-    const dataChegada = String(r[4] || "").trim();
-    const horaChegada = String(r[5] || "").trim().replace(/h$/i, "");
+    // D(3): Destino Ida
+    const destination = extractAirportCode(String(r[3] || ""));
+    // E(4): Data Chegada Ida
+    const dataChegadaIda = String(r[4] || "").trim();
+    // F(5): Hora Chegada Ida
+    const horaChegadaIda = String(r[5] || "").trim().replace(/h$/i, "");
+    // G(6): Origem Volta (ignored, it's the return origin)
+    // H(7): Data Volta
     const dataVolta = String(r[7] || "").trim();
+    // I(8): Hora Saída Volta
     const horaSaidaVolta = String(r[8] || "").trim().replace(/h$/i, "");
+    // J(9): Destino Volta (ignored, same as origin)
+    // K(10): Data Chegada Volta
     const dataChegadaVolta = String(r[10] || "").trim();
+    // L(11): Hora Chegada Volta
     const horaChegadaVolta = String(r[11] || "").trim().replace(/h$/i, "");
+    // M(12): Cia Aérea
+    const airline = String(r[12] || "").trim().toUpperCase() || "NÃO INFORMADO";
+    // N(13): Disponibilidade
+    const seats = String(r[13] || "0").trim();
+    // O(14): Operadora
+    const operadora = String(r[14] || "").trim().toUpperCase();
 
-    let airline = "";
-    let operadora = "";
-
-    if (hasAirlineCol) {
-      airline = String(r[12] || "").trim().toUpperCase();
-      operadora = String(r[13] || "").trim().toUpperCase();
-    } else {
-      operadora = String(r[12] || "").trim().toUpperCase();
-      airline = "";
-    }
-
-    if (!airline) airline = "NÃO INFORMADO";
     if (!origin || !destination) continue;
 
     blocks.push({
@@ -116,8 +132,8 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
       destination,
       departure_date: parseDate(dataIda),
       departure_time: horaSaida,
-      arrival_date: parseDate(dataChegada),
-      arrival_time: horaChegada,
+      arrival_date: parseDate(dataChegadaIda),
+      arrival_time: horaChegadaIda,
       return_departure_date: parseDate(dataVolta),
       return_departure_time: horaSaidaVolta,
       return_arrival_date: parseDate(dataChegadaVolta),
@@ -128,7 +144,7 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
       currency: "BRL",
       price_text: "",
       deadline: "",
-      seats_available: "0",
+      seats_available: seats,
       operator: operadora,
     });
   }
