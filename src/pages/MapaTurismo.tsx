@@ -48,6 +48,7 @@ interface CategoryDef {
   color: string;
   activeColor: string;
   iconColor: string;
+  link?: string;
 }
 
 const CATEGORIES_DATA: CategoryDef[] = [
