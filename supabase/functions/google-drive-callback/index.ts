@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: tokenBody,
+      body: tokenBody.toString(),
     });
 
     const tokenText = await tokenRes.text();
