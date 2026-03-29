@@ -54,9 +54,14 @@ export default function BloqueiosAereos() {
     );
   };
 
+  const parseLocalDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const matchesDateRange = (departureDate: string) => {
     if (!dateFrom && !dateTo) return true;
-    const dep = new Date(departureDate + "T00:00:00");
+    const dep = parseLocalDate(departureDate);
     if (dateFrom && dep < dateFrom) return false;
     if (dateTo && dep > dateTo) return false;
     return true;
@@ -123,7 +128,11 @@ export default function BloqueiosAereos() {
 
   const initialBlocks = useMemo(() => {
     if (hasSearched || !blocks) return [];
-    return [...blocks].sort((a, b) => a.departure_date.localeCompare(b.departure_date));
+    return [...blocks].sort((a, b) => {
+      const dateCmp = a.departure_date.localeCompare(b.departure_date);
+      if (dateCmp !== 0) return dateCmp;
+      return (a.departure_time || "").localeCompare(b.departure_time || "");
+    });
   }, [blocks, hasSearched]);
 
   return (
