@@ -111,10 +111,6 @@ export default function MapaTurismo() {
   };
 
   const handleCategoryChange = (cat: CategoryDef) => {
-    if (cat.link) {
-      navigate(cat.link);
-      return;
-    }
     const newCat = categoryFilter === cat.category ? "all" : cat.category;
     setCategoryFilter(newCat);
     updateUrlParams(newCat, selectedSpecialties);
