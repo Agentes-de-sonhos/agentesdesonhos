@@ -279,6 +279,52 @@ export function AdminUserAnalytics() {
         </Card>
       )}
 
+      {/* Online Users List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wifi className="h-5 w-5 text-green-500" />
+            Usuários Online Agora
+            <Badge variant="secondary" className="ml-2">{onlineUsers}</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!onlineUsersData || onlineUsersData.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground text-sm">
+              Nenhum usuário online no momento.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {onlineUsersData.map((u) => (
+                <div
+                  key={u.user_id}
+                  className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="relative">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={u.avatar_url || ""} />
+                      <AvatarFallback className="text-xs">
+                        {u.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm truncate">{u.name}</p>
+                    {u.agency_name && (
+                      <p className="text-xs text-muted-foreground truncate">{u.agency_name}</p>
+                    )}
+                    {u.city && (
+                      <p className="text-xs text-muted-foreground/70 truncate">{u.city}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Filters & Ranking Table */}
       <Card>
         <CardHeader>
