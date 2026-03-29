@@ -181,8 +181,25 @@ export default function MapaTurismo() {
         : [],
       _source: "operator" as const,
     }));
-    return [...fromSuppliers, ...fromOperators];
-  }, [suppliers, tourOperators]);
+    const fromCruises = (cruiseCompanies || []).map((cm: any) => {
+      const specs: string[] = [];
+      if (cm.tipo) specs.push(cm.tipo);
+      if (cm.categoria) specs.push(cm.categoria);
+      if (cm.subtipo) specs.push(cm.subtipo);
+      return {
+        id: cm.id,
+        name: cm.nome,
+        category: "Cruzeiros",
+        logo_url: cm.logo_url || null,
+        website_url: cm.website,
+        instagram_url: null,
+        sales_channel: cm.sales_channels,
+        specialties: specs.map((s, i) => ({ id: `cruise-${i}`, name: s })),
+        _source: "cruise" as const,
+      };
+    });
+    return [...fromSuppliers, ...fromOperators, ...fromCruises];
+  }, [suppliers, tourOperators, cruiseCompanies]);
 
   // Merge DB specialties + operator specialties for complete filter list
   const allSpecialties = useMemo(() => {
