@@ -134,14 +134,14 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
     if (!r || r.length < 4) continue;
 
     const origin = extractAirportCode(String(r[0] || ""));
-    const dataIda = String(r[1] || "").trim();
+    const rawDataIda = r[1];
     const horaSaida = String(r[2] || "").trim().replace(/h$/i, "");
     const destination = extractAirportCode(String(r[3] || ""));
-    const dataChegadaIda = String(r[4] || "").trim();
+    const rawDataChegadaIda = r[4];
     const horaChegadaIda = String(r[5] || "").trim().replace(/h$/i, "");
-    const dataVolta = String(r[7] || "").trim();
+    const rawDataVolta = r[7];
     const horaSaidaVolta = String(r[8] || "").trim().replace(/h$/i, "");
-    const dataChegadaVolta = String(r[10] || "").trim();
+    const rawDataChegadaVolta = r[10];
     const horaChegadaVolta = String(r[11] || "").trim().replace(/h$/i, "");
 
     let airline = "NÃO INFORMADO";
