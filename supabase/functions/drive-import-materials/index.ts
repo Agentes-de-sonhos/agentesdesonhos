@@ -213,14 +213,15 @@ Deno.serve(async (req) => {
           message: `Operadora "${operatorName}" não encontrada no sistema.`,
         });
 
-        await supabase.from("drive_import_logs").insert({
+        const { error: logErr1 } = await supabase.from("drive_import_logs").insert({
           drive_file_id: `folder_${opFolder.id}`,
           drive_file_name: operatorName,
           drive_folder_name: operatorName,
           supplier_name: operatorName,
           status: "error",
           error_message: `Operadora "${operatorName}" não cadastrada no sistema.`,
-        }).catch((e: any) => console.error("Log insert error:", e));
+        });
+        if (logErr1) console.error("Log insert error:", logErr1);
 
         continue;
       }
@@ -299,7 +300,7 @@ async function processFile(
   const ext = SUPPORTED_MIME_TYPES[file.mimeType];
   if (!ext) {
     results.skipped_unsupported++;
-    await supabase.from("drive_import_logs").insert({
+    const { error: logErr2 } = await supabase.from("drive_import_logs").insert({
       drive_file_id: file.id,
       drive_file_name: file.name,
       drive_folder_name: folderName,
@@ -308,7 +309,8 @@ async function processFile(
       category,
       status: "skipped",
       error_message: `Tipo não suportado: ${file.mimeType}`,
-    }).catch(() => {});
+    });
+    if (logErr2) console.error("Log insert error:", logErr2);
     return;
   }
 
@@ -377,7 +379,7 @@ async function processFile(
     console.error(`Error importing ${file.name}:`, err);
     results.errors++;
 
-    await supabase.from("drive_import_logs").insert({
+    const { error: logErr3 } = await supabase.from("drive_import_logs").insert({
       drive_file_id: file.id,
       drive_file_name: file.name,
       drive_folder_name: folderName,
@@ -386,6 +388,7 @@ async function processFile(
       category,
       status: "error",
       error_message: err instanceof Error ? err.message : "Erro desconhecido",
-    }).catch(() => {});
+    });
+    if (logErr3) console.error("Log insert error:", logErr3);
   }
 }
