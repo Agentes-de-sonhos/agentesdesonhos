@@ -11,40 +11,68 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log("=== GOOGLE DRIVE AUTH START ===");
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      console.error("No valid Authorization header");
+      return new Response(JSON.stringify({ error: "Unauthorized: token não fornecido" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    console.log("SUPABASE_URL present:", !!supabaseUrl);
+    console.log("SUPABASE_ANON_KEY present:", !!supabaseAnonKey);
+    console.log("SERVICE_ROLE_KEY present:", !!serviceRoleKey);
+
+    if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey) {
+      console.error("Missing Supabase env vars");
+      return new Response(JSON.stringify({ error: "Configuração do servidor incompleta (Supabase vars)" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
+    console.log("User fetch result:", !!user, "Error:", userError?.message);
+
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: `Unauthorized: ${userError?.message || "usuário não encontrado"}` }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Verify admin role
-    const serviceSupabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-    const { data: roleData } = await serviceSupabase
+    const serviceSupabase = createClient(supabaseUrl, serviceRoleKey);
+    const { data: roleData, error: roleError } = await serviceSupabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .single();
 
-    if (roleData?.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Acesso negado" }), { status: 403, headers: corsHeaders });
+    console.log("Role data:", roleData, "Role error:", roleError?.message);
+
+    if (roleError || roleData?.role !== "admin") {
+      return new Response(JSON.stringify({ error: "Acesso negado: apenas administradores" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
+    console.log("GOOGLE_CLIENT_ID present:", !!clientId);
+    console.log("GOOGLE_CLIENT_ID value:", clientId ? clientId.substring(0, 15) + "..." : "MISSING");
+
     if (!clientId) {
-      return new Response(JSON.stringify({ error: "Google Client ID não configurado." }), { status: 500, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: "GOOGLE_CLIENT_ID não configurado no servidor" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const redirectUri = "https://mlwwpckahhfsixplxwif.supabase.co/functions/v1/google-drive-callback";
@@ -61,15 +89,20 @@ Deno.serve(async (req) => {
     });
 
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    console.log("=== AUTH URL GENERATED ===");
+    console.log("Redirect URI:", redirectUri);
 
     return new Response(JSON.stringify({ url: authUrl }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: "Erro interno." }), {
-      status: 500,
-      headers: corsHeaders,
+    console.error("=== GOOGLE DRIVE AUTH FATAL ERROR ===");
+    console.error("Error:", error.message);
+    console.error("Stack:", error.stack);
+    return new Response(JSON.stringify({ error: `Erro interno: ${error.message}` }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
