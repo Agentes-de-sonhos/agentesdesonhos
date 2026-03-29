@@ -401,7 +401,7 @@ function CruiseCard({ company, onProfileClick }: { company: CompanhiaMaritima; o
                 "h-8 text-xs gap-1 font-medium",
                 isLuxo ? "text-amber-700 hover:text-amber-800 hover:bg-amber-100/50 dark:text-amber-400 dark:hover:bg-amber-950/50" : "text-primary"
               )}
-              onClick={() => company.website && window.open(company.website, "_blank")}
+              onClick={(e) => { e.stopPropagation(); navigate(`/mapa-turismo/cruzeiros/${company.id}`); }}
             >
               Ver mais <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
