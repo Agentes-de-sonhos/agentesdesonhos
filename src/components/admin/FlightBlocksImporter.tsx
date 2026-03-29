@@ -138,6 +138,10 @@ function getCellDisplayValue(cell?: XLSX.CellObject): string | number | Date {
     return String(cell.w).trim();
   }
 
+  if (typeof cell.v === "boolean") {
+    return String(cell.v);
+  }
+
   return cell.v ?? "";
 }
 
