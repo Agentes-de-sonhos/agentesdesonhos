@@ -134,14 +134,14 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
     if (!r || r.length < 4) continue;
 
     const origin = extractAirportCode(String(r[0] || ""));
-    const dataIda = String(r[1] || "").trim();
+    const rawDataIda = r[1];
     const horaSaida = String(r[2] || "").trim().replace(/h$/i, "");
     const destination = extractAirportCode(String(r[3] || ""));
-    const dataChegadaIda = String(r[4] || "").trim();
+    const rawDataChegadaIda = r[4];
     const horaChegadaIda = String(r[5] || "").trim().replace(/h$/i, "");
-    const dataVolta = String(r[7] || "").trim();
+    const rawDataVolta = r[7];
     const horaSaidaVolta = String(r[8] || "").trim().replace(/h$/i, "");
-    const dataChegadaVolta = String(r[10] || "").trim();
+    const rawDataChegadaVolta = r[10];
     const horaChegadaVolta = String(r[11] || "").trim().replace(/h$/i, "");
 
     let airline = "NÃO INFORMADO";
@@ -167,13 +167,13 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
     blocks.push({
       origin,
       destination,
-      departure_date: parseDate(dataIda),
+      departure_date: parseDate(rawDataIda),
       departure_time: horaSaida,
-      arrival_date: parseDate(dataChegadaIda),
+      arrival_date: parseDate(rawDataChegadaIda),
       arrival_time: horaChegadaIda,
-      return_departure_date: parseDate(dataVolta),
+      return_departure_date: parseDate(rawDataVolta),
       return_departure_time: horaSaidaVolta,
-      return_arrival_date: parseDate(dataChegadaVolta),
+      return_arrival_date: parseDate(rawDataChegadaVolta),
       return_arrival_time: horaChegadaVolta,
       airline,
       block_code: "",
