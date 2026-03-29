@@ -27,7 +27,7 @@ export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMate
       // Fetch all materials for this supplier
       const { data, error } = await supabase
         .from("materials")
-        .select("*, trade_suppliers(id, name)")
+        .select("*, tour_operators(id, name)")
         .eq("supplier_id", supplierId)
         .eq("is_active", true)
         .order("published_at", { ascending: false });

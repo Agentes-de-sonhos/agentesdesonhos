@@ -152,7 +152,7 @@ export function AdminMaterialsManager() {
         .from("materials")
         .select(`
           *,
-          trade_suppliers (
+          tour_operators (
             id,
             name
           ),
@@ -171,7 +171,7 @@ export function AdminMaterialsManager() {
     queryKey: ["trade-suppliers-for-materials"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("trade_suppliers")
+        .from("tour_operators")
         .select("id, name")
         .eq("is_active", true)
         .order("name");

@@ -348,7 +348,7 @@ export function usePublicShowcase(slug: string | undefined) {
 
       let query = supabase
         .from("materials")
-        .select("id, title, file_url, thumbnail_url, category, destination, supplier_id, is_permanent, created_at, trade_suppliers(id, name)")
+        .select("id, title, file_url, thumbnail_url, category, destination, supplier_id, is_permanent, created_at, tour_operators(id, name)")
         .eq("is_active", true)
         .is("trail_id", null)
         .in("material_type", ["Imagem", "Lâmina"])
@@ -397,7 +397,7 @@ export function usePublicShowcase(slug: string | undefined) {
           is_permanent: m.is_permanent || false,
           created_at: m.created_at,
         },
-        _supplierName: m.trade_suppliers?.name || null,
+        _supplierName: (m as any).tour_operators?.name || null,
       })) as (ShowcaseItem & { _supplierName?: string | null })[];
     },
     enabled: !!showcase?.id && isAutoMode && autoSupplierIds.length > 0,

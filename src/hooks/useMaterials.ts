@@ -14,7 +14,7 @@ export function useMaterials() {
         .from("materials")
         .select(`
           *,
-          trade_suppliers (
+          tour_operators (
             id,
             name
           )
@@ -33,7 +33,7 @@ export function useMaterials() {
     queryKey: ["trade-suppliers-for-filter"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("trade_suppliers")
+        .from("tour_operators")
         .select("id, name")
         .eq("is_active", true)
         .order("name");
