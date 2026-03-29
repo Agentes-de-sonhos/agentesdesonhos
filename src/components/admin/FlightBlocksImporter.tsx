@@ -56,31 +56,69 @@ function toIsoDate(year: number, month: number, day: number): string {
   return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
+/**
+ * Validates a date is logically possible (e.g. rejects 31/02).
+ * Returns true if valid.
+ */
+function isValidDate(year: number, month: number, day: number): boolean {
+  if (month < 1 || month > 12 || day < 1) return false;
+  const d = new Date(year, month - 1, day);
+  return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day;
+}
+
+/**
+ * Robust date parser that ALWAYS assumes DD/MM/YYYY (Brazilian format).
+ * Never uses Date.parse or locale-based inference.
+ * Never reinterprets as MM/DD.
+ */
 function parseDate(raw: any): string {
   if (raw == null || raw === "") return "";
 
-  if (raw instanceof Date || (typeof raw === "object" && typeof raw.getFullYear === "function")) {
-    return toIsoDate(raw.getFullYear(), raw.getMonth() + 1, raw.getDate());
-  }
-
+  // Handle Excel serial numbers (safest path — no timezone issues)
   if (typeof raw === "number") {
     const parsed = XLSX.SSF.parse_date_code(raw);
-    if (parsed) {
+    if (parsed && isValidDate(parsed.y, parsed.m, parsed.d)) {
       return toIsoDate(parsed.y, parsed.m, parsed.d);
     }
+    return "";
+  }
+
+  // Handle JS Date objects — use UTC methods to avoid timezone shift
+  if (raw instanceof Date || (typeof raw === "object" && typeof raw.getFullYear === "function")) {
+    const y = raw.getUTCFullYear();
+    const m = raw.getUTCMonth() + 1;
+    const d = raw.getUTCDate();
+    if (isValidDate(y, m, d)) {
+      return toIsoDate(y, m, d);
+    }
+    return "";
   }
 
   const str = String(raw).trim();
   if (!str) return "";
 
-  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+  // Already ISO format (YYYY-MM-DD)
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    const [y, m, d] = str.slice(0, 10).split("-").map(Number);
+    if (isValidDate(y, m, d)) return toIsoDate(y, m, d);
+    return "";
+  }
 
+  // Parse DD/MM/YY or DD/MM/YYYY — ALWAYS Brazilian format, NEVER MM/DD
   const normalized = str.split(/[ T]/)[0];
   const parts = normalized.split("/");
   if (parts.length === 3) {
-    let [day, month, year] = parts;
-    if (year.length === 2) year = `20${year}`;
-    return toIsoDate(Number(year), Number(month), Number(day));
+    const day = Number(parts[0]);
+    const month = Number(parts[1]);
+    let year = Number(parts[2]);
+    if (parts[2].length === 2) year = 2000 + year;
+
+    if (isValidDate(year, month, day)) {
+      return toIsoDate(year, month, day);
+    }
+    // Log invalid date for debugging
+    console.warn(`Data inválida rejeitada: ${str} (dia=${day}, mês=${month}, ano=${year})`);
+    return "";
   }
 
   return "";
