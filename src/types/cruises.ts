@@ -28,6 +28,11 @@ export interface CompanhiaMaritima {
   updated_at: string;
   regioes: Regiao[];
   perfis: PerfilCliente[];
+  how_to_sell: string | null;
+  sales_channels: string | null;
+  commercial_contacts: string | null;
+  specialties: string | null;
+  social_links: Record<string, string> | null;
 }
 
 export type CruiseTipoFilter = 'all' | 'Oceanico' | 'Fluvial' | 'Expedicao';
