@@ -428,7 +428,9 @@ export default function MapaTurismo() {
                   className="group cursor-pointer shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
                   onClick={() =>
                     navigate(
-                      supplier._source === "operator"
+                      supplier._source === "cruise"
+                        ? `/mapa-turismo/cruzeiros/${supplier.id}`
+                        : supplier._source === "operator"
                         ? `/mapa-turismo/operadora/${supplier.id}`
                         : `/mapa-turismo/${supplier.id}`
                     )
