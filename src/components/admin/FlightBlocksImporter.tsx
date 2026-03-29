@@ -275,9 +275,9 @@ export function FlightBlocksImporter() {
     reader.onload = (evt) => {
       try {
         const data = new Uint8Array(evt.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
+        const workbook = XLSX.read(data, { type: "array", cellDates: true });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
         const blocks = parseExcelRows(rows);
         if (blocks.length === 0) {
           toast({ title: "Nenhum bloqueio encontrado no arquivo", variant: "destructive" });
