@@ -274,7 +274,7 @@ export default function MapaTurismo() {
     return results;
   }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, sortBy, reviewStatsMap, getLikeCount]);
 
-  const isLoadingAll = isLoading || loadingOperators;
+  const isLoadingAll = isLoading || loadingOperators || loadingCruises;
 
   const handleOpenReview = (supplier: any) => {
     if (!user) {
