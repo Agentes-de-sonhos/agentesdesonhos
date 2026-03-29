@@ -254,6 +254,12 @@ export function AdminDriveImportManager() {
                   <AlertTriangle className="h-4 w-4" />
                   <span>{syncMutation.data.skipped_duplicate} duplicados</span>
                 </div>
+                {syncMutation.data.skipped_no_supplier > 0 && (
+                  <div className="flex items-center gap-1 text-orange-600">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>{syncMutation.data.skipped_no_supplier} sem operadora</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1 text-red-600">
                   <XCircle className="h-4 w-4" />
                   <span>{syncMutation.data.errors} erros</span>
