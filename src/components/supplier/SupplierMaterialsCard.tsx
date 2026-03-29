@@ -36,34 +36,38 @@ export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMate
       if (error) throw error;
       if (!data || data.length === 0) return [];
 
-      // Group materials by normalized title to create galleries
+      // Group materials by import date + category
       const galleryMap = new Map<string, Material[]>();
       
       data.forEach((material) => {
-        const normalizedTitle = material.title.toLowerCase().trim();
-        if (!galleryMap.has(normalizedTitle)) {
-          galleryMap.set(normalizedTitle, []);
+        const importDate = startOfDay(new Date(material.published_at)).toISOString().slice(0, 10);
+        const key = `${importDate}|${(material.category || '').trim().toLowerCase()}`;
+        if (!galleryMap.has(key)) {
+          galleryMap.set(key, []);
         }
-        galleryMap.get(normalizedTitle)!.push(material as Material);
+        galleryMap.get(key)!.push(material as Material);
       });
 
       // Convert to MaterialGallery array
       const galleriesArray: MaterialGallery[] = [];
       
-      galleryMap.forEach((materials, normalizedTitle) => {
+      galleryMap.forEach((materials, key) => {
         const firstMaterial = materials[0];
         const hasVideos = materials.some(m => m.material_type === "Vídeo");
         const hasImages = materials.some(m => m.material_type === "Imagem");
         const hasPDFs = materials.some(m => m.material_type === "PDF" || m.material_type === "Lâmina");
         
-        // Find best thumbnail
         const thumbnail = materials.find(m => m.thumbnail_url)?.thumbnail_url || 
                          materials.find(m => m.material_type === "Imagem")?.file_url ||
                          null;
 
+        const operatorName = firstMaterial.tour_operators?.name || '';
+        const category = firstMaterial.category || '';
+        const galleryTitle = [operatorName, category].filter(Boolean).join(' • ') || firstMaterial.title;
+
         galleriesArray.push({
-          id: normalizedTitle,
-          title: firstMaterial.title,
+          id: key,
+          title: galleryTitle,
           category: firstMaterial.category,
           destination: firstMaterial.destination,
           supplier_id: firstMaterial.supplier_id,
