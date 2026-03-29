@@ -82,7 +82,7 @@ export default function CruiseDetailPage() {
           </div>
           <h2 className="text-xl font-semibold text-foreground">Companhia não encontrada</h2>
           <p className="text-muted-foreground mt-2 mb-8">A companhia que você está procurando não existe ou foi removida.</p>
-          <Button variant="outline" className="rounded-xl" onClick={() => navigate("/mapa-turismo/cruzeiros")}>
+          <Button variant="outline" className="rounded-xl" onClick={() => navigate("/mapa-turismo?categoria=Cruzeiros")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
           </Button>
         </div>
@@ -109,8 +109,8 @@ export default function CruiseDetailPage() {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
-        <Button variant="ghost" onClick={() => navigate("/mapa-turismo/cruzeiros")} className="rounded-xl text-muted-foreground hover:text-foreground -ml-2">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Companhias Marítimas
+        <Button variant="ghost" onClick={() => navigate("/mapa-turismo?categoria=Cruzeiros")} className="rounded-xl text-muted-foreground hover:text-foreground -ml-2">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Mapa do Turismo
         </Button>
 
         {/* Hero - same pattern as operators */}

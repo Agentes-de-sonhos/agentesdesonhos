@@ -57,7 +57,7 @@ const CATEGORIES_DATA: CategoryDef[] = [
   { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-100 text-sky-700", activeColor: "bg-sky-500 text-white", iconColor: "text-sky-500" },
   { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-100 text-amber-700", activeColor: "bg-amber-500 text-white", iconColor: "text-amber-500" },
   { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-100 text-emerald-700", activeColor: "bg-emerald-500 text-white", iconColor: "text-emerald-500" },
-  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500", link: "/mapa-turismo/cruzeiros" },
+  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500" },
   { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-100 text-rose-700", activeColor: "bg-rose-500 text-white", iconColor: "text-rose-500" },
   { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-pink-100 text-pink-700", activeColor: "bg-pink-500 text-white", iconColor: "text-pink-500" },
   { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", activeColor: "bg-orange-500 text-white", iconColor: "text-orange-500" },
@@ -111,10 +111,6 @@ export default function MapaTurismo() {
   };
 
   const handleCategoryChange = (cat: CategoryDef) => {
-    if (cat.link) {
-      navigate(cat.link);
-      return;
-    }
     const newCat = categoryFilter === cat.category ? "all" : cat.category;
     setCategoryFilter(newCat);
     updateUrlParams(newCat, selectedSpecialties);
@@ -148,6 +144,19 @@ export default function MapaTurismo() {
     },
   });
 
+  const { data: cruiseCompanies, isLoading: loadingCruises } = useQuery({
+    queryKey: ["cruise-companies-listing"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companhias_maritimas")
+        .select("*")
+        .eq("ativo", true)
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const allItems = useMemo(() => {
     const fromSuppliers = (suppliers || []).map((s: any) => ({
       ...s,
@@ -168,8 +177,25 @@ export default function MapaTurismo() {
         : [],
       _source: "operator" as const,
     }));
-    return [...fromSuppliers, ...fromOperators];
-  }, [suppliers, tourOperators]);
+    const fromCruises = (cruiseCompanies || []).map((cm: any) => {
+      const specs: string[] = [];
+      if (cm.tipo) specs.push(cm.tipo);
+      if (cm.categoria) specs.push(cm.categoria);
+      if (cm.subtipo) specs.push(cm.subtipo);
+      return {
+        id: cm.id,
+        name: cm.nome,
+        category: "Cruzeiros",
+        logo_url: cm.logo_url || null,
+        website_url: cm.website,
+        instagram_url: null,
+        sales_channel: cm.sales_channels,
+        specialties: specs.map((s, i) => ({ id: `cruise-${i}`, name: s })),
+        _source: "cruise" as const,
+      };
+    });
+    return [...fromSuppliers, ...fromOperators, ...fromCruises];
+  }, [suppliers, tourOperators, cruiseCompanies]);
 
   // Merge DB specialties + operator specialties for complete filter list
   const allSpecialties = useMemo(() => {
@@ -244,7 +270,7 @@ export default function MapaTurismo() {
     return results;
   }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, sortBy, reviewStatsMap, getLikeCount]);
 
-  const isLoadingAll = isLoading || loadingOperators;
+  const isLoadingAll = isLoading || loadingOperators || loadingCruises;
 
   const handleOpenReview = (supplier: any) => {
     if (!user) {
@@ -398,7 +424,9 @@ export default function MapaTurismo() {
                   className="group cursor-pointer shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
                   onClick={() =>
                     navigate(
-                      supplier._source === "operator"
+                      supplier._source === "cruise"
+                        ? `/mapa-turismo/cruzeiros/${supplier.id}`
+                        : supplier._source === "operator"
                         ? `/mapa-turismo/operadora/${supplier.id}`
                         : `/mapa-turismo/${supplier.id}`
                     )
