@@ -90,7 +90,11 @@ export default function BloqueiosAereos() {
     const arr = [...filteredBlocks];
     if (sortBy === "price_asc") arr.sort((a, b) => (a.price ?? 999999) - (b.price ?? 999999));
     else if (sortBy === "price_desc") arr.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-    else arr.sort((a, b) => a.departure_date.localeCompare(b.departure_date));
+    else arr.sort((a, b) => {
+      const dateCmp = a.departure_date.localeCompare(b.departure_date);
+      if (dateCmp !== 0) return dateCmp;
+      return (a.departure_time || "").localeCompare(b.departure_time || "");
+    });
     return arr;
   }, [filteredBlocks, sortBy]);
 
@@ -101,7 +105,7 @@ export default function BloqueiosAereos() {
     if (!dateStr) return "";
     const parts = dateStr.split("-");
     if (parts.length !== 3) return dateStr;
-    return `${parts[2]}/${parts[1]}`;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
   };
 
   const formatPrice = (price: number | null, currency: string | null) => {
