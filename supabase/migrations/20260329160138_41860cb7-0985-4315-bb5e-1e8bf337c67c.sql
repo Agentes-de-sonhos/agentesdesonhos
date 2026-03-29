@@ -1,0 +1,1 @@
+ALTER TABLE public.google_drive_tokens ADD COLUMN IF NOT EXISTS google_email text;

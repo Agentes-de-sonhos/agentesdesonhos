@@ -16,6 +16,8 @@ import {
   Clock,
   FileImage,
   Loader2,
+  Unlink,
+  Mail,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -31,11 +33,11 @@ export function AdminDriveImportManager() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("google_drive_tokens" as any)
-        .select("id, token_expires_at, updated_at")
+        .select("id, token_expires_at, updated_at, google_email")
         .limit(1)
         .maybeSingle();
       if (error) return null;
-      return data;
+      return data as any;
     },
   });
 
@@ -75,6 +77,7 @@ export function AdminDriveImportManager() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error("Sessão expirada. Faça login novamente.");
+        setIsConnecting(false);
         return;
       }
 
@@ -86,7 +89,6 @@ export function AdminDriveImportManager() {
       if (data?.url) {
         window.open(data.url, "_blank", "width=600,height=700");
         toast.info("Autorize o acesso no Google e volte aqui.");
-        // Poll for connection
         const poll = setInterval(async () => {
           const { data: token } = await supabase
             .from("google_drive_tokens" as any)
@@ -111,6 +113,22 @@ export function AdminDriveImportManager() {
       setIsConnecting(false);
     }
   };
+
+  // Disconnect Google Drive
+  const disconnectMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("google_drive_tokens" as any)
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000"); // delete all
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["google-drive-token"] });
+      toast.success("Google Drive desconectado.");
+    },
+    onError: () => toast.error("Erro ao desconectar."),
+  });
 
   // Sync mutation
   const syncMutation = useMutation({
@@ -185,21 +203,55 @@ export function AdminDriveImportManager() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Connection Status */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <div className={`h-3 w-3 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`} />
-            <span className="text-sm">
+            <span className="text-sm font-medium">
               {isConnected ? "Google Drive conectado" : "Google Drive não conectado"}
             </span>
-            {!isConnected && (
-              <Button size="sm" onClick={handleConnectDrive} disabled={isConnecting}>
-                {isConnecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Link2 className="h-4 w-4 mr-2" />
-                )}
-                Conectar
-              </Button>
+
+            {isConnected && driveToken?.google_email && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Mail className="h-3 w-3" />
+                {driveToken.google_email}
+              </span>
             )}
+
+            <div className="flex gap-2 ml-auto">
+              {!isConnected ? (
+                <Button size="sm" onClick={handleConnectDrive} disabled={isConnecting}>
+                  {isConnecting ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Link2 className="h-4 w-4 mr-2" />
+                  )}
+                  Conectar
+                </Button>
+              ) : (
+                <>
+                  <Button size="sm" variant="outline" onClick={handleConnectDrive} disabled={isConnecting}>
+                    {isConnecting ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                    )}
+                    Reconectar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => disconnectMutation.mutate()}
+                    disabled={disconnectMutation.isPending}
+                  >
+                    {disconnectMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Unlink className="h-4 w-4 mr-2" />
+                    )}
+                    Desconectar
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Folder ID Input */}
