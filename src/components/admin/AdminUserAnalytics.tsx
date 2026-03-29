@@ -91,21 +91,41 @@ export function AdminUserAnalytics() {
     },
   });
 
-  // Fetch online users count
-  const { data: onlineUsers } = useQuery({
-    queryKey: ["admin-online-users"],
+  // Fetch online users with details
+  const { data: onlineUsersData } = useQuery({
+    queryKey: ["admin-online-users-details"],
     queryFn: async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const { data, error } = await (supabase as any)
+      const { data: presenceData, error } = await (supabase as any)
         .from("user_presence")
-        .select("user_id")
+        .select("user_id, last_active_at")
         .eq("is_online", true)
         .gte("last_active_at", fiveMinAgo);
       if (error) throw error;
-      return data?.length || 0;
+      if (!presenceData || presenceData.length === 0) return [];
+
+      const userIds = presenceData.map((p: any) => p.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name, avatar_url, agency_name, city")
+        .in("user_id", userIds);
+
+      return presenceData.map((p: any) => {
+        const profile = profiles?.find((pr) => pr.user_id === p.user_id);
+        return {
+          user_id: p.user_id,
+          last_active_at: p.last_active_at,
+          name: profile?.name || "Usuário",
+          avatar_url: profile?.avatar_url || null,
+          agency_name: profile?.agency_name || null,
+          city: profile?.city || null,
+        };
+      });
     },
     refetchInterval: 30_000,
   });
+
+  const onlineUsers = onlineUsersData?.length ?? 0;
 
   // Filtered data
   const filteredData = useMemo(() => {
@@ -258,6 +278,52 @@ export function AdminUserAnalytics() {
           </CardContent>
         </Card>
       )}
+
+      {/* Online Users List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wifi className="h-5 w-5 text-green-500" />
+            Usuários Online Agora
+            <Badge variant="secondary" className="ml-2">{onlineUsers}</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!onlineUsersData || onlineUsersData.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground text-sm">
+              Nenhum usuário online no momento.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {onlineUsersData.map((u) => (
+                <div
+                  key={u.user_id}
+                  className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="relative">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={u.avatar_url || ""} />
+                      <AvatarFallback className="text-xs">
+                        {u.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm truncate">{u.name}</p>
+                    {u.agency_name && (
+                      <p className="text-xs text-muted-foreground truncate">{u.agency_name}</p>
+                    )}
+                    {u.city && (
+                      <p className="text-xs text-muted-foreground/70 truncate">{u.city}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Filters & Ranking Table */}
       <Card>
