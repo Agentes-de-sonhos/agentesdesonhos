@@ -282,51 +282,91 @@ export default function CruisesPage() {
 }
 
 function CruiseCard({ company, onProfileClick }: { company: CompanhiaMaritima; onProfileClick: (id: string) => void }) {
+  const isLuxo = company.categoria === "Luxo";
+  const displayRegioes = company.regioes.slice(0, 3);
+  const extraRegioes = company.regioes.length - 3;
+
   return (
-    <Card className="group shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover">
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
-          <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-cyan-950 dark:to-cyan-900 flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-border/50">
+    <Card className={cn(
+      "group border-0 overflow-hidden transition-all duration-300 hover:-translate-y-1.5",
+      isLuxo
+        ? "bg-gradient-to-br from-amber-50/80 via-card to-card dark:from-amber-950/30 dark:via-card dark:to-card ring-1 ring-amber-200/60 dark:ring-amber-800/40 shadow-[0_4px_24px_-4px_rgba(217,169,78,0.15)] hover:shadow-[0_12px_32px_-8px_rgba(217,169,78,0.25)]"
+        : "bg-card/90 backdrop-blur-sm ring-1 ring-border/40 shadow-card hover:shadow-card-hover"
+    )}>
+      {/* Luxury accent bar */}
+      {isLuxo && (
+        <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
+      )}
+
+      <CardContent className="p-5 flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-start gap-3.5">
+          <div className={cn(
+            "h-14 w-14 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 transition-transform duration-300 group-hover:scale-105",
+            isLuxo
+              ? "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/60 dark:to-amber-950 ring-amber-200/50 dark:ring-amber-700/50"
+              : "bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-cyan-950 dark:to-cyan-900 ring-border/50"
+          )}>
             {company.logo_url ? (
-              <img src={company.logo_url} alt={company.nome} className="h-full w-full object-contain p-1.5" />
+              <img src={company.logo_url} alt={company.nome} className="h-full w-full object-contain p-1.5" loading="lazy" decoding="async" />
             ) : (
-              <Ship className="h-7 w-7 text-cyan-600 dark:text-cyan-400" />
+              <Ship className={cn("h-7 w-7", isLuxo ? "text-amber-600 dark:text-amber-400" : "text-cyan-600 dark:text-cyan-400")} />
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate text-base">{company.nome}</h3>
-            <div className="flex flex-wrap gap-1.5 mt-1.5">
-              <Badge variant="outline" className={cn("text-[10px] border", TIPO_COLORS[company.tipo] || "")}>
-                {company.tipo === "Expedicao" ? "Expedição" : company.tipo}
+            <h3 className="font-bold text-foreground truncate text-[15px] leading-tight">{company.nome}</h3>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              <Badge variant="outline" className={cn(
+                "text-[10px] font-semibold border px-2 py-0.5 uppercase tracking-wide",
+                TIPO_COLORS[company.tipo] || ""
+              )}>
+                {company.tipo === "Expedicao" ? "Expedição" : company.tipo === "Oceanico" ? "Oceânico" : company.tipo}
               </Badge>
-              <Badge variant="outline" className={cn("text-[10px] border", CATEGORIA_COLORS[company.categoria] || "")}>
+              <Badge variant="outline" className={cn(
+                "text-[10px] font-semibold border px-2 py-0.5",
+                isLuxo ? "bg-amber-100/80 text-amber-800 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700" : "",
+                !isLuxo ? CATEGORIA_COLORS[company.categoria] || "" : ""
+              )}>
+                {isLuxo && <span className="mr-0.5">✦</span>}
                 {company.categoria === "Contemporaneo" ? "Contemporâneo" : company.categoria}
               </Badge>
               {company.subtipo && (
-                <Badge variant="outline" className="text-[10px]">{company.subtipo}</Badge>
+                <Badge variant="outline" className="text-[10px] px-2 py-0.5 text-muted-foreground">{company.subtipo}</Badge>
               )}
             </div>
           </div>
         </div>
 
         {/* Regions */}
-        {company.regioes.length > 0 && (
-          <div className="mt-3 flex items-start gap-1.5">
-            <MapPin className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {company.regioes.map((r) => r.nome).join(" • ")}
-            </p>
+        {displayRegioes.length > 0 && (
+          <div className="mt-4 flex items-center gap-2">
+            <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <div className="flex flex-wrap gap-1.5">
+              {displayRegioes.map((r) => (
+                <span key={r.id} className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-muted/80 text-muted-foreground border border-border/50">
+                  {r.nome}
+                </span>
+              ))}
+              {extraRegioes > 0 && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] text-muted-foreground/70">
+                  +{extraRegioes}
+                </span>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Profile tags - clickable */}
+        {/* Profile chips */}
         {company.perfis.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {company.perfis.map((p) => (
               <button
                 key={p.id}
                 onClick={(e) => { e.stopPropagation(); onProfileClick(p.id); }}
-                className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
+                className={cn(
+                  "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-200 cursor-pointer border",
+                  "bg-primary/8 text-primary border-primary/15 hover:bg-primary/15 hover:border-primary/30 hover:scale-[1.03] active:scale-[0.98]"
+                )}
               >
                 {p.nome}
               </button>
@@ -334,19 +374,35 @@ function CruiseCard({ company, onProfileClick }: { company: CompanhiaMaritima; o
           </div>
         )}
 
-        {company.website && (
-          <div className="mt-3 pt-3 border-t border-border/50">
-            <a
-              href={company.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-primary hover:underline flex items-center gap-1"
-              onClick={(e) => e.stopPropagation()}
+        {/* Footer */}
+        <div className="mt-auto pt-4">
+          <div className="flex items-center justify-between border-t border-border/40 pt-3">
+            {company.website ? (
+              <a
+                href={company.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1.5 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Globe className="h-3.5 w-3.5" /> Visitar site
+              </a>
+            ) : (
+              <span />
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-8 text-xs gap-1 font-medium",
+                isLuxo ? "text-amber-700 hover:text-amber-800 hover:bg-amber-100/50 dark:text-amber-400 dark:hover:bg-amber-950/50" : "text-primary"
+              )}
+              onClick={() => company.website && window.open(company.website, "_blank")}
             >
-              <Globe className="h-3 w-3" /> Visitar site
-            </a>
+              Ver mais <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Button>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
