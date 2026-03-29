@@ -113,7 +113,7 @@ export function useMaterials() {
         category: firstMaterial.category,
         destination: firstMaterial.destination,
         supplier_id: firstMaterial.supplier_id,
-        trade_suppliers: firstMaterial.trade_suppliers,
+        tour_operators: firstMaterial.tour_operators,
         materials: [...mats].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
         published_at: sortedByDate[0].published_at,
         thumbnail_url: thumbnail,
@@ -170,7 +170,7 @@ export function useMaterials() {
     const result: MaterialsBySupplier<MaterialGallery> = {};
     
     galleries?.forEach((gallery) => {
-      const supplierName = gallery.trade_suppliers?.name || "Outros";
+      const supplierName = gallery.tour_operators?.name || "Outros";
       if (!result[supplierName]) {
         result[supplierName] = [];
       }

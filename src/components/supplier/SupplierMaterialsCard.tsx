@@ -66,7 +66,7 @@ export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMate
           category: firstMaterial.category,
           destination: firstMaterial.destination,
           supplier_id: firstMaterial.supplier_id,
-          trade_suppliers: firstMaterial.trade_suppliers,
+          tour_operators: firstMaterial.tour_operators,
           materials,
           published_at: firstMaterial.published_at,
           thumbnail_url: thumbnail,

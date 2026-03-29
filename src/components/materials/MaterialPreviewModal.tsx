@@ -31,7 +31,7 @@ interface Material {
   video_url?: string | null;
   thumbnail_url?: string | null;
   published_at: string;
-  trade_suppliers?: {
+  tour_operators?: {
     id: string;
     name: string;
   } | null;
@@ -202,10 +202,10 @@ export function MaterialPreviewModal({ material, isOpen, onClose }: MaterialPrev
           
           {/* Meta info */}
           <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
-            {material.trade_suppliers && (
+            {material.tour_operators && (
               <div className="flex items-center gap-1.5">
                 <Building2 className="h-4 w-4" />
-                <span>{material.trade_suppliers.name}</span>
+                <span>{material.tour_operators.name}</span>
               </div>
             )}
             <div className="flex items-center gap-1.5">

@@ -128,9 +128,9 @@ export function GalleryCard({ gallery, variant = "default", onOpen }: GalleryCar
           {gallery.title}
         </h3>
         
-        {gallery.trade_suppliers && (
+        {gallery.tour_operators && (
           <p className="text-xs text-muted-foreground mt-1 truncate">
-            {gallery.trade_suppliers.name}
+            {gallery.tour_operators.name}
           </p>
         )}
         

@@ -99,7 +99,7 @@ export function useShowcase() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, title, file_url, thumbnail_url, category, destination, material_type, is_permanent, created_at, supplier_id, trade_suppliers(id, name)")
+        .select("id, title, file_url, thumbnail_url, category, destination, material_type, is_permanent, created_at, supplier_id, tour_operators(id, name)")
         .eq("is_active", true)
         .is("trail_id", null)
         .in("material_type", ["Imagem", "Lâmina"])
@@ -114,7 +114,7 @@ export function useShowcase() {
     queryKey: ["showcase-all-suppliers"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("trade_suppliers")
+        .from("tour_operators")
         .select("id, name, logo_url, category")
         .eq("is_active", true)
         .order("name");

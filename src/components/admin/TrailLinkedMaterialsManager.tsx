@@ -42,7 +42,7 @@ export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsMan
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("id, title, material_type, category, destination, thumbnail_url, file_url, supplier_id, is_permanent, trade_suppliers(id, name)")
+        .select("id, title, material_type, category, destination, thumbnail_url, file_url, supplier_id, is_permanent, tour_operators(id, name)")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(500);
@@ -84,7 +84,7 @@ export function TrailLinkedMaterialsManager({ trailId }: TrailLinkedMaterialsMan
       return {
         key,
         title: getDisplayTitle(first.title),
-        supplier_name: first.trade_suppliers?.name || null,
+        supplier_name: first.tour_operators?.name || null,
         category: first.category,
         destination: first.destination || null,
         thumbnail: thumb,

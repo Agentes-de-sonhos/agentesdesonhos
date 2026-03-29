@@ -249,10 +249,10 @@ export function GalleryModal({ gallery, isOpen, onClose }: GalleryModalProps) {
           
           {/* Meta info */}
           <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
-            {gallery.trade_suppliers && (
+            {gallery.tour_operators && (
               <div className="flex items-center gap-1.5">
                 <Building2 className="h-4 w-4" />
-                <span>{gallery.trade_suppliers.name}</span>
+                <span>{gallery.tour_operators.name}</span>
               </div>
             )}
             <div className="flex items-center gap-1.5">

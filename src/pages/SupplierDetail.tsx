@@ -47,7 +47,7 @@ export default function SupplierDetail() {
     queryKey: ["trade-supplier", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("trade_suppliers")
+        .from("tour_operators")
         .select(`*, supplier_specialties (specialty_id, specialties (id, name))`)
         .eq("id", id!)
         .maybeSingle();
@@ -69,7 +69,7 @@ export default function SupplierDetail() {
     enabled: !!id,
   });
 
-  const updateMutation = useOperatorUpdate(id || "", "trade_suppliers");
+  const updateMutation = useOperatorUpdate(id || "", "tour_operators");
 
   const { reviews, isLoading: reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview } = useSupplierReviews(id || "");
 

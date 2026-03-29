@@ -111,7 +111,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trail_linked_materials")
-        .select("material_id, materials(*, trade_suppliers(id, name))")
+        .select("material_id, materials(*, tour_operators(id, name))")
         .eq("trail_id", trail.id);
       if (error) throw error;
       return (data || []).map((r: any) => r.materials).filter(Boolean);
@@ -123,7 +123,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("materials")
-        .select("*, trade_suppliers(id, name)")
+        .select("*, tour_operators(id, name)")
         .eq("trail_id", trail.id)
         .eq("is_active", true)
         .order("created_at", { ascending: false });

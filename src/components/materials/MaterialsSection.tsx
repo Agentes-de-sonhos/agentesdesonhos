@@ -13,7 +13,7 @@ interface Material {
   video_url?: string | null;
   thumbnail_url?: string | null;
   published_at: string;
-  trade_suppliers?: {
+  tour_operators?: {
     id: string;
     name: string;
   } | null;

@@ -332,11 +332,11 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
         {/* Header - supplier info */}
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
-            {gallery.trade_suppliers?.name?.[0]?.toUpperCase() || "M"}
+            {gallery.tour_operators?.name?.[0]?.toUpperCase() || "M"}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate text-foreground">
-              {gallery.trade_suppliers?.name || "Material de Divulgação"}
+              {gallery.tour_operators?.name || "Material de Divulgação"}
             </p>
             <p className="text-xs text-muted-foreground truncate">
               {gallery.category}
@@ -498,7 +498,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
           {gallery.isCanvaTemplate ? (
             <p className="text-sm text-foreground">
               <span className="font-semibold">
-                {gallery.trade_suppliers?.name || "Divulgação"}
+                {gallery.tour_operators?.name || "Divulgação"}
               </span>{" "}
               {gallery.title}
               {gallery.destination && (
@@ -511,7 +511,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
               return (
                 <p className="text-sm text-foreground">
                   <span className="font-semibold">
-                    {gallery.trade_suppliers?.name || "Divulgação"}
+                    {gallery.tour_operators?.name || "Divulgação"}
                   </span>{" "}
                   {gallery.title}
                   {gallery.destination && (
@@ -530,7 +530,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
                 <div className="flex items-start gap-1.5">
                   <p className="text-sm text-foreground flex-1 whitespace-pre-line">
                     <span className="font-semibold">
-                      {gallery.trade_suppliers?.name || "Divulgação"}
+                      {gallery.tour_operators?.name || "Divulgação"}
                     </span>{" "}
                     {displayText}
                     {!captionExpanded && isLong && (

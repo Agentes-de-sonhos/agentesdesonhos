@@ -20,7 +20,7 @@ interface MaterialCardProps {
     video_url?: string | null;
     thumbnail_url?: string | null;
     published_at: string;
-    trade_suppliers?: {
+    tour_operators?: {
       id: string;
       name: string;
     } | null;
@@ -124,9 +124,9 @@ export function MaterialCard({ material, variant = "default", onPreview }: Mater
           {material.title}
         </h3>
         
-        {material.trade_suppliers && (
+        {material.tour_operators && (
           <p className="text-xs text-muted-foreground mt-1 truncate">
-            {material.trade_suppliers.name}
+            {material.tour_operators.name}
           </p>
         )}
         
