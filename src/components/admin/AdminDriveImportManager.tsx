@@ -85,31 +85,61 @@ export function AdminDriveImportManager() {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("google-drive-auth error:", error);
+        const msg = error.message || JSON.stringify(error);
+        if (msg.includes("Unauthorized") || msg.includes("401")) {
+          toast.error("Erro de autenticação: sessão inválida. Faça login novamente.");
+        } else if (msg.includes("403") || msg.includes("Acesso negado")) {
+          toast.error("Erro de permissão: apenas administradores podem conectar o Google Drive.");
+        } else if (msg.includes("Client ID")) {
+          toast.error("Erro de configuração: Google Client ID não encontrado no servidor.");
+        } else {
+          toast.error(`Erro ao conectar: ${msg}`);
+        }
+        setIsConnecting(false);
+        return;
+      }
+
+      if (data?.error) {
+        console.error("google-drive-auth returned error:", data.error);
+        toast.error(`Erro ao conectar: ${data.error}`);
+        setIsConnecting(false);
+        return;
+      }
+
       if (data?.url) {
         window.open(data.url, "_blank", "width=600,height=700");
         toast.info("Autorize o acesso no Google e volte aqui.");
         const poll = setInterval(async () => {
           const { data: token } = await supabase
             .from("google_drive_tokens" as any)
-            .select("id")
+            .select("id, google_email")
             .limit(1)
             .maybeSingle();
           if (token) {
             clearInterval(poll);
             queryClient.invalidateQueries({ queryKey: ["google-drive-token"] });
-            toast.success("Google Drive conectado!");
+            toast.success("Google Drive conectado com sucesso!");
             setIsConnecting(false);
           }
         }, 3000);
         setTimeout(() => {
           clearInterval(poll);
+          if (isConnecting) {
+            toast.warning("Tempo limite atingido. Verifique se a autorização foi concluída no Google.");
+          }
           setIsConnecting(false);
         }, 120000);
+      } else {
+        console.error("Resposta inesperada do google-drive-auth:", data);
+        toast.error("Erro inesperado: nenhuma URL de autorização retornada.");
+        setIsConnecting(false);
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Erro ao conectar Google Drive.");
+    } catch (err: any) {
+      console.error("Erro completo ao conectar Google Drive:", err);
+      const errorMsg = err?.message || err?.toString() || "Erro desconhecido";
+      toast.error(`Erro ao conectar Google Drive: ${errorMsg}`);
       setIsConnecting(false);
     }
   };
