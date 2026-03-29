@@ -156,7 +156,28 @@ export function CuratedNewsFeed() {
     );
   }
 
-  if (!news || news.length === 0) return null;
+  if (!news || news.length === 0) {
+    return (
+      <Card className="border-0 shadow-md">
+        <CardContent className="pt-6 space-y-4">
+          <div className="mb-3 w-fit">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+              <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
+              Radar do Turismo
+            </h2>
+            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
+          </div>
+          <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+            <div className="rounded-full bg-muted p-3">
+              <Newspaper className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground font-medium">Nenhuma notícia publicada ainda.</p>
+            <p className="text-xs text-muted-foreground/70">Aguarde, em breve teremos novidades por aqui.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Top 3 by score for "Em alta" tag
   const trendingIds = new Set(
