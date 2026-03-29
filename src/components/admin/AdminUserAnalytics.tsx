@@ -91,21 +91,41 @@ export function AdminUserAnalytics() {
     },
   });
 
-  // Fetch online users count
-  const { data: onlineUsers } = useQuery({
-    queryKey: ["admin-online-users"],
+  // Fetch online users with details
+  const { data: onlineUsersData } = useQuery({
+    queryKey: ["admin-online-users-details"],
     queryFn: async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const { data, error } = await (supabase as any)
+      const { data: presenceData, error } = await (supabase as any)
         .from("user_presence")
-        .select("user_id")
+        .select("user_id, last_active_at")
         .eq("is_online", true)
         .gte("last_active_at", fiveMinAgo);
       if (error) throw error;
-      return data?.length || 0;
+      if (!presenceData || presenceData.length === 0) return [];
+
+      const userIds = presenceData.map((p: any) => p.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, name, avatar_url, agency_name, city")
+        .in("user_id", userIds);
+
+      return presenceData.map((p: any) => {
+        const profile = profiles?.find((pr) => pr.user_id === p.user_id);
+        return {
+          user_id: p.user_id,
+          last_active_at: p.last_active_at,
+          name: profile?.name || "Usuário",
+          avatar_url: profile?.avatar_url || null,
+          agency_name: profile?.agency_name || null,
+          city: profile?.city || null,
+        };
+      });
     },
     refetchInterval: 30_000,
   });
+
+  const onlineUsers = onlineUsersData?.length ?? 0;
 
   // Filtered data
   const filteredData = useMemo(() => {
