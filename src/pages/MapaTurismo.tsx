@@ -57,7 +57,7 @@ const CATEGORIES_DATA: CategoryDef[] = [
   { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-100 text-sky-700", activeColor: "bg-sky-500 text-white", iconColor: "text-sky-500" },
   { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-100 text-amber-700", activeColor: "bg-amber-500 text-white", iconColor: "text-amber-500" },
   { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-100 text-emerald-700", activeColor: "bg-emerald-500 text-white", iconColor: "text-emerald-500" },
-  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500", link: "/mapa-turismo/cruzeiros" },
+  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500" },
   { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-100 text-rose-700", activeColor: "bg-rose-500 text-white", iconColor: "text-rose-500" },
   { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-pink-100 text-pink-700", activeColor: "bg-pink-500 text-white", iconColor: "text-pink-500" },
   { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", activeColor: "bg-orange-500 text-white", iconColor: "text-orange-500" },
@@ -143,6 +143,19 @@ export default function MapaTurismo() {
         .select("*")
         .eq("is_active", true)
         .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: cruiseCompanies, isLoading: loadingCruises } = useQuery({
+    queryKey: ["cruise-companies-listing"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companhias_maritimas")
+        .select("*")
+        .eq("ativo", true)
+        .order("nome");
       if (error) throw error;
       return data;
     },
