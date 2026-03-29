@@ -47,7 +47,7 @@ export default function SupplierDetail() {
     queryKey: ["trade-supplier", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("tour_operators")
+        .from("trade_suppliers")
         .select(`*, supplier_specialties (specialty_id, specialties (id, name))`)
         .eq("id", id!)
         .maybeSingle();
