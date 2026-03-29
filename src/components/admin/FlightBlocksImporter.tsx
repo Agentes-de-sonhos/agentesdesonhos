@@ -52,6 +52,9 @@ interface ParsedBlock {
   operator: string;
 }
 
+const DATE_COLUMN_INDEXES = new Set([1, 4, 7, 10]);
+const TIME_COLUMN_INDEXES = new Set([2, 5, 8, 11]);
+
 function toIsoDate(year: number, month: number, day: number): string {
   return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
@@ -105,13 +108,17 @@ function parseDate(raw: any): string {
   }
 
   // Parse DD/MM/YY or DD/MM/YYYY — ALWAYS Brazilian format, NEVER MM/DD
-  const normalized = str.split(/[ T]/)[0];
-  const parts = normalized.split("/");
-  if (parts.length === 3) {
-    const day = Number(parts[0]);
-    const month = Number(parts[1]);
-    let year = Number(parts[2]);
-    if (parts[2].length === 2) year = 2000 + year;
+  const normalized = str
+    .split(/[ T]/)[0]
+    .replace(/[.\-]/g, "/")
+    .replace(/[^\d/]/g, "");
+
+  const match = normalized.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+  if (match) {
+    const day = Number(match[1]);
+    const month = Number(match[2]);
+    let year = Number(match[3]);
+    if (match[3].length === 2) year = 2000 + year;
 
     if (isValidDate(year, month, day)) {
       return toIsoDate(year, month, day);
@@ -122,6 +129,41 @@ function parseDate(raw: any): string {
   }
 
   return "";
+}
+
+function getCellDisplayValue(cell?: XLSX.CellObject): string | number | Date {
+  if (!cell) return "";
+
+  if (cell.w != null && String(cell.w).trim() !== "") {
+    return String(cell.w).trim();
+  }
+
+  return cell.v ?? "";
+}
+
+function getSheetRows(sheet: XLSX.WorkSheet): any[][] {
+  const ref = sheet["!ref"];
+  if (!ref) return [];
+
+  const range = XLSX.utils.decode_range(ref);
+  const rows: any[][] = [];
+
+  for (let rowIndex = range.s.r; rowIndex <= range.e.r; rowIndex++) {
+    const row: any[] = [];
+
+    for (let colIndex = range.s.c; colIndex <= range.e.c; colIndex++) {
+      const address = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+      const cell = sheet[address];
+
+      row[colIndex] = DATE_COLUMN_INDEXES.has(colIndex) || TIME_COLUMN_INDEXES.has(colIndex)
+        ? getCellDisplayValue(cell)
+        : (cell?.v ?? "");
+    }
+
+    rows.push(row);
+  }
+
+  return rows;
 }
 
 function formatDisplayDate(isoDate: string): string {
@@ -318,7 +360,7 @@ export function FlightBlocksImporter() {
         // cellDates: false → dates stay as serial numbers, avoiding timezone shifts
         const workbook = XLSX.read(data, { type: "array", cellDates: false });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, dateNF: "dd/mm/yyyy" });
+        const rows = getSheetRows(sheet);
         const blocks = parseExcelRows(rows);
         if (blocks.length === 0) {
           toast({ title: "Nenhum bloqueio encontrado no arquivo", variant: "destructive" });
