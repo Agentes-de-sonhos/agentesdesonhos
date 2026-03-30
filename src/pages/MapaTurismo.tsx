@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSuppliersWithSpecialties, useAllSpecialties } from "@/hooks/useSupplierSpecialties";
+import { useSuppliersWithSpecialties } from "@/hooks/useSupplierSpecialties";
 import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
 import { useSupplierReviews } from "@/hooks/useSupplierReviews";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
@@ -113,7 +113,8 @@ export default function MapaTurismo() {
   const handleCategoryChange = (cat: CategoryDef) => {
     const newCat = categoryFilter === cat.category ? "all" : cat.category;
     setCategoryFilter(newCat);
-    updateUrlParams(newCat, selectedSpecialties);
+    setSelectedSpecialties([]);
+    updateUrlParams(newCat, []);
   };
 
   const handleSpecialtiesChange = (specialties: string[]) => {
@@ -129,7 +130,7 @@ export default function MapaTurismo() {
   };
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
-  const { data: dbSpecialties = [] } = useAllSpecialties();
+  
 
   const { data: tourOperators, isLoading: loadingOperators } = useQuery({
     queryKey: ["tour-operators-listing"],
@@ -197,35 +198,22 @@ export default function MapaTurismo() {
     return [...fromSuppliers, ...fromOperators, ...fromCruises];
   }, [suppliers, tourOperators, cruiseCompanies]);
 
-  // Merge DB specialties + operator specialties for complete filter list
+  // Contextual specialties: only from items matching the active category
   const allSpecialties = useMemo(() => {
-    const namesMap = new Map<string, string>(); // lowercased → original casing
-    // Add from DB specialties table
-    dbSpecialties.forEach((s) => {
-      const key = s.name.trim().toLowerCase();
-      if (key && !namesMap.has(key)) namesMap.set(key, s.name.trim());
-    });
-    // Add from supplier_specialties (already structured)
-    (suppliers || []).forEach((sup: any) => {
-      (sup.specialties || []).forEach((s: any) => {
+    const namesMap = new Map<string, string>();
+    const itemsForCategory = categoryFilter === "all"
+      ? allItems
+      : allItems.filter((item) => item.category === categoryFilter);
+
+    itemsForCategory.forEach((item: any) => {
+      (item.specialties || []).forEach((s: any) => {
         if (!s?.name) return;
         const key = s.name.trim().toLowerCase();
         if (key && !namesMap.has(key)) namesMap.set(key, s.name.trim());
       });
     });
-    // Add from tour_operators CSV field
-    (tourOperators || []).forEach((op: any) => {
-      if (op.specialties) {
-        op.specialties.split(",").forEach((s: string) => {
-          const trimmed = s.trim();
-          if (!trimmed) return;
-          const key = trimmed.toLowerCase();
-          if (!namesMap.has(key)) namesMap.set(key, trimmed);
-        });
-      }
-    });
     return Array.from(namesMap.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [dbSpecialties, suppliers, tourOperators]);
+  }, [allItems, categoryFilter]);
 
   const specialtyOptions = allSpecialties.map((name) => ({
     value: name,
@@ -353,7 +341,7 @@ export default function MapaTurismo() {
                 options={specialtyOptions}
                 selected={selectedSpecialties}
                 onChange={handleSpecialtiesChange}
-                placeholder="Filtrar por especialidade..."
+                placeholder={categoryFilter !== "all" ? `Filtrar ${CATEGORIES_DATA.find(c => c.category === categoryFilter)?.title?.toLowerCase() || "fornecedores"} por especialidade...` : "Filtrar por especialidade..."}
                 searchPlaceholder="Buscar especialidade..."
                 emptyMessage="Nenhuma especialidade encontrada."
                 className="bg-card"
