@@ -29,7 +29,6 @@ import {
   Copy,
   Trash2,
   Loader2,
-  Loader2,
   FolderOpen,
   MapPin,
   Calendar,
