@@ -896,16 +896,16 @@ export default function GerarOrcamento() {
                   </div>
                   <Switch
                     id="show-investment"
-                    checked={(quote as any).show_investment_section !== false}
+                    checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
                     onCheckedChange={async (checked) => {
                       if (!quote) return;
+                      setShowInvestmentLocal(checked);
                       await supabase.from("quotes").update({ show_investment_section: checked } as any).eq("id", quote.id);
-                      refetchQuote();
                     }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 ml-6">
-                  {(quote as any).show_investment_section !== false
+                  {(showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false)
                     ? "O cliente verá a seção de investimento e condições de pagamento."
                     : "Apenas os valores por serviço serão exibidos ao cliente."}
                 </p>
