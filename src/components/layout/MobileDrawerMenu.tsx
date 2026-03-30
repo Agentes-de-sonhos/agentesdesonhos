@@ -140,7 +140,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection],
     []
   );
 
