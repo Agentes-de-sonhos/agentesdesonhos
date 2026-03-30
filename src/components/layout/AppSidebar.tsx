@@ -105,20 +105,7 @@ const conhecimentoSection: MenuSection = {
   ],
 };
 
-const tradeConnectSection: MenuSection = {
-  title: "Trade Connect",
-  icon: Briefcase,
-  hoverColor: "hover:bg-indigo-600 hover:text-white",
-  headerBg: "bg-indigo-600 text-white",
-  headerHoverBg: "hover:bg-indigo-700",
-  bgColor: "bg-indigo-50",
-  textColor: "text-indigo-700",
-  borderColor: "border-indigo-600",
-  items: [
-    { title: "Meu Perfil", url: "/trade-connect/perfil", icon: User },
-    { title: "Minhas Comunidades", url: "/trade-connect/comunidades", icon: Users },
-  ],
-};
+const tradeConnectItem: MenuItem = { title: "Trade Connect", url: "/trade-connect", icon: Briefcase };
 
 const comunidadeSection: MenuSection = {
   title: "Comunidade",
@@ -261,7 +248,7 @@ export function AppSidebar() {
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, tradeConnectSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, comunidadeSection],
     []
   );
 
@@ -546,6 +533,7 @@ export function AppSidebar() {
 
           {/* Standalone items */}
           <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
+            {renderSingleItem(tradeConnectItem)}
             {renderSingleItem(mentoriasItem)}
           </nav>
         </div>

@@ -4974,6 +4974,7 @@ export type Database = {
           bio: string | null
           city: string | null
           cnpj: string | null
+          cover_image_url: string | null
           cpf: string | null
           created_at: string
           has_password: boolean | null
@@ -5002,6 +5003,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           cnpj?: string | null
+          cover_image_url?: string | null
           cpf?: string | null
           created_at?: string
           has_password?: boolean | null
@@ -5030,6 +5032,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           cnpj?: string | null
+          cover_image_url?: string | null
           cpf?: string | null
           created_at?: string
           has_password?: boolean | null

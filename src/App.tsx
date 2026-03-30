@@ -74,6 +74,7 @@ const CadastroLink = lazy(() => import("./pages/CadastroLink"));
 const LeadFormPublic = lazy(() => import("./pages/LeadFormPublic"));
 const MeusLeads = lazy(() => import("./pages/MeusLeads"));
 const Suporte = lazy(() => import("./pages/Suporte"));
+const TradeConnectHub = lazy(() => import("./pages/TradeConnectHub"));
 const TradeConnectProfile = lazy(() => import("./pages/TradeConnectProfile"));
 const TradeConnectCommunities = lazy(() => import("./pages/TradeConnectCommunities"));
 const AgentProfile = lazy(() => import("./pages/AgentProfile"));
@@ -172,6 +173,7 @@ const App = () => (
             <Route path="/gestao-clientes/metas" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/educa-academy" element={<ProtectedRoute><EducaAcademy /></ProtectedRoute>} />
             <Route path="/comunidade" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+            <Route path="/trade-connect" element={<ProtectedRoute><TradeConnectHub /></ProtectedRoute>} />
             <Route path="/trade-connect/perfil" element={<ProtectedRoute><TradeConnectProfile /></ProtectedRoute>} />
             <Route path="/trade-connect/comunidades" element={<ProtectedRoute><TradeConnectCommunities /></ProtectedRoute>} />
             <Route path="/trade-connect/agente/:userId" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
