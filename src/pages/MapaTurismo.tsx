@@ -115,6 +115,7 @@ export default function MapaTurismo() {
     const newCat = categoryFilter === cat.category ? "all" : cat.category;
     setCategoryFilter(newCat);
     setSelectedSpecialties([]);
+    setHospQuickFilter(null);
     updateUrlParams(newCat, []);
   };
 
