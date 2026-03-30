@@ -120,6 +120,7 @@ export default function MapaTurismo() {
     setCategoryFilter(newCat);
     setSelectedSpecialties([]);
     setHospQuickFilter(null);
+    setCruiseQuickFilters([]);
     updateUrlParams(newCat, []);
   };
 
@@ -133,6 +134,7 @@ export default function MapaTurismo() {
     setCategoryFilter(DEFAULT_CATEGORY);
     setSelectedSpecialties([]);
     setHospQuickFilter(null);
+    setCruiseQuickFilters([]);
     setSearchParams({ categoria: DEFAULT_CATEGORY });
   };
 
