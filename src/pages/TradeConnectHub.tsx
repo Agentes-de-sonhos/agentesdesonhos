@@ -10,18 +10,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import {
   User, Building2, MapPin, Briefcase, Tag, Loader2, Edit,
   Users, UserCheck, UserPlus, Clock, CheckCircle2, AlertCircle,
   MessageCircle, ArrowRight, Heart, Handshake, Camera,
-  MessageCircleQuestion, Eye,
+  MessageCircleQuestion, Eye, PlusCircle, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1200&h=300&fit=crop&q=80";
+
+const CATEGORY_COLORS: Record<string, string> = {
+  geral: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+  destino: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  hotel: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  vendas: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
+  cruzeiro: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
+};
+
+function getCategoryColor(cat?: string | null) {
+  if (!cat) return "bg-muted text-muted-foreground";
+  return CATEGORY_COLORS[cat.toLowerCase()] || "bg-muted text-muted-foreground";
+}
 
 export default function TradeConnectHub() {
   const navigate = useNavigate();
@@ -35,7 +47,6 @@ export default function TradeConnectHub() {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [uploadingCover, setUploadingCover] = useState(false);
 
-  // Fetch profiles for accepted connections
   const connectedUserIds = acceptedConnections.map(c =>
     c.requester_id === user?.id ? c.receiver_id : c.requester_id
   );
@@ -56,7 +67,6 @@ export default function TradeConnectHub() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Community membership
   const { data: membership, isLoading: membershipLoading } = useQuery({
     queryKey: ["community-membership", user?.id],
     queryFn: async () => {
@@ -72,7 +82,6 @@ export default function TradeConnectHub() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Latest Q&A questions
   const { data: latestQuestions = [] } = useQuery({
     queryKey: ["trade-connect-qa-latest"],
     queryFn: async () => {
@@ -128,20 +137,20 @@ export default function TradeConnectHub() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
+      <div className="w-full max-w-7xl mx-auto space-y-6 animate-fade-in">
         {/* ── COVER + HEADER ── */}
-        <Card className="overflow-hidden">
-          <div className="relative h-40 sm:h-52 bg-muted">
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="relative h-44 sm:h-56 bg-muted">
             <img
               src={profile?.cover_image_url || DEFAULT_COVER}
               alt="Capa"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             <Button
               size="sm"
-              variant="secondary"
-              className="absolute top-3 right-3 gap-1.5 opacity-80 hover:opacity-100"
+              className="absolute top-3 right-3 gap-1.5 bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all duration-200"
+              variant="outline"
               onClick={() => coverInputRef.current?.click()}
               disabled={uploadingCover}
             >
@@ -157,25 +166,35 @@ export default function TradeConnectHub() {
             />
           </div>
           <CardContent className="relative pt-0 pb-5 px-4 sm:px-6">
-            <div className="flex flex-col sm:flex-row items-start gap-4 -mt-12 sm:-mt-14">
-              <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+            <div className="flex flex-col sm:flex-row items-start gap-4 -mt-14 sm:-mt-16">
+              <Avatar className="h-28 w-28 border-4 border-background shadow-xl ring-2 ring-primary/20">
                 <AvatarImage src={profile?.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary text-3xl font-bold">
                   {profile?.name?.charAt(0) || "?"}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0 pt-2 sm:pt-6">
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground">{profile?.name || "Sem nome"}</h1>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-sm mt-1">
+              <div className="flex-1 min-w-0 pt-2 sm:pt-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+                  {profile?.name || "Sem nome"}
+                </h1>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
                   {profile?.agency_name && (
-                    <span className="flex items-center gap-1"><Building2 className="h-3.5 w-3.5" />{profile.agency_name}</span>
+                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground font-medium">
+                      <Building2 className="h-4 w-4 text-primary/60" />{profile.agency_name}
+                    </span>
                   )}
                   {(profile?.city || profile?.state) && (
-                    <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{[profile.city, profile.state].filter(Boolean).join(", ")}</span>
+                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4 text-rose-400" />{[profile.city, profile.state].filter(Boolean).join(", ")}
+                    </span>
                   )}
                 </div>
               </div>
-              <Button variant="outline" size="sm" className="mt-2 sm:mt-6 gap-1.5" onClick={() => navigate("/trade-connect/perfil")}>
+              <Button
+                size="sm"
+                className="mt-2 sm:mt-8 gap-1.5 rounded-full px-5 shadow-sm hover:shadow-md transition-all duration-200"
+                onClick={() => navigate("/trade-connect/perfil")}
+              >
                 <Edit className="h-3.5 w-3.5" /> Editar perfil
               </Button>
             </div>
@@ -184,166 +203,255 @@ export default function TradeConnectHub() {
 
         {/* ── 3-COLUMN LAYOUT ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT: Profile summary */}
+
+          {/* ═══ LEFT COLUMN ═══ */}
           <div className="lg:col-span-3 space-y-4">
             {/* Profile completeness */}
-            <Card>
-              <CardContent className="pt-4 pb-4">
-                <div className="flex items-center gap-2 mb-2">
+            <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/20">
+              <CardContent className="pt-5 pb-5">
+                <div className="flex items-center gap-2.5 mb-3">
                   {profileCompleteness === 100 ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <div className="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
                   ) : (
-                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                      <AlertCircle className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
+                    </div>
                   )}
-                  <span className="text-sm font-medium">{profileCompleteness}% completo</span>
+                  <div>
+                    <span className="text-sm font-bold text-foreground">{profileCompleteness}%</span>
+                    <p className="text-xs text-muted-foreground">Perfil completo</p>
+                  </div>
                 </div>
-                <Progress value={profileCompleteness} className="h-2" />
+                <div className="relative">
+                  <Progress value={profileCompleteness} className="h-2.5 bg-blue-100 dark:bg-blue-900/30" />
+                </div>
                 {profileCompleteness < 100 && (
-                  <Button variant="link" size="sm" className="px-0 mt-2 h-auto text-xs" onClick={() => navigate("/trade-connect/perfil")}>
-                    Completar perfil →
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="px-0 mt-2.5 h-auto text-xs font-semibold text-primary"
+                    onClick={() => navigate("/trade-connect/perfil")}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" /> Completar perfil →
                   </Button>
                 )}
               </CardContent>
             </Card>
 
-            {/* Mini profile */}
-            <Card>
-              <CardContent className="pt-4 pb-4 space-y-3">
+            {/* Mini profile info */}
+            <Card className="border-0 shadow-md">
+              <CardContent className="pt-5 pb-5 space-y-4">
                 {profile?.bio && (
-                  <p className="text-xs text-muted-foreground line-clamp-3">{profile.bio}</p>
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                      <User className="h-3.5 w-3.5 text-primary/60" /> Sobre
+                    </h4>
+                    <p className="text-sm text-foreground leading-relaxed line-clamp-4">{profile.bio}</p>
+                  </div>
                 )}
                 {profile?.niches && profile.niches.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1"><Tag className="h-3 w-3" /> Nichos</h4>
-                    <div className="flex flex-wrap gap-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5 text-violet-500" /> Nichos
+                    </h4>
+                    <div className="flex flex-wrap gap-1.5">
                       {profile.niches.slice(0, 5).map((n) => (
-                        <Badge key={n} variant="default" className="text-[10px] px-1.5 py-0">{n}</Badge>
+                        <Badge key={n} className="text-[11px] px-2.5 py-0.5 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 border-0 font-medium">
+                          {n}
+                        </Badge>
                       ))}
                     </div>
                   </div>
                 )}
                 {profile?.specialties && profile.specialties.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground mb-1.5">Especialidades</h4>
-                    <div className="flex flex-wrap gap-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Especialidades</h4>
+                    <div className="flex flex-wrap gap-1.5">
                       {profile.specialties.slice(0, 5).map((s) => (
-                        <Badge key={s} variant="secondary" className="text-[10px] px-1.5 py-0">{s}</Badge>
+                        <Badge key={s} className="text-[11px] px-2.5 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-0 font-medium">
+                          {s}
+                        </Badge>
                       ))}
                       {profile.specialties.length > 5 && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">+{profile.specialties.length - 5}</Badge>
+                        <Badge variant="outline" className="text-[11px] px-2 py-0.5">+{profile.specialties.length - 5}</Badge>
                       )}
                     </div>
                   </div>
                 )}
                 {profile?.years_in_business && (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Briefcase className="h-3 w-3" /> {profile.years_in_business} anos de atuação
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
+                    <Briefcase className="h-4 w-4 text-primary/50" />
+                    <span className="font-medium">{profile.years_in_business} anos</span> de atuação
                   </div>
                 )}
               </CardContent>
             </Card>
-          </div>
 
-          {/* CENTER: Q&A Widget + Activity */}
-          <div className="lg:col-span-5 space-y-4">
-            {/* Help offer card */}
+            {/* Help offer */}
             {profile?.help_offer && (
-              <Card className="border-rose-200 dark:border-rose-900/30">
-                <CardContent className="pt-4 pb-4">
-                  <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
-                    <Heart className="h-4 w-4 text-rose-500" /> Como posso ajudar outros agentes
+              <Card className="border-0 shadow-md bg-gradient-to-br from-rose-50 to-pink-50/50 dark:from-rose-950/20 dark:to-pink-950/10">
+                <CardContent className="pt-5 pb-5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-1.5">
+                    <Heart className="h-3.5 w-3.5" /> Como posso ajudar
                   </h4>
-                  <p className="text-sm text-muted-foreground">{profile.help_offer}</p>
+                  <p className="text-sm text-foreground leading-relaxed">{profile.help_offer}</p>
                 </CardContent>
               </Card>
             )}
 
             {/* Partnership interests */}
             {profile?.partnership_interests && profile.partnership_interests.length > 0 && (
-              <Card>
-                <CardContent className="pt-4 pb-4">
-                  <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
-                    <Handshake className="h-4 w-4" /> Busco parcerias em
+              <Card className="border-0 shadow-md">
+                <CardContent className="pt-5 pb-5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                    <Handshake className="h-3.5 w-3.5 text-emerald-500" /> Busco parcerias
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {profile.partnership_interests.map((p) => (
-                      <Badge key={p} variant="secondary" className="text-xs">{p}</Badge>
+                      <Badge key={p} className="text-[11px] px-2.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border-0 font-medium">
+                        {p}
+                      </Badge>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             )}
+          </div>
 
-            {/* Q&A Widget */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <MessageCircleQuestion className="h-4 w-4 text-primary" />
+          {/* ═══ CENTER COLUMN: Q&A Feed ═══ */}
+          <div className="lg:col-span-5 space-y-4">
+            {/* Ask question CTA */}
+            <Card className="border-0 shadow-md">
+              <CardContent className="py-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 flex-shrink-0">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm">{profile?.name?.charAt(0) || "?"}</AvatarFallback>
+                  </Avatar>
+                  <Button
+                    variant="outline"
+                    className="flex-1 justify-start text-muted-foreground font-normal rounded-full h-10 bg-muted/30 hover:bg-muted/50 border-muted-foreground/20 transition-all duration-200"
+                    onClick={() => navigate("/perguntas-respostas?new=1")}
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2 text-primary" />
+                    Fazer uma pergunta à comunidade...
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Q&A Feed */}
+            <Card className="border-0 shadow-md">
+              <CardHeader className="pb-3 border-b border-border/50">
+                <CardTitle className="text-lg font-bold flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <MessageCircleQuestion className="h-4.5 w-4.5 text-primary" />
+                  </div>
                   Perguntas e Respostas
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0 space-y-2">
+              <CardContent className="pt-2 pb-3">
                 {latestQuestions.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">Nenhuma pergunta ainda</p>
+                  <div className="text-center py-10">
+                    <div className="h-16 w-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                      <MessageCircle className="h-7 w-7 text-muted-foreground/40" />
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">Nenhuma pergunta ainda</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Seja o primeiro a perguntar!</p>
+                  </div>
                 ) : (
-                  <>
-                    {latestQuestions.map((q) => (
+                  <div className="divide-y divide-border/40">
+                    {latestQuestions.map((q, idx) => (
                       <div
                         key={q.id}
-                        className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                        className={`flex items-start gap-3 py-4 px-2 rounded-xl hover:bg-muted/40 cursor-pointer transition-all duration-200 hover:shadow-sm -mx-2 ${idx === 0 ? "bg-primary/[0.03]" : ""}`}
                         onClick={() => navigate(`/perguntas-respostas?q=${q.id}`)}
                       >
-                        <MessageCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <MessageCircle className="h-4 w-4 text-primary" />
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground line-clamp-2">{q.title}</p>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                            {q.category && <Badge variant="outline" className="text-[10px] px-1.5 py-0">{q.category}</Badge>}
-                            <span>{q.answers_count} resposta{q.answers_count !== 1 ? "s" : ""}</span>
-                            <span>{formatDistanceToNow(new Date(q.created_at), { addSuffix: true, locale: ptBR })}</span>
+                          <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                            {q.title}
+                          </p>
+                          <div className="flex items-center gap-2.5 mt-2 flex-wrap">
+                            {q.category && (
+                              <Badge className={`text-[10px] px-2 py-0.5 border-0 font-medium ${getCategoryColor(q.category)}`}>
+                                {q.category}
+                              </Badge>
+                            )}
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <MessageCircle className="h-3 w-3" />
+                              <span className="font-semibold text-foreground/70">{q.answers_count}</span> resposta{q.answers_count !== 1 ? "s" : ""}
+                            </span>
+                            <span className="text-xs text-muted-foreground/70">
+                              {formatDistanceToNow(new Date(q.created_at), { addSuffix: true, locale: ptBR })}
+                            </span>
                           </div>
                         </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground/40 mt-1 flex-shrink-0" />
                       </div>
                     ))}
-                    <Separator />
-                    <Button variant="ghost" size="sm" className="w-full gap-1.5" onClick={() => navigate("/perguntas-respostas")}>
-                      Ver todas as perguntas <ArrowRight className="h-3.5 w-3.5" />
-                    </Button>
-                  </>
+                  </div>
+                )}
+                {latestQuestions.length > 0 && (
+                  <Button
+                    className="w-full mt-3 gap-2 rounded-xl font-semibold"
+                    variant="outline"
+                    onClick={() => navigate("/perguntas-respostas")}
+                  >
+                    Ver todas as perguntas <ArrowRight className="h-4 w-4" />
+                  </Button>
                 )}
               </CardContent>
             </Card>
           </div>
 
-          {/* RIGHT: Connections + Communities */}
+          {/* ═══ RIGHT COLUMN ═══ */}
           <div className="lg:col-span-4 space-y-4">
             {/* Pending requests */}
             {pendingReceived.length > 0 && (
-              <Card className="border-amber-200 dark:border-amber-900/30">
+              <Card className="border-0 shadow-md bg-gradient-to-br from-amber-50 to-orange-50/50 dark:from-amber-950/20 dark:to-orange-950/10">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-amber-500" />
-                    Solicitações pendentes
-                    <Badge variant="secondary" className="ml-auto">{pendingReceived.length}</Badge>
+                  <CardTitle className="text-base font-bold flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                      <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    Solicitações
+                    <Badge className="ml-auto bg-amber-200 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border-0 font-bold">
+                      {pendingReceived.length}
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 space-y-2">
                   {pendingReceived.map((conn) => {
                     const p = getProfile(conn.requester_id);
                     return (
-                      <div key={conn.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
-                        <Avatar className="h-9 w-9 cursor-pointer" onClick={() => navigate(`/trade-connect/agente/${conn.requester_id}`)}>
+                      <div key={conn.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/60 dark:bg-white/5 shadow-sm">
+                        <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-amber-200/50" onClick={() => navigate(`/trade-connect/agente/${conn.requester_id}`)}>
                           <AvatarImage src={p?.avatar_url || undefined} />
-                          <AvatarFallback className="text-xs bg-primary/10 text-primary">{p?.name?.charAt(0) || "?"}</AvatarFallback>
+                          <AvatarFallback className="text-xs bg-amber-100 text-amber-700">{p?.name?.charAt(0) || "?"}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{p?.name || "Agente"}</p>
+                          <p className="text-sm font-semibold truncate">{p?.name || "Agente"}</p>
                           <p className="text-xs text-muted-foreground truncate">{p?.agency_name || ""}</p>
                         </div>
-                        <div className="flex gap-1">
-                          <Button size="icon" variant="ghost" className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" onClick={() => respondRequest({ connectionId: conn.id, accept: true })}>
+                        <div className="flex gap-1.5">
+                          <Button
+                            size="sm"
+                            className="h-8 px-3 gap-1 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
+                            onClick={() => respondRequest({ connectionId: conn.id, accept: true })}
+                          >
                             <UserCheck className="h-3.5 w-3.5" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => respondRequest({ connectionId: conn.id, accept: false })}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 gap-1 rounded-full text-muted-foreground hover:text-destructive hover:border-destructive/50"
+                            onClick={() => respondRequest({ connectionId: conn.id, accept: false })}
+                          >
                             <User className="h-3.5 w-3.5" />
                           </Button>
                         </div>
@@ -354,52 +462,58 @@ export default function TradeConnectHub() {
               </Card>
             )}
 
-            {/* Accepted connections */}
-            <Card>
+            {/* Connections */}
+            <Card className="border-0 shadow-md">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base font-bold flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
                   Minhas Conexões
                   {acceptedConnections.length > 0 && (
-                    <Badge variant="outline" className="ml-auto">{acceptedConnections.length}</Badge>
+                    <Badge className="ml-auto bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-0 font-bold">
+                      {acceptedConnections.length}
+                    </Badge>
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-1">
                 {connectionsLoading ? (
-                  <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                  <div className="flex justify-center py-6"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
                 ) : acceptedConnections.length === 0 ? (
-                  <div className="text-center py-6">
-                    <UserPlus className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-                    <p className="text-sm text-muted-foreground">Nenhuma conexão ainda</p>
-                    <p className="text-xs text-muted-foreground mt-1">Conecte-se com agentes online ou nas comunidades</p>
+                  <div className="text-center py-8">
+                    <div className="h-14 w-14 mx-auto rounded-full bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center mb-3">
+                      <UserPlus className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">Nenhuma conexão ainda</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Conecte-se com agentes online ou nas comunidades</p>
                   </div>
                 ) : (
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     {acceptedConnections.slice(0, 8).map((conn) => {
                       const otherId = conn.requester_id === user?.id ? conn.receiver_id : conn.requester_id;
                       const p = getProfile(otherId);
                       return (
                         <div
                           key={conn.id}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                          className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-blue-50/50 dark:hover:bg-blue-950/20 cursor-pointer transition-all duration-200 hover:shadow-sm"
                           onClick={() => navigate(`/trade-connect/agente/${otherId}`)}
                         >
-                          <Avatar className="h-8 w-8">
+                          <Avatar className="h-9 w-9 ring-1 ring-blue-200/50">
                             <AvatarImage src={p?.avatar_url || undefined} />
-                            <AvatarFallback className="text-xs bg-primary/10 text-primary">{p?.name?.charAt(0) || "?"}</AvatarFallback>
+                            <AvatarFallback className="text-xs bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">{p?.name?.charAt(0) || "?"}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{p?.name || "Agente"}</p>
+                            <p className="text-sm font-semibold truncate">{p?.name || "Agente"}</p>
                             <p className="text-xs text-muted-foreground truncate">{p?.agency_name || ""}</p>
                           </div>
-                          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Eye className="h-4 w-4 text-muted-foreground/40" />
                         </div>
                       );
                     })}
                     {acceptedConnections.length > 8 && (
-                      <p className="text-xs text-center text-muted-foreground pt-1">
-                        +{acceptedConnections.length - 8} conexões
+                      <p className="text-xs text-center text-primary font-medium pt-2 cursor-pointer hover:underline">
+                        Ver todas (+{acceptedConnections.length - 8})
                       </p>
                     )}
                   </div>
@@ -408,50 +522,52 @@ export default function TradeConnectHub() {
             </Card>
 
             {/* Communities */}
-            <Card>
+            <Card className="border-0 shadow-md">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base font-bold flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-lg bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center">
+                    <Heart className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                  </div>
                   Comunidades
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0 space-y-2">
+              <CardContent className="pt-1 space-y-2">
                 {membershipLoading ? (
-                  <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                  <div className="flex justify-center py-6"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
                 ) : (
                   <>
                     {isMember ? (
                       <div
-                        className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/10 hover:shadow-md cursor-pointer transition-all duration-200"
                         onClick={() => navigate("/comunidade")}
                       >
-                        <div className="h-9 w-9 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-                          <Users className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                          <Users className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">Travel Experts</p>
-                          <p className="text-xs text-muted-foreground">Comunidade premium</p>
+                          <p className="text-sm font-bold text-foreground">Travel Experts</p>
+                          <p className="text-xs text-muted-foreground">Comunidade premium de agentes</p>
                         </div>
-                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-[10px]">
+                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border-0 text-[10px] font-bold">
                           Membro
                         </Badge>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30">
-                        <div className="h-9 w-9 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-                          <Users className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                          <Users className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">Travel Experts</p>
-                          <p className="text-xs text-muted-foreground">Comunidade premium</p>
+                          <p className="text-sm font-bold text-foreground">Travel Experts</p>
+                          <p className="text-xs text-muted-foreground">Comunidade premium de agentes</p>
                         </div>
-                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => navigate("/comunidade")}>
+                        <Button size="sm" className="rounded-full px-4 h-8 text-xs font-semibold shadow-sm" onClick={() => navigate("/comunidade")}>
                           Participar
                         </Button>
                       </div>
                     )}
-                    <div className="text-center pt-1">
-                      <p className="text-xs text-muted-foreground">Novas comunidades em breve! 🚀</p>
+                    <div className="text-center pt-2 pb-1">
+                      <p className="text-xs text-muted-foreground/70">Novas comunidades em breve! 🚀</p>
                     </div>
                   </>
                 )}
