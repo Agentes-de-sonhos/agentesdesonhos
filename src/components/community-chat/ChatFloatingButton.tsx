@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useDirectMessages } from "@/hooks/useDirectMessages";
