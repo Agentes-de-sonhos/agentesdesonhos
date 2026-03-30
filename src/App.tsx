@@ -74,6 +74,9 @@ const CadastroLink = lazy(() => import("./pages/CadastroLink"));
 const LeadFormPublic = lazy(() => import("./pages/LeadFormPublic"));
 const MeusLeads = lazy(() => import("./pages/MeusLeads"));
 const Suporte = lazy(() => import("./pages/Suporte"));
+const TradeConnectProfile = lazy(() => import("./pages/TradeConnectProfile"));
+const TradeConnectCommunities = lazy(() => import("./pages/TradeConnectCommunities"));
+const AgentProfile = lazy(() => import("./pages/AgentProfile"));
 const CursosMarketplace = lazy(() => import("./pages/CursosMarketplace"));
 const CursoDetalhe = lazy(() => import("./pages/CursoDetalhe"));
 const CursoEditar = lazy(() => import("./pages/CursoEditar"));
@@ -169,6 +172,9 @@ const App = () => (
             <Route path="/gestao-clientes/metas" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/educa-academy" element={<ProtectedRoute><EducaAcademy /></ProtectedRoute>} />
             <Route path="/comunidade" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+            <Route path="/trade-connect/perfil" element={<ProtectedRoute><TradeConnectProfile /></ProtectedRoute>} />
+            <Route path="/trade-connect/comunidades" element={<ProtectedRoute><TradeConnectCommunities /></ProtectedRoute>} />
+            <Route path="/trade-connect/agente/:userId" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
             <Route path="/beneficios" element={<ProtectedRoute><Beneficios /></ProtectedRoute>} />
             <Route path="/mentorias" element={<ProtectedRoute><Mentorias /></ProtectedRoute>} />
             <Route path="/mentorias/:id" element={<ProtectedRoute><MentoriaDetail /></ProtectedRoute>} />
