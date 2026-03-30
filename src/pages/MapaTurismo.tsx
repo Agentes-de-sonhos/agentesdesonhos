@@ -287,7 +287,7 @@ export default function MapaTurismo() {
     });
 
     return results;
-  }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, sortBy, reviewStatsMap, getLikeCount]);
+  }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, cruiseQuickFilters, sortBy, reviewStatsMap, getLikeCount]);
 
   const isLoadingAll = isLoading || loadingOperators || loadingCruises;
 
