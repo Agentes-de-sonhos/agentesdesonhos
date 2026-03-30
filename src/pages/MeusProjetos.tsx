@@ -280,15 +280,6 @@ export default function MeusProjetos() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 hidden sm:flex"
-                    onClick={() => handleView(item)}
-                    title="Visualizar"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hidden sm:flex"
                     onClick={() => handleEdit(item)}
                     title="Editar"
                   >
@@ -301,10 +292,6 @@ export default function MeusProjetos() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleView(item)}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Visualizar
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleEdit(item)}>
                         <Pencil className="h-4 w-4 mr-2" />
                         Editar
