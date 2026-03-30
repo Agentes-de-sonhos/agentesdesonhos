@@ -82,7 +82,7 @@ export function OperatorHero({
             className="rounded-xl gap-2 border-amber-300/60 hover:border-amber-400 hover:bg-amber-50 text-amber-700 transition-all"
           >
             <Star className="h-4 w-4" />
-            Avaliar Operadora
+            Avaliar Empresa
           </Button>
         </div>
       </div>
