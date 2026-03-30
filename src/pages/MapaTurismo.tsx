@@ -238,7 +238,18 @@ export default function MapaTurismo() {
                 (s: Specialty) => s.name.trim().toLowerCase() === specLower
               )
             );
-          return matchesSearch && matchesCategory && matchesSpecialties;
+
+          // Hospedagem quick filters
+          let matchesQuickFilter = true;
+          if (hospQuickFilter === "resort") {
+            const nameOrSpecs = [item.name, ...(item.specialties || []).map((s: Specialty) => s.name)].join(" ").toLowerCase();
+            matchesQuickFilter = nameOrSpecs.includes("resort");
+          } else if (hospQuickFilter === "rede") {
+            const nameOrSpecs = [item.name, ...(item.specialties || []).map((s: Specialty) => s.name)].join(" ").toLowerCase();
+            matchesQuickFilter = nameOrSpecs.includes("rede hoteleira") || nameOrSpecs.includes("rede");
+          }
+
+          return matchesSearch && matchesCategory && matchesSpecialties && matchesQuickFilter;
         })
       : [];
 
