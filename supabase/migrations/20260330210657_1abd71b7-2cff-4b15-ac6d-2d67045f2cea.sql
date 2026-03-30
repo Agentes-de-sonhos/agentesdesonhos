@@ -1,0 +1,1 @@
+ALTER TABLE public.quotes ADD COLUMN IF NOT EXISTS show_investment_section boolean NOT NULL DEFAULT true;

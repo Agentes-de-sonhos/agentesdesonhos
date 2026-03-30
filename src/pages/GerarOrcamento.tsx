@@ -151,6 +151,7 @@ export default function GerarOrcamento() {
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
   const [autoSaved, setAutoSaved] = useState(false);
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
+  const [showInvestmentLocal, setShowInvestmentLocal] = useState<boolean | null>(null);
   const [headerEditDates, setHeaderEditDates] = useState(false);
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
@@ -882,6 +883,32 @@ export default function GerarOrcamento() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 ml-6">
                   {showDetailed ? "O cliente verá o valor de cada serviço." : "O cliente verá apenas o total."}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-3 px-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <Label htmlFor="show-investment" className="text-sm font-medium cursor-pointer">
+                      Exibir apresentação do investimento
+                    </Label>
+                  </div>
+                  <Switch
+                    id="show-investment"
+                    checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
+                    onCheckedChange={async (checked) => {
+                      if (!quote) return;
+                      setShowInvestmentLocal(checked);
+                      await supabase.from("quotes").update({ show_investment_section: checked } as any).eq("id", quote.id);
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 ml-6">
+                  {(showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false)
+                    ? "O cliente verá a seção de investimento e condições de pagamento."
+                    : "Apenas os valores por serviço serão exibidos ao cliente."}
                 </p>
               </CardContent>
             </Card>

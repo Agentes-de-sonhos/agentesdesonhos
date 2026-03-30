@@ -494,6 +494,8 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
             }
           }
 
+          if ((quote as any).show_investment_section === false) return null;
+
           return (
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground p-8 sm:p-10 text-center shadow-xl">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
@@ -516,7 +518,7 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
         })()}
 
         {/* ─── Payment Notes ─── */}
-        {paymentTerms && (
+        {(quote as any).show_investment_section !== false && paymentTerms && (
           <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
             <div className="flex items-center gap-2 mb-3">
               <CreditCard className="h-5 w-5 text-primary" />
