@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSuppliersWithSpecialties, useAllSpecialties } from "@/hooks/useSupplierSpecialties";
+import { useSuppliersWithSpecialties } from "@/hooks/useSupplierSpecialties";
 import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
 import { useSupplierReviews } from "@/hooks/useSupplierReviews";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
@@ -130,7 +130,7 @@ export default function MapaTurismo() {
   };
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
-  const { data: dbSpecialties = [] } = useAllSpecialties();
+  
 
   const { data: tourOperators, isLoading: loadingOperators } = useQuery({
     queryKey: ["tour-operators-listing"],
