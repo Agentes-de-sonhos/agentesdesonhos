@@ -53,7 +53,7 @@ export function OperatorReviewModal({
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
-            {existingReview ? "Editar Avaliação" : "Avaliar Operadora"}
+            {existingReview ? "Editar Avaliação" : "Avaliar Empresa"}
           </DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">{operatorName}</p>
         </DialogHeader>
