@@ -39,7 +39,6 @@ import {
   ShoppingBag,
   ArrowUpCircle,
   LayoutDashboard,
-  Briefcase,
   Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -98,22 +97,7 @@ const conhecimentoSection: MenuSection = {
   ],
 };
 
-const comunidadeSection: MenuSection = {
-  title: "Comunidade",
-  icon: Heart,
-  hoverColor: "hover:bg-red-600 hover:text-white",
-  headerBg: "bg-red-600 text-white",
-  headerHoverBg: "hover:bg-red-700",
-  bgColor: "bg-red-50",
-  textColor: "text-red-700",
-  borderColor: "border-red-600",
-  items: [
-    { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
-    { title: "Travel Experts", url: "/comunidade", icon: Users, requiredFeature: "community" },
-  ],
-};
-
-const tradeConnectItem: MenuItem = { title: "Trade Connect", url: "/trade-connect", icon: Briefcase };
+const comunidadeItem: MenuItem = { title: "Comunidade", url: "/trade-connect", icon: Heart };
 
 const guiasSection: MenuSection = {
   title: "Guias e Referências",
@@ -239,7 +223,7 @@ export function MobileSidebar() {
 
   // Same order as desktop
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
     []
   );
 
@@ -493,7 +477,7 @@ export function MobileSidebar() {
 
           {/* Standalone items - same as desktop */}
           <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
-            {renderMenuItem(tradeConnectItem)}
+            {renderMenuItem(comunidadeItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>
         </div>

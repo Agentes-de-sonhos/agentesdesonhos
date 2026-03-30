@@ -5,7 +5,7 @@ import {
   GraduationCap, Lock, Calculator, Heart, ChevronDown, MessageCircleQuestion,
   Store, CreditCard, Wallet, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
-  X, Building2, Briefcase,
+  X, Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,17 +52,7 @@ const conhecimentoSection: MenuSection = {
   ],
 };
 
-const comunidadeSection: MenuSection = {
-  title: "Comunidade", icon: Heart,
-  hoverColor: "hover:bg-red-600 hover:text-white", headerBg: "bg-red-600 text-white", headerHoverBg: "hover:bg-red-700",
-  bgColor: "bg-red-50", textColor: "text-red-700", borderColor: "border-red-600",
-  items: [
-    { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
-    { title: "Travel Experts", url: "/comunidade", icon: Users, requiredFeature: "community" },
-  ],
-};
-
-const tradeConnectItem: MenuItem = { title: "Trade Connect", url: "/trade-connect", icon: Briefcase };
+const comunidadeItem: MenuItem = { title: "Comunidade", url: "/trade-connect", icon: Heart };
 
 const guiasSection: MenuSection = {
   title: "Guias e Referências", icon: BookMarked,
@@ -150,7 +140,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection],
     []
   );
 
@@ -309,7 +299,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
           {allSections.map((section) => renderSection(section))}
 
           <nav className="flex flex-col gap-0.5 px-3">
-            {renderMenuItem(tradeConnectItem)}
+            {renderMenuItem(comunidadeItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>
         </div>
