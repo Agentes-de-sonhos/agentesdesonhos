@@ -177,6 +177,9 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
+  const useServicePayment = (quote as any).use_service_payment || 
+    quote.services?.some((s: any) => s.is_custom_payment === true) || false;
+
   const servicesHtml =
     quote.services
       ?.map((service) => {
@@ -199,6 +202,22 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           ${extraCount > 0 ? `<p style="padding-left:34px;font-size:11px;color:#94a3b8;margin:4px 0 8px;">+${extraCount} foto(s) disponíveis no link completo</p>` : ""}
         ` : "";
 
+        // Per-service payment display
+        let paymentHtml = "";
+        if (useServicePayment) {
+          const payConfig = extractServicePaymentConfig(service);
+          if (payConfig.is_custom_payment) {
+            const display = getServicePaymentDisplay(service.amount, payConfig);
+            if (display) {
+              paymentHtml = `
+                <div style="padding-left:34px;margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;">
+                  <p style="font-size:13px;font-weight:600;color:#0f766e;">💳 ${display}</p>
+                </div>
+              `;
+            }
+          }
+        }
+
         return `
         <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:12px;page-break-inside:avoid;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -214,6 +233,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             ${descText ? `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${descText}</p>` : ""}
             ${notesText ? `<p style="margin:8px 0 3px;font-size:13px;color:#64748b;line-height:1.6;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>` : ""}
           </div>
+          ${paymentHtml}
         </div>
       `;
       })
