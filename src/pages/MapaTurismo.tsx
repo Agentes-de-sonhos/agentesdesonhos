@@ -255,7 +255,18 @@ export default function MapaTurismo() {
             matchesQuickFilter = nameOrSpecs.includes("rede hoteleira") || nameOrSpecs.includes("rede");
           }
 
-          return matchesSearch && matchesCategory && matchesSpecialties && matchesQuickFilter;
+          // Cruise quick filters
+          let matchesCruiseFilter = true;
+          if (cruiseQuickFilters.length > 0 && item.category === "Cruzeiros") {
+            const specNames = (item.specialties || []).map((s: Specialty) => s.name.trim().toLowerCase());
+            matchesCruiseFilter = cruiseQuickFilters.every((f) =>
+              specNames.some((sn) => sn.includes(f.toLowerCase()))
+            );
+          } else if (cruiseQuickFilters.length > 0 && item.category !== "Cruzeiros") {
+            matchesCruiseFilter = false;
+          }
+
+          return matchesSearch && matchesCategory && matchesSpecialties && matchesQuickFilter && matchesCruiseFilter;
         })
       : [];
 
