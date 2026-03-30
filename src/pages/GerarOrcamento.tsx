@@ -346,8 +346,7 @@ export default function GerarOrcamento() {
     if (!quote) return;
 
     const token = quote.share_token || await publishQuote(quote.id);
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const publicUrl = `${supabaseUrl}/functions/v1/quote-og?token=${token}`;
+    const publicUrl = `${PUBLIC_DOMAIN}/orcamento/${token}`;
 
     await navigator.clipboard.writeText(publicUrl);
     toast({
