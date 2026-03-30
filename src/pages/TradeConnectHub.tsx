@@ -13,27 +13,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   User, Building2, MapPin, Briefcase, Tag, Loader2, Edit,
   Users, UserCheck, UserPlus, Clock, CheckCircle2, AlertCircle,
-  MessageCircle, ArrowRight, Heart, Handshake, Camera,
-  MessageCircleQuestion, Eye, PlusCircle, Sparkles,
+  Heart, Handshake, Camera, Eye, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { QAFeed } from "@/components/qa/QAFeed";
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1200&h=300&fit=crop&q=80";
-
-const CATEGORY_COLORS: Record<string, string> = {
-  geral: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  destino: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-  hotel: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  vendas: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-  cruzeiro: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
-};
-
-function getCategoryColor(cat?: string | null) {
-  if (!cat) return "bg-muted text-muted-foreground";
-  return CATEGORY_COLORS[cat.toLowerCase()] || "bg-muted text-muted-foreground";
-}
 
 export default function TradeConnectHub() {
   const navigate = useNavigate();
@@ -82,19 +67,6 @@ export default function TradeConnectHub() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: latestQuestions = [] } = useQuery({
-    queryKey: ["trade-connect-qa-latest"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("qa_questions")
-        .select("id, title, category, answers_count, created_at, user_id")
-        .order("created_at", { ascending: false })
-        .limit(5);
-      return data || [];
-    },
-    staleTime: 3 * 60 * 1000,
-  });
-
   const isMember = membership && ["approved_unverified", "verified"].includes(membership.status);
 
   const getProfile = (userId: string) =>
@@ -124,6 +96,15 @@ export default function TradeConnectHub() {
       setUploadingCover(false);
     }
   };
+
+  // Check if left column has any content beyond progress
+  const hasProfileBio = !!profile?.bio;
+  const hasNiches = (profile?.niches?.length || 0) > 0;
+  const hasSpecialties = (profile?.specialties?.length || 0) > 0;
+  const hasYears = !!profile?.years_in_business;
+  const hasProfileInfo = hasProfileBio || hasNiches || hasSpecialties || hasYears;
+  const hasHelpOffer = !!profile?.help_offer;
+  const hasPartnershipInterests = (profile?.partnership_interests?.length || 0) > 0;
 
   if (profileLoading) {
     return (
@@ -174,7 +155,10 @@ export default function TradeConnectHub() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0 pt-2 sm:pt-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+                <h1
+                  className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground"
+                  style={{ textShadow: "0 2px 6px rgba(0,0,0,0.15)" }}
+                >
                   {profile?.name || "Sem nome"}
                 </h1>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
@@ -193,7 +177,7 @@ export default function TradeConnectHub() {
               <Button
                 size="sm"
                 className="mt-2 sm:mt-8 gap-1.5 rounded-full px-5 shadow-sm hover:shadow-md transition-all duration-200"
-                onClick={() => navigate("/trade-connect/perfil")}
+                onClick={() => navigate("/comunidade/perfil")}
               >
                 <Edit className="h-3.5 w-3.5" /> Editar perfil
               </Button>
@@ -232,7 +216,7 @@ export default function TradeConnectHub() {
                     variant="link"
                     size="sm"
                     className="px-0 mt-2.5 h-auto text-xs font-semibold text-primary"
-                    onClick={() => navigate("/trade-connect/perfil")}
+                    onClick={() => navigate("/comunidade/perfil")}
                   >
                     <Sparkles className="h-3 w-3 mr-1" /> Completar perfil →
                   </Button>
@@ -240,76 +224,78 @@ export default function TradeConnectHub() {
               </CardContent>
             </Card>
 
-            {/* Mini profile info */}
-            <Card className="border-0 shadow-md">
-              <CardContent className="pt-5 pb-5 space-y-4">
-                {profile?.bio && (
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
-                      <User className="h-3.5 w-3.5 text-primary/60" /> Sobre
-                    </h4>
-                    <p className="text-sm text-foreground leading-relaxed line-clamp-4">{profile.bio}</p>
-                  </div>
-                )}
-                {profile?.niches && profile.niches.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
-                      <Tag className="h-3.5 w-3.5 text-violet-500" /> Nichos
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {profile.niches.slice(0, 5).map((n) => (
-                        <Badge key={n} className="text-[11px] px-2.5 py-0.5 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 border-0 font-medium">
-                          {n}
-                        </Badge>
-                      ))}
+            {/* Mini profile info - only show if has content */}
+            {hasProfileInfo && (
+              <Card className="border-0 shadow-md">
+                <CardContent className="pt-5 pb-5 space-y-4">
+                  {profile?.bio && (
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                        <User className="h-3.5 w-3.5 text-primary/60" /> Sobre
+                      </h4>
+                      <p className="text-sm text-foreground leading-relaxed line-clamp-4">{profile.bio}</p>
                     </div>
-                  </div>
-                )}
-                {profile?.specialties && profile.specialties.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Especialidades</h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {profile.specialties.slice(0, 5).map((s) => (
-                        <Badge key={s} className="text-[11px] px-2.5 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-0 font-medium">
-                          {s}
-                        </Badge>
-                      ))}
-                      {profile.specialties.length > 5 && (
-                        <Badge variant="outline" className="text-[11px] px-2 py-0.5">+{profile.specialties.length - 5}</Badge>
-                      )}
+                  )}
+                  {hasNiches && (
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                        <Tag className="h-3.5 w-3.5 text-violet-500" /> Nichos
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {profile!.niches!.slice(0, 5).map((n) => (
+                          <Badge key={n} className="text-[11px] px-2.5 py-0.5 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 border-0 font-medium">
+                            {n}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {profile?.years_in_business && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
-                    <Briefcase className="h-4 w-4 text-primary/50" />
-                    <span className="font-medium">{profile.years_in_business} anos</span> de atuação
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                  {hasSpecialties && (
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Especialidades</h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {profile!.specialties!.slice(0, 5).map((s) => (
+                          <Badge key={s} className="text-[11px] px-2.5 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-0 font-medium">
+                            {s}
+                          </Badge>
+                        ))}
+                        {profile!.specialties!.length > 5 && (
+                          <Badge variant="outline" className="text-[11px] px-2 py-0.5">+{profile!.specialties!.length - 5}</Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {profile?.years_in_business && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
+                      <Briefcase className="h-4 w-4 text-primary/50" />
+                      <span className="font-medium">{profile.years_in_business} anos</span> de atuação
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Help offer */}
-            {profile?.help_offer && (
+            {/* Help offer - only show if has content */}
+            {hasHelpOffer && (
               <Card className="border-0 shadow-md bg-gradient-to-br from-rose-50 to-pink-50/50 dark:from-rose-950/20 dark:to-pink-950/10">
                 <CardContent className="pt-5 pb-5">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-1.5">
                     <Heart className="h-3.5 w-3.5" /> Como posso ajudar
                   </h4>
-                  <p className="text-sm text-foreground leading-relaxed">{profile.help_offer}</p>
+                  <p className="text-sm text-foreground leading-relaxed">{profile!.help_offer}</p>
                 </CardContent>
               </Card>
             )}
 
-            {/* Partnership interests */}
-            {profile?.partnership_interests && profile.partnership_interests.length > 0 && (
+            {/* Partnership interests - only show if has content */}
+            {hasPartnershipInterests && (
               <Card className="border-0 shadow-md">
                 <CardContent className="pt-5 pb-5">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
                     <Handshake className="h-3.5 w-3.5 text-emerald-500" /> Busco parcerias
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
-                    {profile.partnership_interests.map((p) => (
+                    {profile!.partnership_interests!.map((p) => (
                       <Badge key={p} className="text-[11px] px-2.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border-0 font-medium">
                         {p}
                       </Badge>
@@ -320,93 +306,9 @@ export default function TradeConnectHub() {
             )}
           </div>
 
-          {/* ═══ CENTER COLUMN: Q&A Feed ═══ */}
+          {/* ═══ CENTER COLUMN: Full Q&A Feed ═══ */}
           <div className="lg:col-span-5 space-y-4">
-            {/* Ask question CTA */}
-            <Card className="border-0 shadow-md">
-              <CardContent className="py-4">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm">{profile?.name?.charAt(0) || "?"}</AvatarFallback>
-                  </Avatar>
-                  <Button
-                    variant="outline"
-                    className="flex-1 justify-start text-muted-foreground font-normal rounded-full h-10 bg-muted/30 hover:bg-muted/50 border-muted-foreground/20 transition-all duration-200"
-                    onClick={() => navigate("/perguntas-respostas?new=1")}
-                  >
-                    <PlusCircle className="h-4 w-4 mr-2 text-primary" />
-                    Fazer uma pergunta à comunidade...
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Q&A Feed */}
-            <Card className="border-0 shadow-md">
-              <CardHeader className="pb-3 border-b border-border/50">
-                <CardTitle className="text-lg font-bold flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <MessageCircleQuestion className="h-4.5 w-4.5 text-primary" />
-                  </div>
-                  Perguntas e Respostas
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2 pb-3">
-                {latestQuestions.length === 0 ? (
-                  <div className="text-center py-10">
-                    <div className="h-16 w-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                      <MessageCircle className="h-7 w-7 text-muted-foreground/40" />
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground">Nenhuma pergunta ainda</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Seja o primeiro a perguntar!</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-border/40">
-                    {latestQuestions.map((q, idx) => (
-                      <div
-                        key={q.id}
-                        className={`flex items-start gap-3 py-4 px-2 rounded-xl hover:bg-muted/40 cursor-pointer transition-all duration-200 hover:shadow-sm -mx-2 ${idx === 0 ? "bg-primary/[0.03]" : ""}`}
-                        onClick={() => navigate(`/perguntas-respostas?q=${q.id}`)}
-                      >
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <MessageCircle className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                            {q.title}
-                          </p>
-                          <div className="flex items-center gap-2.5 mt-2 flex-wrap">
-                            {q.category && (
-                              <Badge className={`text-[10px] px-2 py-0.5 border-0 font-medium ${getCategoryColor(q.category)}`}>
-                                {q.category}
-                              </Badge>
-                            )}
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <MessageCircle className="h-3 w-3" />
-                              <span className="font-semibold text-foreground/70">{q.answers_count}</span> resposta{q.answers_count !== 1 ? "s" : ""}
-                            </span>
-                            <span className="text-xs text-muted-foreground/70">
-                              {formatDistanceToNow(new Date(q.created_at), { addSuffix: true, locale: ptBR })}
-                            </span>
-                          </div>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground/40 mt-1 flex-shrink-0" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {latestQuestions.length > 0 && (
-                  <Button
-                    className="w-full mt-3 gap-2 rounded-xl font-semibold"
-                    variant="outline"
-                    onClick={() => navigate("/perguntas-respostas")}
-                  >
-                    Ver todas as perguntas <ArrowRight className="h-4 w-4" />
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+            <QAFeed />
           </div>
 
           {/* ═══ RIGHT COLUMN ═══ */}
@@ -430,7 +332,7 @@ export default function TradeConnectHub() {
                     const p = getProfile(conn.requester_id);
                     return (
                       <div key={conn.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/60 dark:bg-white/5 shadow-sm">
-                        <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-amber-200/50" onClick={() => navigate(`/trade-connect/agente/${conn.requester_id}`)}>
+                        <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-amber-200/50" onClick={() => navigate(`/comunidade/agente/${conn.requester_id}`)}>
                           <AvatarImage src={p?.avatar_url || undefined} />
                           <AvatarFallback className="text-xs bg-amber-100 text-amber-700">{p?.name?.charAt(0) || "?"}</AvatarFallback>
                         </Avatar>
@@ -497,7 +399,7 @@ export default function TradeConnectHub() {
                         <div
                           key={conn.id}
                           className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-blue-50/50 dark:hover:bg-blue-950/20 cursor-pointer transition-all duration-200 hover:shadow-sm"
-                          onClick={() => navigate(`/trade-connect/agente/${otherId}`)}
+                          onClick={() => navigate(`/comunidade/agente/${otherId}`)}
                         >
                           <Avatar className="h-9 w-9 ring-1 ring-blue-200/50">
                             <AvatarImage src={p?.avatar_url || undefined} />
@@ -539,7 +441,7 @@ export default function TradeConnectHub() {
                     {isMember ? (
                       <div
                         className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/10 hover:shadow-md cursor-pointer transition-all duration-200"
-                        onClick={() => navigate("/comunidade")}
+                        onClick={() => navigate("/comunidade/chat")}
                       >
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-sm">
                           <Users className="h-5 w-5 text-white" />
@@ -561,7 +463,7 @@ export default function TradeConnectHub() {
                           <p className="text-sm font-bold text-foreground">Travel Experts</p>
                           <p className="text-xs text-muted-foreground">Comunidade premium de agentes</p>
                         </div>
-                        <Button size="sm" className="rounded-full px-4 h-8 text-xs font-semibold shadow-sm" onClick={() => navigate("/comunidade")}>
+                        <Button size="sm" className="rounded-full px-4 h-8 text-xs font-semibold shadow-sm" onClick={() => navigate("/comunidade/chat")}>
                           Participar
                         </Button>
                       </div>
