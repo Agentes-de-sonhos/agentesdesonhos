@@ -341,7 +341,7 @@ export default function MapaTurismo() {
                 options={specialtyOptions}
                 selected={selectedSpecialties}
                 onChange={handleSpecialtiesChange}
-                placeholder={categoryFilter !== "all" ? `Filtrar ${CATEGORIES_DATA.find(c => c.category === categoryFilter)?.title?.toLowerCase() || "fornecedores"} por especialidade...` : "Filtrar por especialidade..."}
+                placeholder={categoryFilter !== "all" ? `Filtrar ${CATEGORIES_DATA.find(c => c.category === categoryFilter)?.title?.toLowerCase() || "empresas"} por especialidade...` : "Filtrar por especialidade..."}
                 searchPlaceholder="Buscar especialidade..."
                 emptyMessage="Nenhuma especialidade encontrada."
                 className="bg-card"
@@ -373,8 +373,8 @@ export default function MapaTurismo() {
         {hasActiveFilter && filteredSuppliers.length > 0 && (
           <div className="flex items-center gap-3">
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{filteredSuppliers.length}</span>{" "}
-              fornecedor{filteredSuppliers.length !== 1 ? "es" : ""}
+               <span className="font-semibold text-foreground">{filteredSuppliers.length}</span>{" "}
+               empresa{filteredSuppliers.length !== 1 ? "s" : ""}
             </p>
           </div>
         )}
@@ -393,7 +393,7 @@ export default function MapaTurismo() {
         ) : filteredSuppliers.length === 0 ? (
           <div className="py-12 text-center">
             <p className="text-muted-foreground">
-              Nenhum fornecedor encontrado para este filtro
+              Nenhuma empresa encontrada para este filtro
             </p>
           </div>
         ) : (
