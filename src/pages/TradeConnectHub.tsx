@@ -108,7 +108,7 @@ export default function TradeConnectHub() {
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
       const url = `${urlData.publicUrl}?t=${Date.now()}`;
-      updateProfile.mutate({ cover_image_url: url } as any);
+      updateProfile.mutate({ cover_image_url: url });
     } catch {
       toast.error("Erro ao enviar imagem de capa");
     } finally {
