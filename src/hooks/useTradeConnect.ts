@@ -14,9 +14,12 @@ export interface TradeProfile {
   bio: string | null;
   specialties: string[];
   services: string[];
+  niches: string[];
   niche: string | null;
   years_in_business: number | null;
   phone: string | null;
+  help_offer: string | null;
+  partnership_interests: string[];
 }
 
 export type ConnectionStatus = "none" | "pending_sent" | "pending_received" | "accepted" | "rejected";
@@ -30,6 +33,8 @@ export interface Connection {
   profile?: TradeProfile;
 }
 
+const PROFILE_SELECT = "user_id, name, avatar_url, agency_name, agency_logo_url, city, state, bio, specialties, services, niches, niche, years_in_business, phone, help_offer, partnership_interests";
+
 export function useTradeProfile() {
   const { user } = useAuth();
 
@@ -39,7 +44,7 @@ export function useTradeProfile() {
       if (!user?.id) return null;
       const { data, error } = await supabase
         .from("profiles")
-        .select("user_id, name, avatar_url, agency_name, agency_logo_url, city, state, bio, specialties, services, niche, years_in_business, phone")
+        .select(PROFILE_SELECT)
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) throw error;
@@ -61,9 +66,11 @@ export function useTradeProfile() {
       !!profile.bio,
       (profile.specialties?.length || 0) > 0,
       (profile.services?.length || 0) > 0,
-      !!profile.niche,
+      (profile.niches?.length || 0) > 0,
       !!profile.years_in_business,
       !!profile.phone,
+      !!profile.help_offer,
+      (profile.partnership_interests?.length || 0) > 0,
     ];
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
   })();

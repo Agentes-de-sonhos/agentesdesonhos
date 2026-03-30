@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTradeProfile, useUpdateTradeProfile } from "@/hooks/useTradeConnect";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,13 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { TagSelector } from "@/components/trade-connect/TagSelector";
 import {
   User, Building2, MapPin, Briefcase, Tag, Loader2, Save,
-  CheckCircle2, AlertCircle, X, Plus,
+  CheckCircle2, AlertCircle, Sparkles, Heart, Handshake,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const SPECIALTY_OPTIONS = [
   "Orlando", "Nova York", "Miami", "Europa", "Portugal", "Itália", "França",
@@ -40,6 +39,11 @@ const NICHE_OPTIONS = [
   "Lua de Mel", "Terceira Idade", "Solo", "LGBTQ+", "Ecoturismo", "Gastronômico",
 ];
 
+const PARTNERSHIP_OPTIONS = [
+  "Receptivo", "Grupos", "Corporativo", "Luxo", "Intercâmbio",
+  "Cruzeiros", "Disney & Parques", "Lua de Mel", "Aventura",
+];
+
 export default function TradeConnectProfile() {
   const { profile, isLoading, profileCompleteness } = useTradeProfile();
   const updateProfile = useUpdateTradeProfile();
@@ -49,8 +53,10 @@ export default function TradeConnectProfile() {
     bio: "",
     specialties: [] as string[],
     services: [] as string[],
-    niche: "",
+    niches: [] as string[],
     years_in_business: null as number | null,
+    help_offer: "",
+    partnership_interests: [] as string[],
   });
 
   const startEditing = () => {
@@ -59,8 +65,10 @@ export default function TradeConnectProfile() {
         bio: profile.bio || "",
         specialties: profile.specialties || [],
         services: profile.services || [],
-        niche: profile.niche || "",
+        niches: profile.niches || [],
         years_in_business: profile.years_in_business,
+        help_offer: profile.help_offer || "",
+        partnership_interests: profile.partnership_interests || [],
       });
     }
     setEditing(true);
@@ -70,10 +78,6 @@ export default function TradeConnectProfile() {
     updateProfile.mutate(form, {
       onSuccess: () => setEditing(false),
     });
-  };
-
-  const toggleTag = (list: string[], tag: string, setter: (v: string[]) => void) => {
-    setter(list.includes(tag) ? list.filter((t) => t !== tag) : [...list, tag]);
   };
 
   if (isLoading) {
@@ -192,74 +196,60 @@ export default function TradeConnectProfile() {
                   />
                 </div>
 
-                {/* Niche */}
-                <div>
-                  <Label className="text-sm font-semibold">Nicho principal</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {NICHE_OPTIONS.map((n) => (
-                      <Badge
-                        key={n}
-                        variant={form.niche === n ? "default" : "outline"}
-                        className={cn(
-                          "cursor-pointer transition-all",
-                          form.niche === n && "bg-primary text-primary-foreground"
-                        )}
-                        onClick={() => setForm({ ...form, niche: form.niche === n ? "" : n })}
-                      >
-                        {n}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                {/* Niches (multiple) */}
+                <TagSelector
+                  label="Nichos principais"
+                  options={NICHE_OPTIONS}
+                  selected={form.niches}
+                  onChange={(v) => setForm({ ...form, niches: v })}
+                  maxItems={5}
+                  customPlaceholder="Adicionar novo nicho..."
+                />
 
                 {/* Specialties */}
+                <TagSelector
+                  label="Especialidades"
+                  options={SPECIALTY_OPTIONS}
+                  selected={form.specialties}
+                  onChange={(v) => setForm({ ...form, specialties: v })}
+                  maxItems={10}
+                  customPlaceholder="Adicionar especialidade..."
+                />
+
+                {/* Services (no limit) */}
+                <TagSelector
+                  label="Serviços oferecidos"
+                  options={SERVICE_OPTIONS}
+                  selected={form.services}
+                  onChange={(v) => setForm({ ...form, services: v })}
+                  customPlaceholder="Adicionar serviço..."
+                />
+
+                {/* Help Offer */}
                 <div>
-                  <Label className="text-sm font-semibold">
-                    Especialidades ({form.specialties.length}/10)
+                  <Label className="text-sm font-semibold flex items-center gap-1.5">
+                    <Heart className="h-4 w-4 text-rose-500" />
+                    Como posso ajudar outros agentes?
                   </Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {SPECIALTY_OPTIONS.map((s) => (
-                      <Badge
-                        key={s}
-                        variant={form.specialties.includes(s) ? "default" : "outline"}
-                        className={cn(
-                          "cursor-pointer transition-all text-xs",
-                          form.specialties.includes(s) && "bg-primary text-primary-foreground",
-                          !form.specialties.includes(s) && form.specialties.length >= 10 && "opacity-40 cursor-not-allowed"
-                        )}
-                        onClick={() => {
-                          if (form.specialties.includes(s) || form.specialties.length < 10) {
-                            toggleTag(form.specialties, s, (v) => setForm({ ...form, specialties: v }));
-                          }
-                        }}
-                      >
-                        {s}
-                      </Badge>
-                    ))}
-                  </div>
+                  <Textarea
+                    value={form.help_offer}
+                    onChange={(e) => setForm({ ...form, help_offer: e.target.value })}
+                    placeholder="Ex: Consigo ajudar com grupos Disney, tenho experiência com luxo na Europa..."
+                    className="mt-1.5 min-h-[80px]"
+                    maxLength={300}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">{form.help_offer.length}/300 caracteres</p>
                 </div>
 
-                {/* Services */}
-                <div>
-                  <Label className="text-sm font-semibold">Serviços oferecidos</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {SERVICE_OPTIONS.map((s) => (
-                      <Badge
-                        key={s}
-                        variant={form.services.includes(s) ? "default" : "outline"}
-                        className={cn(
-                          "cursor-pointer transition-all text-xs",
-                          form.services.includes(s) && "bg-primary text-primary-foreground"
-                        )}
-                        onClick={() =>
-                          toggleTag(form.services, s, (v) => setForm({ ...form, services: v }))
-                        }
-                      >
-                        {s}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                {/* Partnership Interests */}
+                <TagSelector
+                  label="Busco parcerias em"
+                  options={PARTNERSHIP_OPTIONS}
+                  selected={form.partnership_interests}
+                  onChange={(v) => setForm({ ...form, partnership_interests: v })}
+                  maxItems={10}
+                  customPlaceholder="Adicionar interesse..."
+                />
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-2">
@@ -288,8 +278,8 @@ export default function TradeConnectProfile() {
                   </p>
                 </div>
 
-                {/* Years + Niche */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* Years + Niches */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-2">
                       <Briefcase className="h-4 w-4" /> Tempo de atuação
@@ -300,11 +290,17 @@ export default function TradeConnectProfile() {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-2">
-                      <Tag className="h-4 w-4" /> Nicho principal
+                      <Tag className="h-4 w-4" /> Nichos principais
                     </h3>
-                    <p className="text-sm text-foreground">
-                      {profile?.niche || "Não informado"}
-                    </p>
+                    {profile?.niches?.length ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {profile.niches.map((n) => (
+                          <Badge key={n} variant="default" className="text-xs">{n}</Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">Não informado</p>
+                    )}
                   </div>
                 </div>
 
@@ -314,9 +310,7 @@ export default function TradeConnectProfile() {
                   {profile?.specialties?.length ? (
                     <div className="flex flex-wrap gap-1.5">
                       {profile.specialties.map((s) => (
-                        <Badge key={s} variant="secondary" className="text-xs">
-                          {s}
-                        </Badge>
+                        <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
                       ))}
                     </div>
                   ) : (
@@ -330,13 +324,37 @@ export default function TradeConnectProfile() {
                   {profile?.services?.length ? (
                     <div className="flex flex-wrap gap-1.5">
                       {profile.services.map((s) => (
-                        <Badge key={s} variant="outline" className="text-xs">
-                          {s}
-                        </Badge>
+                        <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
                       ))}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground italic">Nenhum serviço adicionado</p>
+                  )}
+                </div>
+
+                {/* Help Offer */}
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-rose-500" /> Como posso ajudar outros agentes
+                  </h3>
+                  <p className="text-sm text-foreground">
+                    {profile?.help_offer || <span className="text-muted-foreground italic">Não preenchido</span>}
+                  </p>
+                </div>
+
+                {/* Partnership Interests */}
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                    <Handshake className="h-4 w-4" /> Busco parcerias em
+                  </h3>
+                  {profile?.partnership_interests?.length ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {profile.partnership_interests.map((p) => (
+                        <Badge key={p} variant="secondary" className="text-xs">{p}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Nenhuma parceria informada</p>
                   )}
                 </div>
               </div>
