@@ -151,6 +151,7 @@ export default function GerarOrcamento() {
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
   const [autoSaved, setAutoSaved] = useState(false);
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
+  const [showInvestmentLocal, setShowInvestmentLocal] = useState<boolean | null>(null);
   const [headerEditDates, setHeaderEditDates] = useState(false);
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
