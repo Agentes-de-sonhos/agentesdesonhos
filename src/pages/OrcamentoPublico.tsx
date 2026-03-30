@@ -269,12 +269,9 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
     queryFn: async () => {
       if (!quote?.user_id) return null;
       const { data, error } = await supabase
-        .from("profiles")
-        .select("name, phone, avatar_url, agency_name, agency_logo_url, city, state")
-        .eq("user_id", quote.user_id)
-        .maybeSingle();
-      if (error || !data) return null;
-      return data as AgentProfile;
+        .rpc("get_public_profile", { _user_id: quote.user_id });
+      if (error || !data || (Array.isArray(data) && data.length === 0)) return null;
+      return (Array.isArray(data) ? data[0] : data) as AgentProfile;
     },
     enabled: !!quote?.user_id,
   });
