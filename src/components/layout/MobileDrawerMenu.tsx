@@ -309,6 +309,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
           {allSections.map((section) => renderSection(section))}
 
           <nav className="flex flex-col gap-0.5 px-3">
+            {renderMenuItem(tradeConnectItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>
         </div>

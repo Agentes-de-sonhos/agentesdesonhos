@@ -493,6 +493,7 @@ export function MobileSidebar() {
 
           {/* Standalone items - same as desktop */}
           <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
+            {renderMenuItem(tradeConnectItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>
         </div>
