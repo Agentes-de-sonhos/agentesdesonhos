@@ -32,6 +32,9 @@ import {
   Star,
   ThumbsUp,
   ArrowUpDown,
+  Anchor,
+  Waves,
+  Compass,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -81,6 +84,7 @@ export default function MapaTurismo() {
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("alpha");
   const [hospQuickFilter, setHospQuickFilter] = useState<"resort" | "rede" | null>(null);
+  const [cruiseQuickFilters, setCruiseQuickFilters] = useState<string[]>([]);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string; source: string } | null>(null);
   const navigate = useNavigate();
