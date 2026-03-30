@@ -80,6 +80,7 @@ export default function MapaTurismo() {
   const [categoryFilter, setCategoryFilter] = useState<string>(DEFAULT_CATEGORY);
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("alpha");
+  const [hospQuickFilter, setHospQuickFilter] = useState<"resort" | "rede" | null>(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string; source: string } | null>(null);
   const navigate = useNavigate();
