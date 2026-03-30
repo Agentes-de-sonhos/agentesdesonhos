@@ -74,6 +74,7 @@ const CadastroLink = lazy(() => import("./pages/CadastroLink"));
 const LeadFormPublic = lazy(() => import("./pages/LeadFormPublic"));
 const MeusLeads = lazy(() => import("./pages/MeusLeads"));
 const Suporte = lazy(() => import("./pages/Suporte"));
+const TradeConnectHub = lazy(() => import("./pages/TradeConnectHub"));
 const TradeConnectProfile = lazy(() => import("./pages/TradeConnectProfile"));
 const TradeConnectCommunities = lazy(() => import("./pages/TradeConnectCommunities"));
 const AgentProfile = lazy(() => import("./pages/AgentProfile"));
