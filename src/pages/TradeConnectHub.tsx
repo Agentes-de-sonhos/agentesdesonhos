@@ -133,7 +133,7 @@ export default function TradeConnectHub() {
         <Card className="overflow-hidden">
           <div className="relative h-40 sm:h-52 bg-muted">
             <img
-              src={(profile as any)?.cover_image_url || DEFAULT_COVER}
+              src={profile?.cover_image_url || DEFAULT_COVER}
               alt="Capa"
               className="w-full h-full object-cover"
             />
