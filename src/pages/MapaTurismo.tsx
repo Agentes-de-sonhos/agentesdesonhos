@@ -383,7 +383,40 @@ export default function MapaTurismo() {
           )}
         </div>
 
-        {/* Count bar */}
+        {/* Hospedagem quick filters */}
+        {categoryFilter === "Hospedagem" && (
+          <div className="flex items-center gap-3">
+            <Button
+              variant={hospQuickFilter === "resort" ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "rounded-full px-5 gap-2 transition-all",
+                hospQuickFilter === "resort"
+                  ? "bg-amber-500 hover:bg-amber-600 text-white border-amber-500"
+                  : "border-amber-300 text-amber-700 hover:bg-amber-50"
+              )}
+              onClick={() => setHospQuickFilter(hospQuickFilter === "resort" ? null : "resort")}
+            >
+              <Hotel className="h-4 w-4" />
+              Resort Brasil
+            </Button>
+            <Button
+              variant={hospQuickFilter === "rede" ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "rounded-full px-5 gap-2 transition-all",
+                hospQuickFilter === "rede"
+                  ? "bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-500"
+                  : "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              )}
+              onClick={() => setHospQuickFilter(hospQuickFilter === "rede" ? null : "rede")}
+            >
+              <Building2 className="h-4 w-4" />
+              Rede Hoteleira
+            </Button>
+          </div>
+        )}
+
         {hasActiveFilter && filteredSuppliers.length > 0 && (
           <div className="flex items-center gap-3">
             <p className="text-sm text-muted-foreground">
