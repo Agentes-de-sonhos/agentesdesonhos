@@ -101,6 +101,29 @@ export function ChatFloatingButton() {
   const generalRoom = rooms.find((r) => r.is_general);
   const thematicRooms = rooms.filter((r) => !r.is_general);
 
+  // Swipe-to-close support
+  const panelRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchDeltaY = useRef(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchDeltaY.current = 0;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    touchDeltaY.current = e.touches[0].clientY - touchStartY.current;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchDeltaY.current > 80) {
+      setIsOpen(false);
+    }
+    touchStartY.current = null;
+    touchDeltaY.current = 0;
+  };
+
   return (
     <>
       {/* Floating Button */}
@@ -122,9 +145,28 @@ export function ChatFloatingButton() {
         )}
       </button>
 
+      {/* Overlay — click outside to close (mobile) */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:bg-transparent lg:pointer-events-none"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[380px] h-[520px] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4">
+        <div
+          ref={panelRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="fixed inset-x-0 bottom-0 z-50 h-[85vh] sm:inset-auto sm:bottom-24 sm:right-6 sm:h-[520px] sm:w-[380px] bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4"
+        >
+          {/* Swipe indicator (mobile) */}
+          <div className="sm:hidden flex justify-center pt-2 pb-1">
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          </div>
+
           {/* Header */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
             {view !== "menu" && (
@@ -146,6 +188,14 @@ export function ChatFloatingButton() {
                 {onlineCount + 1} online
               </Badge>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 flex-shrink-0"
+              onClick={() => setIsOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
 
           {/* Content */}
