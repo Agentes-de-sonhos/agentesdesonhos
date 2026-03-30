@@ -128,6 +128,7 @@ export default function MapaTurismo() {
     setSearch("");
     setCategoryFilter(DEFAULT_CATEGORY);
     setSelectedSpecialties([]);
+    setHospQuickFilter(null);
     setSearchParams({ categoria: DEFAULT_CATEGORY });
   };
 
