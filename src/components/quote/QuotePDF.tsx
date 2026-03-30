@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
+import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea",
