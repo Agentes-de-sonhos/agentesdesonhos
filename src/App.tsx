@@ -85,6 +85,7 @@ const Planos = lazy(() => import("./pages/Planos"));
 const Desconto30Off = lazy(() => import("./pages/Desconto30Off"));
 const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
 const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
+const MeusProjetos = lazy(() => import("./pages/MeusProjetos"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -138,6 +139,7 @@ const App = () => (
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/crm" element={<AdminRoute><AdminCRM /></AdminRoute>} />
             <Route path="/ferramentas-ia" element={<ProtectedRoute><FerramentasIA /></ProtectedRoute>} />
+            <Route path="/meus-projetos" element={<ProtectedRoute><MeusProjetos /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-roteiro" element={<ProtectedRoute><CriarRoteiro /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-roteiro/:id" element={<ProtectedRoute><CriarRoteiro /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-conteudo" element={<ProtectedRoute><CriarConteudo /></ProtectedRoute>} />

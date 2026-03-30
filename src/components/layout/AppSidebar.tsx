@@ -39,6 +39,7 @@ import {
   ShoppingBag,
   ArrowUpCircle,
   LayoutDashboard,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,7 @@ const conhecimentoSection: MenuSection = {
   ],
 };
 
+const meusProjetosItem: MenuItem = { title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
 const comunidadeItem: MenuItem = { title: "Comunidade", url: "/trade-connect", icon: Heart };
 
 const guiasSection: MenuSection = {
@@ -517,6 +519,7 @@ export function AppSidebar() {
 
           {/* Standalone items */}
           <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
+            {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(comunidadeItem)}
             {renderSingleItem(mentoriasItem)}
           </nav>

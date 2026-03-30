@@ -5,7 +5,7 @@ import {
   GraduationCap, Lock, Calculator, Heart, ChevronDown, MessageCircleQuestion,
   Store, CreditCard, Wallet, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
-  X, Building2,
+  X, Building2, FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ const conhecimentoSection: MenuSection = {
   ],
 };
 
+const meusProjetosItem: MenuItem = { title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
 const comunidadeItem: MenuItem = { title: "Comunidade", url: "/trade-connect", icon: Heart };
 
 const guiasSection: MenuSection = {
@@ -299,6 +300,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
           {allSections.map((section) => renderSection(section))}
 
           <nav className="flex flex-col gap-0.5 px-3">
+            {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(comunidadeItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>

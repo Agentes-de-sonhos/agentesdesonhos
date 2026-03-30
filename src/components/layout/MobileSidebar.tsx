@@ -40,6 +40,7 @@ import {
   ArrowUpCircle,
   LayoutDashboard,
   Building2,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
@@ -97,6 +98,7 @@ const conhecimentoSection: MenuSection = {
   ],
 };
 
+const meusProjetosItem: MenuItem = { title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
 const comunidadeItem: MenuItem = { title: "Comunidade", url: "/trade-connect", icon: Heart };
 
 const guiasSection: MenuSection = {
@@ -477,6 +479,7 @@ export function MobileSidebar() {
 
           {/* Standalone items - same as desktop */}
           <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
+            {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(comunidadeItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>
