@@ -106,7 +106,7 @@ const conhecimentoSection: MenuSection = {
 };
 
 const meusProjetosItem: MenuItem = { title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
-const comunidadeItem: MenuItem = { title: "Comunidade", url: "/trade-connect", icon: Heart };
+const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart };
 
 const guiasSection: MenuSection = {
   title: "Guias e Referências",

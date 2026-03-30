@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -174,10 +174,15 @@ const App = () => (
             <Route path="/gestao-clientes/funil" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/gestao-clientes/metas" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/educa-academy" element={<ProtectedRoute><EducaAcademy /></ProtectedRoute>} />
-            <Route path="/comunidade" element={<ProtectedRoute><Community /></ProtectedRoute>} />
-            <Route path="/trade-connect" element={<ProtectedRoute><TradeConnectHub /></ProtectedRoute>} />
-            <Route path="/trade-connect/perfil" element={<ProtectedRoute><TradeConnectProfile /></ProtectedRoute>} />
-            <Route path="/trade-connect/comunidades" element={<ProtectedRoute><TradeConnectCommunities /></ProtectedRoute>} />
+            <Route path="/comunidade" element={<ProtectedRoute><TradeConnectHub /></ProtectedRoute>} />
+            <Route path="/comunidade/chat" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+            <Route path="/comunidade/perfil" element={<ProtectedRoute><TradeConnectProfile /></ProtectedRoute>} />
+            <Route path="/comunidade/comunidades" element={<ProtectedRoute><TradeConnectCommunities /></ProtectedRoute>} />
+            <Route path="/comunidade/agente/:userId" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
+            {/* Redirects from old routes */}
+            <Route path="/trade-connect" element={<Navigate to="/comunidade" replace />} />
+            <Route path="/trade-connect/perfil" element={<Navigate to="/comunidade/perfil" replace />} />
+            <Route path="/trade-connect/comunidades" element={<Navigate to="/comunidade/comunidades" replace />} />
             <Route path="/trade-connect/agente/:userId" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
             <Route path="/beneficios" element={<ProtectedRoute><Beneficios /></ProtectedRoute>} />
             <Route path="/mentorias" element={<ProtectedRoute><Mentorias /></ProtectedRoute>} />

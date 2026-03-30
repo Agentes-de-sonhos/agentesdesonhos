@@ -146,7 +146,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
 
   const handleViewProfile = (agent: OnlineAgent) => {
     setPopoverOpen(false);
-    navigate(`/trade-connect/agente/${agent.user_id}`);
+    navigate(`/comunidade/agente/${agent.user_id}`);
   };
 
   if (!hasFeature("community")) return null;
