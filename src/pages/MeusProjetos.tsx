@@ -256,7 +256,7 @@ export default function MeusProjetos() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-foreground truncate">{item.name}</h3>
+                    <h3 className="font-semibold text-foreground truncate cursor-pointer hover:text-primary transition-colors" onClick={() => handleEdit(item)}>{item.name}</h3>
                     <Badge
                       variant={item.status === "published" ? "default" : "secondary"}
                       className="text-[10px] px-1.5 py-0"
