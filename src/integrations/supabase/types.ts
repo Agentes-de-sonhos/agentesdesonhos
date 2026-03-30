@@ -5523,6 +5523,7 @@ export type Database = {
           share_token: string | null
           show_destination_intro: boolean
           show_detailed_prices: boolean
+          show_investment_section: boolean
           start_date: string
           status: string
           total_amount: number
@@ -5556,6 +5557,7 @@ export type Database = {
           share_token?: string | null
           show_destination_intro?: boolean
           show_detailed_prices?: boolean
+          show_investment_section?: boolean
           start_date: string
           status?: string
           total_amount?: number
@@ -5589,6 +5591,7 @@ export type Database = {
           share_token?: string | null
           show_destination_intro?: boolean
           show_detailed_prices?: boolean
+          show_investment_section?: boolean
           start_date?: string
           status?: string
           total_amount?: number
