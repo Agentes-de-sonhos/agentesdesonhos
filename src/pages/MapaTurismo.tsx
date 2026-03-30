@@ -391,10 +391,26 @@ export default function MapaTurismo() {
             </p>
           </div>
         ) : filteredSuppliers.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-muted-foreground">
-              Nenhuma empresa encontrada para este filtro
-            </p>
+          <div className="py-16 text-center flex flex-col items-center gap-3">
+            {categoryFilter === "receptivos" ? (
+              <>
+                <span className="text-4xl">😊</span>
+                <p className="text-lg font-medium text-foreground">Estamos preparando ótimos receptivos para você</p>
+                <p className="text-muted-foreground max-w-md">Em breve você encontrará parceiros incríveis por aqui. Enquanto isso, explore outras categorias!</p>
+              </>
+            ) : categoryFilter === "guias" ? (
+              <>
+                <span className="text-4xl">👀</span>
+                <p className="text-lg font-medium text-foreground">Ainda não temos guias cadastrados por aqui</p>
+                <p className="text-muted-foreground max-w-md">Mas estamos trabalhando para trazer opções incríveis em breve!</p>
+              </>
+            ) : (
+              <>
+                <span className="text-4xl">😅</span>
+                <p className="text-lg font-medium text-foreground">Ainda não encontramos resultados por aqui</p>
+                <p className="text-muted-foreground max-w-md">Tente ajustar os filtros ou explorar outras categorias.</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
