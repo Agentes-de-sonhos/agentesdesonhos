@@ -4977,10 +4977,13 @@ export type Database = {
           cpf: string | null
           created_at: string
           has_password: boolean | null
+          help_offer: string | null
           id: string
           name: string
           neighborhood: string | null
           niche: string | null
+          niches: string[] | null
+          partnership_interests: string[] | null
           phone: string | null
           services: string[] | null
           specialties: string[] | null
@@ -5002,10 +5005,13 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           has_password?: boolean | null
+          help_offer?: string | null
           id?: string
           name: string
           neighborhood?: string | null
           niche?: string | null
+          niches?: string[] | null
+          partnership_interests?: string[] | null
           phone?: string | null
           services?: string[] | null
           specialties?: string[] | null
@@ -5027,10 +5033,13 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           has_password?: boolean | null
+          help_offer?: string | null
           id?: string
           name?: string
           neighborhood?: string | null
           niche?: string | null
+          niches?: string[] | null
+          partnership_interests?: string[] | null
           phone?: string | null
           services?: string[] | null
           specialties?: string[] | null
