@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Building2, MapPin, Briefcase, Tag, MessageCircle,
   UserPlus, UserCheck, Clock, Loader2, ArrowLeft, User,
+  Heart, Handshake,
 } from "lucide-react";
 
 export default function AgentProfile() {
@@ -26,7 +27,7 @@ export default function AgentProfile() {
       if (!userId) return null;
       const { data, error } = await supabase
         .from("profiles")
-        .select("user_id, name, avatar_url, agency_name, agency_logo_url, city, state, bio, specialties, services, niche, years_in_business, phone")
+        .select("user_id, name, avatar_url, agency_name, agency_logo_url, city, state, bio, specialties, services, niches, niche, years_in_business, phone, help_offer, partnership_interests")
         .eq("user_id", userId)
         .maybeSingle();
       if (error) throw error;
@@ -154,7 +155,7 @@ export default function AgentProfile() {
                 </div>
               )}
 
-              {/* Years + Niche */}
+              {/* Years + Niches */}
               <div className="grid grid-cols-2 gap-4">
                 {profile.years_in_business && (
                   <div>
@@ -164,14 +165,20 @@ export default function AgentProfile() {
                     <p className="text-sm text-foreground">{profile.years_in_business} anos</p>
                   </div>
                 )}
-                {profile.niche && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-2">
-                      <Tag className="h-4 w-4" /> Nicho principal
-                    </h3>
-                    <p className="text-sm text-foreground">{profile.niche}</p>
-                  </div>
-                )}
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-2">
+                    <Tag className="h-4 w-4" /> Nichos principais
+                  </h3>
+                  {profile.niches?.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {profile.niches.map((n: string) => (
+                        <Badge key={n} variant="default" className="text-xs">{n}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Não informado</p>
+                  )}
+                </div>
               </div>
 
               {/* Specialties */}
@@ -193,6 +200,30 @@ export default function AgentProfile() {
                   <div className="flex flex-wrap gap-1.5">
                     {profile.services.map((s: string) => (
                       <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Help Offer */}
+              {profile.help_offer && (
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-rose-500" /> Como posso ajudar outros agentes
+                  </h3>
+                  <p className="text-sm text-foreground">{profile.help_offer}</p>
+                </div>
+              )}
+
+              {/* Partnership Interests */}
+              {profile.partnership_interests?.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                    <Handshake className="h-4 w-4" /> Busco parcerias em
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {profile.partnership_interests.map((p: string) => (
+                      <Badge key={p} variant="secondary" className="text-xs">{p}</Badge>
                     ))}
                   </div>
                 </div>
