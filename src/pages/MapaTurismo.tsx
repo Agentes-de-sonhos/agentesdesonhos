@@ -80,6 +80,7 @@ export default function MapaTurismo() {
   const [categoryFilter, setCategoryFilter] = useState<string>(DEFAULT_CATEGORY);
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("alpha");
+  const [hospQuickFilter, setHospQuickFilter] = useState<"resort" | "rede" | null>(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string; source: string } | null>(null);
   const navigate = useNavigate();
@@ -114,6 +115,7 @@ export default function MapaTurismo() {
     const newCat = categoryFilter === cat.category ? "all" : cat.category;
     setCategoryFilter(newCat);
     setSelectedSpecialties([]);
+    setHospQuickFilter(null);
     updateUrlParams(newCat, []);
   };
 
@@ -126,6 +128,7 @@ export default function MapaTurismo() {
     setSearch("");
     setCategoryFilter(DEFAULT_CATEGORY);
     setSelectedSpecialties([]);
+    setHospQuickFilter(null);
     setSearchParams({ categoria: DEFAULT_CATEGORY });
   };
 
@@ -235,7 +238,18 @@ export default function MapaTurismo() {
                 (s: Specialty) => s.name.trim().toLowerCase() === specLower
               )
             );
-          return matchesSearch && matchesCategory && matchesSpecialties;
+
+          // Hospedagem quick filters
+          let matchesQuickFilter = true;
+          if (hospQuickFilter === "resort") {
+            const nameOrSpecs = [item.name, ...(item.specialties || []).map((s: Specialty) => s.name)].join(" ").toLowerCase();
+            matchesQuickFilter = nameOrSpecs.includes("resort");
+          } else if (hospQuickFilter === "rede") {
+            const nameOrSpecs = [item.name, ...(item.specialties || []).map((s: Specialty) => s.name)].join(" ").toLowerCase();
+            matchesQuickFilter = nameOrSpecs.includes("rede hoteleira") || nameOrSpecs.includes("rede");
+          }
+
+          return matchesSearch && matchesCategory && matchesSpecialties && matchesQuickFilter;
         })
       : [];
 
@@ -256,7 +270,7 @@ export default function MapaTurismo() {
     });
 
     return results;
-  }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, sortBy, reviewStatsMap, getLikeCount]);
+  }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, sortBy, reviewStatsMap, getLikeCount]);
 
   const isLoadingAll = isLoading || loadingOperators || loadingCruises;
 
@@ -369,7 +383,40 @@ export default function MapaTurismo() {
           )}
         </div>
 
-        {/* Count bar */}
+        {/* Hospedagem quick filters */}
+        {categoryFilter === "Hospedagem" && (
+          <div className="flex items-center gap-3">
+            <Button
+              variant={hospQuickFilter === "resort" ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "rounded-full px-5 gap-2 transition-all",
+                hospQuickFilter === "resort"
+                  ? "bg-amber-500 hover:bg-amber-600 text-white border-amber-500"
+                  : "border-amber-300 text-amber-700 hover:bg-amber-50"
+              )}
+              onClick={() => setHospQuickFilter(hospQuickFilter === "resort" ? null : "resort")}
+            >
+              <Hotel className="h-4 w-4" />
+              Resort Brasil
+            </Button>
+            <Button
+              variant={hospQuickFilter === "rede" ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "rounded-full px-5 gap-2 transition-all",
+                hospQuickFilter === "rede"
+                  ? "bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-500"
+                  : "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              )}
+              onClick={() => setHospQuickFilter(hospQuickFilter === "rede" ? null : "rede")}
+            >
+              <Building2 className="h-4 w-4" />
+              Rede Hoteleira
+            </Button>
+          </div>
+        )}
+
         {hasActiveFilter && filteredSuppliers.length > 0 && (
           <div className="flex items-center gap-3">
             <p className="text-sm text-muted-foreground">
