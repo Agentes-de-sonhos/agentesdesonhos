@@ -173,6 +173,7 @@ const App = () => (
             <Route path="/gestao-clientes/metas" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/educa-academy" element={<ProtectedRoute><EducaAcademy /></ProtectedRoute>} />
             <Route path="/comunidade" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+            <Route path="/trade-connect" element={<ProtectedRoute><TradeConnectHub /></ProtectedRoute>} />
             <Route path="/trade-connect/perfil" element={<ProtectedRoute><TradeConnectProfile /></ProtectedRoute>} />
             <Route path="/trade-connect/comunidades" element={<ProtectedRoute><TradeConnectCommunities /></ProtectedRoute>} />
             <Route path="/trade-connect/agente/:userId" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
