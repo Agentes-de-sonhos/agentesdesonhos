@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map,
@@ -515,11 +515,19 @@ export function AppSidebar() {
           </div>
 
           {/* All sections */}
-          {allSections.map((section) => renderSection(section))}
+          {allSections.map((section, index) => (
+            <React.Fragment key={section.title}>
+              {renderSection(section)}
+              {section.title === "Criar" && (
+                <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
+                  {renderSingleItem(meusProjetosItem)}
+                </nav>
+              )}
+            </React.Fragment>
+          ))}
 
           {/* Standalone items */}
           <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
-            {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(comunidadeItem)}
             {renderSingleItem(mentoriasItem)}
           </nav>

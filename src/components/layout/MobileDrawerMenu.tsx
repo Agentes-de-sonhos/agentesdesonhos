@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map, Newspaper, User, Cloud, LogOut, Shield, Megaphone, Plane, Users,
@@ -297,10 +297,18 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
             <Separator className="bg-sidebar-border" />
           </div>
 
-          {allSections.map((section) => renderSection(section))}
+          {allSections.map((section) => (
+            <React.Fragment key={section.title}>
+              {renderSection(section)}
+              {section.title === "Criar" && (
+                <nav className="flex flex-col gap-0.5 px-3">
+                  {renderMenuItem(meusProjetosItem)}
+                </nav>
+              )}
+            </React.Fragment>
+          ))}
 
           <nav className="flex flex-col gap-0.5 px-3">
-            {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(comunidadeItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>

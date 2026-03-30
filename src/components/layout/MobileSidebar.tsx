@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, Fragment } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map,
@@ -475,11 +475,19 @@ export function MobileSidebar() {
           </div>
 
           {/* All sections - same order as desktop */}
-          {allSections.map((section) => renderSection(section))}
+          {allSections.map((section) => (
+            <Fragment key={section.title}>
+              {renderSection(section)}
+              {section.title === "Criar" && (
+                <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
+                  {renderMenuItem(meusProjetosItem)}
+                </nav>
+              )}
+            </Fragment>
+          ))}
 
           {/* Standalone items - same as desktop */}
           <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
-            {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(comunidadeItem)}
             {renderMenuItem(mentoriasItem)}
           </nav>
