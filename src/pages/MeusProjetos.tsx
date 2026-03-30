@@ -28,7 +28,6 @@ import {
   Pencil,
   Copy,
   Trash2,
-  Eye,
   Loader2,
   FolderOpen,
   MapPin,
@@ -183,9 +182,6 @@ export default function MeusProjetos() {
     }
   };
 
-  const handleView = (item: ProjectItem) => {
-    handleEdit(item);
-  };
 
   const handleDuplicate = (item: ProjectItem) => {
     if (item.type === "quote") {
@@ -256,7 +252,7 @@ export default function MeusProjetos() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-foreground truncate">{item.name}</h3>
+                    <h3 className="font-semibold text-foreground truncate cursor-pointer hover:text-primary transition-colors" onClick={() => handleEdit(item)}>{item.name}</h3>
                     <Badge
                       variant={item.status === "published" ? "default" : "secondary"}
                       className="text-[10px] px-1.5 py-0"
@@ -280,15 +276,6 @@ export default function MeusProjetos() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 hidden sm:flex"
-                    onClick={() => handleView(item)}
-                    title="Visualizar"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hidden sm:flex"
                     onClick={() => handleEdit(item)}
                     title="Editar"
                   >
@@ -301,10 +288,6 @@ export default function MeusProjetos() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleView(item)}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Visualizar
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleEdit(item)}>
                         <Pencil className="h-4 w-4 mr-2" />
                         Editar
