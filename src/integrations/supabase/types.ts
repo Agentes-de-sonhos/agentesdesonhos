@@ -1473,6 +1473,33 @@ export type Database = {
           },
         ]
       }
+      connections: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_contacts: {
         Row: {
           category: string | null
@@ -4944,6 +4971,7 @@ export type Database = {
           agency_logo_url: string | null
           agency_name: string | null
           avatar_url: string | null
+          bio: string | null
           city: string | null
           cnpj: string | null
           cpf: string | null
@@ -4952,11 +4980,15 @@ export type Database = {
           id: string
           name: string
           neighborhood: string | null
+          niche: string | null
           phone: string | null
+          services: string[] | null
+          specialties: string[] | null
           state: string | null
           street: string | null
           updated_at: string
           user_id: string
+          years_in_business: number | null
           zip_code: string | null
         }
         Insert: {
@@ -4964,6 +4996,7 @@ export type Database = {
           agency_logo_url?: string | null
           agency_name?: string | null
           avatar_url?: string | null
+          bio?: string | null
           city?: string | null
           cnpj?: string | null
           cpf?: string | null
@@ -4972,11 +5005,15 @@ export type Database = {
           id?: string
           name: string
           neighborhood?: string | null
+          niche?: string | null
           phone?: string | null
+          services?: string[] | null
+          specialties?: string[] | null
           state?: string | null
           street?: string | null
           updated_at?: string
           user_id: string
+          years_in_business?: number | null
           zip_code?: string | null
         }
         Update: {
@@ -4984,6 +5021,7 @@ export type Database = {
           agency_logo_url?: string | null
           agency_name?: string | null
           avatar_url?: string | null
+          bio?: string | null
           city?: string | null
           cnpj?: string | null
           cpf?: string | null
@@ -4992,11 +5030,15 @@ export type Database = {
           id?: string
           name?: string
           neighborhood?: string | null
+          niche?: string | null
           phone?: string | null
+          services?: string[] | null
+          specialties?: string[] | null
           state?: string | null
           street?: string | null
           updated_at?: string
           user_id?: string
+          years_in_business?: number | null
           zip_code?: string | null
         }
         Relationships: []

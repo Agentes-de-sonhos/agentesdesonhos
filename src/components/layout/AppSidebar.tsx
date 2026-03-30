@@ -105,6 +105,21 @@ const conhecimentoSection: MenuSection = {
   ],
 };
 
+const tradeConnectSection: MenuSection = {
+  title: "Trade Connect",
+  icon: Briefcase,
+  hoverColor: "hover:bg-indigo-600 hover:text-white",
+  headerBg: "bg-indigo-600 text-white",
+  headerHoverBg: "hover:bg-indigo-700",
+  bgColor: "bg-indigo-50",
+  textColor: "text-indigo-700",
+  borderColor: "border-indigo-600",
+  items: [
+    { title: "Meu Perfil", url: "/trade-connect/perfil", icon: User },
+    { title: "Minhas Comunidades", url: "/trade-connect/comunidades", icon: Users },
+  ],
+};
+
 const comunidadeSection: MenuSection = {
   title: "Comunidade",
   icon: Heart,
@@ -246,7 +261,7 @@ export function AppSidebar() {
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, tradeConnectSection, comunidadeSection],
     []
   );
 
