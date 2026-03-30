@@ -183,7 +183,7 @@ const App = () => (
             <Route path="/trade-connect" element={<Navigate to="/comunidade" replace />} />
             <Route path="/trade-connect/perfil" element={<Navigate to="/comunidade/perfil" replace />} />
             <Route path="/trade-connect/comunidades" element={<Navigate to="/comunidade/comunidades" replace />} />
-            <Route path="/trade-connect/agente/:userId" element={<Navigate to="/comunidade/agente/:userId" replace />} />
+            <Route path="/trade-connect/agente/:userId" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
             <Route path="/beneficios" element={<ProtectedRoute><Beneficios /></ProtectedRoute>} />
             <Route path="/mentorias" element={<ProtectedRoute><Mentorias /></ProtectedRoute>} />
             <Route path="/mentorias/:id" element={<ProtectedRoute><MentoriaDetail /></ProtectedRoute>} />
