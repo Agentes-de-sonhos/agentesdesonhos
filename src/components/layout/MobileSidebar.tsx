@@ -40,6 +40,7 @@ import {
   ArrowUpCircle,
   LayoutDashboard,
   Building2,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
