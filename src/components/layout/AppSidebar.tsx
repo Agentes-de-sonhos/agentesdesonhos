@@ -33,7 +33,7 @@ import {
   Paintbrush,
   UserPlus,
   Headset,
-  Briefcase,
+  Building2,
   Building2,
   DollarSign,
   ArrowDownCircle,
