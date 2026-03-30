@@ -34,7 +34,7 @@ export interface Connection {
   profile?: TradeProfile;
 }
 
-const PROFILE_SELECT = "user_id, name, avatar_url, agency_name, agency_logo_url, city, state, bio, specialties, services, niches, niche, years_in_business, phone, help_offer, partnership_interests";
+const PROFILE_SELECT = "user_id, name, avatar_url, agency_name, agency_logo_url, city, state, bio, specialties, services, niches, niche, years_in_business, phone, help_offer, partnership_interests, cover_image_url";
 
 export function useTradeProfile() {
   const { user } = useAuth();
