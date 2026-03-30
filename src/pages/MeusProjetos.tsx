@@ -205,7 +205,7 @@ export default function MeusProjetos() {
         deleteTrip(deleteTarget.id);
         break;
       case "itinerary":
-        deleteItinerary(deleteTarget.id);
+        deleteItinerary.mutate(deleteTarget.id);
         break;
     }
     setDeleteTarget(null);
