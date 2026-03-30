@@ -67,6 +67,11 @@ export function ChatFloatingButton() {
     return () => window.removeEventListener("start-dm", handler);
   }, [handleAgentChat]);
 
+  // Swipe-to-close support (hooks before early returns)
+  const panelRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchDeltaY = useRef(0);
+
   if (!hasFeature("community")) return null;
 
   const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
@@ -100,11 +105,6 @@ export function ChatFloatingButton() {
 
   const generalRoom = rooms.find((r) => r.is_general);
   const thematicRooms = rooms.filter((r) => !r.is_general);
-
-  // Swipe-to-close support
-  const panelRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef<number | null>(null);
-  const touchDeltaY = useRef(0);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
