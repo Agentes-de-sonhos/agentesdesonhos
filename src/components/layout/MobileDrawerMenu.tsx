@@ -5,7 +5,7 @@ import {
   GraduationCap, Lock, Calculator, Heart, ChevronDown, MessageCircleQuestion,
   Store, CreditCard, Wallet, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
-  X, Building2,
+  X, Building2, Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,16 @@ const comunidadeSection: MenuSection = {
   items: [
     { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
     { title: "Travel Experts", url: "/comunidade", icon: Users, requiredFeature: "community" },
+  ],
+};
+
+const tradeConnectSection: MenuSection = {
+  title: "Trade Connect", icon: Briefcase,
+  hoverColor: "hover:bg-indigo-600 hover:text-white", headerBg: "bg-indigo-600 text-white", headerHoverBg: "hover:bg-indigo-700",
+  bgColor: "bg-indigo-50", textColor: "text-indigo-700", borderColor: "border-indigo-600",
+  items: [
+    { title: "Meu Perfil", url: "/trade-connect/perfil", icon: User },
+    { title: "Minhas Comunidades", url: "/trade-connect/comunidades", icon: Users },
   ],
 };
 
@@ -148,7 +158,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, marketingSection, tradeConnectSection, comunidadeSection],
     []
   );
 
