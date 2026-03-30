@@ -434,7 +434,107 @@ export default function MapaTurismo() {
           </div>
         )}
 
-        {hasActiveFilter && filteredSuppliers.length > 0 && (
+        {/* Cruzeiros quick filters */}
+        {categoryFilter === "Cruzeiros" && (() => {
+          const cruiseItems = allItems.filter((item) => item.category === "Cruzeiros");
+          const getSpecCount = (keyword: string) =>
+            cruiseItems.filter((item) =>
+              (item.specialties || []).some((s: Specialty) => s.name.trim().toLowerCase().includes(keyword.toLowerCase()))
+            ).length;
+
+          const CRUISE_TIPO_FILTERS = [
+            { label: "Oceânico", value: "Oceanico", icon: Anchor },
+            { label: "Fluvial", value: "Fluvial", icon: Waves },
+            { label: "Expedição", value: "Expedicao", icon: Compass },
+          ];
+
+          const CRUISE_CHAR_FILTERS = [
+            "Luxo", "Premium", "Contemporaneo",
+            "Navio Pequeno", "Navio Médio", "Navio Grande",
+            "Boutique", "All Inclusive", "Iate", "Veleiro", "Temático",
+          ];
+
+          const toggleCruiseFilter = (val: string) => {
+            setCruiseQuickFilters((prev) =>
+              prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
+            );
+          };
+
+          const visibleChars = CRUISE_CHAR_FILTERS.filter((f) => getSpecCount(f) > 0);
+
+          return (
+            <div className="space-y-3">
+              {/* Tipo de navegação */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-muted-foreground mr-1">Tipo:</span>
+                {CRUISE_TIPO_FILTERS.map((f) => {
+                  const count = getSpecCount(f.value);
+                  if (count === 0) return null;
+                  const Icon = f.icon;
+                  const isActive = cruiseQuickFilters.includes(f.value);
+                  return (
+                    <Button
+                      key={f.value}
+                      variant={isActive ? "default" : "outline"}
+                      size="sm"
+                      className={cn(
+                        "rounded-full px-4 gap-1.5 h-8 text-xs font-medium transition-all",
+                        isActive
+                          ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-600 shadow-sm"
+                          : "border-border text-muted-foreground hover:border-cyan-400 hover:text-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950"
+                      )}
+                      onClick={() => toggleCruiseFilter(f.value)}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {f.label}
+                      <span className={cn("text-[10px] ml-0.5", isActive ? "text-cyan-200" : "text-muted-foreground/60")}>
+                        {count}
+                      </span>
+                    </Button>
+                  );
+                })}
+              </div>
+
+              {/* Características */}
+              {visibleChars.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground mr-1">Filtros:</span>
+                  {visibleChars.map((f) => {
+                    const isActive = cruiseQuickFilters.includes(f);
+                    const count = getSpecCount(f);
+                    return (
+                      <button
+                        key={f}
+                        onClick={() => toggleCruiseFilter(f)}
+                        className={cn(
+                          "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all border",
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                            : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                        )}
+                      >
+                        {f === "Contemporaneo" ? "Contemporâneo" : f}
+                        <span className={cn("text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/50")}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {cruiseQuickFilters.length > 0 && (
+                    <button
+                      onClick={() => setCruiseQuickFilters([])}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="h-3 w-3" /> Limpar
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+
           <div className="flex items-center gap-3">
             <p className="text-sm text-muted-foreground">
                <span className="font-semibold text-foreground">{filteredSuppliers.length}</span>{" "}
