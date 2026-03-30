@@ -333,14 +333,19 @@ export default function MeusProjetos() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-            Meus Projetos
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Gerencie todos os seus orçamentos, carteiras digitais e roteiros em um só lugar.
-          </p>
+      <div className="w-full space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 flex-shrink-0">
+            <FolderOpen className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+              Meus Projetos
+            </h1>
+            <p className="text-muted-foreground text-sm mt-0.5">
+              Gerencie todos os seus orçamentos, carteiras digitais e roteiros em um só lugar.
+            </p>
+          </div>
         </div>
 
         {/* Search and Filters */}
