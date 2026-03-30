@@ -20,6 +20,7 @@ export interface TradeProfile {
   phone: string | null;
   help_offer: string | null;
   partnership_interests: string[];
+  cover_image_url: string | null;
 }
 
 export type ConnectionStatus = "none" | "pending_sent" | "pending_received" | "accepted" | "rejected";
