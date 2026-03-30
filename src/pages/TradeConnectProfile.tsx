@@ -97,7 +97,7 @@ export default function TradeConnectProfile() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-              Trade Connect — Meu Perfil
+              Comunidade — Meu Perfil
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
               Seu perfil profissional na rede de agentes

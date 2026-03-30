@@ -35,7 +35,7 @@ export default function TradeConnectCommunities() {
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
         <div>
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-            Trade Connect — Minhas Comunidades
+            Comunidade — Minhas Comunidades
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
             Participe de comunidades e conecte-se com outros agentes
