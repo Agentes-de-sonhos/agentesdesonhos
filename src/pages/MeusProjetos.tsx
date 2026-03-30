@@ -183,9 +183,6 @@ export default function MeusProjetos() {
     }
   };
 
-  const handleView = (item: ProjectItem) => {
-    handleEdit(item);
-  };
 
   const handleDuplicate = (item: ProjectItem) => {
     if (item.type === "quote") {
