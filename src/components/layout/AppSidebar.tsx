@@ -233,7 +233,7 @@ export function AppSidebar() {
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection, comunidadeSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
     []
   );
 
