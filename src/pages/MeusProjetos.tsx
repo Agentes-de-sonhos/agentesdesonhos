@@ -28,7 +28,7 @@ import {
   Pencil,
   Copy,
   Trash2,
-  Eye,
+  Loader2,
   Loader2,
   FolderOpen,
   MapPin,
