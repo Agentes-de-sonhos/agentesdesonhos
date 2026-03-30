@@ -35,7 +35,6 @@ import {
   Headset,
   Building2,
   DollarSign,
-  DollarSign,
   ArrowDownCircle,
   ShoppingBag,
   ArrowUpCircle,
