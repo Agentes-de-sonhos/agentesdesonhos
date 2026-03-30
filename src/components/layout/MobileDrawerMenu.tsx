@@ -5,7 +5,7 @@ import {
   GraduationCap, Lock, Calculator, Heart, ChevronDown, MessageCircleQuestion,
   Store, CreditCard, Wallet, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
-  X, Building2, Briefcase,
+  X, Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
