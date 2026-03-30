@@ -534,7 +534,7 @@ export default function MapaTurismo() {
           );
         })()}
 
-
+        {hasActiveFilter && filteredSuppliers.length > 0 && (
           <div className="flex items-center gap-3">
             <p className="text-sm text-muted-foreground">
                <span className="font-semibold text-foreground">{filteredSuppliers.length}</span>{" "}
