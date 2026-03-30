@@ -52,17 +52,7 @@ const conhecimentoSection: MenuSection = {
   ],
 };
 
-const comunidadeSection: MenuSection = {
-  title: "Comunidade", icon: Heart,
-  hoverColor: "hover:bg-red-600 hover:text-white", headerBg: "bg-red-600 text-white", headerHoverBg: "hover:bg-red-700",
-  bgColor: "bg-red-50", textColor: "text-red-700", borderColor: "border-red-600",
-  items: [
-    { title: "Perguntas e Respostas", url: "/perguntas-respostas", icon: MessageCircleQuestion, requiredFeature: "qa_forum" },
-    { title: "Travel Experts", url: "/comunidade", icon: Users, requiredFeature: "community" },
-  ],
-};
-
-const tradeConnectItem: MenuItem = { title: "Trade Connect", url: "/trade-connect", icon: Briefcase };
+const comunidadeItem: MenuItem = { title: "Comunidade", url: "/trade-connect", icon: Heart };
 
 const guiasSection: MenuSection = {
   title: "Guias e Referências", icon: BookMarked,
