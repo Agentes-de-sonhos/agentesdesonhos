@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { usePresence, OnlineAgent } from "@/hooks/usePresence";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -13,23 +15,83 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Switch } from "@/components/ui/switch";
-import { Users } from "lucide-react";
+import { Users, MessageCircle, User, Building2, MapPin } from "lucide-react";
 
 interface OnlineAgentsStripProps {
   onAgentClick?: (agent: OnlineAgent) => void;
 }
 
+function AgentHoverCard({
+  agent,
+  children,
+  onMessage,
+  onViewProfile,
+}: {
+  agent: OnlineAgent;
+  children: React.ReactNode;
+  onMessage: () => void;
+  onViewProfile: () => void;
+}) {
+  return (
+    <HoverCard openDelay={300} closeDelay={200}>
+      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+      <HoverCardContent side="bottom" align="center" className="w-64 p-4">
+        <div className="flex items-start gap-3">
+          <Avatar className="h-12 w-12 border border-border">
+            <AvatarImage src={agent.avatar_url || undefined} alt={agent.name} />
+            <AvatarFallback className="text-sm bg-primary/10 text-primary font-semibold">
+              {agent.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground truncate">{agent.name}</p>
+            {agent.agency_name && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                <Building2 className="h-3 w-3 flex-shrink-0" /> {agent.agency_name}
+              </p>
+            )}
+            {agent.city && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                <MapPin className="h-3 w-3 flex-shrink-0" /> {agent.city}
+              </p>
+            )}
+            <div className="flex items-center gap-1 mt-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Online agora</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2 mt-3">
+          <Button size="sm" variant="default" className="flex-1 h-8 text-xs" onClick={onViewProfile}>
+            <User className="h-3.5 w-3.5 mr-1" /> Ver Perfil
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={onMessage}>
+            <MessageCircle className="h-3.5 w-3.5 mr-1" /> Mensagem
+          </Button>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+
 function AgentAvatar({
   agent,
   size = "md",
-  onClick,
+  onMessage,
+  onViewProfile,
   showStatus = true,
   stackIndex = 0,
 }: {
   agent: OnlineAgent;
   size?: "sm" | "md";
-  onClick: () => void;
+  onMessage: () => void;
+  onViewProfile: () => void;
   showStatus?: boolean;
   stackIndex?: number;
 }) {
@@ -43,47 +105,25 @@ function AgentAvatar({
     .toUpperCase();
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          onClick={onClick}
-          className="relative flex-shrink-0 transition-all duration-200 hover:scale-110 hover:z-30 focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-full"
-          style={{
-            marginLeft: stackIndex > 0 ? "-0.5rem" : 0,
-            zIndex: 20 - stackIndex,
-          }}
-        >
-          <Avatar
-            className={`${dim} border-2 border-background shadow-sm ring-1 ring-border/30`}
-          >
-            <AvatarImage src={agent.avatar_url || undefined} alt={agent.name} />
-            <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          {showStatus && (
-            <span
-              className={`absolute bottom-0 right-0 ${statusDim} rounded-full bg-emerald-500 border-2 border-background`}
-            />
-          )}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" className="text-center max-w-[200px]">
-        <p className="font-semibold text-sm">{agent.name}</p>
-        {agent.agency_name && (
-          <p className="text-xs text-muted-foreground">{agent.agency_name}</p>
+    <AgentHoverCard agent={agent} onMessage={onMessage} onViewProfile={onViewProfile}>
+      <button
+        className="relative flex-shrink-0 transition-all duration-200 hover:scale-110 hover:z-30 focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-full"
+        style={{
+          marginLeft: stackIndex > 0 ? "-0.5rem" : 0,
+          zIndex: 20 - stackIndex,
+        }}
+      >
+        <Avatar className={`${dim} border-2 border-background shadow-sm ring-1 ring-border/30`}>
+          <AvatarImage src={agent.avatar_url || undefined} alt={agent.name} />
+          <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+        {showStatus && (
+          <span className={`absolute bottom-0 right-0 ${statusDim} rounded-full bg-emerald-500 border-2 border-background`} />
         )}
-        {agent.city && (
-          <p className="text-xs text-muted-foreground">{agent.city}</p>
-        )}
-        <div className="flex items-center justify-center gap-1 mt-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span className="text-[10px] text-emerald-600 font-medium">
-            Online agora
-          </span>
-        </div>
-      </TooltipContent>
-    </Tooltip>
+      </button>
+    </AgentHoverCard>
   );
 }
 
@@ -92,15 +132,21 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
     usePresence();
   const { hasFeature } = useSubscription();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  const handleClick = (agent: OnlineAgent) => {
+  const handleMessage = (agent: OnlineAgent) => {
     setPopoverOpen(false);
     if (onAgentClick) {
       onAgentClick(agent);
     } else {
       window.dispatchEvent(new CustomEvent("start-dm", { detail: agent }));
     }
+  };
+
+  const handleViewProfile = (agent: OnlineAgent) => {
+    setPopoverOpen(false);
+    navigate(`/trade-connect/agente/${agent.user_id}`);
   };
 
   if (!hasFeature("community")) return null;
@@ -131,7 +177,8 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
                 key={agent.user_id}
                 agent={agent}
                 size={isMobile ? "sm" : "md"}
-                onClick={() => handleClick(agent)}
+                onMessage={() => handleMessage(agent)}
+                onViewProfile={() => handleViewProfile(agent)}
                 stackIndex={i}
               />
             ))}
@@ -153,48 +200,63 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
                 <PopoverContent
                   side="bottom"
                   align="end"
-                  className="w-72 p-3 max-h-80 overflow-y-auto"
+                  className="w-80 p-3 max-h-80 overflow-y-auto"
                 >
                   <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
                     Todos online ({onlineUsers.length})
                   </p>
                   <div className="grid gap-1">
                     {onlineUsers.map((agent) => (
-                      <button
+                      <div
                         key={agent.user_id}
-                        onClick={() => handleClick(agent)}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors w-full text-left"
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors"
                       >
                         <div className="relative flex-shrink-0">
                           <Avatar className="h-9 w-9 border border-border">
-                            <AvatarImage
-                              src={agent.avatar_url || undefined}
-                              alt={agent.name}
-                            />
+                            <AvatarImage src={agent.avatar_url || undefined} alt={agent.name} />
                             <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
-                              {agent.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")
-                                .slice(0, 2)
-                                .toUpperCase()}
+                              {agent.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-emerald-500 border-2 border-background" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium truncate text-foreground">
-                            {agent.name}
-                          </p>
+                          <p className="text-sm font-medium truncate text-foreground">{agent.name}</p>
                           {(agent.agency_name || agent.city) && (
                             <p className="text-xs text-muted-foreground truncate">
-                              {[agent.agency_name, agent.city]
-                                .filter(Boolean)
-                                .join(" · ")}
+                              {[agent.agency_name, agent.city].filter(Boolean).join(" · ")}
                             </p>
                           )}
                         </div>
-                      </button>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => handleViewProfile(agent)}
+                              >
+                                <User className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent><p>Ver Perfil</p></TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => handleMessage(agent)}
+                              >
+                                <MessageCircle className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent><p>Mensagem</p></TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </PopoverContent>
@@ -215,19 +277,13 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
               disabled={isOnlineLoading}
               className="h-5 w-9 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-muted [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4"
             />
-            <span
-              className={`text-xs font-medium ${isOnline ? "text-emerald-600" : "text-muted-foreground"}`}
-            >
+            <span className={`text-xs font-medium ${isOnline ? "text-emerald-600" : "text-muted-foreground"}`}>
               {isOnline ? "On" : "Off"}
             </span>
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            {isOnline
-              ? "Você está visível para outros agentes"
-              : "Você está invisível"}
-          </p>
+          <p>{isOnline ? "Você está visível para outros agentes" : "Você está invisível"}</p>
         </TooltipContent>
       </Tooltip>
     </div>
