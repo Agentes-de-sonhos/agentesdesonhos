@@ -309,6 +309,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             `;
           }
 
+          if (quote.show_investment_section === false) return '';
+
           return `
             <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
               ${paymentHtml}
@@ -318,7 +320,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         })()}
 
         <!-- Payment Terms -->
-        ${quote.payment_terms ? `
+        ${quote.show_investment_section !== false && quote.payment_terms ? `
           <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px;">
             <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px;">💳 Condições de Pagamento</p>
             <p style="font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>

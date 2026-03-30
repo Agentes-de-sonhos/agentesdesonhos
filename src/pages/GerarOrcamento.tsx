@@ -885,6 +885,32 @@ export default function GerarOrcamento() {
                 </p>
               </CardContent>
             </Card>
+            <Card>
+              <CardContent className="py-3 px-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <Label htmlFor="show-investment" className="text-sm font-medium cursor-pointer">
+                      Exibir apresentação do investimento
+                    </Label>
+                  </div>
+                  <Switch
+                    id="show-investment"
+                    checked={(quote as any).show_investment_section !== false}
+                    onCheckedChange={async (checked) => {
+                      if (!quote) return;
+                      await supabase.from("quotes").update({ show_investment_section: checked } as any).eq("id", quote.id);
+                      refetchQuote();
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 ml-6">
+                  {(quote as any).show_investment_section !== false
+                    ? "O cliente verá a seção de investimento e condições de pagamento."
+                    : "Apenas os valores por serviço serão exibidos ao cliente."}
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
