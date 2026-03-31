@@ -80,6 +80,13 @@ export function useMediaManager() {
     }
   }, [filterType, sortField, sortOrder]);
 
+  // Reload when filter/sort changes
+  const reloadCurrentFolder = useCallback(() => {
+    if (!searchQuery.trim()) {
+      loadContents(currentFolderId);
+    }
+  }, [searchQuery, currentFolderId, loadContents]);
+
   const searchFiles = useCallback(async (query: string) => {
     if (!query.trim()) {
       loadContents(currentFolderId);
