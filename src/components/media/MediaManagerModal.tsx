@@ -114,6 +114,13 @@ export function MediaManagerModal({
     }
   }, [open]);
 
+  // Reload when filter or sort changes
+  useEffect(() => {
+    if (open && !searchQuery.trim()) {
+      loadContents(currentFolderId);
+    }
+  }, [filterType, sortField, sortOrder]);
+
   const handleUpload = useCallback(async (fileList: FileList | File[]) => {
     const arr = Array.from(fileList);
     if (arr.length === 0) return;
