@@ -43,14 +43,17 @@ export function AdvisorReviewActions({ itemId, itemType, itemName }: AdvisorRevi
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
-              className={`h-7 w-7 ${alreadyRecommended ? 'text-success bg-success/10' : 'text-success hover:text-success hover:bg-success/10'}`}
-      onClick={() => {
+              size="sm"
+              className={`h-7 gap-1 px-2 ${alreadyRecommended ? 'text-success bg-success/10' : 'text-success hover:text-success hover:bg-success/10'}`}
+              onClick={() => {
                 if (alreadyRecommended) { setViewReviewsTab("recommend"); setViewReviewsOpen(true); }
                 else { setReviewDialogType("recommend"); setReviewDialogOpen(true); }
               }}
             >
               <ThumbsUp className="h-4 w-4" />
+              {(counts?.recommend || 0) > 0 && (
+                <span className="text-xs font-medium">({counts?.recommend})</span>
+              )}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
