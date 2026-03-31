@@ -60,6 +60,8 @@ export default function ShoppingAdvisor() {
             shortDescription={item.short_description}
             googleMapsLink={item.google_maps_link}
             expertTip={item.expert_tip}
+            itemId={item.id}
+            itemType="shopping"
             priceDisplay={item.price_range ? (
               <span className="text-2xl font-bold text-foreground">{item.price_range}</span>
             ) : undefined}

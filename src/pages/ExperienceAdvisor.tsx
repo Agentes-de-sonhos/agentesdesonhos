@@ -67,6 +67,8 @@ export default function ExperienceAdvisor() {
             shortDescription={item.short_description}
             googleMapsLink={item.google_maps_link}
             expertTip={item.expert_tip}
+            itemId={item.id}
+            itemType="experience"
             priceDisplay={item.average_price != null ? (
               <>
                 <span className="text-xs text-muted-foreground">a partir de</span>
