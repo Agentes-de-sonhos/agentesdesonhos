@@ -265,6 +265,7 @@ const serializeCommercialContacts = (d: OperatorFormData): string | null => {
 
 export function AdminTourOperatorsManager() {
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [showResultDialog, setShowResultDialog] = useState(false);
