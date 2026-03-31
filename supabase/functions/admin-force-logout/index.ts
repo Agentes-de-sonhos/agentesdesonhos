@@ -86,6 +86,19 @@ Deno.serve(async (req) => {
       // Still return success since sessions were invalidated
     }
 
+    // Clear user presence so they appear offline immediately
+    await adminClient
+      .from("user_presence")
+      .update({ is_online: false, last_active_at: new Date(0).toISOString() })
+      .eq("user_id", user_id);
+
+    // Also end any active sessions in user_sessions
+    await adminClient
+      .from("user_sessions")
+      .update({ ended_at: new Date().toISOString() })
+      .eq("user_id", user_id)
+      .is("ended_at", null);
+
     console.log(`Successfully forced logout for user ${user_id}`);
 
     return new Response(JSON.stringify({ success: true }), {
