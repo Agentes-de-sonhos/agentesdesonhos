@@ -45,8 +45,10 @@ export function AdvisorReviewActions({ itemId, itemType, itemName }: AdvisorRevi
               variant="ghost"
               size="icon"
               className={`h-7 w-7 ${alreadyRecommended ? 'text-success bg-success/10' : 'text-success hover:text-success hover:bg-success/10'}`}
-              disabled={alreadyRecommended}
-              onClick={() => { setReviewDialogType("recommend"); setReviewDialogOpen(true); }}
+      onClick={() => {
+                if (alreadyRecommended) { setViewReviewsTab("recommend"); setViewReviewsOpen(true); }
+                else { setReviewDialogType("recommend"); setReviewDialogOpen(true); }
+              }}
             >
               <ThumbsUp className="h-4 w-4" />
             </Button>
