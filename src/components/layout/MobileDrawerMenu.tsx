@@ -103,6 +103,18 @@ const clientesSection: MenuSection = {
   ],
 };
 
+const financeiroSection: MenuSection = {
+  title: "Financeiro", key: "section_financeiro", icon: DollarSign,
+  hoverColor: "hover:bg-emerald-600 hover:text-white", headerBg: "bg-emerald-600 text-white", headerHoverBg: "hover:bg-emerald-700",
+  bgColor: "bg-emerald-50", textColor: "text-emerald-700", borderColor: "border-emerald-600",
+  items: [
+    { key: "vendas_fin", title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial" },
+    { key: "entradas", title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial" },
+    { key: "despesas", title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial" },
+    { key: "dashboard_fin", title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
+  ],
+};
+
 const marketingSection: MenuSection = {
   title: "Marketing", key: "section_marketing", icon: Megaphone,
   hoverColor: "hover:bg-pink-600 hover:text-white", headerBg: "bg-pink-600 text-white", headerHoverBg: "hover:bg-pink-700",
