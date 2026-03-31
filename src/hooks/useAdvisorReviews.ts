@@ -127,6 +127,8 @@ export function useAdvisorReviews(itemId: string, itemType: AdvisorItemType) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["advisor-review-counts", itemType, itemId] });
+      queryClient.invalidateQueries({ queryKey: ["my-advisor-review", itemType, itemId] });
       toast.success(userReview ? "Avaliação atualizada!" : "Avaliação enviada!");
     },
     onError: () => {

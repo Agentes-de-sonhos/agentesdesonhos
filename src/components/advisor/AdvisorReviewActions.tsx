@@ -65,8 +65,10 @@ export function AdvisorReviewActions({ itemId, itemType, itemName }: AdvisorRevi
               variant="ghost"
               size="icon"
               className={`h-7 w-7 ${alreadyNotRecommended ? 'text-destructive bg-destructive/10' : 'text-destructive/60 hover:text-destructive hover:bg-destructive/10'}`}
-              disabled={alreadyNotRecommended}
-              onClick={() => { setReviewDialogType("not_recommend"); setReviewDialogOpen(true); }}
+      onClick={() => {
+                if (alreadyNotRecommended) { setViewReviewsTab("not_recommend"); setViewReviewsOpen(true); }
+                else { setReviewDialogType("not_recommend"); setReviewDialogOpen(true); }
+              }}
             >
               <ThumbsDown className="h-4 w-4" />
             </Button>
