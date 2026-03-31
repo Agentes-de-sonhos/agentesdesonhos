@@ -497,8 +497,6 @@ export function AdminTourOperatorsManager() {
     }
   };
 
-  const [filterCategory, setFilterCategory] = useState<string>("all");
-
   const filtered = operators?.filter((op: any) => {
     const matchesSearch = op.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = filterCategory === "all" || op.category === filterCategory;
