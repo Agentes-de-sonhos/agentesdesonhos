@@ -511,7 +511,7 @@ export function AdminTourOperatorsManager() {
           <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing}>
             {importing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}Importar
           </Button>
-          <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1" />Nova Operadora</Button>
+          <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1" />Adicionar</Button>
           <input ref={fileInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls" onChange={handleImport} />
         </div>
       </CardHeader>
