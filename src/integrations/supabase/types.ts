@@ -92,6 +92,39 @@ export type Database = {
         }
         Relationships: []
       }
+      advisor_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          review_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          review_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          review_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       advisor_suggestions: {
         Row: {
           advisor_type: string
