@@ -256,7 +256,7 @@ export function AdminUserManager() {
       toast({ title: "Erro ao forçar logout", description: err.message, variant: "destructive" });
     },
   });
-
+  const createUserMutation = useMutation({
     mutationFn: async (userData: typeof newUser) => {
       const { data: { session } } = await supabase.auth.getSession();
       const resp = await supabase.functions.invoke("admin-create-user", {
