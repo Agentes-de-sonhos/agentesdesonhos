@@ -522,23 +522,17 @@ export function MobileSidebar() {
             <Separator className="bg-sidebar-border" />
           </div>
 
-          {/* All sections - same order as desktop */}
-          {allSections.map((section) => (
-            <Fragment key={section.title}>
-              {renderSection(section)}
-              {section.title === "Criar" && (
-                <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
-                  {renderMenuItem(meusProjetosItem)}
-                </nav>
-              )}
-            </Fragment>
-          ))}
-
-          {/* Standalone items - same as desktop */}
-          <nav className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
-            {renderMenuItem(comunidadeItem)}
-            {renderMenuItem(mentoriasItem)}
-          </nav>
+          {/* Dynamic menu entries ordered by DB */}
+          {orderedEntries.map((entry) => {
+            if (entry.type === "section") {
+              return <Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</Fragment>;
+            }
+            return (
+              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2")}>
+                {renderMenuItem(entry.item)}
+              </nav>
+            );
+          })}
         </div>
 
         {/* Bottom Section - Conta */}
