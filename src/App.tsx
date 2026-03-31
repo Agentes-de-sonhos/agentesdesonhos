@@ -149,7 +149,7 @@ const App = () => (
             <Route path="/ferramentas-ia/trip-wallet" element={<ProtectedRoute><TripWallet /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/trip-wallet/:id" element={<ProtectedRoute><TripWallet /></ProtectedRoute>} />
             <Route path="/viagem/:token" element={<ViagemPublica />} />
-            <Route path="/c/:slug" element={<CarteiraPublica />} />
+            <Route path="/c/:slug" element={<CarteiraOrVitrineResolver />} />
             <Route path="/v/:code" element={<ShortCodeRedirect />} />
             <Route path="/mapa-turismo" element={<ProtectedRoute><MapaTurismo /></ProtectedRoute>} />
             <Route path="/mapa-turismo/cruzeiros" element={<ProtectedRoute><CruisesPage /></ProtectedRoute>} />
