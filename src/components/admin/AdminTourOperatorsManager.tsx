@@ -36,6 +36,7 @@ import {
   Plus,
   X,
   Link as LinkIcon,
+  ImagePlus,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { toast } from "sonner";
