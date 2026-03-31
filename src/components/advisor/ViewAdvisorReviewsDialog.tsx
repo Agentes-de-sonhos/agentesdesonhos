@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, User, Building2, ThumbsUp, ThumbsDown, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { MessageSquare, Building2, ThumbsUp, ThumbsDown, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
