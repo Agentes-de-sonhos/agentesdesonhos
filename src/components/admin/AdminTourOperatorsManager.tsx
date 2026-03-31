@@ -276,6 +276,8 @@ export function AdminTourOperatorsManager() {
   const [editingOperator, setEditingOperator] = useState<any | null>(null);
   const [formData, setFormData] = useState<OperatorFormData>(initialFormData);
   const [activeTab, setActiveTab] = useState("como-vender");
+  const [quickLogoOperatorId, setQuickLogoOperatorId] = useState<string | null>(null);
+  const [quickLogoOpen, setQuickLogoOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
