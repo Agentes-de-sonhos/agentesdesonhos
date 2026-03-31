@@ -529,6 +529,7 @@ export function AdminTourOperatorsManager() {
   });
 
   return (
+    <>
     <Card className="border-0 shadow-md">
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2">
