@@ -127,6 +127,8 @@ export function useAdvisorReviews(itemId: string, itemType: AdvisorItemType) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["advisor-review-counts", itemType, itemId] });
+      queryClient.invalidateQueries({ queryKey: ["my-advisor-review", itemType, itemId] });
       toast.success(userReview ? "Avaliação atualizada!" : "Avaliação enviada!");
     },
     onError: () => {
@@ -135,16 +137,20 @@ export function useAdvisorReviews(itemId: string, itemType: AdvisorItemType) {
   });
 
   const deleteReview = useMutation({
-    mutationFn: async () => {
-      if (!user || !userReview) throw new Error("Não autenticado");
+    mutationFn: async (reviewId?: string) => {
+      if (!user) throw new Error("Não autenticado");
+      const targetId = reviewId || userReview?.id;
+      if (!targetId) throw new Error("Avaliação não encontrada");
       const { error } = await supabase
         .from("advisor_reviews")
         .delete()
-        .eq("id", userReview.id);
+        .eq("id", targetId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["advisor-review-counts", itemType, itemId] });
+      queryClient.invalidateQueries({ queryKey: ["my-advisor-review", itemType, itemId] });
       toast.success("Avaliação removida");
     },
     onError: () => {
