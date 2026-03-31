@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Upload, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { MediaManagerModal } from "@/components/media/MediaManagerModal";
 
 interface HeroEditFormProps {
   name: string;
@@ -12,25 +12,11 @@ interface HeroEditFormProps {
 }
 
 export function HeroEditForm({ name, logoUrl, onNameChange, onLogoChange }: HeroEditFormProps) {
-  const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [mediaManagerOpen, setMediaManagerOpen] = useState(false);
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const ext = file.name.split(".").pop();
-      const path = `logos/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("supplier-logos").upload(path, file);
-      if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from("supplier-logos").getPublicUrl(path);
-      onLogoChange(publicUrl);
-    } catch (err) {
-      console.error("Upload error:", err);
-    } finally {
-      setUploading(false);
-    }
+  const handleMediaSelect = (url: string) => {
+    onLogoChange(url);
+    setMediaManagerOpen(false);
   };
 
   return (
@@ -55,13 +41,11 @@ export function HeroEditForm({ name, logoUrl, onNameChange, onLogoChange }: Hero
               variant="outline"
               size="sm"
               className="rounded-xl gap-1.5"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
+              onClick={() => setMediaManagerOpen(true)}
             >
               <Upload className="h-3.5 w-3.5" />
-              {uploading ? "Enviando..." : "Upload"}
+              {logoUrl ? "Trocar logo" : "Upload"}
             </Button>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
           </div>
         </div>
       </div>
@@ -73,6 +57,13 @@ export function HeroEditForm({ name, logoUrl, onNameChange, onLogoChange }: Hero
           className="mt-1 rounded-xl"
         />
       </div>
+
+      <MediaManagerModal
+        open={mediaManagerOpen}
+        onOpenChange={setMediaManagerOpen}
+        onSelect={handleMediaSelect}
+        accept="image"
+      />
     </div>
   );
 }
