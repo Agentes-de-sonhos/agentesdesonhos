@@ -496,7 +496,13 @@ export function AdminTourOperatorsManager() {
     }
   };
 
-  const filtered = operators?.filter((op: any) => op.name.toLowerCase().includes(search.toLowerCase()));
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+
+  const filtered = operators?.filter((op: any) => {
+    const matchesSearch = op.name.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = filterCategory === "all" || op.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <Card className="border-0 shadow-md">
