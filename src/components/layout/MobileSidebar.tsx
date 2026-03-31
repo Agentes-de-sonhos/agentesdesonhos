@@ -51,6 +51,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
+import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import {
   Tooltip,
