@@ -59,11 +59,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Sign out user globally by invalidating all their refresh tokens
-    const { error: signOutError } = await adminClient.auth.admin.signOut(user_id, "global");
+    // Force logout by calling GoTrue admin API directly
+    const logoutResp = await fetch(`${supabaseUrl}/auth/v1/admin/users/${user_id}/logout`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${supabaseServiceKey}`,
+        "apikey": supabaseServiceKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ scope: "global" }),
+    });
 
-    if (signOutError) {
-      console.error("Force logout error:", signOutError);
+    if (!logoutResp.ok) {
+      const errBody = await logoutResp.text();
+      console.error("Force logout error:", errBody);
       return new Response(JSON.stringify({ error: "Erro ao forçar logout do usuário." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
