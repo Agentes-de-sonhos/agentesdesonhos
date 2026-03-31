@@ -591,6 +591,7 @@ export function AdminTourOperatorsManager() {
                     {op.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => navigate(`/mapa-turismo/operadora/${op.id}`)} title="Ver página"><Eye className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => { setQuickLogoOperatorId(op.id); setQuickLogoOpen(true); }} title="Alterar logotipo"><ImagePlus className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => openEdit(op)} title="Editar"><Pencil className="h-4 w-4" /></Button>
                   <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(op.id)} title="Remover operadora" description="Tem certeza que deseja remover permanentemente esta operadora?">
                     <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
