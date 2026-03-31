@@ -66,14 +66,17 @@ export function AdvisorReviewActions({ itemId, itemType, itemName }: AdvisorRevi
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
-              className={`h-7 w-7 ${alreadyNotRecommended ? 'text-destructive bg-destructive/10' : 'text-destructive/60 hover:text-destructive hover:bg-destructive/10'}`}
-      onClick={() => {
+              size="sm"
+              className={`h-7 gap-1 px-2 ${alreadyNotRecommended ? 'text-destructive bg-destructive/10' : 'text-destructive/60 hover:text-destructive hover:bg-destructive/10'}`}
+              onClick={() => {
                 if (alreadyNotRecommended) { setViewReviewsTab("not_recommend"); setViewReviewsOpen(true); }
                 else { setReviewDialogType("not_recommend"); setReviewDialogOpen(true); }
               }}
             >
               <ThumbsDown className="h-4 w-4" />
+              {(counts?.not_recommend || 0) > 0 && (
+                <span className="text-xs font-medium">({counts?.not_recommend})</span>
+              )}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
