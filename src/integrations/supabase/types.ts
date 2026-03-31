@@ -3877,6 +3877,94 @@ export type Database = {
           },
         ]
       }
+      media_files: {
+        Row: {
+          created_at: string
+          file_type: string
+          folder_id: string | null
+          id: string
+          mime_type: string
+          name: string
+          original_name: string
+          size_bytes: number
+          storage_path: string
+          updated_at: string
+          uploaded_by: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          file_type: string
+          folder_id?: string | null
+          id?: string
+          mime_type: string
+          name: string
+          original_name: string
+          size_bytes?: number
+          storage_path: string
+          updated_at?: string
+          uploaded_by?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          file_type?: string
+          folder_id?: string | null
+          id?: string
+          mime_type?: string
+          name?: string
+          original_name?: string
+          size_bytes?: number
+          storage_path?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_files_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "media_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_folders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "media_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentorship_lessons: {
         Row: {
           created_at: string

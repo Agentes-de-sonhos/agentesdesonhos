@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Upload, X, FileText, Image as ImageIcon, Loader2, Plus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Upload, X, FileText, Image as ImageIcon, Loader2, Plus, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { MediaManagerModal } from "@/components/media/MediaManagerModal";
+import type { MediaFile } from "@/hooks/useMediaManager";
 
 interface UploadedFile {
   id: string;
@@ -21,14 +22,6 @@ interface MultiFileUploadProps {
   acceptLabel?: string;
 }
 
-const getFileType = (fileName: string): "image" | "pdf" | "video" | "other" => {
-  const ext = fileName.split(".").pop()?.toLowerCase();
-  if (["jpg", "jpeg", "png", "webp", "gif"].includes(ext || "")) return "image";
-  if (ext === "pdf") return "pdf";
-  if (["mp4", "mov", "webm", "avi"].includes(ext || "")) return "video";
-  return "other";
-};
-
 export function MultiFileUpload({
   files,
   onFilesChange,
@@ -36,56 +29,22 @@ export function MultiFileUpload({
   accept,
   acceptLabel,
 }: MultiFileUploadProps) {
-  const [uploading, setUploading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [mediaManagerOpen, setMediaManagerOpen] = useState(false);
 
-  const handleFiles = async (fileList: FileList | null) => {
-    if (!fileList || fileList.length === 0) return;
-
-    setUploading(true);
-    const newFiles: UploadedFile[] = [];
-
-    try {
-      for (const file of Array.from(fileList)) {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("materials")
-          .upload(fileName, file);
-
-        if (uploadError) {
-          console.error("Upload error:", uploadError);
-          toast.error(`Erro ao enviar ${file.name}`);
-          continue;
-        }
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("materials").getPublicUrl(fileName);
-
-        newFiles.push({
-          id: fileName,
-          name: file.name,
-          url: publicUrl,
-          type: getFileType(file.name),
-        });
-      }
-
-      if (newFiles.length > 0) {
-        onFilesChange([...files, ...newFiles]);
-        toast.success(
-          `${newFiles.length} arquivo${newFiles.length > 1 ? "s" : ""} enviado${newFiles.length > 1 ? "s" : ""}`
-        );
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Erro ao enviar arquivos");
-    } finally {
-      setUploading(false);
-      if (inputRef.current) {
-        inputRef.current.value = "";
+  const handleMediaSelect = (url: string, file?: MediaFile) => {
+    if (file) {
+      const newFile: UploadedFile = {
+        id: file.id,
+        name: file.name,
+        url: file.url,
+        type: file.file_type as UploadedFile["type"],
+      };
+      // Avoid duplicates
+      if (!files.some((f) => f.url === url)) {
+        onFilesChange([...files, newFile]);
+        toast.success("Arquivo selecionado!");
+      } else {
+        toast.info("Arquivo já adicionado.");
       }
     }
   };
@@ -94,65 +53,26 @@ export function MultiFileUpload({
     onFilesChange(files.filter((f) => f.id !== fileId));
   };
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    handleFiles(e.dataTransfer.files);
-  };
-
   return (
     <div className="space-y-3">
-      {/* Drag & Drop Zone */}
+      {/* Open Media Manager */}
       <div
         className={cn(
           "border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer",
-          dragActive
-            ? "border-primary bg-primary/5"
-            : "border-muted-foreground/25 hover:border-primary/50",
+          "border-muted-foreground/25 hover:border-primary/50",
           disabled && "opacity-50 cursor-not-allowed"
         )}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={() => !disabled && inputRef.current?.click()}
+        onClick={() => !disabled && setMediaManagerOpen(true)}
       >
-        {uploading ? (
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Enviando arquivos...</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2">
-            <Upload className="h-8 w-8 text-muted-foreground" />
-            <p className="text-sm font-medium">
-              Arraste arquivos ou clique para selecionar
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {acceptLabel || "Imagens (JPG, PNG, WebP) e PDFs"}
-            </p>
-          </div>
-        )}
-        <input
-          ref={inputRef}
-          type="file"
-          className="hidden"
-          multiple
-          accept={accept || ".pdf,.jpg,.jpeg,.png,.webp"}
-          onChange={(e) => handleFiles(e.target.files)}
-          disabled={disabled || uploading}
-        />
+        <div className="flex flex-col items-center gap-2">
+          <FolderOpen className="h-8 w-8 text-muted-foreground" />
+          <p className="text-sm font-medium">
+            Clique para abrir o Gerenciador de Arquivos
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {acceptLabel || "Selecione arquivos do gerenciador"}
+          </p>
+        </div>
       </div>
 
       {/* Uploaded Files List */}
@@ -192,19 +112,25 @@ export function MultiFileUpload({
       )}
 
       {/* Add More Files Button */}
-      {files.length > 0 && !uploading && (
+      {files.length > 0 && (
         <Button
           type="button"
           variant="outline"
           size="sm"
           className="gap-2"
-          onClick={() => inputRef.current?.click()}
+          onClick={() => setMediaManagerOpen(true)}
           disabled={disabled}
         >
           <Plus className="h-4 w-4" />
           Adicionar mais arquivos
         </Button>
       )}
+
+      <MediaManagerModal
+        open={mediaManagerOpen}
+        onOpenChange={setMediaManagerOpen}
+        onSelect={handleMediaSelect}
+      />
     </div>
   );
 }
