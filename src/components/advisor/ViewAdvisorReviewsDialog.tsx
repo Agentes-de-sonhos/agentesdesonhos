@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, User, Building2, ThumbsUp, ThumbsDown, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { MessageSquare, Building2, ThumbsUp, ThumbsDown, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -56,7 +57,12 @@ function ReviewList({
           <div key={rev.id} className="rounded-lg border border-border/50 p-4 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm">
-                <User className="h-4 w-4 text-muted-foreground" />
+                <Avatar className="h-7 w-7">
+                  <AvatarImage src={rev.profile?.avatar_url || ""} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                    {(rev.profile?.name || "A").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 <span className="font-medium text-foreground">{rev.profile?.name || "Agente"}</span>
                 {rev.profile?.agency_name && (
                   <>
