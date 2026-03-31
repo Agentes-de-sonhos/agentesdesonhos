@@ -308,7 +308,26 @@ export function AdminTourOperatorsManager() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] }),
   });
 
-  const saveMutation = useMutation({
+  const quickLogoMutation = useMutation({
+    mutationFn: async ({ id, logo_url }: { id: string; logo_url: string }) => {
+      const { error } = await supabase.from("tour_operators").update({ logo_url } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+      toast.success("Logotipo atualizado!");
+      setQuickLogoOpen(false);
+      setQuickLogoOperatorId(null);
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const handleQuickLogoSelect = useCallback((files: MediaFile[]) => {
+    if (files.length > 0 && quickLogoOperatorId) {
+      quickLogoMutation.mutate({ id: quickLogoOperatorId, logo_url: files[0].url });
+    }
+  }, [quickLogoOperatorId, quickLogoMutation]);
+
     mutationFn: async ({ id, data }: { id: string | null; data: OperatorFormData }) => {
       const socialLinks: Record<string, string> = {};
       if (data.facebook.trim()) socialLinks.facebook = data.facebook.trim();
