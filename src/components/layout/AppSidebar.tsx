@@ -562,23 +562,17 @@ export function AppSidebar() {
             <Separator className="bg-sidebar-border" />
           </div>
 
-          {/* All sections */}
-          {allSections.map((section, index) => (
-            <React.Fragment key={section.title}>
-              {renderSection(section)}
-              {section.title === "Criar" && (
-                <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
-                  {renderSingleItem(meusProjetosItem)}
-                </nav>
-              )}
-            </React.Fragment>
-          ))}
-
-          {/* Standalone items */}
-          <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
-            {renderSingleItem(comunidadeItem)}
-            {renderSingleItem(mentoriasItem)}
-          </nav>
+          {/* Dynamic menu entries ordered by DB */}
+          {orderedEntries.map((entry) => {
+            if (entry.type === "section") {
+              return <Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</Fragment>;
+            }
+            return (
+              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
+                {renderSingleItem(entry.item)}
+              </nav>
+            );
+          })}
         </div>
 
         {/* Bottom Section - Compact */}
