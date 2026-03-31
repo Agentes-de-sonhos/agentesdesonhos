@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { format } from "date-fns";
@@ -263,6 +263,10 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
   const token = tokenOverride ?? params.token;
   const { quote, isLoading } = usePublicQuote(token);
   const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(0);
+
+  useEffect(() => {
+    document.title = "Orçamento de Viagem";
+  }, []);
 
   const { data: agentProfile } = useQuery({
     queryKey: ["agent-profile-public", quote?.user_id],
