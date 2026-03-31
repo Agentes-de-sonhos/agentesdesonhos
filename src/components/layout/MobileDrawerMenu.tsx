@@ -16,6 +16,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
+import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 
