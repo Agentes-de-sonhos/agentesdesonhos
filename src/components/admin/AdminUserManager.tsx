@@ -240,7 +240,23 @@ export function AdminUserManager() {
     },
   });
 
-  const createUserMutation = useMutation({
+  const forceLogoutMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const resp = await supabase.functions.invoke("admin-force-logout", {
+        body: { user_id: userId },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao forçar logout");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
+    },
+    onSuccess: () => {
+      toast({ title: "Logout forçado com sucesso!", description: "Todas as sessões do usuário foram encerradas." });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao forçar logout", description: err.message, variant: "destructive" });
+    },
+  });
+
     mutationFn: async (userData: typeof newUser) => {
       const { data: { session } } = await supabase.auth.getSession();
       const resp = await supabase.functions.invoke("admin-create-user", {
