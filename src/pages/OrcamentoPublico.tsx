@@ -264,6 +264,10 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
   const { quote, isLoading } = usePublicQuote(token);
   const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(0);
 
+  useEffect(() => {
+    document.title = "Orçamento de Viagem";
+  }, []);
+
   const { data: agentProfile } = useQuery({
     queryKey: ["agent-profile-public", quote?.user_id],
     queryFn: async () => {
