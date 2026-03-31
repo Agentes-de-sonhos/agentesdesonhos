@@ -822,5 +822,13 @@ export function AdminTourOperatorsManager() {
         </DialogContent>
       </Dialog>
     </Card>
+
+    <MediaManagerModal
+      open={quickLogoOpen}
+      onOpenChange={(open) => { setQuickLogoOpen(open); if (!open) setQuickLogoOperatorId(null); }}
+      onSelect={handleQuickLogoSelect}
+      accept="image/*"
+    />
+    </>
   );
 }
