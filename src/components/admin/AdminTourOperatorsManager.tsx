@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,12 +36,14 @@ import {
   Plus,
   X,
   Link as LinkIcon,
+  ImagePlus,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { SupplierLogoUpload } from "./SupplierLogoUpload";
+import { MediaManagerModal } from "@/components/media/MediaManagerModal";
 
 const TEMPLATE_HEADERS = [
   "Operator Name", "Category", "Description", "How to Sell",
@@ -273,6 +275,8 @@ export function AdminTourOperatorsManager() {
   const [editingOperator, setEditingOperator] = useState<any | null>(null);
   const [formData, setFormData] = useState<OperatorFormData>(initialFormData);
   const [activeTab, setActiveTab] = useState("como-vender");
+  const [quickLogoOperatorId, setQuickLogoOperatorId] = useState<string | null>(null);
+  const [quickLogoOpen, setQuickLogoOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -302,6 +306,26 @@ export function AdminTourOperatorsManager() {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] }),
   });
+
+  const quickLogoMutation = useMutation({
+    mutationFn: async ({ id, logo_url }: { id: string; logo_url: string }) => {
+      const { error } = await supabase.from("tour_operators").update({ logo_url } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+      toast.success("Logotipo atualizado!");
+      setQuickLogoOpen(false);
+      setQuickLogoOperatorId(null);
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const handleQuickLogoSelect = useCallback((url: string) => {
+    if (quickLogoOperatorId) {
+      quickLogoMutation.mutate({ id: quickLogoOperatorId, logo_url: url });
+    }
+  }, [quickLogoOperatorId, quickLogoMutation]);
 
   const saveMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string | null; data: OperatorFormData }) => {
@@ -504,6 +528,7 @@ export function AdminTourOperatorsManager() {
   });
 
   return (
+    <>
     <Card className="border-0 shadow-md">
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2">
@@ -566,6 +591,7 @@ export function AdminTourOperatorsManager() {
                     {op.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => navigate(`/mapa-turismo/operadora/${op.id}`)} title="Ver página"><Eye className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => { setQuickLogoOperatorId(op.id); setQuickLogoOpen(true); }} title="Alterar logotipo"><ImagePlus className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => openEdit(op)} title="Editar"><Pencil className="h-4 w-4" /></Button>
                   <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(op.id)} title="Remover operadora" description="Tem certeza que deseja remover permanentemente esta operadora?">
                     <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
@@ -796,5 +822,13 @@ export function AdminTourOperatorsManager() {
         </DialogContent>
       </Dialog>
     </Card>
+
+    <MediaManagerModal
+      open={quickLogoOpen}
+      onOpenChange={(open) => { setQuickLogoOpen(open); if (!open) setQuickLogoOperatorId(null); }}
+      onSelect={handleQuickLogoSelect}
+      accept="image/*"
+    />
+    </>
   );
 }
