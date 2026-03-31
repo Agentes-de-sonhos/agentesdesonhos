@@ -328,6 +328,7 @@ export function AdminTourOperatorsManager() {
     }
   }, [quickLogoOperatorId, quickLogoMutation]);
 
+  const saveMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string | null; data: OperatorFormData }) => {
       const socialLinks: Record<string, string> = {};
       if (data.facebook.trim()) socialLinks.facebook = data.facebook.trim();
