@@ -72,6 +72,7 @@ interface MenuItem {
 
 interface MenuSection {
   title: string;
+  key?: string;
   icon: React.ComponentType<{ className?: string }>;
   items: MenuItem[];
   hoverColor: string;
