@@ -613,6 +613,16 @@ export function AdminUserManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title="Forçar logout"
+                          className="text-orange-600 hover:text-orange-700"
+                          onClick={() => forceLogoutMutation.mutate(user.user_id)}
+                          disabled={forceLogoutMutation.isPending}
+                        >
+                          <LogOut className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           title="Excluir usuário"
                           className="text-destructive hover:text-destructive"
                           onClick={() => setDeletingUser(user)}
