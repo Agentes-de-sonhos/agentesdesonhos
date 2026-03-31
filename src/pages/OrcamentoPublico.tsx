@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { format } from "date-fns";
