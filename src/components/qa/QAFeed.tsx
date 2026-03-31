@@ -120,7 +120,7 @@ export function QAFeed() {
       {/* ── Compose Box ── */}
       {/* Engagement banner */}
       <div className="rounded-2xl bg-primary/5 border border-primary/10 p-4 space-y-2">
-        <p className="text-sm font-semibold text-foreground">🚀 Essa é a sua comunidade!</p>
+        <p className="text-sm font-semibold text-foreground">🚀 Esse é o seu espaço para tirar dúvidas e para colaborar!</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
           Tem dúvida, ideia ou dica? Joga aqui 👇<br />
           💡 Pode ser simples: destino, fornecedor, cliente difícil…
