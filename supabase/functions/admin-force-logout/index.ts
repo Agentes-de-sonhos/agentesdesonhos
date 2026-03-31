@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), {
-        status: 401,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const { data: { user: caller } } = await callerClient.auth.getUser();
     if (!caller) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), {
-        status: 401,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 
     if (!roleData) {
       return new Response(JSON.stringify({ error: "Acesso negado. Apenas administradores." }), {
-        status: 403,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -54,30 +54,39 @@ Deno.serve(async (req) => {
 
     if (!user_id) {
       return new Response(JSON.stringify({ error: "user_id é obrigatório" }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Force logout by calling GoTrue admin API directly
-    const logoutResp = await fetch(`${supabaseUrl}/auth/v1/admin/users/${user_id}/logout`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${supabaseServiceKey}`,
-        "apikey": supabaseServiceKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ scope: "global" }),
+    console.log(`Admin ${caller.id} forcing logout for user ${user_id}`);
+
+    // Strategy: ban user for 1 second to invalidate all sessions, then unban
+    const { error: banError } = await adminClient.auth.admin.updateUserById(user_id, {
+      ban_duration: "1s",
     });
 
-    if (!logoutResp.ok) {
-      const errBody = await logoutResp.text();
-      console.error("Force logout error:", errBody);
-      return new Response(JSON.stringify({ error: "Erro ao forçar logout do usuário." }), {
-        status: 400,
+    if (banError) {
+      console.error("Ban error:", banError);
+      return new Response(JSON.stringify({ error: `Erro ao invalidar sessões: ${banError.message}` }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Wait briefly then unban
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    const { error: unbanError } = await adminClient.auth.admin.updateUserById(user_id, {
+      ban_duration: "none",
+    });
+
+    if (unbanError) {
+      console.error("Unban error:", unbanError);
+      // Still return success since sessions were invalidated
+    }
+
+    console.log(`Successfully forced logout for user ${user_id}`);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -86,7 +95,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("admin-force-logout error:", err);
     return new Response(JSON.stringify({ error: "Erro ao processar solicitação." }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
