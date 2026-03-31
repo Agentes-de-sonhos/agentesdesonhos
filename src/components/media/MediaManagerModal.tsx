@@ -90,6 +90,7 @@ export function MediaManagerModal({
     deleteFile,
     searchFiles,
     currentFolderId,
+    loadContents,
   } = useMediaManager();
 
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
