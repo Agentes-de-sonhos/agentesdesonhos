@@ -503,7 +503,7 @@ export function AdminTourOperatorsManager() {
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2">
           <Building2 className="h-5 w-5" />
-          Operadoras de Turismo
+          Fornecedores
           {operators && <Badge variant="secondary" className="ml-2">{operators.length}</Badge>}
         </CardTitle>
         <div className="flex flex-wrap gap-2">
