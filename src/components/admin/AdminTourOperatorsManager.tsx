@@ -265,6 +265,7 @@ const serializeCommercialContacts = (d: OperatorFormData): string | null => {
 
 export function AdminTourOperatorsManager() {
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [showResultDialog, setShowResultDialog] = useState(false);
@@ -496,7 +497,11 @@ export function AdminTourOperatorsManager() {
     }
   };
 
-  const filtered = operators?.filter((op: any) => op.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = operators?.filter((op: any) => {
+    const matchesSearch = op.name.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = filterCategory === "all" || op.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <Card className="border-0 shadow-md">
@@ -516,10 +521,27 @@ export function AdminTourOperatorsManager() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar operadora..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        <div className="flex gap-3 flex-col sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Buscar fornecedor..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          </div>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-full sm:w-[220px]">
+              <SelectValue placeholder="Tipo de serviço" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os serviços</SelectItem>
+              {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
+        {filterCategory !== "all" && (
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">{filterCategory}</Badge>
+            <span className="text-sm text-muted-foreground">{filtered?.length || 0} resultado(s)</span>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
