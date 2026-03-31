@@ -45,78 +45,78 @@ interface MenuSection {
 }
 
 const conhecimentoSection: MenuSection = {
-  title: "Conhecimento", icon: BookOpen,
+  title: "Conhecimento", key: "section_conhecimento", icon: BookOpen,
   hoverColor: "hover:bg-blue-600 hover:text-white", headerBg: "bg-blue-600 text-white", headerHoverBg: "hover:bg-blue-700",
   bgColor: "bg-blue-50", textColor: "text-blue-700", borderColor: "border-blue-600",
   items: [
-    { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
-    { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
+    { key: "educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { key: "noticias", title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
   ],
 };
 
-const meusProjetosItem: MenuItem = { title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
-const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart };
+const meusProjetosItem: MenuItem = { key: "meus_projetos", title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
+const comunidadeItem: MenuItem = { key: "comunidade", title: "Comunidade", url: "/comunidade", icon: Heart };
 
 const guiasSection: MenuSection = {
-  title: "Guias e Referências", icon: BookMarked,
+  title: "Guias e Referências", key: "section_guias", icon: BookMarked,
   hoverColor: "hover:bg-emerald-600 hover:text-white", headerBg: "bg-emerald-600 text-white", headerHoverBg: "hover:bg-emerald-700",
   bgColor: "bg-emerald-50", textColor: "text-emerald-700", borderColor: "border-emerald-600",
   items: [
-    { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
-    { title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
-    { title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
+    { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
+    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
+    { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
+    { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
 
 const recursosVendasSection: MenuSection = {
-  title: "Recursos de Vendas", icon: ShoppingCart,
+  title: "Recursos de Vendas", key: "section_recursos_vendas", icon: ShoppingCart,
   hoverColor: "hover:bg-orange-600 hover:text-white", headerBg: "bg-orange-600 text-white", headerHoverBg: "hover:bg-orange-700",
   bgColor: "bg-orange-50", textColor: "text-orange-700", borderColor: "border-orange-600",
   items: [
-    { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
-    { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
+    { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
+    { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
+    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
   ],
 };
 
 const criarSection: MenuSection = {
-  title: "Criar", icon: PlusCircle,
+  title: "Criar", key: "section_criar", icon: PlusCircle,
   hoverColor: "hover:bg-violet-600 hover:text-white", headerBg: "bg-violet-600 text-white", headerHoverBg: "hover:bg-violet-700",
   bgColor: "bg-violet-50", textColor: "text-violet-700", borderColor: "border-violet-600",
   items: [
-    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
-    { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
-    { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
-    { title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+    { key: "carteira_digital", title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
+    { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
+    { key: "roteiros", title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
+    { key: "conteudo", title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
   ],
 };
 
 const clientesSection: MenuSection = {
-  title: "Clientes", icon: Users,
+  title: "Clientes", key: "section_clientes", icon: Users,
   hoverColor: "hover:bg-cyan-600 hover:text-white", headerBg: "bg-cyan-600 text-white", headerHoverBg: "hover:bg-cyan-700",
   bgColor: "bg-cyan-50", textColor: "text-cyan-700", borderColor: "border-cyan-600",
   items: [
-    { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
-    { title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
-    { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
+    { key: "gestao_clientes", title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
+    { key: "oportunidades", title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
+    { key: "meta_vendas", title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
   ],
 };
 
 const marketingSection: MenuSection = {
-  title: "Marketing", icon: Megaphone,
+  title: "Marketing", key: "section_marketing", icon: Megaphone,
   hoverColor: "hover:bg-pink-600 hover:text-white", headerBg: "bg-pink-600 text-white", headerHoverBg: "hover:bg-pink-700",
   bgColor: "bg-pink-50", textColor: "text-pink-700", borderColor: "border-pink-600",
   items: [
-    { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
-    { title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
-    { title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
-    { title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
+    { key: "cartao_visitas", title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
+    { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
+    { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
+    { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
   ],
 };
 
-const mentoriasItem: MenuItem = { title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
-const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
+const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
+const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
