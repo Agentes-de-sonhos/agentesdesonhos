@@ -63,6 +63,8 @@ export default function DiningAdvisor() {
             shortDescription={item.short_description}
             googleMapsLink={item.google_maps_link}
             expertTip={item.expert_tip}
+            itemId={item.id}
+            itemType="dining"
             priceDisplay={item.price_range ? (
               <span className="text-2xl font-bold text-foreground">{item.price_range}</span>
             ) : undefined}

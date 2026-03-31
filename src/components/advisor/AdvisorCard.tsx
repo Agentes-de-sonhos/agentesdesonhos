@@ -1,6 +1,8 @@
 import { MapPin, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AdvisorReviewActions } from "./AdvisorReviewActions";
+import { AdvisorItemType } from "@/hooks/useAdvisorReviews";
 
 interface Tag {
   label: string;
@@ -19,6 +21,9 @@ interface AdvisorCardProps {
   priceDisplay?: React.ReactNode;
   googleMapsLink?: string | null;
   expertTip?: string | null;
+  // Review props
+  itemId?: string;
+  itemType?: AdvisorItemType;
 }
 
 export function AdvisorCard({
@@ -32,6 +37,8 @@ export function AdvisorCard({
   priceDisplay,
   googleMapsLink,
   expertTip,
+  itemId,
+  itemType,
 }: AdvisorCardProps) {
   return (
     <Card className="border-border/50 hover:border-primary/30 hover:shadow-md transition-all group">
@@ -101,12 +108,13 @@ export function AdvisorCard({
             )}
           </div>
 
-          {/* Price */}
-          {priceDisplay && (
-            <div className="sm:text-right sm:min-w-[100px] flex sm:flex-col items-center sm:items-end gap-2">
-              {priceDisplay}
-            </div>
-          )}
+          {/* Price + Review Actions */}
+          <div className="sm:text-right sm:min-w-[120px] flex sm:flex-col items-center sm:items-end gap-2">
+            {priceDisplay}
+            {itemId && itemType && (
+              <AdvisorReviewActions itemId={itemId} itemType={itemType} itemName={name} />
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

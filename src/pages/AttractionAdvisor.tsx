@@ -60,6 +60,8 @@ export default function AttractionAdvisor() {
             shortDescription={item.short_description}
             googleMapsLink={item.google_maps_link}
             expertTip={item.expert_tip}
+            itemId={item.id}
+            itemType="attraction"
           />
         );
       }}
