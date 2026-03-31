@@ -50,6 +50,7 @@ import {
   Trash2,
   Eye,
   Settings2,
+  LogOut,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -239,6 +240,22 @@ export function AdminUserManager() {
     },
   });
 
+  const forceLogoutMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const resp = await supabase.functions.invoke("admin-force-logout", {
+        body: { user_id: userId },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao forçar logout");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
+    },
+    onSuccess: () => {
+      toast({ title: "Logout forçado com sucesso!", description: "Todas as sessões do usuário foram encerradas." });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao forçar logout", description: err.message, variant: "destructive" });
+    },
+  });
   const createUserMutation = useMutation({
     mutationFn: async (userData: typeof newUser) => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -592,6 +609,16 @@ export function AdminUserManager() {
                           }}
                         >
                           <CreditCard className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Forçar logout"
+                          className="text-orange-600 hover:text-orange-700"
+                          onClick={() => forceLogoutMutation.mutate(user.user_id)}
+                          disabled={forceLogoutMutation.isPending}
+                        >
+                          <LogOut className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
