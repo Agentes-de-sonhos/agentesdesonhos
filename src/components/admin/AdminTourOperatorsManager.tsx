@@ -44,7 +44,6 @@ import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { SupplierLogoUpload } from "./SupplierLogoUpload";
 import { MediaManagerModal } from "@/components/media/MediaManagerModal";
-import type { MediaFile } from "@/hooks/useMediaManager";
 
 const TEMPLATE_HEADERS = [
   "Operator Name", "Category", "Description", "How to Sell",
