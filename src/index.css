@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix EXIF orientation for profile photos on mobile */
+img {
+  image-orientation: from-image;
+}
+
 /* Agentes de Sonhos Design System
    Clean, minimal tourism productivity platform
    Colors: Sky blue primary, coral accents, warm neutrals
