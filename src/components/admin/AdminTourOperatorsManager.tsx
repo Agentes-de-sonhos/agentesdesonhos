@@ -322,9 +322,9 @@ export function AdminTourOperatorsManager() {
     onError: (err: any) => toast.error(err.message),
   });
 
-  const handleQuickLogoSelect = useCallback((files: MediaFile[]) => {
-    if (files.length > 0 && quickLogoOperatorId) {
-      quickLogoMutation.mutate({ id: quickLogoOperatorId, logo_url: files[0].url });
+  const handleQuickLogoSelect = useCallback((url: string) => {
+    if (quickLogoOperatorId) {
+      quickLogoMutation.mutate({ id: quickLogoOperatorId, logo_url: url });
     }
   }, [quickLogoOperatorId, quickLogoMutation]);
 
