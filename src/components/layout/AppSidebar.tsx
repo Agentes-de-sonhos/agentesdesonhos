@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, Fragment } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map,
@@ -52,6 +52,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
+import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import {
   Tooltip,
@@ -78,6 +79,7 @@ interface MenuItem {
 
 interface MenuSection {
   title: string;
+  key?: string;
   icon: React.ComponentType<{ className?: string }>;
   items: MenuItem[];
   hoverColor: string;
@@ -92,6 +94,7 @@ interface MenuSection {
 
 const conhecimentoSection: MenuSection = {
   title: "Conhecimento",
+  key: "section_conhecimento",
   icon: BookOpen,
   hoverColor: "hover:bg-blue-600 hover:text-white",
   headerBg: "bg-blue-600 text-white",
@@ -100,16 +103,17 @@ const conhecimentoSection: MenuSection = {
   textColor: "text-blue-700",
   borderColor: "border-blue-600",
   items: [
-    { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
-    { title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
+    { key: "educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { key: "noticias", title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
   ],
 };
 
-const meusProjetosItem: MenuItem = { title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
-const comunidadeItem: MenuItem = { title: "Comunidade", url: "/comunidade", icon: Heart };
+const meusProjetosItem: MenuItem = { key: "meus_projetos", title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
+const comunidadeItem: MenuItem = { key: "comunidade", title: "Comunidade", url: "/comunidade", icon: Heart };
 
 const guiasSection: MenuSection = {
   title: "Guias e Referências",
+  key: "section_guias",
   icon: BookMarked,
   hoverColor: "hover:bg-emerald-600 hover:text-white",
   headerBg: "bg-emerald-600 text-white",
@@ -118,15 +122,16 @@ const guiasSection: MenuSection = {
   textColor: "text-emerald-700",
   borderColor: "border-emerald-600",
   items: [
-    { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
-    { title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
-    { title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
+    { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
+    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
+    { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
+    { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
 
 const recursosVendasSection: MenuSection = {
   title: "Recursos de Vendas",
+  key: "section_recursos_vendas",
   icon: ShoppingCart,
   hoverColor: "hover:bg-orange-600 hover:text-white",
   headerBg: "bg-orange-600 text-white",
@@ -135,14 +140,15 @@ const recursosVendasSection: MenuSection = {
   textColor: "text-orange-700",
   borderColor: "border-orange-600",
   items: [
-    { title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
-    { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
+    { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
+    { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
+    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
   ],
 };
 
 const criarSection: MenuSection = {
   title: "Criar",
+  key: "section_criar",
   icon: PlusCircle,
   hoverColor: "hover:bg-violet-600 hover:text-white",
   headerBg: "bg-violet-600 text-white",
@@ -151,15 +157,16 @@ const criarSection: MenuSection = {
   textColor: "text-violet-700",
   borderColor: "border-violet-600",
   items: [
-    { title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
-    { title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
-    { title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
-    { title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+    { key: "carteira_digital", title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
+    { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
+    { key: "roteiros", title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
+    { key: "conteudo", title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
   ],
 };
 
 const clientesSection: MenuSection = {
   title: "Clientes",
+  key: "section_clientes",
   icon: Users,
   hoverColor: "hover:bg-cyan-600 hover:text-white",
   headerBg: "bg-cyan-600 text-white",
@@ -168,14 +175,15 @@ const clientesSection: MenuSection = {
   textColor: "text-cyan-700",
   borderColor: "border-cyan-600",
   items: [
-    { title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
-    { title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
-    { title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
+    { key: "gestao_clientes", title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
+    { key: "oportunidades", title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
+    { key: "meta_vendas", title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
   ],
 };
 
 const financeiroSection: MenuSection = {
   title: "Financeiro",
+  key: "section_financeiro",
   icon: DollarSign,
   hoverColor: "hover:bg-emerald-600 hover:text-white",
   headerBg: "bg-emerald-600 text-white",
@@ -184,15 +192,16 @@ const financeiroSection: MenuSection = {
   textColor: "text-emerald-700",
   borderColor: "border-emerald-600",
   items: [
-    { title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial" },
-    { title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial" },
-    { title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial" },
-    { title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
+    { key: "vendas_fin", title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial" },
+    { key: "entradas", title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial" },
+    { key: "despesas", title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial" },
+    { key: "dashboard_fin", title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
   ],
 };
 
 const marketingSection: MenuSection = {
   title: "Marketing",
+  key: "section_marketing",
   icon: Megaphone,
   hoverColor: "hover:bg-pink-600 hover:text-white",
   headerBg: "bg-pink-600 text-white",
@@ -201,16 +210,16 @@ const marketingSection: MenuSection = {
   textColor: "text-pink-700",
   borderColor: "border-pink-600",
   items: [
-    { title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
-    { title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
-    { title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
-    { title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
+    { key: "cartao_visitas", title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
+    { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
+    { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
+    { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
   ],
 };
 
-const mentoriasItem: MenuItem = { title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
+const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
 
-const dashboardItem: MenuItem = { title: "Início", url: "/dashboard", icon: Home };
+const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
@@ -237,6 +246,45 @@ export function AppSidebar() {
     () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
     []
   );
+
+  const standaloneItems: MenuItem[] = useMemo(
+    () => [meusProjetosItem, comunidadeItem, mentoriasItem],
+    []
+  );
+
+  const { orderMap } = useFullMenuOrder();
+
+  type MenuEntry =
+    | { type: "section"; section: MenuSection; orderIdx: number }
+    | { type: "item"; item: MenuItem; orderIdx: number };
+
+  const orderedEntries: MenuEntry[] = useMemo(() => {
+    const mainOrder = orderMap["main"] || {};
+    const entries: MenuEntry[] = [];
+
+    for (const section of allSections) {
+      const sortedItems = [...section.items].sort((a, b) => {
+        const sectionKey = section.key?.replace("section_", "") || "";
+        const sectionOrder = orderMap[sectionKey] || {};
+        return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
+      });
+      entries.push({
+        type: "section",
+        section: { ...section, items: sortedItems },
+        orderIdx: mainOrder[section.key || ""] ?? 999,
+      });
+    }
+
+    for (const item of standaloneItems) {
+      entries.push({
+        type: "item",
+        item,
+        orderIdx: mainOrder[item.key || ""] ?? 999,
+      });
+    }
+
+    return entries.sort((a, b) => a.orderIdx - b.orderIdx);
+  }, [allSections, standaloneItems, orderMap]);
 
   const toggleSection = (title: string) => {
     setUserInteracted(true);
@@ -514,23 +562,17 @@ export function AppSidebar() {
             <Separator className="bg-sidebar-border" />
           </div>
 
-          {/* All sections */}
-          {allSections.map((section, index) => (
-            <React.Fragment key={section.title}>
-              {renderSection(section)}
-              {section.title === "Criar" && (
-                <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
-                  {renderSingleItem(meusProjetosItem)}
-                </nav>
-              )}
-            </React.Fragment>
-          ))}
-
-          {/* Standalone items */}
-          <nav className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
-            {renderSingleItem(comunidadeItem)}
-            {renderSingleItem(mentoriasItem)}
-          </nav>
+          {/* Dynamic menu entries ordered by DB */}
+          {orderedEntries.map((entry) => {
+            if (entry.type === "section") {
+              return <Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</Fragment>;
+            }
+            return (
+              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
+                {renderSingleItem(entry.item)}
+              </nav>
+            );
+          })}
         </div>
 
         {/* Bottom Section - Compact */}
