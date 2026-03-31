@@ -51,27 +51,30 @@ function getServiceDetails(service: QuoteService): string[] {
   switch (service.service_type) {
     case "flight":
       details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
-      if (data.outbound_detail) {
-        const ob = data.outbound_detail;
+      // Multi-leg support (backward compat)
+      const outLegs = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
+      const retLegs = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
+      outLegs.forEach((ob: any, i: number) => {
         const parts: string[] = [];
         if (ob.flight_number) parts.push(`Voo ${ob.flight_number}`);
         if (ob.airport_origin && ob.airport_destination) parts.push(`${ob.airport_origin} → ${ob.airport_destination}`);
         if (ob.departure_time) parts.push(`Saída ${ob.departure_time}`);
         if (ob.arrival_time) parts.push(`Chegada ${ob.arrival_time}`);
-        if (parts.length) details.push(`Ida: ${parts.join(" | ")}`);
-      }
-      if (data.return_detail) {
-        const rt = data.return_detail;
+        const label = outLegs.length > 1 ? `✈ Ida (trecho ${i + 1})` : `✈ Ida`;
+        if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
+      });
+      retLegs.forEach((rt: any, i: number) => {
         const parts: string[] = [];
         if (rt.flight_number) parts.push(`Voo ${rt.flight_number}`);
         if (rt.airport_origin && rt.airport_destination) parts.push(`${rt.airport_origin} → ${rt.airport_destination}`);
         if (rt.departure_time) parts.push(`Saída ${rt.departure_time}`);
         if (rt.arrival_time) parts.push(`Chegada ${rt.arrival_time}`);
-        if (parts.length) details.push(`Volta: ${parts.join(" | ")}`);
-      }
+        const label = retLegs.length > 1 ? `✈ Volta (trecho ${i + 1})` : `✈ Volta`;
+        if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
+      });
       if (data.includes_baggage) details.push("✓ Bagagem incluída");
       if (data.includes_boarding_fee) details.push("✓ Taxa de embarque incluída");
-      if (data.notes) details.push(`Obs: ${data.notes}`);
+      if (data.notes) details.push(data.notes);
       break;
     case "hotel":
       details.push(`${data.hotel_name} — ${data.city}`);
