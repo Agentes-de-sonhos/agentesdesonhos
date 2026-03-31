@@ -147,6 +147,45 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     []
   );
 
+  const standaloneItems: MenuItem[] = useMemo(
+    () => [meusProjetosItem, comunidadeItem, mentoriasItem],
+    []
+  );
+
+  const { orderMap } = useFullMenuOrder();
+
+  type MenuEntry =
+    | { type: "section"; section: MenuSection; orderIdx: number }
+    | { type: "item"; item: MenuItem; orderIdx: number };
+
+  const orderedEntries: MenuEntry[] = useMemo(() => {
+    const mainOrder = orderMap["main"] || {};
+    const entries: MenuEntry[] = [];
+
+    for (const section of allSections) {
+      const sortedItems = [...section.items].sort((a, b) => {
+        const sectionKey = section.key?.replace("section_", "") || "";
+        const sectionOrder = orderMap[sectionKey] || {};
+        return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
+      });
+      entries.push({
+        type: "section",
+        section: { ...section, items: sortedItems },
+        orderIdx: mainOrder[section.key || ""] ?? 999,
+      });
+    }
+
+    for (const item of standaloneItems) {
+      entries.push({
+        type: "item",
+        item,
+        orderIdx: mainOrder[item.key || ""] ?? 999,
+      });
+    }
+
+    return entries.sort((a, b) => a.orderIdx - b.orderIdx);
+  }, [allSections, standaloneItems, orderMap]);
+
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
 
   const toggleSection = (title: string) => {
