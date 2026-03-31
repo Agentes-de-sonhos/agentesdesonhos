@@ -52,6 +52,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
+import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import {
   Tooltip,
