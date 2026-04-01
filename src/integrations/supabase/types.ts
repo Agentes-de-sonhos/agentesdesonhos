@@ -4290,6 +4290,54 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_phrases: {
+        Row: {
+          created_at: string
+          id: string
+          month: number
+          phrase: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month: number
+          phrase: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month?: number
+          phrase?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      monthly_popup_views: {
+        Row: {
+          id: string
+          user_id: string
+          viewed_at: string
+          viewed_month: number
+          viewed_year: number
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          viewed_at?: string
+          viewed_month: number
+          viewed_year: number
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          viewed_at?: string
+          viewed_month?: number
+          viewed_year?: number
+        }
+        Relationships: []
+      }
       monthly_prizes: {
         Row: {
           created_at: string
