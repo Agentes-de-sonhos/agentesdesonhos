@@ -2,13 +2,13 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Quote, QuoteService, ServiceType, ServiceData } from "@/types/quote";
+import type { Quote, ServiceType, ServiceData } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 
 const OrcamentoPublico = lazy(() => import("@/pages/OrcamentoPublico"));
 
 async function fetchQuoteByPublicCode(agencySlug: string, code: string) {
-  const { data, error } = await supabase.rpc('get_quote_by_public_code', {
+  const { data, error } = await supabase.rpc('get_quote_by_public_code' as any, {
     p_agency_slug: agencySlug,
     p_code: code,
   });
