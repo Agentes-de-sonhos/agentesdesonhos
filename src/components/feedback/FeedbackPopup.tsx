@@ -8,14 +8,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { X, Star, MessageCircle, Send, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
-const FEEDBACK_KEY = "platform_feedback_v1";
+const FEEDBACK_KEY = "platform_feedback_v2";
 
-function hasFeedbackDismissed(userId: string): boolean {
+function getCurrentMonthKey(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}`;
+}
+
+function hasFeedbackDismissedThisMonth(userId: string): boolean {
   try {
     const stored = localStorage.getItem(FEEDBACK_KEY);
     if (!stored) return false;
     const data = JSON.parse(stored);
-    return data[userId] === true;
+    return data[userId] === getCurrentMonthKey();
   } catch {
     return false;
   }
@@ -25,7 +30,7 @@ function markFeedbackDismissed(userId: string): void {
   try {
     const stored = localStorage.getItem(FEEDBACK_KEY);
     const data = stored ? JSON.parse(stored) : {};
-    data[userId] = true;
+    data[userId] = getCurrentMonthKey();
     localStorage.setItem(FEEDBACK_KEY, JSON.stringify(data));
   } catch {}
 }
@@ -42,9 +47,12 @@ export function FeedbackPopup() {
 
   useEffect(() => {
     if (!user) return;
-    if (hasFeedbackDismissed(user.id)) return;
+    if (hasFeedbackDismissedThisMonth(user.id)) return;
 
     // Check if popup is enabled and user hasn't submitted yet
+    const now = new Date();
+    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01T00:00:00`;
+
     Promise.all([
       supabase
         .from("feedback_settings" as any)
@@ -55,6 +63,7 @@ export function FeedbackPopup() {
         .from("user_feedback" as any)
         .select("id")
         .eq("user_id", user.id)
+        .gte("created_at", monthStart)
         .limit(1),
     ]).then(([settingsRes, feedbackRes]) => {
       if ((settingsRes.data as any)?.value !== "true") return;
