@@ -1,6 +1,6 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
-import { Loader2, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,6 +91,9 @@ export default function CarteiraPublicaV2() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [needsPassword, setNeedsPassword] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+
+  const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
 
   useEffect(() => {
     if (!agencySlug || !accessCode) return;
@@ -101,8 +104,10 @@ export default function CarteiraPublicaV2() {
         setLoading(false);
       })
       .catch((err) => {
-        if (err.message === "Senha incorreta") {
+        if (err.message === "Senha incorreta" || err.message === "Senha inválida") {
           setNeedsPassword(true);
+        } else if (err.message === LOCKED_MSG) {
+          setIsLocked(true);
         } else {
           setError(err.message);
         }
@@ -119,7 +124,12 @@ export default function CarteiraPublicaV2() {
       setTripData(result);
       setNeedsPassword(false);
     } catch (err: any) {
-      setError(err.message || "Erro ao acessar carteira");
+      if (err.message === LOCKED_MSG) {
+        setIsLocked(true);
+        setNeedsPassword(false);
+      } else {
+        setError(err.message || "Erro ao acessar carteira");
+      }
     } finally {
       setLoading(false);
     }
@@ -137,6 +147,26 @@ export default function CarteiraPublicaV2() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isLocked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-destructive/5 flex items-center justify-center p-4">
+        <Card className="w-full max-w-sm shadow-xl border-0">
+          <CardContent className="pt-8 pb-6 px-6 text-center space-y-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 mx-auto">
+              <ShieldAlert className="h-8 w-8 text-destructive" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold mb-1">Acesso Bloqueado</h1>
+              <p className="text-sm text-muted-foreground">
+                Acesso bloqueado por segurança. Entre em contato com a agência responsável.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
