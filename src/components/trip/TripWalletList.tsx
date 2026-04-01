@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
+import { buildCarteiraLink } from "@/lib/carteira-domain";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { useNavigate } from "react-router-dom";
