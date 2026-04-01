@@ -78,6 +78,7 @@ export interface Itinerary {
   budgetLevel: string;
   status: 'draft' | 'generating' | 'review' | 'approved' | 'published';
   shareToken: string | null;
+  publicAccessCode: string | null;
   createdAt: string;
   updatedAt: string;
   days?: ItineraryDay[];
