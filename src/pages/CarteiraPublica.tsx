@@ -100,6 +100,10 @@ export default function CarteiraPublica() {
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
 
   useEffect(() => {
+    setOgMeta({
+      title: "Sua viagem organizada em um só lugar 🎒",
+      description: "Acesse seus vouchers, ingressos e documentos de forma simples e segura.",
+    });
     if (!slug) return;
     verifyTripBySlug(slug, "")
       .then((result) => {
