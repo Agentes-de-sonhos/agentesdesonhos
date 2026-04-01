@@ -20,6 +20,7 @@ export function useItineraries() {
     budgetLevel: data.budget_level as string,
     status: data.status as Itinerary["status"],
     shareToken: data.share_token as string | null,
+    publicAccessCode: (data as any).public_access_code as string | null,
     createdAt: data.created_at as string,
     updatedAt: data.updated_at as string,
   });
