@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicBusinessCard, generateVCard, SocialLinks } from "@/hooks/useBusinessCard";
 import { supabase } from "@/integrations/supabase/client";
