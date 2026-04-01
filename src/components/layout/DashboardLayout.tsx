@@ -26,6 +26,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Global Popup Modal for admin announcements */}
       <GlobalPopupModal />
       
+      {/* Monthly Popup (inspirational + events) */}
+      <MonthlyPopupModal />
+      
       {/* Community Chat Floating Button (Premium only) */}
       <ChatFloatingButton />
       
