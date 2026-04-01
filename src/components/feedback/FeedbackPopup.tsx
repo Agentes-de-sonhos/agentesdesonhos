@@ -120,16 +120,18 @@ export function FeedbackPopup() {
   if (!user) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md p-0 overflow-hidden gap-0 border-0 rounded-2xl">
-        {/* Close */}
-        <button
-          onClick={handleClose}
-          className="absolute right-3 top-3 z-10 rounded-full bg-background/80 backdrop-blur-sm p-1.5 hover:bg-background transition-colors"
-          aria-label="Fechar"
-        >
-          <X className="h-4 w-4" />
-        </button>
+    <Dialog open={isOpen} onOpenChange={() => { if (step === "thanks") handleClose(); }}>
+      <DialogContent className="max-w-md p-0 overflow-hidden gap-0 border-0 rounded-2xl" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => { if (step !== "thanks") e.preventDefault(); }}>
+        {/* Close - only visible after submitting */}
+        {step === "thanks" && (
+          <button
+            onClick={handleClose}
+            className="absolute right-3 top-3 z-10 rounded-full bg-background/80 backdrop-blur-sm p-1.5 hover:bg-background transition-colors"
+            aria-label="Fechar"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
 
         {/* Header gradient */}
         <div className="bg-gradient-to-br from-primary/90 to-primary px-6 pt-8 pb-6 text-primary-foreground text-center">
