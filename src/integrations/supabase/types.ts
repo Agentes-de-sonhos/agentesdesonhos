@@ -7497,7 +7497,9 @@ export type Database = {
           created_at: string
           destination: string
           end_date: string
+          failed_password_attempts: number
           id: string
+          is_locked: boolean
           public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
@@ -7515,7 +7517,9 @@ export type Database = {
           created_at?: string
           destination: string
           end_date: string
+          failed_password_attempts?: number
           id?: string
+          is_locked?: boolean
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
@@ -7533,7 +7537,9 @@ export type Database = {
           created_at?: string
           destination?: string
           end_date?: string
+          failed_password_attempts?: number
           id?: string
+          is_locked?: boolean
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
