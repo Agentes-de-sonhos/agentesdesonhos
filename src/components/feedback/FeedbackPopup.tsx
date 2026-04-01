@@ -50,6 +50,9 @@ export function FeedbackPopup() {
     if (hasFeedbackDismissedThisMonth(user.id)) return;
 
     // Check if popup is enabled and user hasn't submitted yet
+    const now = new Date();
+    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01T00:00:00`;
+
     Promise.all([
       supabase
         .from("feedback_settings" as any)
@@ -60,6 +63,7 @@ export function FeedbackPopup() {
         .from("user_feedback" as any)
         .select("id")
         .eq("user_id", user.id)
+        .gte("created_at", monthStart)
         .limit(1),
     ]).then(([settingsRes, feedbackRes]) => {
       if ((settingsRes.data as any)?.value !== "true") return;
