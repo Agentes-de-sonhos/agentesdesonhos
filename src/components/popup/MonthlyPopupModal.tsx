@@ -17,10 +17,21 @@ export function MonthlyPopupModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (shouldShow) {
-      const timer = setTimeout(() => setIsOpen(true), 1500);
-      return () => clearTimeout(timer);
-    }
+    if (!shouldShow) return;
+    
+    // Wait and check that no other modal (feedback) is blocking
+    const checkAndOpen = () => {
+      const hasOpenDialog = document.querySelector('[role="dialog"]');
+      if (hasOpenDialog) {
+        // Another modal is open, retry later
+        const retry = setTimeout(checkAndOpen, 2000);
+        return () => clearTimeout(retry);
+      }
+      setIsOpen(true);
+    };
+
+    const timer = setTimeout(checkAndOpen, 2500);
+    return () => clearTimeout(timer);
   }, [shouldShow]);
 
   const handleClose = () => {
