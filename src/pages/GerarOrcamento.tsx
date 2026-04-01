@@ -347,7 +347,13 @@ export default function GerarOrcamento() {
     if (!quote) return;
 
     const token = quote.share_token || await publishQuote(quote.id);
-    const publicUrl = `${PUBLIC_DOMAIN}/orcamento/${token}`;
+    
+    // Use new format if public_access_code exists and agent has agency name
+    const accessCode = (quote as any).public_access_code;
+    const agencyName = agentProfile?.agency_name;
+    const publicUrl = accessCode && agencyName
+      ? buildOrcamentoLink(agencyName, accessCode)
+      : `${PUBLIC_DOMAIN}/orcamento/${token}`;
 
     await navigator.clipboard.writeText(publicUrl);
     toast({
