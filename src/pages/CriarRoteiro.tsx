@@ -380,7 +380,11 @@ export default function CriarRoteiro() {
                   </Button>
                 )}
                 {currentItinerary.status === "published" && currentItinerary.shareToken && (
-                  <Button onClick={() => handleCopyLink(currentItinerary.shareToken!)}>
+                  <Button onClick={() => {
+                    const url = buildItineraryUrl(currentItinerary);
+                    navigator.clipboard.writeText(url);
+                    toast.success("Link copiado!");
+                  }}>
                     <Link2 className="mr-2 h-4 w-4" />
                     Copiar Link
                   </Button>
