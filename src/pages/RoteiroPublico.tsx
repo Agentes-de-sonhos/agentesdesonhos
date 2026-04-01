@@ -163,8 +163,9 @@ function CollapsibleDayCard({
   );
 }
 
-export default function RoteiroPublico() {
-  const { token } = useParams();
+export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: string } = {}) {
+  const params = useParams();
+  const token = tokenOverride ?? params.token;
   const [itinerary, setItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
