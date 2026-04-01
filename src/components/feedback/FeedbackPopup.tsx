@@ -215,17 +215,15 @@ export function FeedbackPopup() {
           )}
 
           {step !== "thanks" && (
-            <Button
-              variant="ghost"
-              className="w-full text-sm"
-              onClick={() => {
-                handleClose();
-                navigate("/suporte");
-              }}
+            <a
+              href="/suporte"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Falar com suporte
-            </Button>
+            </a>
           )}
         </div>
       </DialogContent>
