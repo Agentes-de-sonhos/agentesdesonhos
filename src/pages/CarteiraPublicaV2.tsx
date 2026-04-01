@@ -124,7 +124,12 @@ export default function CarteiraPublicaV2() {
       setTripData(result);
       setNeedsPassword(false);
     } catch (err: any) {
-      setError(err.message || "Erro ao acessar carteira");
+      if (err.message === LOCKED_MSG) {
+        setIsLocked(true);
+        setNeedsPassword(false);
+      } else {
+        setError(err.message || "Erro ao acessar carteira");
+      }
     } finally {
       setLoading(false);
     }
