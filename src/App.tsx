@@ -28,6 +28,7 @@ const ViagemPublica = lazy(() => import("./pages/ViagemPublica"));
 const CarteiraPublica = lazy(() => import("./pages/CarteiraPublica"));
 const ShortCodeRedirect = lazy(() => import("./pages/ShortCodeRedirect"));
 const CarteiraPublicaV2 = lazy(() => import("./pages/CarteiraPublicaV2"));
+const PublicCodeResolver = lazy(() => import("./components/routing/PublicCodeResolver"));
 const MapaTurismo = lazy(() => import("./pages/MapaTurismo"));
 const SupplierDetail = lazy(() => import("./pages/SupplierDetail"));
 const OperadoraDetail = lazy(() => import("./pages/OperadoraDetail"));
