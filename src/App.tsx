@@ -27,6 +27,7 @@ const TripWallet = lazy(() => import("./pages/TripWallet"));
 const ViagemPublica = lazy(() => import("./pages/ViagemPublica"));
 const CarteiraPublica = lazy(() => import("./pages/CarteiraPublica"));
 const ShortCodeRedirect = lazy(() => import("./pages/ShortCodeRedirect"));
+const CarteiraPublicaV2 = lazy(() => import("./pages/CarteiraPublicaV2"));
 const MapaTurismo = lazy(() => import("./pages/MapaTurismo"));
 const SupplierDetail = lazy(() => import("./pages/SupplierDetail"));
 const OperadoraDetail = lazy(() => import("./pages/OperadoraDetail"));
@@ -211,6 +212,7 @@ const App = () => (
             <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
+            <Route path="/:agencySlug/:accessCode" element={<CarteiraPublicaV2 />} />
             <Route path="/:slug" element={<SlugResolver />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

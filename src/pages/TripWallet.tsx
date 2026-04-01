@@ -287,7 +287,7 @@ function TripWalletContent() {
             subtitle="Organize vouchers, documentos e serviços das viagens"
             icon={Wallet}
           />
-          <TripWalletList />
+          <TripWalletList agencyName={agentProfile?.agency_name || undefined} />
         </div>
       </DashboardLayout>
     );
@@ -569,7 +569,7 @@ function TripWalletContent() {
         </div>
 
         {/* Share Modal */}
-        <ShareTripModal trip={trip} open={showShareModal} onOpenChange={setShowShareModal} />
+        <ShareTripModal trip={trip} agencyName={agentProfile?.agency_name || undefined} open={showShareModal} onOpenChange={setShowShareModal} />
       </div>
     </DashboardLayout>
   );

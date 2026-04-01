@@ -7498,6 +7498,7 @@ export type Database = {
           destination: string
           end_date: string
           id: string
+          public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
           short_code: string | null
@@ -7515,6 +7516,7 @@ export type Database = {
           destination: string
           end_date: string
           id?: string
+          public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           short_code?: string | null
@@ -7532,6 +7534,7 @@ export type Database = {
           destination?: string
           end_date?: string
           id?: string
+          public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           short_code?: string | null
@@ -7906,6 +7909,7 @@ export type Database = {
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       generate_certificate_number: { Args: never; Returns: string }
+      generate_public_access_code: { Args: never; Returns: string }
       generate_secure_share_token: { Args: never; Returns: string }
       generate_trip_short_code: { Args: never; Returns: string }
       generate_trip_slug: {
@@ -7917,6 +7921,7 @@ export type Database = {
         Returns: string
       }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
+      get_agency_slug_for_user: { Args: { p_user_id: string }; Returns: string }
       get_gamification_ranking: {
         Args: { limit_count?: number }
         Returns: {
@@ -8003,6 +8008,10 @@ export type Database = {
           uses_count: number
         }[]
       }
+      get_trip_by_public_code: {
+        Args: { p_agency_slug: string; p_code: string }
+        Returns: Json
+      }
       get_user_analytics: {
         Args: { _end_date?: string; _start_date?: string }
         Returns: {
@@ -8054,6 +8063,10 @@ export type Database = {
       }
       verify_trip_access_by_slug: {
         Args: { p_password: string; p_slug: string }
+        Returns: Json
+      }
+      verify_trip_by_public_code: {
+        Args: { p_agency_slug: string; p_code: string; p_password: string }
         Returns: Json
       }
     }

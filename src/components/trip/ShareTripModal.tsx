@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
+import { buildCarteiraLink } from "@/lib/carteira-domain";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, Check, Link, QrCode, ExternalLink, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,21 +12,29 @@ import { useToast } from "@/hooks/use-toast";
 import type { Trip } from "@/types/trip";
 
 interface ShareTripModalProps {
-  trip: Trip;
+  trip: Trip & { public_access_code?: string | null };
+  agencyName?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function ShareTripModal({ trip, open, onOpenChange }: ShareTripModalProps) {
+export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTripModalProps) {
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const origin = PUBLIC_DOMAIN;
+  
+  // New format link (for trips with public_access_code)
+  const newFormatLink = (trip.public_access_code && agencyName)
+    ? buildCarteiraLink(agencyName, trip.public_access_code)
+    : null;
+  
+  // Legacy links
   const slugLink = trip.slug ? `${origin}/c/${trip.slug}` : null;
   const shortLink = trip.short_code ? `${origin}/v/${trip.short_code}` : null;
   const legacyLink = trip.share_token ? `${origin}/viagem/${trip.share_token}` : null;
 
-  const primaryLink = slugLink || legacyLink || "";
+  const primaryLink = newFormatLink || slugLink || legacyLink || "";
   const displayShortLink = shortLink || "";
 
   const handleCopy = (text: string, field: string) => {
