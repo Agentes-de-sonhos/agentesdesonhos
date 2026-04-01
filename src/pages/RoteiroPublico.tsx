@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { setOgMeta } from "@/lib/ogMeta";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -173,6 +174,10 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const [periodImages, setPeriodImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    setOgMeta({
+      title: "Seu roteiro de viagem está pronto ✈️",
+      description: "Acesse seu roteiro completo e viaje com tudo organizado na palma da mão.",
+    });
     if (token) loadItinerary(token);
   }, [token]);
 

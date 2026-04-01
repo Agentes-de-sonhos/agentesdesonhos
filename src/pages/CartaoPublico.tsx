@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicBusinessCard, generateVCard, SocialLinks } from "@/hooks/useBusinessCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +25,10 @@ export default function CartaoPublico() {
   const { data: card, isLoading } = usePublicBusinessCard(slug);
 
   useEffect(() => {
-    document.title = "Cartão Virtual";
+    setOgMeta({
+      title: "Seu contato de viagem digital 📲",
+      description: "Tenha acesso rápido ao seu agente e informações importantes da sua viagem.",
+    });
   }, []);
 
   if (isLoading) {
