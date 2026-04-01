@@ -138,7 +138,7 @@ export function TripRemindersCard() {
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">{reminder.trip?.client_name}</span>
-                        {getReminderLabel(reminder.days_before)}
+                        {getReminderLabel(reminder.daysRemaining, isReturn)}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5" />
