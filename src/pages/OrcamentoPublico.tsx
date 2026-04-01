@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { QuoteService, ServiceType } from "@/types/quote";
+import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
@@ -258,17 +258,19 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: string } = {}) {
+export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null } = {}) {
   const params = useParams<{ token: string }>();
   const token = tokenOverride ?? params.token;
-  const { quote, isLoading } = usePublicQuote(token);
+  const { quote: fetchedQuote, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
+  const quote = quoteOverride ?? fetchedQuote;
+  const isLoading = quoteOverride ? false : isFetching;
   const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(0);
 
   useEffect(() => {
     document.title = "Orçamento de Viagem";
   }, []);
 
-  const { data: agentProfile } = useQuery({
+  const { data: fetchedAgentProfile } = useQuery({
     queryKey: ["agent-profile-public", quote?.user_id],
     queryFn: async () => {
       if (!quote?.user_id) return null;
@@ -277,8 +279,9 @@ export default function OrcamentoPublico({ tokenOverride }: { tokenOverride?: st
       if (error || !data || (Array.isArray(data) && data.length === 0)) return null;
       return (Array.isArray(data) ? data[0] : data) as AgentProfile;
     },
-    enabled: !!quote?.user_id,
+    enabled: !!quote?.user_id && !agentProfileOverride,
   });
+  const agentProfile = agentProfileOverride ?? fetchedAgentProfile;
 
   if (isLoading) {
     return (

@@ -5640,6 +5640,7 @@ export type Database = {
           payment_display_mode: string
           payment_method_label: string | null
           payment_terms: string | null
+          public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
           show_destination_intro: boolean
@@ -5674,6 +5675,7 @@ export type Database = {
           payment_display_mode?: string
           payment_method_label?: string | null
           payment_terms?: string | null
+          public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
@@ -5708,6 +5710,7 @@ export type Database = {
           payment_display_mode?: string
           payment_method_label?: string | null
           payment_terms?: string | null
+          public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
@@ -7916,6 +7919,7 @@ export type Database = {
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       generate_certificate_number: { Args: never; Returns: string }
       generate_public_access_code: { Args: never; Returns: string }
+      generate_quote_access_code: { Args: never; Returns: string }
       generate_secure_share_token: { Args: never; Returns: string }
       generate_trip_short_code: { Args: never; Returns: string }
       generate_trip_slug: {
@@ -8003,6 +8007,10 @@ export type Database = {
           state: string
           user_id: string
         }[]
+      }
+      get_quote_by_public_code: {
+        Args: { p_agency_slug: string; p_code: string }
+        Returns: Json
       }
       get_registration_link: {
         Args: { _token: string }
