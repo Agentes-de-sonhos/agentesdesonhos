@@ -49,8 +49,10 @@ export function FeedbackPopup() {
     if (!user) return;
     if (hasFeedbackDismissedThisMonth(user.id)) return;
 
-    // Check if popup is enabled and user hasn't submitted yet
+    // Only show from day 5 onwards
     const now = new Date();
+    if (now.getDate() < 5) return;
+
     const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01T00:00:00`;
 
     Promise.all([
@@ -173,6 +175,11 @@ export function FeedbackPopup() {
               <p className="text-center text-xs text-muted-foreground">
                 Clique para avaliar
               </p>
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2.5 text-center">
+                <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                  ⚠️ Sua avaliação é obrigatória para continuar usando a plataforma.
+                </p>
+              </div>
             </>
           )}
 
