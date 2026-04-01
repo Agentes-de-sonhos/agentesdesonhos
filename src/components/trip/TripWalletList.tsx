@@ -68,7 +68,14 @@ export function TripWalletList({ agencyName }: { agencyName?: string }) {
   // Reset to page 1 when filter changes
   useEffect(() => { resetPage(); }, [filter, resetPage]);
 
-  const handleCopyLink = (trip: Trip) => {
+  const handleCopyLink = (trip: Trip & { public_access_code?: string | null }) => {
+    // Prefer new format if available
+    if (trip.public_access_code && agencyName) {
+      const url = buildCarteiraLink(agencyName, trip.public_access_code);
+      navigator.clipboard.writeText(url);
+      toast({ title: "Link copiado!", description: "Link da carteira copiado para a área de transferência." });
+      return;
+    }
     const origin = PUBLIC_DOMAIN;
     const url = trip.slug 
       ? `${origin}/c/${trip.slug}`
