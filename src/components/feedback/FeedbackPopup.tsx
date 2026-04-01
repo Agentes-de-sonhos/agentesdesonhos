@@ -77,6 +77,8 @@ export function FeedbackPopup() {
   }, [user]);
 
   const handleClose = () => {
+    // Only allow closing after submitting feedback (step === "thanks")
+    if (step !== "thanks") return;
     if (user) markFeedbackDismissed(user.id);
     setIsOpen(false);
   };
