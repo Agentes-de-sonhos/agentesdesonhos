@@ -287,7 +287,7 @@ function TripWalletContent() {
             subtitle="Organize vouchers, documentos e serviços das viagens"
             icon={Wallet}
           />
-          <TripWalletList />
+          <TripWalletList agencyName={agentProfile?.agency_name || undefined} />
         </div>
       </DashboardLayout>
     );
