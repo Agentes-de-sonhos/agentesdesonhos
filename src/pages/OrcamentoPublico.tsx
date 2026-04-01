@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { format } from "date-fns";
