@@ -77,6 +77,8 @@ export function FeedbackPopup() {
   }, [user]);
 
   const handleClose = () => {
+    // Only allow closing after submitting feedback (step === "thanks")
+    if (step !== "thanks") return;
     if (user) markFeedbackDismissed(user.id);
     setIsOpen(false);
   };
@@ -118,16 +120,18 @@ export function FeedbackPopup() {
   if (!user) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md p-0 overflow-hidden gap-0 border-0 rounded-2xl">
-        {/* Close */}
-        <button
-          onClick={handleClose}
-          className="absolute right-3 top-3 z-10 rounded-full bg-background/80 backdrop-blur-sm p-1.5 hover:bg-background transition-colors"
-          aria-label="Fechar"
-        >
-          <X className="h-4 w-4" />
-        </button>
+    <Dialog open={isOpen} onOpenChange={() => { if (step === "thanks") handleClose(); }}>
+      <DialogContent className="max-w-md p-0 overflow-hidden gap-0 border-0 rounded-2xl" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => { if (step !== "thanks") e.preventDefault(); }}>
+        {/* Close - only visible after submitting */}
+        {step === "thanks" && (
+          <button
+            onClick={handleClose}
+            className="absolute right-3 top-3 z-10 rounded-full bg-background/80 backdrop-blur-sm p-1.5 hover:bg-background transition-colors"
+            aria-label="Fechar"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
 
         {/* Header gradient */}
         <div className="bg-gradient-to-br from-primary/90 to-primary px-6 pt-8 pb-6 text-primary-foreground text-center">
@@ -211,17 +215,15 @@ export function FeedbackPopup() {
           )}
 
           {step !== "thanks" && (
-            <Button
-              variant="ghost"
-              className="w-full text-sm"
-              onClick={() => {
-                handleClose();
-                navigate("/suporte");
-              }}
+            <a
+              href="/suporte"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Falar com suporte
-            </Button>
+            </a>
           )}
         </div>
       </DialogContent>
