@@ -213,8 +213,16 @@ export default function CriarRoteiro() {
     }
   };
 
+  const buildItineraryUrl = (itinerary: Itinerary) => {
+    const code = itinerary.publicAccessCode;
+    const agencyName = agentProfile?.agency_name;
+    if (code && agencyName) {
+      return buildRoteiroLink(agencyName, code);
+    }
+    return `${PUBLIC_DOMAIN}/roteiro/${itinerary.shareToken}`;
+  };
+
   const handlePublish = async (itineraryId: string) => {
-    // Generate cryptographically secure 32-character hex token
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
     const shareToken = Array.from(array)
@@ -227,13 +235,27 @@ export default function CriarRoteiro() {
       shareToken,
     });
 
-    const url = `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
+    // Refetch to get public_access_code
+    const { data: refreshed } = await supabase
+      .from("itineraries")
+      .select("public_access_code, share_token")
+      .eq("id", itineraryId)
+      .single();
+
+    const code = (refreshed as any)?.public_access_code;
+    const agencyName = agentProfile?.agency_name;
+    const url = code && agencyName
+      ? buildRoteiroLink(agencyName, code)
+      : `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
+
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado! O roteiro foi publicado.");
   };
 
   const handleCopyLink = async (shareToken: string) => {
-    const url = `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
+    // Find itinerary by shareToken to use new URL if available
+    const found = itineraries.find(i => i.shareToken === shareToken);
+    const url = found ? buildItineraryUrl(found) : `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };
