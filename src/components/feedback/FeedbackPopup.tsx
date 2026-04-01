@@ -8,14 +8,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { X, Star, MessageCircle, Send, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
-const FEEDBACK_KEY = "platform_feedback_v1";
+const FEEDBACK_KEY = "platform_feedback_v2";
 
-function hasFeedbackDismissed(userId: string): boolean {
+function getCurrentMonthKey(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}`;
+}
+
+function hasFeedbackDismissedThisMonth(userId: string): boolean {
   try {
     const stored = localStorage.getItem(FEEDBACK_KEY);
     if (!stored) return false;
     const data = JSON.parse(stored);
-    return data[userId] === true;
+    return data[userId] === getCurrentMonthKey();
   } catch {
     return false;
   }
@@ -25,7 +30,7 @@ function markFeedbackDismissed(userId: string): void {
   try {
     const stored = localStorage.getItem(FEEDBACK_KEY);
     const data = stored ? JSON.parse(stored) : {};
-    data[userId] = true;
+    data[userId] = getCurrentMonthKey();
     localStorage.setItem(FEEDBACK_KEY, JSON.stringify(data));
   } catch {}
 }
