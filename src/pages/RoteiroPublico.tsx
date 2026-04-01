@@ -280,6 +280,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         budgetLevel: itineraryData.budget_level,
         status: itineraryData.status as Itinerary["status"],
         shareToken: itineraryData.share_token,
+        publicAccessCode: (itineraryData as any).public_access_code || null,
         createdAt: itineraryData.created_at,
         updatedAt: itineraryData.updated_at,
         days: daysWithActivities,
