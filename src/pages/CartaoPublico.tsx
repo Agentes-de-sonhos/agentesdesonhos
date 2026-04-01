@@ -25,7 +25,10 @@ export default function CartaoPublico() {
   const { data: card, isLoading } = usePublicBusinessCard(slug);
 
   useEffect(() => {
-    document.title = "Cartão Virtual";
+    setOgMeta({
+      title: "Seu contato de viagem digital 📲",
+      description: "Tenha acesso rápido ao seu agente e informações importantes da sua viagem.",
+    });
   }, []);
 
   if (isLoading) {

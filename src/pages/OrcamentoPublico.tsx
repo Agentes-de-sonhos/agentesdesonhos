@@ -268,7 +268,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(0);
 
   useEffect(() => {
-    document.title = "Orçamento de Viagem";
+    setOgMeta({
+      title: "Seu orçamento de viagem chegou 💰",
+      description: "Confira todos os detalhes da sua viagem e aprove sua próxima experiência.",
+    });
   }, []);
 
   const { data: fetchedAgentProfile } = useQuery({

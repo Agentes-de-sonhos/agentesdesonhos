@@ -22,6 +22,10 @@ export default function VitrinePublica() {
   const [tracked, setTracked] = useState(false);
 
   useEffect(() => {
+    setOgMeta({
+      title: "Conheça esta agência de viagens 🌍",
+      description: "Descubra experiências incríveis e fale com especialistas para sua próxima viagem.",
+    });
     if (showcase && !tracked) {
       trackEvent(showcase.id, "page_view");
       setTracked(true);
