@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
+import { buildRoteiroLink } from "@/lib/roteiro-domain";
+import { useAuth } from "@/hooks/useAuth";
+import { fetchAgentProfile, type AgentProfile } from "@/hooks/useAgentProfile";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -11,6 +14,7 @@ import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
 import { useItineraries } from "@/hooks/useItineraries";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,12 +35,14 @@ import {
 export default function CriarRoteiro() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"create" | "list">("create");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
+  const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
 
   const {
     itineraries,
@@ -57,6 +63,12 @@ export default function CriarRoteiro() {
   const [editDestination, setEditDestination] = useState("");
 
   const { canUse: canCreateItinerary, remaining: itinerariesRemaining, hasLimit, incrementUsage } = useDailyLimit("itinerary");
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchAgentProfile(user.id, supabase).then(setAgentProfile);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (id) {
@@ -201,8 +213,16 @@ export default function CriarRoteiro() {
     }
   };
 
+  const buildItineraryUrl = (itinerary: Itinerary) => {
+    const code = itinerary.publicAccessCode;
+    const agencyName = agentProfile?.agency_name;
+    if (code && agencyName) {
+      return buildRoteiroLink(agencyName, code);
+    }
+    return `${PUBLIC_DOMAIN}/roteiro/${itinerary.shareToken}`;
+  };
+
   const handlePublish = async (itineraryId: string) => {
-    // Generate cryptographically secure 32-character hex token
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
     const shareToken = Array.from(array)
@@ -215,13 +235,27 @@ export default function CriarRoteiro() {
       shareToken,
     });
 
-    const url = `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
+    // Refetch to get public_access_code
+    const { data: refreshed } = await supabase
+      .from("itineraries")
+      .select("public_access_code, share_token")
+      .eq("id", itineraryId)
+      .single();
+
+    const code = (refreshed as any)?.public_access_code;
+    const agencyName = agentProfile?.agency_name;
+    const url = code && agencyName
+      ? buildRoteiroLink(agencyName, code)
+      : `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
+
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado! O roteiro foi publicado.");
   };
 
   const handleCopyLink = async (shareToken: string) => {
-    const url = `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
+    // Find itinerary by shareToken to use new URL if available
+    const found = itineraries.find(i => i.shareToken === shareToken);
+    const url = found ? buildItineraryUrl(found) : `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };
@@ -346,7 +380,11 @@ export default function CriarRoteiro() {
                   </Button>
                 )}
                 {currentItinerary.status === "published" && currentItinerary.shareToken && (
-                  <Button onClick={() => handleCopyLink(currentItinerary.shareToken!)}>
+                  <Button onClick={() => {
+                    const url = buildItineraryUrl(currentItinerary);
+                    navigator.clipboard.writeText(url);
+                    toast.success("Link copiado!");
+                  }}>
                     <Link2 className="mr-2 h-4 w-4" />
                     Copiar Link
                   </Button>

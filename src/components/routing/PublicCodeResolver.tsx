@@ -5,17 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 const CarteiraPublicaV2 = lazy(() => import("@/pages/CarteiraPublicaV2"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
+const RoteiroPublicoV2 = lazy(() => import("@/pages/RoteiroPublicoV2"));
 
 /**
  * Resolver for /:agencySlug/:accessCode route.
- * Tries to resolve as a quote first (fast check), then falls back to carteira digital.
- * On seuorcamento.tur.br domain → always quote.
- * On carteiradigital.tur.br domain → always carteira.
- * On main domain → tries quote, then carteira.
+ * Domain-based: seuorcamento.tur.br → quote, carteiradigital.tur.br → carteira, seuroteiro.tur.br → itinerary.
+ * Main domain: tries quote → itinerary → carteira.
  */
 export default function PublicCodeResolver() {
   const { agencySlug, accessCode } = useParams();
-  const [resolved, setResolved] = useState<"quote" | "carteira" | null>(null);
+  const [resolved, setResolved] = useState<"quote" | "carteira" | "itinerary" | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -28,13 +27,17 @@ export default function PublicCodeResolver() {
       setLoading(false);
       return;
     }
+    if (hostname.includes("seuroteiro.tur.br")) {
+      setResolved("itinerary");
+      setLoading(false);
+      return;
+    }
     if (hostname.includes("carteiradigital.tur.br")) {
       setResolved("carteira");
       setLoading(false);
       return;
     }
 
-    // On main domain: try quote first, then carteira
     if (!agencySlug || !accessCode) {
       setError("Link inválido");
       setLoading(false);
@@ -42,6 +45,7 @@ export default function PublicCodeResolver() {
     }
 
     const tryResolve = async () => {
+      // Try quote
       try {
         const { data } = await supabase.rpc('get_quote_by_public_code' as any, {
           p_agency_slug: agencySlug,
@@ -53,9 +57,21 @@ export default function PublicCodeResolver() {
           setLoading(false);
           return;
         }
-      } catch {
-        // Not a quote, try carteira
-      }
+      } catch { /* not a quote */ }
+
+      // Try itinerary
+      try {
+        const { data } = await supabase.rpc('get_itinerary_by_public_code' as any, {
+          p_agency_slug: agencySlug,
+          p_code: accessCode,
+        });
+        const result = data as any;
+        if (result && !result.error) {
+          setResolved("itinerary");
+          setLoading(false);
+          return;
+        }
+      } catch { /* not an itinerary */ }
 
       // Fall back to carteira
       setResolved("carteira");
@@ -86,7 +102,7 @@ export default function PublicCodeResolver() {
 
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
-      {resolved === "quote" ? <OrcamentoPublicoV2 /> : <CarteiraPublicaV2 />}
+      {resolved === "quote" ? <OrcamentoPublicoV2 /> : resolved === "itinerary" ? <RoteiroPublicoV2 /> : <CarteiraPublicaV2 />}
     </Suspense>
   );
 }

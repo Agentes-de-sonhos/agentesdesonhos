@@ -3201,6 +3201,7 @@ export type Database = {
           destination: string
           end_date: string
           id: string
+          public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
           start_date: string
@@ -3217,6 +3218,7 @@ export type Database = {
           destination: string
           end_date: string
           id?: string
+          public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           start_date: string
@@ -3233,6 +3235,7 @@ export type Database = {
           destination?: string
           end_date?: string
           id?: string
+          public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           start_date?: string
@@ -7918,6 +7921,7 @@ export type Database = {
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       generate_certificate_number: { Args: never; Returns: string }
+      generate_itinerary_access_code: { Args: never; Returns: string }
       generate_public_access_code: { Args: never; Returns: string }
       generate_quote_access_code: { Args: never; Returns: string }
       generate_secure_share_token: { Args: never; Returns: string }
@@ -7961,6 +7965,10 @@ export type Database = {
           user_id: string
           user_name: string
         }[]
+      }
+      get_itinerary_by_public_code: {
+        Args: { p_agency_slug: string; p_code: string }
+        Returns: Json
       }
       get_monthly_sales_ranking: {
         Args: { target_month: number; target_year: number }
