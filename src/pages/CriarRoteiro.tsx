@@ -34,12 +34,14 @@ import {
 export default function CriarRoteiro() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"create" | "list">("create");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
+  const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
 
   const {
     itineraries,
