@@ -49,8 +49,10 @@ export function FeedbackPopup() {
     if (!user) return;
     if (hasFeedbackDismissedThisMonth(user.id)) return;
 
-    // Check if popup is enabled and user hasn't submitted yet
+    // Only show from day 5 onwards
     const now = new Date();
+    if (now.getDate() < 5) return;
+
     const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01T00:00:00`;
 
     Promise.all([
