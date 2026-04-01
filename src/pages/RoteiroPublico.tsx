@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { setOgMeta } from "@/lib/ogMeta";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
