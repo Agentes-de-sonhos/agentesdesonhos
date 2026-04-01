@@ -151,6 +151,26 @@ export default function CarteiraPublicaV2() {
     );
   }
 
+  if (isLocked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-destructive/5 flex items-center justify-center p-4">
+        <Card className="w-full max-w-sm shadow-xl border-0">
+          <CardContent className="pt-8 pb-6 px-6 text-center space-y-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 mx-auto">
+              <ShieldAlert className="h-8 w-8 text-destructive" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold mb-1">Acesso Bloqueado</h1>
+              <p className="text-sm text-muted-foreground">
+                Acesso bloqueado por segurança. Entre em contato com a agência responsável.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (needsPassword && !tripData) {
     return <PasswordGate onUnlock={handleUnlock} loading={loading} error={error} />;
   }
