@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicShowcase, type ShowcaseItem, getFeaturedLabel } from "@/hooks/useShowcase";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
