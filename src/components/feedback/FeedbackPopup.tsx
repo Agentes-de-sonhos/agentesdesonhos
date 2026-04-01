@@ -177,7 +177,7 @@ export function FeedbackPopup() {
               </p>
               <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2.5 text-center">
                 <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
-                  ⚠️ Sua avaliação é obrigatória para continuar usando a plataforma.
+                  Antes de continuar, que tal nos deixar sua avaliação? É rápido e faz toda a diferença!
                 </p>
               </div>
             </>
