@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { BottomNavBar } from "./BottomNavBar";
 import { Footer } from "./Footer";
 import { GlobalPopupModal } from "@/components/popup/GlobalPopupModal";
+import { MonthlyPopupModal } from "@/components/popup/MonthlyPopupModal";
 import { ChatFloatingButton } from "@/components/community-chat/ChatFloatingButton";
 import { SessionTimeoutModal } from "@/components/session/SessionTimeoutModal";
 import { isImpersonating } from "@/components/admin/ImpersonationBanner";
