@@ -64,6 +64,12 @@ export default function CriarRoteiro() {
   const { canUse: canCreateItinerary, remaining: itinerariesRemaining, hasLimit, incrementUsage } = useDailyLimit("itinerary");
 
   useEffect(() => {
+    if (user?.id) {
+      fetchAgentProfile(user.id, supabase).then(setAgentProfile);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
     if (id) {
       loadItinerary(id);
     }
