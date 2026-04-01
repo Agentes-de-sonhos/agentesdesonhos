@@ -56,7 +56,7 @@ function filterTrips(trips: Trip[], filter: FilterType): Trip[] {
   });
 }
 
-export function TripWalletList() {
+export function TripWalletList({ agencyName }: { agencyName?: string }) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trips, isLoading, deleteTrip } = useTrips();
