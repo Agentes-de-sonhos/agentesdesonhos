@@ -91,6 +91,9 @@ export default function CarteiraPublicaV2() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [needsPassword, setNeedsPassword] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+
+  const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
 
   useEffect(() => {
     if (!agencySlug || !accessCode) return;
@@ -101,8 +104,10 @@ export default function CarteiraPublicaV2() {
         setLoading(false);
       })
       .catch((err) => {
-        if (err.message === "Senha incorreta") {
+        if (err.message === "Senha incorreta" || err.message === "Senha inválida") {
           setNeedsPassword(true);
+        } else if (err.message === LOCKED_MSG) {
+          setIsLocked(true);
         } else {
           setError(err.message);
         }

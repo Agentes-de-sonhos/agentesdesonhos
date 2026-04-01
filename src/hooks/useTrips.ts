@@ -150,7 +150,7 @@ export function useTrips() {
   const regeneratePasswordMutation = useMutation({
     mutationFn: async (id: string) => {
       const newPassword = generatePassword();
-      const { error } = await supabase.from("trips").update({ access_password: newPassword }).eq("id", id);
+      const { error } = await supabase.from("trips").update({ access_password: newPassword, failed_password_attempts: 0, is_locked: false } as any).eq("id", id);
       if (error) throw error;
       return newPassword;
     },
