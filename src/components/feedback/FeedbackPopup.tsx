@@ -47,7 +47,7 @@ export function FeedbackPopup() {
 
   useEffect(() => {
     if (!user) return;
-    if (hasFeedbackDismissed(user.id)) return;
+    if (hasFeedbackDismissedThisMonth(user.id)) return;
 
     // Check if popup is enabled and user hasn't submitted yet
     Promise.all([
