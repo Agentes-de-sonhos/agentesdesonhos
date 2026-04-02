@@ -551,7 +551,7 @@ export function AdminPopupsManager() {
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-md p-0 overflow-hidden">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg max-h-[90vh] p-0 overflow-y-auto gap-0 border-0 w-auto">
           {previewPopup && (
             <div className="relative">
               {previewPopup.video_url ? (
@@ -559,15 +559,15 @@ export function AdminPopupsManager() {
                   <video
                     src={previewPopup.video_url}
                     controls
-                    className="w-full max-h-[50vh] object-contain"
+                    className="w-full max-h-[60vh] object-contain"
                   />
                 </div>
               ) : previewPopup.image_url ? (
-                <div className="w-full aspect-video">
+                <div className="w-full bg-muted flex items-center justify-center">
                   <img
                     src={previewPopup.image_url}
                     alt={previewPopup.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto object-contain"
                   />
                 </div>
               ) : null}
