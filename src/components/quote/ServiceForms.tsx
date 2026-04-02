@@ -70,6 +70,7 @@ function formatCurrencyInline(value: number) {
 }
 
 const flightLegSchema = z.object({
+  leg_date: z.string().optional(),
   airport_origin: z.string().optional(),
   airport_destination: z.string().optional(),
   departure_time: z.string().optional(),
@@ -77,7 +78,7 @@ const flightLegSchema = z.object({
   flight_number: z.string().optional(),
 });
 
-const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
+const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ leg_date: "", airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
 
 /** Normalize old single-leg data to multi-leg arrays */
 function normalizeLegs(init: any): { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] } {
