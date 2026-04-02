@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { PopupRichTextEditor } from "../PopupRichTextEditor";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -144,7 +144,7 @@ export function AdminCrmTemplates() {
       </CardContent>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Editar Template" : "Novo Template"}</DialogTitle>
           </DialogHeader>
@@ -159,7 +159,8 @@ export function AdminCrmTemplates() {
             </div>
             <div>
               <Label>Mensagem *</Label>
-              <Textarea rows={8} value={form.mensagem} onChange={(e) => setForm({ ...form, mensagem: e.target.value })} placeholder="Use {{nome}} para personalizar com o nome do contato" />
+              <p className="text-xs text-muted-foreground mb-1">Use {"{{nome}}"} para personalizar com o nome do contato</p>
+              <PopupRichTextEditor content={form.mensagem} onChange={(html) => setForm({ ...form, mensagem: html })} />
             </div>
           </div>
           <DialogFooter>
