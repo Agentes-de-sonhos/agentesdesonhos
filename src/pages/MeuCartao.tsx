@@ -116,7 +116,7 @@ export default function MeuCartao() {
 
   const copyLink = () => {
     if (card) {
-      navigator.clipboard.writeText(`${PUBLIC_DOMAIN}/${card.slug}`);
+      navigator.clipboard.writeText(getCardShareUrl(card.slug));
       toast.success("Link copiado!");
     }
   };
