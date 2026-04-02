@@ -1,23 +1,8 @@
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import type { BusinessCard, SocialLinks } from "@/hooks/useBusinessCard";
 
 const PUBLIC_DOMAIN = "https://contato.tur.br";
-
-// Page dimensions in mm — proportional to 375x812 mobile viewport
-// Using 90mm width (≈375px scaled) with dynamic height
-const W = 90;
-const MARGIN_X = 6;
-const CONTENT_X = MARGIN_X;
-const CONTENT_W = W - MARGIN_X * 2;
-
-function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace("#", "");
-  return [
-    parseInt(h.substring(0, 2), 16),
-    parseInt(h.substring(2, 4), 16),
-    parseInt(h.substring(4, 6), 16),
-  ];
-}
 
 function formatWhatsapp(raw: string): string {
   const digits = raw.replace(/\D/g, "");
@@ -26,366 +11,221 @@ function formatWhatsapp(raw: string): string {
   return digits;
 }
 
-async function loadImageAsBase64(url: string): Promise<string | null> {
-  try {
-    const res = await fetch(url, { mode: "cors" });
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
-  }
-}
-
-async function generateQrDataUrl(text: string, size: number, color: string): Promise<string> {
-  try {
-    const { default: QRCode } = await import("qrcode");
-    return await QRCode.toDataURL(text, {
-      width: size,
-      margin: 1,
-      color: { dark: color, light: "#FFFFFF" },
-    });
-  } catch {
-    return "";
-  }
-}
-
-const SOCIAL_LABELS: Record<keyof SocialLinks, string> = {
-  instagram: "IG",
-  facebook: "FB",
-  linkedin: "IN",
-  twitter: "X",
-  youtube: "YT",
-  tiktok: "TK",
-};
-
 /**
- * Calculates the total page height dynamically based on card content,
- * then renders each section matching the public CartaoPublico.tsx layout.
+ * Build the same HTML structure as CartaoPublico.tsx,
+ * render it off-screen, capture with html2canvas, then
+ * produce a PDF with clickable link overlays.
  */
 export async function generateBusinessCardPdf(card: BusinessCard): Promise<void> {
   const primaryColor = card.primary_color || "#0284c7";
   const secondaryColor = card.secondary_color || "#f97316";
-  const [pr, pg, pb] = hexToRgb(primaryColor);
-  const [sr, sg, sb] = hexToRgb(secondaryColor);
   const publicUrl = `${PUBLIC_DOMAIN}/${card.slug}`;
   const activeSocials = Object.entries(card.social_links || {}).filter(([, v]) => !!v) as [keyof SocialLinks, string][];
-  const activeButtons = card.buttons.filter(b => b.text);
+  const activeButtons = card.buttons.filter((b) => b.text);
 
-  // ─── Pre-calculate total height ───
-  let totalH = 0;
-  const COVER_H = 38; // cover area
-  const PHOTO_R = 13; // photo radius in mm
-  const PHOTO_OVERLAP = 7; // how much photo overlaps below cover
-  totalH += COVER_H + PHOTO_OVERLAP + PHOTO_R + 4; // cover + photo bottom + gap
+  const SOCIAL_ICONS: Record<string, string> = {
+    instagram: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
+    facebook: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+    linkedin: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>`,
+    twitter: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>`,
+    youtube: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>`,
+    tiktok: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>`,
+  };
 
-  // Name block
-  totalH += 7; // name
-  if (card.title) totalH += 4;
-  if (card.agency_name) totalH += 4;
-  totalH += 4; // gap
+  const CONTACT_ICONS: Record<string, string> = {
+    whatsapp: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
+    phone: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+    email: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
+    globe: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`,
+  };
+
+  // --- Build HTML identical to CartaoPublico.tsx ---
+  const coverStyle = card.cover_url
+    ? `background: url(${card.cover_url}) center/cover no-repeat;`
+    : `background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});`;
+
+  const photoHtml = card.photo_url
+    ? `<img src="${card.photo_url}" alt="${card.name}" crossorigin="anonymous" style="height:112px;width:112px;border-radius:9999px;border:4px solid white;object-fit:cover;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1);" />`
+    : `<div style="height:112px;width:112px;border-radius:9999px;border:4px solid white;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1);display:flex;align-items:center;justify-content:center;color:white;font-size:30px;font-weight:700;background-color:${primaryColor};">${card.name?.charAt(0)?.toUpperCase() || "?"}</div>`;
 
   // Quick contacts
-  const contacts: { label: string; url: string; bgColor: [number, number, number] }[] = [];
-  if (card.whatsapp) contacts.push({ label: "WA", url: `https://wa.me/${formatWhatsapp(card.whatsapp)}`, bgColor: [37, 211, 102] });
-  if (card.phone) contacts.push({ label: "TEL", url: `tel:${card.phone}`, bgColor: [pr, pg, pb] });
-  if (card.email) contacts.push({ label: "@", url: `mailto:${card.email}`, bgColor: [pr, pg, pb] });
+  const contactItems: string[] = [];
+  if (card.whatsapp) {
+    contactItems.push(`<a href="https://wa.me/${formatWhatsapp(card.whatsapp)}" data-link="whatsapp" style="display:flex;align-items:center;justify-content:center;height:48px;width:48px;border-radius:9999px;color:white;background-color:#25D366;box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">${CONTACT_ICONS.whatsapp}</a>`);
+  }
+  if (card.phone) {
+    contactItems.push(`<a href="tel:${card.phone}" data-link="phone" style="display:flex;align-items:center;justify-content:center;height:48px;width:48px;border-radius:9999px;color:white;background-color:${primaryColor};box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">${CONTACT_ICONS.phone}</a>`);
+  }
+  if (card.email) {
+    contactItems.push(`<a href="mailto:${card.email}" data-link="email" style="display:flex;align-items:center;justify-content:center;height:48px;width:48px;border-radius:9999px;color:white;background-color:${primaryColor};box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">${CONTACT_ICONS.email}</a>`);
+  }
   if (card.website) {
     const siteUrl = card.website.startsWith("http") ? card.website : `https://${card.website}`;
-    contacts.push({ label: "WEB", url: siteUrl, bgColor: [pr, pg, pb] });
+    contactItems.push(`<a href="${siteUrl}" data-link="website" style="display:flex;align-items:center;justify-content:center;height:48px;width:48px;border-radius:9999px;color:white;background-color:${primaryColor};box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);">${CONTACT_ICONS.globe}</a>`);
   }
-  if (contacts.length > 0) totalH += 14; // contact circles + gap
-
-  // Save contact button
-  totalH += 12; // button height + gap
 
   // Action buttons
-  if (activeButtons.length > 0) {
-    totalH += activeButtons.length * 12 + 4;
-  }
+  const buttonsHtml = activeButtons.map((btn) => {
+    const btnUrl = btn.url.startsWith("http") ? btn.url : `https://${btn.url}`;
+    return `<a href="${btnUrl}" data-link="button" style="display:block;width:100%;padding:12px 16px;border-radius:12px;font-weight:500;border:2px solid ${primaryColor};color:${primaryColor};text-align:center;text-decoration:none;box-sizing:border-box;">
+      <span style="display:inline-flex;align-items:center;gap:8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        ${btn.text}
+      </span>
+    </a>`;
+  }).join("");
 
   // Social links
-  if (activeSocials.length > 0) {
-    totalH += 20; // label + icons + gap
-  }
+  const socialsHtml = activeSocials.map(([key, url]) => {
+    const socialUrl = url.startsWith("http") ? url : `https://${url}`;
+    return `<a href="${socialUrl}" data-link="social" style="display:flex;align-items:center;justify-content:center;height:44px;width:44px;border-radius:9999px;color:white;background-color:${primaryColor};box-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);">${SOCIAL_ICONS[key] || ""}</a>`;
+  }).join("");
 
-  // Logo + QR section
-  totalH += 45;
+  // Logos
+  const logosHtml = card.logos.length > 0
+    ? card.logos.map((url) => `<img src="${url}" alt="Logo" crossorigin="anonymous" style="max-height:120px;max-width:210px;object-fit:contain;" />`).join("")
+    : "";
 
-  // Bottom padding
-  totalH += 6;
+  // QR Code - generate via canvas
+  let qrDataUrl = "";
+  try {
+    const { default: QRCode } = await import("qrcode");
+    qrDataUrl = await QRCode.toDataURL(publicUrl, {
+      width: 240,
+      margin: 1,
+      color: { dark: primaryColor, light: "#FFFFFF" },
+    });
+  } catch { /* skip */ }
 
-  const H = Math.max(totalH, 120);
+  const html = `
+    <div id="pdf-card-root" style="width:390px;background:white;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;overflow:hidden;">
+      <!-- Cover -->
+      <div style="height:160px;position:relative;display:flex;align-items:flex-end;justify-content:center;${coverStyle}">
+        <div style="position:absolute;bottom:-56px;left:50%;transform:translateX(-50%);">
+          ${photoHtml}
+        </div>
+      </div>
 
-  // ─── Create PDF ───
-  const doc = new jsPDF({ unit: "mm", format: [W, H], orientation: "portrait" });
+      <!-- Body -->
+      <div style="padding:64px 24px 32px;text-align:center;">
+        <!-- Name & title -->
+        <div style="margin-bottom:24px;">
+          <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0;">${card.name || ""}</h1>
+          ${card.title ? `<p style="color:#6b7280;margin:4px 0 0;font-size:16px;">${card.title}</p>` : ""}
+          ${card.agency_name ? `<p style="font-size:14px;font-weight:500;margin:4px 0 0;color:${primaryColor};">${card.agency_name}</p>` : ""}
+        </div>
 
-  // White background
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, W, H, "F");
+        <!-- Quick contacts -->
+        ${contactItems.length > 0 ? `<div style="display:flex;justify-content:center;gap:12px;margin-bottom:24px;">${contactItems.join("")}</div>` : ""}
 
-  let y = 0;
+        <!-- Save contact button -->
+        <button style="width:100%;padding:12px;border-radius:12px;font-weight:600;color:white;background-color:${primaryColor};border:none;font-size:16px;box-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1);cursor:pointer;margin-bottom:24px;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          Salvar Contato
+        </button>
 
-  // ═══════════════════════════════════════════
-  // COVER (h-40 ≈ 160px → 38mm)
-  // ═══════════════════════════════════════════
-  if (card.cover_url) {
-    const coverImg = await loadImageAsBase64(card.cover_url);
-    if (coverImg) {
-      try {
-        doc.addImage(coverImg, "JPEG", 0, 0, W, COVER_H);
-      } catch {
-        drawGradientCover(doc, pr, pg, pb, sr, sg, sb, COVER_H);
-      }
-    } else {
-      drawGradientCover(doc, pr, pg, pb, sr, sg, sb, COVER_H);
+        <!-- Action buttons -->
+        ${activeButtons.length > 0 ? `<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">${buttonsHtml}</div>` : ""}
+
+        <!-- Social links -->
+        ${activeSocials.length > 0 ? `
+          <div style="margin-bottom:24px;">
+            <p style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Siga-me nas redes</p>
+            <div style="display:flex;justify-content:center;gap:12px;">${socialsHtml}</div>
+          </div>
+        ` : ""}
+
+        <!-- Logo + QR Code -->
+        <div style="padding-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+            ${logosHtml ? `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${logosHtml}</div>` : "<span></span>"}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <p style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin:0;">Escaneie para salvar</p>
+            <div style="background:white;padding:12px;border-radius:12px;box-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);border:1px solid #e5e7eb;">
+              ${qrDataUrl ? `<img src="${qrDataUrl}" width="120" height="120" style="display:block;" />` : ""}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // --- Render off-screen ---
+  const container = document.createElement("div");
+  container.style.cssText = "position:fixed;left:-9999px;top:0;z-index:-1;";
+  container.innerHTML = html;
+  document.body.appendChild(container);
+
+  const root = container.querySelector("#pdf-card-root") as HTMLElement;
+
+  // Wait for all images to load
+  const images = root.querySelectorAll("img");
+  await Promise.all(
+    Array.from(images).map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          if (img.complete) return resolve();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+        })
+    )
+  );
+
+  // Small delay for fonts
+  await new Promise((r) => setTimeout(r, 300));
+
+  // --- Capture with html2canvas ---
+  const canvas = await html2canvas(root, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: "#ffffff",
+    width: 390,
+    windowWidth: 390,
+  });
+
+  // --- Create PDF ---
+  const imgData = canvas.toDataURL("image/jpeg", 0.95);
+  const pxToMm = 0.264583;
+  const pdfW = canvas.width * pxToMm / 2; // /2 because scale:2
+  const pdfH = canvas.height * pxToMm / 2;
+
+  const doc = new jsPDF({
+    unit: "mm",
+    format: [pdfW, pdfH],
+    orientation: "portrait",
+  });
+
+  doc.addImage(imgData, "JPEG", 0, 0, pdfW, pdfH);
+
+  // --- Add clickable link overlays ---
+  // We need to map the positions of interactive elements from the HTML to PDF coordinates
+  const scaleX = pdfW / 390;
+  const scaleY = pdfH / root.scrollHeight;
+
+  const allLinks = root.querySelectorAll("a[data-link], button");
+  allLinks.forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    const rootRect = root.getBoundingClientRect();
+
+    const x = (rect.left - rootRect.left) * scaleX;
+    const y = (rect.top - rootRect.top) * scaleY;
+    const w = rect.width * scaleX;
+    const h = rect.height * scaleY;
+
+    const href = el.getAttribute("href");
+    if (href && href !== "#") {
+      doc.link(x, y, w, h, { url: href });
+    } else if (el.tagName === "BUTTON") {
+      // Save contact button links to public URL
+      doc.link(x, y, w, h, { url: publicUrl });
     }
-  } else {
-    drawGradientCover(doc, pr, pg, pb, sr, sg, sb, COVER_H);
-  }
+  });
 
-  // ═══════════════════════════════════════════
-  // PHOTO (h-28 w-28 ≈ 112px → 26mm diameter, centered, overlapping cover)
-  // ═══════════════════════════════════════════
-  const photoDiameter = PHOTO_R * 2;
-  const photoCx = W / 2;
-  const photoCy = COVER_H + PHOTO_OVERLAP; // center of photo
+  // Cleanup
+  document.body.removeChild(container);
 
-  // White border (border-4 ≈ 1.5mm)
-  doc.setFillColor(255, 255, 255);
-  doc.circle(photoCx, photoCy, PHOTO_R + 1.5, "F");
-
-  if (card.photo_url) {
-    const photoImg = await loadImageAsBase64(card.photo_url);
-    if (photoImg) {
-      try {
-        doc.addImage(
-          photoImg, "JPEG",
-          photoCx - PHOTO_R, photoCy - PHOTO_R,
-          photoDiameter, photoDiameter,
-        );
-      } catch { /* skip */ }
-    }
-  } else {
-    doc.setFillColor(pr, pg, pb);
-    doc.circle(photoCx, photoCy, PHOTO_R, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.setFont("helvetica", "bold");
-    const initial = card.name?.charAt(0)?.toUpperCase() || "?";
-    doc.text(initial, photoCx, photoCy + 3, { align: "center" });
-  }
-
-  y = photoCy + PHOTO_R + 5;
-
-  // ═══════════════════════════════════════════
-  // NAME & TITLE (matching text-2xl bold + text-gray-500 + text-sm primary)
-  // ═══════════════════════════════════════════
-  doc.setTextColor(17, 24, 39); // gray-900
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text(card.name || "", W / 2, y, { align: "center" });
-  y += 5;
-
-  if (card.title) {
-    doc.setTextColor(107, 114, 128); // gray-500
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text(card.title, W / 2, y, { align: "center" });
-    y += 4;
-  }
-
-  if (card.agency_name) {
-    doc.setTextColor(pr, pg, pb);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text(card.agency_name, W / 2, y, { align: "center" });
-    y += 4;
-  }
-
-  y += 3;
-
-  // ═══════════════════════════════════════════
-  // QUICK CONTACT CIRCLES (h-12 w-12 ≈ 48px → 11mm)
-  // ═══════════════════════════════════════════
-  if (contacts.length > 0) {
-    const circleR = 5.5;
-    const gap = 3;
-    const totalW = contacts.length * circleR * 2 + (contacts.length - 1) * gap;
-    let cx = (W - totalW) / 2 + circleR;
-
-    for (const c of contacts) {
-      // Shadow effect (subtle)
-      doc.setFillColor(200, 200, 200);
-      doc.circle(cx + 0.3, y + circleR + 0.3, circleR, "F");
-
-      // Circle
-      doc.setFillColor(c.bgColor[0], c.bgColor[1], c.bgColor[2]);
-      doc.circle(cx, y + circleR, circleR, "F");
-
-      // Link
-      doc.link(cx - circleR, y, circleR * 2, circleR * 2, { url: c.url });
-
-      // Label
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(5.5);
-      doc.setFont("helvetica", "bold");
-      doc.text(c.label, cx, y + circleR + 1.5, { align: "center" });
-
-      cx += circleR * 2 + gap;
-    }
-    y += circleR * 2 + 5;
-  }
-
-  // ═══════════════════════════════════════════
-  // SAVE CONTACT BUTTON (w-full py-3 rounded-xl)
-  // ═══════════════════════════════════════════
-  const saveBtnH = 9;
-  const saveBtnX = CONTENT_X;
-  const saveBtnW = CONTENT_W;
-
-  // Shadow
-  doc.setFillColor(180, 180, 180);
-  doc.roundedRect(saveBtnX + 0.3, y + 0.5, saveBtnW, saveBtnH, 3, 3, "F");
-
-  // Button
-  doc.setFillColor(pr, pg, pb);
-  doc.roundedRect(saveBtnX, y, saveBtnW, saveBtnH, 3, 3, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text("⬇  Salvar Contato", W / 2, y + saveBtnH / 2 + 1.5, { align: "center" });
-  doc.link(saveBtnX, y, saveBtnW, saveBtnH, { url: publicUrl });
-  y += saveBtnH + 5;
-
-  // ═══════════════════════════════════════════
-  // ACTION BUTTONS (w-full py-3 rounded-xl border-2)
-  // ═══════════════════════════════════════════
-  if (activeButtons.length > 0) {
-    for (const btn of activeButtons) {
-      const abtnH = 9;
-      const abtnX = CONTENT_X;
-      const abtnW = CONTENT_W;
-
-      // Outlined button
-      doc.setDrawColor(pr, pg, pb);
-      doc.setLineWidth(0.6);
-      doc.setFillColor(255, 255, 255);
-      doc.roundedRect(abtnX, y, abtnW, abtnH, 3, 3, "FD");
-
-      doc.setTextColor(pr, pg, pb);
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      const label = btn.text.length > 35 ? btn.text.substring(0, 35) + "…" : btn.text;
-      doc.text(`↗  ${label}`, W / 2, y + abtnH / 2 + 1.2, { align: "center" });
-
-      const btnUrl = btn.url.startsWith("http") ? btn.url : `https://${btn.url}`;
-      doc.link(abtnX, y, abtnW, abtnH, { url: btnUrl });
-
-      y += abtnH + 3;
-    }
-    y += 2;
-  }
-
-  // ═══════════════════════════════════════════
-  // SOCIAL LINKS (h-11 w-11 ≈ 44px → 10mm)
-  // ═══════════════════════════════════════════
-  if (activeSocials.length > 0) {
-    doc.setTextColor(156, 163, 175); // gray-400
-    doc.setFontSize(5);
-    doc.setFont("helvetica", "normal");
-    doc.text("SIGA-ME NAS REDES", W / 2, y, { align: "center" });
-    y += 4;
-
-    const sCircleR = 5;
-    const sGap = 3;
-    const sTotalW = activeSocials.length * sCircleR * 2 + (activeSocials.length - 1) * sGap;
-    let sx = (W - sTotalW) / 2 + sCircleR;
-
-    for (const [key, url] of activeSocials) {
-      // Shadow
-      doc.setFillColor(210, 210, 210);
-      doc.circle(sx + 0.2, y + sCircleR + 0.2, sCircleR, "F");
-
-      // Circle
-      doc.setFillColor(pr, pg, pb);
-      doc.circle(sx, y + sCircleR, sCircleR, "F");
-
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(5);
-      doc.setFont("helvetica", "bold");
-      doc.text(SOCIAL_LABELS[key] || "?", sx, y + sCircleR + 1.2, { align: "center" });
-
-      const socialUrl = url.startsWith("http") ? url : `https://${url}`;
-      doc.link(sx - sCircleR, y, sCircleR * 2, sCircleR * 2, { url: socialUrl });
-
-      sx += sCircleR * 2 + sGap;
-    }
-    y += sCircleR * 2 + 6;
-  }
-
-  // ═══════════════════════════════════════════
-  // LOGO + QR CODE (flex items-center justify-between)
-  // ═══════════════════════════════════════════
-  const sectionY = y + 2;
-  const qrSize = 28;
-  const qrX = W - MARGIN_X - qrSize - 4;
-  const logoMaxW = W / 2 - MARGIN_X - 4;
-
-  // Logo on the left
-  if (card.logos.length > 0) {
-    const logoImg = await loadImageAsBase64(card.logos[0]);
-    if (logoImg) {
-      try {
-        // Maintain aspect ratio within bounds
-        const logoMaxH = 28;
-        doc.addImage(logoImg, "PNG", CONTENT_X + 2, sectionY + 2, logoMaxW, logoMaxH);
-      } catch { /* skip */ }
-    }
-  }
-
-  // QR Code on the right
-  doc.setTextColor(156, 163, 175);
-  doc.setFontSize(4.5);
-  doc.setFont("helvetica", "normal");
-  doc.text("ESCANEIE PARA SALVAR", qrX + qrSize / 2, sectionY, { align: "center" });
-
-  const qrDataUrl = await generateQrDataUrl(publicUrl, 300, primaryColor);
-  if (qrDataUrl) {
-    // QR border/shadow (bg-white p-3 rounded-xl shadow-inner border)
-    doc.setFillColor(248, 248, 248);
-    doc.setDrawColor(229, 231, 235);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(qrX - 2, sectionY + 2, qrSize + 4, qrSize + 4, 2, 2, "FD");
-
-    try {
-      doc.addImage(qrDataUrl, "PNG", qrX, sectionY + 4, qrSize, qrSize);
-    } catch { /* skip */ }
-  }
-
-  // ─── Save ───
-  const fileName = `cartao-${card.slug || "virtual"}.pdf`;
-  doc.save(fileName);
-}
-
-/** Draw a 135deg gradient from primaryColor to secondaryColor */
-function drawGradientCover(
-  doc: jsPDF,
-  pr: number, pg: number, pb: number,
-  sr: number, sg: number, sb: number,
-  coverH: number,
-) {
-  // Diagonal gradient approximation using thin horizontal strips with color interpolation
-  for (let i = 0; i < coverH; i++) {
-    const t = i / coverH;
-    const r = Math.round(pr + (sr - pr) * t);
-    const g = Math.round(pg + (sg - pg) * t);
-    const b = Math.round(pb + (sb - pb) * t);
-    doc.setFillColor(r, g, b);
-    doc.rect(0, i, W, 1.2, "F");
-  }
+  // Save
+  doc.save(`cartao-${card.slug || "virtual"}.pdf`);
 }
