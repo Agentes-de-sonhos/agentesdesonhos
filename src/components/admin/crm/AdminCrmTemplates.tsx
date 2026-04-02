@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PopupRichTextEditor } from "../PopupRichTextEditor";
+import { PlaybookRichTextEditor } from "../PlaybookRichTextEditor";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -160,7 +160,7 @@ export function AdminCrmTemplates() {
             <div>
               <Label>Mensagem *</Label>
               <p className="text-xs text-muted-foreground mb-1">Use {"{{nome}}"} para personalizar com o nome do contato</p>
-              <PopupRichTextEditor content={form.mensagem} onChange={(html) => setForm({ ...form, mensagem: html })} />
+              <PlaybookRichTextEditor content={form.mensagem} onChange={(html) => setForm({ ...form, mensagem: html })} />
             </div>
           </div>
           <DialogFooter>
