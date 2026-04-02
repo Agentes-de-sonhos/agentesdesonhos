@@ -160,7 +160,7 @@ export function AdminCrmTemplates() {
             <div>
               <Label>Mensagem *</Label>
               <p className="text-xs text-muted-foreground mb-1">Use {"{{nome}}"} para personalizar com o nome do contato</p>
-              <PopupRichTextEditor content={form.mensagem} onChange={(html) => setForm({ ...form, mensagem: html })} />
+              <PlaybookRichTextEditor content={form.mensagem} onChange={(html) => setForm({ ...form, mensagem: html })} />
             </div>
           </div>
           <DialogFooter>
