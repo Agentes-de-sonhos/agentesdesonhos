@@ -70,6 +70,7 @@ function formatCurrencyInline(value: number) {
 }
 
 const flightLegSchema = z.object({
+  leg_date: z.string().optional(),
   airport_origin: z.string().optional(),
   airport_destination: z.string().optional(),
   departure_time: z.string().optional(),
@@ -77,7 +78,7 @@ const flightLegSchema = z.object({
   flight_number: z.string().optional(),
 });
 
-const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
+const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ leg_date: "", airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
 
 /** Normalize old single-leg data to multi-leg arrays */
 function normalizeLegs(init: any): { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] } {
@@ -140,7 +141,11 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
               </Button>
             )}
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Data do voo</label>
+              <Input type="date" value={leg.leg_date || ""} onChange={e => updateLeg(idx, "leg_date", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de origem</label>
               <Input placeholder="GRU" value={leg.airport_origin || ""} onChange={e => updateLeg(idx, "airport_origin", e.target.value)} className="h-8 text-sm mt-1" />
