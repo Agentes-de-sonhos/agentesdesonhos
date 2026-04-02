@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBusinessCard, CardButton, SocialLinks } from "@/hooks/useBusinessCard";
 import { toast } from "sonner";
-import { CreditCard, Copy, Eye, ExternalLink } from "lucide-react";
+import { CreditCard, Copy, Eye, ExternalLink, FileDown, Loader2 } from "lucide-react";
 import { AdminEditButton } from "@/components/layout/AdminEditButton";
 import { WizardProgressBar, WizardStep } from "@/components/card-wizard/WizardProgressBar";
 import { CardPreview } from "@/components/card-wizard/CardPreview";
