@@ -141,7 +141,11 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
               </Button>
             )}
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Data do voo</label>
+              <Input type="date" value={leg.leg_date || ""} onChange={e => updateLeg(idx, "leg_date", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de origem</label>
               <Input placeholder="GRU" value={leg.airport_origin || ""} onChange={e => updateLeg(idx, "airport_origin", e.target.value)} className="h-8 text-sm mt-1" />
