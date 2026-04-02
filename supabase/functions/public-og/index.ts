@@ -6,7 +6,7 @@ const DOMAINS: Record<string, string> = {
   "carteiradigital.tur.br": "wallet",
 };
 
-const OG_IMAGE = "https://www.vitrine.tur.br/og-image.png";
+const OG_IMAGE = "https://www.vitrine.tur.br/favicon.png";
 
 const OG_CONTENT: Record<string, { title: string; description: string }> = {
   quote: {
