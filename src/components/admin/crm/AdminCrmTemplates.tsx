@@ -144,7 +144,7 @@ export function AdminCrmTemplates() {
       </CardContent>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Editar Template" : "Novo Template"}</DialogTitle>
           </DialogHeader>
