@@ -10,7 +10,7 @@ export function setOgMeta(opts: {
   url?: string;
 }) {
   const defaults = {
-    image: "https://www.vitrine.tur.br/og-image.png",
+    image: "https://www.vitrine.tur.br/favicon.png",
     url: window.location.href,
   };
   const { title, description, image = defaults.image, url = defaults.url } = opts;
