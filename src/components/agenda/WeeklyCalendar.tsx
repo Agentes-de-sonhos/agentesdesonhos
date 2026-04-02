@@ -100,7 +100,7 @@ export function WeeklyCalendar({
                   )}
                 >
                   <div className="text-xs text-muted-foreground uppercase">
-                    {format(day, "EEE", { locale: ptBR })}
+                    {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][day.getDay()]}
                   </div>
                   <div
                     className={cn(
