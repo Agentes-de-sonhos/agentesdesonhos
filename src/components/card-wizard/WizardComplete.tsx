@@ -5,6 +5,7 @@ import { Check, Eye, Copy, Share2, FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useBusinessCard } from "@/hooks/useBusinessCard";
 import { generateBusinessCardPdf } from "@/lib/generateBusinessCardPdf";
+import { getCardShareUrl } from "@/lib/cardShareUrl";
 
 const PUBLIC_DOMAIN = "https://contato.tur.br";
 
@@ -17,16 +18,17 @@ export function WizardComplete({ slug, onRestart }: WizardCompleteProps) {
   const { card } = useBusinessCard();
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const publicUrl = `${PUBLIC_DOMAIN}/${slug}`;
+  const shareUrl = getCardShareUrl(slug);
 
   const copyLink = () => {
-    navigator.clipboard.writeText(publicUrl);
+    navigator.clipboard.writeText(shareUrl);
     toast.success("Link copiado!");
   };
 
   const share = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Meu Cartão Virtual", url: publicUrl });
+        await navigator.share({ title: "Meu Cartão Virtual", url: shareUrl });
       } catch { /* cancelled */ }
     } else {
       copyLink();

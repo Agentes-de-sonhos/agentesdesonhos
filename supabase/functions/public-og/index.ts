@@ -33,9 +33,10 @@ const OG_CONTENT: Record<string, { title: string; description: string }> = {
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
-  const type = url.searchParams.get("type"); // quote | itinerary | wallet | card | showcase
-  const targetUrl = url.searchParams.get("url"); // full SPA URL to redirect to
-  const token = url.searchParams.get("token"); // optional: share_token for enriched preview
+  const type = url.searchParams.get("type");
+  const targetUrl = url.searchParams.get("url");
+  const token = url.searchParams.get("token");
+  const slug = url.searchParams.get("slug");
 
   if (!type || !targetUrl) {
     return new Response("Missing required params", { status: 400 });
@@ -45,42 +46,70 @@ Deno.serve(async (req) => {
   let ogTitle = content.title;
   let ogDescription = content.description;
   let ogImage = OG_IMAGE;
+  let twitterCard = "summary";
 
-  // Try to enrich with real data if token provided
-  if (token) {
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false } }
+  );
+
+  // Enrich card type with real data from business_cards table
+  if (type === "card" && slug) {
     try {
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-        { auth: { persistSession: false } }
-      );
+      const { data: card } = await supabase
+        .from("business_cards")
+        .select("id, name, title, agency_name, photo_url, primary_color, secondary_color, logos, user_id")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .maybeSingle();
 
-      if (type === "quote") {
-        const { data: quote } = await supabase
-          .from("quotes")
-          .select("destination, user_id")
-          .eq("share_token", token)
-          .eq("status", "published")
+      if (card) {
+        const titleParts = [card.name];
+        if (card.title) titleParts.push(card.title);
+        else if (card.agency_name) titleParts.push(card.agency_name);
+        ogTitle = titleParts.join(" • ");
+
+        ogDescription = card.agency_name
+          ? `Fale comigo e planeje sua próxima viagem com ${card.agency_name} ✈️`
+          : "Fale comigo e planeje sua próxima viagem com quem entende ✈️";
+
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        ogImage = `${supabaseUrl}/functions/v1/card-og-image?slug=${encodeURIComponent(slug)}`;
+        twitterCard = "summary_large_image";
+      }
+    } catch {
+      // Fallback to generic
+    }
+  }
+
+  // Enrich quote type
+  if (type === "quote" && token) {
+    try {
+      const { data: quote } = await supabase
+        .from("quotes")
+        .select("destination, user_id")
+        .eq("share_token", token)
+        .eq("status", "published")
+        .maybeSingle();
+
+      if (quote) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("agency_name, agency_logo_url")
+          .eq("user_id", quote.user_id)
           .maybeSingle();
 
-        if (quote) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("agency_name, agency_logo_url")
-            .eq("user_id", quote.user_id)
-            .maybeSingle();
-
-          if (profile?.agency_name) {
-            ogTitle = `Orçamento personalizado | ${profile.agency_name}`;
-            ogDescription = `Confira seu orçamento personalizado para ${quote.destination}, preparado especialmente por ${profile.agency_name}.`;
-          }
-          if (profile?.agency_logo_url) {
-            ogImage = profile.agency_logo_url;
-          }
+        if (profile?.agency_name) {
+          ogTitle = `Orçamento personalizado | ${profile.agency_name}`;
+          ogDescription = `Confira seu orçamento personalizado para ${quote.destination}, preparado especialmente por ${profile.agency_name}.`;
+        }
+        if (profile?.agency_logo_url) {
+          ogImage = profile.agency_logo_url;
         }
       }
     } catch {
-      // Fallback to generic content
+      // Fallback
     }
   }
 
@@ -95,9 +124,11 @@ Deno.serve(async (req) => {
   <meta property="og:title" content="${esc(ogTitle)}" />
   <meta property="og:description" content="${esc(ogDescription)}" />
   <meta property="og:image" content="${esc(ogImage)}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:url" content="${esc(targetUrl)}" />
 
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content="${twitterCard}" />
   <meta name="twitter:title" content="${esc(ogTitle)}" />
   <meta name="twitter:description" content="${esc(ogDescription)}" />
   <meta name="twitter:image" content="${esc(ogImage)}" />
