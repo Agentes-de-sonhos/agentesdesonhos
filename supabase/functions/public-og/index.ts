@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
   <meta property="og:image" content="${esc(ogImage)}" />
   <meta property="og:url" content="${esc(targetUrl)}" />
 
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="${esc(ogTitle)}" />
   <meta name="twitter:description" content="${esc(ogDescription)}" />
   <meta name="twitter:image" content="${esc(ogImage)}" />
