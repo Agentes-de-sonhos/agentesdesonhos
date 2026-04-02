@@ -198,7 +198,7 @@ export default function MeuCartao() {
         </div>
 
         {/* Quick actions */}
-        <div className="flex gap-2 justify-center">
+        <div className="flex gap-2 justify-center flex-wrap">
           <Button variant="outline" size="sm" onClick={copyLink}>
             <Copy className="h-4 w-4 mr-1" /> Copiar link
           </Button>
@@ -206,6 +206,29 @@ export default function MeuCartao() {
             <a href={`/${card.slug}`} target="_blank" rel="noopener noreferrer">
               <Eye className="h-4 w-4 mr-1" /> Visualizar
             </a>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={generatingPdf}
+            onClick={async () => {
+              setGeneratingPdf(true);
+              try {
+                await generateBusinessCardPdf(card as any);
+                toast.success("PDF gerado com sucesso!");
+              } catch {
+                toast.error("Erro ao gerar PDF.");
+              } finally {
+                setGeneratingPdf(false);
+              }
+            }}
+          >
+            {generatingPdf ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <FileDown className="h-4 w-4 mr-1" />
+            )}
+            Gerar PDF
           </Button>
         </div>
 
