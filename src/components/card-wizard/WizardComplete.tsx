@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Eye, Copy, Share2 } from "lucide-react";
+import { Check, Eye, Copy, Share2, FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useBusinessCard } from "@/hooks/useBusinessCard";
+import { generateBusinessCardPdf } from "@/lib/generateBusinessCardPdf";
 
 const PUBLIC_DOMAIN = "https://contato.tur.br";
 
@@ -11,6 +14,8 @@ interface WizardCompleteProps {
 }
 
 export function WizardComplete({ slug, onRestart }: WizardCompleteProps) {
+  const { card } = useBusinessCard();
+  const [generatingPdf, setGeneratingPdf] = useState(false);
   const publicUrl = `${PUBLIC_DOMAIN}/${slug}`;
 
   const copyLink = () => {
@@ -25,6 +30,22 @@ export function WizardComplete({ slug, onRestart }: WizardCompleteProps) {
       } catch { /* cancelled */ }
     } else {
       copyLink();
+    }
+  };
+
+  const handleGeneratePdf = async () => {
+    if (!card) {
+      toast.error("Cartão não encontrado.");
+      return;
+    }
+    setGeneratingPdf(true);
+    try {
+      await generateBusinessCardPdf(card);
+      toast.success("PDF gerado com sucesso!");
+    } catch {
+      toast.error("Erro ao gerar PDF.");
+    } finally {
+      setGeneratingPdf(false);
     }
   };
 
@@ -53,6 +74,14 @@ export function WizardComplete({ slug, onRestart }: WizardCompleteProps) {
           </Button>
           <Button variant="outline" onClick={share}>
             <Share2 className="h-4 w-4 mr-1" /> Compartilhar cartão
+          </Button>
+          <Button variant="outline" onClick={handleGeneratePdf} disabled={generatingPdf}>
+            {generatingPdf ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <FileDown className="h-4 w-4 mr-1" />
+            )}
+            Gerar PDF
           </Button>
         </div>
 

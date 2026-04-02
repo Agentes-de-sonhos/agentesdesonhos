@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { generateBusinessCardPdf } from "@/lib/generateBusinessCardPdf";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBusinessCard, CardButton, SocialLinks } from "@/hooks/useBusinessCard";
 import { toast } from "sonner";
-import { CreditCard, Copy, Eye, ExternalLink } from "lucide-react";
+import { CreditCard, Copy, Eye, ExternalLink, FileDown, Loader2 } from "lucide-react";
 import { AdminEditButton } from "@/components/layout/AdminEditButton";
 import { WizardProgressBar, WizardStep } from "@/components/card-wizard/WizardProgressBar";
 import { CardPreview } from "@/components/card-wizard/CardPreview";
@@ -33,6 +34,7 @@ export default function MeuCartao() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isComplete, setIsComplete] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   const [form, setForm] = useState({
     name: "", title: "", agency_name: "", phone: "", whatsapp: "", email: "", website: "",
@@ -196,7 +198,7 @@ export default function MeuCartao() {
         </div>
 
         {/* Quick actions */}
-        <div className="flex gap-2 justify-center">
+        <div className="flex gap-2 justify-center flex-wrap">
           <Button variant="outline" size="sm" onClick={copyLink}>
             <Copy className="h-4 w-4 mr-1" /> Copiar link
           </Button>
@@ -204,6 +206,29 @@ export default function MeuCartao() {
             <a href={`/${card.slug}`} target="_blank" rel="noopener noreferrer">
               <Eye className="h-4 w-4 mr-1" /> Visualizar
             </a>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={generatingPdf}
+            onClick={async () => {
+              setGeneratingPdf(true);
+              try {
+                await generateBusinessCardPdf(card as any);
+                toast.success("PDF gerado com sucesso!");
+              } catch {
+                toast.error("Erro ao gerar PDF.");
+              } finally {
+                setGeneratingPdf(false);
+              }
+            }}
+          >
+            {generatingPdf ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <FileDown className="h-4 w-4 mr-1" />
+            )}
+            Gerar PDF
           </Button>
         </div>
 
