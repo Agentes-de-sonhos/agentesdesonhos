@@ -34,6 +34,7 @@ export default function MeuCartao() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isComplete, setIsComplete] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   const [form, setForm] = useState({
     name: "", title: "", agency_name: "", phone: "", whatsapp: "", email: "", website: "",
