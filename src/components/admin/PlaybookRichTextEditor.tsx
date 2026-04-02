@@ -66,7 +66,14 @@ export function PlaybookRichTextEditor({ content, onChange }: PlaybookRichTextEd
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none min-h-[200px] px-4 py-3 focus:outline-none text-foreground prose-headings:text-foreground prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-li:leading-relaxed prose-a:text-primary [&_img[data-emoji]]:inline [&_img[data-emoji]]:w-5 [&_img[data-emoji]]:h-5 [&_img[data-emoji]]:m-0',
+        class: 'prose prose-sm max-w-none min-h-[200px] px-4 py-3 focus:outline-none text-foreground prose-headings:text-foreground prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-li:leading-relaxed prose-a:text-primary',
+      },
+      transformPastedHTML(html) {
+        return html.replace(/<img[^>]*alt="([^"]*)"[^>]*class="[^"]*emoji[^"]*"[^>]*\/?>/gi, '$1')
+                   .replace(/<img[^>]*class="[^"]*emoji[^"]*"[^>]*alt="([^"]*)"[^>]*\/?>/gi, '$1')
+                   .replace(/<img[^>]*src="[^"]*emoji[^"]*"[^>]*alt="([^"]*)"[^>]*\/?>/gi, '$1')
+                   .replace(/<img[^>]*alt="([^"]*)"[^>]*src="[^"]*emoji[^"]*"[^>]*\/?>/gi, '$1')
+                   .replace(/<img[^>]*alt="([\p{Emoji}\u200d\ufe0f]+)"[^>]*\/?>/giu, '$1');
       },
     },
   });
