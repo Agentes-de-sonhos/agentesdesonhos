@@ -86,7 +86,7 @@ export function GlobalPopupModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md max-h-[90vh] p-0 overflow-y-auto gap-0 border-0">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg max-h-[90vh] p-0 overflow-y-auto gap-0 border-0 w-auto">
         {/* Close button */}
         <button
           onClick={handleClose}
@@ -111,11 +111,11 @@ export function GlobalPopupModal() {
 
         {/* Image (only if no video) */}
         {!hasVideo && hasImage && (
-          <div className="w-full relative overflow-hidden bg-muted">
+          <div className="w-full relative overflow-hidden bg-muted flex items-center justify-center">
             <img
               src={currentPopup.image_url!}
               alt={currentPopup.title}
-              className="w-full max-h-[60vh] object-contain"
+              className="w-full h-auto object-contain"
             />
           </div>
         )}
