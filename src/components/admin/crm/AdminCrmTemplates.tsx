@@ -159,7 +159,8 @@ export function AdminCrmTemplates() {
             </div>
             <div>
               <Label>Mensagem *</Label>
-              <Textarea rows={8} value={form.mensagem} onChange={(e) => setForm({ ...form, mensagem: e.target.value })} placeholder="Use {{nome}} para personalizar com o nome do contato" />
+              <p className="text-xs text-muted-foreground mb-1">Use {"{{nome}}"} para personalizar com o nome do contato</p>
+              <PopupRichTextEditor content={form.mensagem} onChange={(html) => setForm({ ...form, mensagem: html })} />
             </div>
           </div>
           <DialogFooter>
