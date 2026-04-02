@@ -166,7 +166,7 @@ export function AdminBusinessCardsManager() {
   };
 
   const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(`${PUBLIC_DOMAIN}/${slug}`);
+    navigator.clipboard.writeText(getCardShareUrl(slug));
     toast.success("Link copiado!");
   };
 
