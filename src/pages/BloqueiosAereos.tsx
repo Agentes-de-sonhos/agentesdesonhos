@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
+
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Loader2, Plane, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
