@@ -76,7 +76,7 @@ export default function Mentorias() {
 
   return (
     <DashboardLayout>
-      <ComingSoonOverlay pageKey="mentorias" />
+      
       <div className="space-y-8">
         <PageHeader
           pageKey="mentorias"

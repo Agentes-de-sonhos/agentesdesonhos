@@ -137,7 +137,7 @@ export default function BloqueiosAereos() {
 
   return (
     <DashboardLayout>
-      <ComingSoonOverlay pageKey="bloqueios-aereos" />
+      
       <div className="space-y-6">
         <PageHeader
           pageKey="bloqueios-aereos"

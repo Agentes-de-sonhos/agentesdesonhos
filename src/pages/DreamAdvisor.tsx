@@ -294,7 +294,7 @@ export default function DreamAdvisor() {
 
   return (
     <DashboardLayout>
-      <ComingSoonOverlay pageKey="dream-advisor" />
+      
       <TooltipProvider>
         <div className="space-y-6">
           <PageHeader
