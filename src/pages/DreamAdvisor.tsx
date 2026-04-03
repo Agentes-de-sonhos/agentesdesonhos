@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Building2, UtensilsCrossed, Landmark, ShoppingBag, Compass, Globe } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
+
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
