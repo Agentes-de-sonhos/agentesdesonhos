@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
+
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ export default function Mentorias() {
 
   return (
     <DashboardLayout>
-      <ComingSoonOverlay pageKey="mentorias" />
+      
       <div className="space-y-8">
         <PageHeader
           pageKey="mentorias"
