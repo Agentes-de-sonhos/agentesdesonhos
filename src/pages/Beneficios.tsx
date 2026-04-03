@@ -3,7 +3,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { useDebounce } from "@/hooks/useDebounce";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ComingSoonOverlay } from "@/components/subscription/ComingSoonOverlay";
+
 import { useBenefits } from "@/hooks/useBenefits";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tag, Plus, Search } from "lucide-react";
