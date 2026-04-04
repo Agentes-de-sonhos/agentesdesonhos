@@ -7351,6 +7351,7 @@ export type Database = {
           maps_url: string | null
           notes: string | null
           order_index: number
+          origin: string
           period: string
           photo_urls: string[] | null
           start_time: string | null
@@ -7369,6 +7370,7 @@ export type Database = {
           maps_url?: string | null
           notes?: string | null
           order_index?: number
+          origin?: string
           period: string
           photo_urls?: string[] | null
           start_time?: string | null
@@ -7387,6 +7389,7 @@ export type Database = {
           maps_url?: string | null
           notes?: string | null
           order_index?: number
+          origin?: string
           period?: string
           photo_urls?: string[] | null
           start_time?: string | null
