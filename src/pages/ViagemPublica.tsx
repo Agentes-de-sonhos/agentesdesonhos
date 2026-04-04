@@ -1533,7 +1533,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                                     </p>
                                   </div>
                                 </div>
-                                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                               </button>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
