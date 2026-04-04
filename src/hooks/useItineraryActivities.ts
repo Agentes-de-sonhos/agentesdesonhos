@@ -36,6 +36,7 @@ export interface CreateActivityData {
   document_urls?: string[];
   maps_url?: string | null;
   order_index?: number;
+  origin?: "servico" | "ia" | "manual";
 }
 
 export function useItineraryActivities(tripId: string | undefined) {
