@@ -245,7 +245,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
     }
   };
 
-
+  if (isLoading) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-8">
