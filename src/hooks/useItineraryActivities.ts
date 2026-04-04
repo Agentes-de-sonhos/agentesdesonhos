@@ -77,6 +77,7 @@ export function useItineraryActivities(tripId: string | undefined) {
           photo_urls: data.photo_urls ?? [],
           document_urls: data.document_urls ?? [],
           maps_url: data.maps_url ?? null,
+          origin: data.origin ?? "manual",
         })
         .select()
         .single();
