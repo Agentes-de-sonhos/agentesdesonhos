@@ -1581,10 +1581,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   const isDayOpen = openDay === dateStr;
 
                   return (
-                    <div key={dateStr} className={cn("rounded-xl overflow-hidden border shadow-sm bg-card transition-shadow hover:shadow-md", SERVICE_COLORS.itinerary.border)}>
+                    <div key={dateStr} className={cn(
+                      "rounded-xl overflow-hidden border shadow-sm bg-card transition-all duration-200",
+                      isDayOpen ? cn(SERVICE_COLORS.itinerary.activeBorder, SERVICE_COLORS.itinerary.activeGlow, "shadow-md") : cn(SERVICE_COLORS.itinerary.border, "hover:shadow-md")
+                    )}>
                       <button
                         onClick={() => toggleDay(dateStr)}
-                        className={cn("w-full flex items-center justify-between p-4 transition-colors", SERVICE_COLORS.itinerary.hoverBg)}
+                        className={cn("w-full flex items-center justify-between p-4 transition-colors duration-200", SERVICE_COLORS.itinerary.hoverBg)}
                       >
                         <div className="flex items-center gap-3">
                           <div className={cn("flex h-10 w-10 items-center justify-center rounded-full font-bold text-sm shrink-0", SERVICE_COLORS.itinerary.bg, SERVICE_COLORS.itinerary.icon)}>
