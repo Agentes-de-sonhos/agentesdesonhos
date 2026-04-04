@@ -93,6 +93,7 @@ export default function CarteiraPublicaV2() {
   const [error, setError] = useState("");
   const [needsPassword, setNeedsPassword] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [usedPassword, setUsedPassword] = useState("");
 
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
 
