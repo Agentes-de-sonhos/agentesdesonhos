@@ -272,39 +272,44 @@ function PasswordGate({ onUnlock }: { onUnlock: (password: string) => void }) {
   );
 }
 
-// Collapsible Service Section
-function CollapsibleServiceSection({ 
-  type, services, defaultOpen, sectionRef 
+// Service Section (controlled open/close for exclusive accordion)
+function ServiceSection({ 
+  type, services, isOpen, onToggle, sectionRef 
 }: { 
-  type: TripServiceType; services: TripService[]; defaultOpen: boolean; sectionRef: (el: HTMLDivElement | null) => void;
+  type: TripServiceType; services: TripService[]; isOpen: boolean; onToggle: () => void; sectionRef: (el: HTMLDivElement | null) => void;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
   const Icon = SERVICE_ICONS[type];
   const label = SERVICE_LABELS[type];
 
   return (
     <div ref={sectionRef} data-service-type={type} style={{ scrollMarginTop: '70px' }}>
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-                <Icon className="h-4.5 w-4.5 text-primary" />
-              </div>
-              <span className="font-semibold text-sm">{label}</span>
-              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
-                {services.length}
-              </span>
+      <div className="rounded-xl overflow-hidden border border-border/60 shadow-sm bg-card transition-shadow hover:shadow-md">
+        <button
+          onClick={onToggle}
+          className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/40 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+              <Icon className="h-5 w-5 text-primary" />
             </div>
-            <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="space-y-2 mt-2 mb-1">
+            <div className="text-left">
+              <span className="font-semibold text-sm block">{label}</span>
+              <span className="text-[11px] text-muted-foreground">{services.length} {services.length === 1 ? 'item' : 'itens'}</span>
+            </div>
+          </div>
+          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", isOpen && "rotate-180")} />
+        </button>
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-300 ease-in-out",
+            isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"
+          )}
+        >
+          <div className="space-y-2 px-4 pb-4 pt-1">
             {services.map((s) => <PublicServiceCard key={s.id} service={s} />)}
           </div>
-        </CollapsibleContent>
-      </Collapsible>
+        </div>
+      </div>
     </div>
   );
 }
