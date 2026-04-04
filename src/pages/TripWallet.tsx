@@ -275,8 +275,8 @@ function TripWalletContent() {
     await updateTrip({ id, status: newStatus });
   };
 
-  const handleGeneratePDF = () => {
-    if (trip) generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[]);
+  const handleGeneratePDF = async () => {
+    if (trip) await generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[], { mode: "authenticated" });
   };
 
   // Listing view

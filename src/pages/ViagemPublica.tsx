@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { generateTripPDF } from "@/components/trip/TripPDF";
+import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
@@ -1403,7 +1403,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               </span>
             )}
           </div>
-          <Button size="sm" variant="outline" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities)}>
+          <Button size="sm" variant="outline" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
             <FileText className="mr-2 h-4 w-4" /> PDF
           </Button>
         </div>
