@@ -1473,6 +1473,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               {availableTabs.map((type) => {
                 const Icon = SERVICE_ICONS[type];
                 const colors = SERVICE_COLORS[type];
+                const isActive = openSection === `service-${type}`;
                 return (
                   <button
                     key={type}
@@ -1482,7 +1483,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                         sectionRefs.current[type]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }, 100);
                     }}
-                    className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all duration-200 group", colors.border, colors.hoverBg)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
+                      isActive ? cn(colors.activeBorder, colors.activeGlow, "shadow-md") : cn(colors.border, "hover:shadow-md"),
+                      colors.hoverBg
+                    )}
                   >
                     <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", colors.bg)}>
                       <Icon className={cn("h-5 w-5", colors.icon)} />
