@@ -27,6 +27,20 @@ const SERVICE_ICONS: Record<TripServiceType, any> = {
   attraction: Ticket, insurance: Shield, cruise: Ship, train: TrainFront, other: FileText,
 };
 
+// Pastel color system per service category (bg, icon darker shade, border)
+const SERVICE_COLORS: Record<TripServiceType | 'itinerary', { bg: string; icon: string; badge: string; border: string; hoverBg: string }> = {
+  flight:     { bg: 'bg-[#D6EAF8]', icon: 'text-[#2E86C1]', badge: 'bg-[#D6EAF8] text-[#2E86C1]', border: 'border-[#D6EAF8]/80', hoverBg: 'hover:bg-[#D6EAF8]/30' },
+  train:      { bg: 'bg-[#D6EAF8]', icon: 'text-[#2874A6]', badge: 'bg-[#D6EAF8] text-[#2874A6]', border: 'border-[#D6EAF8]/80', hoverBg: 'hover:bg-[#D6EAF8]/30' },
+  hotel:      { bg: 'bg-[#E8DAEF]', icon: 'text-[#7D3C98]', badge: 'bg-[#E8DAEF] text-[#7D3C98]', border: 'border-[#E8DAEF]/80', hoverBg: 'hover:bg-[#E8DAEF]/30' },
+  attraction: { bg: 'bg-[#FDEBD0]', icon: 'text-[#CA6F1E]', badge: 'bg-[#FDEBD0] text-[#CA6F1E]', border: 'border-[#FDEBD0]/80', hoverBg: 'hover:bg-[#FDEBD0]/30' },
+  car_rental: { bg: 'bg-[#D5F5E3]', icon: 'text-[#1E8449]', badge: 'bg-[#D5F5E3] text-[#1E8449]', border: 'border-[#D5F5E3]/80', hoverBg: 'hover:bg-[#D5F5E3]/30' },
+  insurance:  { bg: 'bg-[#D4E6F1]', icon: 'text-[#2471A3]', badge: 'bg-[#D4E6F1] text-[#2471A3]', border: 'border-[#D4E6F1]/80', hoverBg: 'hover:bg-[#D4E6F1]/30' },
+  transfer:   { bg: 'bg-[#D1F2EB]', icon: 'text-[#148F77]', badge: 'bg-[#D1F2EB] text-[#148F77]', border: 'border-[#D1F2EB]/80', hoverBg: 'hover:bg-[#D1F2EB]/30' },
+  cruise:     { bg: 'bg-[#D4E6F8]', icon: 'text-[#1A5276]', badge: 'bg-[#D4E6F8] text-[#1A5276]', border: 'border-[#D4E6F8]/80', hoverBg: 'hover:bg-[#D4E6F8]/30' },
+  other:      { bg: 'bg-[#ECECEC]', icon: 'text-[#5D6D7E]', badge: 'bg-[#ECECEC] text-[#5D6D7E]', border: 'border-[#ECECEC]/80', hoverBg: 'hover:bg-[#ECECEC]/30' },
+  itinerary:  { bg: 'bg-[#FCF3CF]', icon: 'text-[#B7950B]', badge: 'bg-[#FCF3CF] text-[#B7950B]', border: 'border-[#FCF3CF]/80', hoverBg: 'hover:bg-[#FCF3CF]/30' },
+};
+
 const SERVICE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagens", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
@@ -280,21 +294,22 @@ function ServiceSection({
 }) {
   const Icon = SERVICE_ICONS[type];
   const label = SERVICE_LABELS[type];
+  const colors = SERVICE_COLORS[type];
 
   return (
     <div ref={sectionRef} data-service-type={type} style={{ scrollMarginTop: '70px' }}>
-      <div className="rounded-xl overflow-hidden border border-border/60 shadow-sm bg-card transition-shadow hover:shadow-md">
+      <div className={cn("rounded-xl overflow-hidden border shadow-sm bg-card transition-shadow hover:shadow-md", colors.border)}>
         <button
           onClick={onToggle}
-          className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/40 transition-colors"
+          className={cn("w-full flex items-center justify-between px-4 py-3.5 transition-colors", colors.hoverBg)}
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shrink-0">
-              <Icon className="h-5 w-5 text-primary" />
+            <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl shrink-0", colors.bg)}>
+              <Icon className={cn("h-5 w-5", colors.icon)} />
             </div>
             <div className="text-left">
               <span className="font-semibold text-sm block">{label}</span>
-              <span className="text-[11px] text-muted-foreground">{services.length} {services.length === 1 ? 'item' : 'itens'}</span>
+              <span className={cn("text-[11px] px-2 py-0.5 rounded-full font-medium", colors.badge)}>{services.length} {services.length === 1 ? 'item' : 'itens'}</span>
             </div>
           </div>
           <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", isOpen && "rotate-180")} />
@@ -1455,6 +1470,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
               {availableTabs.map((type) => {
                 const Icon = SERVICE_ICONS[type];
+                const colors = SERVICE_COLORS[type];
                 return (
                   <button
                     key={type}
@@ -1464,35 +1480,38 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                         sectionRefs.current[type]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }, 100);
                     }}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 hover:bg-primary/5 shadow-sm hover:shadow-md transition-all duration-200 group"
+                    className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all duration-200 group", colors.border, colors.hoverBg)}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                      <Icon className="h-5 w-5 text-primary" />
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", colors.bg)}>
+                      <Icon className={cn("h-5 w-5", colors.icon)} />
                     </div>
                     <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">{SERVICE_LABELS[type]}</span>
-                    <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">{grouped[type].length}</span>
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", colors.badge)}>{grouped[type].length}</span>
                   </button>
                 );
               })}
-              {itineraryActivities.length > 0 && (
-                <button
-                  onClick={() => {
-                    setOpenSection('itinerary');
-                    setTimeout(() => {
-                      itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 hover:bg-primary/5 shadow-sm hover:shadow-md transition-all duration-200 group"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                    <CalendarDays className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">Roteiro</span>
-                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
-                    {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
-                  </span>
-                </button>
-              )}
+              {itineraryActivities.length > 0 && (() => {
+                const itColors = SERVICE_COLORS.itinerary;
+                return (
+                  <button
+                    onClick={() => {
+                      setOpenSection('itinerary');
+                      setTimeout(() => {
+                        itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 100);
+                    }}
+                    className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all duration-200 group", itColors.border, itColors.hoverBg)}
+                  >
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", itColors.bg)}>
+                      <CalendarDays className={cn("h-5 w-5", itColors.icon)} />
+                    </div>
+                    <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">Roteiro</span>
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", itColors.badge)}>
+                      {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
+                    </span>
+                  </button>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -1547,13 +1566,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   const isDayOpen = openDay === dateStr;
 
                   return (
-                    <div key={dateStr} className="rounded-xl overflow-hidden border border-border/60 shadow-sm bg-card transition-shadow hover:shadow-md">
+                    <div key={dateStr} className={cn("rounded-xl overflow-hidden border shadow-sm bg-card transition-shadow hover:shadow-md", SERVICE_COLORS.itinerary.border)}>
                       <button
                         onClick={() => toggleDay(dateStr)}
-                        className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+                        className={cn("w-full flex items-center justify-between p-4 transition-colors", SERVICE_COLORS.itinerary.hoverBg)}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">
+                          <div className={cn("flex h-10 w-10 items-center justify-center rounded-full font-bold text-sm shrink-0", SERVICE_COLORS.itinerary.bg, SERVICE_COLORS.itinerary.icon)}>
                             {idx + 1}
                           </div>
                           <div className="text-left">
