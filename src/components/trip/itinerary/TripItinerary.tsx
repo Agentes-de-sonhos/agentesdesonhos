@@ -14,6 +14,7 @@ import type { TripService } from "@/types/trip";
 
 interface Props {
   tripId: string;
+  destination: string;
   startDate: string;
   endDate: string;
   services: TripService[];
