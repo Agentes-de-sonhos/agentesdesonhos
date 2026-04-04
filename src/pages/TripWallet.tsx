@@ -66,6 +66,8 @@ function TripWalletContent() {
     replaceVoucher, removeVoucher, isAddingService, isUpdatingService, editHistory 
   } = useTrip(id && id !== "nova" ? id : undefined);
 
+  const { activities: itineraryActivities } = useItineraryActivities(id && id !== "nova" ? id : undefined);
+
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [editingService, setEditingService] = useState<TripService | null>(null);
   const [isUploading, setIsUploading] = useState(false);
