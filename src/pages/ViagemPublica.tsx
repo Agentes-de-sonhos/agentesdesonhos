@@ -1391,11 +1391,23 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     password: usedPassword,
   };
 
+  // Exclusive accordion state — only one section open at a time
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const toggleSection = useCallback((key: string) => {
+    setOpenSection(prev => prev === key ? null : key);
+  }, []);
+
+  // Exclusive accordion for itinerary days
+  const [openDay, setOpenDay] = useState<string | null>(null);
+  const toggleDay = useCallback((key: string) => {
+    setOpenDay(prev => prev === key ? null : key);
+  }, []);
+
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-primary/5">
+    <div className="min-h-screen bg-gradient-to-b from-background via-muted/5 to-primary/5">
       {/* Agency Header */}
-      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b bg-background/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
         <div className="container max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {agentProfile?.agency_logo_url ? (
@@ -1408,18 +1420,18 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               </span>
             )}
           </div>
-          <Button size="sm" variant="outline" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
+          <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
             <FileText className="mr-2 h-4 w-4" /> PDF
           </Button>
         </div>
       </header>
 
-      <div className="container max-w-5xl mx-auto px-4 py-6">
+      <div className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
         {/* Trip Overview Card */}
-        <Card className="mb-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="pt-5 pb-4">
+        <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
+          <CardContent className="pt-5 pb-5 relative">
             <h1 className="text-xl sm:text-2xl font-bold mb-3">{tripData.client_name}</h1>
-            <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
               <span className="flex items-center gap-1.5">
                 <MapPin className="h-4 w-4 text-primary" />
                 <span className="font-medium">{tripData.destination}</span>
@@ -1436,55 +1448,81 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           </CardContent>
         </Card>
 
-        {/* Mobile Quick Nav */}
-        {isMobile && (availableTabs.length > 0 || itineraryActivities.length > 0) && (
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-2 -mx-1 px-1 scrollbar-hide">
-            {availableTabs.map((type) => {
-              const Icon = SERVICE_ICONS[type];
-              return (
+        {/* Service Navigation Grid — always visible, replaces horizontal scroll */}
+        {(availableTabs.length > 0 || itineraryActivities.length > 0) && (
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Navegação rápida</h2>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+              {availableTabs.map((type) => {
+                const Icon = SERVICE_ICONS[type];
+                return (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      setOpenSection(`service-${type}`);
+                      setTimeout(() => {
+                        sectionRefs.current[type]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 100);
+                    }}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 hover:bg-primary/5 shadow-sm hover:shadow-md transition-all duration-200 group"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">{SERVICE_LABELS[type]}</span>
+                    <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">{grouped[type].length}</span>
+                  </button>
+                );
+              })}
+              {itineraryActivities.length > 0 && (
                 <button
-                  key={type}
-                  onClick={() => scrollToSection(type)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-muted/50 hover:bg-primary/10 text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0 transition-colors"
+                  onClick={() => {
+                    setOpenSection('itinerary');
+                    setTimeout(() => {
+                      itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 hover:bg-primary/5 shadow-sm hover:shadow-md transition-all duration-200 group"
                 >
-                  <Icon className="h-3.5 w-3.5" />
-                  {SERVICE_LABELS[type]}
-                  <span className="bg-primary/10 text-primary px-1 py-0.5 rounded-full text-[10px] font-semibold">{grouped[type].length}</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                    <CalendarDays className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">Roteiro</span>
+                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
+                    {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
+                  </span>
                 </button>
-              );
-            })}
-            {itineraryActivities.length > 0 && (
-              <button
-                onClick={() => scrollToSection("itinerary")}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-muted/50 hover:bg-primary/10 text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0 transition-colors"
-              >
-                <CalendarDays className="h-3.5 w-3.5" />
-                Roteiro
-              </button>
-            )}
+              )}
+            </div>
           </div>
         )}
 
-        {/* Collapsible Service Sections */}
-        <div className="space-y-3">
-          {services.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Nenhum serviço adicionado ainda
-              </CardContent>
-            </Card>
-          ) : (
-            availableTabs.map((type, index) => (
-              <CollapsibleServiceSection
-                key={type}
-                type={type}
-                services={grouped[type]}
-                defaultOpen={index === 0}
-                sectionRef={(el) => { sectionRefs.current[type] = el; }}
-              />
-            ))
-          )}
-        </div>
+        {/* Services Section */}
+        {services.length > 0 && (
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Serviços da viagem</h2>
+            <div className="space-y-3">
+              {availableTabs.map((type) => (
+                <ServiceSection
+                  key={type}
+                  type={type}
+                  services={grouped[type]}
+                  isOpen={openSection === `service-${type}`}
+                  onToggle={() => toggleSection(`service-${type}`)}
+                  sectionRef={(el) => { sectionRefs.current[type] = el; }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {services.length === 0 && (
+          <Card className="shadow-sm">
+            <CardContent className="py-8 text-center text-muted-foreground">
+              Nenhum serviço adicionado ainda
+            </CardContent>
+          </Card>
+        )}
 
         {/* Day-by-Day Itinerary Section */}
         {itineraryActivities.length > 0 && (() => {
@@ -1498,110 +1536,103 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           const sortedDates = Object.keys(grouped_days).sort();
 
           return (
-            <div ref={itineraryRef} className="mt-6" style={{ scrollMarginTop: '70px' }}>
-              <Collapsible defaultOpen>
-                <CollapsibleTrigger asChild>
-                  <button className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-                        <CalendarDays className="h-4.5 w-4.5 text-primary" />
-                      </div>
-                      <span className="font-semibold text-sm">Roteiro da Viagem</span>
-                      <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
-                        {sortedDates.length} dias
-                      </span>
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="space-y-3">
-                    {sortedDates.map((dateStr, idx) => {
-                      const [y,m,d] = dateStr.split("-").map(Number);
-                      const dayDate = new Date(y, m-1, d);
-                      const dayActivities = grouped_days[dateStr];
-                      const periods = ["morning","afternoon","evening"] as const;
+            <div ref={itineraryRef} style={{ scrollMarginTop: '70px' }}>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Roteiro dia a dia</h2>
+              <div className="space-y-3">
+                {sortedDates.map((dateStr, idx) => {
+                  const [y,m,d] = dateStr.split("-").map(Number);
+                  const dayDate = new Date(y, m-1, d);
+                  const dayActivities = grouped_days[dateStr];
+                  const periods = ["morning","afternoon","evening"] as const;
+                  const isDayOpen = openDay === dateStr;
 
-                      return (
-                        <Collapsible key={dateStr} defaultOpen={idx === 0} className="group">
-                          <Card className="border-border/50 overflow-hidden">
-                            <CollapsibleTrigger asChild>
-                              <button className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
-                                    {idx + 1}
-                                  </div>
-                                  <div className="text-left">
-                                    <h4 className="font-semibold text-sm">Dia {idx + 1}</h4>
-                                    <p className="text-xs text-muted-foreground">
-                                      {format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-                                    </p>
-                                  </div>
+                  return (
+                    <div key={dateStr} className="rounded-xl overflow-hidden border border-border/60 shadow-sm bg-card transition-shadow hover:shadow-md">
+                      <button
+                        onClick={() => toggleDay(dateStr)}
+                        className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">
+                            {idx + 1}
+                          </div>
+                          <div className="text-left">
+                            <h4 className="font-semibold text-sm">Dia {idx + 1}</h4>
+                            <p className="text-xs text-muted-foreground capitalize">
+                              {format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", isDayOpen && "rotate-180")} />
+                      </button>
+                      <div
+                        className={cn(
+                          "overflow-hidden transition-all duration-300 ease-in-out",
+                          isDayOpen ? "max-h-[3000px] opacity-100" : "max-h-0 opacity-0"
+                        )}
+                      >
+                        <div className="px-4 pb-4 pt-0">
+                          {periods.map(period => {
+                            const periodActs = dayActivities.filter((a: any) => a.period === period);
+                            if (periodActs.length === 0) return null;
+                            const PIcon = PERIOD_ICONS[period];
+                            return (
+                              <div key={period} className="mb-3 last:mb-0">
+                                <div className="flex items-center gap-2 mb-1.5">
+                                  <PIcon className={cn("h-3.5 w-3.5", period === "morning" ? "text-amber-500" : period === "afternoon" ? "text-orange-500" : "text-indigo-400")} />
+                                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{PERIOD_LABELS[period]}</span>
                                 </div>
-                                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                              </button>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <CardContent className="px-4 pb-4 pt-0">
-                                {periods.map(period => {
-                                  const periodActs = dayActivities.filter((a: any) => a.period === period);
-                                  if (periodActs.length === 0) return null;
-                                  const PIcon = PERIOD_ICONS[period];
-                                  return (
-                                    <div key={period} className="mb-3 last:mb-0">
-                                      <div className="flex items-center gap-2 mb-1.5">
-                                        <PIcon className={cn("h-3.5 w-3.5", period === "morning" ? "text-amber-500" : period === "afternoon" ? "text-orange-500" : "text-indigo-400")} />
-                                        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{PERIOD_LABELS[period]}</span>
-                                      </div>
-                                      <div className="space-y-2 ml-5">
-                                        {periodActs.map((act: any) => (
-                                          <div key={act.id} className="border-l-2 border-primary/20 pl-3 py-1">
-                                            <p className="text-sm font-medium">{act.title}</p>
-                                            {act.description && <p className="text-xs text-muted-foreground">{act.description}</p>}
-                                            {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
-                                            {act.location && <p className="text-xs text-muted-foreground">📍 {act.location}</p>}
-                                            {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
-                                          </div>
-                                        ))}
-                                      </div>
+                                <div className="space-y-2 ml-5">
+                                  {periodActs.map((act: any) => (
+                                    <div key={act.id} className="border-l-2 border-primary/20 pl-3 py-1">
+                                      <p className="text-sm font-medium">{act.title}</p>
+                                      {act.description && <p className="text-xs text-muted-foreground">{act.description}</p>}
+                                      {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
+                                      {act.location && <p className="text-xs text-muted-foreground">📍 {act.location}</p>}
+                                      {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
                                     </div>
-                                  );
-                                })}
-                              </CardContent>
-                            </CollapsibleContent>
-                          </Card>
-                        </Collapsible>
-                      );
-                    })}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })()}
 
         {/* Agent Footer */}
-        <div className="mt-12 pt-6 border-t">
+        <div className="mt-8 pt-6 border-t">
           {agentProfile ? (
-            <div className="flex items-center justify-center gap-3">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={agentProfile.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {agentProfile.name?.charAt(0).toUpperCase() || '?'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-left">
-                <p className="font-semibold">{agentProfile.name}</p>
-                {agentProfile.phone && <p className="text-sm text-muted-foreground">📱 {agentProfile.phone}</p>}
-                {agentProfile.agency_name && <p className="text-sm text-muted-foreground">{agentProfile.agency_name}</p>}
-              </div>
-            </div>
+            <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-border/40 shadow-sm">
+              <CardContent className="py-5">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-14 w-14 border-2 border-primary/20">
+                    <AvatarImage src={agentProfile.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                      {agentProfile.name?.charAt(0).toUpperCase() || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-left">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Seu agente de viagens</p>
+                    <p className="font-bold text-base">{agentProfile.name}</p>
+                    {agentProfile.phone && <p className="text-sm text-muted-foreground">📱 {agentProfile.phone}</p>}
+                    {agentProfile.agency_name && <p className="text-sm text-muted-foreground">{agentProfile.agency_name}</p>}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             <p className="text-center text-sm text-muted-foreground">Agentes de Sonhos • Sua viagem começa aqui</p>
           )}
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-6 pb-4 text-center">
           <p className="text-xs text-muted-foreground/60">
             Desenvolvido por <span className="font-medium text-muted-foreground/80">Nobre Digital</span>
           </p>
