@@ -232,8 +232,20 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
     });
     setEditingActivity(null);
   };
+  const handleAIGenerated = async (newActivities: CreateActivityData[], mode: "replace" | "append") => {
+    if (mode === "replace") {
+      // Delete all existing activities
+      for (const act of activities) {
+        await deleteActivity(act.id);
+      }
+    }
+    // Add all new activities
+    for (const act of newActivities) {
+      await addActivity(act);
+    }
+  };
 
-  if (isLoading) {
+
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-8">
