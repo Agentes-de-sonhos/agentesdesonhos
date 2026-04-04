@@ -400,9 +400,10 @@ export async function generateTripPDF(
             slug: voucherAccess.slug,
             share_token: voucherAccess.shareToken,
             password: voucherAccess.password,
+            expires_in: 604800, // 7 days
           });
         } else {
-          url = await getSignedVoucherUrl(file.path);
+          url = await getSignedVoucherUrl(file.path, 604800); // 7 days
         }
         if (url) signedUrlCache[file.path] = url;
       } catch {
