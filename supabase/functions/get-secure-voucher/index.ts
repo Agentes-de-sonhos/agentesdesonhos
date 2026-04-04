@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
       auth: { persistSession: false },
     });
 
-    const { file_path, trip_id, password, share_token, slug } = await req.json();
+    const { file_path, trip_id, password, share_token, slug, expires_in } = await req.json();
 
     if (!file_path) {
       return new Response(
