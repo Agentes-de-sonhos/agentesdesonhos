@@ -375,42 +375,31 @@ export async function generateTripPDF(
   const endDate = parseLocal(trip.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-  // Pre-resolve signed URLs for all attachments
+  // Build permanent voucher URLs using the serve-voucher proxy
   toast.info("Preparando PDF com documentos...");
-  const signedUrlCache: Record<string, string> = {};
+  const permanentUrlCache: Record<string, string> = {};
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const shareToken = (trip as any).share_token;
 
-  const allFiles: { path: string }[] = [];
-  for (const service of (trip.services || [])) {
-    if (service.attachments?.length > 0) {
-      for (const att of service.attachments) {
-        if (att.url) allFiles.push({ path: att.url });
+  if (supabaseUrl && shareToken) {
+    for (const service of (trip.services || [])) {
+      const files: { path: string }[] = [];
+      if (service.attachments?.length > 0) {
+        for (const att of service.attachments) {
+          if (att.url) files.push({ path: att.url });
+        }
+      } else if (service.voucher_url) {
+        files.push({ path: service.voucher_url });
       }
-    } else if (service.voucher_url) {
-      allFiles.push({ path: service.voucher_url });
+      for (const file of files) {
+        const cleanPath = extractVoucherPath(file.path);
+        if (cleanPath) {
+          const url = `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(cleanPath)}`;
+          permanentUrlCache[file.path] = url;
+        }
+      }
     }
   }
-
-  // Resolve all URLs in parallel
-  await Promise.all(
-    allFiles.map(async (file) => {
-      try {
-        let url: string | null = null;
-        if (voucherAccess?.mode === "public") {
-          url = await getPublicVoucherUrl(file.path, {
-            slug: voucherAccess.slug,
-            share_token: voucherAccess.shareToken,
-            password: voucherAccess.password,
-            expires_in: 604800, // 7 days
-          });
-        } else {
-          url = await getSignedVoucherUrl(file.path, 604800); // 7 days
-        }
-        if (url) signedUrlCache[file.path] = url;
-      } catch {
-        // Skip failed URLs
-      }
-    })
-  );
 
   // Group services by type
   const grouped = (trip.services || []).reduce((acc, service) => {
