@@ -464,6 +464,7 @@ function TripWalletContent() {
             {/* Day by Day Itinerary */}
             <TripItinerary
               tripId={trip.id}
+              destination={trip.destination}
               startDate={trip.start_date}
               endDate={trip.end_date}
               services={trip.services || []}
