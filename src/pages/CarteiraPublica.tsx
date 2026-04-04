@@ -96,6 +96,7 @@ export default function CarteiraPublica() {
   const [error, setError] = useState("");
   const [needsPassword, setNeedsPassword] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [usedPassword, setUsedPassword] = useState("");
 
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
 
@@ -130,6 +131,7 @@ export default function CarteiraPublica() {
     try {
       const result = await verifyTripBySlug(slug, password);
       setTripData(result);
+      setUsedPassword(password);
       setNeedsPassword(false);
     } catch (err: any) {
       if (err.message === LOCKED_MSG) {
@@ -207,7 +209,8 @@ export default function CarteiraPublica() {
     }>
       <ViagemPublica 
         preLoadedTrip={tripData.trip} 
-        preLoadedAgent={tripData.agentProfile} 
+        preLoadedAgent={tripData.agentProfile}
+        preLoadedPassword={usedPassword}
       />
     </Suspense>
   );

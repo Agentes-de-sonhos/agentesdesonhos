@@ -1236,9 +1236,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
 interface ViagemPublicaProps {
   preLoadedTrip?: Trip;
   preLoadedAgent?: AgentProfile | null;
+  preLoadedPassword?: string;
 }
 
-export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemPublicaProps = {}) {
+export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoadedPassword }: ViagemPublicaProps = {}) {
   const { token } = useParams();
   const location = useLocation();
   const preAuth = location.state as { preAuthenticated?: boolean; tripData?: Trip; agentProfile?: AgentProfile | null } | null;
@@ -1251,7 +1252,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [usedPassword, setUsedPassword] = useState("");
+  const [usedPassword, setUsedPassword] = useState(preLoadedPassword || "");
   const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
 
   // Fetch itinerary activities when trip is loaded
