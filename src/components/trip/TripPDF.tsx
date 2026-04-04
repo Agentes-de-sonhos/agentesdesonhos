@@ -272,7 +272,90 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   `;
 }
 
-export function generateTripPDF(trip: Trip, profile?: AgentProfile | null) {
+export interface ItineraryActivityForPDF {
+  id: string;
+  day_date: string;
+  period: string;
+  title: string;
+  description: string | null;
+  start_time: string | null;
+  location: string | null;
+  notes: string | null;
+  order_index: number;
+}
+
+function generateItinerarySection(activities: ItineraryActivityForPDF[]): string {
+  if (!activities || activities.length === 0) return "";
+
+  const PERIOD_LABELS: Record<string, string> = { morning: "☀️ Manhã", afternoon: "🌅 Tarde", evening: "🌙 Noite" };
+  
+  const grouped = activities.reduce((acc, act) => {
+    if (!acc[act.day_date]) acc[act.day_date] = [];
+    acc[act.day_date].push(act);
+    return acc;
+  }, {} as Record<string, ItineraryActivityForPDF[]>);
+
+  const sortedDates = Object.keys(grouped).sort();
+
+  const daysHtml = sortedDates.map((dateStr, idx) => {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const dayDate = new Date(y, m - 1, d);
+    const dayActivities = grouped[dateStr];
+    const periods = ["morning", "afternoon", "evening"];
+
+    const periodsHtml = periods.map(period => {
+      const periodActs = dayActivities.filter(a => a.period === period);
+      if (periodActs.length === 0) return "";
+      
+      const actsHtml = periodActs.map(act => `
+        <div style="border-left: 2px solid #0f766e33; padding-left: 10px; margin-bottom: 6px;">
+          <p style="font-weight: 600; font-size: 13px; margin: 0;">${act.title}</p>
+          ${act.description ? `<p style="font-size: 12px; color: #475569; margin: 2px 0 0 0;">${act.description}</p>` : ''}
+          ${act.start_time ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">⏰ ${act.start_time}</p>` : ''}
+          ${act.location ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">📍 ${act.location}</p>` : ''}
+          ${act.notes ? `<p style="font-size: 11px; color: #64748b; font-style: italic; margin: 2px 0 0 0;">${act.notes}</p>` : ''}
+        </div>
+      `).join("");
+
+      return `
+        <div style="margin-bottom: 10px;">
+          <p style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 6px 0;">
+            ${PERIOD_LABELS[period] || period}
+          </p>
+          ${actsHtml}
+        </div>
+      `;
+    }).join("");
+
+    const formattedDate = format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR });
+
+    return `
+      <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: white; page-break-inside: avoid;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0f766e20, #14b8a620); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #0f766e;">
+            ${idx + 1}
+          </div>
+          <div>
+            <p style="font-weight: 600; font-size: 14px; margin: 0;">Dia ${idx + 1}</p>
+            <p style="font-size: 12px; color: #64748b; margin: 0; text-transform: capitalize;">${formattedDate}</p>
+          </div>
+        </div>
+        ${periodsHtml}
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div style="margin-top: 32px; page-break-before: auto;">
+      <h3 style="font-size: 20px; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
+        📅 Roteiro Dia a Dia
+      </h3>
+      ${daysHtml}
+    </div>
+  `;
+}
+
+export function generateTripPDF(trip: Trip, profile?: AgentProfile | null, itineraryActivities?: ItineraryActivityForPDF[]) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const startDate = parseLocal(trip.start_date);
   const endDate = parseLocal(trip.end_date);
@@ -316,6 +399,8 @@ export function generateTripPDF(trip: Trip, profile?: AgentProfile | null) {
       </div>
     `;
   }).join("");
+
+  const itineraryHtml = generateItinerarySection(itineraryActivities || []);
 
   const html = `
     <!DOCTYPE html>
@@ -380,6 +465,9 @@ export function generateTripPDF(trip: Trip, profile?: AgentProfile | null) {
         </h3>
         
         ${servicesHtml || '<p style="text-align: center; color: #64748b; padding: 24px;">Nenhum serviço adicionado</p>'}
+
+        <!-- Itinerary -->
+        ${itineraryHtml}
 
         <!-- Footer -->
         <div style="margin-top: 40px;">
