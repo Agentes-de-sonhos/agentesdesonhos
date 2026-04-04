@@ -262,6 +262,10 @@ serve(async (req) => {
     const additionalText = additionalLines.length > 0
       ? "\n\nPREFERÊNCIAS ADICIONAIS:\n" + additionalLines.join("\n") : "";
 
+    const serviceContextText = prefs.serviceContext
+      ? "\n\n" + prefs.serviceContext + "\n\nIMPORTANTE: NÃO sugira atividades que conflitem com os serviços listados acima. Preencha apenas os períodos livres com sugestões complementares."
+      : "";
+
     const profileRules = buildProfileRules(tripType);
 
     const datesInfo: string[] = [];
