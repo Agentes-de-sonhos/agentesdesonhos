@@ -204,7 +204,8 @@ export default function CarteiraPublicaV2() {
     }>
       <ViagemPublica 
         preLoadedTrip={tripData.trip} 
-        preLoadedAgent={tripData.agentProfile} 
+        preLoadedAgent={tripData.agentProfile}
+        preLoadedPassword={usedPassword}
       />
     </Suspense>
   );
