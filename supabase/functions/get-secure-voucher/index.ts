@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
       auth: { persistSession: false },
     });
 
-    const { file_path, trip_id, password, share_token, slug } = await req.json();
+    const { file_path, trip_id, password, share_token, slug, expires_in } = await req.json();
 
     if (!file_path) {
       return new Response(
@@ -119,10 +119,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Generate signed URL (60 seconds expiry)
+    // Generate signed URL — default 120s, max 7 days (604800s)
+    const ttl = Math.min(Math.max(Number(expires_in) || 120, 60), 604800);
     const { data, error } = await adminClient.storage
       .from("vouchers")
-      .createSignedUrl(file_path, 120);
+      .createSignedUrl(file_path, ttl);
 
     if (error || !data?.signedUrl) {
       console.error("Signed URL error:", error);
