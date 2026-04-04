@@ -3,16 +3,18 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X } from "lucide-react";
+import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
 import { usePeriodImages } from "@/hooks/usePeriodImages";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
+import { AIItineraryModal } from "./AIItineraryModal";
 import type { TripService } from "@/types/trip";
 
 interface Props {
   tripId: string;
+  destination: string;
   startDate: string;
   endDate: string;
   services: TripService[];
@@ -113,12 +115,13 @@ function PeriodImageUpload({
   );
 }
 
-export function TripItinerary({ tripId, startDate, endDate, services, readOnly = false }: Props) {
+export function TripItinerary({ tripId, destination, startDate, endDate, services, readOnly = false }: Props) {
   const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading: isPeriodUploading } = usePeriodImages(tripId);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [addingFor, setAddingFor] = useState<{ dateStr: string; period: Period } | null>(null);
   const [editingActivity, setEditingActivity] = useState<ItineraryActivity | null>(null);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   const days = useMemo(() => generateDays(startDate, endDate), [startDate, endDate]);
 
@@ -229,6 +232,18 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
     });
     setEditingActivity(null);
   };
+  const handleAIGenerated = async (newActivities: CreateActivityData[], mode: "replace" | "append") => {
+    if (mode === "replace") {
+      // Delete all existing activities
+      for (const act of activities) {
+        await deleteActivity(act.id);
+      }
+    }
+    // Add all new activities
+    for (const act of newActivities) {
+      await addActivity(act);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -243,10 +258,18 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-primary" />
-          Roteiro Dia a Dia
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-primary" />
+            Roteiro Dia a Dia
+          </CardTitle>
+          {!readOnly && (
+            <Button variant="outline" size="sm" onClick={() => setAiModalOpen(true)}>
+              <Sparkles className="mr-1.5 h-4 w-4" />
+              Gerar roteiro com IA
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {days.map((day) => {
@@ -369,6 +392,17 @@ export function TripItinerary({ tripId, startDate, endDate, services, readOnly =
           );
         })}
       </CardContent>
+
+      <AIItineraryModal
+        open={aiModalOpen}
+        onOpenChange={setAiModalOpen}
+        tripId={tripId}
+        destination={destination}
+        startDate={startDate}
+        endDate={endDate}
+        existingActivitiesCount={activities.length}
+        onGenerated={handleAIGenerated}
+      />
     </Card>
   );
 }
