@@ -1403,7 +1403,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               </span>
             )}
           </div>
-          <Button size="sm" variant="outline" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities)}>
+          <Button size="sm" variant="outline" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
             <FileText className="mr-2 h-4 w-4" /> PDF
           </Button>
         </div>
