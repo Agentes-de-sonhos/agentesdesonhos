@@ -330,7 +330,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isOther = service.service_type === 'other';
 
   return (
-    <Card className="border-border/50">
+    <Card className="border-border/40 shadow-sm hover:shadow transition-shadow">
       <CardContent className="p-4">
         <h4 className="font-semibold text-sm mb-1">{title}</h4>
         {dates && (
