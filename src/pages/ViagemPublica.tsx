@@ -1431,7 +1431,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
         </Card>
 
         {/* Mobile Quick Nav */}
-        {isMobile && availableTabs.length > 1 && (
+        {isMobile && (availableTabs.length > 0 || itineraryActivities.length > 0) && (
           <div className="flex gap-2 overflow-x-auto pb-2 mb-2 -mx-1 px-1 scrollbar-hide">
             {availableTabs.map((type) => {
               const Icon = SERVICE_ICONS[type];
@@ -1447,6 +1447,15 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
                 </button>
               );
             })}
+            {itineraryActivities.length > 0 && (
+              <button
+                onClick={() => scrollToSection("itinerary")}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-muted/50 hover:bg-primary/10 text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0 transition-colors"
+              >
+                <CalendarDays className="h-3.5 w-3.5" />
+                Roteiro
+              </button>
+            )}
           </div>
         )}
 
