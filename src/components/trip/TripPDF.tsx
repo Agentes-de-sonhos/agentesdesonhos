@@ -546,11 +546,6 @@ export async function generateTripPDF(
           <!-- Agent Signature -->
           ${generateAgentSignature(profile || null)}
 
-          ${Object.keys(signedUrlCache).length > 0 ? `
-          <p style="text-align: center; font-size: 10px; color: #94a3b8; margin-top: 16px;">
-            ⚠️ Os links dos documentos anexados expiram em 2 minutos. Salve o PDF e abra os links logo após a geração.
-          </p>
-          ` : ''}
         </div>
       </div>
     </body>
