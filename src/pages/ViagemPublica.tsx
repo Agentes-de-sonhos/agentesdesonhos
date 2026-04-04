@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Wallet, MapPin, Calendar, FileText, Loader2, Lock, Plane, Hotel, Car, Bus,
   Ticket, Shield, Ship, TrainFront, Download, ExternalLink, MessageSquare,
-  ChevronDown
+  ChevronDown, Sun, Sunset, Moon, CalendarDays
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -1246,16 +1247,36 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
   const [tripData, setTripData] = useState<Trip | null>(preLoadedTrip || preAuth?.tripData || null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preLoadedAgent ?? preAuth?.agentProfile ?? null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const itineraryRef = useRef<HTMLDivElement | null>(null);
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [usedPassword, setUsedPassword] = useState("");
+  const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
 
-  const scrollToSection = useCallback((type: TripServiceType) => {
+  // Fetch itinerary activities when trip is loaded
+  useEffect(() => {
+    if (!tripData?.id) return;
+    const fetchItinerary = async () => {
+      const { data } = await supabase
+        .from("trip_itinerary_activities")
+        .select("*")
+        .eq("trip_id", tripData.id)
+        .order("day_date", { ascending: true })
+        .order("order_index", { ascending: true });
+      if (data) setItineraryActivities(data);
+    };
+    fetchItinerary();
+  }, [tripData?.id]);
+
+  const scrollToSection = useCallback((type: TripServiceType | "itinerary") => {
+    if (type === "itinerary") {
+      itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     const el = sectionRefs.current[type];
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Also open the collapsible if it's closed - we trigger a click on the trigger
       const trigger = el.querySelector('[data-state="closed"]');
       if (trigger) (trigger as HTMLElement).click();
     }
@@ -1381,7 +1402,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
               </span>
             )}
           </div>
-          <Button size="sm" variant="outline" onClick={() => generateTripPDF(tripData, agentProfile)}>
+          <Button size="sm" variant="outline" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities)}>
             <FileText className="mr-2 h-4 w-4" /> PDF
           </Button>
         </div>
@@ -1410,7 +1431,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
         </Card>
 
         {/* Mobile Quick Nav */}
-        {isMobile && availableTabs.length > 1 && (
+        {isMobile && (availableTabs.length > 0 || itineraryActivities.length > 0) && (
           <div className="flex gap-2 overflow-x-auto pb-2 mb-2 -mx-1 px-1 scrollbar-hide">
             {availableTabs.map((type) => {
               const Icon = SERVICE_ICONS[type];
@@ -1426,6 +1447,15 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
                 </button>
               );
             })}
+            {itineraryActivities.length > 0 && (
+              <button
+                onClick={() => scrollToSection("itinerary")}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-muted/50 hover:bg-primary/10 text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0 transition-colors"
+              >
+                <CalendarDays className="h-3.5 w-3.5" />
+                Roteiro
+              </button>
+            )}
           </div>
         )}
 
@@ -1449,6 +1479,92 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
             ))
           )}
         </div>
+
+        {/* Day-by-Day Itinerary Section */}
+        {itineraryActivities.length > 0 && (() => {
+          const PERIOD_ICONS: Record<string, typeof Sun> = { morning: Sun, afternoon: Sunset, evening: Moon };
+          const PERIOD_LABELS: Record<string, string> = { morning: "Manhã", afternoon: "Tarde", evening: "Noite" };
+          const grouped_days = itineraryActivities.reduce((acc: Record<string, any[]>, act: any) => {
+            if (!acc[act.day_date]) acc[act.day_date] = [];
+            acc[act.day_date].push(act);
+            return acc;
+          }, {} as Record<string, any[]>);
+          const sortedDates = Object.keys(grouped_days).sort();
+
+          return (
+            <div ref={itineraryRef} className="mt-6" style={{ scrollMarginTop: '70px' }}>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger asChild>
+                  <button className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                        <CalendarDays className="h-4.5 w-4.5 text-primary" />
+                      </div>
+                      <span className="font-semibold text-sm">Roteiro da Viagem</span>
+                      <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                        {sortedDates.length} dias
+                      </span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-4">
+                    {sortedDates.map((dateStr, idx) => {
+                      const [y,m,d] = dateStr.split("-").map(Number);
+                      const dayDate = new Date(y, m-1, d);
+                      const dayActivities = grouped_days[dateStr];
+                      const periods = ["morning","afternoon","evening"] as const;
+
+                      return (
+                        <Card key={dateStr} className="border-border/50">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
+                                {idx + 1}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-sm">Dia {idx + 1}</h4>
+                                <p className="text-xs text-muted-foreground">
+                                  {format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {periods.map(period => {
+                              const periodActs = dayActivities.filter((a: any) => a.period === period);
+                              if (periodActs.length === 0) return null;
+                              const PIcon = PERIOD_ICONS[period];
+                              return (
+                                <div key={period} className="mb-3 last:mb-0">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <PIcon className={cn("h-3.5 w-3.5", period === "morning" ? "text-amber-500" : period === "afternoon" ? "text-orange-500" : "text-indigo-400")} />
+                                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{PERIOD_LABELS[period]}</span>
+                                  </div>
+                                  <div className="space-y-2 ml-5">
+                                    {periodActs.map((act: any) => (
+                                      <div key={act.id} className="border-l-2 border-primary/20 pl-3 py-1">
+                                        <p className="text-sm font-medium">{act.title}</p>
+                                        {act.description && <p className="text-xs text-muted-foreground">{act.description}</p>}
+                                        {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
+                                        {act.location && <p className="text-xs text-muted-foreground">📍 {act.location}</p>}
+                                        {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          );
+        })()}
 
         {/* Agent Footer */}
         <div className="mt-12 pt-6 border-t">

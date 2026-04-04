@@ -16,7 +16,8 @@ import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { TripWalletList } from "@/components/trip/TripWalletList";
 import { TripEditForm } from "@/components/trip/TripEditForm";
 import { TripEditHistory } from "@/components/trip/TripEditHistory";
-import { generateTripPDF } from "@/components/trip/TripPDF";
+import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
+import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
@@ -64,6 +65,8 @@ function TripWalletContent() {
     trip, addService, updateService, deleteService, uploadVoucher, 
     replaceVoucher, removeVoucher, isAddingService, isUpdatingService, editHistory 
   } = useTrip(id && id !== "nova" ? id : undefined);
+
+  const { activities: itineraryActivities } = useItineraryActivities(id && id !== "nova" ? id : undefined);
 
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [editingService, setEditingService] = useState<TripService | null>(null);
@@ -273,7 +276,7 @@ function TripWalletContent() {
   };
 
   const handleGeneratePDF = () => {
-    if (trip) generateTripPDF(trip, agentProfile);
+    if (trip) generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[]);
   };
 
   // Listing view
