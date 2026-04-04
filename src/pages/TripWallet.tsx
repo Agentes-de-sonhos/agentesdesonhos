@@ -276,7 +276,7 @@ function TripWalletContent() {
   };
 
   const handleGeneratePDF = () => {
-    if (trip) generateTripPDF(trip, agentProfile);
+    if (trip) generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[]);
   };
 
   // Listing view
