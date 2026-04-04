@@ -17,6 +17,7 @@ export interface ItineraryActivity {
   document_urls: string[];
   maps_url: string | null;
   order_index: number;
+  origin: "servico" | "ia" | "manual";
   created_at: string;
   updated_at: string;
 }
