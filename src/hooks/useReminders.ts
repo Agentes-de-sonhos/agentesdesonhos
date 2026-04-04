@@ -106,11 +106,12 @@ export function useReminders() {
   // Calculate days remaining for each reminder
   const remindersWithDays = reminders.map((reminder) => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tripDate = new Date(reminder.trip?.start_date || "");
-    tripDate.setHours(0, 0, 0, 0);
-    const diffTime = tripDate.getTime() - today.getTime();
-    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dateStr = reminder.trip?.start_date || "";
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const tripDate = new Date(y, m - 1, d);
+    const diffTime = tripDate.getTime() - todayLocal.getTime();
+    const daysRemaining = Math.round(diffTime / (1000 * 60 * 60 * 24));
     return { ...reminder, daysRemaining };
   });
 
