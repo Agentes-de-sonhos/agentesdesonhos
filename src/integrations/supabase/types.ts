@@ -7971,6 +7971,7 @@ export type Database = {
         Returns: boolean
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
+      check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
       generate_certificate_number: { Args: never; Returns: string }
       generate_itinerary_access_code: { Args: never; Returns: string }
       generate_public_access_code: { Args: never; Returns: string }
