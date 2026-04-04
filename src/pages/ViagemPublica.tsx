@@ -27,6 +27,20 @@ const SERVICE_ICONS: Record<TripServiceType, any> = {
   attraction: Ticket, insurance: Shield, cruise: Ship, train: TrainFront, other: FileText,
 };
 
+// Pastel color system per service category (bg, icon darker shade, border)
+const SERVICE_COLORS: Record<TripServiceType | 'itinerary', { bg: string; icon: string; badge: string; border: string; hoverBg: string }> = {
+  flight:     { bg: 'bg-[#D6EAF8]', icon: 'text-[#2E86C1]', badge: 'bg-[#D6EAF8] text-[#2E86C1]', border: 'border-[#D6EAF8]/80', hoverBg: 'hover:bg-[#D6EAF8]/30' },
+  train:      { bg: 'bg-[#D6EAF8]', icon: 'text-[#2874A6]', badge: 'bg-[#D6EAF8] text-[#2874A6]', border: 'border-[#D6EAF8]/80', hoverBg: 'hover:bg-[#D6EAF8]/30' },
+  hotel:      { bg: 'bg-[#E8DAEF]', icon: 'text-[#7D3C98]', badge: 'bg-[#E8DAEF] text-[#7D3C98]', border: 'border-[#E8DAEF]/80', hoverBg: 'hover:bg-[#E8DAEF]/30' },
+  attraction: { bg: 'bg-[#FDEBD0]', icon: 'text-[#CA6F1E]', badge: 'bg-[#FDEBD0] text-[#CA6F1E]', border: 'border-[#FDEBD0]/80', hoverBg: 'hover:bg-[#FDEBD0]/30' },
+  car_rental: { bg: 'bg-[#D5F5E3]', icon: 'text-[#1E8449]', badge: 'bg-[#D5F5E3] text-[#1E8449]', border: 'border-[#D5F5E3]/80', hoverBg: 'hover:bg-[#D5F5E3]/30' },
+  insurance:  { bg: 'bg-[#D4E6F1]', icon: 'text-[#2471A3]', badge: 'bg-[#D4E6F1] text-[#2471A3]', border: 'border-[#D4E6F1]/80', hoverBg: 'hover:bg-[#D4E6F1]/30' },
+  transfer:   { bg: 'bg-[#D1F2EB]', icon: 'text-[#148F77]', badge: 'bg-[#D1F2EB] text-[#148F77]', border: 'border-[#D1F2EB]/80', hoverBg: 'hover:bg-[#D1F2EB]/30' },
+  cruise:     { bg: 'bg-[#D4E6F8]', icon: 'text-[#1A5276]', badge: 'bg-[#D4E6F8] text-[#1A5276]', border: 'border-[#D4E6F8]/80', hoverBg: 'hover:bg-[#D4E6F8]/30' },
+  other:      { bg: 'bg-[#ECECEC]', icon: 'text-[#5D6D7E]', badge: 'bg-[#ECECEC] text-[#5D6D7E]', border: 'border-[#ECECEC]/80', hoverBg: 'hover:bg-[#ECECEC]/30' },
+  itinerary:  { bg: 'bg-[#FCF3CF]', icon: 'text-[#B7950B]', badge: 'bg-[#FCF3CF] text-[#B7950B]', border: 'border-[#FCF3CF]/80', hoverBg: 'hover:bg-[#FCF3CF]/30' },
+};
+
 const SERVICE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagens", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
