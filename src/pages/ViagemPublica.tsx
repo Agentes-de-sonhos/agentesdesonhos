@@ -1480,6 +1480,92 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
           )}
         </div>
 
+        {/* Day-by-Day Itinerary Section */}
+        {itineraryActivities.length > 0 && (() => {
+          const PERIOD_ICONS: Record<string, typeof Sun> = { morning: Sun, afternoon: Sunset, evening: Moon };
+          const PERIOD_LABELS: Record<string, string> = { morning: "Manhã", afternoon: "Tarde", evening: "Noite" };
+          const grouped_days = itineraryActivities.reduce((acc: Record<string, any[]>, act: any) => {
+            if (!acc[act.day_date]) acc[act.day_date] = [];
+            acc[act.day_date].push(act);
+            return acc;
+          }, {} as Record<string, any[]>);
+          const sortedDates = Object.keys(grouped_days).sort();
+
+          return (
+            <div ref={itineraryRef} className="mt-6" style={{ scrollMarginTop: '70px' }}>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger asChild>
+                  <button className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                        <CalendarDays className="h-4.5 w-4.5 text-primary" />
+                      </div>
+                      <span className="font-semibold text-sm">Roteiro da Viagem</span>
+                      <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                        {sortedDates.length} dias
+                      </span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-4">
+                    {sortedDates.map((dateStr, idx) => {
+                      const [y,m,d] = dateStr.split("-").map(Number);
+                      const dayDate = new Date(y, m-1, d);
+                      const dayActivities = grouped_days[dateStr];
+                      const periods = ["morning","afternoon","evening"] as const;
+
+                      return (
+                        <Card key={dateStr} className="border-border/50">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
+                                {idx + 1}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-sm">Dia {idx + 1}</h4>
+                                <p className="text-xs text-muted-foreground">
+                                  {format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {periods.map(period => {
+                              const periodActs = dayActivities.filter((a: any) => a.period === period);
+                              if (periodActs.length === 0) return null;
+                              const PIcon = PERIOD_ICONS[period];
+                              return (
+                                <div key={period} className="mb-3 last:mb-0">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <PIcon className={cn("h-3.5 w-3.5", period === "morning" ? "text-amber-500" : period === "afternoon" ? "text-orange-500" : "text-indigo-400")} />
+                                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{PERIOD_LABELS[period]}</span>
+                                  </div>
+                                  <div className="space-y-2 ml-5">
+                                    {periodActs.map((act: any) => (
+                                      <div key={act.id} className="border-l-2 border-primary/20 pl-3 py-1">
+                                        <p className="text-sm font-medium">{act.title}</p>
+                                        {act.description && <p className="text-xs text-muted-foreground">{act.description}</p>}
+                                        {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
+                                        {act.location && <p className="text-xs text-muted-foreground">📍 {act.location}</p>}
+                                        {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          );
+        })()}
+
         {/* Agent Footer */}
         <div className="mt-12 pt-6 border-t">
           {agentProfile ? (
