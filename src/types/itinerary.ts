@@ -32,6 +32,7 @@ export interface AdditionalPreferences {
   localOrTouristy?: 'local' | 'touristy' | 'mix';
   exclusiveOrPopular?: 'exclusive' | 'popular' | 'mix';
   mobilityLimitations?: string;
+  serviceContext?: string;
 }
 
 export interface ItineraryFormData {
