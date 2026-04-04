@@ -1510,7 +1510,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {sortedDates.map((dateStr, idx) => {
                       const [y,m,d] = dateStr.split("-").map(Number);
                       const dayDate = new Date(y, m-1, d);
@@ -1518,46 +1518,54 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       const periods = ["morning","afternoon","evening"] as const;
 
                       return (
-                        <Card key={dateStr} className="border-border/50">
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2 mb-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
-                                {idx + 1}
-                              </div>
-                              <div>
-                                <h4 className="font-semibold text-sm">Dia {idx + 1}</h4>
-                                <p className="text-xs text-muted-foreground">
-                                  {format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            {periods.map(period => {
-                              const periodActs = dayActivities.filter((a: any) => a.period === period);
-                              if (periodActs.length === 0) return null;
-                              const PIcon = PERIOD_ICONS[period];
-                              return (
-                                <div key={period} className="mb-3 last:mb-0">
-                                  <div className="flex items-center gap-2 mb-1.5">
-                                    <PIcon className={cn("h-3.5 w-3.5", period === "morning" ? "text-amber-500" : period === "afternoon" ? "text-orange-500" : "text-indigo-400")} />
-                                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{PERIOD_LABELS[period]}</span>
+                        <Collapsible key={dateStr} defaultOpen={idx === 0} className="group">
+                          <Card className="border-border/50 overflow-hidden">
+                            <CollapsibleTrigger asChild>
+                              <button className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
+                                    {idx + 1}
                                   </div>
-                                  <div className="space-y-2 ml-5">
-                                    {periodActs.map((act: any) => (
-                                      <div key={act.id} className="border-l-2 border-primary/20 pl-3 py-1">
-                                        <p className="text-sm font-medium">{act.title}</p>
-                                        {act.description && <p className="text-xs text-muted-foreground">{act.description}</p>}
-                                        {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
-                                        {act.location && <p className="text-xs text-muted-foreground">📍 {act.location}</p>}
-                                        {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
-                                      </div>
-                                    ))}
+                                  <div className="text-left">
+                                    <h4 className="font-semibold text-sm">Dia {idx + 1}</h4>
+                                    <p className="text-xs text-muted-foreground">
+                                      {format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                                    </p>
                                   </div>
                                 </div>
-                              );
-                            })}
-                          </CardContent>
-                        </Card>
+                                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                              </button>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <CardContent className="px-4 pb-4 pt-0">
+                                {periods.map(period => {
+                                  const periodActs = dayActivities.filter((a: any) => a.period === period);
+                                  if (periodActs.length === 0) return null;
+                                  const PIcon = PERIOD_ICONS[period];
+                                  return (
+                                    <div key={period} className="mb-3 last:mb-0">
+                                      <div className="flex items-center gap-2 mb-1.5">
+                                        <PIcon className={cn("h-3.5 w-3.5", period === "morning" ? "text-amber-500" : period === "afternoon" ? "text-orange-500" : "text-indigo-400")} />
+                                        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{PERIOD_LABELS[period]}</span>
+                                      </div>
+                                      <div className="space-y-2 ml-5">
+                                        {periodActs.map((act: any) => (
+                                          <div key={act.id} className="border-l-2 border-primary/20 pl-3 py-1">
+                                            <p className="text-sm font-medium">{act.title}</p>
+                                            {act.description && <p className="text-xs text-muted-foreground">{act.description}</p>}
+                                            {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
+                                            {act.location && <p className="text-xs text-muted-foreground">📍 {act.location}</p>}
+                                            {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </CardContent>
+                            </CollapsibleContent>
+                          </Card>
+                        </Collapsible>
                       );
                     })}
                   </div>
