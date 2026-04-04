@@ -1254,11 +1254,29 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
   const [usedPassword, setUsedPassword] = useState("");
   const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
 
-  const scrollToSection = useCallback((type: TripServiceType) => {
+  // Fetch itinerary activities when trip is loaded
+  useEffect(() => {
+    if (!tripData?.id) return;
+    const fetchItinerary = async () => {
+      const { data } = await supabase
+        .from("trip_itinerary_activities")
+        .select("*")
+        .eq("trip_id", tripData.id)
+        .order("day_date", { ascending: true })
+        .order("order_index", { ascending: true });
+      if (data) setItineraryActivities(data);
+    };
+    fetchItinerary();
+  }, [tripData?.id]);
+
+  const scrollToSection = useCallback((type: TripServiceType | "itinerary") => {
+    if (type === "itinerary") {
+      itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     const el = sectionRefs.current[type];
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Also open the collapsible if it's closed - we trigger a click on the trigger
       const trigger = el.querySelector('[data-state="closed"]');
       if (trigger) (trigger as HTMLElement).click();
     }
