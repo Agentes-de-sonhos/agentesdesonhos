@@ -294,21 +294,22 @@ function ServiceSection({
 }) {
   const Icon = SERVICE_ICONS[type];
   const label = SERVICE_LABELS[type];
+  const colors = SERVICE_COLORS[type];
 
   return (
     <div ref={sectionRef} data-service-type={type} style={{ scrollMarginTop: '70px' }}>
-      <div className="rounded-xl overflow-hidden border border-border/60 shadow-sm bg-card transition-shadow hover:shadow-md">
+      <div className={cn("rounded-xl overflow-hidden border shadow-sm bg-card transition-shadow hover:shadow-md", colors.border)}>
         <button
           onClick={onToggle}
-          className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/40 transition-colors"
+          className={cn("w-full flex items-center justify-between px-4 py-3.5 transition-colors", colors.hoverBg)}
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shrink-0">
-              <Icon className="h-5 w-5 text-primary" />
+            <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl shrink-0", colors.bg)}>
+              <Icon className={cn("h-5 w-5", colors.icon)} />
             </div>
             <div className="text-left">
               <span className="font-semibold text-sm block">{label}</span>
-              <span className="text-[11px] text-muted-foreground">{services.length} {services.length === 1 ? 'item' : 'itens'}</span>
+              <span className={cn("text-[11px] px-2 py-0.5 rounded-full font-medium", colors.badge)}>{services.length} {services.length === 1 ? 'item' : 'itens'}</span>
             </div>
           </div>
           <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", isOpen && "rotate-180")} />
