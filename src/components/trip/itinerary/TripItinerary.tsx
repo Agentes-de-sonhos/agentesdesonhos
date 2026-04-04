@@ -392,6 +392,17 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
           );
         })}
       </CardContent>
+
+      <AIItineraryModal
+        open={aiModalOpen}
+        onOpenChange={setAiModalOpen}
+        tripId={tripId}
+        destination={destination}
+        startDate={startDate}
+        endDate={endDate}
+        existingActivitiesCount={activities.length}
+        onGenerated={handleAIGenerated}
+      />
     </Card>
   );
 }
