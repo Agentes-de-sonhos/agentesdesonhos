@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
-import { getSignedVoucherUrl, getPublicVoucherUrl, extractVoucherPath } from "@/lib/secureVoucher";
+import { extractVoucherPath } from "@/lib/secureVoucher";
 import { toast } from "sonner";
 
 export interface VoucherAccessOptions {
