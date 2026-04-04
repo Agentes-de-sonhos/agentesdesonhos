@@ -220,6 +220,11 @@ serve(async (req) => {
       if (!mlCheck.valid) return validationError(mlCheck.error, corsHeaders);
       prefs.mobilityLimitations = mlCheck.value;
     }
+    if (rawPrefs.serviceContext) {
+      const scCheck = validateString(rawPrefs.serviceContext, "Contexto de serviços", 0, 5000);
+      if (!scCheck.valid) return validationError(scCheck.error, corsHeaders);
+      prefs.serviceContext = scCheck.value;
+    }
 
     // --- BUILD AI REQUEST ---
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
