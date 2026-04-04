@@ -1236,9 +1236,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
 interface ViagemPublicaProps {
   preLoadedTrip?: Trip;
   preLoadedAgent?: AgentProfile | null;
+  preLoadedPassword?: string;
 }
 
-export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemPublicaProps = {}) {
+export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoadedPassword }: ViagemPublicaProps = {}) {
   const { token } = useParams();
   const location = useLocation();
   const preAuth = location.state as { preAuthenticated?: boolean; tripData?: Trip; agentProfile?: AgentProfile | null } | null;
