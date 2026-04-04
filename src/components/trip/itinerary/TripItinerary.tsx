@@ -3,12 +3,13 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X } from "lucide-react";
+import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
 import { usePeriodImages } from "@/hooks/usePeriodImages";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
+import { AIItineraryModal } from "./AIItineraryModal";
 import type { TripService } from "@/types/trip";
 
 interface Props {
