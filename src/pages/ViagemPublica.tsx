@@ -1499,6 +1499,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               })}
               {itineraryActivities.length > 0 && (() => {
                 const itColors = SERVICE_COLORS.itinerary;
+                const isActive = openSection === 'itinerary';
                 return (
                   <button
                     onClick={() => {
@@ -1507,7 +1508,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                         itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }, 100);
                     }}
-                    className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all duration-200 group", itColors.border, itColors.hoverBg)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
+                      isActive ? cn(itColors.activeBorder, itColors.activeGlow, "shadow-md") : cn(itColors.border, "hover:shadow-md"),
+                      itColors.hoverBg
+                    )}
                   >
                     <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", itColors.bg)}>
                       <CalendarDays className={cn("h-5 w-5", itColors.icon)} />
