@@ -1247,10 +1247,12 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent }: ViagemP
   const [tripData, setTripData] = useState<Trip | null>(preLoadedTrip || preAuth?.tripData || null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preLoadedAgent ?? preAuth?.agentProfile ?? null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const itineraryRef = useRef<HTMLDivElement | null>(null);
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [usedPassword, setUsedPassword] = useState("");
+  const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
 
   const scrollToSection = useCallback((type: TripServiceType) => {
     const el = sectionRefs.current[type];
