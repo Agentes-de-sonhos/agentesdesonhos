@@ -419,14 +419,14 @@ export async function generateTripPDF(
       let attachmentsHtml = '';
       if (service.attachments?.length > 0) {
         attachmentsHtml = service.attachments.map((att: any) => {
-          const signedUrl = signedUrlCache[att.url];
+          const signedUrl = permanentUrlCache[att.url];
           if (signedUrl) {
             return `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; color: #0f766e; font-size: 12px; text-decoration: underline; margin-right: 12px;">📎 ${att.name} ↗</a>`;
           }
           return `<span style="color: #64748b; font-size: 12px;">📎 ${att.name}</span>`;
         }).join(' ');
       } else if (service.voucher_url) {
-        const signedUrl = signedUrlCache[service.voucher_url];
+        const signedUrl = permanentUrlCache[service.voucher_url];
         const name = service.voucher_name || 'Documento anexo';
         if (signedUrl) {
           attachmentsHtml = `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; color: #0f766e; font-size: 12px; text-decoration: underline;">📎 ${name} ↗</a>`;
