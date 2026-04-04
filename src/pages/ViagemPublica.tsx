@@ -300,10 +300,13 @@ function ServiceSection({
 
   return (
     <div ref={sectionRef} data-service-type={type} style={{ scrollMarginTop: '70px' }}>
-      <div className={cn("rounded-xl overflow-hidden border shadow-sm bg-card transition-shadow hover:shadow-md", colors.border)}>
+      <div className={cn(
+        "rounded-xl overflow-hidden border shadow-sm bg-card transition-all duration-200",
+        isOpen ? cn(colors.activeBorder, colors.activeGlow, "shadow-md") : cn(colors.border, "hover:shadow-md")
+      )}>
         <button
           onClick={onToggle}
-          className={cn("w-full flex items-center justify-between px-4 py-3.5 transition-colors", colors.hoverBg)}
+          className={cn("w-full flex items-center justify-between px-4 py-3.5 transition-colors duration-200", colors.hoverBg)}
         >
           <div className="flex items-center gap-3">
             <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl shrink-0", colors.bg)}>
@@ -314,7 +317,7 @@ function ServiceSection({
               <span className={cn("text-[11px] px-2 py-0.5 rounded-full font-medium", colors.badge)}>{services.length} {services.length === 1 ? 'item' : 'itens'}</span>
             </div>
           </div>
-          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", isOpen && "rotate-180")} />
+          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isOpen && "rotate-180")} />
         </button>
         <div
           className={cn(
