@@ -1518,7 +1518,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       const periods = ["morning","afternoon","evening"] as const;
 
                       return (
-                        <Collapsible key={dateStr} defaultOpen={idx === 0}>
+                        <Collapsible key={dateStr} defaultOpen={idx === 0} className="group">
                           <Card className="border-border/50 overflow-hidden">
                             <CollapsibleTrigger asChild>
                               <button className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
