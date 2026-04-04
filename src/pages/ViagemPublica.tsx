@@ -1566,13 +1566,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   const isDayOpen = openDay === dateStr;
 
                   return (
-                    <div key={dateStr} className="rounded-xl overflow-hidden border border-border/60 shadow-sm bg-card transition-shadow hover:shadow-md">
+                    <div key={dateStr} className={cn("rounded-xl overflow-hidden border shadow-sm bg-card transition-shadow hover:shadow-md", SERVICE_COLORS.itinerary.border)}>
                       <button
                         onClick={() => toggleDay(dateStr)}
-                        className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+                        className={cn("w-full flex items-center justify-between p-4 transition-colors", SERVICE_COLORS.itinerary.hoverBg)}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">
+                          <div className={cn("flex h-10 w-10 items-center justify-center rounded-full font-bold text-sm shrink-0", SERVICE_COLORS.itinerary.bg, SERVICE_COLORS.itinerary.icon)}>
                             {idx + 1}
                           </div>
                           <div className="text-left">
