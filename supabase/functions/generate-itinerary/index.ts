@@ -22,7 +22,7 @@ const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
 const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
 const ALLOWED_BODY_KEYS = ["destination", "startDate", "endDate", "travelersCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences"];
-const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations"];
+const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations", "serviceContext"];
 
 const tripTypeLabels: Record<string, string> = {
   casal: "viagem de casal",
@@ -220,6 +220,11 @@ serve(async (req) => {
       if (!mlCheck.valid) return validationError(mlCheck.error, corsHeaders);
       prefs.mobilityLimitations = mlCheck.value;
     }
+    if (rawPrefs.serviceContext) {
+      const scCheck = validateString(rawPrefs.serviceContext, "Contexto de serviços", 0, 5000);
+      if (!scCheck.valid) return validationError(scCheck.error, corsHeaders);
+      prefs.serviceContext = scCheck.value;
+    }
 
     // --- BUILD AI REQUEST ---
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -257,6 +262,10 @@ serve(async (req) => {
     const additionalText = additionalLines.length > 0
       ? "\n\nPREFERÊNCIAS ADICIONAIS:\n" + additionalLines.join("\n") : "";
 
+    const serviceContextText = prefs.serviceContext
+      ? "\n\n" + prefs.serviceContext + "\n\nIMPORTANTE: NÃO sugira atividades que conflitem com os serviços listados acima. Preencha apenas os períodos livres com sugestões complementares."
+      : "";
+
     const profileRules = buildProfileRules(tripType);
 
     const datesInfo: string[] = [];
@@ -287,7 +296,7 @@ ${profileRules}`;
 - Período: ${days} dias (${startDate} a ${endDate})
 - Viajantes: ${travelersCount} pessoa(s)
 - Tipo de viagem: ${tripTypeLabels[tripType] || tripType}
-- Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}
+- Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}
 
 Datas dos dias: ${datesInfo.join(', ')}
 

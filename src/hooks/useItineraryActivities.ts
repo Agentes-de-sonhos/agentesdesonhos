@@ -17,6 +17,7 @@ export interface ItineraryActivity {
   document_urls: string[];
   maps_url: string | null;
   order_index: number;
+  origin: "servico" | "ia" | "manual";
   created_at: string;
   updated_at: string;
 }
@@ -35,6 +36,7 @@ export interface CreateActivityData {
   document_urls?: string[];
   maps_url?: string | null;
   order_index?: number;
+  origin?: "servico" | "ia" | "manual";
 }
 
 export function useItineraryActivities(tripId: string | undefined) {
@@ -75,6 +77,7 @@ export function useItineraryActivities(tripId: string | undefined) {
           photo_urls: data.photo_urls ?? [],
           document_urls: data.document_urls ?? [],
           maps_url: data.maps_url ?? null,
+          origin: data.origin ?? "manual",
         })
         .select()
         .single();

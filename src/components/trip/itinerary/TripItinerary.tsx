@@ -3,14 +3,26 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X, Sparkles } from "lucide-react";
+import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X, Sparkles, RefreshCw, Plane, Hotel, Bus, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
 import { usePeriodImages } from "@/hooks/usePeriodImages";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
-import { AIItineraryModal } from "./AIItineraryModal";
+import { AIItineraryModal, type OverwriteMode } from "./AIItineraryModal";
+import { servicesToActivities } from "@/utils/serviceToItinerary";
 import type { TripService } from "@/types/trip";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Props {
   tripId: string;
@@ -27,6 +39,12 @@ const PERIOD_CONFIG: Record<Period, { label: string; icon: typeof Sun; color: st
   morning: { label: "Manhã", icon: Sun, color: "text-amber-500" },
   afternoon: { label: "Tarde", icon: Sunset, color: "text-orange-500" },
   evening: { label: "Noite", icon: Moon, color: "text-indigo-400" },
+};
+
+const ORIGIN_BADGE: Record<string, { label: string; className: string }> = {
+  servico: { label: "Serviço", className: "bg-blue-500/10 text-blue-600 border-blue-200" },
+  ia: { label: "IA", className: "bg-purple-500/10 text-purple-600 border-purple-200" },
+  manual: { label: "Manual", className: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
 };
 
 function parseLocalDate(dateStr: string): Date {
@@ -122,6 +140,8 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
   const [addingFor, setAddingFor] = useState<{ dateStr: string; period: Period } | null>(null);
   const [editingActivity, setEditingActivity] = useState<ItineraryActivity | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [serviceEditWarning, setServiceEditWarning] = useState<ItineraryActivity | null>(null);
 
   const days = useMemo(() => generateDays(startDate, endDate), [startDate, endDate]);
 
@@ -194,8 +214,17 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
       photo_urls: photoUrls,
       document_urls: documentUrls,
       maps_url: data.maps_url,
+      origin: "manual",
     });
     setAddingFor(null);
+  };
+
+  const handleEditClick = (activity: ItineraryActivity) => {
+    if (activity.origin === "servico") {
+      setServiceEditWarning(activity);
+    } else {
+      setEditingActivity(activity);
+    }
   };
 
   const handleUpdateActivity = async (
@@ -232,14 +261,45 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
     });
     setEditingActivity(null);
   };
-  const handleAIGenerated = async (newActivities: CreateActivityData[], mode: "replace" | "append") => {
-    if (mode === "replace") {
-      // Delete all existing activities
+
+  const handleSyncServices = async () => {
+    setIsSyncing(true);
+    try {
+      const serviceActs = servicesToActivities(services, tripId);
+      
+      // Remove all existing "servico" origin activities
+      const existingServiceActs = activities.filter(a => a.origin === "servico");
+      for (const act of existingServiceActs) {
+        await deleteActivity(act.id);
+      }
+      
+      // Add new service activities
+      for (const act of serviceActs) {
+        await addActivity(act);
+      }
+      
+      toast.success(`${serviceActs.length} evento(s) de serviços sincronizados! ✅`);
+    } catch (error) {
+      toast.error("Erro ao sincronizar serviços");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleAIGenerated = async (newActivities: CreateActivityData[], mode: OverwriteMode) => {
+    if (mode === "replace_all") {
       for (const act of activities) {
         await deleteActivity(act.id);
       }
+    } else if (mode === "keep_services_replace_ai") {
+      // Delete only IA-origin activities
+      const iaActs = activities.filter(a => a.origin === "ia");
+      for (const act of iaActs) {
+        await deleteActivity(act.id);
+      }
     }
-    // Add all new activities
+    // "append" mode: don't delete anything
+    
     for (const act of newActivities) {
       await addActivity(act);
     }
@@ -258,16 +318,27 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5 text-primary" />
             Roteiro Dia a Dia
           </CardTitle>
           {!readOnly && (
-            <Button variant="outline" size="sm" onClick={() => setAiModalOpen(true)}>
-              <Sparkles className="mr-1.5 h-4 w-4" />
-              Gerar roteiro com IA
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSyncServices}
+                disabled={isSyncing}
+              >
+                {isSyncing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
+                Sincronizar serviços
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setAiModalOpen(true)}>
+                <Sparkles className="mr-1.5 h-4 w-4" />
+                Gerar roteiro com IA
+              </Button>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -276,6 +347,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
           const isExpanded = expandedDays.has(day.dateStr);
           const dayActivities = activitiesByDay[day.dateStr] || [];
           const activityCount = dayActivities.length;
+          const serviceCount = dayActivities.filter(a => a.origin === "servico").length;
 
           return (
             <div key={day.dateStr} className="border border-border rounded-lg overflow-hidden">
@@ -293,6 +365,11 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                   {activityCount > 0 && (
                     <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
                       {activityCount} {activityCount === 1 ? "atividade" : "atividades"}
+                    </span>
+                  )}
+                  {serviceCount > 0 && (
+                    <span className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded-full font-medium">
+                      {serviceCount} serviço{serviceCount !== 1 ? "s" : ""}
                     </span>
                   )}
                 </div>
@@ -343,12 +420,22 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                               </div>
                             );
                           }
+                          const originBadge = ORIGIN_BADGE[activity.origin] || ORIGIN_BADGE.manual;
                           return (
-                            <div key={activity.id} className="ml-4">
+                            <div key={activity.id} className="ml-4 relative">
+                              {/* Origin badge */}
+                              <div className="absolute -left-1 top-1.5 z-10">
+                                <span className={cn(
+                                  "text-[9px] font-semibold px-1.5 py-0.5 rounded-full border",
+                                  originBadge.className
+                                )}>
+                                  {originBadge.label}
+                                </span>
+                              </div>
                               <ItineraryActivityCard
                                 activity={activity}
                                 linkedService={activity.linked_service_id ? services.find((s) => s.id === activity.linked_service_id) : undefined}
-                                onEdit={() => setEditingActivity(activity)}
+                                onEdit={() => handleEditClick(activity)}
                                 onDelete={() => deleteActivity(activity.id)}
                                 readOnly={readOnly}
                               />
@@ -400,9 +487,34 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
         destination={destination}
         startDate={startDate}
         endDate={endDate}
-        existingActivitiesCount={activities.length}
+        existingActivities={activities}
+        services={services}
         onGenerated={handleAIGenerated}
       />
+
+      {/* Service edit warning */}
+      <AlertDialog open={!!serviceEditWarning} onOpenChange={(open) => !open && setServiceEditWarning(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Item vinculado a um serviço
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Este item foi gerado automaticamente a partir de um serviço cadastrado. Alterações aqui <strong>não atualizam</strong> o serviço original.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (serviceEditWarning) setEditingActivity(serviceEditWarning);
+              setServiceEditWarning(null);
+            }}>
+              Editar mesmo assim
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
