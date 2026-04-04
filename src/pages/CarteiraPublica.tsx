@@ -131,6 +131,7 @@ export default function CarteiraPublica() {
     try {
       const result = await verifyTripBySlug(slug, password);
       setTripData(result);
+      setUsedPassword(password);
       setNeedsPassword(false);
     } catch (err: any) {
       if (err.message === LOCKED_MSG) {
