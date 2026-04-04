@@ -41,7 +41,7 @@ export async function getSignedVoucherUrl(filePath: string, expiresIn = 120): Pr
  */
 export async function getPublicVoucherUrl(
   filePath: string,
-  opts: { slug?: string; share_token?: string; password?: string }
+  opts: { slug?: string; share_token?: string; password?: string; expires_in?: number }
 ): Promise<string | null> {
   const path = extractVoucherPath(filePath);
   if (!path) return null;
@@ -53,6 +53,7 @@ export async function getPublicVoucherUrl(
         slug: opts.slug || undefined,
         share_token: opts.share_token || undefined,
         password: opts.password || undefined,
+        expires_in: opts.expires_in || undefined,
       },
     });
 
