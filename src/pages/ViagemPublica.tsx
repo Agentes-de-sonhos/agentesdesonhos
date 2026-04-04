@@ -1252,7 +1252,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [usedPassword, setUsedPassword] = useState("");
+  const [usedPassword, setUsedPassword] = useState(preLoadedPassword || "");
   const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
 
   // Fetch itinerary activities when trip is loaded
