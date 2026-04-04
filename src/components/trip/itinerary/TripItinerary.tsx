@@ -258,10 +258,18 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-primary" />
-          Roteiro Dia a Dia
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-primary" />
+            Roteiro Dia a Dia
+          </CardTitle>
+          {!readOnly && (
+            <Button variant="outline" size="sm" onClick={() => setAiModalOpen(true)}>
+              <Sparkles className="mr-1.5 h-4 w-4" />
+              Gerar roteiro com IA
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {days.map((day) => {
