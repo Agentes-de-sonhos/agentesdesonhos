@@ -1470,6 +1470,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
               {availableTabs.map((type) => {
                 const Icon = SERVICE_ICONS[type];
+                const colors = SERVICE_COLORS[type];
                 return (
                   <button
                     key={type}
@@ -1479,35 +1480,38 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                         sectionRefs.current[type]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }, 100);
                     }}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 hover:bg-primary/5 shadow-sm hover:shadow-md transition-all duration-200 group"
+                    className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all duration-200 group", colors.border, colors.hoverBg)}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                      <Icon className="h-5 w-5 text-primary" />
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", colors.bg)}>
+                      <Icon className={cn("h-5 w-5", colors.icon)} />
                     </div>
                     <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">{SERVICE_LABELS[type]}</span>
-                    <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">{grouped[type].length}</span>
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", colors.badge)}>{grouped[type].length}</span>
                   </button>
                 );
               })}
-              {itineraryActivities.length > 0 && (
-                <button
-                  onClick={() => {
-                    setOpenSection('itinerary');
-                    setTimeout(() => {
-                      itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 hover:bg-primary/5 shadow-sm hover:shadow-md transition-all duration-200 group"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                    <CalendarDays className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">Roteiro</span>
-                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
-                    {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
-                  </span>
-                </button>
-              )}
+              {itineraryActivities.length > 0 && (() => {
+                const itColors = SERVICE_COLORS.itinerary;
+                return (
+                  <button
+                    onClick={() => {
+                      setOpenSection('itinerary');
+                      setTimeout(() => {
+                        itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 100);
+                    }}
+                    className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all duration-200 group", itColors.border, itColors.hoverBg)}
+                  >
+                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", itColors.bg)}>
+                      <CalendarDays className={cn("h-5 w-5", itColors.icon)} />
+                    </div>
+                    <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">Roteiro</span>
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", itColors.badge)}>
+                      {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
+                    </span>
+                  </button>
+                );
+              })()}
             </div>
           </div>
         )}
