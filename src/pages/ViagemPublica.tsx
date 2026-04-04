@@ -1600,7 +1600,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                             </p>
                           </div>
                         </div>
-                        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", isDayOpen && "rotate-180")} />
+                        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isDayOpen && "rotate-180")} />
                       </button>
                       <div
                         className={cn(
