@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Note, NoteFilters, NoteSortOption } from "@/types/notes";
+import { Note, NoteFilters, NoteSortOption, NoteTypeFilter } from "@/types/notes";
 
 export function useNotes() {
   const { user } = useAuth();
@@ -13,6 +13,7 @@ export function useNotes() {
     search: "",
     sortBy: "updated_at",
     sortOrder: "desc",
+    typeFilter: "all",
   });
 
   // Fetch all notes
