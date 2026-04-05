@@ -189,6 +189,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
     if (!newPax.name.trim()) return;
     setPassengers([...passengers, { ...newPax }]);
     setNewPax(emptyPassenger());
+    setIsEditingPax(false);
   };
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
