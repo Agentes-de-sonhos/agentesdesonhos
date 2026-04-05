@@ -426,6 +426,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         {passengers.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'}){p.seat ? ` • ${p.seat}` : ''}</span>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); }}>
+              <Pencil className="h-3 w-3" />
+            </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
               <X className="h-3 w-3" />
             </Button>
@@ -1198,6 +1201,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         {guests.map((g, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{g.name}{g.age ? ` (${g.age})` : ''}{g.notes ? ` • ${g.notes}` : ''}</span>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewGuest({ ...g }); setGuests(guests.filter((_, idx) => idx !== i)); }}>
+              <Pencil className="h-3 w-3" />
+            </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setGuests(guests.filter((_, idx) => idx !== i))}>
               <X className="h-3 w-3" />
             </Button>
@@ -2584,6 +2590,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
                 {p.name} ({p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})
                 {p.document ? ` • ${p.document}` : ''}
               </span>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); }}>
+                <Pencil className="h-3 w-3" />
+              </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
                 <X className="h-3 w-3" />
               </Button>
@@ -3112,6 +3121,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         {insuredPersons.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{p.name}{p.coverage_type ? ` (${p.coverage_type === 'individual' ? 'Individual' : 'Familiar'})` : ''}{p.birth_date ? ` • ${p.birth_date}` : ''}</span>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewInsured({ ...p }); setInsuredPersons(insuredPersons.filter((_, idx) => idx !== i)); }}>
+              <Pencil className="h-3 w-3" />
+            </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setInsuredPersons(insuredPersons.filter((_, idx) => idx !== i))}>
               <X className="h-3 w-3" />
             </Button>
@@ -3541,6 +3553,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
                 {p.document && <span className="text-muted-foreground"> • {p.document}</span>}
                 {p.notes && <span className="text-muted-foreground italic"> • {p.notes}</span>}
               </div>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPaxName(p.name); setNewPaxBirth(p.birth_date || ''); setNewPaxDoc(p.document || ''); setNewPaxNotes(p.notes || ''); setPassengers(passengers.filter((_, idx) => idx !== i)); }}>
+                <Pencil className="h-3 w-3" />
+              </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
                 <X className="h-3 w-3" />
               </Button>
@@ -4542,6 +4557,9 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           {passengers.map((p, i) => (
             <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
               <span className="text-sm flex-1">{p.name}</span>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPassengerName(p.name); removePassenger(i); }}>
+                <Pencil className="h-3 w-3" />
+              </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => removePassenger(i)}>
                 <X className="h-3 w-3" />
               </Button>
