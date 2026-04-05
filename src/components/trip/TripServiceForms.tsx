@@ -2802,6 +2802,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
     defaultValues?.insured_persons?.length > 0 ? defaultValues.insured_persons : []
   );
   const [newInsured, setNewInsured] = useState<InsuredPersonInput>(emptyInsured());
+  const [isEditingInsured, setIsEditingInsured] = useState(false);
 
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
