@@ -151,6 +151,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
     defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
   );
   const [newPax, setNewPax] = useState<FlightPassengerInput>(emptyPassenger());
+  const [isEditingPax, setIsEditingPax] = useState(false);
 
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
