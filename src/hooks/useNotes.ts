@@ -65,6 +65,7 @@ export function useNotes() {
           title: noteData.title || "Nova Nota",
           content: noteData.content || "",
           is_favorite: noteData.is_favorite || false,
+          is_template: noteData.is_template || false,
           client_id: noteData.client_id || null,
           opportunity_id: noteData.opportunity_id || null,
           event_id: noteData.event_id || null,
