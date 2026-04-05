@@ -4394,6 +4394,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
     if (!newPassengerName.trim()) return;
     setPassengers([...passengers, { name: newPassengerName.trim() }]);
     setNewPassengerName("");
+    setIsEditingPax(false);
   };
 
   const removePassenger = (index: number) => {
