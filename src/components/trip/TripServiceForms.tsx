@@ -3329,6 +3329,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
     if (!newPaxName.trim()) return;
     setPassengers([...passengers, { name: newPaxName.trim(), birth_date: newPaxBirth || undefined, document: newPaxDoc || undefined, notes: newPaxNotes || undefined }]);
     setNewPaxName(""); setNewPaxBirth(""); setNewPaxDoc(""); setNewPaxNotes("");
+    setIsEditingPax(false);
   };
 
   const addItineraryStop = () => {
