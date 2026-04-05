@@ -95,6 +95,22 @@ export default function BlocoNotas() {
     [updateNote]
   );
 
+  const handleToggleTemplate = useCallback(
+    async (note: Note) => {
+      try {
+        await updateNote({ id: note.id, is_template: !note.is_template });
+        toast({
+          title: note.is_template ? "Modelo removido" : "Definido como modelo",
+          description: note.is_template ? "A nota não é mais um modelo." : "A nota agora pode ser usada como modelo.",
+        });
+      } catch (error) {
+        console.error("Error toggling template:", error);
+        toast({ title: "Erro ao atualizar modelo", description: "Tente novamente.", variant: "destructive" });
+      }
+    },
+    [updateNote, toast]
+  );
+
   const handleExportPDF = useCallback((note: Note) => {
     // Create a simple PDF using browser print
     const printWindow = window.open("", "_blank");
