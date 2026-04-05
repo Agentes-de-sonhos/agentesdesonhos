@@ -4366,6 +4366,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
     defaultValues?.passengers || []
   );
   const [newPassengerName, setNewPassengerName] = useState("");
+  const [isEditingPax, setIsEditingPax] = useState(false);
 
   const form = useForm<z.infer<typeof trainSchema>>({
     resolver: zodResolver(trainSchema),
