@@ -3131,6 +3131,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{p.name}{p.coverage_type ? ` (${p.coverage_type === 'individual' ? 'Individual' : 'Familiar'})` : ''}{p.birth_date ? ` • ${p.birth_date}` : ''}</span>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewInsured({ ...p }); setInsuredPersons(insuredPersons.filter((_, idx) => idx !== i)); setIsEditingInsured(true); }}>
+              <Pencil className="h-3 w-3" />
             </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setInsuredPersons(insuredPersons.filter((_, idx) => idx !== i))}>
               <X className="h-3 w-3" />
