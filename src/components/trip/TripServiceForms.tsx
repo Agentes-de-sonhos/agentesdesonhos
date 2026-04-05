@@ -4565,8 +4565,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           {passengers.map((p, i) => (
             <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
               <span className="text-sm flex-1">{p.name}</span>
-              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPassengerName(p.name); removePassenger(i); }}>
-                <Pencil className="h-3 w-3" />
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPassengerName(p.name); removePassenger(i); setIsEditingPax(true); }}>
               </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => removePassenger(i)}>
                 <X className="h-3 w-3" />
