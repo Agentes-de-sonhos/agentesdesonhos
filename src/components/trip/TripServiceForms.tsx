@@ -2849,6 +2849,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
     if (!newInsured.name.trim()) return;
     setInsuredPersons([...insuredPersons, { ...newInsured }]);
     setNewInsured(emptyInsured());
+    setIsEditingInsured(false);
   };
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
