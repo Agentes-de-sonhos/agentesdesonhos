@@ -430,6 +430,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'}){p.seat ? ` • ${p.seat}` : ''}</span>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); setIsEditingPax(true); }}>
+              <Pencil className="h-3 w-3" />
             </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
               <X className="h-3 w-3" />
