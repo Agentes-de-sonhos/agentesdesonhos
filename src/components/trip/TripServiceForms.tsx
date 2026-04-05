@@ -1219,7 +1219,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
             <Input placeholder="Obs (aniversário, lua de mel...)" value={newGuest.notes} onChange={(e) => setNewGuest({ ...newGuest, notes: e.target.value })} />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addGuest} disabled={!newGuest.name.trim()}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Hóspede
+            {isEditingGuest ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Hóspede</>}
           </Button>
         </div>
 
