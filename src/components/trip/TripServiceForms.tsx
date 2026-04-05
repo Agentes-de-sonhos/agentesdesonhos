@@ -3151,7 +3151,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </div>
           <Input placeholder="Observações (opcional)" value={newInsured.notes} onChange={(e) => setNewInsured({ ...newInsured, notes: e.target.value })} />
           <Button type="button" variant="outline" size="sm" onClick={addInsured}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Segurado
+            {isEditingInsured ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Segurado</>}
           </Button>
         </div>
 
