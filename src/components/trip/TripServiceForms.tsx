@@ -2615,7 +2615,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
             <Input placeholder="Documento (se necessário)" value={newPax.document} onChange={(e) => setNewPax({ ...newPax, document: e.target.value })} />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro
+            {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro</>}
           </Button>
         </div>
 
