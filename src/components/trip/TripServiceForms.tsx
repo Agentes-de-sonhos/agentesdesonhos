@@ -2313,6 +2313,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
     if (!newPax.name.trim()) return;
     setPassengers([...passengers, { ...newPax }]);
     setNewPax({ name: '', ticket_type: 'adulto', document: '', notes: '' });
+    setIsEditingPax(false);
   };
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
