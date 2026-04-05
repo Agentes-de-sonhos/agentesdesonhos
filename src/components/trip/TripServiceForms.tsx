@@ -650,6 +650,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
     defaultValues?.guests?.length > 0 ? defaultValues.guests : []
   );
   const [newGuest, setNewGuest] = useState<HotelGuestInput>(emptyGuest());
+  const [isEditingGuest, setIsEditingGuest] = useState(false);
 
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
