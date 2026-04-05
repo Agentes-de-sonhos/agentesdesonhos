@@ -4581,7 +4581,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
               className="flex-1"
             />
             <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
-              <Plus className="h-3 w-3 mr-1" /> Adicionar
+              {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar</>}
             </Button>
           </div>
         </div>
