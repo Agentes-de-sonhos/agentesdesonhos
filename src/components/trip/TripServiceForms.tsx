@@ -2269,6 +2269,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
   const [newPax, setNewPax] = useState<AttractionPassengerInput>({ name: '', ticket_type: 'adulto', document: '', notes: '' });
+  const [isEditingPax, setIsEditingPax] = useState(false);
 
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
