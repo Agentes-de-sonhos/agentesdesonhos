@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Note, NoteFilters, NoteSortOption } from "@/types/notes";
+import { Note, NoteFilters, NoteSortOption, NoteTypeFilter } from "@/types/notes";
 
 export function useNotes() {
   const { user } = useAuth();
@@ -13,6 +13,7 @@ export function useNotes() {
     search: "",
     sortBy: "updated_at",
     sortOrder: "desc",
+    typeFilter: "all",
   });
 
   // Fetch all notes
@@ -27,8 +28,15 @@ export function useNotes() {
 
       let query = supabase
         .from("notes")
-        .select("id, user_id, title, content, is_favorite, client_id, event_id, opportunity_id, created_at, updated_at")
+        .select("id, user_id, title, content, is_favorite, is_template, client_id, event_id, opportunity_id, created_at, updated_at")
         .eq("user_id", user.id);
+
+      // Apply type filter
+      if (filters.typeFilter === "templates") {
+        query = query.eq("is_template", true);
+      } else if (filters.typeFilter === "notes") {
+        query = query.eq("is_template", false);
+      }
 
       // Apply search filter
       if (filters.search) {
@@ -57,6 +65,7 @@ export function useNotes() {
           title: noteData.title || "Nova Nota",
           content: noteData.content || "",
           is_favorite: noteData.is_favorite || false,
+          is_template: noteData.is_template || false,
           client_id: noteData.client_id || null,
           opportunity_id: noteData.opportunity_id || null,
           event_id: noteData.event_id || null,
