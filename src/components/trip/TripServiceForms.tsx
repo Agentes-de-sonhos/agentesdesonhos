@@ -3277,6 +3277,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   const [newPaxBirth, setNewPaxBirth] = useState("");
   const [newPaxDoc, setNewPaxDoc] = useState("");
   const [newPaxNotes, setNewPaxNotes] = useState("");
+  const [isEditingPax, setIsEditingPax] = useState(false);
 
   const [itinerary, setItinerary] = useState<{ date: string; port: string; arrival_time: string; departure_time: string; stop_type: string; notes: string }[]>(
     defaultValues?.itinerary || []
