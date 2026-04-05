@@ -3565,6 +3565,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
                 {p.notes && <span className="text-muted-foreground italic"> • {p.notes}</span>}
               </div>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPaxName(p.name); setNewPaxBirth(p.birth_date || ''); setNewPaxDoc(p.document || ''); setNewPaxNotes(p.notes || ''); setPassengers(passengers.filter((_, idx) => idx !== i)); setIsEditingPax(true); }}>
+                <Pencil className="h-3 w-3" />
               </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
                 <X className="h-3 w-3" />
