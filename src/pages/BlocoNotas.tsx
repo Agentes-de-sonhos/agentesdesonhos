@@ -185,6 +185,7 @@ export default function BlocoNotas() {
       onDeleteNote={setDeleteNoteId}
       onDuplicateNote={handleDuplicateNote}
       onToggleFavorite={handleToggleFavorite}
+      onToggleTemplate={handleToggleTemplate}
       filters={filters}
       onFiltersChange={setFilters}
       isLoading={isLoading}
