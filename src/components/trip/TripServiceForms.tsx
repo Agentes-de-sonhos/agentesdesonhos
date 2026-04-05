@@ -2598,6 +2598,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
                 {p.document ? ` • ${p.document}` : ''}
               </span>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); setIsEditingPax(true); }}>
+                <Pencil className="h-3 w-3" />
               </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
                 <X className="h-3 w-3" />
