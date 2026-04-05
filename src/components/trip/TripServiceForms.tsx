@@ -454,7 +454,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
             <Input placeholder="Observações" value={newPax.notes} onChange={(e) => setNewPax({ ...newPax, notes: e.target.value })} />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro
+            {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro</>}
           </Button>
         </div>
 
