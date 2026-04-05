@@ -21,6 +21,7 @@ import {
   Store,
   CreditCard,
   Wallet,
+  StickyNote,
   Home,
   BookOpen,
   Compass,
