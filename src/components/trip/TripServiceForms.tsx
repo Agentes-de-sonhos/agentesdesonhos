@@ -1,3 +1,4 @@
+import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
 import { useState } from "react";
 import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
 import { CollapsibleFormSection } from "@/components/trip/CollapsibleFormSection";
@@ -483,7 +484,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         <FormField control={form.control} name="baggage_rules" render={({ field }) => (
           <FormItem>
             <FormLabel>Regras de Bagagem</FormLabel>
-            <FormControl><Textarea placeholder="Peso máximo, dimensões, itens proibidos..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Peso máximo, dimensões, itens proibidos..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -547,19 +548,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         <FormField control={form.control} name="required_documents" render={({ field }) => (
           <FormItem>
             <FormLabel>Documentos Obrigatórios</FormLabel>
-            <FormControl><Textarea placeholder="Passaporte válido, visto, certificado de vacinação..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Passaporte válido, visto, certificado de vacinação..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <FormField control={form.control} name="immigration_rules" render={({ field }) => (
           <FormItem>
             <FormLabel>Regras de Imigração</FormLabel>
-            <FormControl><Textarea placeholder="Informações sobre alfândega, declarações..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Informações sobre alfândega, declarações..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <FormField control={form.control} name="boarding_notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações Gerais</FormLabel>
-            <FormControl><Textarea placeholder="Informações adicionais para o passageiro..." rows={3} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Informações adicionais para o passageiro..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -907,7 +908,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="checkin_instructions" render={({ field }) => (
           <FormItem>
             <FormLabel>Instruções de Check-in</FormLabel>
-            <FormControl><Textarea placeholder="Instruções especiais para chegada..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Instruções especiais para chegada..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <FormField control={form.control} name="late_arrival_policy" render={({ field }) => (
@@ -999,7 +1000,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="amenities" render={({ field }) => (
           <FormItem>
             <FormLabel>Amenities do Quarto</FormLabel>
-            <FormControl><Textarea placeholder="Ar condicionado, cofre, minibar, secador..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Ar condicionado, cofre, minibar, secador..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -1063,13 +1064,13 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="food_notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações sobre Alimentação</FormLabel>
-            <FormControl><Textarea placeholder="Restrições, opções vegetarianas..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Restrições, opções vegetarianas..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <FormField control={form.control} name="all_inclusive_rules" render={({ field }) => (
           <FormItem>
             <FormLabel>Regras do All Inclusive</FormLabel>
-            <FormControl><Textarea placeholder="Horários, restaurantes, bebidas..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Horários, restaurantes, bebidas..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -1151,7 +1152,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="other_inclusions" render={({ field }) => (
           <FormItem>
             <FormLabel>Outros Serviços Inclusos</FormLabel>
-            <FormControl><Textarea placeholder="Spa, academia, piscina, toalhas de praia..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Spa, academia, piscina, toalhas de praia..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -1162,7 +1163,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
           <FormItem>
             <FormLabel>Política de Cancelamento</FormLabel>
-            <FormControl><Textarea placeholder="Cancelamento gratuito até..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Cancelamento gratuito até..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -1223,7 +1224,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="special_requests" render={({ field }) => (
           <FormItem>
             <FormLabel>Solicitações Especiais</FormLabel>
-            <FormControl><Textarea placeholder="Andar alto, berço, travesseiro extra..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Andar alto, berço, travesseiro extra..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -1234,13 +1235,13 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações da Agência</FormLabel>
-            <FormControl><Textarea placeholder="Notas internas da agência para o cliente..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Notas internas da agência para o cliente..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações Gerais</FormLabel>
-            <FormControl><Textarea placeholder="Informações adicionais..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Informações adicionais..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -1471,7 +1472,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
         <FormField control={form.control} name="pickup_instructions" render={({ field }) => (
-          <FormItem><FormLabel>Instruções de Retirada</FormLabel><FormControl><Textarea placeholder="Siga as placas para 'Car Rental'..." rows={2} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Instruções de Retirada</FormLabel><FormControl><TextareaWithTemplate placeholder="Siga as placas para 'Car Rental'..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
         <FormField control={form.control} name="pickup_maps_url" render={({ field }) => (
           <FormItem><FormLabel>Link Google Maps (Retirada)</FormLabel><FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl></FormItem>
@@ -1500,7 +1501,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
         <FormField control={form.control} name="dropoff_instructions" render={({ field }) => (
-          <FormItem><FormLabel>Instruções de Devolução</FormLabel><FormControl><Textarea placeholder="Estacionar na área indicada..." rows={2} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Instruções de Devolução</FormLabel><FormControl><TextareaWithTemplate placeholder="Estacionar na área indicada..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
         <FormField control={form.control} name="dropoff_late_policy" render={({ field }) => (
           <FormItem><FormLabel>Política de Atraso</FormLabel><FormControl><Input placeholder="Cobrança por hora adicional..." {...field} /></FormControl></FormItem>
@@ -1579,7 +1580,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
         <FormField control={form.control} name="insurance_notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações do Seguro</FormLabel><FormControl><Textarea placeholder="Informações importantes sobre o seguro..." rows={2} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Observações do Seguro</FormLabel><FormControl><TextareaWithTemplate placeholder="Informações importantes sobre o seguro..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
         </CollapsibleFormSection>
@@ -1659,7 +1660,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
         <FormField control={form.control} name="fuel_notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações de Combustível</FormLabel><FormControl><Textarea placeholder="Posto mais próximo, tipo de combustível..." rows={2} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Observações de Combustível</FormLabel><FormControl><TextareaWithTemplate placeholder="Posto mais próximo, tipo de combustível..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
         </CollapsibleFormSection>
@@ -1667,7 +1668,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         <CollapsibleFormSection title="⚠️ Orientações Importantes">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
-            <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><Textarea placeholder="CNH válida, passaporte..." rows={2} {...field} /></FormControl></FormItem>
+            <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><TextareaWithTemplate placeholder="CNH válida, passaporte..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
           )} />
           <FormField control={form.control} name="minimum_age" render={({ field }) => (
             <FormItem><FormLabel>Idade Mínima</FormLabel><FormControl><Input placeholder="21 anos" {...field} /></FormControl></FormItem>
@@ -1682,10 +1683,10 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
         <FormField control={form.control} name="traffic_rules" render={({ field }) => (
-          <FormItem><FormLabel>Regras de Trânsito</FormLabel><FormControl><Textarea placeholder="Velocidade máxima, pedágios, estacionamento..." rows={2} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Regras de Trânsito</FormLabel><FormControl><TextareaWithTemplate placeholder="Velocidade máxima, pedágios, estacionamento..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Informações adicionais..." rows={3} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><TextareaWithTemplate placeholder="Informações adicionais..." rows={3} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
         </CollapsibleFormSection>
@@ -1996,7 +1997,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
               )} />
             </div>
             <FormField control={form.control} name="meeting_instructions" render={({ field }) => (
-              <FormItem><FormLabel>Onde encontrar o motorista *</FormLabel><FormControl><Textarea placeholder="Ex: Saída do desembarque, portão B, motorista com placa com seu nome" rows={3} {...field} /></FormControl></FormItem>
+              <FormItem><FormLabel>Onde encontrar o motorista *</FormLabel><FormControl><TextareaWithTemplate placeholder="Ex: Saída do desembarque, portão B, motorista com placa com seu nome" rows={3} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
             )} />
           </CollapsibleFormSection>
         )}
@@ -2057,7 +2058,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
           )} />
         </div>
         <FormField control={form.control} name="location_notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações Logísticas</FormLabel><FormControl><Textarea placeholder="Ex: acesso restrito, portaria lateral..." rows={2} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Observações Logísticas</FormLabel><FormControl><TextareaWithTemplate placeholder="Ex: acesso restrito, portaria lateral..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
         </CollapsibleFormSection>
@@ -2182,7 +2183,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
         <CollapsibleFormSection title="⚠️ Orientações Importantes">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
-            <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><Textarea placeholder="Passaporte, voucher impresso..." rows={2} {...field} /></FormControl></FormItem>
+            <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><TextareaWithTemplate placeholder="Passaporte, voucher impresso..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
           )} />
           <FormField control={form.control} name="emergency_contact" render={({ field }) => (
             <FormItem><FormLabel>Contato de Emergência</FormLabel><FormControl><Input placeholder="+33 1 234 5678" {...field} /></FormControl></FormItem>
@@ -2193,14 +2194,14 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
             <FormItem><FormLabel>Contato da Agência</FormLabel><FormControl><Input placeholder="+55 11 99999-9999" {...field} /></FormControl></FormItem>
           )} />
           <FormField control={form.control} name="plan_b" render={({ field }) => (
-            <FormItem><FormLabel>Plano B (atraso de voo, etc.)</FormLabel><FormControl><Textarea placeholder="Em caso de atraso, ligar para..." rows={2} {...field} /></FormControl></FormItem>
+            <FormItem><FormLabel>Plano B (atraso de voo, etc.)</FormLabel><FormControl><TextareaWithTemplate placeholder="Em caso de atraso, ligar para..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
           )} />
         </div>
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações da Agência</FormLabel><FormControl><Textarea placeholder="Informações adicionais para o passageiro..." rows={3} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Observações da Agência</FormLabel><FormControl><TextareaWithTemplate placeholder="Informações adicionais para o passageiro..." rows={3} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><Textarea placeholder="Notas gerais..." rows={2} {...field} /></FormControl></FormItem>
+          <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><TextareaWithTemplate placeholder="Notas gerais..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
         </CollapsibleFormSection>
@@ -2509,7 +2510,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         <FormField control={form.control} name="usage_instructions" render={({ field }) => (
           <FormItem>
             <FormLabel>Instruções Importantes de Uso</FormLabel>
-            <FormControl><Textarea placeholder="Como usar o ingresso, onde apresentar, regras de entrada..." rows={3} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Como usar o ingresso, onde apresentar, regras de entrada..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -2639,7 +2640,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         <FormField control={form.control} name="attraction_rules" render={({ field }) => (
           <FormItem>
             <FormLabel>Regras da Atração</FormLabel>
-            <FormControl><Textarea placeholder="Regras de uso, altura mínima, restrições..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Regras de uso, altura mínima, restrições..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -2676,7 +2677,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
             <FormLabel>Dicas Exclusivas</FormLabel>
-            <FormControl><Textarea placeholder="Melhor horário para visitar, como evitar filas, dicas de alimentação no local..." rows={4} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Melhor horário para visitar, como evitar filas, dicas de alimentação no local..." rows={4} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -2722,7 +2723,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações da Agência</FormLabel>
-            <FormControl><Textarea placeholder="Observações adicionais para o cliente..." rows={3} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Observações adicionais para o cliente..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -3092,25 +3093,25 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         <FormField control={form.control} name="how_to_activate" render={({ field }) => (
           <FormItem>
             <FormLabel>Como Acionar o Seguro</FormLabel>
-            <FormControl><Textarea placeholder="1. Ligue para a central 24h&#10;2. Informe o número da apólice&#10;3. Descreva a situação..." rows={3} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="1. Ligue para a central 24h&#10;2. Informe o número da apólice&#10;3. Descreva a situação..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <FormField control={form.control} name="required_documents_claim" render={({ field }) => (
           <FormItem>
             <FormLabel>Documentos Necessários</FormLabel>
-            <FormControl><Textarea placeholder="Apólice, passaporte, relatório médico..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Apólice, passaporte, relatório médico..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <FormField control={form.control} name="hospital_procedure" render={({ field }) => (
           <FormItem>
             <FormLabel>Procedimento Hospitalar</FormLabel>
-            <FormControl><Textarea placeholder="Em caso de internação, entre em contato com a central antes..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Em caso de internação, entre em contato com a central antes..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <FormField control={form.control} name="reimbursement_info" render={({ field }) => (
           <FormItem>
             <FormLabel>Reembolso (se aplicável)</FormLabel>
-            <FormControl><Textarea placeholder="Guardar todos os comprovantes originais..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Guardar todos os comprovantes originais..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -3178,7 +3179,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         <FormField control={form.control} name="coverage_observations" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações da Cobertura</FormLabel>
-            <FormControl><Textarea placeholder="Detalhes específicos da cobertura..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Detalhes específicos da cobertura..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -3189,7 +3190,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
             <FormLabel>Orientações do Agente</FormLabel>
-            <FormControl><Textarea placeholder="Quando acionar o seguro, dicas sobre hospitais no destino, diferença entre reembolso e atendimento direto..." rows={4} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Quando acionar o seguro, dicas sobre hospitais no destino, diferença entre reembolso e atendimento direto..." rows={4} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -3209,7 +3210,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações Gerais</FormLabel>
-            <FormControl><Textarea placeholder="Informações adicionais..." rows={3} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Informações adicionais..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
           </FormItem>
         )} />
 
@@ -3693,7 +3694,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         <FormField control={form.control} name="required_documents" render={({ field }) => (
           <FormItem>
             <FormLabel>Documentos Obrigatórios</FormLabel>
-            <FormControl><Textarea placeholder="Passaporte válido, visto, certidão de nascimento..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Passaporte válido, visto, certidão de nascimento..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -3718,7 +3719,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         <FormField control={form.control} name="company_rules" render={({ field }) => (
           <FormItem>
             <FormLabel>Regras Importantes da Companhia</FormLabel>
-            <FormControl><Textarea placeholder="Regras sobre bebidas, política de cancelamento..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Regras sobre bebidas, política de cancelamento..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -3726,7 +3727,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         <FormField control={form.control} name="boarding_notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações Gerais</FormLabel>
-            <FormControl><Textarea placeholder="Informações adicionais para o passageiro..." rows={3} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Informações adicionais para o passageiro..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -4023,7 +4024,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="description" render={({ field }) => (
           <FormItem>
             <FormLabel>Descrição / Detalhes</FormLabel>
-            <FormControl><Textarea placeholder="Informações adicionais do serviço..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Informações adicionais do serviço..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -4109,7 +4110,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="how_to_arrive" render={({ field }) => (
           <FormItem>
             <FormLabel>Como Chegar</FormLabel>
-            <FormControl><Textarea placeholder="Instruções de como chegar ao local..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Instruções de como chegar ao local..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -4203,7 +4204,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
             <FormField control={form.control} name="chip_activation_instructions" render={({ field }) => (
               <FormItem>
                 <FormLabel>Instruções de Ativação</FormLabel>
-                <FormControl><Textarea placeholder="Passo a passo para ativar o chip..." rows={3} {...field} /></FormControl>
+                <FormControl><TextareaWithTemplate placeholder="Passo a passo para ativar o chip..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
@@ -4284,7 +4285,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
             <FormLabel>Dicas do seu Agente de Viagem</FormLabel>
-            <FormControl><Textarea placeholder="Dress code, dicas locais, melhor horário..." rows={3} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Dress code, dicas locais, melhor horário..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -4292,7 +4293,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Observações da Agência</FormLabel>
-            <FormControl><Textarea placeholder="Observações internas ou para o cliente..." rows={2} {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Observações internas ou para o cliente..." rows={2} {...field} onValueChange={field.onChange} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
