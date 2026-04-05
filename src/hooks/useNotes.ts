@@ -28,8 +28,15 @@ export function useNotes() {
 
       let query = supabase
         .from("notes")
-        .select("id, user_id, title, content, is_favorite, client_id, event_id, opportunity_id, created_at, updated_at")
+        .select("id, user_id, title, content, is_favorite, is_template, client_id, event_id, opportunity_id, created_at, updated_at")
         .eq("user_id", user.id);
+
+      // Apply type filter
+      if (filters.typeFilter === "templates") {
+        query = query.eq("is_template", true);
+      } else if (filters.typeFilter === "notes") {
+        query = query.eq("is_template", false);
+      }
 
       // Apply search filter
       if (filters.search) {
