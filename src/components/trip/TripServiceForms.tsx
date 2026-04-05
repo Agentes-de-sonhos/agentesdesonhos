@@ -1205,8 +1205,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         {guests.map((g, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{g.name}{g.age ? ` (${g.age})` : ''}{g.notes ? ` • ${g.notes}` : ''}</span>
-            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewGuest({ ...g }); setGuests(guests.filter((_, idx) => idx !== i)); }}>
-              <Pencil className="h-3 w-3" />
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewGuest({ ...g }); setGuests(guests.filter((_, idx) => idx !== i)); setIsEditingGuest(true); }}>
             </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setGuests(guests.filter((_, idx) => idx !== i))}>
               <X className="h-3 w-3" />
