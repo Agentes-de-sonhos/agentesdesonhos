@@ -151,6 +151,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
     defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
   );
   const [newPax, setNewPax] = useState<FlightPassengerInput>(emptyPassenger());
+  const [isEditingPax, setIsEditingPax] = useState(false);
 
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
@@ -188,6 +189,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
     if (!newPax.name.trim()) return;
     setPassengers([...passengers, { ...newPax }]);
     setNewPax(emptyPassenger());
+    setIsEditingPax(false);
   };
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
@@ -427,7 +429,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         {passengers.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'}){p.seat ? ` • ${p.seat}` : ''}</span>
-            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); }}>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); setIsEditingPax(true); }}>
               <Pencil className="h-3 w-3" />
             </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
@@ -453,7 +455,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
             <Input placeholder="Observações" value={newPax.notes} onChange={(e) => setNewPax({ ...newPax, notes: e.target.value })} />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro
+            {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro</>}
           </Button>
         </div>
 
@@ -649,6 +651,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
     defaultValues?.guests?.length > 0 ? defaultValues.guests : []
   );
   const [newGuest, setNewGuest] = useState<HotelGuestInput>(emptyGuest());
+  const [isEditingGuest, setIsEditingGuest] = useState(false);
 
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
@@ -711,6 +714,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
     if (!newGuest.name.trim()) return;
     setGuests([...guests, { ...newGuest }]);
     setNewGuest(emptyGuest());
+    setIsEditingGuest(false);
   };
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
@@ -1202,7 +1206,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         {guests.map((g, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{g.name}{g.age ? ` (${g.age})` : ''}{g.notes ? ` • ${g.notes}` : ''}</span>
-            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewGuest({ ...g }); setGuests(guests.filter((_, idx) => idx !== i)); }}>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewGuest({ ...g }); setGuests(guests.filter((_, idx) => idx !== i)); setIsEditingGuest(true); }}>
               <Pencil className="h-3 w-3" />
             </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setGuests(guests.filter((_, idx) => idx !== i))}>
@@ -1217,7 +1221,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
             <Input placeholder="Obs (aniversário, lua de mel...)" value={newGuest.notes} onChange={(e) => setNewGuest({ ...newGuest, notes: e.target.value })} />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addGuest} disabled={!newGuest.name.trim()}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Hóspede
+            {isEditingGuest ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Hóspede</>}
           </Button>
         </div>
 
@@ -2267,6 +2271,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
   const [newPax, setNewPax] = useState<AttractionPassengerInput>({ name: '', ticket_type: 'adulto', document: '', notes: '' });
+  const [isEditingPax, setIsEditingPax] = useState(false);
 
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
@@ -2310,6 +2315,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
     if (!newPax.name.trim()) return;
     setPassengers([...passengers, { ...newPax }]);
     setNewPax({ name: '', ticket_type: 'adulto', document: '', notes: '' });
+    setIsEditingPax(false);
   };
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
@@ -2591,7 +2597,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
                 {p.name} ({p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})
                 {p.document ? ` • ${p.document}` : ''}
               </span>
-              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); }}>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); setIsEditingPax(true); }}>
                 <Pencil className="h-3 w-3" />
               </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
@@ -2612,7 +2618,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
             <Input placeholder="Documento (se necessário)" value={newPax.document} onChange={(e) => setNewPax({ ...newPax, document: e.target.value })} />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro
+            {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro</>}
           </Button>
         </div>
 
@@ -2799,6 +2805,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
     defaultValues?.insured_persons?.length > 0 ? defaultValues.insured_persons : []
   );
   const [newInsured, setNewInsured] = useState<InsuredPersonInput>(emptyInsured());
+  const [isEditingInsured, setIsEditingInsured] = useState(false);
 
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
@@ -2845,6 +2852,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
     if (!newInsured.name.trim()) return;
     setInsuredPersons([...insuredPersons, { ...newInsured }]);
     setNewInsured(emptyInsured());
+    setIsEditingInsured(false);
   };
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
@@ -3122,7 +3130,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         {insuredPersons.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
             <span className="flex-1">{p.name}{p.coverage_type ? ` (${p.coverage_type === 'individual' ? 'Individual' : 'Familiar'})` : ''}{p.birth_date ? ` • ${p.birth_date}` : ''}</span>
-            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewInsured({ ...p }); setInsuredPersons(insuredPersons.filter((_, idx) => idx !== i)); }}>
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewInsured({ ...p }); setInsuredPersons(insuredPersons.filter((_, idx) => idx !== i)); setIsEditingInsured(true); }}>
               <Pencil className="h-3 w-3" />
             </Button>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setInsuredPersons(insuredPersons.filter((_, idx) => idx !== i))}>
@@ -3147,7 +3155,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </div>
           <Input placeholder="Observações (opcional)" value={newInsured.notes} onChange={(e) => setNewInsured({ ...newInsured, notes: e.target.value })} />
           <Button type="button" variant="outline" size="sm" onClick={addInsured}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Segurado
+            {isEditingInsured ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Segurado</>}
           </Button>
         </div>
 
@@ -3273,6 +3281,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   const [newPaxBirth, setNewPaxBirth] = useState("");
   const [newPaxDoc, setNewPaxDoc] = useState("");
   const [newPaxNotes, setNewPaxNotes] = useState("");
+  const [isEditingPax, setIsEditingPax] = useState(false);
 
   const [itinerary, setItinerary] = useState<{ date: string; port: string; arrival_time: string; departure_time: string; stop_type: string; notes: string }[]>(
     defaultValues?.itinerary || []
@@ -3324,6 +3333,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
     if (!newPaxName.trim()) return;
     setPassengers([...passengers, { name: newPaxName.trim(), birth_date: newPaxBirth || undefined, document: newPaxDoc || undefined, notes: newPaxNotes || undefined }]);
     setNewPaxName(""); setNewPaxBirth(""); setNewPaxDoc(""); setNewPaxNotes("");
+    setIsEditingPax(false);
   };
 
   const addItineraryStop = () => {
@@ -3554,7 +3564,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
                 {p.document && <span className="text-muted-foreground"> • {p.document}</span>}
                 {p.notes && <span className="text-muted-foreground italic"> • {p.notes}</span>}
               </div>
-              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPaxName(p.name); setNewPaxBirth(p.birth_date || ''); setNewPaxDoc(p.document || ''); setNewPaxNotes(p.notes || ''); setPassengers(passengers.filter((_, idx) => idx !== i)); }}>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPaxName(p.name); setNewPaxBirth(p.birth_date || ''); setNewPaxDoc(p.document || ''); setNewPaxNotes(p.notes || ''); setPassengers(passengers.filter((_, idx) => idx !== i)); setIsEditingPax(true); }}>
                 <Pencil className="h-3 w-3" />
               </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPassengers(passengers.filter((_, idx) => idx !== i))}>
@@ -3571,7 +3581,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
             <Input placeholder="Observações" value={newPaxNotes} onChange={(e) => setNewPaxNotes(e.target.value)} />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro
+            {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar Passageiro</>}
           </Button>
         </div>
 
@@ -4361,6 +4371,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
     defaultValues?.passengers || []
   );
   const [newPassengerName, setNewPassengerName] = useState("");
+  const [isEditingPax, setIsEditingPax] = useState(false);
 
   const form = useForm<z.infer<typeof trainSchema>>({
     resolver: zodResolver(trainSchema),
@@ -4388,6 +4399,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
     if (!newPassengerName.trim()) return;
     setPassengers([...passengers, { name: newPassengerName.trim() }]);
     setNewPassengerName("");
+    setIsEditingPax(false);
   };
 
   const removePassenger = (index: number) => {
@@ -4558,7 +4570,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
           {passengers.map((p, i) => (
             <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
               <span className="text-sm flex-1">{p.name}</span>
-              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPassengerName(p.name); removePassenger(i); }}>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPassengerName(p.name); removePassenger(i); setIsEditingPax(true); }}>
                 <Pencil className="h-3 w-3" />
               </Button>
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => removePassenger(i)}>
@@ -4575,7 +4587,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
               className="flex-1"
             />
             <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
-              <Plus className="h-3 w-3 mr-1" /> Adicionar
+              {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar</>}
             </Button>
           </div>
         </div>
