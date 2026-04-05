@@ -713,6 +713,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
     if (!newGuest.name.trim()) return;
     setGuests([...guests, { ...newGuest }]);
     setNewGuest(emptyGuest());
+    setIsEditingGuest(false);
   };
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
