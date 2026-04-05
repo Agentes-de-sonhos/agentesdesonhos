@@ -4,6 +4,7 @@ export interface Note {
   title: string;
   content: string;
   is_favorite: boolean;
+  is_template: boolean;
   client_id: string | null;
   opportunity_id: string | null;
   event_id: string | null;
@@ -12,9 +13,11 @@ export interface Note {
 }
 
 export type NoteSortOption = 'updated_at' | 'created_at' | 'title';
+export type NoteTypeFilter = 'all' | 'notes' | 'templates';
 
 export interface NoteFilters {
   search: string;
   sortBy: NoteSortOption;
   sortOrder: 'asc' | 'desc';
+  typeFilter: NoteTypeFilter;
 }
