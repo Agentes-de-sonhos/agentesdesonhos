@@ -516,20 +516,26 @@ export function useFinancial() {
     summary,
     isLoading: salesLoading || productsLoading || customerPaymentsLoading || supplierPaymentsLoading || incomeLoading || expenseLoading,
     createSale: createSaleMutation.mutateAsync,
+    updateSale: updateSaleMutation.mutateAsync,
     deleteSale: deleteSaleMutation.mutateAsync,
     createSaleProduct: createSaleProductMutation.mutateAsync,
+    updateSaleProduct: updateSaleProductMutation.mutateAsync,
     deleteSaleProduct: deleteSaleProductMutation.mutateAsync,
     createCustomerPayment: createCustomerPaymentMutation.mutateAsync,
     deleteCustomerPayment: deleteCustomerPaymentMutation.mutateAsync,
     createSupplierPayment: createSupplierPaymentMutation.mutateAsync,
     deleteSupplierPayment: deleteSupplierPaymentMutation.mutateAsync,
     createIncome: createIncomeMutation.mutateAsync,
+    updateIncome: updateIncomeMutation.mutateAsync,
     deleteIncome: deleteIncomeMutation.mutateAsync,
     createExpense: createExpenseMutation.mutateAsync,
+    updateExpense: updateExpenseMutation.mutateAsync,
     deleteExpense: deleteExpenseMutation.mutateAsync,
     isCreating: createSaleMutation.isPending || createSaleProductMutation.isPending || 
                 createCustomerPaymentMutation.isPending || createSupplierPaymentMutation.isPending ||
                 createIncomeMutation.isPending || createExpenseMutation.isPending,
+    isUpdating: updateSaleMutation.isPending || updateSaleProductMutation.isPending ||
+                updateIncomeMutation.isPending || updateExpenseMutation.isPending,
   };
 }
 
