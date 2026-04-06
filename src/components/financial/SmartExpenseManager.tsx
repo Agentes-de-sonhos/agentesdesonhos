@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Trash2, Tag, Loader2, Repeat } from "lucide-react";
+import { Plus, Trash2, Tag, Loader2, Repeat, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -51,23 +50,19 @@ interface ExpenseFormState {
 }
 
 export function SmartExpenseManager() {
-  const { expenseEntries, createExpense, deleteExpense, isCreating } = useFinancial();
+  const { expenseEntries, createExpense, updateExpense, deleteExpense, isCreating, isUpdating } = useFinancial();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<ExpenseFormState>({
-    description: "",
-    category: "outros",
-    amount: 0,
+    description: "", category: "outros", amount: 0,
     entry_date: new Date().toISOString().split("T")[0],
-    expense_type: "variable",
-    is_recurring: false,
-    notes: "",
+    expense_type: "variable", is_recurring: false, notes: "",
   });
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
-  // Monthly totals
   const monthStart = new Date();
   monthStart.setDate(1);
   const monthStartStr = monthStart.toISOString().split("T")[0];
@@ -76,7 +71,6 @@ export function SmartExpenseManager() {
   const fixedTotal = monthlyExpenses.filter(e => e.expense_type === "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
   const variableTotal = monthlyExpenses.filter(e => e.expense_type !== "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
 
-  // Auto-suggest category
   const suggestCategory = (desc: string) => {
     const d = desc.toLowerCase();
     if (d.includes("sistema") || d.includes("software") || d.includes("crm")) return "sistema";
@@ -94,75 +88,60 @@ export function SmartExpenseManager() {
   const handleDescriptionChange = (desc: string) => {
     const suggested = suggestCategory(desc);
     setFormData(prev => ({
-      ...prev,
-      description: desc,
+      ...prev, description: desc,
       ...(suggested && prev.category === "outros" ? { category: suggested } : {}),
     }));
   };
 
-  const handleSubmit = async () => {
-    await createExpense({
-      description: formData.description,
-      category: formData.category as any,
-      amount: formData.amount,
-      entry_date: formData.entry_date,
-      notes: formData.notes || undefined,
-    });
-    setIsDialogOpen(false);
-    setFormData({
-      description: "", category: "outros", amount: 0,
-      entry_date: new Date().toISOString().split("T")[0],
-      expense_type: "variable", is_recurring: false, notes: "",
-    });
+  const resetForm = () => {
+    setFormData({ description: "", category: "outros", amount: 0, entry_date: new Date().toISOString().split("T")[0], expense_type: "variable", is_recurring: false, notes: "" });
+    setEditingId(null);
   };
 
-  const handleDelete = async () => {
-    if (deleteId) {
-      await deleteExpense(deleteId);
-      setDeleteId(null);
-    }
+  const openEdit = (entry: typeof expenseEntries[0]) => {
+    setEditingId(entry.id);
+    setFormData({
+      description: entry.description, category: entry.category,
+      amount: Number(entry.amount), entry_date: entry.entry_date,
+      expense_type: entry.expense_type || "variable",
+      is_recurring: entry.is_recurring || false, notes: entry.notes || "",
+    });
+    setIsDialogOpen(true);
   };
+
+  const handleSubmit = async () => {
+    const payload = {
+      description: formData.description, category: formData.category as any,
+      amount: formData.amount, entry_date: formData.entry_date,
+      notes: formData.notes || undefined,
+    };
+    if (editingId) {
+      await updateExpense({ id: editingId, ...payload });
+    } else {
+      await createExpense(payload);
+    }
+    setIsDialogOpen(false);
+    resetForm();
+  };
+
+  const handleDelete = async () => { if (deleteId) { await deleteExpense(deleteId); setDeleteId(null); } };
+  const isSaving = isCreating || isUpdating;
 
   return (
     <div className="space-y-4">
-      {/* Summary */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total do Mês</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-destructive">{formatCurrency(totalMonth)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Despesas Fixas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{formatCurrency(fixedTotal)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Despesas Variáveis</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{formatCurrency(variableTotal)}</div>
-          </CardContent>
-        </Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Total do Mês</CardTitle></CardHeader><CardContent><div className="text-xl font-bold text-destructive">{formatCurrency(totalMonth)}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Despesas Fixas</CardTitle></CardHeader><CardContent><div className="text-xl font-bold">{formatCurrency(fixedTotal)}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Despesas Variáveis</CardTitle></CardHeader><CardContent><div className="text-xl font-bold">{formatCurrency(variableTotal)}</div></CardContent></Card>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Despesas</h3>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Despesa
+        <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+          <Plus className="h-4 w-4 mr-2" /> Nova Despesa
         </Button>
       </div>
 
-      {/* Table */}
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
@@ -172,16 +151,12 @@ export function SmartExpenseManager() {
               <TableHead>Categoria</TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead className="text-right">Valor</TableHead>
-              <TableHead className="w-[60px]"></TableHead>
+              <TableHead className="w-[80px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {expenseEntries.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                  Nenhuma despesa registrada
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma despesa registrada</TableCell></TableRow>
             ) : (
               expenseEntries.map((entry) => (
                 <TableRow key={entry.id}>
@@ -191,26 +166,23 @@ export function SmartExpenseManager() {
                     {entry.is_recurring && <Repeat className="h-3 w-3 text-muted-foreground" />}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="gap-1">
-                      <Tag className="h-3 w-3" />
-                      {EXPENSE_CATEGORIES_EXPANDED[entry.category] || entry.category}
-                    </Badge>
+                    <Badge variant="secondary" className="gap-1"><Tag className="h-3 w-3" />{EXPENSE_CATEGORIES_EXPANDED[entry.category] || entry.category}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={cn(
-                      "text-xs",
-                      entry.expense_type === "fixed" ? "border-blue-500/30 text-blue-600 dark:text-blue-400" : ""
-                    )}>
+                    <Badge variant="outline" className={cn("text-xs", entry.expense_type === "fixed" ? "border-blue-500/30 text-blue-600 dark:text-blue-400" : "")}>
                       {entry.expense_type === "fixed" ? "Fixa" : "Variável"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right font-medium text-destructive">
-                    -{formatCurrency(Number(entry.amount))}
-                  </TableCell>
+                  <TableCell className="text-right font-medium text-destructive">-{formatCurrency(Number(entry.amount))}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => setDeleteId(entry.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex items-center gap-0.5">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(entry)}>
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteId(entry.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -219,61 +191,37 @@ export function SmartExpenseManager() {
         </Table>
       </div>
 
-      {/* New Expense Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nova Despesa</DialogTitle>
+            <DialogTitle>{editingId ? "Editar Despesa" : "Nova Despesa"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Descrição</Label>
-              <Input
-                value={formData.description}
-                onChange={(e) => handleDescriptionChange(e.target.value)}
-                placeholder="Ex: Sistema CRM, Café com fornecedor..."
-              />
+              <Input value={formData.description} onChange={(e) => handleDescriptionChange(e.target.value)} placeholder="Ex: Sistema CRM, Café com fornecedor..." />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Categoria</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(v) => setFormData({ ...formData, category: v })}
-                >
+                <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(EXPENSE_CATEGORIES_EXPANDED).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectContent>{Object.entries(EXPENSE_CATEGORIES_EXPANDED).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Valor</Label>
-                <Input
-                  type="number"
-                  value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                  placeholder="0,00"
-                />
+                <Input type="number" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })} placeholder="0,00" />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Data</Label>
-                <Input
-                  type="date"
-                  value={formData.entry_date}
-                  onChange={(e) => setFormData({ ...formData, entry_date: e.target.value })}
-                />
+                <Input type="date" value={formData.entry_date} onChange={(e) => setFormData({ ...formData, entry_date: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label>Tipo</Label>
-                <Select
-                  value={formData.expense_type}
-                  onValueChange={(v) => setFormData({ ...formData, expense_type: v })}
-                >
+                <Select value={formData.expense_type} onValueChange={(v) => setFormData({ ...formData, expense_type: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="fixed">Fixa (recorrente)</SelectItem>
@@ -284,18 +232,14 @@ export function SmartExpenseManager() {
             </div>
             <div className="space-y-2">
               <Label>Observações</Label>
-              <Textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Observações opcionais"
-              />
+              <Textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações opcionais" />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSubmit} disabled={isCreating || !formData.description || formData.amount <= 0}>
-              {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Salvar
+            <Button variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }}>Cancelar</Button>
+            <Button onClick={handleSubmit} disabled={isSaving || !formData.description || formData.amount <= 0}>
+              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {editingId ? "Salvar" : "Criar"}
             </Button>
           </DialogFooter>
         </DialogContent>
