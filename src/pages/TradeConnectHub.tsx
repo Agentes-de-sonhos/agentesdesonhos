@@ -156,7 +156,7 @@ export default function TradeConnectHub() {
               </Avatar>
               <div className="flex-1 min-w-0 pt-2 sm:pt-8">
                 <h1
-                  className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-foreground shadow-none opacity-100 bg-secondary-foreground"
+                  className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-foreground shadow-none opacity-100 bg-[#0f1729]/0"
                   style={{ textShadow: "0 2px 6px rgba(0,0,0,0.15)" }}
                 >
                   {profile?.name || "Sem nome"}
