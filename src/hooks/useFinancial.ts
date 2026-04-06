@@ -384,6 +384,90 @@ export function useFinancial() {
     },
   });
 
+  // Update sale mutation
+  const updateSaleMutation = useMutation({
+    mutationFn: async ({ id, ...formData }: SaleFormData & { id: string }) => {
+      const { data, error } = await supabase
+        .from("sales")
+        .update(formData)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+      toast({ title: "Venda atualizada", description: "Os dados foram salvos." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao atualizar venda", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Update sale product mutation
+  const updateSaleProductMutation = useMutation({
+    mutationFn: async ({ id, ...formData }: SaleProductFormData & { id: string }) => {
+      const { data, error } = await supabase
+        .from("sale_products")
+        .update(formData)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      toast({ title: "Produto atualizado", description: "Os dados foram salvos." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao atualizar produto", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Update income mutation
+  const updateIncomeMutation = useMutation({
+    mutationFn: async ({ id, ...formData }: IncomeFormData & { id: string }) => {
+      const { data, error } = await supabase
+        .from("income_entries")
+        .update(formData)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      toast({ title: "Entrada atualizada", description: "Os dados foram salvos." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao atualizar entrada", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Update expense mutation
+  const updateExpenseMutation = useMutation({
+    mutationFn: async ({ id, ...formData }: ExpenseFormData & { id: string }) => {
+      const { data, error } = await supabase
+        .from("expense_entries")
+        .update(formData)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expense_entries"] });
+      toast({ title: "Despesa atualizada", description: "Os dados foram salvos." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao atualizar despesa", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Legacy expense mutation
   const createExpenseMutation = useMutation({
     mutationFn: async (formData: ExpenseFormData) => {
