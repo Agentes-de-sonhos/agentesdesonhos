@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FormattedText } from "@/components/ui/formatted-text";
 
 interface DestinationIntroPublicProps {
   text: string | null;
@@ -64,7 +65,7 @@ export function DestinationIntroPublic({ text, images, destination }: Destinatio
       {/* Description text */}
       {hasText && (
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-center px-2 sm:px-6">
-          {text}
+          <FormattedText>{text!}</FormattedText>
         </p>
       )}
     </section>
