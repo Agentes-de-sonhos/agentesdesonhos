@@ -54,11 +54,29 @@ export function SmartExpenseManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [sellerFilter, setSellerFilter] = useState<string>("all");
   const [formData, setFormData] = useState<ExpenseFormState>({
     description: "", category: "outros", amount: 0,
     entry_date: new Date().toISOString().split("T")[0],
     expense_type: "variable", is_recurring: false, notes: "",
   });
+
+  // Extract unique seller names from commission expenses
+  const sellerNames = useMemo(() => {
+    const names = new Set<string>();
+    expenseEntries.forEach(e => {
+      if (e.category === 'comissao' && e.description.startsWith('Comissão - ')) {
+        names.add(e.description.replace('Comissão - ', ''));
+      }
+    });
+    return Array.from(names).sort();
+  }, [expenseEntries]);
+
+  const filteredExpenses = useMemo(() => {
+    if (sellerFilter === "all") return expenseEntries;
+    if (sellerFilter === "no_commission") return expenseEntries.filter(e => e.category !== 'comissao');
+    return expenseEntries.filter(e => e.description === `Comissão - ${sellerFilter}`);
+  }, [expenseEntries, sellerFilter]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
