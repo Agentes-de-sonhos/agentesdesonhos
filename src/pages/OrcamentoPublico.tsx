@@ -544,7 +544,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               <CreditCard className="h-5 w-5 text-primary" />
               <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Condições de Pagamento</h3>
             </div>
-            <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{paymentTerms}</p>
+            <p className="text-sm text-foreground leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></p>
           </div>
         )}
 
@@ -556,7 +556,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </p>
           )}
           {validityDisclaimer && (
-            <p className="text-xs text-muted-foreground">{validityDisclaimer}</p>
+            <p className="text-xs text-muted-foreground"><FormattedText>{validityDisclaimer}</FormattedText></p>
           )}
           {!validUntil && !validityDisclaimer && (
             <p className="text-xs text-muted-foreground">
