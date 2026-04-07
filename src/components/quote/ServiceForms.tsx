@@ -805,6 +805,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
           </FormItem>
         )} />
 
+        <FormField control={form.control} name="location" render={({ field }) => (
           <FormItem>
             <FormLabel>Local / Trajeto</FormLabel>
             <FormControl><Input placeholder="Ex: Aeroporto CDG ↔ Hotel Marriott" {...field} /></FormControl>
