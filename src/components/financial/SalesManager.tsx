@@ -82,7 +82,7 @@ export function SalesManager() {
   };
 
   const resetProductForm = () => {
-    setProductFormData({ product_type: "aereo", description: "", sale_price: 0, cost_price: 0, commission_type: "percentage", commission_value: 0 });
+    setProductFormData({ ...defaultProductForm });
     setEditingProductId(null);
   };
 
@@ -134,7 +134,17 @@ export function SalesManager() {
     setProductFormData({
       product_type: product.product_type, description: product.description || "",
       sale_price: Number(product.sale_price), cost_price: Number(product.cost_price),
+      non_commissionable_taxes: Number((product as any).non_commissionable_taxes) || 0,
       commission_type: product.commission_type, commission_value: Number(product.commission_value),
+      supplier_name: (product as any).supplier_name || "",
+      payment_rule: (product as any).payment_rule || "after_sale",
+      payment_days: (product as any).payment_days || 30,
+      expected_date: (product as any).expected_date || "",
+      requires_invoice: (product as any).requires_invoice || false,
+      invoice_status: (product as any).invoice_status || "a_emitir",
+      invoice_number: (product as any).invoice_number || "",
+      invoice_issued_date: (product as any).invoice_issued_date || "",
+      invoice_sent_date: (product as any).invoice_sent_date || "",
     });
     setIsProductDialogOpen(true);
   };
