@@ -54,6 +54,11 @@ interface ExpenseFormState {
 
 export function SmartExpenseManager() {
   const { expenseEntries, createExpense, updateExpense, deleteExpense, isCreating, isUpdating } = useFinancial();
+  const { showExport, setShowExport, agencyName } = useFinancialExport("Despesas");
+  const handleExportExpenses = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
+    const { columns, rows, totals } = prepareExpensesExport(filteredExpenses, period);
+    await exportFinancialData({ tabLabel: "Despesas", columns, rows, period, agencyName, totals }, fmt);
+  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);

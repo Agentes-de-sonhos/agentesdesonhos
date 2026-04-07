@@ -31,6 +31,11 @@ import { cn } from "@/lib/utils";
 
 export function EntradasManager() {
   const { incomeEntries, sales, createIncome, updateIncome, deleteIncome, isCreating, isUpdating } = useFinancial();
+  const { showExport, setShowExport, agencyName } = useFinancialExport("Entradas");
+  const handleExportEntradas = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
+    const { columns, rows, totals } = prepareEntradasExport(incomeEntries, sales, period);
+    await exportFinancialData({ tabLabel: "Entradas", columns, rows, period, agencyName, totals }, fmt);
+  };
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
