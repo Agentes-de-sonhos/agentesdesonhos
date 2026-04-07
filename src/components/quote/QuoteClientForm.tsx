@@ -5,8 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Users, Baby, MapPin, DollarSign, Settings2, ChevronDown } from "lucide-react";
+import { CalendarIcon, Users, Baby, MapPin, DollarSign, Settings2, ChevronDown, Plane } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,13 +38,27 @@ const formSchema = z.object({
   adults_count: z.number().min(1, "Mínimo 1 adulto"),
   children_count: z.number().min(0),
   destination: z.string().min(2, "Destino é obrigatório"),
+  trip_type: z.enum(["round_trip", "one_way"]),
   dateRange: z.object({
     from: z.date({ required_error: "Data de início é obrigatória" }),
-    to: z.date({ required_error: "Data de fim é obrigatória" }),
-  }).refine((r) => r.to >= r.from, {
-    message: "Data de fim deve ser após a data de início",
-    path: ["to"],
+    to: z.date().optional().nullable(),
   }),
+}).refine((data) => {
+  if (data.trip_type === "round_trip") {
+    return !!data.dateRange.to;
+  }
+  return true;
+}, {
+  message: "Data de fim é obrigatória para viagens de ida e volta",
+  path: ["dateRange", "to"],
+}).refine((data) => {
+  if (data.trip_type === "round_trip" && data.dateRange.from && data.dateRange.to) {
+    return data.dateRange.to >= data.dateRange.from;
+  }
+  return true;
+}, {
+  message: "Data de fim deve ser após a data de início",
+  path: ["dateRange", "to"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -71,11 +86,14 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
       adults_count: draft?.adults_count || 2,
       children_count: draft?.children_count || 0,
       destination: draft?.destination || "",
+      trip_type: (draft as any)?.trip_type || "round_trip",
       dateRange: draft?.dateRange?.from
-        ? { from: new Date(draft.dateRange.from), to: draft.dateRange.to ? new Date(draft.dateRange.to) : undefined as any }
-        : { from: undefined as any, to: undefined as any },
+        ? { from: new Date(draft.dateRange.from), to: draft.dateRange.to ? new Date(draft.dateRange.to) : undefined }
+        : { from: undefined as any, to: undefined },
     },
   });
+
+  const tripType = form.watch("trip_type");
 
   // Auto-save form values on change
   const watchedValues = form.watch();
@@ -97,6 +115,11 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
       return;
     }
     clearDraft();
+    const endDate = values.trip_type === "one_way"
+      ? format(values.dateRange.from, "yyyy-MM-dd")
+      : values.dateRange.to
+        ? format(values.dateRange.to, "yyyy-MM-dd")
+        : format(values.dateRange.from, "yyyy-MM-dd");
     onSubmit({
       client_id: selectedClient.id,
       client_name: values.client_name,
@@ -104,7 +127,7 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
       children_count: values.children_count,
       destination: values.destination,
       start_date: format(values.dateRange.from, "yyyy-MM-dd"),
-      end_date: format(values.dateRange.to, "yyyy-MM-dd"),
+      end_date: endDate,
       currency,
       currency_mode: currencyMode,
       exchange_rate: currencyMode === "conversion" ? exchangeRate : null,
