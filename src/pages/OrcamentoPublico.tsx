@@ -517,18 +517,18 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           if ((quote as any).show_investment_section === false) return null;
 
           return (
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground p-8 sm:p-10 text-center shadow-xl">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
-              <div className="relative space-y-3">
-                <p className="text-sm font-medium opacity-80 uppercase tracking-widest">
-                  {showDetailedPrices ? "Investimento Total" : "Valor do Pacote Completo"}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/90 to-primary/70 text-primary-foreground p-6 sm:p-8 text-center shadow-md">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_50%)]" />
+              <div className="relative space-y-2">
+                <p className="text-xs font-medium opacity-70 uppercase tracking-widest">
+                  {showDetailedPrices ? "Investimento Total" : "Valor do Pacote"}
                 </p>
                 <div className="flex flex-col items-center gap-1">
                   {mainDisplay}
                 </div>
                 {subtitleDisplay}
                 {quote.services && quote.services.length > 0 && (
-                  <p className="text-xs opacity-60 pt-1">
+                  <p className="text-xs opacity-50 pt-1">
                     {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
                   </p>
                 )}
