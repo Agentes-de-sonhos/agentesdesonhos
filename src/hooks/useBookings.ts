@@ -441,8 +441,58 @@ export function useBookingDetail(bookingId: string | undefined) {
 
   const addCommission = useMutation({
     mutationFn: async (values: Omit<BookingCommission, "id" | "user_id" | "created_at" | "supplier">) => {
-      const { error } = await supabase.from("booking_commissions").insert({ ...values, user_id: user!.id });
+      const { data, error } = await supabase.from("booking_commissions").insert({ ...values, user_id: user!.id }).select().single();
       if (error) throw error;
+
+      // Generate agenda reminders for this commission
+      const events: any[] = [];
+      const svc = servicesQuery.data?.find(s => s.id === values.booking_service_id);
+      const svcLabel = svc ? `${SERVICE_TYPES[svc.service_type] || svc.service_type}${svc.description ? ` - ${svc.description}` : ""}` : "Serviço";
+      const bookingName = bookingQuery.data?.trip_name || "Venda";
+
+      if (values.requires_invoice) {
+        // Reminder: emit invoice (today + 1 day)
+        const emitDate = new Date();
+        emitDate.setDate(emitDate.getDate() + 1);
+        events.push({
+          user_id: user!.id,
+          title: `📄 Emitir NF - ${svcLabel}`,
+          description: `Emitir nota fiscal para comissão de R$ ${fmt(Number(values.commission_amount))} referente a "${bookingName}"`,
+          event_date: emitDate.toISOString().slice(0, 10),
+          event_type: "lembrete",
+          color: "#f59e0b",
+        });
+      }
+
+      if (values.expected_date) {
+        // Reminder: expected receive date
+        events.push({
+          user_id: user!.id,
+          title: `💰 Comissão prevista - ${svcLabel}`,
+          description: `Recebimento previsto de R$ ${fmt(Number(values.commission_amount))} referente a "${bookingName}"`,
+          event_date: values.expected_date,
+          event_type: "lembrete",
+          color: "#8b5cf6",
+        });
+
+        // Reminder: if overdue (expected_date + 3 days)
+        const overdueDate = new Date(values.expected_date + "T00:00:00");
+        overdueDate.setDate(overdueDate.getDate() + 3);
+        events.push({
+          user_id: user!.id,
+          title: `⚠️ Cobrar fornecedor - ${svcLabel}`,
+          description: `Comissão de R$ ${fmt(Number(values.commission_amount))} pode estar atrasada. Verificar com fornecedor referente a "${bookingName}"`,
+          event_date: overdueDate.toISOString().slice(0, 10),
+          event_type: "lembrete",
+          color: "#ef4444",
+        });
+      }
+
+      if (events.length > 0) {
+        await supabase.from("agency_events").insert(events);
+      }
+
+      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["booking-commissions", bookingId] });
