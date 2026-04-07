@@ -63,16 +63,15 @@ export function SalesManager() {
   const getProductsForSale = (saleId: string) => saleProducts.filter(p => p.sale_id === saleId);
 
   const calculateProductCommission = (product: typeof saleProducts[0]) => {
-    if (product.commission_type === 'percentage') return Number(product.sale_price) * Number(product.commission_value) / 100;
+    const prodTaxes = Number((product as any).non_commissionable_taxes) || 0;
+    const base = Number(product.sale_price) - prodTaxes;
+    if (product.commission_type === 'percentage') return base * Number(product.commission_value) / 100;
     return Number(product.commission_value);
   };
 
-  const calculateSaleProfit = (saleId: string) => {
+  const calculateSaleTotalCommission = (saleId: string) => {
     const products = getProductsForSale(saleId);
-    const totalSale = products.reduce((sum, p) => sum + Number(p.sale_price), 0);
-    const totalCost = products.reduce((sum, p) => sum + Number(p.cost_price), 0);
-    const totalCommission = products.reduce((sum, p) => sum + calculateProductCommission(p), 0);
-    return totalSale - totalCost - totalCommission;
+    return products.reduce((sum, p) => sum + calculateProductCommission(p), 0);
   };
 
   const resetSaleForm = () => {
