@@ -153,7 +153,6 @@ export function SmartDashboard() {
         </div>
       </div>
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Dashboard" onExport={handleExportDashboard} />
-      </div>
 
       {/* Smart Alerts */}
       <div className="space-y-2">
