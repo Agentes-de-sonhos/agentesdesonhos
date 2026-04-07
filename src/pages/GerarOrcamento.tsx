@@ -357,6 +357,7 @@ export default function GerarOrcamento() {
   const handleCreateQuote = async (formData: QuoteFormData) => {
     const newQuote = await createQuote(formData);
     incrementUsage();
+    setDraftBanner(null);
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
   };
 
