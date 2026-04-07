@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { Loader2, DollarSign, LayoutDashboard, ArrowDownCircle, ShoppingBag, ArrowUpCircle } from "lucide-react";
+import { Loader2, DollarSign, LayoutDashboard, ArrowDownCircle, ShoppingBag, ArrowUpCircle, Receipt } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,10 +7,10 @@ import { SmartDashboard } from "@/components/financial/SmartDashboard";
 import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager";
 import { SalesManager } from "@/components/financial/SalesManager";
 import { EntradasManager } from "@/components/financial/EntradasManager";
+import { CommissionsReceivable } from "@/components/financial/CommissionsReceivable";
 import { useFinancial } from "@/hooks/useFinancial";
 
-
-const VALID_TABS = ["vendas", "despesas", "entradas", "dashboard"] as const;
+const VALID_TABS = ["vendas", "comissoes", "entradas", "despesas", "dashboard"] as const;
 
 export default function Financeiro() {
   const { isLoading } = useFinancial();
@@ -38,10 +38,14 @@ export default function Financeiro() {
             </div>
           ) : (
             <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 max-w-lg">
+              <TabsList className="grid w-full grid-cols-5 max-w-2xl">
                 <TabsTrigger value="vendas" className="gap-1.5">
                   <ShoppingBag className="h-4 w-4" />
                   <span className="hidden sm:inline">Vendas</span>
+                </TabsTrigger>
+                <TabsTrigger value="comissoes" className="gap-1.5">
+                  <Receipt className="h-4 w-4" />
+                  <span className="hidden sm:inline">Comissões</span>
                 </TabsTrigger>
                 <TabsTrigger value="entradas" className="gap-1.5">
                   <ArrowUpCircle className="h-4 w-4" />
@@ -59,6 +63,10 @@ export default function Financeiro() {
 
               <TabsContent value="vendas">
                 <SalesManager />
+              </TabsContent>
+
+              <TabsContent value="comissoes">
+                <CommissionsReceivable />
               </TabsContent>
 
               <TabsContent value="despesas">
