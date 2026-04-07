@@ -84,18 +84,13 @@ export function SalesManager() {
   };
 
   const handleOpportunitySelect = (opportunityId: string) => {
-    setSelectedOpportunity(opportunityId);
-    if (opportunityId === "manual") {
-      setFormData({ client_name: "", destination: "", sale_amount: 0, sale_date: new Date().toISOString().split("T")[0], notes: "" });
-    } else {
-      const opp = closedOpportunities.find(o => o.id === opportunityId);
-      if (opp) {
-        setFormData({
-          client_name: opp.client?.name || "", destination: opp.destination,
-          sale_amount: Number(opp.estimated_value), sale_date: new Date().toISOString().split("T")[0],
-          notes: opp.notes || "", opportunity_id: opp.id,
-        });
-      }
+    const opp = closedOpportunities.find(o => o.id === opportunityId);
+    if (opp) {
+      setFormData({
+        client_name: opp.client?.name || "", destination: opp.destination,
+        sale_amount: Number(opp.estimated_value), sale_date: new Date().toISOString().split("T")[0],
+        notes: opp.notes || "", opportunity_id: opp.id,
+      });
     }
   };
 
