@@ -418,6 +418,8 @@ const hotelSchema = z.object({
   room_type: z.string().min(1, "Tipo de quarto é obrigatório"),
   meal_plan: z.string().min(1, "Regime de alimentação é obrigatório"),
   price: z.number().min(0),
+  adult_price: z.number().min(0).optional(),
+  child_price: z.number().min(0).optional(),
   notes: z.string().optional(),
 });
 
@@ -429,7 +431,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     defaultValues: {
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
       hotel_name: init?.hotel_name || "", city: init?.city || "",
-      room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0, notes: init?.notes || "",
+      room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0,
+      adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
+      notes: init?.notes || "",
       check_in: init?.check_in ? parseLocalDate(init.check_in) : tripStartDate,
       check_out: init?.check_out ? parseLocalDate(init.check_out) : tripEndDate,
     },
@@ -486,11 +490,13 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   }, [form, onPlaceIdChange]);
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
-    const data = {
+    const data: any = {
       hotel_name: values.hotel_name, city: values.city,
       check_in: format(values.check_in, "yyyy-MM-dd"), check_out: format(values.check_out, "yyyy-MM-dd"),
       room_type: values.room_type, meal_plan: values.meal_plan, price: values.price, notes: values.notes || "",
     };
+    if (values.adult_price && values.adult_price > 0) data.adult_price = values.adult_price;
+    if (values.child_price && values.child_price > 0) data.child_price = values.child_price;
     onSubmit(data, values.price, values.option_label || undefined, values.service_description || undefined);
   };
 
