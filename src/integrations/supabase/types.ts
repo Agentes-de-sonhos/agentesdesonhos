@@ -733,12 +733,17 @@ export type Database = {
       booking_services: {
         Row: {
           booking_id: string
+          commission_type: string
+          commission_value: number
           cost_price: number
           created_at: string
           description: string | null
+          du_type: string
+          du_value: number
           expected_commission: number
           expected_commission_date: string | null
           id: string
+          non_commissionable_taxes: number
           sale_price: number
           service_type: string
           status: string
@@ -747,12 +752,17 @@ export type Database = {
         }
         Insert: {
           booking_id: string
+          commission_type?: string
+          commission_value?: number
           cost_price?: number
           created_at?: string
           description?: string | null
+          du_type?: string
+          du_value?: number
           expected_commission?: number
           expected_commission_date?: string | null
           id?: string
+          non_commissionable_taxes?: number
           sale_price?: number
           service_type: string
           status?: string
@@ -761,12 +771,17 @@ export type Database = {
         }
         Update: {
           booking_id?: string
+          commission_type?: string
+          commission_value?: number
           cost_price?: number
           created_at?: string
           description?: string | null
+          du_type?: string
+          du_value?: number
           expected_commission?: number
           expected_commission_date?: string | null
           id?: string
+          non_commissionable_taxes?: number
           sale_price?: number
           service_type?: string
           status?: string
