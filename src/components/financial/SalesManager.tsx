@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { format } from "date-fns";
+import { useState, useMemo } from "react";
+import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil } from "lucide-react";
+import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,10 +43,12 @@ export function SalesManager() {
     client_name: "", destination: "", sale_amount: 0,
     sale_date: new Date().toISOString().split("T")[0], notes: "",
   });
-  const [productFormData, setProductFormData] = useState<SaleProductFormData>({
+  const defaultProductForm: SaleProductFormData = {
     product_type: "aereo", description: "", sale_price: 0,
-    cost_price: 0, commission_type: "percentage", commission_value: 0,
-  });
+    cost_price: 0, non_commissionable_taxes: 0, commission_type: "percentage", commission_value: 0,
+    payment_rule: "after_sale", payment_days: 30, requires_invoice: false,
+  };
+  const [productFormData, setProductFormData] = useState<SaleProductFormData>(defaultProductForm);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -60,16 +63,15 @@ export function SalesManager() {
   const getProductsForSale = (saleId: string) => saleProducts.filter(p => p.sale_id === saleId);
 
   const calculateProductCommission = (product: typeof saleProducts[0]) => {
-    if (product.commission_type === 'percentage') return Number(product.sale_price) * Number(product.commission_value) / 100;
+    const prodTaxes = Number((product as any).non_commissionable_taxes) || 0;
+    const base = Number(product.sale_price) - prodTaxes;
+    if (product.commission_type === 'percentage') return base * Number(product.commission_value) / 100;
     return Number(product.commission_value);
   };
 
-  const calculateSaleProfit = (saleId: string) => {
+  const calculateSaleTotalCommission = (saleId: string) => {
     const products = getProductsForSale(saleId);
-    const totalSale = products.reduce((sum, p) => sum + Number(p.sale_price), 0);
-    const totalCost = products.reduce((sum, p) => sum + Number(p.cost_price), 0);
-    const totalCommission = products.reduce((sum, p) => sum + calculateProductCommission(p), 0);
-    return totalSale - totalCost - totalCommission;
+    return products.reduce((sum, p) => sum + calculateProductCommission(p), 0);
   };
 
   const resetSaleForm = () => {
@@ -79,7 +81,7 @@ export function SalesManager() {
   };
 
   const resetProductForm = () => {
-    setProductFormData({ product_type: "aereo", description: "", sale_price: 0, cost_price: 0, commission_type: "percentage", commission_value: 0 });
+    setProductFormData({ ...defaultProductForm });
     setEditingProductId(null);
   };
 
@@ -131,7 +133,17 @@ export function SalesManager() {
     setProductFormData({
       product_type: product.product_type, description: product.description || "",
       sale_price: Number(product.sale_price), cost_price: Number(product.cost_price),
+      non_commissionable_taxes: Number((product as any).non_commissionable_taxes) || 0,
       commission_type: product.commission_type, commission_value: Number(product.commission_value),
+      supplier_name: (product as any).supplier_name || "",
+      payment_rule: (product as any).payment_rule || "after_sale",
+      payment_days: (product as any).payment_days || 30,
+      expected_date: (product as any).expected_date || "",
+      requires_invoice: (product as any).requires_invoice || false,
+      invoice_status: (product as any).invoice_status || "a_emitir",
+      invoice_number: (product as any).invoice_number || "",
+      invoice_issued_date: (product as any).invoice_issued_date || "",
+      invoice_sent_date: (product as any).invoice_sent_date || "",
     });
     setIsProductDialogOpen(true);
   };
@@ -148,10 +160,11 @@ export function SalesManager() {
   const importedOpportunityIds = sales.map(s => s.opportunity_id).filter(Boolean);
   const availableOpportunities = closedOpportunities.filter(o => !importedOpportunityIds.includes(o.id));
   const isSaving = isCreating || isUpdating;
+  const taxes = Number(productFormData.non_commissionable_taxes) || 0;
+  const commissionBase = (Number(productFormData.sale_price) || 0) - taxes;
   const estimatedCommission = productFormData.commission_type === "percentage"
-    ? (Number(productFormData.sale_price) || 0) * (Number(productFormData.commission_value) || 0) / 100
+    ? commissionBase * (Number(productFormData.commission_value) || 0) / 100
     : Number(productFormData.commission_value) || 0;
-  const estimatedProfit = (Number(productFormData.sale_price) || 0) - (Number(productFormData.cost_price) || 0) - estimatedCommission;
 
   const renderSectionHeader = (step: number, title: string, description: string) => (
     <div className="space-y-1">
@@ -192,7 +205,7 @@ export function SalesManager() {
           sales.map((sale) => {
             const products = getProductsForSale(sale.id);
             const isExpanded = expandedSales.has(sale.id);
-            const profit = calculateSaleProfit(sale.id);
+            const totalCommission = calculateSaleTotalCommission(sale.id);
 
             return (
               <Collapsible key={sale.id} open={isExpanded} onOpenChange={() => toggleSaleExpanded(sale.id)}>
@@ -217,7 +230,7 @@ export function SalesManager() {
                         <div className="text-right">
                           <div className="font-medium">{formatCurrency(Number(sale.sale_amount))}</div>
                           {products.length > 0 && (
-                            <div className={`text-sm ${profit >= 0 ? 'text-success' : 'text-destructive'}`}>Lucro: {formatCurrency(profit)}</div>
+                            <div className="text-sm text-primary">Comissão: {formatCurrency(totalCommission)}</div>
                           )}
                         </div>
                         <div className="flex items-center gap-1">
@@ -259,27 +272,24 @@ export function SalesManager() {
                               <TableHead>Tipo</TableHead>
                               <TableHead>Descrição</TableHead>
                               <TableHead className="text-right">Preço Venda</TableHead>
-                              <TableHead className="text-right">Custo</TableHead>
                               <TableHead className="text-right">Comissão</TableHead>
-                              <TableHead className="text-right">Lucro</TableHead>
+                              <TableHead>Fornecedor</TableHead>
                               <TableHead className="w-[80px]"></TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {products.map((product) => {
                               const commission = calculateProductCommission(product);
-                              const productProfit = Number(product.sale_price) - Number(product.cost_price) - commission;
                               return (
                                 <TableRow key={product.id}>
                                   <TableCell className="font-medium">{PRODUCT_TYPES[product.product_type]}</TableCell>
                                   <TableCell className="text-muted-foreground">{product.description || "-"}</TableCell>
                                   <TableCell className="text-right">{formatCurrency(Number(product.sale_price))}</TableCell>
-                                  <TableCell className="text-right text-destructive">{formatCurrency(Number(product.cost_price))}</TableCell>
-                                  <TableCell className="text-right text-warning">
+                                  <TableCell className="text-right text-primary">
                                     {formatCurrency(commission)}
                                     {product.commission_type === 'percentage' && <span className="text-xs text-muted-foreground ml-1">({product.commission_value}%)</span>}
                                   </TableCell>
-                                  <TableCell className={`text-right font-medium ${productProfit >= 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(productProfit)}</TableCell>
+                                  <TableCell className="text-muted-foreground">{(product as any).supplier_name || "-"}</TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-0.5">
                                       <Button variant="ghost" size="icon" onClick={() => openEditProduct(product)}>
@@ -412,15 +422,16 @@ export function SalesManager() {
             </section>
 
             <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-              {renderSectionHeader(2, "Comissão e Cálculo", "Defina os valores financeiros e a comissão deste produto.")}
+              {renderSectionHeader(2, "Comissão e Cálculo", "Defina os valores e a regra de comissão deste produto.")}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Preço de Venda</Label>
+                  <Label>Preço de Venda *</Label>
                   <Input type="number" value={productFormData.sale_price} onChange={(e) => setProductFormData({ ...productFormData, sale_price: Number(e.target.value) })} placeholder="0,00" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Custo (Fornecedor)</Label>
-                  <Input type="number" value={productFormData.cost_price} onChange={(e) => setProductFormData({ ...productFormData, cost_price: Number(e.target.value) })} placeholder="0,00" />
+                  <Label>Taxas / valores não comissionáveis</Label>
+                  <Input type="number" value={productFormData.non_commissionable_taxes || ""} onChange={(e) => setProductFormData({ ...productFormData, non_commissionable_taxes: Number(e.target.value) })} placeholder="0,00 (opcional)" />
+                  <p className="text-xs text-muted-foreground">Taxas, impostos ou valores que não entram na base de comissão</p>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -445,24 +456,92 @@ export function SalesManager() {
                   <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(productFormData.sale_price) || 0)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Comissão estimada</p>
-                  <p className="text-sm font-semibold text-foreground">{formatCurrency(estimatedCommission)}</p>
+                  <p className="text-xs text-muted-foreground">Base comissionável</p>
+                  <p className="text-sm font-semibold text-foreground">{formatCurrency(commissionBase)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Lucro estimado</p>
-                  <p className="text-sm font-semibold text-foreground">{formatCurrency(estimatedProfit)}</p>
+                  <p className="text-xs text-muted-foreground">Comissão estimada</p>
+                  <p className="text-sm font-semibold text-primary">{formatCurrency(estimatedCommission)}</p>
                 </div>
               </div>
             </section>
 
             <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-              {renderSectionHeader(3, "Recebimento e Nota Fiscal", "Organização operacional deste produto dentro da Gestão Financeira.")}
-              <div className="rounded-lg border border-dashed border-border bg-background/80 p-4">
-                <p className="text-sm font-medium text-foreground">Acompanhamento operacional centralizado</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Depois de salvar o produto, o acompanhamento de comissão, recebimento e nota fiscal pode ser feito na aba de comissões da Gestão Financeira.
-                </p>
+              {renderSectionHeader(3, "Recebimento e Nota Fiscal", "Configure o fornecedor, prazo e nota fiscal deste produto.")}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Fornecedor</Label>
+                  <Input value={productFormData.supplier_name || ""} onChange={(e) => setProductFormData({ ...productFormData, supplier_name: e.target.value })} placeholder="Nome do fornecedor" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Regra de recebimento</Label>
+                  <Select value={productFormData.payment_rule} onValueChange={(v) => setProductFormData({ ...productFormData, payment_rule: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="after_sale">Após a venda</SelectItem>
+                      <SelectItem value="after_travel">Após a viagem</SelectItem>
+                      <SelectItem value="after_invoice_issued">Após emissão da NF</SelectItem>
+                      <SelectItem value="after_invoice_sent">Após envio da NF</SelectItem>
+                      <SelectItem value="manual">Data manual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Prazo em dias</Label>
+                  <Input type="number" value={productFormData.payment_days} onChange={(e) => setProductFormData({ ...productFormData, payment_days: Number(e.target.value) })} placeholder="30" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Data prevista de recebimento</Label>
+                  <Input type="date" value={productFormData.expected_date || ""} onChange={(e) => setProductFormData({ ...productFormData, expected_date: e.target.value })} />
+                  <p className="text-xs text-muted-foreground">Calculada automaticamente ou informe manualmente</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <Checkbox
+                  id="requires_invoice"
+                  checked={productFormData.requires_invoice}
+                  onCheckedChange={(checked) => setProductFormData({ ...productFormData, requires_invoice: !!checked })}
+                />
+                <Label htmlFor="requires_invoice" className="text-sm font-medium cursor-pointer">Exige nota fiscal?</Label>
+              </div>
+
+              {productFormData.requires_invoice && (
+                <div className="space-y-4 rounded-lg border border-dashed border-border bg-background/80 p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <FileText className="h-4 w-4" /> Dados da Nota Fiscal
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Status da Nota</Label>
+                      <Select value={productFormData.invoice_status || "a_emitir"} onValueChange={(v) => setProductFormData({ ...productFormData, invoice_status: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="a_emitir">A emitir</SelectItem>
+                          <SelectItem value="emitida">Emitida</SelectItem>
+                          <SelectItem value="enviada">Enviada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Número da Nota</Label>
+                      <Input value={productFormData.invoice_number || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_number: e.target.value })} placeholder="Nº da NF" />
+                    </div>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Data de Emissão</Label>
+                      <Input type="date" value={productFormData.invoice_issued_date || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_issued_date: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Data de Envio</Label>
+                      <Input type="date" value={productFormData.invoice_sent_date || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_sent_date: e.target.value })} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
           </div>
 

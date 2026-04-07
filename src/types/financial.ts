@@ -155,8 +155,18 @@ export interface SaleProductFormData {
   description?: string;
   sale_price: number;
   cost_price: number;
+  non_commissionable_taxes: number;
   commission_type: 'percentage' | 'fixed';
   commission_value: number;
+  supplier_name?: string;
+  payment_rule: string;
+  payment_days: number;
+  expected_date?: string;
+  requires_invoice: boolean;
+  invoice_status?: string;
+  invoice_number?: string;
+  invoice_issued_date?: string;
+  invoice_sent_date?: string;
 }
 
 export interface CustomerPaymentFormData {
