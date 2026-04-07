@@ -35,7 +35,7 @@ export function SalesManager() {
   const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<string>("");
+  const [selectedOpportunity, setSelectedOpportunity] = useState<string>("client");
   const [editingSaleId, setEditingSaleId] = useState<string | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [formData, setFormData] = useState<SaleFormData>({
@@ -75,7 +75,7 @@ export function SalesManager() {
   const resetSaleForm = () => {
     setFormData({ client_name: "", destination: "", sale_amount: 0, sale_date: new Date().toISOString().split("T")[0], notes: "" });
     setEditingSaleId(null);
-    setSelectedOpportunity("");
+    setSelectedOpportunity("client");
   };
 
   const resetProductForm = () => {
@@ -84,18 +84,13 @@ export function SalesManager() {
   };
 
   const handleOpportunitySelect = (opportunityId: string) => {
-    setSelectedOpportunity(opportunityId);
-    if (opportunityId === "manual") {
-      setFormData({ client_name: "", destination: "", sale_amount: 0, sale_date: new Date().toISOString().split("T")[0], notes: "" });
-    } else {
-      const opp = closedOpportunities.find(o => o.id === opportunityId);
-      if (opp) {
-        setFormData({
-          client_name: opp.client?.name || "", destination: opp.destination,
-          sale_amount: Number(opp.estimated_value), sale_date: new Date().toISOString().split("T")[0],
-          notes: opp.notes || "", opportunity_id: opp.id,
-        });
-      }
+    const opp = closedOpportunities.find(o => o.id === opportunityId);
+    if (opp) {
+      setFormData({
+        client_name: opp.client?.name || "", destination: opp.destination,
+        sale_amount: Number(opp.estimated_value), sale_date: new Date().toISOString().split("T")[0],
+        notes: opp.notes || "", opportunity_id: opp.id,
+      });
     }
   };
 
@@ -291,23 +286,48 @@ export function SalesManager() {
             <DialogTitle>{editingSaleId ? "Editar Venda" : "Nova Venda"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {!editingSaleId && availableOpportunities.length > 0 && (
-              <div className="space-y-2">
-                <Label>Importar de Oportunidade</Label>
-                <Select value={selectedOpportunity} onValueChange={handleOpportunitySelect}>
-                  <SelectTrigger><SelectValue placeholder="Selecione ou cadastre manualmente" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="manual">Cadastro Manual</SelectItem>
-                    {availableOpportunities.map((opp) => (
-                      <SelectItem key={opp.id} value={opp.id}>{opp.client?.name} - {opp.destination}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {!editingSaleId && (
+              <div className="space-y-3">
+                <Label>Origem da Venda</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedOpportunity("client"); setFormData({ ...formData, opportunity_id: undefined }); }}
+                    className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${selectedOpportunity !== "opportunity" ? "border-primary bg-primary/5 text-primary" : "border-muted hover:border-muted-foreground/30"}`}
+                  >
+                    <User className="h-4 w-4" /> Selecionar Cliente
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOpportunity("opportunity")}
+                    className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${selectedOpportunity === "opportunity" ? "border-primary bg-primary/5 text-primary" : "border-muted hover:border-muted-foreground/30"}`}
+                  >
+                    <Download className="h-4 w-4" /> Importar de Oportunidade
+                  </button>
+                </div>
+
+                {selectedOpportunity === "opportunity" && (
+                  <div className="space-y-2">
+                    <Label>Oportunidade</Label>
+                    {availableOpportunities.length === 0 ? (
+                      <p className="text-sm text-muted-foreground p-3 border rounded-lg bg-muted/30">Nenhuma oportunidade fechada disponível para importar.</p>
+                    ) : (
+                      <Select value={formData.opportunity_id || ""} onValueChange={(id) => handleOpportunitySelect(id)}>
+                        <SelectTrigger><SelectValue placeholder="Selecione uma oportunidade" /></SelectTrigger>
+                        <SelectContent>
+                          {availableOpportunities.map((opp) => (
+                            <SelectItem key={opp.id} value={opp.id}>{opp.client?.name} - {opp.destination}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                )}
               </div>
             )}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Cliente</Label>
+                <Label>Cliente *</Label>
                 <Input value={formData.client_name} onChange={(e) => setFormData({ ...formData, client_name: e.target.value })} placeholder="Nome do cliente" />
               </div>
               <div className="space-y-2">
