@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, CloudOff, Cloud } from "lucide-react";
+import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildOrcamentoLink } from "@/lib/orcamento-domain";
 import { useNavigate, useParams } from "react-router-dom";
@@ -150,7 +151,7 @@ export default function GerarOrcamento() {
   const [entryPercentage, setEntryPercentage] = useState(30);
   const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
-  const [autoSaved, setAutoSaved] = useState(false);
+  
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
   const [showInvestmentLocal, setShowInvestmentLocal] = useState<boolean | null>(null);
   const [headerEditDates, setHeaderEditDates] = useState(false);
@@ -158,18 +159,39 @@ export default function GerarOrcamento() {
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
   const [openSection, setOpenSection] = useState<"payment" | "validity" | null>(null);
+  const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
+
+  // Check for unsaved draft on mount (only on list screen)
+  useEffect(() => {
+    if (!id) {
+      const draft = getLocalDraft();
+      if (draft) setDraftBanner(draft);
+    }
+  }, [id]);
+
+  // Flush refs for autosave on page leave
+  const flushPaymentRef = useRef<(() => void) | undefined>();
+  const flushValidityRef = useRef<(() => void) | undefined>();
+  const flushPendingSave = useCallback(() => {
+    flushPaymentRef.current?.();
+    flushValidityRef.current?.();
+  }, []);
+
+  const { saveStatus, showSaved, showSaving, showError } = useQuoteAutosave(
+    id,
+    quote?.client_name,
+    quote?.destination,
+    flushPendingSave,
+  );
 
   const quoteLoadedRef = useRef(false);
   const quoteInitializedRef = useRef(false);
-  const autoSavedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const paymentSnapshotRef = useRef("");
   const validitySnapshotRef = useRef("");
 
   const showAutoSavedFeedback = useCallback(() => {
-    setAutoSaved(true);
-    if (autoSavedTimeoutRef.current) clearTimeout(autoSavedTimeoutRef.current);
-    autoSavedTimeoutRef.current = setTimeout(() => setAutoSaved(false), 2500);
-  }, []);
+    showSaved();
+  }, [showSaved]);
 
   const buildPaymentSnapshot = useCallback(() => JSON.stringify({
     payment_terms: paymentTerms || null,
@@ -279,11 +301,11 @@ export default function GerarOrcamento() {
     }
   }, [quote, buildValiditySnapshot, toast, showAutoSavedFeedback]);
 
+  // Wire up flush refs for beforeunload/visibilitychange
   useEffect(() => {
-    return () => {
-      if (autoSavedTimeoutRef.current) clearTimeout(autoSavedTimeoutRef.current);
-    };
-  }, []);
+    flushPaymentRef.current = () => handleSavePaymentConfig();
+    flushValidityRef.current = () => handleSaveValidity();
+  }, [handleSavePaymentConfig, handleSaveValidity]);
 
   // Debounced auto-save for payment config
   useEffect(() => {
@@ -335,6 +357,7 @@ export default function GerarOrcamento() {
   const handleCreateQuote = async (formData: QuoteFormData) => {
     const newQuote = await createQuote(formData);
     incrementUsage();
+    setDraftBanner(null);
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
   };
 
@@ -355,6 +378,7 @@ export default function GerarOrcamento() {
       ? buildOrcamentoLink(agencyName, accessCode)
       : `${PUBLIC_DOMAIN}/orcamento/${token}`;
 
+    clearLocalDraft();
     await navigator.clipboard.writeText(publicUrl);
     toast({
       title: quote.share_token ? "Link copiado" : "Orçamento publicado",
@@ -448,6 +472,39 @@ export default function GerarOrcamento() {
               ) : (
                 <><Lock className="h-4 w-4" /> Limite diário atingido. Faça upgrade para orçamentos ilimitados.</>
               )}
+            </div>
+          )}
+
+          {/* Draft recovery banner */}
+          {draftBanner && (
+            <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 flex items-center justify-between gap-3 animate-fade-in">
+              <div className="flex items-center gap-3 min-w-0">
+                <FileText className="h-5 w-5 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">Rascunho encontrado</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {draftBanner.clientName} — {draftBanner.destination}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { clearLocalDraft(); setDraftBanner(null); }}
+                >
+                  Descartar
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setDraftBanner(null);
+                    navigate(`/ferramentas-ia/gerar-orcamento/${draftBanner.quoteId}`);
+                  }}
+                >
+                  Continuar editando
+                </Button>
+              </div>
             </div>
           )}
 
@@ -578,10 +635,22 @@ export default function GerarOrcamento() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0 flex-wrap">
-            {autoSaved && (
+            {saveStatus === "saving" && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Salvo
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Salvando...
+              </span>
+            )}
+            {saveStatus === "saved" && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
+                <Cloud className="h-3 w-3 text-primary" />
+                Rascunho salvo
+              </span>
+            )}
+            {saveStatus === "error" && (
+              <span className="text-xs text-destructive flex items-center gap-1 animate-fade-in">
+                <CloudOff className="h-3 w-3" />
+                Erro ao salvar
               </span>
             )}
             <Button variant="outline" size="sm" className="sm:size-default" onClick={handleGeneratePDF}>
