@@ -1,5 +1,8 @@
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
+import { useFinancialExport } from "@/hooks/useFinancialExport";
+import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { exportFinancialData, prepareExpensesExport } from "@/utils/financialExport";
 import { ptBR } from "date-fns/locale";
 import { Plus, Trash2, Tag, Loader2, Repeat, Pencil, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -153,9 +156,11 @@ export function SmartExpenseManager() {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Despesas Variáveis</CardTitle></CardHeader><CardContent><div className="text-xl font-bold">{formatCurrency(variableTotal)}</div></CardContent></Card>
       </div>
 
+      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Despesas" onExport={handleExportExpenses} />
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-semibold">Despesas</h3>
         <div className="flex items-center gap-2">
+          <ExportButton onClick={() => setShowExport(true)} />
           {sellerNames.length > 0 && (
             <Select value={sellerFilter} onValueChange={setSellerFilter}>
               <SelectTrigger className="w-[180px] h-9">

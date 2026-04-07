@@ -3,6 +3,9 @@ import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users } from "lucide-react";
+import { useFinancialExport } from "@/hooks/useFinancialExport";
+import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -274,14 +277,24 @@ export function SalesManager() {
     </div>
   );
 
+  const { showExport, setShowExport, agencyName } = useFinancialExport("Vendas");
+  const handleExportSales = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
+    const { columns, rows, totals } = prepareSalesExport(sales, period);
+    await exportFinancialData({ tabLabel: "Vendas", columns, rows, period, agencyName, totals }, fmt);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Vendas</h3>
-        <Button onClick={() => { resetSaleForm(); setIsDialogOpen(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Nova Venda
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={() => setShowExport(true)} />
+          <Button onClick={() => { resetSaleForm(); setIsDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Nova Venda
+          </Button>
+        </div>
       </div>
+      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Vendas" onExport={handleExportSales} />
 
       {availableOpportunities.length > 0 && (
         <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
