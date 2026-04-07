@@ -602,10 +602,22 @@ export default function GerarOrcamento() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0 flex-wrap">
-            {autoSaved && (
+            {saveStatus === "saving" && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Salvo
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Salvando...
+              </span>
+            )}
+            {saveStatus === "saved" && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
+                <Cloud className="h-3 w-3 text-emerald-500" />
+                Rascunho salvo
+              </span>
+            )}
+            {saveStatus === "error" && (
+              <span className="text-xs text-destructive flex items-center gap-1 animate-fade-in">
+                <CloudOff className="h-3 w-3" />
+                Erro ao salvar
               </span>
             )}
             <Button variant="outline" size="sm" className="sm:size-default" onClick={handleGeneratePDF}>
