@@ -378,6 +378,7 @@ export default function GerarOrcamento() {
       ? buildOrcamentoLink(agencyName, accessCode)
       : `${PUBLIC_DOMAIN}/orcamento/${token}`;
 
+    clearLocalDraft();
     await navigator.clipboard.writeText(publicUrl);
     toast({
       title: quote.share_token ? "Link copiado" : "Orçamento publicado",
