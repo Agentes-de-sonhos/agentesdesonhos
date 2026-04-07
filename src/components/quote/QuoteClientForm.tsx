@@ -222,56 +222,128 @@ export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
           )}
         />
 
+        {/* Trip Type Selector */}
+        <FormField
+          control={form.control}
+          name="trip_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <Plane className="h-4 w-4" />
+                Tipo de Viagem
+              </FormLabel>
+              <FormControl>
+                <RadioGroup
+                  value={field.value}
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    if (val === "one_way") {
+                      form.setValue("dateRange", { from: form.getValues("dateRange.from"), to: undefined });
+                    }
+                  }}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="round_trip" id="round_trip" />
+                    <Label htmlFor="round_trip" className="font-normal cursor-pointer">Ida e volta</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="one_way" id="one_way" />
+                    <Label htmlFor="one_way" className="font-normal cursor-pointer">Somente ida</Label>
+                  </div>
+                </RadioGroup>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="dateRange"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Período da Viagem</FormLabel>
-              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value?.from && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value?.from ? (
-                        field.value.to ? (
-                          <>
-                            {format(field.value.from, "dd/MM/yyyy", { locale: ptBR })}
-                            {" — "}
-                            {format(field.value.to, "dd/MM/yyyy", { locale: ptBR })}
-                          </>
+              <FormLabel>{tripType === "one_way" ? "Data da Viagem" : "Período da Viagem"}</FormLabel>
+              {tripType === "one_way" ? (
+                /* Single date picker for one-way */
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value?.from && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value?.from
+                          ? format(field.value.from, "dd/MM/yyyy", { locale: ptBR })
+                          : <span>Selecione a data</span>
+                        }
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value?.from}
+                      onSelect={(date) => {
+                        field.onChange({ from: date, to: undefined });
+                        if (date) setCalendarOpen(false);
+                      }}
+                      disabled={(date) => date < new Date()}
+                      locale={ptBR}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                /* Range picker for round trip */
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value?.from && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value?.from ? (
+                          field.value.to ? (
+                            <>
+                              {format(field.value.from, "dd/MM/yyyy", { locale: ptBR })}
+                              {" — "}
+                              {format(field.value.to, "dd/MM/yyyy", { locale: ptBR })}
+                            </>
+                          ) : (
+                            format(field.value.from, "dd/MM/yyyy", { locale: ptBR })
+                          )
                         ) : (
-                          format(field.value.from, "dd/MM/yyyy", { locale: ptBR })
-                        )
-                      ) : (
-                        <span>Selecione início e fim</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="range"
-                    selected={field.value?.from ? { from: field.value.from, to: field.value.to } as DateRange : undefined}
-                    onSelect={(range: DateRange | undefined) => {
-                      field.onChange({ from: range?.from, to: range?.to });
-                      if (range?.from && range?.to) {
-                        setCalendarOpen(false);
-                      }
-                    }}
-                    disabled={(date) => date < new Date()}
-                    numberOfMonths={2}
-                    locale={ptBR}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+                          <span>Selecione início e fim</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="range"
+                      selected={field.value?.from ? { from: field.value.from, to: field.value.to ?? undefined } as DateRange : undefined}
+                      onSelect={(range: DateRange | undefined) => {
+                        field.onChange({ from: range?.from, to: range?.to });
+                        if (range?.from && range?.to) {
+                          setCalendarOpen(false);
+                        }
+                      }}
+                      disabled={(date) => date < new Date()}
+                      numberOfMonths={2}
+                      locale={ptBR}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
               <FormMessage />
             </FormItem>
           )}
