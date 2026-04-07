@@ -144,10 +144,15 @@ export function SmartDashboard() {
             Dia {currentDay} de {daysInMonth} — {daysRemaining} dia{daysRemaining !== 1 ? "s" : ""} restante{daysRemaining !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={openGoalDialog}>
-          <Settings2 className="h-4 w-4 mr-2" />
-          Definir Meta
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={() => setShowExport(true)} />
+          <Button variant="outline" size="sm" onClick={openGoalDialog}>
+            <Settings2 className="h-4 w-4 mr-2" />
+            Definir Meta
+          </Button>
+        </div>
+      </div>
+      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Dashboard" onExport={handleExportDashboard} />
       </div>
 
       {/* Smart Alerts */}
