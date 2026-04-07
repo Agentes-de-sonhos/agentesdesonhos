@@ -84,6 +84,8 @@ export function SalesManager() {
     setFormData({ client_name: "", destination: "", sale_amount: 0, sale_date: new Date().toISOString().split("T")[0], notes: "" });
     setEditingSaleId(null);
     setSelectedOpportunity("client");
+    setSellerId("");
+    setSellerCommission(0);
   };
 
   const resetProductForm = () => {
@@ -102,11 +104,41 @@ export function SalesManager() {
     }
   };
 
+  // Sync seller commission expense
+  const syncSellerExpense = async (saleId: string, saleData: SaleFormData, selId: string, selComm: number) => {
+    if (!selId || selComm <= 0 || !saleData.sale_amount) return;
+    const seller = sellers.find(s => s.id === selId);
+    if (!seller) return;
+    const commissionAmount = Number(saleData.sale_amount) * selComm / 100;
+    if (commissionAmount <= 0) return;
+
+    // Remove existing seller expense for this sale
+    const existingExpenses = expenseEntries.filter(e => (e as any).sale_id === saleId && e.category === 'comissao');
+    for (const exp of existingExpenses) {
+      await deleteExpense(exp.id);
+    }
+
+    // Create new expense
+    await createExpense({
+      description: `Comissão - ${seller.name}`,
+      category: 'comissao' as any,
+      amount: commissionAmount,
+      entry_date: saleData.sale_date,
+      notes: `Comissão de ${selComm}% sobre venda de ${saleData.client_name}`,
+    } as any, saleId);
+  };
+
   const handleSubmit = async () => {
     if (editingSaleId) {
-      await updateSale({ id: editingSaleId, ...formData });
+      await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
+      if (sellerId) {
+        await syncSellerExpense(editingSaleId, formData, sellerId, sellerCommission);
+      }
     } else {
-      await createSale(formData);
+      const result = await createSale({ ...formData, seller_id: sellerId || undefined, seller_commission_percent: sellerId ? sellerCommission : undefined } as any);
+      if (result && sellerId) {
+        await syncSellerExpense(result.id, formData, sellerId, sellerCommission);
+      }
     }
     setIsDialogOpen(false);
     resetSaleForm();
