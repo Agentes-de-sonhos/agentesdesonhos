@@ -88,6 +88,11 @@ export function BookingDetail({ bookingId, onBack }: Props) {
               cost_price: svc.cost_price,
               expected_commission: svc.expected_commission,
               expected_commission_date: svc.expected_commission_date,
+              non_commissionable_taxes: svc.non_commissionable_taxes,
+              commission_type: svc.commission_type,
+              commission_value: svc.commission_value,
+              du_value: svc.du_value,
+              du_type: svc.du_type,
               status: svc.status,
             });
           }}
