@@ -4,15 +4,20 @@ import { useAuth } from "./useAuth";
 
 export interface CommissionReceivable {
   id: string;
-  booking_service_id: string;
+  sale_id: string;
   user_id: string;
-  supplier_id: string | null;
-  commission_amount: number;
-  expected_date: string | null;
-  received_date: string | null;
-  status: string;
+  product_type: string;
+  description: string | null;
+  sale_price: number;
+  non_commissionable_taxes: number;
+  commission_type: string;
+  commission_value: number;
+  commission_status: string;
+  supplier_name: string | null;
   payment_rule: string;
   payment_days: number;
+  expected_date: string | null;
+  received_date: string | null;
   requires_invoice: boolean;
   invoice_status: string | null;
   invoice_number: string | null;
@@ -20,27 +25,17 @@ export interface CommissionReceivable {
   invoice_sent_date: string | null;
   internal_notes: string | null;
   created_at: string;
-  supplier?: { id: string; name: string } | null;
-  service?: {
-    id: string;
-    booking_id: string;
-    service_type: string;
-    description: string | null;
-    sale_price: number;
-    cost_price: number;
-    non_commissionable_taxes: number;
-    commission_type: string;
-    commission_value: number;
-    du_value: number;
-    du_type: string;
-    supplier_id: string | null;
-    supplier?: { id: string; name: string } | null;
-    booking?: {
-      id: string;
-      trip_name: string;
-      client?: { id: string; name: string } | null;
-    } | null;
-  } | null;
+  // Joined sale data
+  client_name: string;
+  destination: string;
+  sale_date: string;
+  commission_amount: number;
+}
+
+function calculateCommission(p: { sale_price: number; non_commissionable_taxes: number; commission_type: string; commission_value: number }): number {
+  const base = Number(p.sale_price) - (Number(p.non_commissionable_taxes) || 0);
+  if (p.commission_type === "percentage") return base * Number(p.commission_value) / 100;
+  return Number(p.commission_value);
 }
 
 export function useCommissionsReceivable() {
@@ -50,24 +45,24 @@ export function useCommissionsReceivable() {
     queryKey: ["commissions-receivable", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("booking_commissions")
+        .from("sale_products")
         .select(`
           *,
-          supplier:clients!booking_commissions_supplier_id_fkey(id, name),
-          service:booking_services!booking_commissions_booking_service_id_fkey(
-            id, booking_id, service_type, description, sale_price, cost_price,
-            non_commissionable_taxes, commission_type, commission_value, du_value, du_type,
-            supplier_id,
-            supplier:clients!booking_services_supplier_id_fkey(id, name),
-            booking:bookings!booking_services_booking_id_fkey(
-              id, trip_name,
-              client:clients!bookings_client_id_fkey(id, name)
-            )
-          )
+          sale:sales!sale_products_sale_id_fkey(client_name, destination, sale_date)
         `)
+        .eq("user_id", user!.id)
         .order("expected_date", { ascending: true, nullsFirst: false });
       if (error) throw error;
-      return (data || []) as CommissionReceivable[];
+
+      return (data || []).map((row: any) => ({
+        ...row,
+        client_name: row.sale?.client_name || "—",
+        destination: row.sale?.destination || "",
+        sale_date: row.sale?.sale_date || "",
+        commission_amount: calculateCommission(row),
+        // Map commission_status field
+        status: row.commission_status || "previsao_criada",
+      })) as (CommissionReceivable & { status: string })[];
     },
     enabled: !!user,
   });
