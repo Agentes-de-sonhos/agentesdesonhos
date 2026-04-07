@@ -5904,10 +5904,20 @@ export type Database = {
           cost_price: number
           created_at: string
           description: string | null
+          expected_date: string | null
           id: string
+          invoice_issued_date: string | null
+          invoice_number: string | null
+          invoice_sent_date: string | null
+          invoice_status: string | null
+          non_commissionable_taxes: number | null
+          payment_days: number | null
+          payment_rule: string | null
           product_type: string
+          requires_invoice: boolean | null
           sale_id: string
           sale_price: number
+          supplier_name: string | null
           updated_at: string
           user_id: string
         }
@@ -5917,10 +5927,20 @@ export type Database = {
           cost_price?: number
           created_at?: string
           description?: string | null
+          expected_date?: string | null
           id?: string
+          invoice_issued_date?: string | null
+          invoice_number?: string | null
+          invoice_sent_date?: string | null
+          invoice_status?: string | null
+          non_commissionable_taxes?: number | null
+          payment_days?: number | null
+          payment_rule?: string | null
           product_type: string
+          requires_invoice?: boolean | null
           sale_id: string
           sale_price?: number
+          supplier_name?: string | null
           updated_at?: string
           user_id: string
         }
@@ -5930,10 +5950,20 @@ export type Database = {
           cost_price?: number
           created_at?: string
           description?: string | null
+          expected_date?: string | null
           id?: string
+          invoice_issued_date?: string | null
+          invoice_number?: string | null
+          invoice_sent_date?: string | null
+          invoice_status?: string | null
+          non_commissionable_taxes?: number | null
+          payment_days?: number | null
+          payment_rule?: string | null
           product_type?: string
+          requires_invoice?: boolean | null
           sale_id?: string
           sale_price?: number
+          supplier_name?: string | null
           updated_at?: string
           user_id?: string
         }
