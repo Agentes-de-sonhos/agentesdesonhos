@@ -19,6 +19,7 @@ import type {
   ExpenseCategory,
   ProductType,
 } from "@/types/financial";
+import { PRODUCT_TYPES } from "@/types/financial";
 
 export function useFinancial() {
   const { user } = useAuth();
