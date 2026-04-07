@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, CloudOff, Cloud, Loader2 as Loader2Icon } from "lucide-react";
+import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildOrcamentoLink } from "@/lib/orcamento-domain";
 import { useNavigate, useParams } from "react-router-dom";
