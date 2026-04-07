@@ -225,6 +225,8 @@ export function useFinancial() {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
       queryClient.invalidateQueries({ queryKey: ["customer_payments"] });
+      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
       toast({ title: "Venda excluída", description: "A venda foi removida." });
     },
     onError: (error) => {

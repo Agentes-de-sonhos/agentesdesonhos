@@ -51,7 +51,9 @@ export function SmartDashboard() {
   const monthlySaleIds = new Set(monthlySales.map(s => s.id));
   const monthlyProducts = saleProducts.filter(p => monthlySaleIds.has(p.sale_id));
   const commissionGenerated = monthlyProducts.reduce((sum, p) => {
-    if (p.commission_type === 'percentage') return sum + (Number(p.sale_price) * Number(p.commission_value) / 100);
+    const taxes = Number((p as any).non_commissionable_taxes) || 0;
+    const base = Number(p.sale_price) - taxes;
+    if (p.commission_type === 'percentage') return sum + (base * Number(p.commission_value) / 100);
     return sum + Number(p.commission_value);
   }, 0);
 
