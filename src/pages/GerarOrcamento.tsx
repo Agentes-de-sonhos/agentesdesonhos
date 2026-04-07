@@ -616,6 +616,19 @@ export default function GerarOrcamento() {
                   </Badge>
                 )}
               </div>
+              {/* Trip Title inline edit */}
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Input
+                  className="h-6 text-xs border-dashed w-48"
+                  placeholder="Título da viagem (opcional)"
+                  defaultValue={(quote as any).trip_title || ""}
+                  onBlur={async (e) => {
+                    const val = e.target.value.trim() || null;
+                    if (val !== ((quote as any).trip_title || null)) {
+                      await supabase.from("quotes").update({ trip_title: val } as any).eq("id", quote.id);
+                    }
+                  }}
+                />
               <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1 sm:gap-2 flex-wrap">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {editingDestination ? (
