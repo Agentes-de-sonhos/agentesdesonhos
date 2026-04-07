@@ -703,6 +703,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
 const transferSchema = z.object({
   company_name: z.string().optional(),
   transfer_mode: z.enum(["arrival", "departure", "round_trip"]),
+  service_category: z.enum(["regular", "private"]).optional(),
   location: z.string().min(2, "Local é obrigatório"),
   arrival_date: z.date({ required_error: "Data de chegada é obrigatória" }),
   departure_date: z.date().optional(),
@@ -718,6 +719,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
     defaultValues: {
       company_name: init?.company_name || "",
       transfer_mode: init?.transfer_type || "round_trip",
+      service_category: init?.service_category || undefined,
       location: init?.location || "",
       price: init?.price || initialData?.amount || 0,
       arrival_date: init?.date ? parseLocalDate(init.date) : tripStartDate,
