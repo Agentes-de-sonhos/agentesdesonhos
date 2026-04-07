@@ -41,6 +41,9 @@ export function SmartDashboard() {
     await exportFinancialData({ tabLabel: "Dashboard", columns, rows, period, agencyName, totals }, fmt);
   };
 
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+
   // Current month boundaries
   const now = new Date();
   const monthStart = `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`;
