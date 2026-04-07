@@ -43,10 +43,12 @@ export function SalesManager() {
     client_name: "", destination: "", sale_amount: 0,
     sale_date: new Date().toISOString().split("T")[0], notes: "",
   });
-  const [productFormData, setProductFormData] = useState<SaleProductFormData>({
+  const defaultProductForm: SaleProductFormData = {
     product_type: "aereo", description: "", sale_price: 0,
-    cost_price: 0, commission_type: "percentage", commission_value: 0,
-  });
+    cost_price: 0, non_commissionable_taxes: 0, commission_type: "percentage", commission_value: 0,
+    payment_rule: "after_sale", payment_days: 30, requires_invoice: false,
+  };
+  const [productFormData, setProductFormData] = useState<SaleProductFormData>(defaultProductForm);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
