@@ -1,50 +1,44 @@
 
+## Plano de Integração Financeira
 
-## Plano: Geração de PDF Interativo para o Cartão Virtual
+### Problema atual
+- Quando um produto é criado na venda, **nenhuma entrada financeira é gerada automaticamente**
+- A aba "Entradas" é 100% manual e desconectada das vendas
+- O Dashboard calcula comissões **sem descontar taxas não comissionáveis**
+- Não há fluxo automático: Venda → Comissão + Entrada
 
-### Visão Geral
-Criar uma função que gera um PDF em formato vertical (smartphone) replicando o layout visual do cartão público, com todos os links clicáveis (WhatsApp, telefone, e-mail, site, redes sociais, botões de ação).
+### Mudanças propostas
 
-### Abordagem Técnica
-Usar a biblioteca **jsPDF** para gerar o PDF diretamente no navegador, desenhando cada elemento do cartão (foto, nome, título, ícones de contato, botões, redes sociais, logos) com links ativos via `doc.link()`. O formato será vertical, simulando tela de celular (100mm x 178mm aprox.).
+#### 1. Auto-geração de Entradas (fluxo Venda → Entradas)
+Quando um produto é criado/editado/excluído na venda:
+- Gerar automaticamente uma entrada na tabela `income_entries` com:
+  - `sale_id` vinculado
+  - `sale_product_id` (novo campo) para rastreio individual
+  - `status`: "pending" (a receber)
+  - `expected_date`: calculada pela regra de recebimento do produto
+  - `amount`: valor da comissão calculada
+  - `source`: "auto" (para diferenciar de entradas manuais)
+- Ao editar produto → atualizar entrada correspondente
+- Ao excluir produto → remover entrada correspondente
 
-### Arquivos a Criar/Editar
+#### 2. Migração de banco (adicionar `sale_product_id` em `income_entries`)
+- Adicionar coluna `sale_product_id` (UUID, nullable, FK para sale_products)
+- Isso permite vincular cada entrada a um produto específico
 
-1. **`src/lib/generateBusinessCardPdf.ts`** — Nova função que:
-   - Recebe os dados do `BusinessCard`
-   - Cria um PDF vertical com jsPDF (tamanho customizado ~smartphone)
-   - Desenha o gradiente/cover de fundo
-   - Renderiza foto circular (se houver)
-   - Renderiza nome, título, agência com as cores do cartão
-   - Desenha botões de contato rápido (WhatsApp, telefone, e-mail, site) como círculos coloridos com links clicáveis
-   - Desenha botão "Salvar Contato" com link para vCard (fallback: sem link)
-   - Desenha botões de ação customizados com bordas e links
-   - Desenha ícones de redes sociais com links
-   - Renderiza logos da agência
-   - QR Code via canvas (biblioteca `qrcode`) convertido para imagem no PDF
-   - Retorna o Blob do PDF
+#### 3. Corrigir cálculos do Dashboard
+- Comissão = `(sale_price - non_commissionable_taxes) * % comissão`
+- Lucro = Total Comissões - Total Despesas
+- Adicionar indicadores: Total a Receber, Total Atrasado, Total Recebido
 
-2. **`src/components/card-wizard/WizardComplete.tsx`** — Adicionar botão "Gerar PDF":
-   - Importar a função de geração
-   - Buscar dados completos do cartão via hook
-   - Botão com ícone de download que chama a função e faz auto-download
-   - Nome do arquivo: `cartao-{slug}.pdf`
+#### 4. Invalidação cruzada
+- Ao criar/editar/excluir produto → invalidar queries de `sale_products`, `income_entries`, `commissions-receivable`
+- Ao marcar entrada como "Recebido" → refletir no dashboard automaticamente
 
-3. **`src/pages/MeuCartao.tsx`** — Adicionar botão "Gerar PDF" na seção de ações rápidas (ao lado de "Copiar link" e "Visualizar")
-
-### Dependência
-- Instalar `jspdf` (já pode estar disponível; caso contrário, adicionar ao package.json)
-
-### Detalhes do Layout do PDF
-- Dimensões: ~100mm x 178mm (proporção smartphone)
-- Header com gradiente usando as cores primária/secundária do cartão
-- Foto centralizada com borda branca circular
-- Tipografia: Helvetica (built-in do jsPDF)
-- Botões de contato como retângulos arredondados com texto e links `href`
-- Redes sociais como círculos com texto abreviado e links
-- QR Code no rodapé apontando para a URL pública
-- Arquivo leve, otimizado para compartilhamento via WhatsApp
-
-### Resultado
-O agente poderá gerar e compartilhar seu cartão virtual como PDF interativo, mantendo a identidade visual e todos os links funcionais.
-
+#### 5. Dashboard consolidado
+- Total vendido (mês)
+- Total comissões geradas
+- Total já recebido
+- Valores a receber
+- Valores em atraso
+- Total despesas
+- Lucro líquido (comissões recebidas - despesas)
