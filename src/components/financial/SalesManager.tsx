@@ -311,6 +311,10 @@ export function SalesManager() {
                             <MapPin className="h-3 w-3" /> {sale.destination}
                             <span className="mx-2">•</span>
                             {format(new Date(sale.sale_date), "dd/MM/yyyy", { locale: ptBR })}
+                            {(sale as any).seller_id && (() => {
+                              const seller = sellers.find(s => s.id === (sale as any).seller_id);
+                              return seller ? <><span className="mx-2">•</span><Users className="h-3 w-3" />{seller.name}</> : null;
+                            })()}
                           </div>
                         </div>
                       </div>
