@@ -426,15 +426,16 @@ export function SalesManager() {
             </section>
 
             <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-              {renderSectionHeader(2, "Comissão e Cálculo", "Defina os valores financeiros e a comissão deste produto.")}
+              {renderSectionHeader(2, "Comissão e Cálculo", "Defina os valores e a regra de comissão deste produto.")}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Preço de Venda</Label>
+                  <Label>Preço de Venda *</Label>
                   <Input type="number" value={productFormData.sale_price} onChange={(e) => setProductFormData({ ...productFormData, sale_price: Number(e.target.value) })} placeholder="0,00" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Custo (Fornecedor)</Label>
-                  <Input type="number" value={productFormData.cost_price} onChange={(e) => setProductFormData({ ...productFormData, cost_price: Number(e.target.value) })} placeholder="0,00" />
+                  <Label>Taxas / valores não comissionáveis</Label>
+                  <Input type="number" value={productFormData.non_commissionable_taxes || ""} onChange={(e) => setProductFormData({ ...productFormData, non_commissionable_taxes: Number(e.target.value) })} placeholder="0,00 (opcional)" />
+                  <p className="text-xs text-muted-foreground">Taxas, impostos ou valores que não entram na base de comissão</p>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -459,24 +460,92 @@ export function SalesManager() {
                   <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(productFormData.sale_price) || 0)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Comissão estimada</p>
-                  <p className="text-sm font-semibold text-foreground">{formatCurrency(estimatedCommission)}</p>
+                  <p className="text-xs text-muted-foreground">Base comissionável</p>
+                  <p className="text-sm font-semibold text-foreground">{formatCurrency(commissionBase)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Lucro estimado</p>
-                  <p className="text-sm font-semibold text-foreground">{formatCurrency(estimatedProfit)}</p>
+                  <p className="text-xs text-muted-foreground">Comissão estimada</p>
+                  <p className="text-sm font-semibold text-primary">{formatCurrency(estimatedCommission)}</p>
                 </div>
               </div>
             </section>
 
             <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-              {renderSectionHeader(3, "Recebimento e Nota Fiscal", "Organização operacional deste produto dentro da Gestão Financeira.")}
-              <div className="rounded-lg border border-dashed border-border bg-background/80 p-4">
-                <p className="text-sm font-medium text-foreground">Acompanhamento operacional centralizado</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Depois de salvar o produto, o acompanhamento de comissão, recebimento e nota fiscal pode ser feito na aba de comissões da Gestão Financeira.
-                </p>
+              {renderSectionHeader(3, "Recebimento e Nota Fiscal", "Configure o fornecedor, prazo e nota fiscal deste produto.")}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Fornecedor</Label>
+                  <Input value={productFormData.supplier_name || ""} onChange={(e) => setProductFormData({ ...productFormData, supplier_name: e.target.value })} placeholder="Nome do fornecedor" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Regra de recebimento</Label>
+                  <Select value={productFormData.payment_rule} onValueChange={(v) => setProductFormData({ ...productFormData, payment_rule: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="after_sale">Após a venda</SelectItem>
+                      <SelectItem value="after_travel">Após a viagem</SelectItem>
+                      <SelectItem value="after_invoice_issued">Após emissão da NF</SelectItem>
+                      <SelectItem value="after_invoice_sent">Após envio da NF</SelectItem>
+                      <SelectItem value="manual">Data manual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Prazo em dias</Label>
+                  <Input type="number" value={productFormData.payment_days} onChange={(e) => setProductFormData({ ...productFormData, payment_days: Number(e.target.value) })} placeholder="30" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Data prevista de recebimento</Label>
+                  <Input type="date" value={productFormData.expected_date || ""} onChange={(e) => setProductFormData({ ...productFormData, expected_date: e.target.value })} />
+                  <p className="text-xs text-muted-foreground">Calculada automaticamente ou informe manualmente</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <Checkbox
+                  id="requires_invoice"
+                  checked={productFormData.requires_invoice}
+                  onCheckedChange={(checked) => setProductFormData({ ...productFormData, requires_invoice: !!checked })}
+                />
+                <Label htmlFor="requires_invoice" className="text-sm font-medium cursor-pointer">Exige nota fiscal?</Label>
+              </div>
+
+              {productFormData.requires_invoice && (
+                <div className="space-y-4 rounded-lg border border-dashed border-border bg-background/80 p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <FileText className="h-4 w-4" /> Dados da Nota Fiscal
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Status da Nota</Label>
+                      <Select value={productFormData.invoice_status || "a_emitir"} onValueChange={(v) => setProductFormData({ ...productFormData, invoice_status: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="a_emitir">A emitir</SelectItem>
+                          <SelectItem value="emitida">Emitida</SelectItem>
+                          <SelectItem value="enviada">Enviada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Número da Nota</Label>
+                      <Input value={productFormData.invoice_number || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_number: e.target.value })} placeholder="Nº da NF" />
+                    </div>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Data de Emissão</Label>
+                      <Input type="date" value={productFormData.invoice_issued_date || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_issued_date: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Data de Envio</Label>
+                      <Input type="date" value={productFormData.invoice_sent_date || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_sent_date: e.target.value })} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
           </div>
 
