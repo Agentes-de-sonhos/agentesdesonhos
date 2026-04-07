@@ -464,8 +464,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const installmentValue = total / (installments || 1);
             mainDisplay = (
               <>
-                <span className="text-2xl sm:text-3xl font-bold opacity-90">{installments}x de</span>
-                <span className="text-5xl sm:text-6xl font-black tracking-tight">{formatCurrency(installmentValue)}</span>
+                <span className="text-xl sm:text-2xl font-bold opacity-90">{installments}x de</span>
+                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">{formatCurrency(installmentValue)}</span>
               </>
             );
             subtitleDisplay = (
@@ -479,10 +479,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const installmentValue = remainder / (installments || 1);
             mainDisplay = (
               <div className="space-y-1">
-                <p className="text-xl sm:text-2xl font-bold opacity-90">
+                <p className="text-lg sm:text-xl font-bold opacity-90">
                   Entrada de <span className="text-primary-foreground">{formatCurrency(entryValue)}</span>
                 </p>
-                <p className="text-3xl sm:text-4xl font-black tracking-tight">
+                <p className="text-2xl sm:text-3xl font-extrabold tracking-tight">
                   + {installments}x de {formatCurrency(installmentValue)}
                 </p>
               </div>
@@ -497,7 +497,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const discountedTotal = total * (1 - discountPct / 100);
             mainDisplay = (
               <>
-                <span className="text-5xl sm:text-6xl font-black tracking-tight">{formatCurrency(discountedTotal)}</span>
+                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">{formatCurrency(discountedTotal)}</span>
               </>
             );
             if (discountPct > 0) {
