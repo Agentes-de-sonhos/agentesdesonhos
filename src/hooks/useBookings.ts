@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
+const fmtCurrency = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+
 export interface Booking {
   id: string;
   user_id: string;
