@@ -108,6 +108,8 @@ export function EntradasManager() {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
+      queryClient.invalidateQueries({ queryKey: ["sale_products"] });
       toast({ title: "✅ Entrada recebida!", description: "Valor marcado como recebido." });
     }
   };
