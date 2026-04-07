@@ -475,6 +475,39 @@ export default function GerarOrcamento() {
             </div>
           )}
 
+          {/* Draft recovery banner */}
+          {draftBanner && (
+            <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 flex items-center justify-between gap-3 animate-fade-in">
+              <div className="flex items-center gap-3 min-w-0">
+                <FileText className="h-5 w-5 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">Rascunho encontrado</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {draftBanner.clientName} — {draftBanner.destination}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { clearLocalDraft(); setDraftBanner(null); }}
+                >
+                  Descartar
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setDraftBanner(null);
+                    navigate(`/ferramentas-ia/gerar-orcamento/${draftBanner.quoteId}`);
+                  }}
+                >
+                  Continuar editando
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="grid gap-6 lg:grid-cols-5">
             {/* ── New Quote Form ── */}
             <Card className="lg:col-span-2">
