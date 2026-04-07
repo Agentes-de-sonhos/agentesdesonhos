@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } from "react";
+import { BrandText } from "@/components/ui/brand-text";
 import { useParams, useLocation } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -1431,9 +1432,9 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         <div className="container max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {agentProfile?.agency_logo_url ? (
-              <img src={agentProfile.agency_logo_url} alt={agentProfile.agency_name || ''} className="h-10 max-w-32 object-contain" />
+              <img src={agentProfile.agency_logo_url} alt={agentProfile.agency_name || ''} translate="no" className="h-10 max-w-32 object-contain notranslate" />
             ) : agentProfile?.agency_name ? (
-              <span className="font-bold text-primary">{agentProfile.agency_name}</span>
+              <BrandText className="font-bold text-primary">{agentProfile.agency_name}</BrandText>
             ) : (
               <span className="font-bold text-primary flex items-center gap-2">
                 <Wallet className="h-5 w-5" /> Carteira de Viagem
@@ -1659,7 +1660,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Seu agente de viagens</p>
                     <p className="font-bold text-base">{agentProfile.name}</p>
                     {agentProfile.phone && <p className="text-sm text-muted-foreground">📱 {agentProfile.phone}</p>}
-                    {agentProfile.agency_name && <p className="text-sm text-muted-foreground">{agentProfile.agency_name}</p>}
+                    {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground">{agentProfile.agency_name}</BrandText>}
                   </div>
                 </div>
               </CardContent>

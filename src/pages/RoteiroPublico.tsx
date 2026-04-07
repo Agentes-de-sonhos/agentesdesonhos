@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BrandText } from "@/components/ui/brand-text";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -334,7 +335,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
           {agentProfile?.agency_logo_url ? (
             <img
               src={agentProfile.agency_logo_url}
-              alt={agentProfile.agency_name || "Agência"}
+               alt={agentProfile.agency_name || "Agência"}
+               translate="no"
               className="h-16 sm:h-20 max-w-[280px] object-contain"
             />
           ) : (
@@ -342,9 +344,9 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <Briefcase className="h-7 w-7 text-primary" />
               </div>
-              <span className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+              <BrandText as="span" className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                 {agentProfile?.agency_name || "Roteiro de Viagem"}
-              </span>
+              </BrandText>
             </div>
           )}
         </div>
@@ -416,7 +418,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 )}
                 <div className="space-y-1">
                   <p className="text-xl font-bold text-foreground">{agentProfile.name}</p>
-                  {agentProfile.agency_name && <p className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</p>}
+                  {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
                   {(agentProfile.city || agentProfile.state) && (
                     <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
                   )}

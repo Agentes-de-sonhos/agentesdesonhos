@@ -16,7 +16,8 @@ export function ShowcaseHeader({ profile, showcase, categories, selectedCategory
             <img
               src={profile.agency_logo_url}
               alt={profile.agency_name || ""}
-              className="h-16 sm:h-20 w-auto max-w-[60%] object-contain"
+              translate="no"
+              className="h-16 sm:h-20 w-auto max-w-[60%] object-contain notranslate"
             />
           ) : (
             <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xl shrink-0">
@@ -26,7 +27,7 @@ export function ShowcaseHeader({ profile, showcase, categories, selectedCategory
 
           <div className="min-w-0">
             {profile?.agency_name && !profile?.agency_logo_url && (
-              <h1 className="font-bold text-lg text-foreground truncate">{profile.agency_name}</h1>
+              <h1 className="font-bold text-lg text-foreground truncate notranslate" translate="no">{profile.agency_name}</h1>
             )}
             {(profile?.city || profile?.state) && (
               <p className="text-xs text-muted-foreground mt-0.5">

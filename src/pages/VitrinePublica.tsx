@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BrandText } from "@/components/ui/brand-text";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicShowcase, type ShowcaseItem, getFeaturedLabel } from "@/hooks/useShowcase";
@@ -142,7 +143,7 @@ export default function VitrinePublica() {
       {/* ─── Footer ─── */}
       <footer className="bg-card border-t py-8">
         <div className="max-w-xl mx-auto px-4 text-center space-y-1.5">
-          <p className="font-semibold text-sm text-foreground">{profile?.agency_name || profile?.name}</p>
+          <BrandText as="p" className="font-semibold text-sm text-foreground">{profile?.agency_name || profile?.name}</BrandText>
           {(profile?.city || profile?.state) && (
             <p className="text-xs text-muted-foreground">
               {[profile?.city, profile?.state].filter(Boolean).join(" · ")}

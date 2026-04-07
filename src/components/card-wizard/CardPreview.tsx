@@ -71,7 +71,7 @@ export function CardPreview(props: CardPreviewProps) {
           <div>
             <p className="text-sm font-bold text-gray-900 truncate">{name || "Seu Nome"}</p>
             {title && <p className="text-xs text-gray-500 truncate">{title}</p>}
-            {agency_name && <p className="text-xs font-medium truncate" style={{ color: pc }}>{agency_name}</p>}
+            {agency_name && <p className="text-xs font-medium truncate notranslate" translate="no" style={{ color: pc }}>{agency_name}</p>}
           </div>
 
           {/* Quick icons */}
