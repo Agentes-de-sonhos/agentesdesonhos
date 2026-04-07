@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,11 +34,11 @@ import type { Sale, SaleFormData, SaleProductFormData, ProductType } from "@/typ
 import { PRODUCT_TYPES } from "@/types/financial";
 
 export function SalesManager() {
-  const { sales, saleProducts, expenseEntries, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
+  const { sales, saleProducts, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
   const { closedOpportunities } = useClosedOpportunities();
   const { sellers } = useSellers();
   const { user } = useAuth();
-  const queryClient = (await import("@tanstack/react-query")).useQueryClient();
+  const queryClient = useQueryClient();
   const [sellerId, setSellerId] = useState<string>("");
   const [sellerCommission, setSellerCommission] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
