@@ -2,6 +2,9 @@ import { useState, useMemo } from "react";
 import { useCommissionsReceivable, CommissionReceivable } from "@/hooks/useCommissionsReceivable";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useFinancialExport } from "@/hooks/useFinancialExport";
+import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { exportFinancialData, prepareCommissionsExport } from "@/utils/financialExport";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -132,6 +135,11 @@ function NoteDialog({ commission, open, onOpenChange }: { commission: Commission
 
 export function CommissionsReceivable() {
   const { data: commissions = [], isLoading } = useCommissionsReceivable();
+  const { showExport, setShowExport, agencyName } = useFinancialExport("Comissões");
+  const handleExportCommissions = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
+    const { columns, rows, totals } = prepareCommissionsExport(filtered, period);
+    await exportFinancialData({ tabLabel: "Comissões", columns, rows, period, agencyName, totals }, fmt);
+  };
   const qc = useQueryClient();
   const [showFilters, setShowFilters] = useState(false);
   const [noteCommission, setNoteCommission] = useState<CommissionReceivable | null>(null);
@@ -206,12 +214,16 @@ export function CommissionsReceivable() {
     <div className="space-y-6">
       <SummaryCards commissions={commissions} />
 
+      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Comissões" onExport={handleExportCommissions} />
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="gap-2">
           <Filter className="h-4 w-4" /> Filtros
           {showFilters ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </Button>
-        <span className="text-sm text-muted-foreground">{filtered.length} comissão(ões)</span>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={() => setShowExport(true)} />
+          <span className="text-sm text-muted-foreground">{filtered.length} comissão(ões)</span>
+        </div>
       </div>
 
       {showFilters && (

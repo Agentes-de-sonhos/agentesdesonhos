@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { useFinancialExport } from "@/hooks/useFinancialExport";
+import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { exportFinancialData, prepareEntradasExport } from "@/utils/financialExport";
 import { ptBR } from "date-fns/locale";
 import { Plus, Trash2, CheckCircle2, Clock, AlertTriangle, Loader2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +31,11 @@ import { cn } from "@/lib/utils";
 
 export function EntradasManager() {
   const { incomeEntries, sales, createIncome, updateIncome, deleteIncome, isCreating, isUpdating } = useFinancial();
+  const { showExport, setShowExport, agencyName } = useFinancialExport("Entradas");
+  const handleExportEntradas = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
+    const { columns, rows, totals } = prepareEntradasExport(incomeEntries, sales, period);
+    await exportFinancialData({ tabLabel: "Entradas", columns, rows, period, agencyName, totals }, fmt);
+  };
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -179,11 +187,15 @@ export function EntradasManager() {
         <Card className={cn(totalOverdue > 0 && "ring-1 ring-destructive/30")}><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-destructive" />Atrasadas</CardTitle></CardHeader><CardContent><div className={cn("text-xl font-bold", totalOverdue > 0 ? "text-destructive" : "text-muted-foreground")}>{formatCurrency(totalOverdue)}</div><p className="text-xs text-muted-foreground">{overdue.length} entrada{overdue.length !== 1 ? "s" : ""}</p></CardContent></Card>
       </div>
 
+      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Entradas" onExport={handleExportEntradas} />
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Entradas</h3>
-        <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Nova Entrada
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={() => setShowExport(true)} />
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Nova Entrada
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="todas" className="space-y-4">

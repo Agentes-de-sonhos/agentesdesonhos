@@ -4,6 +4,9 @@ import {
   Zap, Calendar, ArrowRight, Settings2, Loader2, Rocket,
   DollarSign, ArrowDownCircle, ArrowUpCircle, PiggyBank
 } from "lucide-react";
+import { useFinancialExport } from "@/hooks/useFinancialExport";
+import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { exportFinancialData, prepareDashboardExport } from "@/utils/financialExport";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +35,11 @@ export function SmartDashboard() {
   const { goal, upsertGoal, currentMonth, currentYear, isLoading: goalLoading } = useFinancialGoals();
   const [showGoalDialog, setShowGoalDialog] = useState(false);
   const [goalForm, setGoalForm] = useState({ profit_goal: 0, commission_margin: 10 });
+  const { showExport, setShowExport, agencyName } = useFinancialExport("Dashboard");
+  const handleExportDashboard = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
+    const { columns, rows, totals } = prepareDashboardExport(sales, incomeEntries, expenseEntries, saleProducts, period);
+    await exportFinancialData({ tabLabel: "Dashboard", columns, rows, period, agencyName, totals }, fmt);
+  };
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -136,11 +144,15 @@ export function SmartDashboard() {
             Dia {currentDay} de {daysInMonth} — {daysRemaining} dia{daysRemaining !== 1 ? "s" : ""} restante{daysRemaining !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={openGoalDialog}>
-          <Settings2 className="h-4 w-4 mr-2" />
-          Definir Meta
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={() => setShowExport(true)} />
+          <Button variant="outline" size="sm" onClick={openGoalDialog}>
+            <Settings2 className="h-4 w-4 mr-2" />
+            Definir Meta
+          </Button>
+        </div>
       </div>
+      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Dashboard" onExport={handleExportDashboard} />
 
       {/* Smart Alerts */}
       <div className="space-y-2">
