@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -398,154 +400,159 @@ export function SalesManager() {
 
       {/* Product Dialog (Create/Edit) */}
       <Dialog open={isProductDialogOpen} onOpenChange={(open) => { setIsProductDialogOpen(open); if (!open) resetProductForm(); }}>
-        <DialogContent className="sm:max-w-3xl">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-0">
             <DialogTitle>{editingProductId ? "Editar Produto" : "Adicionar Produto"}</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-5">
-            <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-              {renderSectionHeader(1, "Dados do Produto", "Informações principais do serviço/produto vendido.")}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Tipo de Produto</Label>
-                  <Select value={productFormData.product_type} onValueChange={(v) => setProductFormData({ ...productFormData, product_type: v as ProductType })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{Object.entries(PRODUCT_TYPES).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Descrição</Label>
-                  <Input value={productFormData.description || ""} onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })} placeholder="Ex: Hotel XYZ, 5 noites" />
-                </div>
-              </div>
-            </section>
+          <Tabs defaultValue="dados" className="flex flex-col flex-1 min-h-0">
+            <TabsList className="mx-6 mt-2 grid w-auto grid-cols-3">
+              <TabsTrigger value="dados">Dados do Produto</TabsTrigger>
+              <TabsTrigger value="comissao">Comissão e Cálculo</TabsTrigger>
+              <TabsTrigger value="recebimento">Recebimento e NF</TabsTrigger>
+            </TabsList>
 
-            <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-              {renderSectionHeader(2, "Comissão e Cálculo", "Defina os valores e a regra de comissão deste produto.")}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Preço de Venda *</Label>
-                  <Input type="number" value={productFormData.sale_price} onChange={(e) => setProductFormData({ ...productFormData, sale_price: Number(e.target.value) })} placeholder="0,00" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Taxas / valores não comissionáveis</Label>
-                  <Input type="number" value={productFormData.non_commissionable_taxes || ""} onChange={(e) => setProductFormData({ ...productFormData, non_commissionable_taxes: Number(e.target.value) })} placeholder="0,00 (opcional)" />
-                  <p className="text-xs text-muted-foreground">Taxas, impostos ou valores que não entram na base de comissão</p>
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Tipo de Comissão</Label>
-                  <Select value={productFormData.commission_type} onValueChange={(v) => setProductFormData({ ...productFormData, commission_type: v as 'percentage' | 'fixed' })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="percentage">Percentual (%)</SelectItem>
-                      <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>{productFormData.commission_type === 'percentage' ? 'Comissão (%)' : 'Comissão (R$)'}</Label>
-                  <Input type="number" value={productFormData.commission_value} onChange={(e) => setProductFormData({ ...productFormData, commission_value: Number(e.target.value) })} placeholder="0" />
-                </div>
-              </div>
-              <div className="grid gap-3 rounded-lg border border-dashed border-border bg-background/80 p-4 sm:grid-cols-3">
-                <div>
-                  <p className="text-xs text-muted-foreground">Preço de venda</p>
-                  <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(productFormData.sale_price) || 0)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Base comissionável</p>
-                  <p className="text-sm font-semibold text-foreground">{formatCurrency(commissionBase)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Comissão estimada</p>
-                  <p className="text-sm font-semibold text-primary">{formatCurrency(estimatedCommission)}</p>
-                </div>
-              </div>
-            </section>
-
-            <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-              {renderSectionHeader(3, "Recebimento e Nota Fiscal", "Configure o fornecedor, prazo e nota fiscal deste produto.")}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Fornecedor</Label>
-                  <Input value={productFormData.supplier_name || ""} onChange={(e) => setProductFormData({ ...productFormData, supplier_name: e.target.value })} placeholder="Nome do fornecedor" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Regra de recebimento</Label>
-                  <Select value={productFormData.payment_rule} onValueChange={(v) => setProductFormData({ ...productFormData, payment_rule: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="after_sale">Após a venda</SelectItem>
-                      <SelectItem value="after_travel">Após a viagem</SelectItem>
-                      <SelectItem value="after_invoice_issued">Após emissão da NF</SelectItem>
-                      <SelectItem value="after_invoice_sent">Após envio da NF</SelectItem>
-                      <SelectItem value="manual">Data manual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Prazo em dias</Label>
-                  <Input type="number" value={productFormData.payment_days} onChange={(e) => setProductFormData({ ...productFormData, payment_days: Number(e.target.value) })} placeholder="30" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Data prevista de recebimento</Label>
-                  <Input type="date" value={productFormData.expected_date || ""} onChange={(e) => setProductFormData({ ...productFormData, expected_date: e.target.value })} />
-                  <p className="text-xs text-muted-foreground">Calculada automaticamente ou informe manualmente</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2 pt-2">
-                <Checkbox
-                  id="requires_invoice"
-                  checked={productFormData.requires_invoice}
-                  onCheckedChange={(checked) => setProductFormData({ ...productFormData, requires_invoice: !!checked })}
-                />
-                <Label htmlFor="requires_invoice" className="text-sm font-medium cursor-pointer">Exige nota fiscal?</Label>
-              </div>
-
-              {productFormData.requires_invoice && (
-                <div className="space-y-4 rounded-lg border border-dashed border-border bg-background/80 p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <FileText className="h-4 w-4" /> Dados da Nota Fiscal
+            <ScrollArea className="flex-1 min-h-0 px-6 py-4">
+              <TabsContent value="dados" className="mt-0 space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Tipo de Produto</Label>
+                    <Select value={productFormData.product_type} onValueChange={(v) => setProductFormData({ ...productFormData, product_type: v as ProductType })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{Object.entries(PRODUCT_TYPES).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
+                    </Select>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Status da Nota</Label>
-                      <Select value={productFormData.invoice_status || "a_emitir"} onValueChange={(v) => setProductFormData({ ...productFormData, invoice_status: v })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="a_emitir">A emitir</SelectItem>
-                          <SelectItem value="emitida">Emitida</SelectItem>
-                          <SelectItem value="enviada">Enviada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Número da Nota</Label>
-                      <Input value={productFormData.invoice_number || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_number: e.target.value })} placeholder="Nº da NF" />
-                    </div>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Data de Emissão</Label>
-                      <Input type="date" value={productFormData.invoice_issued_date || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_issued_date: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Data de Envio</Label>
-                      <Input type="date" value={productFormData.invoice_sent_date || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_sent_date: e.target.value })} />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Descrição</Label>
+                    <Input value={productFormData.description || ""} onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })} placeholder="Ex: Hotel XYZ, 5 noites" />
                   </div>
                 </div>
-              )}
-            </section>
-          </div>
+              </TabsContent>
 
-          <DialogFooter>
+              <TabsContent value="comissao" className="mt-0 space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Preço de Venda *</Label>
+                    <Input type="number" value={productFormData.sale_price} onChange={(e) => setProductFormData({ ...productFormData, sale_price: Number(e.target.value) })} placeholder="0,00" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Taxas / valores não comissionáveis</Label>
+                    <Input type="number" value={productFormData.non_commissionable_taxes || ""} onChange={(e) => setProductFormData({ ...productFormData, non_commissionable_taxes: Number(e.target.value) })} placeholder="0,00 (opcional)" />
+                    <p className="text-xs text-muted-foreground">Taxas, impostos ou valores que não entram na base de comissão</p>
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Tipo de Comissão</Label>
+                    <Select value={productFormData.commission_type} onValueChange={(v) => setProductFormData({ ...productFormData, commission_type: v as 'percentage' | 'fixed' })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">Percentual (%)</SelectItem>
+                        <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{productFormData.commission_type === 'percentage' ? 'Comissão (%)' : 'Comissão (R$)'}</Label>
+                    <Input type="number" value={productFormData.commission_value} onChange={(e) => setProductFormData({ ...productFormData, commission_value: Number(e.target.value) })} placeholder="0" />
+                  </div>
+                </div>
+                <div className="grid gap-3 rounded-lg border border-dashed border-border bg-background/80 p-4 sm:grid-cols-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Preço de venda</p>
+                    <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(productFormData.sale_price) || 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Base comissionável</p>
+                    <p className="text-sm font-semibold text-foreground">{formatCurrency(commissionBase)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Comissão estimada</p>
+                    <p className="text-sm font-semibold text-primary">{formatCurrency(estimatedCommission)}</p>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="recebimento" className="mt-0 space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Fornecedor</Label>
+                    <Input value={productFormData.supplier_name || ""} onChange={(e) => setProductFormData({ ...productFormData, supplier_name: e.target.value })} placeholder="Nome do fornecedor" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Regra de recebimento</Label>
+                    <Select value={productFormData.payment_rule} onValueChange={(v) => setProductFormData({ ...productFormData, payment_rule: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="after_sale">Após a venda</SelectItem>
+                        <SelectItem value="after_travel">Após a viagem</SelectItem>
+                        <SelectItem value="after_invoice_issued">Após emissão da NF</SelectItem>
+                        <SelectItem value="after_invoice_sent">Após envio da NF</SelectItem>
+                        <SelectItem value="manual">Data manual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Prazo em dias</Label>
+                    <Input type="number" value={productFormData.payment_days} onChange={(e) => setProductFormData({ ...productFormData, payment_days: Number(e.target.value) })} placeholder="30" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Data prevista de recebimento</Label>
+                    <Input type="date" value={productFormData.expected_date || ""} onChange={(e) => setProductFormData({ ...productFormData, expected_date: e.target.value })} />
+                    <p className="text-xs text-muted-foreground">Calculada automaticamente ou informe manualmente</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2 pt-2">
+                  <Checkbox
+                    id="requires_invoice"
+                    checked={productFormData.requires_invoice}
+                    onCheckedChange={(checked) => setProductFormData({ ...productFormData, requires_invoice: !!checked })}
+                  />
+                  <Label htmlFor="requires_invoice" className="text-sm font-medium cursor-pointer">Exige nota fiscal?</Label>
+                </div>
+
+                {productFormData.requires_invoice && (
+                  <div className="space-y-4 rounded-lg border border-dashed border-border bg-background/80 p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <FileText className="h-4 w-4" /> Dados da Nota Fiscal
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Status da Nota</Label>
+                        <Select value={productFormData.invoice_status || "a_emitir"} onValueChange={(v) => setProductFormData({ ...productFormData, invoice_status: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="a_emitir">A emitir</SelectItem>
+                            <SelectItem value="emitida">Emitida</SelectItem>
+                            <SelectItem value="enviada">Enviada</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Número da Nota</Label>
+                        <Input value={productFormData.invoice_number || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_number: e.target.value })} placeholder="Nº da NF" />
+                      </div>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Data de Emissão</Label>
+                        <Input type="date" value={productFormData.invoice_issued_date || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_issued_date: e.target.value })} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Data de Envio</Label>
+                        <Input type="date" value={productFormData.invoice_sent_date || ""} onChange={(e) => setProductFormData({ ...productFormData, invoice_sent_date: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+            </ScrollArea>
+          </Tabs>
+
+          <DialogFooter className="px-6 pb-6 pt-2 border-t">
             <Button variant="outline" onClick={() => { setIsProductDialogOpen(false); resetProductForm(); }}>Cancelar</Button>
             <Button onClick={handleProductSubmit} disabled={isSaving || productFormData.sale_price <= 0}>
               {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
