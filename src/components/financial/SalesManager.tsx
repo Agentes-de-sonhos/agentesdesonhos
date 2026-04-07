@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText } from "lucide-react";
+import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/collapsible";
 import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
 import { useSellers } from "@/hooks/useSellers";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { Sale, SaleFormData, SaleProductFormData, ProductType } from "@/types/financial";
 import { PRODUCT_TYPES } from "@/types/financial";
 
