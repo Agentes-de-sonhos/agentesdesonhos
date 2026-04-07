@@ -222,6 +222,14 @@ export function SalesManager() {
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">{products.length} produto(s)</span>
+                          <Button
+                            variant={products.length === 0 ? "default" : "outline"}
+                            size="sm"
+                            className="h-8 text-xs"
+                            onClick={(e) => { e.stopPropagation(); openAddProduct(sale.id); }}
+                          >
+                            <Plus className="h-3 w-3 mr-1" /> Produto
+                          </Button>
                           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditSale(sale); }}>
                             <Pencil className="h-4 w-4 text-muted-foreground" />
                           </Button>
