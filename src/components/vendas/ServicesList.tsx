@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,17 @@ const statusColors: Record<string, string> = {
   cancelado: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
 
+function calcCommission(salePrice: number, taxes: number, commType: string, commValue: number) {
+  const base = salePrice - taxes;
+  if (commType === "percentage") return base * (commValue / 100);
+  return commValue;
+}
+
+function calcDU(salePrice: number, duType: string, duValue: number) {
+  if (duType === "percentage") return salePrice * (duValue / 100);
+  return duValue;
+}
+
 function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
   bookingId: string;
   onSubmit: (v: any) => void;
@@ -40,9 +51,25 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
   const [description, setDescription] = useState(initial?.description || "");
   const [salePrice, setSalePrice] = useState(initial ? String(initial.sale_price) : "");
   const [costPrice, setCostPrice] = useState(initial ? String(initial.cost_price) : "");
-  const [expectedCommission, setExpectedCommission] = useState(initial ? String(initial.expected_commission) : "");
+  const [taxes, setTaxes] = useState(initial ? String(initial.non_commissionable_taxes) : "0");
+  const [commType, setCommType] = useState(initial?.commission_type || "percentage");
+  const [commValue, setCommValue] = useState(initial ? String(initial.commission_value) : "");
+  const [duType, setDuType] = useState(initial?.du_type || "fixed");
+  const [duValue, setDuValue] = useState(initial ? String(initial.du_value) : "0");
   const [commissionDate, setCommissionDate] = useState(initial?.expected_commission_date || "");
   const [status, setStatus] = useState(initial?.status || "pendente");
+
+  const isAereo = serviceType === "aereo";
+
+  const computed = useMemo(() => {
+    const sp = Number(salePrice) || 0;
+    const tx = Number(taxes) || 0;
+    const base = sp - tx;
+    const commission = calcCommission(sp, tx, commType, Number(commValue) || 0);
+    const du = isAereo ? calcDU(sp, duType, Number(duValue) || 0) : 0;
+    const profit = commission + du;
+    return { base, commission, du, profit };
+  }, [salePrice, taxes, commType, commValue, duType, duValue, isAereo]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +80,12 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
       description: description || null,
       sale_price: Number(salePrice) || 0,
       cost_price: Number(costPrice) || 0,
-      expected_commission: Number(expectedCommission) || 0,
+      non_commissionable_taxes: Number(taxes) || 0,
+      commission_type: commType,
+      commission_value: Number(commValue) || 0,
+      du_value: isAereo ? (Number(duValue) || 0) : 0,
+      du_type: duType,
+      expected_commission: computed.commission,
       expected_commission_date: commissionDate || null,
       status,
     };
@@ -87,7 +119,9 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
         <Label className="text-xs">Descrição</Label>
         <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" placeholder="Ex: Hotel Marriott Paris - 5 noites" />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+      {/* Valores */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div>
           <Label className="text-xs">Valor Venda *</Label>
           <Input type="number" step="0.01" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="mt-1" required />
@@ -97,14 +131,68 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
           <Input type="number" step="0.01" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} className="mt-1" />
         </div>
         <div>
-          <Label className="text-xs">Comissão Esperada</Label>
-          <Input type="number" step="0.01" value={expectedCommission} onChange={(e) => setExpectedCommission(e.target.value)} className="mt-1" />
+          <Label className="text-xs">Taxas não comissionáveis</Label>
+          <Input type="number" step="0.01" value={taxes} onChange={(e) => setTaxes(e.target.value)} className="mt-1" placeholder="0" />
+        </div>
+      </div>
+
+      {/* Comissão */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div>
+          <Label className="text-xs">Tipo Comissão</Label>
+          <select value={commType} onChange={(e) => setCommType(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <option value="percentage">Percentual (%)</option>
+            <option value="fixed">Valor Fixo (R$)</option>
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">{commType === "percentage" ? "% Comissão" : "Valor Comissão (R$)"}</Label>
+          <Input type="number" step="0.01" value={commValue} onChange={(e) => setCommValue(e.target.value)} className="mt-1" />
         </div>
         <div>
           <Label className="text-xs">Data Comissão</Label>
           <Input type="date" value={commissionDate} onChange={(e) => setCommissionDate(e.target.value)} className="mt-1" />
         </div>
+        <div className="flex flex-col justify-end">
+          <p className="text-xs text-muted-foreground">Base: R$ {fmt(computed.base)}</p>
+          <p className="text-xs font-medium text-foreground">Comissão: R$ {fmt(computed.commission)}</p>
+        </div>
       </div>
+
+      {/* DU - Aéreo only */}
+      {isAereo && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 rounded-md border border-dashed border-primary/30 bg-primary/5">
+          <div className="col-span-full">
+            <Label className="text-xs font-semibold">DU (Taxa de serviço do agente) — Aéreo</Label>
+          </div>
+          <div>
+            <Label className="text-xs">Tipo DU</Label>
+            <select value={duType} onChange={(e) => setDuType(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <option value="fixed">Valor Fixo (R$)</option>
+              <option value="percentage">Percentual (%)</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">{duType === "percentage" ? "% DU" : "Valor DU (R$)"}</Label>
+            <Input type="number" step="0.01" value={duValue} onChange={(e) => setDuValue(e.target.value)} className="mt-1" />
+          </div>
+          <div className="flex flex-col justify-end">
+            <p className="text-xs font-medium text-foreground">DU: R$ {fmt(computed.du)}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Lucro resumo */}
+      <div className="flex items-center justify-between p-3 rounded-md bg-muted/50 border">
+        <span className="text-sm font-medium">Lucro do Agente</span>
+        <span className="text-sm font-bold text-foreground">
+          R$ {fmt(computed.profit)}
+          {isAereo && computed.du > 0 && (
+            <span className="text-xs font-normal text-muted-foreground ml-1">(Comissão R$ {fmt(computed.commission)} + DU R$ {fmt(computed.du)})</span>
+          )}
+        </span>
+      </div>
+
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="outline" size="sm" onClick={onCancel}><X className="h-3.5 w-3.5 mr-1" />Cancelar</Button>
         <Button type="submit" size="sm" disabled={isLoading}>
@@ -135,7 +223,11 @@ export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, o
             />
           );
         }
-        const margin = Number(s.sale_price) - Number(s.cost_price);
+        const taxes = Number(s.non_commissionable_taxes) || 0;
+        const commission = calcCommission(Number(s.sale_price), taxes, s.commission_type, Number(s.commission_value));
+        const du = s.service_type === "aereo" ? calcDU(Number(s.sale_price), s.du_type, Number(s.du_value)) : 0;
+        const profit = commission + du;
+
         return (
           <Card key={s.id} className="group hover:shadow-sm transition-shadow">
             <CardContent className="py-3 px-4">
@@ -158,9 +250,11 @@ export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, o
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-semibold text-foreground">R$ {fmt(Number(s.sale_price))}</p>
+                  {taxes > 0 && <p className="text-xs text-muted-foreground">Taxas: R$ {fmt(taxes)}</p>}
                   <p className="text-xs text-muted-foreground">Custo: R$ {fmt(Number(s.cost_price))}</p>
-                  <p className={`text-xs font-medium ${margin >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                    Margem: R$ {fmt(margin)}
+                  <p className={`text-xs font-medium ${profit >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                    Lucro: R$ {fmt(profit)}
+                    {s.service_type === "aereo" && du > 0 && <span className="text-muted-foreground font-normal"> (Com+DU)</span>}
                   </p>
                 </div>
               </div>

@@ -26,7 +26,13 @@ export function BookingDetail({ bookingId, onBack }: Props) {
     const commissionPending = totalCommission - commissionReceived;
     const totalPaid = payments.filter((p) => p.status === "pago").reduce((s, p) => s + Number(p.amount), 0);
     const totalPayments = payments.reduce((s, p) => s + Number(p.amount), 0);
-    const profit = totalSold - totalCost;
+    const profit = services.reduce((sum, s) => {
+      const taxes = Number(s.non_commissionable_taxes) || 0;
+      const base = Number(s.sale_price) - taxes;
+      const comm = s.commission_type === "percentage" ? base * (Number(s.commission_value) / 100) : Number(s.commission_value);
+      const du = s.service_type === "aereo" ? (s.du_type === "percentage" ? Number(s.sale_price) * (Number(s.du_value) / 100) : Number(s.du_value)) : 0;
+      return sum + comm + du;
+    }, 0);
 
     const agencyPayments = payments.filter((p) => p.receipt_type !== "direto_fornecedor");
     const directPayments = payments.filter((p) => p.receipt_type === "direto_fornecedor");
@@ -88,6 +94,11 @@ export function BookingDetail({ bookingId, onBack }: Props) {
               cost_price: svc.cost_price,
               expected_commission: svc.expected_commission,
               expected_commission_date: svc.expected_commission_date,
+              non_commissionable_taxes: svc.non_commissionable_taxes,
+              commission_type: svc.commission_type,
+              commission_value: svc.commission_value,
+              du_value: svc.du_value,
+              du_type: svc.du_type,
               status: svc.status,
             });
           }}
