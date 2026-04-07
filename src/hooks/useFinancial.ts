@@ -160,9 +160,12 @@ export function useFinancial() {
     
     const grossProfit = totalSales - totalCosts;
     
+    // Commission calculation: (sale_price - non_commissionable_taxes) * %
     const totalCommissions = saleProducts.reduce((sum, p) => {
+      const taxes = Number((p as any).non_commissionable_taxes) || 0;
+      const base = Number(p.sale_price) - taxes;
       if (p.commission_type === 'percentage') {
-        return sum + (Number(p.sale_price) * Number(p.commission_value) / 100);
+        return sum + (base * Number(p.commission_value) / 100);
       }
       return sum + Number(p.commission_value);
     }, 0);
