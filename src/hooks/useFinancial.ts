@@ -474,10 +474,14 @@ export function useFinancial() {
         .select()
         .single();
       if (error) throw error;
+      // Sync income entry with updated data
+      await syncIncomeEntry(id, data.sale_id, formData);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
       toast({ title: "Produto atualizado", description: "Os dados foram salvos." });
     },
     onError: (error) => {
