@@ -31,8 +31,11 @@ import type { Sale, SaleFormData, SaleProductFormData, ProductType } from "@/typ
 import { PRODUCT_TYPES } from "@/types/financial";
 
 export function SalesManager() {
-  const { sales, saleProducts, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
+  const { sales, saleProducts, expenseEntries, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, createExpense, deleteExpense, isCreating, isUpdating } = useFinancial();
   const { closedOpportunities } = useClosedOpportunities();
+  const { sellers } = useSellers();
+  const [sellerId, setSellerId] = useState<string>("");
+  const [sellerCommission, setSellerCommission] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
