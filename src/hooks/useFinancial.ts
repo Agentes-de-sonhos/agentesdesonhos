@@ -19,6 +19,7 @@ import type {
   ExpenseCategory,
   ProductType,
 } from "@/types/financial";
+import { PRODUCT_TYPES } from "@/types/financial";
 
 export function useFinancial() {
   const { user } = useAuth();
@@ -159,9 +160,12 @@ export function useFinancial() {
     
     const grossProfit = totalSales - totalCosts;
     
+    // Commission calculation: (sale_price - non_commissionable_taxes) * %
     const totalCommissions = saleProducts.reduce((sum, p) => {
+      const taxes = Number((p as any).non_commissionable_taxes) || 0;
+      const base = Number(p.sale_price) - taxes;
       if (p.commission_type === 'percentage') {
-        return sum + (Number(p.sale_price) * Number(p.commission_value) / 100);
+        return sum + (base * Number(p.commission_value) / 100);
       }
       return sum + Number(p.commission_value);
     }, 0);
@@ -221,12 +225,64 @@ export function useFinancial() {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
       queryClient.invalidateQueries({ queryKey: ["customer_payments"] });
+      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
       toast({ title: "Venda excluída", description: "A venda foi removida." });
     },
     onError: (error) => {
       toast({ title: "Erro ao excluir venda", description: error.message, variant: "destructive" });
     },
   });
+
+  // Helper to calculate commission amount
+  const calcCommissionAmount = (formData: SaleProductFormData) => {
+    const taxes = Number(formData.non_commissionable_taxes) || 0;
+    const base = Number(formData.sale_price) - taxes;
+    if (formData.commission_type === 'percentage') {
+      return base * (Number(formData.commission_value) || 0) / 100;
+    }
+    return Number(formData.commission_value) || 0;
+  };
+
+  // Auto-generate income entry for a product
+  const syncIncomeEntry = async (productId: string, saleId: string, formData: SaleProductFormData) => {
+    if (!user) return;
+    const commissionAmount = calcCommissionAmount(formData);
+    if (commissionAmount <= 0) return;
+
+    // Check if income entry already exists for this product
+    const { data: existing } = await supabase
+      .from("income_entries")
+      .select("id")
+      .eq("sale_product_id", productId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const entryData = {
+      sale_id: saleId,
+      sale_product_id: productId,
+      amount: commissionAmount,
+      entry_date: formData.expected_date || new Date().toISOString().split("T")[0],
+      expected_date: formData.expected_date || null,
+      payment_method: "pix",
+      status: "pending",
+      source: "auto",
+      notes: `Comissão: ${formData.supplier_name || PRODUCT_TYPES[formData.product_type] || formData.product_type}`,
+      user_id: user.id,
+    };
+
+    if (existing) {
+      await supabase.from("income_entries").update(entryData).eq("id", existing.id);
+    } else {
+      await supabase.from("income_entries").insert(entryData);
+    }
+  };
+
+  // Remove auto-generated income entry for a product
+  const removeIncomeEntry = async (productId: string) => {
+    if (!user) return;
+    await supabase.from("income_entries").delete().eq("sale_product_id", productId).eq("user_id", user.id);
+  };
 
   // Create sale product mutation
   const createSaleProductMutation = useMutation({
@@ -242,10 +298,14 @@ export function useFinancial() {
         .select()
         .single();
       if (error) throw error;
+      // Auto-generate income entry
+      await syncIncomeEntry(data.id, saleId, formData);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
       toast({ title: "Produto adicionado", description: "O produto foi vinculado à venda." });
     },
     onError: (error) => {
@@ -256,11 +316,15 @@ export function useFinancial() {
   // Delete sale product mutation
   const deleteSaleProductMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Remove auto-generated income entry first
+      await removeIncomeEntry(id);
       const { error } = await supabase.from("sale_products").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
       toast({ title: "Produto removido", description: "O produto foi desvinculado." });
     },
     onError: (error) => {
@@ -415,10 +479,14 @@ export function useFinancial() {
         .select()
         .single();
       if (error) throw error;
+      // Sync income entry with updated data
+      await syncIncomeEntry(id, data.sale_id, formData);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
       toast({ title: "Produto atualizado", description: "Os dados foram salvos." });
     },
     onError: (error) => {

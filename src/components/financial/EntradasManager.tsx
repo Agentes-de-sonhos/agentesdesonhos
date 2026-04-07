@@ -108,6 +108,8 @@ export function EntradasManager() {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
+      queryClient.invalidateQueries({ queryKey: ["sale_products"] });
       toast({ title: "✅ Entrada recebida!", description: "Valor marcado como recebido." });
     }
   };
@@ -135,9 +137,15 @@ export function EntradasManager() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium">{entry.sale?.client_name || entry.notes || "Entrada manual"}</span>
                 {getStatusBadge(entry)}
+                {(entry as any).source === "auto" && (
+                  <Badge variant="outline" className="text-xs gap-1 border-primary/30 text-primary">⚡ Automática</Badge>
+                )}
               </div>
               <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
                 <span>{format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</span>
+                {(entry as any).expected_date && (entry as any).status === "pending" && (
+                  <><span>•</span><span>Previsto: {format(new Date((entry as any).expected_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })}</span></>
+                )}
                 <span>•</span>
                 <span>{PAYMENT_METHODS[entry.payment_method] || entry.payment_method}</span>
                 {entry.sale?.destination && (<><span>•</span><span>{entry.sale.destination}</span></>)}
