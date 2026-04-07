@@ -139,6 +139,12 @@ export function SalesManager() {
       await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
       if (sellerId) {
         await syncSellerExpense(editingSaleId, formData, sellerId, sellerCommission);
+      } else {
+        // Remove seller expense if seller was cleared
+        if (user) {
+          await supabase.from("expense_entries").delete().eq("sale_id", editingSaleId).eq("category", "comissao").eq("user_id", user.id);
+          queryClient.invalidateQueries({ queryKey: ["expense_entries"] });
+        }
       }
     } else {
       const result = await createSale({ ...formData, seller_id: sellerId || undefined, seller_commission_percent: sellerId ? sellerCommission : undefined } as any);
