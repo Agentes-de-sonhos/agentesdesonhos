@@ -267,8 +267,20 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
         </div>
 
+        {/* Trip type toggle */}
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="radio" checked={!isOneWay} onChange={() => { setIsOneWay(false); form.setValue("is_one_way", false); }} className="accent-primary" />
+            <span className="text-sm">Ida e volta</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="radio" checked={isOneWay} onChange={() => { setIsOneWay(true); form.setValue("is_one_way", true); form.setValue("return_date", undefined); }} className="accent-primary" />
+            <span className="text-sm">Somente ida</span>
+          </label>
+        </div>
+
         {/* BLOCO 2 — Datas */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={cn("grid gap-4", !isOneWay && "sm:grid-cols-2")}>
           <FormField control={form.control} name="departure_date" render={({ field }) => (
             <FormItem className="flex flex-col"><FormLabel>Data de Ida</FormLabel>
               <Popover><PopoverTrigger asChild><FormControl>
@@ -280,17 +292,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
-          <FormField control={form.control} name="return_date" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Data de Volta</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
-          )} />
+          {!isOneWay && (
+            <FormField control={form.control} name="return_date" render={({ field }) => (
+              <FormItem className="flex flex-col"><FormLabel>Data de Volta</FormLabel>
+                <Popover><PopoverTrigger asChild><FormControl>
+                  <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                    {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button></FormControl></PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={field.value ?? undefined} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover><FormMessage /></FormItem>
+            )} />
+          )}
         </div>
 
         {/* BLOCO 3 — Inclusões */}
@@ -317,7 +331,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           {showFlightDetails && (
             <div className="px-4 pb-4 space-y-5 border-t border-border/40 pt-3">
               <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" />
-              <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" />
+              {!isOneWay && <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" />}
             </div>
           )}
         </div>
