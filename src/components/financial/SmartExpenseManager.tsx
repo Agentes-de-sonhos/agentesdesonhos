@@ -84,7 +84,7 @@ export function SmartExpenseManager() {
   const monthStart = new Date();
   monthStart.setDate(1);
   const monthStartStr = monthStart.toISOString().split("T")[0];
-  const monthlyExpenses = expenseEntries.filter(e => e.entry_date >= monthStartStr);
+  const monthlyExpenses = filteredExpenses.filter(e => e.entry_date >= monthStartStr);
   const totalMonth = monthlyExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const fixedTotal = monthlyExpenses.filter(e => e.expense_type === "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
   const variableTotal = monthlyExpenses.filter(e => e.expense_type !== "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
