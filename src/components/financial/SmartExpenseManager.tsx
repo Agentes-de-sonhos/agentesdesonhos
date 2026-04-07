@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Trash2, Tag, Loader2, Repeat, Pencil } from "lucide-react";
+import { Plus, Trash2, Tag, Loader2, Repeat, Pencil, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,11 +54,29 @@ export function SmartExpenseManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [sellerFilter, setSellerFilter] = useState<string>("all");
   const [formData, setFormData] = useState<ExpenseFormState>({
     description: "", category: "outros", amount: 0,
     entry_date: new Date().toISOString().split("T")[0],
     expense_type: "variable", is_recurring: false, notes: "",
   });
+
+  // Extract unique seller names from commission expenses
+  const sellerNames = useMemo(() => {
+    const names = new Set<string>();
+    expenseEntries.forEach(e => {
+      if (e.category === 'comissao' && e.description.startsWith('Comissão - ')) {
+        names.add(e.description.replace('Comissão - ', ''));
+      }
+    });
+    return Array.from(names).sort();
+  }, [expenseEntries]);
+
+  const filteredExpenses = useMemo(() => {
+    if (sellerFilter === "all") return expenseEntries;
+    if (sellerFilter === "no_commission") return expenseEntries.filter(e => e.category !== 'comissao');
+    return expenseEntries.filter(e => e.description === `Comissão - ${sellerFilter}`);
+  }, [expenseEntries, sellerFilter]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -66,7 +84,7 @@ export function SmartExpenseManager() {
   const monthStart = new Date();
   monthStart.setDate(1);
   const monthStartStr = monthStart.toISOString().split("T")[0];
-  const monthlyExpenses = expenseEntries.filter(e => e.entry_date >= monthStartStr);
+  const monthlyExpenses = filteredExpenses.filter(e => e.entry_date >= monthStartStr);
   const totalMonth = monthlyExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const fixedTotal = monthlyExpenses.filter(e => e.expense_type === "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
   const variableTotal = monthlyExpenses.filter(e => e.expense_type !== "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
@@ -135,11 +153,28 @@ export function SmartExpenseManager() {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Despesas Variáveis</CardTitle></CardHeader><CardContent><div className="text-xl font-bold">{formatCurrency(variableTotal)}</div></CardContent></Card>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-semibold">Despesas</h3>
-        <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Nova Despesa
-        </Button>
+        <div className="flex items-center gap-2">
+          {sellerNames.length > 0 && (
+            <Select value={sellerFilter} onValueChange={setSellerFilter}>
+              <SelectTrigger className="w-[180px] h-9">
+                <Filter className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                <SelectValue placeholder="Filtrar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="no_commission">Sem comissões</SelectItem>
+                {sellerNames.map(name => (
+                  <SelectItem key={name} value={name}>Comissão - {name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Nova Despesa
+          </Button>
+        </div>
       </div>
 
       <div className="border rounded-lg">
@@ -155,10 +190,10 @@ export function SmartExpenseManager() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {expenseEntries.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma despesa registrada</TableCell></TableRow>
+            {filteredExpenses.length === 0 ? (
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma despesa encontrada</TableCell></TableRow>
             ) : (
-              expenseEntries.map((entry) => (
+              filteredExpenses.map((entry) => (
                 <TableRow key={entry.id}>
                   <TableCell>{format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                   <TableCell className="flex items-center gap-2">

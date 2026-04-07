@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { Loader2, DollarSign, LayoutDashboard, ArrowDownCircle, ShoppingBag, ArrowUpCircle, Receipt } from "lucide-react";
+import { Loader2, DollarSign, LayoutDashboard, ArrowDownCircle, ShoppingBag, ArrowUpCircle, Receipt, Users } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,9 +8,10 @@ import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager"
 import { SalesManager } from "@/components/financial/SalesManager";
 import { EntradasManager } from "@/components/financial/EntradasManager";
 import { CommissionsReceivable } from "@/components/financial/CommissionsReceivable";
+import { SellersManager } from "@/components/financial/SellersManager";
 import { useFinancial } from "@/hooks/useFinancial";
 
-const VALID_TABS = ["vendas", "comissoes", "entradas", "despesas", "dashboard"] as const;
+const VALID_TABS = ["vendas", "comissoes", "entradas", "despesas", "dashboard", "vendedoras"] as const;
 
 export default function Financeiro() {
   const { isLoading } = useFinancial();
@@ -38,7 +39,7 @@ export default function Financeiro() {
             </div>
           ) : (
             <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+              <TabsList className="grid w-full grid-cols-6 max-w-3xl">
                 <TabsTrigger value="vendas" className="gap-1.5">
                   <ShoppingBag className="h-4 w-4" />
                   <span className="hidden sm:inline">Vendas</span>
@@ -54,6 +55,10 @@ export default function Financeiro() {
                 <TabsTrigger value="despesas" className="gap-1.5">
                   <ArrowDownCircle className="h-4 w-4" />
                   <span className="hidden sm:inline">Despesas</span>
+                </TabsTrigger>
+                <TabsTrigger value="vendedoras" className="gap-1.5">
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Vendedoras</span>
                 </TabsTrigger>
                 <TabsTrigger value="dashboard" className="gap-1.5">
                   <LayoutDashboard className="h-4 w-4" />
@@ -75,6 +80,10 @@ export default function Financeiro() {
 
               <TabsContent value="entradas">
                 <EntradasManager />
+              </TabsContent>
+
+              <TabsContent value="vendedoras">
+                <SellersManager />
               </TabsContent>
 
               <TabsContent value="dashboard">

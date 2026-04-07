@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,12 +27,20 @@ import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
+import { useSellers } from "@/hooks/useSellers";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { Sale, SaleFormData, SaleProductFormData, ProductType } from "@/types/financial";
 import { PRODUCT_TYPES } from "@/types/financial";
 
 export function SalesManager() {
   const { sales, saleProducts, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
   const { closedOpportunities } = useClosedOpportunities();
+  const { sellers } = useSellers();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [sellerId, setSellerId] = useState<string>("");
+  const [sellerCommission, setSellerCommission] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
@@ -80,6 +89,8 @@ export function SalesManager() {
     setFormData({ client_name: "", destination: "", sale_amount: 0, sale_date: new Date().toISOString().split("T")[0], notes: "" });
     setEditingSaleId(null);
     setSelectedOpportunity("client");
+    setSellerId("");
+    setSellerCommission(0);
   };
 
   const resetProductForm = () => {
@@ -98,11 +109,48 @@ export function SalesManager() {
     }
   };
 
+  // Sync seller commission expense
+  const syncSellerExpense = async (saleId: string, saleData: SaleFormData, selId: string, selComm: number) => {
+    if (!user || !selId || selComm <= 0 || !saleData.sale_amount) return;
+    const seller = sellers.find(s => s.id === selId);
+    if (!seller) return;
+    const commissionAmount = Number(saleData.sale_amount) * selComm / 100;
+    if (commissionAmount <= 0) return;
+
+    // Remove existing seller expense for this sale
+    await supabase.from("expense_entries").delete().eq("sale_id", saleId).eq("category", "comissao").eq("user_id", user.id);
+
+    // Create new expense with sale_id
+    await supabase.from("expense_entries").insert({
+      user_id: user.id,
+      description: `Comissão - ${seller.name}`,
+      category: "comissao",
+      amount: commissionAmount,
+      entry_date: saleData.sale_date,
+      notes: `Comissão de ${selComm}% sobre venda de ${saleData.client_name}`,
+      sale_id: saleId,
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["expense_entries"] });
+  };
+
   const handleSubmit = async () => {
     if (editingSaleId) {
-      await updateSale({ id: editingSaleId, ...formData });
+      await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
+      if (sellerId) {
+        await syncSellerExpense(editingSaleId, formData, sellerId, sellerCommission);
+      } else {
+        // Remove seller expense if seller was cleared
+        if (user) {
+          await supabase.from("expense_entries").delete().eq("sale_id", editingSaleId).eq("category", "comissao").eq("user_id", user.id);
+          queryClient.invalidateQueries({ queryKey: ["expense_entries"] });
+        }
+      }
     } else {
-      await createSale(formData);
+      const result = await createSale({ ...formData, seller_id: sellerId || undefined, seller_commission_percent: sellerId ? sellerCommission : undefined } as any);
+      if (result && sellerId) {
+        await syncSellerExpense(result.id, formData, sellerId, sellerCommission);
+      }
     }
     setIsDialogOpen(false);
     resetSaleForm();
@@ -127,6 +175,8 @@ export function SalesManager() {
       sale_amount: Number(sale.sale_amount), sale_date: sale.sale_date,
       notes: sale.notes || "", opportunity_id: sale.opportunity_id || undefined,
     });
+    setSellerId((sale as any).seller_id || "");
+    setSellerCommission(Number((sale as any).seller_commission_percent) || 0);
     setIsDialogOpen(true);
   };
 
@@ -267,6 +317,10 @@ export function SalesManager() {
                             <MapPin className="h-3 w-3" /> {sale.destination}
                             <span className="mx-2">•</span>
                             {format(new Date(sale.sale_date), "dd/MM/yyyy", { locale: ptBR })}
+                            {(sale as any).seller_id && (() => {
+                              const seller = sellers.find(s => s.id === (sale as any).seller_id);
+                              return seller ? <><span className="mx-2">•</span><Users className="h-3 w-3" />{seller.name}</> : null;
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -425,6 +479,44 @@ export function SalesManager() {
                 <Input type="date" value={formData.sale_date} onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })} />
               </div>
             </div>
+            {sellers.length > 0 && (
+              <div className="space-y-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Users className="h-4 w-4 text-muted-foreground" /> Quem vendeu?
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Vendedora</Label>
+                    <Select value={sellerId} onValueChange={(v) => {
+                      setSellerId(v);
+                      const sel = sellers.find(s => s.id === v);
+                      if (sel) setSellerCommission(sel.default_commission_percent);
+                    }}>
+                      <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
+                      <SelectContent>
+                        {sellers.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name} ({s.default_commission_percent}%)</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {sellerId && (
+                    <div className="space-y-2">
+                      <Label>Comissão (%)</Label>
+                      <Input type="number" value={sellerCommission} onChange={(e) => setSellerCommission(Number(e.target.value))} min={0} max={100} step={0.5} />
+                      <p className="text-xs text-muted-foreground">
+                        {formData.sale_amount > 0 && `= ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(formData.sale_amount * sellerCommission / 100)}`}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {sellerId && (
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => { setSellerId(""); setSellerCommission(0); }}>
+                    Remover vendedora
+                  </Button>
+                )}
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Observações</Label>
               <Textarea value={formData.notes || ""} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações opcionais" />
