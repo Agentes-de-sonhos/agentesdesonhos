@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle, FileText, AlertTriangle, Clock, DollarSign, Filter, ChevronDown, ChevronUp, Pencil, MessageSquare, Eye } from "lucide-react";
-import { SERVICE_TYPES, SERVICE_ICONS } from "@/hooks/useBookings";
+import { Loader2, CheckCircle, FileText, AlertTriangle, Clock, DollarSign, Filter, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
+import { PRODUCT_TYPES } from "@/types/financial";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,26 +23,22 @@ const COMMISSION_STATUSES: Record<string, { label: string; color: string; icon: 
   aguardando_envio_nota: { label: "Aguardando Envio NF", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400", icon: "📤" },
   aguardando_pagamento: { label: "Aguardando Pagamento", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400", icon: "⏳" },
   recebido: { label: "Recebido", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400", icon: "✅" },
-  parcialmente_recebido: { label: "Parcialmente Recebido", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", icon: "🔄" },
   atrasado: { label: "Atrasado", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", icon: "🚨" },
   cancelado: { label: "Cancelado", color: "bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400", icon: "❌" },
 };
 
-const INVOICE_STATUSES: Record<string, string> = {
-  nao_se_aplica: "N/A",
-  pendente_emissao: "A emitir",
-  emitida: "Emitida",
-  enviada: "Enviada",
-  aprovada: "Aprovada",
-  recusada: "Recusada",
-};
-
 const PAYMENT_RULES: Record<string, string> = {
   after_sale: "Após a venda",
-  after_trip: "Após a viagem",
+  after_travel: "Após a viagem",
   after_invoice_issued: "Após emissão NF",
   after_invoice_sent: "Após envio NF",
   manual: "Data manual",
+};
+
+const INVOICE_STATUSES: Record<string, string> = {
+  a_emitir: "A emitir",
+  emitida: "Emitida",
+  enviada: "Enviada",
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -68,14 +64,14 @@ function isDueIn7Days(c: CommissionReceivable) {
 
 function SummaryCards({ commissions }: { commissions: CommissionReceivable[] }) {
   const active = commissions.filter(c => c.status !== "cancelado");
-  const totalPrevisto = active.filter(c => c.status !== "recebido").reduce((s, c) => s + Number(c.commission_amount), 0);
-  const totalAguardandoNF = active.filter(c => c.status === "aguardando_emissao_nota" || c.status === "aguardando_envio_nota").reduce((s, c) => s + Number(c.commission_amount), 0);
-  const totalAguardandoPgto = active.filter(c => c.status === "aguardando_pagamento").reduce((s, c) => s + Number(c.commission_amount), 0);
-  const totalAtrasado = active.filter(c => isOverdue(c)).reduce((s, c) => s + Number(c.commission_amount), 0);
+  const totalPrevisto = active.filter(c => c.status !== "recebido").reduce((s, c) => s + c.commission_amount, 0);
+  const totalAguardandoNF = active.filter(c => c.status === "aguardando_emissao_nota" || c.status === "aguardando_envio_nota").reduce((s, c) => s + c.commission_amount, 0);
+  const totalAguardandoPgto = active.filter(c => c.status === "aguardando_pagamento").reduce((s, c) => s + c.commission_amount, 0);
+  const totalAtrasado = active.filter(c => isOverdue(c)).reduce((s, c) => s + c.commission_amount, 0);
 
   const now = new Date();
   const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-  const totalRecebidoMes = active.filter(c => c.status === "recebido" && c.received_date && c.received_date >= monthStart).reduce((s, c) => s + Number(c.commission_amount), 0);
+  const totalRecebidoMes = active.filter(c => c.status === "recebido" && c.received_date && c.received_date >= monthStart).reduce((s, c) => s + c.commission_amount, 0);
 
   const cards = [
     { label: "A Receber", value: totalPrevisto, color: "text-violet-600 dark:text-violet-400", icon: DollarSign },
@@ -107,7 +103,7 @@ function NoteDialog({ commission, open, onOpenChange }: { commission: Commission
   const [note, setNote] = useState(commission.internal_notes || "");
   const mutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("booking_commissions").update({ internal_notes: note }).eq("id", commission.id);
+      const { error } = await supabase.from("sale_products").update({ internal_notes: note } as any).eq("id", commission.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -140,10 +136,9 @@ export function CommissionsReceivable() {
   const [showFilters, setShowFilters] = useState(false);
   const [noteCommission, setNoteCommission] = useState<CommissionReceivable | null>(null);
 
-  // Filters
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterInvoice, setFilterInvoice] = useState("all");
-  const [filterServiceType, setFilterServiceType] = useState("all");
+  const [filterProductType, setFilterProductType] = useState("all");
   const [filterSupplier, setFilterSupplier] = useState("");
   const [filterClient, setFilterClient] = useState("");
   const [filterQuickDate, setFilterQuickDate] = useState("all");
@@ -152,36 +147,29 @@ export function CommissionsReceivable() {
 
   const updateCommission = useMutation({
     mutationFn: async ({ id, ...values }: { id: string } & Record<string, any>) => {
-      const { error } = await supabase.from("booking_commissions").update(values).eq("id", id);
+      // Map status to commission_status column
+      const updateData: any = { ...values };
+      if (updateData.status) {
+        updateData.commission_status = updateData.status;
+        delete updateData.status;
+      }
+      const { error } = await supabase.from("sale_products").update(updateData).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["commissions-receivable"] });
-      qc.invalidateQueries({ queryKey: ["booking-commissions"] });
-      qc.invalidateQueries({ queryKey: ["all-booking-commissions-summary"] });
+      qc.invalidateQueries({ queryKey: ["sale_products"] });
       toast.success("Comissão atualizada");
     },
     onError: () => toast.error("Erro ao atualizar"),
   });
 
-  // Extract unique values for filters
-  const suppliers = useMemo(() => {
-    const set = new Map<string, string>();
-    commissions.forEach(c => {
-      const name = c.supplier?.name || c.service?.supplier?.name;
-      const id = c.supplier_id || c.service?.supplier_id;
-      if (name && id) set.set(id, name);
-    });
-    return Array.from(set.entries()).map(([id, name]) => ({ id, name }));
-  }, [commissions]);
-
-  const serviceTypes = useMemo(() => {
+  const productTypes = useMemo(() => {
     const set = new Set<string>();
-    commissions.forEach(c => { if (c.service?.service_type) set.add(c.service.service_type); });
+    commissions.forEach(c => set.add(c.product_type));
     return Array.from(set);
   }, [commissions]);
 
-  // Apply filters
   const filtered = useMemo(() => {
     return commissions.filter(c => {
       if (filterStatus !== "all") {
@@ -189,17 +177,15 @@ export function CommissionsReceivable() {
         else if (c.status !== filterStatus) return false;
       }
       if (filterInvoice !== "all") {
-        if (filterInvoice === "nao_se_aplica" && c.requires_invoice) return false;
-        if (filterInvoice !== "nao_se_aplica" && c.invoice_status !== filterInvoice) return false;
+        if (filterInvoice === "n_a" && c.requires_invoice) return false;
+        if (filterInvoice !== "n_a" && c.invoice_status !== filterInvoice) return false;
       }
-      if (filterServiceType !== "all" && c.service?.service_type !== filterServiceType) return false;
+      if (filterProductType !== "all" && c.product_type !== filterProductType) return false;
       if (filterSupplier) {
-        const sName = (c.supplier?.name || c.service?.supplier?.name || "").toLowerCase();
-        if (!sName.includes(filterSupplier.toLowerCase())) return false;
+        if (!(c.supplier_name || "").toLowerCase().includes(filterSupplier.toLowerCase())) return false;
       }
       if (filterClient) {
-        const cName = (c.service?.booking?.client?.name || "").toLowerCase();
-        if (!cName.includes(filterClient.toLowerCase())) return false;
+        if (!c.client_name.toLowerCase().includes(filterClient.toLowerCase())) return false;
       }
       if (filterQuickDate === "today" && !isDueToday(c)) return false;
       if (filterQuickDate === "7days" && !isDueIn7Days(c)) return false;
@@ -210,7 +196,7 @@ export function CommissionsReceivable() {
       if (filterDateTo && c.expected_date && c.expected_date > filterDateTo) return false;
       return true;
     });
-  }, [commissions, filterStatus, filterInvoice, filterServiceType, filterSupplier, filterClient, filterQuickDate, filterDateFrom, filterDateTo]);
+  }, [commissions, filterStatus, filterInvoice, filterProductType, filterSupplier, filterClient, filterQuickDate, filterDateFrom, filterDateTo]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -220,7 +206,6 @@ export function CommissionsReceivable() {
     <div className="space-y-6">
       <SummaryCards commissions={commissions} />
 
-      {/* Filters toggle */}
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="gap-2">
           <Filter className="h-4 w-4" /> Filtros
@@ -244,14 +229,15 @@ export function CommissionsReceivable() {
               <Label className="text-xs">Status NF</Label>
               <select value={filterInvoice} onChange={(e) => setFilterInvoice(e.target.value)} className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm">
                 <option value="all">Todos</option>
+                <option value="n_a">N/A</option>
                 {Object.entries(INVOICE_STATUSES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
             <div>
-              <Label className="text-xs">Tipo Serviço</Label>
-              <select value={filterServiceType} onChange={(e) => setFilterServiceType(e.target.value)} className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm">
+              <Label className="text-xs">Tipo Produto</Label>
+              <select value={filterProductType} onChange={(e) => setFilterProductType(e.target.value)} className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm">
                 <option value="all">Todos</option>
-                {serviceTypes.map(t => <option key={t} value={t}>{SERVICE_TYPES[t] || t}</option>)}
+                {productTypes.map(t => <option key={t} value={t}>{PRODUCT_TYPES[t as keyof typeof PRODUCT_TYPES] || t}</option>)}
               </select>
             </div>
             <div>
@@ -285,15 +271,14 @@ export function CommissionsReceivable() {
         </Card>
       )}
 
-      {/* Table */}
       <Card>
         <ScrollArea className="w-full">
-          <div className="min-w-[1100px]">
+          <div className="min-w-[1000px]">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="text-left p-3 font-medium text-muted-foreground">Cliente</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Serviço</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">Produto</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">Fornecedor</th>
                   <th className="text-right p-3 font-medium text-muted-foreground">Venda</th>
                   <th className="text-right p-3 font-medium text-muted-foreground">Comissão</th>
@@ -308,58 +293,44 @@ export function CommissionsReceivable() {
                 {filtered.length === 0 ? (
                   <tr>
                     <td colSpan={10} className="p-8 text-center text-muted-foreground">
-                      Nenhuma comissão encontrada com os filtros aplicados.
+                      Nenhuma comissão encontrada. Adicione produtos às suas vendas para ver as comissões aqui.
                     </td>
                   </tr>
                 ) : filtered.map((c) => {
-                  const svc = c.service;
-                  const clientName = svc?.booking?.client?.name || "—";
-                  const svcType = svc?.service_type || "";
-                  const supplierName = c.supplier?.name || svc?.supplier?.name || "—";
-                  const bookingName = svc?.booking?.trip_name || "";
                   const overdue = isOverdue(c);
+                  const taxes = Number(c.non_commissionable_taxes) || 0;
+                  const baseComm = Number(c.sale_price) - taxes;
                   const statusInfo = overdue
                     ? COMMISSION_STATUSES.atrasado
-                    : (COMMISSION_STATUSES[c.status] || { label: c.status, color: "bg-muted text-muted-foreground", icon: "📋" });
-
-                  const taxes = Number(svc?.non_commissionable_taxes) || 0;
-                  const salePrice = Number(svc?.sale_price) || 0;
-                  const baseComm = salePrice - taxes;
-
-                  const du = svc?.service_type === "aereo"
-                    ? (svc.du_type === "percentage" ? salePrice * (Number(svc.du_value) / 100) : Number(svc.du_value))
-                    : 0;
-                  const profit = Number(c.commission_amount) + du;
+                    : (COMMISSION_STATUSES[c.status] || COMMISSION_STATUSES.previsao_criada);
 
                   return (
                     <tr key={c.id} className={`border-b hover:bg-muted/30 transition-colors ${overdue ? "bg-red-50/50 dark:bg-red-950/10" : ""}`}>
                       <td className="p-3">
-                        <p className="font-medium text-foreground">{clientName}</p>
-                        <p className="text-xs text-muted-foreground truncate max-w-[140px]">{bookingName}</p>
+                        <p className="font-medium text-foreground">{c.client_name}</p>
+                        <p className="text-xs text-muted-foreground truncate max-w-[140px]">{c.destination}</p>
                       </td>
                       <td className="p-3">
-                        <div className="flex items-center gap-1.5">
-                          <span>{SERVICE_ICONS[svcType] || "📦"}</span>
-                          <span>{SERVICE_TYPES[svcType] || svcType}</span>
-                        </div>
-                        {svc?.description && <p className="text-xs text-muted-foreground truncate max-w-[160px]">{svc.description}</p>}
+                        <p className="font-medium">{PRODUCT_TYPES[c.product_type as keyof typeof PRODUCT_TYPES] || c.product_type}</p>
+                        {c.description && <p className="text-xs text-muted-foreground truncate max-w-[160px]">{c.description}</p>}
                       </td>
-                      <td className="p-3 text-foreground">{supplierName}</td>
+                      <td className="p-3 text-foreground">{c.supplier_name || "—"}</td>
                       <td className="p-3 text-right">
-                        <p className="font-medium">R$ {fmt(salePrice)}</p>
+                        <p className="font-medium">R$ {fmt(Number(c.sale_price))}</p>
                         {taxes > 0 && <p className="text-xs text-muted-foreground">Taxas: {fmt(taxes)}</p>}
                         {taxes > 0 && <p className="text-xs text-muted-foreground">Base: {fmt(baseComm)}</p>}
                       </td>
                       <td className="p-3 text-right">
-                        <p className="font-semibold text-foreground">R$ {fmt(Number(c.commission_amount))}</p>
-                        {du > 0 && <p className="text-xs text-muted-foreground">DU: {fmt(du)}</p>}
-                        <p className={`text-xs font-medium ${profit >= 0 ? "text-emerald-600" : "text-red-500"}`}>Lucro: {fmt(profit)}</p>
+                        <p className="font-semibold text-primary">R$ {fmt(c.commission_amount)}</p>
+                        {c.commission_type === "percentage" && (
+                          <p className="text-xs text-muted-foreground">{c.commission_value}%</p>
+                        )}
                       </td>
                       <td className="p-3 text-center">
                         {c.requires_invoice ? (
                           <div>
                             <Badge variant="outline" className="text-[10px]">
-                              {INVOICE_STATUSES[c.invoice_status || "pendente_emissao"] || c.invoice_status}
+                              {INVOICE_STATUSES[c.invoice_status || "a_emitir"] || c.invoice_status}
                             </Badge>
                             {c.invoice_number && <p className="text-[10px] text-muted-foreground mt-0.5">#{c.invoice_number}</p>}
                           </div>
@@ -386,7 +357,6 @@ export function CommissionsReceivable() {
                       </td>
                       <td className="p-3">
                         <div className="flex items-center gap-0.5 justify-center flex-wrap">
-                          {/* Quick NF actions */}
                           {c.requires_invoice && c.status === "aguardando_emissao_nota" && (
                             <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px]" title="Marcar NF emitida"
                               onClick={() => updateCommission.mutate({ id: c.id, status: "aguardando_envio_nota", invoice_status: "emitida" })}>
@@ -399,14 +369,12 @@ export function CommissionsReceivable() {
                               📤→
                             </Button>
                           )}
-                          {/* Mark received */}
                           {c.status !== "recebido" && c.status !== "cancelado" && (
                             <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px] text-emerald-600" title="Marcar como recebido"
                               onClick={() => updateCommission.mutate({ id: c.id, status: "recebido", received_date: today() })}>
                               <CheckCircle className="h-3.5 w-3.5" />
                             </Button>
                           )}
-                          {/* Add note */}
                           <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px]" title="Observações"
                             onClick={() => setNoteCommission(c)}>
                             <MessageSquare className="h-3.5 w-3.5" />
