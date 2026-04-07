@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText } from "lucide-react";
@@ -167,6 +167,48 @@ export function SalesManager() {
   const estimatedCommission = productFormData.commission_type === "percentage"
     ? commissionBase * (Number(productFormData.commission_value) || 0) / 100
     : Number(productFormData.commission_value) || 0;
+
+  // Auto-calculate expected_date based on payment_rule
+  const currentSaleForProduct = useMemo(() => {
+    if (editingProductId) {
+      const product = saleProducts.find(p => p.id === editingProductId);
+      return product ? sales.find(s => s.id === product.sale_id) : null;
+    }
+    return selectedSaleId ? sales.find(s => s.id === selectedSaleId) : null;
+  }, [editingProductId, selectedSaleId, sales, saleProducts]);
+
+  useEffect(() => {
+    if (productFormData.payment_rule === "manual") return;
+
+    let baseDate: string | null = null;
+    const rule = productFormData.payment_rule;
+
+    if (rule === "after_sale" && currentSaleForProduct?.sale_date) {
+      baseDate = currentSaleForProduct.sale_date;
+    } else if (rule === "after_travel" && currentSaleForProduct) {
+      baseDate = (currentSaleForProduct as any).end_date || currentSaleForProduct.sale_date;
+    } else if (rule === "after_invoice_issued" && productFormData.invoice_issued_date) {
+      baseDate = productFormData.invoice_issued_date;
+    } else if (rule === "after_invoice_sent" && productFormData.invoice_sent_date) {
+      baseDate = productFormData.invoice_sent_date;
+    }
+
+    if (baseDate) {
+      const [y, m, d] = baseDate.split("-").map(Number);
+      const date = new Date(y, m - 1, d);
+      const expected = addDays(date, Number(productFormData.payment_days) || 0);
+      const formatted = format(expected, "yyyy-MM-dd");
+      if (formatted !== productFormData.expected_date) {
+        setProductFormData(prev => ({ ...prev, expected_date: formatted }));
+      }
+    }
+  }, [
+    productFormData.payment_rule,
+    productFormData.payment_days,
+    productFormData.invoice_issued_date,
+    productFormData.invoice_sent_date,
+    currentSaleForProduct,
+  ]);
 
   const renderSectionHeader = (step: number, title: string, description: string) => (
     <div className="space-y-1">
