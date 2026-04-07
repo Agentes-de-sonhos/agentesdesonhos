@@ -113,7 +113,7 @@ export default function CartaoPublico() {
             <h1 className="text-2xl font-bold text-gray-900">{card.name}</h1>
             {card.title && <p className="text-gray-500 mt-1">{card.title}</p>}
             {card.agency_name && (
-              <p className="text-sm font-medium mt-1" style={{ color: primaryColor }}>
+              <p className="text-sm font-medium mt-1 notranslate" translate="no" style={{ color: primaryColor }}>
                 {card.agency_name}
               </p>
             )}

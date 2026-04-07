@@ -26,7 +26,7 @@ export function ShowcaseHeader({ profile, showcase, categories, selectedCategory
 
           <div className="min-w-0">
             {profile?.agency_name && !profile?.agency_logo_url && (
-              <h1 className="font-bold text-lg text-foreground truncate">{profile.agency_name}</h1>
+              <h1 className="font-bold text-lg text-foreground truncate notranslate" translate="no">{profile.agency_name}</h1>
             )}
             {(profile?.city || profile?.state) && (
               <p className="text-xs text-muted-foreground mt-0.5">
