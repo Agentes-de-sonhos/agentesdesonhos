@@ -629,6 +629,7 @@ export default function GerarOrcamento() {
                     }
                   }}
                 />
+              </div>
               <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1 sm:gap-2 flex-wrap">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {editingDestination ? (
