@@ -169,6 +169,8 @@ export function SalesManager() {
       sale_amount: Number(sale.sale_amount), sale_date: sale.sale_date,
       notes: sale.notes || "", opportunity_id: sale.opportunity_id || undefined,
     });
+    setSellerId((sale as any).seller_id || "");
+    setSellerCommission(Number((sale as any).seller_commission_percent) || 0);
     setIsDialogOpen(true);
   };
 
