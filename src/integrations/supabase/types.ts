@@ -5752,6 +5752,7 @@ export type Database = {
           start_date: string
           status: string
           total_amount: number
+          trip_title: string | null
           updated_at: string
           use_service_payment: boolean
           user_id: string
@@ -5787,6 +5788,7 @@ export type Database = {
           start_date: string
           status?: string
           total_amount?: number
+          trip_title?: string | null
           updated_at?: string
           use_service_payment?: boolean
           user_id: string
@@ -5822,6 +5824,7 @@ export type Database = {
           start_date?: string
           status?: string
           total_amount?: number
+          trip_title?: string | null
           updated_at?: string
           use_service_payment?: boolean
           user_id?: string

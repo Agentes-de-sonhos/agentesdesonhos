@@ -418,6 +418,8 @@ const hotelSchema = z.object({
   room_type: z.string().min(1, "Tipo de quarto é obrigatório"),
   meal_plan: z.string().min(1, "Regime de alimentação é obrigatório"),
   price: z.number().min(0),
+  adult_price: z.number().min(0).optional(),
+  child_price: z.number().min(0).optional(),
   notes: z.string().optional(),
 });
 
@@ -429,7 +431,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     defaultValues: {
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
       hotel_name: init?.hotel_name || "", city: init?.city || "",
-      room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0, notes: init?.notes || "",
+      room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0,
+      adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
+      notes: init?.notes || "",
       check_in: init?.check_in ? parseLocalDate(init.check_in) : tripStartDate,
       check_out: init?.check_out ? parseLocalDate(init.check_out) : tripEndDate,
     },
@@ -486,11 +490,13 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   }, [form, onPlaceIdChange]);
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
-    const data = {
+    const data: any = {
       hotel_name: values.hotel_name, city: values.city,
       check_in: format(values.check_in, "yyyy-MM-dd"), check_out: format(values.check_out, "yyyy-MM-dd"),
       room_type: values.room_type, meal_plan: values.meal_plan, price: values.price, notes: values.notes || "",
     };
+    if (values.adult_price && values.adult_price > 0) data.adult_price = values.adult_price;
+    if (values.child_price && values.child_price > 0) data.child_price = values.child_price;
     onSubmit(data, values.price, values.option_label || undefined, values.service_description || undefined);
   };
 
@@ -604,6 +610,14 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="adult_price" render={({ field }) => (
+            <FormItem><FormLabel>Valor Adulto (opcional)</FormLabel><FormControl><Input type="number" min={0} step="0.01" placeholder="0.00" {...field} value={field.value || ""} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="child_price" render={({ field }) => (
+            <FormItem><FormLabel>Valor Criança (opcional)</FormLabel><FormControl><Input type="number" min={0} step="0.01" placeholder="0.00" {...field} value={field.value || ""} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+          )} />
+        </div>
         {paymentSlot}
 
         {/* 7. Label (optional) */}
@@ -703,6 +717,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
 const transferSchema = z.object({
   company_name: z.string().optional(),
   transfer_mode: z.enum(["arrival", "departure", "round_trip"]),
+  service_category: z.enum(["regular", "private"]).optional(),
   location: z.string().min(2, "Local é obrigatório"),
   arrival_date: z.date({ required_error: "Data de chegada é obrigatória" }),
   departure_date: z.date().optional(),
@@ -718,6 +733,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
     defaultValues: {
       company_name: init?.company_name || "",
       transfer_mode: init?.transfer_type || "round_trip",
+      service_category: init?.service_category || undefined,
       location: init?.location || "",
       price: init?.price || initialData?.amount || 0,
       arrival_date: init?.date ? parseLocalDate(init.date) : tripStartDate,
@@ -731,21 +747,22 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
   const isRoundTrip = transferMode === "round_trip";
 
   const handleSubmit = async (values: z.infer<typeof transferSchema>) => {
+    const base = { company_name: values.company_name || "", location: values.location, service_category: values.service_category || null };
     if (values.transfer_mode === "round_trip") {
       await onSubmit(
-        { transfer_type: "arrival" as const, company_name: values.company_name || "", location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        { ...base, transfer_type: "arrival" as const, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
         values.price
       );
       if (values.departure_date) {
         await onSubmit(
-          { transfer_type: "departure" as const, company_name: values.company_name || "", location: values.location, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
+          { ...base, transfer_type: "departure" as const, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
           values.price
         );
       }
     } else {
       const mappedType = values.transfer_mode === "arrival" ? "arrival" : "departure";
       await onSubmit(
-        { transfer_type: mappedType, company_name: values.company_name || "", location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        { ...base, transfer_type: mappedType, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
         values.price
       );
     }
@@ -774,6 +791,25 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
                   )}
                 >
                   <div className="text-lg mb-1">{opt.icon}</div>
+                  <div className="text-sm font-medium">{opt.label}</div>
+                  <div className="text-[10px] text-muted-foreground">{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <FormField control={form.control} name="service_category" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Categoria</FormLabel>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: "regular", label: "Regular", desc: "Compartilhado" },
+                { value: "private", label: "Privativo", desc: "Exclusivo" },
+              ].map((opt) => (
+                <button key={opt.value} type="button" onClick={() => field.onChange(field.value === opt.value ? undefined : opt.value)}
+                  className={cn("rounded-lg border-2 p-2 text-center transition-all hover:bg-muted/50", field.value === opt.value ? "border-primary bg-primary/5" : "border-border")}>
                   <div className="text-sm font-medium">{opt.label}</div>
                   <div className="text-[10px] text-muted-foreground">{opt.desc}</div>
                 </button>
@@ -1039,16 +1075,16 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
   const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: true, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
+    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: init?.is_unit_price !== false, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
   });
 
-  const isUnitPrice = true;
+  const isUnitPrice = form.watch("is_unit_price");
   const price = form.watch("price");
-  const totalAmount = price * totalPax;
+  const totalAmount = isUnitPrice ? price * totalPax : price;
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
-    const computed = values.price * totalPax;
-    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: true, notes: values.notes || "" }, computed);
+    const computed = values.is_unit_price ? values.price * totalPax : values.price;
+    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: values.is_unit_price, notes: values.notes || "" }, computed);
   };
 
   return (
@@ -1085,11 +1121,26 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
           <FormItem><FormLabel>Cobertura</FormLabel><FormControl><Input placeholder="USD 60.000, USD 100.000..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
-        {/* Pricing is always per-person — multiplication is automatic */}
+        {/* Pricing mode toggle */}
+        <FormField control={form.control} name="is_unit_price" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo de valor</FormLabel>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => field.onChange(true)}
+                className={cn("rounded-lg border-2 p-2 text-center text-sm font-medium transition-all", field.value ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50")}>
+                Por pessoa
+              </button>
+              <button type="button" onClick={() => field.onChange(false)}
+                className={cn("rounded-lg border-2 p-2 text-center text-sm font-medium transition-all", !field.value ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50")}>
+                Valor único (total)
+              </button>
+            </div>
+          </FormItem>
+        )} />
 
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem>
-            <FormLabel>Valor por pessoa (R$)</FormLabel>
+            <FormLabel>{isUnitPrice ? "Valor por pessoa (R$)" : "Valor total (R$)"}</FormLabel>
             <FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} /></FormControl>
             {isUnitPrice && totalPax > 0 && price > 0 && (
               <p className="text-xs text-muted-foreground">

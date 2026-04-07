@@ -15,6 +15,7 @@ import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/ser
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
 import { BrandText } from "@/components/ui/brand-text";
+import { FormattedText } from "@/components/ui/formatted-text";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -142,6 +143,8 @@ function getServiceDetails(service: QuoteService): string[] {
     case "transfer":
       details.push(`Local: ${data.location}`);
       details.push(`Data: ${formatDateShort(data.date)}`);
+      if (data.service_category) details.push(`Tipo: ${data.service_category === "private" ? "Privativo" : "Regular"}`);
+      if (data.notes) details.push(data.notes);
       break;
     case "attraction":
       if (data.ticket_type) details.push(`Tipo: ${data.ticket_type}`);
@@ -153,6 +156,7 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Seguradora: ${data.provider}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
       details.push(`Cobertura: ${data.coverage}`);
+      if (data.notes) details.push(data.notes);
       break;
     case "cruise":
       details.push(`Navio: ${data.ship_name}`);
@@ -227,16 +231,18 @@ function CollapsibleServiceCard({
             <p className="text-base font-semibold text-foreground">{getServiceName(service)}</p>
           )}
           {isOpen && details.map((d, i) => (
-            <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
+            <p key={i} className="text-sm text-muted-foreground leading-relaxed">
+              <FormattedText>{d}</FormattedText>
+            </p>
           ))}
           {isOpen && service.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
-              {service.description}
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <FormattedText>{service.description}</FormattedText>
             </p>
           )}
           {isOpen && service.service_type === "attraction" && (service.service_data as any)?.notes && (
-            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic whitespace-pre-wrap break-words overflow-wrap-anywhere">
-              {(service.service_data as any).notes}
+            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic">
+              <FormattedText>{(service.service_data as any).notes}</FormattedText>
             </p>
           )}
           {/* Per-service payment display */}
@@ -458,8 +464,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const installmentValue = total / (installments || 1);
             mainDisplay = (
               <>
-                <span className="text-2xl sm:text-3xl font-bold opacity-90">{installments}x de</span>
-                <span className="text-5xl sm:text-6xl font-black tracking-tight">{formatCurrency(installmentValue)}</span>
+                <span className="text-xl sm:text-2xl font-bold opacity-90">{installments}x de</span>
+                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">{formatCurrency(installmentValue)}</span>
               </>
             );
             subtitleDisplay = (
@@ -473,10 +479,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const installmentValue = remainder / (installments || 1);
             mainDisplay = (
               <div className="space-y-1">
-                <p className="text-xl sm:text-2xl font-bold opacity-90">
+                <p className="text-lg sm:text-xl font-bold opacity-90">
                   Entrada de <span className="text-primary-foreground">{formatCurrency(entryValue)}</span>
                 </p>
-                <p className="text-3xl sm:text-4xl font-black tracking-tight">
+                <p className="text-2xl sm:text-3xl font-extrabold tracking-tight">
                   + {installments}x de {formatCurrency(installmentValue)}
                 </p>
               </div>
@@ -491,7 +497,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const discountedTotal = total * (1 - discountPct / 100);
             mainDisplay = (
               <>
-                <span className="text-5xl sm:text-6xl font-black tracking-tight">{formatCurrency(discountedTotal)}</span>
+                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">{formatCurrency(discountedTotal)}</span>
               </>
             );
             if (discountPct > 0) {
@@ -511,18 +517,18 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           if ((quote as any).show_investment_section === false) return null;
 
           return (
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground p-8 sm:p-10 text-center shadow-xl">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
-              <div className="relative space-y-3">
-                <p className="text-sm font-medium opacity-80 uppercase tracking-widest">
-                  {showDetailedPrices ? "Investimento Total" : "Valor do Pacote Completo"}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/90 to-primary/70 text-primary-foreground p-6 sm:p-8 text-center shadow-md">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_50%)]" />
+              <div className="relative space-y-2">
+                <p className="text-xs font-medium opacity-70 uppercase tracking-widest">
+                  {showDetailedPrices ? "Investimento Total" : "Valor do Pacote"}
                 </p>
                 <div className="flex flex-col items-center gap-1">
                   {mainDisplay}
                 </div>
                 {subtitleDisplay}
                 {quote.services && quote.services.length > 0 && (
-                  <p className="text-xs opacity-60 pt-1">
+                  <p className="text-xs opacity-50 pt-1">
                     {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
                   </p>
                 )}
@@ -538,7 +544,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               <CreditCard className="h-5 w-5 text-primary" />
               <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Condições de Pagamento</h3>
             </div>
-            <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{paymentTerms}</p>
+            <p className="text-sm text-foreground leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></p>
           </div>
         )}
 
@@ -550,7 +556,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </p>
           )}
           {validityDisclaimer && (
-            <p className="text-xs text-muted-foreground">{validityDisclaimer}</p>
+            <p className="text-xs text-muted-foreground"><FormattedText>{validityDisclaimer}</FormattedText></p>
           )}
           {!validUntil && !validityDisclaimer && (
             <p className="text-xs text-muted-foreground">
