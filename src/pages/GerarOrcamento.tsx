@@ -114,6 +114,8 @@ function QuoteHistoryRow({
 
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function GerarOrcamento() {
+  const [editingDestination, setEditingDestination] = useState(false);
+  const [destinationDraft, setDestinationDraft] = useState("");
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
@@ -615,7 +617,32 @@ export default function GerarOrcamento() {
                 )}
               </div>
               <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1 sm:gap-2 flex-wrap">
-                <MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{quote.destination}</span>
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                {editingDestination ? (
+                  <span className="flex items-center gap-1">
+                    <Input
+                      className="h-6 text-xs w-40"
+                      value={destinationDraft}
+                      onChange={(e) => setDestinationDraft(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Enter" && destinationDraft.trim()) {
+                          await supabase.from("quotes").update({ destination: destinationDraft.trim() } as any).eq("id", quote.id);
+                          setEditingDestination(false);
+                        }
+                        if (e.key === "Escape") setEditingDestination(false);
+                      }}
+                      autoFocus
+                    />
+                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={async () => {
+                      if (destinationDraft.trim()) {
+                        await supabase.from("quotes").update({ destination: destinationDraft.trim() } as any).eq("id", quote.id);
+                      }
+                      setEditingDestination(false);
+                    }}>✓</Button>
+                  </span>
+                ) : (
+                  <span className="truncate cursor-pointer hover:underline" onClick={() => { setDestinationDraft(quote.destination); setEditingDestination(true); }}>{quote.destination}</span>
+                )}
                 <span className="text-xs">•</span>
                 <span className="whitespace-nowrap">{formatDateShort(quote.start_date)} — {formatDateShort(quote.end_date)}</span>
                 <Button variant="ghost" size="icon" className="h-6 w-6 ml-0.5 shrink-0" onClick={() => setHeaderEditDates(true)} title="Editar datas">
