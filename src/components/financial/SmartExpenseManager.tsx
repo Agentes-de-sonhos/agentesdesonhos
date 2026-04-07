@@ -190,10 +190,10 @@ export function SmartExpenseManager() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {expenseEntries.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma despesa registrada</TableCell></TableRow>
+            {filteredExpenses.length === 0 ? (
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma despesa encontrada</TableCell></TableRow>
             ) : (
-              expenseEntries.map((entry) => (
+              filteredExpenses.map((entry) => (
                 <TableRow key={entry.id}>
                   <TableCell>{format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                   <TableCell className="flex items-center gap-2">
