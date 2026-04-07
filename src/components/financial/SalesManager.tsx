@@ -469,6 +469,44 @@ export function SalesManager() {
                 <Input type="date" value={formData.sale_date} onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })} />
               </div>
             </div>
+            {sellers.length > 0 && (
+              <div className="space-y-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Users className="h-4 w-4 text-muted-foreground" /> Quem vendeu?
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Vendedora</Label>
+                    <Select value={sellerId} onValueChange={(v) => {
+                      setSellerId(v);
+                      const sel = sellers.find(s => s.id === v);
+                      if (sel) setSellerCommission(sel.default_commission_percent);
+                    }}>
+                      <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
+                      <SelectContent>
+                        {sellers.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name} ({s.default_commission_percent}%)</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {sellerId && (
+                    <div className="space-y-2">
+                      <Label>Comissão (%)</Label>
+                      <Input type="number" value={sellerCommission} onChange={(e) => setSellerCommission(Number(e.target.value))} min={0} max={100} step={0.5} />
+                      <p className="text-xs text-muted-foreground">
+                        {formData.sale_amount > 0 && `= ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(formData.sale_amount * sellerCommission / 100)}`}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {sellerId && (
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => { setSellerId(""); setSellerCommission(0); }}>
+                    Remover vendedora
+                  </Button>
+                )}
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Observações</Label>
               <Textarea value={formData.notes || ""} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações opcionais" />
