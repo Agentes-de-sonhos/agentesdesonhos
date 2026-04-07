@@ -598,7 +598,15 @@ export type Database = {
           created_at: string
           expected_date: string | null
           id: string
+          internal_notes: string | null
+          invoice_issued_date: string | null
+          invoice_number: string | null
+          invoice_sent_date: string | null
+          invoice_status: string | null
+          payment_days: number
+          payment_rule: string
           received_date: string | null
+          requires_invoice: boolean
           status: string
           supplier_id: string | null
           user_id: string
@@ -609,7 +617,15 @@ export type Database = {
           created_at?: string
           expected_date?: string | null
           id?: string
+          internal_notes?: string | null
+          invoice_issued_date?: string | null
+          invoice_number?: string | null
+          invoice_sent_date?: string | null
+          invoice_status?: string | null
+          payment_days?: number
+          payment_rule?: string
           received_date?: string | null
+          requires_invoice?: boolean
           status?: string
           supplier_id?: string | null
           user_id: string
@@ -620,7 +636,15 @@ export type Database = {
           created_at?: string
           expected_date?: string | null
           id?: string
+          internal_notes?: string | null
+          invoice_issued_date?: string | null
+          invoice_number?: string | null
+          invoice_sent_date?: string | null
+          invoice_status?: string | null
+          payment_days?: number
+          payment_rule?: string
           received_date?: string | null
+          requires_invoice?: boolean
           status?: string
           supplier_id?: string | null
           user_id?: string
