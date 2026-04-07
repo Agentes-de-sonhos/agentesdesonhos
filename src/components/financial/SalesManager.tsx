@@ -161,10 +161,11 @@ export function SalesManager() {
   const importedOpportunityIds = sales.map(s => s.opportunity_id).filter(Boolean);
   const availableOpportunities = closedOpportunities.filter(o => !importedOpportunityIds.includes(o.id));
   const isSaving = isCreating || isUpdating;
+  const taxes = Number(productFormData.non_commissionable_taxes) || 0;
+  const commissionBase = (Number(productFormData.sale_price) || 0) - taxes;
   const estimatedCommission = productFormData.commission_type === "percentage"
-    ? (Number(productFormData.sale_price) || 0) * (Number(productFormData.commission_value) || 0) / 100
+    ? commissionBase * (Number(productFormData.commission_value) || 0) / 100
     : Number(productFormData.commission_value) || 0;
-  const estimatedProfit = (Number(productFormData.sale_price) || 0) - (Number(productFormData.cost_price) || 0) - estimatedCommission;
 
   const renderSectionHeader = (step: number, title: string, description: string) => (
     <div className="space-y-1">
