@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, Loader2, Pencil, Copy, X, Check } from "lucide-react";
 import { BookingService, SERVICE_TYPES, SERVICE_ICONS, useClients } from "@/hooks/useBookings";
 import { format } from "date-fns";
@@ -16,6 +18,7 @@ interface Props {
   onDelete: (id: string) => void;
   onDuplicate: (svc: BookingService) => void;
   isAdding: boolean;
+  onAddCommission?: (values: any) => void;
 }
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
@@ -25,6 +28,34 @@ const statusColors: Record<string, string> = {
   pendente: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   confirmado: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
   cancelado: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+};
+
+const PAYMENT_RULES: Record<string, string> = {
+  apos_venda: "X dias após a venda",
+  apos_viagem: "X dias após a viagem",
+  apos_emissao_nf: "X dias após emissão da NF",
+  apos_envio_nf: "X dias após envio da NF",
+  data_manual: "Data manual",
+};
+
+const INVOICE_STATUSES: Record<string, string> = {
+  nao_aplica: "Não se aplica",
+  a_emitir: "A emitir",
+  emitida: "Emitida",
+  enviada: "Enviada",
+  aprovada: "Aprovada",
+  recusada: "Recusada",
+};
+
+const COMMISSION_STATUSES: Record<string, string> = {
+  previsao_criada: "Previsão criada",
+  aguardando_emissao_nota: "Aguardando emissão de NF",
+  aguardando_envio_nota: "Aguardando envio de NF",
+  aguardando_pagamento: "Aguardando pagamento",
+  recebido: "Recebido",
+  parcialmente_recebido: "Parcialmente recebido",
+  atrasado: "Atrasado",
+  cancelado: "Cancelado",
 };
 
 function calcCommission(salePrice: number, taxes: number, commType: string, commValue: number) {
@@ -38,6 +69,8 @@ function calcDU(salePrice: number, duType: string, duValue: number) {
   return duValue;
 }
 
+const selectClass = "mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+
 function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
   bookingId: string;
   onSubmit: (v: any) => void;
@@ -46,20 +79,35 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
   initial?: BookingService;
 }) {
   const { data: clients = [] } = useClients();
+
+  // === Block 1: Product Data ===
   const [serviceType, setServiceType] = useState(initial?.service_type || "hotel");
   const [supplierId, setSupplierId] = useState(initial?.supplier_id || "");
   const [description, setDescription] = useState(initial?.description || "");
   const [salePrice, setSalePrice] = useState(initial ? String(initial.sale_price) : "");
   const [costPrice, setCostPrice] = useState(initial ? String(initial.cost_price) : "");
+  const [status, setStatus] = useState(initial?.status || "pendente");
+
+  // === Block 2: Commission ===
   const [taxes, setTaxes] = useState(initial ? String(initial.non_commissionable_taxes) : "0");
   const [commType, setCommType] = useState(initial?.commission_type || "percentage");
   const [commValue, setCommValue] = useState(initial ? String(initial.commission_value) : "");
   const [duType, setDuType] = useState(initial?.du_type || "fixed");
   const [duValue, setDuValue] = useState(initial ? String(initial.du_value) : "0");
-  const [commissionDate, setCommissionDate] = useState(initial?.expected_commission_date || "");
-  const [status, setStatus] = useState(initial?.status || "pendente");
 
-  const isAereo = serviceType === "aereo";
+  // === Block 3: Receivable & Invoice ===
+  const [paymentRule, setPaymentRule] = useState("apos_venda");
+  const [paymentDays, setPaymentDays] = useState("30");
+  const [expectedDate, setExpectedDate] = useState(initial?.expected_commission_date || "");
+  const [requiresInvoice, setRequiresInvoice] = useState(false);
+  const [invoiceStatus, setInvoiceStatus] = useState("nao_aplica");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [invoiceIssuedDate, setInvoiceIssuedDate] = useState("");
+  const [invoiceSentDate, setInvoiceSentDate] = useState("");
+  const [commissionStatus, setCommissionStatus] = useState("previsao_criada");
+  const [internalNotes, setInternalNotes] = useState("");
+
+  const isAereo = serviceType === "aereo" || serviceType === "voo";
 
   const computed = useMemo(() => {
     const sp = Number(salePrice) || 0;
@@ -86,31 +134,55 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
       du_value: isAereo ? (Number(duValue) || 0) : 0,
       du_type: duType,
       expected_commission: computed.commission,
-      expected_commission_date: commissionDate || null,
+      expected_commission_date: expectedDate || null,
       status,
+      // Commission control data (will be used to create booking_commission)
+      _commission_control: {
+        supplier_id: supplierId || null,
+        commission_amount: computed.commission,
+        payment_rule: paymentRule,
+        payment_days: Number(paymentDays) || 0,
+        expected_date: expectedDate || null,
+        requires_invoice: requiresInvoice,
+        invoice_status: requiresInvoice ? invoiceStatus : "nao_aplica",
+        invoice_number: invoiceNumber || null,
+        invoice_issued_date: invoiceIssuedDate || null,
+        invoice_sent_date: invoiceSentDate || null,
+        status: commissionStatus,
+        internal_notes: internalNotes || null,
+      },
     };
     onSubmit(payload);
   };
 
+  const sectionHeader = (title: string, num: number) => (
+    <div className="flex items-center gap-2 pt-2 pb-1 border-b border-border/50">
+      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">{num}</span>
+      <span className="text-sm font-semibold text-foreground">{title}</span>
+    </div>
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="border rounded-lg p-4 space-y-4 bg-muted/30">
+    <form onSubmit={handleSubmit} className="border rounded-lg p-4 space-y-5 bg-muted/30">
+      {/* ═══ BLOCK 1: Dados do Produto ═══ */}
+      {sectionHeader("Dados do Produto", 1)}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div>
           <Label className="text-xs">Tipo *</Label>
-          <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className={selectClass}>
             {Object.entries(SERVICE_TYPES).map(([k, v]) => <option key={k} value={k}>{SERVICE_ICONS[k]} {v}</option>)}
           </select>
         </div>
         <div>
           <Label className="text-xs">Fornecedor</Label>
-          <select value={supplierId} onChange={(e) => setSupplierId(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select value={supplierId} onChange={(e) => setSupplierId(e.target.value)} className={selectClass}>
             <option value="">Selecione</option>
             {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
         <div>
           <Label className="text-xs">Status</Label>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className={selectClass}>
             {Object.entries(statusLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
@@ -119,28 +191,27 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
         <Label className="text-xs">Descrição</Label>
         <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" placeholder="Ex: Hotel Marriott Paris - 5 noites" />
       </div>
-
-      {/* Valores */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">Valor Venda *</Label>
           <Input type="number" step="0.01" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="mt-1" required />
         </div>
         <div>
-          <Label className="text-xs">Custo</Label>
+          <Label className="text-xs">Custo (ref.)</Label>
           <Input type="number" step="0.01" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} className="mt-1" />
         </div>
+      </div>
+
+      {/* ═══ BLOCK 2: Comissão e Cálculo ═══ */}
+      {sectionHeader("Comissão e Cálculo", 2)}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div>
           <Label className="text-xs">Taxas não comissionáveis</Label>
           <Input type="number" step="0.01" value={taxes} onChange={(e) => setTaxes(e.target.value)} className="mt-1" placeholder="0" />
         </div>
-      </div>
-
-      {/* Comissão */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div>
           <Label className="text-xs">Tipo Comissão</Label>
-          <select value={commType} onChange={(e) => setCommType(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select value={commType} onChange={(e) => setCommType(e.target.value)} className={selectClass}>
             <option value="percentage">Percentual (%)</option>
             <option value="fixed">Valor Fixo (R$)</option>
           </select>
@@ -149,25 +220,17 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
           <Label className="text-xs">{commType === "percentage" ? "% Comissão" : "Valor Comissão (R$)"}</Label>
           <Input type="number" step="0.01" value={commValue} onChange={(e) => setCommValue(e.target.value)} className="mt-1" />
         </div>
-        <div>
-          <Label className="text-xs">Data Comissão</Label>
-          <Input type="date" value={commissionDate} onChange={(e) => setCommissionDate(e.target.value)} className="mt-1" />
-        </div>
-        <div className="flex flex-col justify-end">
-          <p className="text-xs text-muted-foreground">Base: R$ {fmt(computed.base)}</p>
-          <p className="text-xs font-medium text-foreground">Comissão: R$ {fmt(computed.commission)}</p>
-        </div>
       </div>
 
       {/* DU - Aéreo only */}
       {isAereo && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 rounded-md border border-dashed border-primary/30 bg-primary/5">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-3 rounded-md border border-dashed border-primary/30 bg-primary/5">
           <div className="col-span-full">
             <Label className="text-xs font-semibold">DU (Taxa de serviço do agente) — Aéreo</Label>
           </div>
           <div>
             <Label className="text-xs">Tipo DU</Label>
-            <select value={duType} onChange={(e) => setDuType(e.target.value)} className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <select value={duType} onChange={(e) => setDuType(e.target.value)} className={selectClass}>
               <option value="fixed">Valor Fixo (R$)</option>
               <option value="percentage">Percentual (%)</option>
             </select>
@@ -182,15 +245,83 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
         </div>
       )}
 
-      {/* Lucro resumo */}
+      {/* Summary */}
       <div className="flex items-center justify-between p-3 rounded-md bg-muted/50 border">
-        <span className="text-sm font-medium">Lucro do Agente</span>
-        <span className="text-sm font-bold text-foreground">
-          R$ {fmt(computed.profit)}
-          {isAereo && computed.du > 0 && (
-            <span className="text-xs font-normal text-muted-foreground ml-1">(Comissão R$ {fmt(computed.commission)} + DU R$ {fmt(computed.du)})</span>
-          )}
-        </span>
+        <div className="text-xs text-muted-foreground space-y-0.5">
+          <p>Base comissionável: R$ {fmt(computed.base)}</p>
+          <p>Comissão: R$ {fmt(computed.commission)}</p>
+          {isAereo && computed.du > 0 && <p>DU: R$ {fmt(computed.du)}</p>}
+        </div>
+        <div className="text-right">
+          <span className="text-xs text-muted-foreground">Lucro do Agente</span>
+          <p className="text-sm font-bold text-foreground">R$ {fmt(computed.profit)}</p>
+        </div>
+      </div>
+
+      {/* ═══ BLOCK 3: Recebimento e Nota Fiscal ═══ */}
+      {sectionHeader("Recebimento e Nota Fiscal", 3)}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div>
+          <Label className="text-xs">Regra de Recebimento</Label>
+          <select value={paymentRule} onChange={(e) => setPaymentRule(e.target.value)} className={selectClass}>
+            {Object.entries(PAYMENT_RULES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+        {paymentRule !== "data_manual" && (
+          <div>
+            <Label className="text-xs">Prazo (dias)</Label>
+            <Input type="number" value={paymentDays} onChange={(e) => setPaymentDays(e.target.value)} className="mt-1" />
+          </div>
+        )}
+        <div>
+          <Label className="text-xs">Data prevista recebimento</Label>
+          <Input type="date" value={expectedDate} onChange={(e) => setExpectedDate(e.target.value)} className="mt-1" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div>
+          <Label className="text-xs">Status do Recebimento</Label>
+          <select value={commissionStatus} onChange={(e) => setCommissionStatus(e.target.value)} className={selectClass}>
+            {Object.entries(COMMISSION_STATUSES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-2 pt-5">
+          <Switch checked={requiresInvoice} onCheckedChange={(v) => {
+            setRequiresInvoice(v);
+            if (!v) setInvoiceStatus("nao_aplica");
+            else setInvoiceStatus("a_emitir");
+          }} />
+          <Label className="text-xs">Exige Nota Fiscal?</Label>
+        </div>
+      </div>
+
+      {requiresInvoice && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 rounded-md border border-dashed border-amber-400/40 bg-amber-50/30 dark:bg-amber-900/10">
+          <div>
+            <Label className="text-xs">Status da NF</Label>
+            <select value={invoiceStatus} onChange={(e) => setInvoiceStatus(e.target.value)} className={selectClass}>
+              {Object.entries(INVOICE_STATUSES).filter(([k]) => k !== "nao_aplica").map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Nº da NF</Label>
+            <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} className="mt-1" placeholder="Ex: 12345" />
+          </div>
+          <div>
+            <Label className="text-xs">Data emissão NF</Label>
+            <Input type="date" value={invoiceIssuedDate} onChange={(e) => setInvoiceIssuedDate(e.target.value)} className="mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs">Data envio NF</Label>
+            <Input type="date" value={invoiceSentDate} onChange={(e) => setInvoiceSentDate(e.target.value)} className="mt-1" />
+          </div>
+        </div>
+      )}
+
+      <div>
+        <Label className="text-xs">Observações internas</Label>
+        <Textarea value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="mt-1" rows={2} placeholder="Notas sobre o recebimento desta comissão..." />
       </div>
 
       <div className="flex gap-2 justify-end">
@@ -204,9 +335,21 @@ function ServiceForm({ bookingId, onSubmit, onCancel, isLoading, initial }: {
   );
 }
 
-export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, onDuplicate, isAdding }: Props) {
+export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, onDuplicate, isAdding, onAddCommission }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const handleAddWithCommission = async (v: any) => {
+    const commControl = v._commission_control;
+    delete v._commission_control;
+    onAdd(v);
+    // Commission will be created after service is added via BookingDetail
+  };
+
+  const handleUpdateWithCommission = (v: any) => {
+    delete v._commission_control;
+    onUpdate(v);
+  };
 
   return (
     <div className="space-y-2">
@@ -217,7 +360,7 @@ export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, o
               key={s.id}
               bookingId={bookingId}
               initial={s}
-              onSubmit={(v) => { onUpdate(v); setEditingId(null); }}
+              onSubmit={(v) => { handleUpdateWithCommission(v); setEditingId(null); }}
               onCancel={() => setEditingId(null)}
               isLoading={false}
             />
@@ -225,7 +368,8 @@ export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, o
         }
         const taxes = Number(s.non_commissionable_taxes) || 0;
         const commission = calcCommission(Number(s.sale_price), taxes, s.commission_type, Number(s.commission_value));
-        const du = s.service_type === "aereo" ? calcDU(Number(s.sale_price), s.du_type, Number(s.du_value)) : 0;
+        const isAereo = s.service_type === "aereo" || s.service_type === "voo";
+        const du = isAereo ? calcDU(Number(s.sale_price), s.du_type, Number(s.du_value)) : 0;
         const profit = commission + du;
 
         return (
@@ -254,7 +398,7 @@ export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, o
                   <p className="text-xs text-muted-foreground">Custo: R$ {fmt(Number(s.cost_price))}</p>
                   <p className={`text-xs font-medium ${profit >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                     Lucro: R$ {fmt(profit)}
-                    {s.service_type === "aereo" && du > 0 && <span className="text-muted-foreground font-normal"> (Com+DU)</span>}
+                    {isAereo && du > 0 && <span className="text-muted-foreground font-normal"> (Com+DU)</span>}
                   </p>
                 </div>
               </div>
@@ -277,7 +421,7 @@ export function ServicesList({ bookingId, services, onAdd, onUpdate, onDelete, o
       {showForm ? (
         <ServiceForm
           bookingId={bookingId}
-          onSubmit={(v) => { onAdd(v); setShowForm(false); }}
+          onSubmit={(v) => { handleAddWithCommission(v); setShowForm(false); }}
           onCancel={() => setShowForm(false)}
           isLoading={isAdding}
         />
