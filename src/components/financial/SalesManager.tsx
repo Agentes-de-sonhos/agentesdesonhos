@@ -35,7 +35,7 @@ export function SalesManager() {
   const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<string>("");
+  const [selectedOpportunity, setSelectedOpportunity] = useState<string>("client");
   const [editingSaleId, setEditingSaleId] = useState<string | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [formData, setFormData] = useState<SaleFormData>({
