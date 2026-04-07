@@ -29,6 +29,11 @@ export interface BookingService {
   cost_price: number;
   expected_commission: number;
   expected_commission_date: string | null;
+  non_commissionable_taxes: number;
+  commission_type: string;
+  commission_value: number;
+  du_value: number;
+  du_type: string;
   status: string;
   created_at: string;
   supplier?: { id: string; name: string } | null;
