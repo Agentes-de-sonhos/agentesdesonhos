@@ -301,11 +301,11 @@ export default function GerarOrcamento() {
     }
   }, [quote, buildValiditySnapshot, toast, showAutoSavedFeedback]);
 
+  // Wire up flush refs for beforeunload/visibilitychange
   useEffect(() => {
-    return () => {
-      if (autoSavedTimeoutRef.current) clearTimeout(autoSavedTimeoutRef.current);
-    };
-  }, []);
+    flushPaymentRef.current = () => handleSavePaymentConfig();
+    flushValidityRef.current = () => handleSaveValidity();
+  }, [handleSavePaymentConfig, handleSaveValidity]);
 
   // Debounced auto-save for payment config
   useEffect(() => {
