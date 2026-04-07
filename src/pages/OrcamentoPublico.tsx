@@ -15,6 +15,7 @@ import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/ser
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
 import { BrandText } from "@/components/ui/brand-text";
+import { FormattedText } from "@/components/ui/formatted-text";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -230,16 +231,18 @@ function CollapsibleServiceCard({
             <p className="text-base font-semibold text-foreground">{getServiceName(service)}</p>
           )}
           {isOpen && details.map((d, i) => (
-            <p key={i} className="text-sm text-muted-foreground leading-relaxed">{d}</p>
+            <p key={i} className="text-sm text-muted-foreground leading-relaxed">
+              <FormattedText>{d}</FormattedText>
+            </p>
           ))}
           {isOpen && service.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
-              {service.description}
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <FormattedText>{service.description}</FormattedText>
             </p>
           )}
           {isOpen && service.service_type === "attraction" && (service.service_data as any)?.notes && (
-            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic whitespace-pre-wrap break-words overflow-wrap-anywhere">
-              {(service.service_data as any).notes}
+            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic">
+              <FormattedText>{(service.service_data as any).notes}</FormattedText>
             </p>
           )}
           {/* Per-service payment display */}
