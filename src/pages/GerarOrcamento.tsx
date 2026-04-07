@@ -159,18 +159,30 @@ export default function GerarOrcamento() {
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
   const [openSection, setOpenSection] = useState<"payment" | "validity" | null>(null);
+  const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
-  const quoteLoadedRef = useRef(false);
-  const quoteInitializedRef = useRef(false);
-  const autoSavedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const paymentSnapshotRef = useRef("");
-  const validitySnapshotRef = useRef("");
+  // Check for unsaved draft on mount (only on list screen)
+  useEffect(() => {
+    if (!id) {
+      const draft = getLocalDraft();
+      if (draft) setDraftBanner(draft);
+    }
+  }, [id]);
 
-  const showAutoSavedFeedback = useCallback(() => {
-    setAutoSaved(true);
-    if (autoSavedTimeoutRef.current) clearTimeout(autoSavedTimeoutRef.current);
-    autoSavedTimeoutRef.current = setTimeout(() => setAutoSaved(false), 2500);
+  // Flush refs for autosave on page leave
+  const flushPaymentRef = useRef<(() => void) | undefined>();
+  const flushValidityRef = useRef<(() => void) | undefined>();
+  const flushPendingSave = useCallback(() => {
+    flushPaymentRef.current?.();
+    flushValidityRef.current?.();
   }, []);
+
+  const { saveStatus, showSaved, showSaving, showError } = useQuoteAutosave(
+    id,
+    quote?.client_name,
+    quote?.destination,
+    flushPendingSave,
+  );
 
   const buildPaymentSnapshot = useCallback(() => JSON.stringify({
     payment_terms: paymentTerms || null,
