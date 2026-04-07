@@ -610,6 +610,14 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField control={form.control} name="adult_price" render={({ field }) => (
+            <FormItem><FormLabel>Valor Adulto (opcional)</FormLabel><FormControl><Input type="number" min={0} step="0.01" placeholder="0.00" {...field} value={field.value || ""} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="child_price" render={({ field }) => (
+            <FormItem><FormLabel>Valor Criança (opcional)</FormLabel><FormControl><Input type="number" min={0} step="0.01" placeholder="0.00" {...field} value={field.value || ""} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+          )} />
+        </div>
         {paymentSlot}
 
         {/* 7. Label (optional) */}
