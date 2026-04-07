@@ -273,27 +273,24 @@ export function SalesManager() {
                               <TableHead>Tipo</TableHead>
                               <TableHead>Descrição</TableHead>
                               <TableHead className="text-right">Preço Venda</TableHead>
-                              <TableHead className="text-right">Custo</TableHead>
                               <TableHead className="text-right">Comissão</TableHead>
-                              <TableHead className="text-right">Lucro</TableHead>
+                              <TableHead>Fornecedor</TableHead>
                               <TableHead className="w-[80px]"></TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {products.map((product) => {
                               const commission = calculateProductCommission(product);
-                              const productProfit = Number(product.sale_price) - Number(product.cost_price) - commission;
                               return (
                                 <TableRow key={product.id}>
                                   <TableCell className="font-medium">{PRODUCT_TYPES[product.product_type]}</TableCell>
                                   <TableCell className="text-muted-foreground">{product.description || "-"}</TableCell>
                                   <TableCell className="text-right">{formatCurrency(Number(product.sale_price))}</TableCell>
-                                  <TableCell className="text-right text-destructive">{formatCurrency(Number(product.cost_price))}</TableCell>
-                                  <TableCell className="text-right text-warning">
+                                  <TableCell className="text-right text-primary">
                                     {formatCurrency(commission)}
                                     {product.commission_type === 'percentage' && <span className="text-xs text-muted-foreground ml-1">({product.commission_value}%)</span>}
                                   </TableCell>
-                                  <TableCell className={`text-right font-medium ${productProfit >= 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(productProfit)}</TableCell>
+                                  <TableCell className="text-muted-foreground">{(product as any).supplier_name || "-"}</TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-0.5">
                                       <Button variant="ghost" size="icon" onClick={() => openEditProduct(product)}>
