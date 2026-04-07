@@ -111,26 +111,27 @@ export function SalesManager() {
 
   // Sync seller commission expense
   const syncSellerExpense = async (saleId: string, saleData: SaleFormData, selId: string, selComm: number) => {
-    if (!selId || selComm <= 0 || !saleData.sale_amount) return;
+    if (!user || !selId || selComm <= 0 || !saleData.sale_amount) return;
     const seller = sellers.find(s => s.id === selId);
     if (!seller) return;
     const commissionAmount = Number(saleData.sale_amount) * selComm / 100;
     if (commissionAmount <= 0) return;
 
     // Remove existing seller expense for this sale
-    const existingExpenses = expenseEntries.filter(e => (e as any).sale_id === saleId && e.category === 'comissao');
-    for (const exp of existingExpenses) {
-      await deleteExpense(exp.id);
-    }
+    await supabase.from("expense_entries").delete().eq("sale_id", saleId).eq("category", "comissao").eq("user_id", user.id);
 
-    // Create new expense
-    await createExpense({
+    // Create new expense with sale_id
+    await supabase.from("expense_entries").insert({
+      user_id: user.id,
       description: `Comissão - ${seller.name}`,
-      category: 'comissao' as any,
+      category: "comissao",
       amount: commissionAmount,
       entry_date: saleData.sale_date,
       notes: `Comissão de ${selComm}% sobre venda de ${saleData.client_name}`,
-    } as any, saleId);
+      sale_id: saleId,
+    });
+
+    queryClient.invalidateQueries({ queryKey: ["expense_entries"] });
   };
 
   const handleSubmit = async () => {
