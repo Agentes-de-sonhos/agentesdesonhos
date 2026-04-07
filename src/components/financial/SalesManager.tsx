@@ -26,6 +26,7 @@ import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
+import { useSellers } from "@/hooks/useSellers";
 import type { Sale, SaleFormData, SaleProductFormData, ProductType } from "@/types/financial";
 import { PRODUCT_TYPES } from "@/types/financial";
 
