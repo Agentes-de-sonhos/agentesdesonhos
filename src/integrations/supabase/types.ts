@@ -3189,6 +3189,7 @@ export type Database = {
           notes: string | null
           payment_method: string
           sale_id: string | null
+          sale_product_id: string | null
           source: string | null
           status: string
           updated_at: string
@@ -3203,6 +3204,7 @@ export type Database = {
           notes?: string | null
           payment_method?: string
           sale_id?: string | null
+          sale_product_id?: string | null
           source?: string | null
           status?: string
           updated_at?: string
@@ -3217,6 +3219,7 @@ export type Database = {
           notes?: string | null
           payment_method?: string
           sale_id?: string | null
+          sale_product_id?: string | null
           source?: string | null
           status?: string
           updated_at?: string
@@ -3228,6 +3231,13 @@ export type Database = {
             columns: ["sale_id"]
             isOneToOne: false
             referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "income_entries_sale_product_id_fkey"
+            columns: ["sale_product_id"]
+            isOneToOne: false
+            referencedRelation: "sale_products"
             referencedColumns: ["id"]
           },
         ]
