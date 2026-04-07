@@ -148,6 +148,24 @@ export function SalesManager() {
   const importedOpportunityIds = sales.map(s => s.opportunity_id).filter(Boolean);
   const availableOpportunities = closedOpportunities.filter(o => !importedOpportunityIds.includes(o.id));
   const isSaving = isCreating || isUpdating;
+  const estimatedCommission = productFormData.commission_type === "percentage"
+    ? (Number(productFormData.sale_price) || 0) * (Number(productFormData.commission_value) || 0) / 100
+    : Number(productFormData.commission_value) || 0;
+  const estimatedProfit = (Number(productFormData.sale_price) || 0) - (Number(productFormData.cost_price) || 0) - estimatedCommission;
+
+  const renderSectionHeader = (step: number, title: string, description: string) => (
+    <div className="space-y-1">
+      <div className="flex items-center gap-3">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+          {step}
+        </span>
+        <div>
+          <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+          <p className="text-xs text-muted-foreground">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -362,51 +380,84 @@ export function SalesManager() {
 
       {/* Product Dialog (Create/Edit) */}
       <Dialog open={isProductDialogOpen} onOpenChange={(open) => { setIsProductDialogOpen(open); if (!open) resetProductForm(); }}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>{editingProductId ? "Editar Produto" : "Adicionar Produto"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Tipo de Produto</Label>
-                <Select value={productFormData.product_type} onValueChange={(v) => setProductFormData({ ...productFormData, product_type: v as ProductType })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{Object.entries(PRODUCT_TYPES).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
-                </Select>
+
+          <div className="space-y-5">
+            <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
+              {renderSectionHeader(1, "Dados do Produto", "Informações principais do serviço/produto vendido.")}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Tipo de Produto</Label>
+                  <Select value={productFormData.product_type} onValueChange={(v) => setProductFormData({ ...productFormData, product_type: v as ProductType })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{Object.entries(PRODUCT_TYPES).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Descrição</Label>
+                  <Input value={productFormData.description || ""} onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })} placeholder="Ex: Hotel XYZ, 5 noites" />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Descrição</Label>
-                <Input value={productFormData.description || ""} onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })} placeholder="Ex: Hotel XYZ, 5 noites" />
+            </section>
+
+            <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
+              {renderSectionHeader(2, "Comissão e Cálculo", "Defina os valores financeiros e a comissão deste produto.")}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Preço de Venda</Label>
+                  <Input type="number" value={productFormData.sale_price} onChange={(e) => setProductFormData({ ...productFormData, sale_price: Number(e.target.value) })} placeholder="0,00" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Custo (Fornecedor)</Label>
+                  <Input type="number" value={productFormData.cost_price} onChange={(e) => setProductFormData({ ...productFormData, cost_price: Number(e.target.value) })} placeholder="0,00" />
+                </div>
               </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Preço de Venda</Label>
-                <Input type="number" value={productFormData.sale_price} onChange={(e) => setProductFormData({ ...productFormData, sale_price: Number(e.target.value) })} placeholder="0,00" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Tipo de Comissão</Label>
+                  <Select value={productFormData.commission_type} onValueChange={(v) => setProductFormData({ ...productFormData, commission_type: v as 'percentage' | 'fixed' })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">Percentual (%)</SelectItem>
+                      <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{productFormData.commission_type === 'percentage' ? 'Comissão (%)' : 'Comissão (R$)'}</Label>
+                  <Input type="number" value={productFormData.commission_value} onChange={(e) => setProductFormData({ ...productFormData, commission_value: Number(e.target.value) })} placeholder="0" />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Custo (Fornecedor)</Label>
-                <Input type="number" value={productFormData.cost_price} onChange={(e) => setProductFormData({ ...productFormData, cost_price: Number(e.target.value) })} placeholder="0,00" />
+              <div className="grid gap-3 rounded-lg border border-dashed border-border bg-background/80 p-4 sm:grid-cols-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">Preço de venda</p>
+                  <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(productFormData.sale_price) || 0)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Comissão estimada</p>
+                  <p className="text-sm font-semibold text-foreground">{formatCurrency(estimatedCommission)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Lucro estimado</p>
+                  <p className="text-sm font-semibold text-foreground">{formatCurrency(estimatedProfit)}</p>
+                </div>
               </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Tipo de Comissão</Label>
-                <Select value={productFormData.commission_type} onValueChange={(v) => setProductFormData({ ...productFormData, commission_type: v as 'percentage' | 'fixed' })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Percentual (%)</SelectItem>
-                    <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
-                  </SelectContent>
-                </Select>
+            </section>
+
+            <section className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
+              {renderSectionHeader(3, "Recebimento e Nota Fiscal", "Organização operacional deste produto dentro da Gestão Financeira.")}
+              <div className="rounded-lg border border-dashed border-border bg-background/80 p-4">
+                <p className="text-sm font-medium text-foreground">Acompanhamento operacional centralizado</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Depois de salvar o produto, o acompanhamento de comissão, recebimento e nota fiscal pode ser feito na aba de comissões da Gestão Financeira.
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label>{productFormData.commission_type === 'percentage' ? 'Comissão (%)' : 'Comissão (R$)'}</Label>
-                <Input type="number" value={productFormData.commission_value} onChange={(e) => setProductFormData({ ...productFormData, commission_value: Number(e.target.value) })} placeholder="0" />
-              </div>
-            </div>
+            </section>
           </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => { setIsProductDialogOpen(false); resetProductForm(); }}>Cancelar</Button>
             <Button onClick={handleProductSubmit} disabled={isSaving || productFormData.sale_price <= 0}>
