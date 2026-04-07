@@ -786,7 +786,25 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
           </FormItem>
         )} />
 
-        <FormField control={form.control} name="location" render={({ field }) => (
+        <FormField control={form.control} name="service_category" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Categoria</FormLabel>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: "regular", label: "Regular", desc: "Compartilhado" },
+                { value: "private", label: "Privativo", desc: "Exclusivo" },
+              ].map((opt) => (
+                <button key={opt.value} type="button" onClick={() => field.onChange(field.value === opt.value ? undefined : opt.value)}
+                  className={cn("rounded-lg border-2 p-2 text-center transition-all hover:bg-muted/50", field.value === opt.value ? "border-primary bg-primary/5" : "border-border")}>
+                  <div className="text-sm font-medium">{opt.label}</div>
+                  <div className="text-[10px] text-muted-foreground">{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+            <FormMessage />
+          </FormItem>
+        )} />
+
           <FormItem>
             <FormLabel>Local / Trajeto</FormLabel>
             <FormControl><Input placeholder="Ex: Aeroporto CDG ↔ Hotel Marriott" {...field} /></FormControl>
