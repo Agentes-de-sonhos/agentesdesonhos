@@ -733,21 +733,22 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
   const isRoundTrip = transferMode === "round_trip";
 
   const handleSubmit = async (values: z.infer<typeof transferSchema>) => {
+    const base = { company_name: values.company_name || "", location: values.location, service_category: values.service_category || null };
     if (values.transfer_mode === "round_trip") {
       await onSubmit(
-        { transfer_type: "arrival" as const, company_name: values.company_name || "", location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        { ...base, transfer_type: "arrival" as const, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
         values.price
       );
       if (values.departure_date) {
         await onSubmit(
-          { transfer_type: "departure" as const, company_name: values.company_name || "", location: values.location, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
+          { ...base, transfer_type: "departure" as const, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
           values.price
         );
       }
     } else {
       const mappedType = values.transfer_mode === "arrival" ? "arrival" : "departure";
       await onSubmit(
-        { transfer_type: mappedType, company_name: values.company_name || "", location: values.location, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
+        { ...base, transfer_type: mappedType, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
         values.price
       );
     }
