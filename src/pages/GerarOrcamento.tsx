@@ -184,6 +184,15 @@ export default function GerarOrcamento() {
     flushPendingSave,
   );
 
+  const quoteLoadedRef = useRef(false);
+  const quoteInitializedRef = useRef(false);
+  const paymentSnapshotRef = useRef("");
+  const validitySnapshotRef = useRef("");
+
+  const showAutoSavedFeedback = useCallback(() => {
+    showSaved();
+  }, [showSaved]);
+
   const buildPaymentSnapshot = useCallback(() => JSON.stringify({
     payment_terms: paymentTerms || null,
     payment_display_mode: paymentDisplayMode,
