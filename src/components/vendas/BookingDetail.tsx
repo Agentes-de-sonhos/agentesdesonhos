@@ -134,6 +134,7 @@ export function BookingDetail({ bookingId, onBack }: Props) {
           onAdd={(v) => detail.addCommission.mutate(v)}
           onUpdate={(v) => detail.updateCommission.mutate(v)}
           isAdding={detail.addCommission.isPending}
+          booking={booking}
         />
       </section>
 
