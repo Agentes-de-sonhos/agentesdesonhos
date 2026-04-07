@@ -63,6 +63,14 @@ export interface BookingCommission {
   expected_date: string | null;
   received_date: string | null;
   status: string;
+  payment_rule: string;
+  payment_days: number;
+  requires_invoice: boolean;
+  invoice_status: string | null;
+  invoice_number: string | null;
+  invoice_issued_date: string | null;
+  invoice_sent_date: string | null;
+  internal_notes: string | null;
   created_at: string;
   supplier?: { id: string; name: string } | null;
 }
