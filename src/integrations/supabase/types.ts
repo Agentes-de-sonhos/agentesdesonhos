@@ -5899,6 +5899,7 @@ export type Database = {
       }
       sale_products: {
         Row: {
+          commission_status: string
           commission_type: string
           commission_value: number
           cost_price: number
@@ -5906,6 +5907,7 @@ export type Database = {
           description: string | null
           expected_date: string | null
           id: string
+          internal_notes: string | null
           invoice_issued_date: string | null
           invoice_number: string | null
           invoice_sent_date: string | null
@@ -5914,6 +5916,7 @@ export type Database = {
           payment_days: number | null
           payment_rule: string | null
           product_type: string
+          received_date: string | null
           requires_invoice: boolean | null
           sale_id: string
           sale_price: number
@@ -5922,6 +5925,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          commission_status?: string
           commission_type?: string
           commission_value?: number
           cost_price?: number
@@ -5929,6 +5933,7 @@ export type Database = {
           description?: string | null
           expected_date?: string | null
           id?: string
+          internal_notes?: string | null
           invoice_issued_date?: string | null
           invoice_number?: string | null
           invoice_sent_date?: string | null
@@ -5937,6 +5942,7 @@ export type Database = {
           payment_days?: number | null
           payment_rule?: string | null
           product_type: string
+          received_date?: string | null
           requires_invoice?: boolean | null
           sale_id: string
           sale_price?: number
@@ -5945,6 +5951,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          commission_status?: string
           commission_type?: string
           commission_value?: number
           cost_price?: number
@@ -5952,6 +5959,7 @@ export type Database = {
           description?: string | null
           expected_date?: string | null
           id?: string
+          internal_notes?: string | null
           invoice_issued_date?: string | null
           invoice_number?: string | null
           invoice_sent_date?: string | null
@@ -5960,6 +5968,7 @@ export type Database = {
           payment_days?: number | null
           payment_rule?: string | null
           product_type?: string
+          received_date?: string | null
           requires_invoice?: boolean | null
           sale_id?: string
           sale_price?: number
