@@ -75,7 +75,7 @@ export function SalesManager() {
   const resetSaleForm = () => {
     setFormData({ client_name: "", destination: "", sale_amount: 0, sale_date: new Date().toISOString().split("T")[0], notes: "" });
     setEditingSaleId(null);
-    setSelectedOpportunity("");
+    setSelectedOpportunity("client");
   };
 
   const resetProductForm = () => {
