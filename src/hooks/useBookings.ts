@@ -459,7 +459,7 @@ export function useBookingDetail(bookingId: string | undefined) {
         events.push({
           user_id: user!.id,
           title: `📄 Emitir NF - ${svcLabel}`,
-          description: `Emitir nota fiscal para comissão de R$ ${fmt(Number(values.commission_amount))} referente a "${bookingName}"`,
+          description: `Emitir nota fiscal para comissão de R$ ${fmtCurrency(Number(values.commission_amount))} referente a "${bookingName}"`,
           event_date: emitDate.toISOString().slice(0, 10),
           event_type: "lembrete",
           color: "#f59e0b",
@@ -471,7 +471,7 @@ export function useBookingDetail(bookingId: string | undefined) {
         events.push({
           user_id: user!.id,
           title: `💰 Comissão prevista - ${svcLabel}`,
-          description: `Recebimento previsto de R$ ${fmt(Number(values.commission_amount))} referente a "${bookingName}"`,
+          description: `Recebimento previsto de R$ ${fmtCurrency(Number(values.commission_amount))} referente a "${bookingName}"`,
           event_date: values.expected_date,
           event_type: "lembrete",
           color: "#8b5cf6",
@@ -483,7 +483,7 @@ export function useBookingDetail(bookingId: string | undefined) {
         events.push({
           user_id: user!.id,
           title: `⚠️ Cobrar fornecedor - ${svcLabel}`,
-          description: `Comissão de R$ ${fmt(Number(values.commission_amount))} pode estar atrasada. Verificar com fornecedor referente a "${bookingName}"`,
+          description: `Comissão de R$ ${fmtCurrency(Number(values.commission_amount))} pode estar atrasada. Verificar com fornecedor referente a "${bookingName}"`,
           event_date: overdueDate.toISOString().slice(0, 10),
           event_type: "lembrete",
           color: "#ef4444",
