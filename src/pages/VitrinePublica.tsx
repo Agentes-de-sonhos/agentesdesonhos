@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BrandText } from "@/components/ui/brand-text";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicShowcase, type ShowcaseItem, getFeaturedLabel } from "@/hooks/useShowcase";

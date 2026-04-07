@@ -14,6 +14,7 @@ import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
+import { BrandText } from "@/components/ui/brand-text";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",

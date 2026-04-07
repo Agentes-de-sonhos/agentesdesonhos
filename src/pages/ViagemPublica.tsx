@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } from "react";
+import { BrandText } from "@/components/ui/brand-text";
 import { useParams, useLocation } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BrandText } from "@/components/ui/brand-text";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
