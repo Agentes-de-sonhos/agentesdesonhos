@@ -1,0 +1,1 @@
+ALTER TABLE public.quotes ADD COLUMN IF NOT EXISTS trip_title TEXT DEFAULT NULL;
