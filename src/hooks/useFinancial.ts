@@ -311,11 +311,15 @@ export function useFinancial() {
   // Delete sale product mutation
   const deleteSaleProductMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Remove auto-generated income entry first
+      await removeIncomeEntry(id);
       const { error } = await supabase.from("sale_products").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
       toast({ title: "Produto removido", description: "O produto foi desvinculado." });
     },
     onError: (error) => {
