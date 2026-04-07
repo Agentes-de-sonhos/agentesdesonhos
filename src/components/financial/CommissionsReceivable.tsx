@@ -135,6 +135,11 @@ function NoteDialog({ commission, open, onOpenChange }: { commission: Commission
 
 export function CommissionsReceivable() {
   const { data: commissions = [], isLoading } = useCommissionsReceivable();
+  const { showExport, setShowExport, agencyName } = useFinancialExport("Comissões");
+  const handleExportCommissions = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
+    const { columns, rows, totals } = prepareCommissionsExport(filtered, period);
+    await exportFinancialData({ tabLabel: "Comissões", columns, rows, period, agencyName, totals }, fmt);
+  };
   const qc = useQueryClient();
   const [showFilters, setShowFilters] = useState(false);
   const [noteCommission, setNoteCommission] = useState<CommissionReceivable | null>(null);
