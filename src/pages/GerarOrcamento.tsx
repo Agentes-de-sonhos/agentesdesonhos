@@ -643,7 +643,7 @@ export default function GerarOrcamento() {
             )}
             {saveStatus === "saved" && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
-                <Cloud className="h-3 w-3 text-emerald-500" />
+                <Cloud className="h-3 w-3 text-primary" />
                 Rascunho salvo
               </span>
             )}
