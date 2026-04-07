@@ -13,6 +13,7 @@ export interface CommissionReceivable {
   commission_type: string;
   commission_value: number;
   commission_status: string;
+  status: string;
   supplier_name: string | null;
   payment_rule: string;
   payment_days: number;
@@ -25,7 +26,6 @@ export interface CommissionReceivable {
   invoice_sent_date: string | null;
   internal_notes: string | null;
   created_at: string;
-  // Joined sale data
   client_name: string;
   destination: string;
   sale_date: string;
@@ -60,9 +60,8 @@ export function useCommissionsReceivable() {
         destination: row.sale?.destination || "",
         sale_date: row.sale?.sale_date || "",
         commission_amount: calculateCommission(row),
-        // Map commission_status field
         status: row.commission_status || "previsao_criada",
-      })) as (CommissionReceivable & { status: string })[];
+      })) as CommissionReceivable[];
     },
     enabled: !!user,
   });
