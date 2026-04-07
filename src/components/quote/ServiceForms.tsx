@@ -1061,16 +1061,16 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
   const totalPax = adultsCount + childrenCount;
   const form = useForm<z.infer<typeof insuranceSchema>>({
     resolver: zodResolver(insuranceSchema),
-    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: true, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
+    defaultValues: { provider: init?.provider || "", coverage: init?.coverage || "", price: init?.price || initialData?.amount || 0, is_unit_price: init?.is_unit_price !== false, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
   });
 
-  const isUnitPrice = true;
+  const isUnitPrice = form.watch("is_unit_price");
   const price = form.watch("price");
-  const totalAmount = price * totalPax;
+  const totalAmount = isUnitPrice ? price * totalPax : price;
 
   const handleSubmit = (values: z.infer<typeof insuranceSchema>) => {
-    const computed = values.price * totalPax;
-    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: true, notes: values.notes || "" }, computed);
+    const computed = values.is_unit_price ? values.price * totalPax : values.price;
+    onSubmit({ provider: values.provider, start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"), coverage: values.coverage, price: values.price, is_unit_price: values.is_unit_price, notes: values.notes || "" }, computed);
   };
 
   return (
@@ -1107,11 +1107,26 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
           <FormItem><FormLabel>Cobertura</FormLabel><FormControl><Input placeholder="USD 60.000, USD 100.000..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
-        {/* Pricing is always per-person — multiplication is automatic */}
+        {/* Pricing mode toggle */}
+        <FormField control={form.control} name="is_unit_price" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tipo de valor</FormLabel>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => field.onChange(true)}
+                className={cn("rounded-lg border-2 p-2 text-center text-sm font-medium transition-all", field.value ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50")}>
+                Por pessoa
+              </button>
+              <button type="button" onClick={() => field.onChange(false)}
+                className={cn("rounded-lg border-2 p-2 text-center text-sm font-medium transition-all", !field.value ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50")}>
+                Valor único (total)
+              </button>
+            </div>
+          </FormItem>
+        )} />
 
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem>
-            <FormLabel>Valor por pessoa (R$)</FormLabel>
+            <FormLabel>{isUnitPrice ? "Valor por pessoa (R$)" : "Valor total (R$)"}</FormLabel>
             <FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} /></FormControl>
             {isUnitPrice && totalPax > 0 && price > 0 && (
               <p className="text-xs text-muted-foreground">
