@@ -4,6 +4,9 @@ import {
   Zap, Calendar, ArrowRight, Settings2, Loader2, Rocket,
   DollarSign, ArrowDownCircle, ArrowUpCircle, PiggyBank
 } from "lucide-react";
+import { useFinancialExport } from "@/hooks/useFinancialExport";
+import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { exportFinancialData, prepareDashboardExport } from "@/utils/financialExport";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,9 +35,11 @@ export function SmartDashboard() {
   const { goal, upsertGoal, currentMonth, currentYear, isLoading: goalLoading } = useFinancialGoals();
   const [showGoalDialog, setShowGoalDialog] = useState(false);
   const [goalForm, setGoalForm] = useState({ profit_goal: 0, commission_margin: 10 });
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+  const { showExport, setShowExport, agencyName } = useFinancialExport("Dashboard");
+  const handleExportDashboard = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
+    const { columns, rows, totals } = prepareDashboardExport(sales, incomeEntries, expenseEntries, saleProducts, period);
+    await exportFinancialData({ tabLabel: "Dashboard", columns, rows, period, agencyName, totals }, fmt);
+  };
 
   // Current month boundaries
   const now = new Date();
