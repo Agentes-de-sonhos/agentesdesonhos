@@ -153,11 +153,28 @@ export function SmartExpenseManager() {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Despesas Variáveis</CardTitle></CardHeader><CardContent><div className="text-xl font-bold">{formatCurrency(variableTotal)}</div></CardContent></Card>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-semibold">Despesas</h3>
-        <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Nova Despesa
-        </Button>
+        <div className="flex items-center gap-2">
+          {sellerNames.length > 0 && (
+            <Select value={sellerFilter} onValueChange={setSellerFilter}>
+              <SelectTrigger className="w-[180px] h-9">
+                <Filter className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                <SelectValue placeholder="Filtrar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="no_commission">Sem comissões</SelectItem>
+                {sellerNames.map(name => (
+                  <SelectItem key={name} value={name}>Comissão - {name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Nova Despesa
+          </Button>
+        </div>
       </div>
 
       <div className="border rounded-lg">
