@@ -2216,6 +2216,7 @@ export type Database = {
           id: string
           is_recurring: boolean
           notes: string | null
+          sale_id: string | null
           updated_at: string
           user_id: string
         }
@@ -2229,6 +2230,7 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           notes?: string | null
+          sale_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -2242,10 +2244,19 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           notes?: string | null
+          sale_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "expense_entries_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       experiences: {
         Row: {
@@ -6015,6 +6026,8 @@ export type Database = {
           payment_method: string | null
           sale_amount: number
           sale_date: string
+          seller_commission_percent: number | null
+          seller_id: string | null
           start_date: string | null
           trip_status: string | null
           trip_type: string | null
@@ -6036,6 +6049,8 @@ export type Database = {
           payment_method?: string | null
           sale_amount?: number
           sale_date?: string
+          seller_commission_percent?: number | null
+          seller_id?: string | null
           start_date?: string | null
           trip_status?: string | null
           trip_type?: string | null
@@ -6057,6 +6072,8 @@ export type Database = {
           payment_method?: string | null
           sale_amount?: number
           sale_date?: string
+          seller_commission_percent?: number | null
+          seller_id?: string | null
           start_date?: string | null
           trip_status?: string | null
           trip_type?: string | null
@@ -6076,6 +6093,13 @@ export type Database = {
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
         ]
@@ -6107,6 +6131,36 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           year?: number
+        }
+        Relationships: []
+      }
+      sellers: {
+        Row: {
+          created_at: string
+          default_commission_percent: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_commission_percent?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_commission_percent?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
