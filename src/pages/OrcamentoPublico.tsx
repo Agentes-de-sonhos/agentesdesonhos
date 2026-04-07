@@ -142,6 +142,8 @@ function getServiceDetails(service: QuoteService): string[] {
     case "transfer":
       details.push(`Local: ${data.location}`);
       details.push(`Data: ${formatDateShort(data.date)}`);
+      if (data.service_category) details.push(`Tipo: ${data.service_category === "private" ? "Privativo" : "Regular"}`);
+      if (data.notes) details.push(data.notes);
       break;
     case "attraction":
       if (data.ticket_type) details.push(`Tipo: ${data.ticket_type}`);
@@ -153,6 +155,7 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Seguradora: ${data.provider}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
       details.push(`Cobertura: ${data.coverage}`);
+      if (data.notes) details.push(data.notes);
       break;
     case "cruise":
       details.push(`Navio: ${data.ship_name}`);
