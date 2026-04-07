@@ -205,7 +205,7 @@ export function SalesManager() {
           sales.map((sale) => {
             const products = getProductsForSale(sale.id);
             const isExpanded = expandedSales.has(sale.id);
-            const profit = calculateSaleProfit(sale.id);
+            const totalCommission = calculateSaleTotalCommission(sale.id);
 
             return (
               <Collapsible key={sale.id} open={isExpanded} onOpenChange={() => toggleSaleExpanded(sale.id)}>
@@ -230,7 +230,7 @@ export function SalesManager() {
                         <div className="text-right">
                           <div className="font-medium">{formatCurrency(Number(sale.sale_amount))}</div>
                           {products.length > 0 && (
-                            <div className={`text-sm ${profit >= 0 ? 'text-success' : 'text-destructive'}`}>Lucro: {formatCurrency(profit)}</div>
+                            <div className="text-sm text-primary">Comissão: {formatCurrency(totalCommission)}</div>
                           )}
                         </div>
                         <div className="flex items-center gap-1">
