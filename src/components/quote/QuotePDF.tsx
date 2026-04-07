@@ -50,7 +50,11 @@ function getServiceDetails(service: QuoteService): string[] {
   const details: string[] = [];
   switch (service.service_type) {
     case "flight":
-      details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
+      if (data.return_date && !data.is_one_way) {
+        details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
+      } else {
+        details.push(`Ida: ${formatDate(data.departure_date)} (somente ida)`);
+      }
       // Multi-leg support (backward compat)
       const outLegs = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
       const retLegs = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];

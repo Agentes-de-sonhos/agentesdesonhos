@@ -106,7 +106,8 @@ const flightSchema = z.object({
   destination_city: z.string().min(2, "Cidade de destino é obrigatória"),
   airline: z.string().min(2, "Companhia aérea é obrigatória"),
   departure_date: z.date({ required_error: "Data de ida é obrigatória" }),
-  return_date: z.date({ required_error: "Data de volta é obrigatória" }),
+  return_date: z.date().optional().nullable(),
+  is_one_way: z.boolean(),
   includes_baggage: z.boolean(),
   includes_boarding_fee: z.boolean(),
   adult_price: z.number().min(0),
@@ -188,6 +189,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
   const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
 
+  const isOneWayInit = init?.return_date ? false : !tripEndDate || (init && !init.return_date);
+  const [isOneWay, setIsOneWay] = useState(init?.is_one_way ?? isOneWayInit ?? false);
+
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
     defaultValues: {
@@ -197,9 +201,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
       adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
       is_unit_price: true,
+      is_one_way: init?.is_one_way ?? isOneWayInit ?? false,
       notes: init?.notes || "",
       departure_date: init?.departure_date ? parseLocalDate(init.departure_date) : tripStartDate,
-      return_date: init?.return_date ? parseLocalDate(init.return_date) : tripEndDate,
+      return_date: init?.return_date ? parseLocalDate(init.return_date) : (isOneWayInit ? undefined : tripEndDate),
       outbound_legs: normalizedLegs.outbound,
       return_legs: normalizedLegs.return_,
     },
@@ -226,10 +231,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     const data: any = {
       origin_city: values.origin_city, destination_city: values.destination_city,
       airline: values.airline, departure_date: format(values.departure_date, "yyyy-MM-dd"),
-      return_date: format(values.return_date, "yyyy-MM-dd"),
+      return_date: !isOneWay && values.return_date ? format(values.return_date, "yyyy-MM-dd") : "",
       includes_baggage: values.includes_baggage, includes_boarding_fee: values.includes_boarding_fee,
       adult_price: values.adult_price, child_price: values.child_price,
-      is_unit_price: true,
+      is_unit_price: true, is_one_way: isOneWay,
       notes: values.notes || "",
     };
 
@@ -238,7 +243,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       // backward compat: keep first leg as outbound_detail
       data.outbound_detail = outboundLegs[0];
     }
-    if (hasReturn) {
+    if (!isOneWay && hasReturn) {
       data.return_legs = returnLegs;
       data.return_detail = returnLegs[0];
     }
@@ -262,8 +267,20 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
         </div>
 
+        {/* Trip type toggle */}
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="radio" checked={!isOneWay} onChange={() => { setIsOneWay(false); form.setValue("is_one_way", false); }} className="accent-primary" />
+            <span className="text-sm">Ida e volta</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="radio" checked={isOneWay} onChange={() => { setIsOneWay(true); form.setValue("is_one_way", true); form.setValue("return_date", undefined); }} className="accent-primary" />
+            <span className="text-sm">Somente ida</span>
+          </label>
+        </div>
+
         {/* BLOCO 2 — Datas */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={cn("grid gap-4", !isOneWay && "sm:grid-cols-2")}>
           <FormField control={form.control} name="departure_date" render={({ field }) => (
             <FormItem className="flex flex-col"><FormLabel>Data de Ida</FormLabel>
               <Popover><PopoverTrigger asChild><FormControl>
@@ -275,17 +292,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
-          <FormField control={form.control} name="return_date" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Data de Volta</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
-          )} />
+          {!isOneWay && (
+            <FormField control={form.control} name="return_date" render={({ field }) => (
+              <FormItem className="flex flex-col"><FormLabel>Data de Volta</FormLabel>
+                <Popover><PopoverTrigger asChild><FormControl>
+                  <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                    {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button></FormControl></PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={field.value ?? undefined} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover><FormMessage /></FormItem>
+            )} />
+          )}
         </div>
 
         {/* BLOCO 3 — Inclusões */}
@@ -312,7 +331,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           {showFlightDetails && (
             <div className="px-4 pb-4 space-y-5 border-t border-border/40 pt-3">
               <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" />
-              <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" />
+              {!isOneWay && <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" />}
             </div>
           )}
         </div>
