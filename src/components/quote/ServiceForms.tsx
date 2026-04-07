@@ -189,6 +189,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
   const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
 
+  const isOneWayInit = init?.return_date ? false : !tripEndDate || (init && !init.return_date);
+  const [isOneWay, setIsOneWay] = useState(init?.is_one_way ?? isOneWayInit ?? false);
+
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
     defaultValues: {
@@ -198,9 +201,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
       adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
       is_unit_price: true,
+      is_one_way: init?.is_one_way ?? isOneWayInit ?? false,
       notes: init?.notes || "",
       departure_date: init?.departure_date ? parseLocalDate(init.departure_date) : tripStartDate,
-      return_date: init?.return_date ? parseLocalDate(init.return_date) : tripEndDate,
+      return_date: init?.return_date ? parseLocalDate(init.return_date) : (isOneWayInit ? undefined : tripEndDate),
       outbound_legs: normalizedLegs.outbound,
       return_legs: normalizedLegs.return_,
     },
