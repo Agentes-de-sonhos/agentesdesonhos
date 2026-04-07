@@ -372,9 +372,20 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             <MapPin className="h-3.5 w-3.5" />
             Proposta de Viagem
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
-            {quote.destination}
-          </h1>
+          {(quote as any).trip_title ? (
+            <>
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
+                {(quote as any).trip_title}
+              </h1>
+              <p className="text-xl sm:text-2xl font-semibold text-muted-foreground">
+                {quote.destination}
+              </p>
+            </>
+          ) : (
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
+              {quote.destination}
+            </h1>
+          )}
           <p className="text-lg text-muted-foreground">
             Preparado especialmente para{" "}
             <span className="font-semibold text-foreground">{quote.client_name}</span>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Loader2, Sparkles, MapPin, X, ImageIcon, GripVertical } from "lucide-react";
+import { Loader2, Sparkles, MapPin, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -31,8 +31,9 @@ export function DestinationIntroEditor({
   const [images, setImages] = useState<string[]>(introImages || []);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isFetchingPhotos, setIsFetchingPhotos] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const initializedRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setEnabled(showIntro);
@@ -40,7 +41,6 @@ export function DestinationIntroEditor({
     setImages(introImages || []);
   }, [showIntro, introText, introImages]);
 
-  // Auto-save text changes
   const saveToDb = useCallback(
     async (updates: Record<string, any>) => {
       const { error } = await supabase
@@ -67,8 +67,6 @@ export function DestinationIntroEditor({
   const handleToggle = async (checked: boolean) => {
     setEnabled(checked);
     await saveToDb({ show_destination_intro: checked });
-
-    // Auto-generate on first enable if no content exists
     if (checked && !text && images.length === 0) {
       handleGenerate();
     }
@@ -84,21 +82,15 @@ export function DestinationIntroEditor({
     setIsFetchingPhotos(true);
 
     try {
-      // Generate text via AI
       const { data: aiData, error: aiError } = await supabase.functions.invoke(
         "generate-destination-intro",
         { body: { destination } }
       );
-
       if (!aiError && aiData?.text) {
         setText(aiData.text);
         await saveToDb({ destination_intro_text: aiData.text });
       } else {
-        toast({
-          title: "Não foi possível gerar o texto",
-          description: "Tente novamente ou escreva manualmente.",
-          variant: "destructive",
-        });
+        toast({ title: "Não foi possível gerar o texto", description: "Tente novamente ou escreva manualmente.", variant: "destructive" });
       }
     } catch {
       toast({ title: "Erro ao gerar texto", variant: "destructive" });
@@ -106,32 +98,16 @@ export function DestinationIntroEditor({
       setIsGenerating(false);
     }
 
-    // Fetch photos from Google Places
     try {
       const { data: placeData, error: placeError } = await supabase.functions.invoke(
         "places-autocomplete",
-        {
-          body: {
-            input: destination,
-            place_type: "city",
-          },
-        }
+        { body: { input: destination, place_type: "city" } }
       );
-
       if (!placeError && placeData?.predictions?.length > 0) {
-        const topPrediction = placeData.predictions[0];
-
         const { data: detailsData } = await supabase.functions.invoke(
           "places-autocomplete",
-          {
-            body: {
-              fetch_details: true,
-              place_id: topPrediction.place_id,
-              place_type: "city",
-            },
-          }
+          { body: { fetch_details: true, place_id: placeData.predictions[0].place_id, place_type: "city" } }
         );
-
         if (detailsData?.details?.photo_urls?.length > 0) {
           const photos = detailsData.details.photo_urls.slice(0, 5);
           setImages(photos);
@@ -151,6 +127,32 @@ export function DestinationIntroEditor({
     await saveToDb({ destination_intro_images: newImages });
   };
 
+  const handleUploadImages = async (files: FileList) => {
+    setIsUploading(true);
+    const newUrls: string[] = [];
+
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `destination-intro/${quoteId}/${crypto.randomUUID()}.${ext}`;
+
+      const { error } = await supabase.storage.from("media-files").upload(path, file, { upsert: true });
+      if (error) {
+        toast({ title: "Erro ao enviar imagem", description: error.message, variant: "destructive" });
+        continue;
+      }
+      const { data: urlData } = supabase.storage.from("media-files").getPublicUrl(path);
+      if (urlData?.publicUrl) newUrls.push(urlData.publicUrl);
+    }
+
+    if (newUrls.length > 0) {
+      const updated = [...images, ...newUrls];
+      setImages(updated);
+      await saveToDb({ destination_intro_images: updated });
+    }
+    setIsUploading(false);
+  };
+
   if (!enabled) {
     return (
       <Card>
@@ -162,11 +164,7 @@ export function DestinationIntroEditor({
                 Apresentação do Destino
               </Label>
             </div>
-            <Switch
-              id="show-destination"
-              checked={enabled}
-              onCheckedChange={handleToggle}
-            />
+            <Switch id="show-destination" checked={enabled} onCheckedChange={handleToggle} />
           </div>
           <p className="text-xs text-muted-foreground mt-1 ml-6">
             Exiba imagens e uma descrição do destino antes dos serviços.
@@ -187,11 +185,7 @@ export function DestinationIntroEditor({
               Apresentação do Destino
             </Label>
           </div>
-          <Switch
-            id="show-destination-on"
-            checked={enabled}
-            onCheckedChange={handleToggle}
-          />
+          <Switch id="show-destination-on" checked={enabled} onCheckedChange={handleToggle} />
         </div>
 
         {/* Images */}
@@ -220,6 +214,26 @@ export function DestinationIntroEditor({
             Buscando fotos do destino...
           </div>
         ) : null}
+
+        {/* Upload button */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => e.target.files && handleUploadImages(e.target.files)}
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className="gap-2"
+        >
+          {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+          Adicionar imagem
+        </Button>
 
         {/* Text */}
         <Textarea
