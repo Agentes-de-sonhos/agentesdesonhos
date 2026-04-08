@@ -4,7 +4,6 @@ import {
   Zap, Calendar, Settings2, Loader2, Rocket,
   DollarSign, ArrowDownCircle, ArrowUpCircle, PiggyBank,
   ShoppingBag, BarChart3, Clock, ExternalLink,
-  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
@@ -32,27 +31,20 @@ const MONTH_NAMES = [
 
 const SHORT_MONTHS = ["", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-export function SmartDashboard() {
+interface SmartDashboardProps {
+  viewMonth: number;
+  viewYear: number;
+}
+
+export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const { sales, saleProducts, expenseEntries, incomeEntries } = useFinancial();
 
-  // Month navigator state
   const now = new Date();
-  const [viewMonth, setViewMonth] = useState(now.getMonth() + 1);
-  const [viewYear, setViewYear] = useState(now.getFullYear());
 
   const isCurrentMonth = viewMonth === now.getMonth() + 1 && viewYear === now.getFullYear();
 
-  const goToPrevMonth = () => {
-    if (viewMonth === 1) { setViewMonth(12); setViewYear(viewYear - 1); }
-    else setViewMonth(viewMonth - 1);
-  };
-  const goToNextMonth = () => {
-    if (viewMonth === 12) { setViewMonth(1); setViewYear(viewYear + 1); }
-    else setViewMonth(viewMonth + 1);
-  };
-  const goToCurrentMonth = () => { setViewMonth(now.getMonth() + 1); setViewYear(now.getFullYear()); };
 
   const { goal, upsertGoal, isLoading: goalLoading } = useFinancialGoals(viewMonth, viewYear);
   const [showGoalDialog, setShowGoalDialog] = useState(false);
@@ -169,28 +161,15 @@ export function SmartDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header with month navigator */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToPrevMonth}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="text-center min-w-[160px]">
-            <h2 className="text-xl sm:text-2xl font-bold">{periodLabel}</h2>
-            {isCurrentMonth && (
-              <p className="text-xs text-muted-foreground">
-                <Calendar className="inline h-3 w-3 mr-1" />
-                Dia {currentDay} de {daysInMonth} — {daysRemaining} restante{daysRemaining !== 1 ? "s" : ""}
-              </p>
-            )}
-          </div>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToNextMonth}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          {!isCurrentMonth && (
-            <Button variant="ghost" size="sm" className="text-xs" onClick={goToCurrentMonth}>
-              Hoje
-            </Button>
+        <div className="text-center">
+          <h2 className="text-xl sm:text-2xl font-bold">{periodLabel}</h2>
+          {isCurrentMonth && (
+            <p className="text-xs text-muted-foreground">
+              <Calendar className="inline h-3 w-3 mr-1" />
+              Dia {currentDay} de {daysInMonth} — {daysRemaining} restante{daysRemaining !== 1 ? "s" : ""}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
