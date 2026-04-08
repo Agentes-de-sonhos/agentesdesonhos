@@ -58,7 +58,7 @@ export default function Financeiro() {
                 </TabsTrigger>
                 <TabsTrigger value="vendedoras" className="gap-1.5">
                   <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">Vendedoras</span>
+                  <span className="hidden sm:inline">Vendedores</span>
                 </TabsTrigger>
                 <TabsTrigger value="dashboard" className="gap-1.5">
                   <LayoutDashboard className="h-4 w-4" />
