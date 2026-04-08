@@ -433,9 +433,9 @@ export function SalesManager() {
                 </div>
               </Collapsible>
             );
-          })
-        )}
+          })}
         </>)}
+      </div>
       </div>
 
       {/* Sale Dialog (Create/Edit) */}
