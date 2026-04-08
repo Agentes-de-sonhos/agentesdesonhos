@@ -133,7 +133,22 @@ export function useFinancial() {
     enabled: !!user,
   });
 
+  // Helper: calculate product-based total for a sale
+  const getSaleProductsTotal = (saleId: string) =>
+    saleProducts.filter(p => p.sale_id === saleId).reduce((sum, p) => sum + Number(p.sale_price), 0);
+
+  // Helper: calculate commission for a product
+  const calcProductCommission = (p: SaleProduct) => {
+    const taxes = Number((p as any).non_commissionable_taxes) || 0;
+    const base = Number(p.sale_price) - taxes;
+    return p.commission_type === 'percentage'
+      ? base * Number(p.commission_value) / 100
+      : Number(p.commission_value);
+  };
+
   // Calculate enhanced summary
+  // BUSINESS LOGIC: For a travel agency, commission IS the revenue.
+  // Profit = Total Commissions (from suppliers) - Total Expenses (operational + seller commissions)
   const summary: FinancialSummary = (() => {
     const today = new Date().toISOString().split("T")[0];
     const monthStart = new Date();
@@ -141,36 +156,38 @@ export function useFinancial() {
     const monthStartStr = monthStart.toISOString().split("T")[0];
     const yearStart = `${new Date().getFullYear()}-01-01`;
 
+    // Use product totals when available, fallback to sale_amount
+    const getSaleValue = (sale: Sale) => {
+      const productTotal = getSaleProductsTotal(sale.id);
+      return productTotal > 0 ? productTotal : Number(sale.sale_amount);
+    };
+
     const salesToday = sales
       .filter(s => s.sale_date === today)
-      .reduce((sum, s) => sum + Number(s.sale_amount), 0);
+      .reduce((sum, s) => sum + getSaleValue(s), 0);
 
     const salesMonth = sales
       .filter(s => s.sale_date >= monthStartStr)
-      .reduce((sum, s) => sum + Number(s.sale_amount), 0);
+      .reduce((sum, s) => sum + getSaleValue(s), 0);
 
     const salesYear = sales
       .filter(s => s.sale_date >= yearStart)
-      .reduce((sum, s) => sum + Number(s.sale_amount), 0);
+      .reduce((sum, s) => sum + getSaleValue(s), 0);
 
-    const totalSales = saleProducts.reduce((sum, p) => sum + Number(p.sale_price), 0) || 
-                       sales.reduce((sum, s) => sum + Number(s.sale_amount), 0);
+    const totalSales = sales.reduce((sum, s) => sum + getSaleValue(s), 0);
     
+    // Total commissions = agency revenue from suppliers
+    const totalCommissions = saleProducts.reduce((sum, p) => sum + calcProductCommission(p), 0);
+    
+    // Total costs = cost_price of products (what's paid to suppliers)
     const totalCosts = saleProducts.reduce((sum, p) => sum + Number(p.cost_price), 0);
     
+    // Gross profit = total sales - total costs (traditional view)
     const grossProfit = totalSales - totalCosts;
     
-    // Commission calculation: (sale_price - non_commissionable_taxes) * %
-    const totalCommissions = saleProducts.reduce((sum, p) => {
-      const taxes = Number((p as any).non_commissionable_taxes) || 0;
-      const base = Number(p.sale_price) - taxes;
-      if (p.commission_type === 'percentage') {
-        return sum + (base * Number(p.commission_value) / 100);
-      }
-      return sum + Number(p.commission_value);
-    }, 0);
-    
-    const netProfit = grossProfit - totalCommissions;
+    // Net profit = commissions (revenue) - expenses (operational costs including seller commissions)
+    const totalExpenses = expenseEntries.reduce((sum, e) => sum + Number(e.amount), 0);
+    const netProfit = totalCommissions - totalExpenses;
 
     const totalCustomerPayments = customerPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const totalSupplierPayments = supplierPayments.reduce((sum, p) => sum + Number(p.amount), 0);
@@ -215,9 +232,29 @@ export function useFinancial() {
     },
   });
 
+  // Auto-sync sale_amount from products total
+  const syncSaleAmount = async (saleId: string) => {
+    const { data: products } = await supabase
+      .from("sale_products")
+      .select("sale_price")
+      .eq("sale_id", saleId);
+    if (products && products.length > 0) {
+      const total = products.reduce((sum, p) => sum + Number(p.sale_price), 0);
+      await supabase.from("sales").update({ sale_amount: total }).eq("id", saleId);
+    }
+  };
+
   // Delete sale mutation
   const deleteSaleMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Clean up seller commission expenses
+      if (user) {
+        await supabase.from("expense_entries").delete().eq("sale_id", id).eq("category", "comissao").eq("user_id", user.id);
+      }
+      // Clean up auto-generated income entries
+      if (user) {
+        await supabase.from("income_entries").delete().eq("sale_id", id).eq("user_id", user.id);
+      }
       const { error } = await supabase.from("sales").delete().eq("id", id);
       if (error) throw error;
     },
@@ -226,6 +263,7 @@ export function useFinancial() {
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
       queryClient.invalidateQueries({ queryKey: ["customer_payments"] });
       queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+      queryClient.invalidateQueries({ queryKey: ["expense_entries"] });
       queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
       toast({ title: "Venda excluída", description: "A venda foi removida." });
     },
@@ -300,9 +338,12 @@ export function useFinancial() {
       if (error) throw error;
       // Auto-generate income entry
       await syncIncomeEntry(data.id, saleId, formData);
+      // Auto-sync sale_amount from products
+      await syncSaleAmount(saleId);
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
       queryClient.invalidateQueries({ queryKey: ["income_entries"] });
       queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
@@ -316,12 +357,19 @@ export function useFinancial() {
   // Delete sale product mutation
   const deleteSaleProductMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Get sale_id before deleting
+      const { data: product } = await supabase.from("sale_products").select("sale_id").eq("id", id).single();
       // Remove auto-generated income entry first
       await removeIncomeEntry(id);
       const { error } = await supabase.from("sale_products").delete().eq("id", id);
       if (error) throw error;
+      // Auto-sync sale_amount after product removal
+      if (product?.sale_id) {
+        await syncSaleAmount(product.sale_id);
+      }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
       queryClient.invalidateQueries({ queryKey: ["income_entries"] });
       queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
@@ -481,9 +529,12 @@ export function useFinancial() {
       if (error) throw error;
       // Sync income entry with updated data
       await syncIncomeEntry(id, data.sale_id, formData);
+      // Auto-sync sale_amount from products
+      await syncSaleAmount(data.sale_id);
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["sale_products"] });
       queryClient.invalidateQueries({ queryKey: ["income_entries"] });
       queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
