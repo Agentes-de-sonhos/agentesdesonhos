@@ -164,38 +164,8 @@ export default function Financeiro() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Navigation Groups */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Group 1: Financeiro */}
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-1">
-                  Financeiro
-                </p>
-                <div className="flex gap-1">
-                  {FINANCEIRO_TABS.map(tab => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.key;
-                    return (
-                      <button
-                        key={tab.key}
-                        onClick={() => handleTabChange(tab.key)}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
-                          isActive
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground"
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span className="hidden sm:inline">{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-            </div>
+          <div className="space-y-4">
+            <div className="flex gap-1">
 
             {/* Tab Content */}
             <div>
