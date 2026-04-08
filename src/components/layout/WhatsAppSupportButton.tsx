@@ -48,12 +48,9 @@ export function WhatsAppSupportButton() {
       >
         <MessageCircle className="h-5 w-5 fill-white" />
         <span className="font-semibold text-sm whitespace-nowrap">
-          💬 Suporte – Fale com a gente
+          Suporte
         </span>
       </a>
-      <span className="text-xs text-muted-foreground max-w-[200px] leading-tight hidden sm:block">
-        Encontrou algum erro ou tem uma sugestão de melhoria?
-      </span>
     </div>
   );
 }
