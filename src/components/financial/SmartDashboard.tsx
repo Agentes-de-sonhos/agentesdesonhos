@@ -4,7 +4,6 @@ import {
   Zap, Calendar, Settings2, Loader2, Rocket,
   DollarSign, ArrowDownCircle, ArrowUpCircle, PiggyBank,
   ShoppingBag, BarChart3, Clock, ExternalLink,
-  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
