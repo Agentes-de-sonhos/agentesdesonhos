@@ -320,7 +320,7 @@ export function SalesManager() {
               </div>
             );
           })()}
-          sales.map((sale) => {
+          {sales.map((sale) => {
             const products = getProductsForSale(sale.id);
             const isExpanded = expandedSales.has(sale.id);
             const totalCommission = calculateSaleTotalCommission(sale.id);
