@@ -28,15 +28,15 @@ export function PageHeader({ pageKey, title, subtitle, icon: Icon, adminTab, chi
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="shrink-0">
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Icon className="h-8 w-8 text-primary" />
             {title}
           </h1>
           <p className="text-muted-foreground mt-1">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap flex-1 justify-center">
           {children}
           {adminTab && <AdminEditButton adminTab={adminTab} />}
         </div>
