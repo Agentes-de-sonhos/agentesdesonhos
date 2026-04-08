@@ -186,9 +186,6 @@ export default function Financeiro() {
 
               {/* Group 2: Gestão */}
               <div className="space-y-1.5 text-transparent bg-accent border-solid border-pink-950 mx-0 px-[4px] py-0 my-[5px] border rounded-lg">
-                <p className="text-[10px] font-semibold uppercase tracking-widest px-1 text-primary-foreground">
-                  &nbsp;ORIGEM
-                </p>
                 <div className="flex gap-1">
                   {GESTAO_TABS.map(tab => {
                     const Icon = tab.icon;
