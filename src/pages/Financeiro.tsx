@@ -182,7 +182,7 @@ export default function Financeiro() {
                     )}
                   >
                     <ShoppingBag className="h-4 w-4" />
-                    <span className="hidden sm:inline">Nova Venda</span>
+                    <span className="hidden sm:inline">Vendas</span>
                   </button>
                 );
               })()}
