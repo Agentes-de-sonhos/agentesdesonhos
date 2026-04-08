@@ -109,56 +109,57 @@ export default function Financeiro() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 animate-fade-in">
-        {/* Page Header with actions */}
-        <PageHeader
-          pageKey="financeiro"
-          title="Gestão Financeira"
-          subtitle="Controle simples e inteligente da sua agência"
-          icon={DollarSign}
-        >
-          <div className="flex items-center gap-2">
-            {GESTAO_TABS.map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => handleTabChange(tab.key)}
-                  className={cn(
-                    "flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-accent text-primary-foreground",
-                    isActive
-                      ? "shadow-lg"
-                      : "hover:shadow-lg"
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+      <div className="space-y-4 animate-fade-in relative">
+        <div className="relative">
+          <PageHeader
+            pageKey="financeiro"
+            title="Gestão Financeira"
+            subtitle="Controle simples e inteligente da sua agência"
+            icon={DollarSign}
+          >
+            <div className="flex items-center gap-2">
+              {GESTAO_TABS.map(tab => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => handleTabChange(tab.key)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-accent text-primary-foreground",
+                      isActive
+                        ? "shadow-lg"
+                        : "hover:shadow-lg"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </PageHeader>
 
           {showPeriodSelector && (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent" onClick={goToPrevMonth}>
+            <div className="absolute top-0 right-0 flex items-center gap-2">
+              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-foreground" onClick={goToPrevMonth}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="text-center min-w-[140px]">
                 <span className="text-sm font-semibold">{periodLabel}</span>
               </div>
-              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent" onClick={goToNextMonth}>
+              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-foreground" onClick={goToNextMonth}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
               {!isCurrentMonth && (
-                <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={goToCurrentMonth}>
+                <Button variant="ghost" size="sm" className="text-xs gap-1 hover:bg-transparent" onClick={goToCurrentMonth}>
                   <Calendar className="h-3 w-3" />
                   Hoje
                 </Button>
               )}
             </div>
           )}
-        </PageHeader>
+        </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
