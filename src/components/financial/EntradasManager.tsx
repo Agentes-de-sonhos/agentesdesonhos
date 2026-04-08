@@ -188,25 +188,26 @@ export function EntradasManager() {
       </div>
 
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Entradas" onExport={handleExportEntradas} />
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Entradas</h3>
-        <div className="flex items-center gap-2">
-          <ExportButton onClick={() => setShowExport(true)} />
-          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-            <Plus className="h-4 w-4 mr-2" /> Nova Entrada
-          </Button>
-        </div>
-      </div>
-
       <Tabs defaultValue="todas" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="todas">Todas</TabsTrigger>
-          <TabsTrigger value="pendentes" className="gap-1">
-            A Receber
-            {pending.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{pending.length}</Badge>}
-          </TabsTrigger>
-          <TabsTrigger value="recebidas">Recebidas</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-semibold">Entradas</h3>
+            <TabsList>
+              <TabsTrigger value="todas">Todas</TabsTrigger>
+              <TabsTrigger value="pendentes" className="gap-1">
+                A Receber
+                {pending.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{pending.length}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="recebidas">Recebidas</TabsTrigger>
+            </TabsList>
+          </div>
+          <div className="flex items-center gap-2">
+            <ExportButton onClick={() => setShowExport(true)} />
+            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+              <Plus className="h-4 w-4 mr-2" /> Nova Entrada
+            </Button>
+          </div>
+        </div>
         <TabsContent value="todas">{renderEntryList(incomeEntries, true)}</TabsContent>
         <TabsContent value="pendentes">{renderEntryList(pending, true)}</TabsContent>
         <TabsContent value="recebidas">{renderEntryList(received)}</TabsContent>
