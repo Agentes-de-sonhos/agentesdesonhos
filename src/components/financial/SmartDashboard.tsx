@@ -4,6 +4,7 @@ import {
   Zap, Calendar, Settings2, Loader2, Rocket,
   DollarSign, ArrowDownCircle, ArrowUpCircle, PiggyBank,
   ShoppingBag, BarChart3, Clock, ExternalLink,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
@@ -31,16 +32,31 @@ const MONTH_NAMES = [
 
 const SHORT_MONTHS = ["", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-type PeriodOption = "month" | "last" | "quarter";
-
 export function SmartDashboard() {
   const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const { sales, saleProducts, expenseEntries, incomeEntries } = useFinancial();
-  const { goal, upsertGoal, currentMonth, currentYear, isLoading: goalLoading } = useFinancialGoals();
+
+  // Month navigator state
+  const now = new Date();
+  const [viewMonth, setViewMonth] = useState(now.getMonth() + 1);
+  const [viewYear, setViewYear] = useState(now.getFullYear());
+
+  const isCurrentMonth = viewMonth === now.getMonth() + 1 && viewYear === now.getFullYear();
+
+  const goToPrevMonth = () => {
+    if (viewMonth === 1) { setViewMonth(12); setViewYear(viewYear - 1); }
+    else setViewMonth(viewMonth - 1);
+  };
+  const goToNextMonth = () => {
+    if (viewMonth === 12) { setViewMonth(1); setViewYear(viewYear + 1); }
+    else setViewMonth(viewMonth + 1);
+  };
+  const goToCurrentMonth = () => { setViewMonth(now.getMonth() + 1); setViewYear(now.getFullYear()); };
+
+  const { goal, upsertGoal, isLoading: goalLoading } = useFinancialGoals(viewMonth, viewYear);
   const [showGoalDialog, setShowGoalDialog] = useState(false);
   const [goalForm, setGoalForm] = useState({ profit_goal: 0, commission_margin: 10 });
-  const [period, setPeriod] = useState<PeriodOption>("month");
   const { showExport, setShowExport, agencyName } = useFinancialExport("Dashboard");
 
   const handleExportDashboard = async (p: { start: Date; end: Date }, fmt: ExportFormat) => {
@@ -51,37 +67,14 @@ export function SmartDashboard() {
   const fmt = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
-  const now = new Date();
   const today = now.toISOString().split("T")[0];
 
-  // Period boundaries
-  const { periodStart, periodEnd, periodLabel } = useMemo(() => {
-    const y = currentYear;
-    const m = currentMonth;
-    if (period === "month") {
-      return {
-        periodStart: `${y}-${String(m).padStart(2, "0")}-01`,
-        periodEnd: `${y}-${String(m + 1).padStart(2, "0")}-01`,
-        periodLabel: `${MONTH_NAMES[m]} ${y}`,
-      };
-    }
-    if (period === "last") {
-      const pm = m === 1 ? 12 : m - 1;
-      const py = m === 1 ? y - 1 : y;
-      return {
-        periodStart: `${py}-${String(pm).padStart(2, "0")}-01`,
-        periodEnd: `${y}-${String(m).padStart(2, "0")}-01`,
-        periodLabel: `${MONTH_NAMES[pm]} ${py}`,
-      };
-    }
-    // quarter: last 3 months
-    const d = new Date(y, m - 3, 1);
-    return {
-      periodStart: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`,
-      periodEnd: `${y}-${String(m + 1).padStart(2, "0")}-01`,
-      periodLabel: `Últimos 3 meses`,
-    };
-  }, [period, currentMonth, currentYear]);
+  // Period boundaries based on selected month
+  const periodStart = `${viewYear}-${String(viewMonth).padStart(2, "0")}-01`;
+  const periodEnd = viewMonth === 12
+    ? `${viewYear + 1}-01-01`
+    : `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-01`;
+  const periodLabel = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
 
   // Helpers
   const calcProductCommission = (p: any) => {
@@ -122,12 +115,12 @@ export function SmartDashboard() {
   const currentProfit = totalCommission - totalExpenses;
 
   // Projection (only for current month)
-  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-  const currentDay = now.getDate();
-  const daysRemaining = daysInMonth - currentDay;
+  const daysInMonth = new Date(viewYear, viewMonth, 0).getDate();
+  const currentDay = isCurrentMonth ? now.getDate() : daysInMonth;
+  const daysRemaining = isCurrentMonth ? daysInMonth - currentDay : 0;
   const dailyAvg = currentDay > 0 ? totalCommission / currentDay : 0;
-  const projectedCommission = period === "month" ? dailyAvg * daysInMonth : totalCommission;
-  const projectedProfit = period === "month" ? projectedCommission - totalExpenses : currentProfit;
+  const projectedCommission = isCurrentMonth ? dailyAvg * daysInMonth : totalCommission;
+  const projectedProfit = isCurrentMonth ? projectedCommission - totalExpenses : currentProfit;
 
   // Goal
   const profitGoal = goal?.profit_goal || 0;
@@ -144,11 +137,11 @@ export function SmartDashboard() {
       (e as any).expected_date <= new Date(now.getTime() + 7 * 86400000).toISOString().split("T")[0]
   );
 
-  // Chart data: monthly comparison (last 3 months)
+  // Chart data: 3 months centered on selected month
   const chartData = useMemo(() => {
     const months: { month: string; receitas: number; despesas: number }[] = [];
     for (let i = 2; i >= 0; i--) {
-      const d = new Date(currentYear, currentMonth - 1 - i, 1);
+      const d = new Date(viewYear, viewMonth - 1 - i, 1);
       const m = d.getMonth() + 1;
       const y = d.getFullYear();
       const ms = `${y}-${String(m).padStart(2, "0")}`;
@@ -160,7 +153,7 @@ export function SmartDashboard() {
       months.push({ month: `${SHORT_MONTHS[m]}/${String(y).slice(2)}`, receitas: Math.round(mCommission), despesas: Math.round(mExpenses) });
     }
     return months;
-  }, [sales, saleProducts, expenseEntries, currentMonth, currentYear]);
+  }, [sales, saleProducts, expenseEntries, viewMonth, viewYear]);
 
   const openGoalDialog = () => {
     setGoalForm({ profit_goal: goal?.profit_goal || 0, commission_margin: goal?.commission_margin || 10 });
@@ -176,32 +169,31 @@ export function SmartDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header with period selector */}
+      {/* Header with month navigator */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold">{periodLabel}</h2>
-          {period === "month" && (
-            <p className="text-sm text-muted-foreground">
-              <Calendar className="inline h-3.5 w-3.5 mr-1" />
-              Dia {currentDay} de {daysInMonth} — {daysRemaining} dia{daysRemaining !== 1 ? "s" : ""} restante{daysRemaining !== 1 ? "s" : ""}
-            </p>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToPrevMonth}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="text-center min-w-[160px]">
+            <h2 className="text-xl sm:text-2xl font-bold">{periodLabel}</h2>
+            {isCurrentMonth && (
+              <p className="text-xs text-muted-foreground">
+                <Calendar className="inline h-3 w-3 mr-1" />
+                Dia {currentDay} de {daysInMonth} — {daysRemaining} restante{daysRemaining !== 1 ? "s" : ""}
+              </p>
+            )}
+          </div>
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToNextMonth}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          {!isCurrentMonth && (
+            <Button variant="ghost" size="sm" className="text-xs" onClick={goToCurrentMonth}>
+              Hoje
+            </Button>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex rounded-lg border overflow-hidden">
-            {([["month", "Este mês"], ["last", "Mês anterior"], ["quarter", "3 meses"]] as const).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setPeriod(key)}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-medium transition-colors",
-                  period === key ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
           <ExportButton onClick={() => setShowExport(true)} />
           <Button variant="outline" size="sm" onClick={openGoalDialog}>
             <Settings2 className="h-4 w-4 mr-1" /> Meta
@@ -263,8 +255,8 @@ export function SmartDashboard() {
 
       {/* ===== LINHA 2: INTELIGÊNCIA ===== */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Projeção */}
-        {period === "month" && (
+        {/* Projeção (only current month) */}
+        {isCurrentMonth && (
           <Card className="border-dashed">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -497,7 +489,7 @@ export function SmartDashboard() {
       <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Meta de {MONTH_NAMES[currentMonth]}</DialogTitle>
+            <DialogTitle>Meta de {MONTH_NAMES[viewMonth]} {viewYear}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
