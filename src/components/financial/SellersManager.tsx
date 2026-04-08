@@ -52,17 +52,17 @@ export function SellersManager() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-semibold">Vendedoras</h3>
+          <h3 className="text-lg font-semibold">Vendedores</h3>
         </div>
         <Button size="sm" onClick={() => { reset(); setIsOpen(true); }}>
-          <Plus className="h-4 w-4 mr-1" /> Nova
+          <Plus className="h-4 w-4 mr-1" /> Novo
         </Button>
       </div>
 
       {sellers.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground text-sm">
-            Nenhuma vendedora cadastrada. Cadastre para controlar comissões por pessoa.
+            Nenhuma vendedor cadastrado. Cadastre para controlar comissões por pessoa.
           </CardContent>
         </Card>
       ) : (
@@ -93,17 +93,17 @@ export function SellersManager() {
       <Dialog open={isOpen} onOpenChange={(o) => { setIsOpen(o); if (!o) reset(); }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>{editingId ? "Editar Vendedora" : "Nova Vendedora"}</DialogTitle>
+            <DialogTitle>{editingId ? "Editar Vendedor" : "Novo Vendedor"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nome</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Maria" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: João" />
             </div>
             <div className="space-y-2">
               <Label>Comissão padrão (%)</Label>
               <Input type="number" value={commission} onChange={(e) => setCommission(Number(e.target.value))} placeholder="10" min={0} max={100} step={0.5} />
-              <p className="text-xs text-muted-foreground">Valor sugerido ao selecionar esta vendedora em uma venda</p>
+              <p className="text-xs text-muted-foreground">Valor sugerido ao selecionar este vendedor em uma venda</p>
             </div>
           </div>
           <DialogFooter>
@@ -118,8 +118,8 @@ export function SellersManager() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remover vendedora?</AlertDialogTitle>
-            <AlertDialogDescription>A vendedora será desativada. Vendas existentes não serão afetadas.</AlertDialogDescription>
+            <AlertDialogTitle>Remover vendedor?</AlertDialogTitle>
+            <AlertDialogDescription>O vendedor será desativado. Vendas existentes não serão afetadas.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
