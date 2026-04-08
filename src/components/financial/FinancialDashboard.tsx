@@ -55,11 +55,18 @@ export function FinancialDashboard({ summary }: FinancialDashboardProps) {
       bgColor: "bg-primary/10",
     },
     {
-      title: "Custos",
+      title: "Custos (Fornecedores)",
       value: summary.totalCosts,
       icon: ArrowDownCircle,
       color: "text-destructive",
       bgColor: "bg-destructive/10",
+    },
+    {
+      title: "Comissões (Receita)",
+      value: summary.totalCommissions,
+      icon: Percent,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
       title: "Lucro Bruto",
@@ -69,19 +76,13 @@ export function FinancialDashboard({ summary }: FinancialDashboardProps) {
       bgColor: summary.grossProfit >= 0 ? "bg-success/10" : "bg-destructive/10",
     },
     {
-      title: "Comissões",
-      value: summary.totalCommissions,
-      icon: Percent,
-      color: "text-warning",
-      bgColor: "bg-warning/10",
-    },
-    {
       title: "Lucro Líquido",
       value: summary.netProfit,
       icon: summary.netProfit >= 0 ? TrendingUp : TrendingDown,
       color: summary.netProfit >= 0 ? "text-success" : "text-destructive",
       bgColor: summary.netProfit >= 0 ? "bg-success/10" : "bg-destructive/10",
       isResult: true,
+      subtitle: "Comissões − Despesas",
     },
   ];
 
