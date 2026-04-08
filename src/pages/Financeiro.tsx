@@ -117,6 +117,26 @@ export default function Financeiro() {
           subtitle="Controle simples e inteligente da sua agência"
           icon={DollarSign}
         >
+          {GESTAO_TABS.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => handleTabChange(tab.key)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-primary/80 text-primary-foreground hover:shadow-lg"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            );
+          })}
+
           <Button onClick={handleNewSale} className="gap-2 shadow-sm">
             <Plus className="h-4 w-4" />
             Nova Venda
@@ -179,35 +199,6 @@ export default function Financeiro() {
                 </div>
               </div>
 
-              {/* Separator */}
-              <div className="hidden sm:flex items-end pb-1">
-                <div className="h-8 w-px bg-border" />
-              </div>
-
-              {/* Group 2: Gestão */}
-              <div className="space-y-1.5 text-transparent bg-accent border-solid border-pink-950 mx-0 px-[4px] py-0 my-[5px] border rounded-lg">
-                <div className="flex gap-1">
-                  {GESTAO_TABS.map(tab => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.key;
-                    return (
-                      <button
-                        key={tab.key}
-                        onClick={() => handleTabChange(tab.key)}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
-                          isActive
-                            ? "bg-muted text-foreground shadow-sm ring-1 ring-border"
-                            : "hover:bg-accent text-primary-foreground"
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span className="hidden sm:inline">{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
 
             {/* Tab Content */}
