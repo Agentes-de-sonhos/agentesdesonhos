@@ -98,9 +98,8 @@ export default function Financeiro() {
     setSearchParams({ tab: value }, { replace: true });
   };
 
-  // Open new sale dialog by switching to vendas tab with a flag
   const handleNewSale = () => {
-    setSearchParams({ tab: "vendas", action: "new" }, { replace: true });
+    setSearchParams({ tab: "vendas" }, { replace: true });
   };
 
   const isFinanceiroTab = FINANCEIRO_TABS.some(t => t.key === activeTab);
