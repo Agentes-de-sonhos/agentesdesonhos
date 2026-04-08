@@ -46,15 +46,6 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
 
   const isCurrentMonth = viewMonth === now.getMonth() + 1 && viewYear === now.getFullYear();
 
-  const goToPrevMonth = () => {
-    if (viewMonth === 1) { setViewMonth(12); setViewYear(viewYear - 1); }
-    else setViewMonth(viewMonth - 1);
-  };
-  const goToNextMonth = () => {
-    if (viewMonth === 12) { setViewMonth(1); setViewYear(viewYear + 1); }
-    else setViewMonth(viewMonth + 1);
-  };
-  const goToCurrentMonth = () => { setViewMonth(now.getMonth() + 1); setViewYear(now.getFullYear()); };
 
   const { goal, upsertGoal, isLoading: goalLoading } = useFinancialGoals(viewMonth, viewYear);
   const [showGoalDialog, setShowGoalDialog] = useState(false);
