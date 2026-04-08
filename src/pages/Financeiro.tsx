@@ -167,7 +167,7 @@ export default function Financeiro() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex gap-1">
+            <div className="flex items-center gap-1">
               {FINANCEIRO_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
@@ -187,6 +187,14 @@ export default function Financeiro() {
                   </button>
                 );
               })}
+
+              <button
+                onClick={handleNewSale}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-accent text-primary-foreground hover:shadow-lg ml-2"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Nova Venda</span>
+              </button>
             </div>
 
             <div>
