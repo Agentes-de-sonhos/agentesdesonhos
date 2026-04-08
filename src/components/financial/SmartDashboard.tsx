@@ -163,8 +163,8 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold">{periodLabel}</h2>
+        <div className="text-left">
+          <h2 className="text-xl sm:text-2xl font-bold text-left">{periodLabel}</h2>
           {isCurrentMonth && (
             <p className="text-xs text-muted-foreground">
               <Calendar className="inline h-3 w-3 mr-1" />
