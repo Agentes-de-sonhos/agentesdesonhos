@@ -110,16 +110,13 @@ export default function Financeiro() {
   return (
     <DashboardLayout>
       <div className="space-y-4 animate-fade-in">
-        {/* Page Header */}
+        {/* Page Header with actions */}
         <PageHeader
           pageKey="financeiro"
           title="Gestão Financeira"
           subtitle="Controle simples e inteligente da sua agência"
           icon={DollarSign}
-        />
-
-        {/* Top bar: Nova Venda + Period Selector */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        >
           <Button onClick={handleNewSale} className="gap-2 shadow-sm">
             <Plus className="h-4 w-4" />
             Nova Venda
@@ -144,7 +141,7 @@ export default function Financeiro() {
               )}
             </div>
           )}
-        </div>
+        </PageHeader>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
