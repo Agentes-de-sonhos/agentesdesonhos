@@ -308,7 +308,18 @@ export function SalesManager() {
       <div className="space-y-2">
         {sales.length === 0 ? (
           <div className="border rounded-lg p-8 text-center text-muted-foreground">Nenhuma venda registrada</div>
-        ) : (
+        ) : (<>
+          {/* Alert: sales without products */}
+          {(() => {
+            const salesWithoutProducts = sales.filter(s => getProductsForSale(s.id).length === 0);
+            if (salesWithoutProducts.length === 0) return null;
+            return (
+              <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-700 dark:text-amber-400">
+                <Package className="h-4 w-4 mt-0.5 shrink-0" />
+                <span><strong>{salesWithoutProducts.length}</strong> venda{salesWithoutProducts.length > 1 ? "s" : ""} sem produtos cadastrados. Adicione produtos para calcular comissões e entradas automaticamente.</span>
+              </div>
+            );
+          })()}
           sales.map((sale) => {
             const products = getProductsForSale(sale.id);
             const isExpanded = expandedSales.has(sale.id);
@@ -424,6 +435,7 @@ export function SalesManager() {
             );
           })
         )}
+        </>)}
       </div>
 
       {/* Sale Dialog (Create/Edit) */}
