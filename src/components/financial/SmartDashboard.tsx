@@ -41,6 +41,20 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   const [, setSearchParams] = useSearchParams();
   const { sales, saleProducts, expenseEntries, incomeEntries } = useFinancial();
 
+  const getIncomeStatus = (entry: any) => {
+    const rawStatus = String(entry?.status || "received").toLowerCase();
+
+    if (["received", "recebido"].includes(rawStatus)) {
+      return "received";
+    }
+
+    if (["pending", "a_receber", "prevista", "previsao_criada"].includes(rawStatus)) {
+      return "pending";
+    }
+
+    return rawStatus;
+  };
+
   const now = new Date();
 
   const isCurrentMonth = viewMonth === now.getMonth() + 1 && viewYear === now.getFullYear();
@@ -91,15 +105,15 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
 
   // Income statuses
   const incomeReceived = periodIncome
-    .filter(e => (e as any).status === "received")
+    .filter(e => getIncomeStatus(e) === "received")
     .reduce((s, e) => s + Number(e.amount), 0);
   const incomePending = periodIncome
-    .filter(e => (e as any).status === "pending")
+    .filter(e => getIncomeStatus(e) === "pending")
     .reduce((s, e) => s + Number(e.amount), 0);
 
   // Overdue: any pending income across ALL time where expected_date < today
   const overdueEntries = incomeEntries.filter(
-    e => (e as any).status === "pending" && (e as any).expected_date && (e as any).expected_date < today
+    e => getIncomeStatus(e) === "pending" && (e as any).expected_date && (e as any).expected_date < today
   );
   const overdueTotal = overdueEntries.reduce((s, e) => s + Number(e.amount), 0);
 
