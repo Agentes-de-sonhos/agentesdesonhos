@@ -6,8 +6,6 @@ import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRigh
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -308,8 +306,19 @@ export function SalesManager() {
       <div className="space-y-2">
         {sales.length === 0 ? (
           <div className="border rounded-lg p-8 text-center text-muted-foreground">Nenhuma venda registrada</div>
-        ) : (
-          sales.map((sale) => {
+        ) : (<>
+          {/* Alert: sales without products */}
+          {(() => {
+            const salesWithoutProducts = sales.filter(s => getProductsForSale(s.id).length === 0);
+            if (salesWithoutProducts.length === 0) return null;
+            return (
+              <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-700 dark:text-amber-400">
+                <Package className="h-4 w-4 mt-0.5 shrink-0" />
+                <span><strong>{salesWithoutProducts.length}</strong> venda{salesWithoutProducts.length > 1 ? "s" : ""} sem produtos cadastrados. Adicione produtos para calcular comissões e entradas automaticamente.</span>
+              </div>
+            );
+          })()}
+          {sales.map((sale) => {
             const products = getProductsForSale(sale.id);
             const isExpanded = expandedSales.has(sale.id);
             const totalCommission = calculateSaleTotalCommission(sale.id);
@@ -422,8 +431,8 @@ export function SalesManager() {
                 </div>
               </Collapsible>
             );
-          })
-        )}
+          })}
+        </>)}
       </div>
 
       {/* Sale Dialog (Create/Edit) */}
@@ -547,85 +556,87 @@ export function SalesManager() {
 
       {/* Product Dialog (Create/Edit) */}
       <Dialog open={isProductDialogOpen} onOpenChange={(open) => { setIsProductDialogOpen(open); if (!open) resetProductForm(); }}>
-        <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0">
-          <DialogHeader className="px-6 pt-6 pb-0">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
             <DialogTitle>{editingProductId ? "Editar Produto" : "Adicionar Produto"}</DialogTitle>
           </DialogHeader>
 
-          <Tabs defaultValue="dados" className="flex flex-col flex-1 min-h-0">
-            <TabsList className="mx-6 mt-2 grid w-auto grid-cols-3">
-              <TabsTrigger value="dados">Dados do Produto</TabsTrigger>
-              <TabsTrigger value="comissao">Comissão e Cálculo</TabsTrigger>
-              <TabsTrigger value="recebimento">Recebimento e NF</TabsTrigger>
-            </TabsList>
+          <div className="space-y-5">
+            {/* Section 1: Basic */}
+            {renderSectionHeader(1, "Dados do Produto", "Tipo e descrição")}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Tipo de Produto</Label>
+                <Select value={productFormData.product_type} onValueChange={(v) => setProductFormData({ ...productFormData, product_type: v as ProductType })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{Object.entries(PRODUCT_TYPES).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Descrição</Label>
+                <Input value={productFormData.description || ""} onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })} placeholder="Ex: Hotel XYZ, 5 noites" />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Fornecedor</Label>
+                <Input value={productFormData.supplier_name || ""} onChange={(e) => setProductFormData({ ...productFormData, supplier_name: e.target.value })} placeholder="Nome do fornecedor" />
+              </div>
+              <div className="space-y-2">
+                <Label>Preço de Venda *</Label>
+                <Input type="number" value={productFormData.sale_price} onChange={(e) => setProductFormData({ ...productFormData, sale_price: Number(e.target.value) })} placeholder="0,00" />
+              </div>
+            </div>
 
-            <ScrollArea className="flex-1 min-h-0 px-6 py-4">
-              <TabsContent value="dados" className="mt-0 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Tipo de Produto</Label>
-                    <Select value={productFormData.product_type} onValueChange={(v) => setProductFormData({ ...productFormData, product_type: v as ProductType })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{Object.entries(PRODUCT_TYPES).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Descrição</Label>
-                    <Input value={productFormData.description || ""} onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })} placeholder="Ex: Hotel XYZ, 5 noites" />
-                  </div>
-                </div>
-              </TabsContent>
+            {/* Section 2: Commission */}
+            {renderSectionHeader(2, "Comissão", "Quanto você recebe")}
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label>Tipo</Label>
+                <Select value={productFormData.commission_type} onValueChange={(v) => setProductFormData({ ...productFormData, commission_type: v as 'percentage' | 'fixed' })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentual (%)</SelectItem>
+                    <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{productFormData.commission_type === 'percentage' ? 'Comissão (%)' : 'Comissão (R$)'}</Label>
+                <Input type="number" value={productFormData.commission_value} onChange={(e) => setProductFormData({ ...productFormData, commission_value: Number(e.target.value) })} placeholder="0" />
+              </div>
+              <div className="space-y-2">
+                <Label>Taxas não comissionáveis</Label>
+                <Input type="number" value={productFormData.non_commissionable_taxes || ""} onChange={(e) => setProductFormData({ ...productFormData, non_commissionable_taxes: Number(e.target.value) })} placeholder="0,00" />
+              </div>
+            </div>
 
-              <TabsContent value="comissao" className="mt-0 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Preço de Venda *</Label>
-                    <Input type="number" value={productFormData.sale_price} onChange={(e) => setProductFormData({ ...productFormData, sale_price: Number(e.target.value) })} placeholder="0,00" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Taxas / valores não comissionáveis</Label>
-                    <Input type="number" value={productFormData.non_commissionable_taxes || ""} onChange={(e) => setProductFormData({ ...productFormData, non_commissionable_taxes: Number(e.target.value) })} placeholder="0,00 (opcional)" />
-                    <p className="text-xs text-muted-foreground">Taxas, impostos ou valores que não entram na base de comissão</p>
-                  </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Tipo de Comissão</Label>
-                    <Select value={productFormData.commission_type} onValueChange={(v) => setProductFormData({ ...productFormData, commission_type: v as 'percentage' | 'fixed' })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="percentage">Percentual (%)</SelectItem>
-                        <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{productFormData.commission_type === 'percentage' ? 'Comissão (%)' : 'Comissão (R$)'}</Label>
-                    <Input type="number" value={productFormData.commission_value} onChange={(e) => setProductFormData({ ...productFormData, commission_value: Number(e.target.value) })} placeholder="0" />
-                  </div>
-                </div>
-                <div className="grid gap-3 rounded-lg border border-dashed border-border bg-background/80 p-4 sm:grid-cols-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Preço de venda</p>
-                    <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(productFormData.sale_price) || 0)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Base comissionável</p>
-                    <p className="text-sm font-semibold text-foreground">{formatCurrency(commissionBase)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Comissão estimada</p>
-                    <p className="text-sm font-semibold text-primary">{formatCurrency(estimatedCommission)}</p>
-                  </div>
-                </div>
-              </TabsContent>
+            {/* Commission summary */}
+            <div className="grid gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4 sm:grid-cols-3">
+              <div>
+                <p className="text-xs text-muted-foreground">Preço de venda</p>
+                <p className="text-sm font-semibold">{formatCurrency(Number(productFormData.sale_price) || 0)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Base comissionável</p>
+                <p className="text-sm font-semibold">{formatCurrency(commissionBase)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Comissão estimada</p>
+                <p className="text-sm font-semibold text-primary">{formatCurrency(estimatedCommission)}</p>
+              </div>
+            </div>
 
-              <TabsContent value="recebimento" className="mt-0 space-y-4">
+            {/* Section 3: Advanced (collapsible) */}
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground gap-1 w-full justify-start">
+                  <ChevronRight className="h-3 w-3 transition-transform [[data-state=open]_&]:rotate-90" />
+                  Recebimento e Nota Fiscal (avançado)
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pt-3">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Fornecedor</Label>
-                    <Input value={productFormData.supplier_name || ""} onChange={(e) => setProductFormData({ ...productFormData, supplier_name: e.target.value })} placeholder="Nome do fornecedor" />
-                  </div>
                   <div className="space-y-2">
                     <Label>Regra de recebimento</Label>
                     <Select value={productFormData.payment_rule} onValueChange={(v) => setProductFormData({ ...productFormData, payment_rule: v })}>
@@ -639,17 +650,15 @@ export function SalesManager() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label>Prazo em dias</Label>
                     <Input type="number" value={productFormData.payment_days} onChange={(e) => setProductFormData({ ...productFormData, payment_days: Number(e.target.value) })} placeholder="30" />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Data prevista de recebimento</Label>
-                    <Input type="date" value={productFormData.expected_date || ""} onChange={(e) => setProductFormData({ ...productFormData, expected_date: e.target.value })} />
-                    <p className="text-xs text-muted-foreground">Calculada automaticamente ou informe manualmente</p>
-                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Data prevista de recebimento</Label>
+                  <Input type="date" value={productFormData.expected_date || ""} onChange={(e) => setProductFormData({ ...productFormData, expected_date: e.target.value })} />
+                  <p className="text-xs text-muted-foreground">Calculada automaticamente ou informe manualmente</p>
                 </div>
 
                 <div className="flex items-center space-x-2 pt-2">
@@ -662,8 +671,8 @@ export function SalesManager() {
                 </div>
 
                 {productFormData.requires_invoice && (
-                  <div className="space-y-4 rounded-lg border border-dashed border-border bg-background/80 p-4">
-                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <div className="space-y-4 rounded-lg border border-dashed border-border bg-muted/30 p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium">
                       <FileText className="h-4 w-4" /> Dados da Nota Fiscal
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -695,11 +704,11 @@ export function SalesManager() {
                     </div>
                   </div>
                 )}
-              </TabsContent>
-            </ScrollArea>
-          </Tabs>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
 
-          <DialogFooter className="px-6 pb-6 pt-2 border-t">
+          <DialogFooter className="pt-2 border-t">
             <Button variant="outline" onClick={() => { setIsProductDialogOpen(false); resetProductForm(); }}>Cancelar</Button>
             <Button onClick={handleProductSubmit} disabled={isSaving || productFormData.sale_price <= 0}>
               {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
