@@ -32,15 +32,17 @@ const MONTH_NAMES = [
 
 const SHORT_MONTHS = ["", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-export function SmartDashboard() {
+interface SmartDashboardProps {
+  viewMonth: number;
+  viewYear: number;
+}
+
+export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const { sales, saleProducts, expenseEntries, incomeEntries } = useFinancial();
 
-  // Month navigator state
   const now = new Date();
-  const [viewMonth, setViewMonth] = useState(now.getMonth() + 1);
-  const [viewYear, setViewYear] = useState(now.getFullYear());
 
   const isCurrentMonth = viewMonth === now.getMonth() + 1 && viewYear === now.getFullYear();
 
