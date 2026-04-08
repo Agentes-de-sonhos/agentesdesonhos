@@ -188,7 +188,7 @@ export default function Financeiro() {
                           "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                           isActive
                             ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            : "text-muted-foreground"
                         )}
                       >
                         <Icon className="h-4 w-4" />
