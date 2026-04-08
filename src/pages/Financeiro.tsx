@@ -125,10 +125,10 @@ export default function Financeiro() {
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                  "flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-primary/80 text-primary-foreground hover:shadow-lg"
+                    : "bg-accent text-primary-foreground hover:shadow-lg"
                 )}
               >
                 <Icon className="h-4 w-4" />
