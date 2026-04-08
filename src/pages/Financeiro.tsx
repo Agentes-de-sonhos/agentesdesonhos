@@ -185,9 +185,9 @@ export default function Financeiro() {
               </div>
 
               {/* Group 2: Gestão */}
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-1">
-                  ORIGEM
+              <div className="space-y-1.5 text-transparent bg-accent border-solid border-pink-950 mx-0 px-[4px] py-0 my-[5px] border">
+                <p className="text-[10px] font-semibold uppercase tracking-widest px-1 text-primary-foreground">
+                  &nbsp;ORIGEM
                 </p>
                 <div className="flex gap-1">
                   {GESTAO_TABS.map(tab => {
@@ -201,7 +201,7 @@ export default function Financeiro() {
                           "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                           isActive
                             ? "bg-muted text-foreground shadow-sm ring-1 ring-border"
-                            : "text-muted-foreground/70 hover:bg-accent hover:text-accent-foreground"
+                            : "hover:bg-accent text-primary-foreground"
                         )}
                       >
                         <Icon className="h-4 w-4" />
