@@ -187,7 +187,7 @@ export default function Financeiro() {
               {/* Group 2: Gestão */}
               <div className="space-y-1.5">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-1">
-                  Gestão / Origem
+                  ORIGEM
                 </p>
                 <div className="flex gap-1">
                   {GESTAO_TABS.map(tab => {
