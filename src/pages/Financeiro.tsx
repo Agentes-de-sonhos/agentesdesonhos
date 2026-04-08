@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Loader2, DollarSign, LayoutDashboard, ArrowDownCircle,
-  ShoppingBag, ArrowUpCircle, Receipt, Users, Plus,
+  ShoppingBag, ArrowUpCircle, Receipt, Users,
   ChevronLeft, ChevronRight, Calendar,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
