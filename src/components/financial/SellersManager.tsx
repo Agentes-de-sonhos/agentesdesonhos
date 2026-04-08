@@ -62,7 +62,7 @@ export function SellersManager() {
       {sellers.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground text-sm">
-            Nenhuma vendedor cadastrado. Cadastre para controlar comissões por pessoa.
+            Nenhum vendedor cadastrado. Cadastre para controlar comissões por pessoa.
           </CardContent>
         </Card>
       ) : (
