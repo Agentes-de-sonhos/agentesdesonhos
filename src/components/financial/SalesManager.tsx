@@ -436,7 +436,6 @@ export function SalesManager() {
           })}
         </>)}
       </div>
-      </div>
 
       {/* Sale Dialog (Create/Edit) */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetSaleForm(); }}>
