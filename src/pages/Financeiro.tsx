@@ -147,7 +147,49 @@ export default function Financeiro() {
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-1">
-              {FINANCEIRO_TABS.map(tab => {
+              {/* Dashboard */}
+              {(() => {
+                const dashTab = FINANCEIRO_TABS[0];
+                const Icon = dashTab.icon;
+                const isActive = activeTab === dashTab.key;
+                return (
+                  <button
+                    key={dashTab.key}
+                    onClick={() => handleTabChange(dashTab.key)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="hidden sm:inline">{dashTab.label}</span>
+                  </button>
+                );
+              })()}
+
+              {/* Nova Venda - between Dashboard and Entradas */}
+              {(() => {
+                const isActive = activeTab === "vendas";
+                return (
+                  <button
+                    onClick={handleNewSale}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    <span className="hidden sm:inline">Nova Venda</span>
+                  </button>
+                );
+              })()}
+
+              {/* Entradas + Despesas */}
+              {FINANCEIRO_TABS.slice(1).map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
                 return (
@@ -166,14 +208,6 @@ export default function Financeiro() {
                   </button>
                 );
               })}
-
-              <button
-                onClick={handleNewSale}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-accent text-primary-foreground hover:shadow-lg ml-2"
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Nova Venda</span>
-              </button>
 
               {GESTAO_TABS.filter(t => t.key !== "vendas").map(tab => {
                 const Icon = tab.icon;
