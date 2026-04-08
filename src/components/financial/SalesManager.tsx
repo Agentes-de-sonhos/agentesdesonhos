@@ -40,6 +40,7 @@ export function SalesManager() {
   const { sellers } = useSellers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sellerId, setSellerId] = useState<string>("");
   const [sellerCommission, setSellerCommission] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
