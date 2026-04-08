@@ -64,6 +64,14 @@ export function SalesManager() {
   };
   const [productFormData, setProductFormData] = useState<SaleProductFormData>(defaultProductForm);
 
+  // Auto-open dialog when action=new
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsDialogOpen(true);
+      setSearchParams({ tab: "vendas" }, { replace: true });
+    }
+  }, [searchParams]);
+
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
