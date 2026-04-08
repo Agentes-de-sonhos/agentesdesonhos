@@ -228,7 +228,7 @@ export function SmartDashboard() {
             <div className={cn("text-2xl font-bold", currentProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>
               {formatCurrency(currentProfit)}
             </div>
-            <p className="text-xs text-muted-foreground">Comissões - Despesas</p>
+            <p className="text-xs text-muted-foreground">Comissões − Despesas</p>
           </CardContent>
         </Card>
       </div>
