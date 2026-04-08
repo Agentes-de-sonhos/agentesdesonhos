@@ -117,36 +117,37 @@ export default function Financeiro() {
           subtitle="Controle simples e inteligente da sua agência"
           icon={DollarSign}
         >
-          {GESTAO_TABS.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => handleTabChange(tab.key)}
-                className={cn(
-                  "flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-accent text-primary-foreground",
-                  isActive
-                    ? "shadow-lg"
-                    : "hover:shadow-lg"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            );
-          })}
-
+          <div className="flex items-center gap-2">
+            {GESTAO_TABS.map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => handleTabChange(tab.key)}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-accent text-primary-foreground",
+                    isActive
+                      ? "shadow-lg"
+                      : "hover:shadow-lg"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
 
           {showPeriodSelector && (
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToPrevMonth}>
+              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent" onClick={goToPrevMonth}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="text-center min-w-[140px]">
                 <span className="text-sm font-semibold">{periodLabel}</span>
               </div>
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToNextMonth}>
+              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent" onClick={goToNextMonth}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
               {!isCurrentMonth && (
