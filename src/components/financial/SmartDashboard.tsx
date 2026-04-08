@@ -162,28 +162,15 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header with month navigator */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToPrevMonth}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="text-center min-w-[160px]">
-            <h2 className="text-xl sm:text-2xl font-bold">{periodLabel}</h2>
-            {isCurrentMonth && (
-              <p className="text-xs text-muted-foreground">
-                <Calendar className="inline h-3 w-3 mr-1" />
-                Dia {currentDay} de {daysInMonth} — {daysRemaining} restante{daysRemaining !== 1 ? "s" : ""}
-              </p>
-            )}
-          </div>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToNextMonth}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          {!isCurrentMonth && (
-            <Button variant="ghost" size="sm" className="text-xs" onClick={goToCurrentMonth}>
-              Hoje
-            </Button>
+        <div className="text-center">
+          <h2 className="text-xl sm:text-2xl font-bold">{periodLabel}</h2>
+          {isCurrentMonth && (
+            <p className="text-xs text-muted-foreground">
+              <Calendar className="inline h-3 w-3 mr-1" />
+              Dia {currentDay} de {daysInMonth} — {daysRemaining} restante{daysRemaining !== 1 ? "s" : ""}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
