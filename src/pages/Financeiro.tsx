@@ -137,13 +137,6 @@ export default function Financeiro() {
             );
           })}
 
-          <button
-            onClick={handleNewSale}
-            className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-accent text-primary-foreground hover:shadow-lg shadow-sm"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Nova Venda</span>
-          </button>
 
           {showPeriodSelector && (
             <div className="flex items-center gap-2">
