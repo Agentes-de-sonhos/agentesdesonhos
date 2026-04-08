@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,6 +41,7 @@ export function SalesManager() {
   const { sellers } = useSellers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sellerId, setSellerId] = useState<string>("");
   const [sellerCommission, setSellerCommission] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -61,6 +63,14 @@ export function SalesManager() {
     payment_rule: "after_sale", payment_days: 30, requires_invoice: false,
   };
   const [productFormData, setProductFormData] = useState<SaleProductFormData>(defaultProductForm);
+
+  // Auto-open dialog when action=new
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsDialogOpen(true);
+      setSearchParams({ tab: "vendas" }, { replace: true });
+    }
+  }, [searchParams]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
