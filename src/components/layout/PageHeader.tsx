@@ -9,9 +9,10 @@ interface PageHeaderProps {
   subtitle: string;
   icon: LucideIcon;
   adminTab?: string;
+  children?: React.ReactNode;
 }
 
-export function PageHeader({ pageKey, title, subtitle, icon: Icon, adminTab }: PageHeaderProps) {
+export function PageHeader({ pageKey, title, subtitle, icon: Icon, adminTab, children }: PageHeaderProps) {
   const { data: bannerUrl } = useQuery({
     queryKey: ["page-banner", pageKey],
     queryFn: async () => {
@@ -27,7 +28,7 @@ export function PageHeader({ pageKey, title, subtitle, icon: Icon, adminTab }: P
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Icon className="h-8 w-8 text-primary" />
@@ -35,7 +36,10 @@ export function PageHeader({ pageKey, title, subtitle, icon: Icon, adminTab }: P
           </h1>
           <p className="text-muted-foreground mt-1">{subtitle}</p>
         </div>
-        {adminTab && <AdminEditButton adminTab={adminTab} />}
+        <div className="flex items-center gap-2 flex-wrap">
+          {children}
+          {adminTab && <AdminEditButton adminTab={adminTab} />}
+        </div>
       </div>
 
       {bannerUrl && (
