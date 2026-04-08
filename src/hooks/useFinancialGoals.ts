@@ -14,13 +14,13 @@ export interface FinancialGoal {
   updated_at: string;
 }
 
-export function useFinancialGoals() {
+export function useFinancialGoals(month?: number, year?: number) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
+  const currentMonth = month ?? (now.getMonth() + 1);
+  const currentYear = year ?? now.getFullYear();
 
   const { data: goal, isLoading } = useQuery({
     queryKey: ["financial-goal", user?.id, currentMonth, currentYear],
