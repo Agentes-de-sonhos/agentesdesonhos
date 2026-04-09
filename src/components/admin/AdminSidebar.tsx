@@ -32,6 +32,7 @@ import {
   Gift,
   HardDrive,
   CreditCard,
+  Eye,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -99,6 +100,7 @@ const menuGroups: AdminMenuGroup[] = [
       { id: "analytics", label: "Analytics", icon: BarChart3 },
       { id: "surveys", label: "Pesquisas", icon: MessageCircle },
       { id: "drive-import", label: "Drive", icon: HardDrive },
+      { id: "support-mode", label: "Modo Suporte", icon: Eye },
     ],
   },
 ];
