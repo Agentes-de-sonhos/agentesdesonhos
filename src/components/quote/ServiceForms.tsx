@@ -53,6 +53,12 @@ interface ServiceFormProps {
   photoSlot?: React.ReactNode;
 }
 
+/** Resolve paymentSlot: if it's a function, call with amount; otherwise render as-is */
+function renderPaymentSlot(slot: ServiceFormProps['paymentSlot'], amount: number): React.ReactNode {
+  if (typeof slot === 'function') return slot(amount);
+  return slot;
+}
+
 /** Helper: disable dates outside trip range */
 function makeDateDisabler(tripStart?: Date, tripEnd?: Date) {
   if (!tripStart || !tripEnd) return undefined;
