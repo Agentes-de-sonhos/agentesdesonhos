@@ -325,7 +325,6 @@ export function AdminUserManager() {
       // Sign in as the target user using the magic link token
       const { error: verifyError } = await supabase.auth.verifyOtp({
         type: "magiclink",
-        email,
         token_hash,
       });
 
