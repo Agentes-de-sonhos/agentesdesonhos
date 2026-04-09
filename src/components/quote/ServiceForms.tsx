@@ -47,10 +47,16 @@ interface ServiceFormProps {
   childrenCount?: number;
   /** When editing, pass the existing service data to pre-fill the form */
   initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null; image_urls?: string[] };
-  /** Optional slot rendered between total/notes and action buttons */
-  paymentSlot?: React.ReactNode;
+  /** Optional slot rendered between total/notes and action buttons — receives live computed amount */
+  paymentSlot?: ((liveAmount: number) => React.ReactNode) | React.ReactNode;
   /** Optional slot for photo upload */
   photoSlot?: React.ReactNode;
+}
+
+/** Resolve paymentSlot: if it's a function, call with amount; otherwise render as-is */
+function renderPaymentSlot(slot: ServiceFormProps['paymentSlot'], amount: number): React.ReactNode {
+  if (typeof slot === 'function') return slot(amount);
+  return slot;
 }
 
 /** Helper: disable dates outside trip range */
@@ -394,7 +400,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           </div>
         )}
 
-        {paymentSlot}
+        {renderPaymentSlot(paymentSlot, totalAmount)}
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -618,7 +624,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
             <FormItem><FormLabel>Valor Criança (opcional)</FormLabel><FormControl><Input type="number" min={0} step="0.01" placeholder="0.00" {...field} value={field.value || ""} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
-        {paymentSlot}
+        {renderPaymentSlot(paymentSlot, form.watch("price"))}
 
         {/* 7. Label (optional) */}
         {showOptionLabel && (
@@ -700,7 +706,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
-        {paymentSlot}
+        {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -888,7 +894,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
           </FormItem>
         )} />
 
-        {paymentSlot}
+        {renderPaymentSlot(paymentSlot, isRoundTrip ? price * 2 : price)}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
@@ -1048,7 +1054,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
           <FormItem><FormLabel>Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Observações sobre o ingresso..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
-        {paymentSlot}
+        {renderPaymentSlot(paymentSlot, totalAmount)}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -1150,7 +1156,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
             <FormMessage />
           </FormItem>
         )} />
-        {paymentSlot}
+        {renderPaymentSlot(paymentSlot, totalAmount)}
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -1235,7 +1241,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
-        {paymentSlot}
+        {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -1285,7 +1291,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
-        {paymentSlot}
+        {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
