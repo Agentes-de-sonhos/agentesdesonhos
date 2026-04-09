@@ -350,7 +350,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               src={agentProfile.agency_logo_url}
                alt={agentProfile.agency_name || "Agência"}
                translate="no"
-              className="h-16 sm:h-20 max-w-[280px] object-contain"
+              className="h-32 sm:h-40 max-w-[400px] object-contain"
             />
           ) : (
             <div className="flex items-center gap-3">
