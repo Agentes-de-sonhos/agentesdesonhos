@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.drive-import-materials]
 verify_jwt = false
+
+[functions.admin-resolve-resource]
+verify_jwt = false
