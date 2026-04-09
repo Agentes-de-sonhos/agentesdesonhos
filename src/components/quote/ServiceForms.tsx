@@ -1324,7 +1324,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
     onImageUrlsChange([...imageUrls, ...urls]);
   };
 
-  // Hotel mode: only Google photos, no manual upload
+  // Hotel mode: Google photos prioritized + discrete manual upload
   if (hotelMode) {
     return (
       <div className="space-y-2">
@@ -1343,14 +1343,29 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
             </div>
           </>
         )}
-        {placeId && (
-          <GoogleHotelPhotos
-            placeId={placeId}
-            onPhotosSelected={handleGooglePhotosSelected}
-            existingUrls={imageUrls}
-            autoShow
-          />
-        )}
+        <div className="flex items-center gap-2">
+          {placeId && (
+            <div className="flex-1">
+              <GoogleHotelPhotos
+                placeId={placeId}
+                onPhotosSelected={handleGooglePhotosSelected}
+                existingUrls={imageUrls}
+                autoShow
+              />
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors shrink-0"
+            title="Enviar foto própria"
+          >
+            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
+            {uploading ? "Enviando..." : "Upload"}
+          </button>
+        </div>
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
         {!placeId && imageUrls.length === 0 && (
           <p className="text-xs text-muted-foreground italic">Selecione um hotel acima para carregar fotos automaticamente</p>
         )}
