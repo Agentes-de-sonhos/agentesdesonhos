@@ -92,6 +92,42 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_resource_access_logs: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          resource_id: string
+          resource_owner_id: string | null
+          resource_type: string
+          url_input: string | null
+        }
+        Insert: {
+          action?: string
+          admin_user_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          resource_id: string
+          resource_owner_id?: string | null
+          resource_type: string
+          url_input?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          resource_id?: string
+          resource_owner_id?: string | null
+          resource_type?: string
+          url_input?: string | null
+        }
+        Relationships: []
+      }
       advisor_reviews: {
         Row: {
           comment: string | null
