@@ -259,18 +259,24 @@ Deno.serve(async (req) => {
           const files = await listDriveFiles(accessToken, catFolder.id);
           console.log(`  Category "${category}": ${files.length} files`);
           
+          // Each folder gets its own batch_id so files group into one card
+          const folderBatchId = `${syncRunId}_${opFolder.id}_${catFolder.id}`;
+          
           for (const file of files) {
             results.total_files_found++;
-            await processFile(supabase, accessToken, file, supplier, category, opFolder.name, importedFileIds, results, batchId);
+            await processFile(supabase, accessToken, file, supplier, category, opFolder.name, importedFileIds, results, folderBatchId);
           }
         }
       } else {
         const files = await listDriveFiles(accessToken, opFolder.id);
         console.log(`  No categories, direct files: ${files.length}`);
         
+        // Each operator folder gets its own batch_id
+        const folderBatchId = `${syncRunId}_${opFolder.id}`;
+        
         for (const file of files) {
           results.total_files_found++;
-          await processFile(supabase, accessToken, file, supplier, "Geral", opFolder.name, importedFileIds, results, batchId);
+          await processFile(supabase, accessToken, file, supplier, "Geral", opFolder.name, importedFileIds, results, folderBatchId);
         }
       }
     }
