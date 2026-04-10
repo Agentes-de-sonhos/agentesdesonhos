@@ -28,6 +28,7 @@ export default function MinhaVitrine() {
     showcase, items, availableMaterials, allSuppliers, loadingShowcase,
     createShowcase, updateShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage, uploadMultipleImages,
   } = useShowcase();
+  const { categoryNames: SUGGESTED_CATEGORIES } = useVitrineCategories();
 
   const [slug, setSlug] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
