@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 
 const SUGGESTED_SUBCATEGORIES = ["Réveillon", "MSC", "Costa Cruzeiros", "Férias de Julho", "Disney", "Europa"];
-const SUGGESTED_SUBCATEGORIES = ["Réveillon", "MSC", "Costa Cruzeiros", "Férias de Julho", "Disney", "Europa"];
 
 export default function MinhaVitrine() {
   const { user } = useAuth();
