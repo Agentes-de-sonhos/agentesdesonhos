@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,8 @@ import {
   Pin,
   GraduationCap,
   GripVertical,
+  CloudDownload,
+  Upload,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -887,6 +890,58 @@ export function AdminMaterialsManager() {
     );
   }
 
+  // Split galleries by source
+  const manualGalleries = galleries.filter(g => g.materials.every((m: any) => !m.batch_id));
+  const driveGalleries = galleries.filter(g => g.materials.some((m: any) => !!m.batch_id));
+
+  const renderGalleryGrid = (items: MaterialGalleryGroup[]) => {
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>Nenhum material nesta aba</p>
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {items.map((gallery) => (
+          <button
+            key={gallery.key}
+            className="group text-left rounded-lg border bg-card overflow-hidden hover:ring-2 hover:ring-primary/50 transition-all"
+            onClick={() => setOpenGalleryKey(gallery.key)}
+          >
+            <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden relative">
+              {gallery.thumbnail ? (
+                <img src={gallery.thumbnail} alt={gallery.title} className="w-full h-full object-cover" />
+              ) : (
+                <FolderOpen className="h-10 w-10 text-muted-foreground" />
+              )}
+              {gallery.is_permanent && (
+                <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                  <Pin className="h-3 w-3" />
+                </div>
+              )}
+              {gallery.trail_name && (
+                <div className="absolute top-2 left-2 bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px] font-medium flex items-center gap-1">
+                  <GraduationCap className="h-3 w-3" />
+                  <span className="truncate max-w-[80px]">{gallery.trail_name}</span>
+                </div>
+              )}
+              <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 text-xs font-medium">
+                {gallery.materials.length}
+              </div>
+            </div>
+            <div className="p-2">
+              <p className="text-sm font-medium truncate">{gallery.title}</p>
+              <p className="text-xs text-muted-foreground truncate">{gallery.supplier_name || gallery.category}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   // --- Render galleries list view ---
   return (
     <Card className="border-0 shadow-md">
@@ -1046,47 +1101,25 @@ export function AdminMaterialsManager() {
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
-        ) : galleries.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {galleries.map((gallery) => (
-              <button
-                key={gallery.key}
-                className="group text-left rounded-lg border bg-card overflow-hidden hover:ring-2 hover:ring-primary/50 transition-all"
-                onClick={() => setOpenGalleryKey(gallery.key)}
-              >
-                <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden relative">
-                  {gallery.thumbnail ? (
-                    <img src={gallery.thumbnail} alt={gallery.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <FolderOpen className="h-10 w-10 text-muted-foreground" />
-                  )}
-                  {gallery.is_permanent && (
-                    <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                      <Pin className="h-3 w-3" />
-                    </div>
-                  )}
-                  {gallery.trail_name && (
-                    <div className="absolute top-2 left-2 bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-[10px] font-medium flex items-center gap-1">
-                      <GraduationCap className="h-3 w-3" />
-                      <span className="truncate max-w-[80px]">{gallery.trail_name}</span>
-                    </div>
-                  )}
-                  <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 text-xs font-medium">
-                    {gallery.materials.length}
-                  </div>
-                </div>
-                <div className="p-2">
-                  <p className="text-sm font-medium truncate">{gallery.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">{gallery.supplier_name || gallery.category}</p>
-                </div>
-              </button>
-            ))}
-          </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum material cadastrado</p>
-          </div>
+          <Tabs defaultValue="manual" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="manual" className="gap-2">
+                <Upload className="h-4 w-4" />
+                Minhas Galerias ({manualGalleries.length})
+              </TabsTrigger>
+              <TabsTrigger value="drive" className="gap-2">
+                <CloudDownload className="h-4 w-4" />
+                Google Drive ({driveGalleries.length})
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="manual">
+              {renderGalleryGrid(manualGalleries)}
+            </TabsContent>
+            <TabsContent value="drive">
+              {renderGalleryGrid(driveGalleries)}
+            </TabsContent>
+          </Tabs>
         )}
       </CardContent>
     </Card>
