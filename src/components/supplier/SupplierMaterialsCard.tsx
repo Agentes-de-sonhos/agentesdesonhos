@@ -40,8 +40,10 @@ export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMate
       const galleryMap = new Map<string, Material[]>();
       
       data.forEach((material) => {
-        const importDate = startOfDay(new Date(material.published_at)).toISOString().slice(0, 10);
-        const key = `${importDate}|${(material.category || '').trim().toLowerCase()}`;
+        // Use batch_id when available for unique gallery cards per sync
+        const key = material.batch_id 
+          ? `${material.batch_id}|${(material.category || '').trim().toLowerCase()}`
+          : `${startOfDay(new Date(material.published_at)).toISOString().slice(0, 10)}|${(material.category || '').trim().toLowerCase()}`;
         if (!galleryMap.has(key)) {
           galleryMap.set(key, []);
         }

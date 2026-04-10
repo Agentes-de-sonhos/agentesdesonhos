@@ -69,14 +69,15 @@ export function useMaterials() {
     const galleryMap = new Map<string, Material[]>();
     
     materials?.forEach((material) => {
-      // Create a unique key based on import date (day), supplier, and category
-      const importDate = startOfDay(new Date(material.published_at)).toISOString().slice(0, 10);
-      const key = `${importDate}|${material.supplier_id || 'none'}|${(material.category || '').trim().toLowerCase()}`;
+      // Use batch_id as primary grouping key when available; fallback to date+supplier+category
+      const groupKey = material.batch_id 
+        ? `${material.batch_id}|${material.supplier_id || 'none'}|${(material.category || '').trim().toLowerCase()}`
+        : `${startOfDay(new Date(material.published_at)).toISOString().slice(0, 10)}|${material.supplier_id || 'none'}|${(material.category || '').trim().toLowerCase()}`;
       
-      if (!galleryMap.has(key)) {
-        galleryMap.set(key, []);
+      if (!galleryMap.has(groupKey)) {
+        galleryMap.set(groupKey, []);
       }
-      galleryMap.get(key)!.push(material);
+      galleryMap.get(groupKey)!.push(material);
     });
 
     // Convert map to array of galleries

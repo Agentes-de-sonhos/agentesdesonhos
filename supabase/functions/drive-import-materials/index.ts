@@ -175,9 +175,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Generate a unique batch_id for this sync run
+    const batchId = `sync_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+
     console.log("=== DRIVE IMPORT START ===");
     console.log("Root folder ID:", rootFolderId);
     console.log("User ID:", user.id);
+    console.log("Batch ID:", batchId);
 
     // Get valid access token
     const accessToken = await getValidAccessToken(supabase, user.id);
@@ -257,7 +261,7 @@ Deno.serve(async (req) => {
           
           for (const file of files) {
             results.total_files_found++;
-            await processFile(supabase, accessToken, file, supplier, category, opFolder.name, importedFileIds, results);
+            await processFile(supabase, accessToken, file, supplier, category, opFolder.name, importedFileIds, results, batchId);
           }
         }
       } else {
@@ -266,7 +270,7 @@ Deno.serve(async (req) => {
         
         for (const file of files) {
           results.total_files_found++;
-          await processFile(supabase, accessToken, file, supplier, "Geral", opFolder.name, importedFileIds, results);
+          await processFile(supabase, accessToken, file, supplier, "Geral", opFolder.name, importedFileIds, results, batchId);
         }
       }
     }
@@ -308,7 +312,8 @@ async function processFile(
   category: string,
   folderName: string,
   importedFileIds: Set<string>,
-  results: any
+  results: any,
+  batchId: string
 ) {
   if (importedFileIds.has(file.id)) {
     results.skipped_duplicate++;
@@ -368,6 +373,7 @@ async function processFile(
         is_active: true,
         is_permanent: false,
         published_at: new Date().toISOString(),
+        batch_id: batchId,
       })
       .select("id")
       .single();

@@ -15,6 +15,7 @@ export interface Material {
   order_index?: number;
   canva_url?: string | null;
   trail_id?: string | null;
+  batch_id?: string | null;
   tour_operators?: {
     id: string;
     name: string;
