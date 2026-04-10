@@ -145,6 +145,7 @@ export function AdminMaterialsManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MaterialForm>(initialForm);
   const [openGalleryKey, setOpenGalleryKey] = useState<string | null>(null);
+  const [openDriveFolder, setOpenDriveFolder] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
