@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ImageCarouselProps {
@@ -8,6 +8,27 @@ interface ImageCarouselProps {
 
 export function ImageCarousel({ images, onImageClick }: ImageCarouselProps) {
   const [current, setCurrent] = useState(0);
+  const touchStartX = useRef(0);
+  const touchDeltaX = useRef(0);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const threshold = 50;
+    if (touchDeltaX.current < -threshold && current < images.length - 1) {
+      setCurrent(c => c + 1);
+    } else if (touchDeltaX.current > threshold && current > 0) {
+      setCurrent(c => c - 1);
+    }
+    touchDeltaX.current = 0;
+  }, [current, images.length]);
 
   if (images.length <= 1) {
     return (
@@ -19,8 +40,30 @@ export function ImageCarousel({ images, onImageClick }: ImageCarouselProps) {
   }
 
   return (
-    <div className="relative" onClick={onImageClick}>
-      <img src={images[current]} alt="" className="w-full block cursor-pointer" loading="lazy" />
+    <div
+      className="relative touch-pan-y"
+      onClick={onImageClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <div className="overflow-hidden">
+        <div
+          className="flex transition-transform duration-300 ease-out"
+          style={{ transform: `translateX(-${current * 100}%)` }}
+        >
+          {images.map((src, i) => (
+            <img
+              key={i}
+              src={src}
+              alt=""
+              className="w-full flex-shrink-0 block cursor-pointer"
+              loading={i === 0 ? "eager" : "lazy"}
+              draggable={false}
+            />
+          ))}
+        </div>
+      </div>
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
         {images.map((_, i) => (
