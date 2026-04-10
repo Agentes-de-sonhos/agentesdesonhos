@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,10 +26,11 @@ import { Plus, Pencil, Trash2, MapPin, Upload, Loader2, FileText, FolderOpen, Gr
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useAcademy, useAcademyAdmin, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TrailTrainingsManager } from "./TrailTrainingsManager";
 import { TrailLinkedMaterialsManager } from "./TrailLinkedMaterialsManager";
 import { TrailExamManager } from "./TrailExamManager";
-import { POPULAR_DESTINATIONS, MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
+import { MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
 import { usePlaybook } from "@/hooks/usePlaybook";
 import { ImageGalleryPicker } from "./ImageGalleryPicker";
 import { ImageCropDialog } from "./ImageCropDialog";
@@ -48,7 +49,46 @@ export function AdminAcademyManager() {
   const { trails } = useAcademy();
   const { destinations: playbookDestinations } = usePlaybook();
   const { createTrail, updateTrail, deleteTrail, saveTrailMaterial, updateTrailMaterial, reorderTrailMaterials, deleteTrailMaterial, saveTrailSpeaker, updateTrailSpeaker, deleteTrailSpeaker } = useAcademyAdmin();
-  
+  const queryClient = useQueryClient();
+
+  const { data: academyDestinations = [] } = useQuery({
+    queryKey: ['academy-destinations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('academy_destinations')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return (data || []).map((d: any) => d.name as string);
+    },
+  });
+
+  const [newDestinationName, setNewDestinationName] = useState('');
+  const [creatingDestination, setCreatingDestination] = useState(false);
+
+  const handleCreateDestination = async () => {
+    const name = newDestinationName.trim();
+    if (!name) return;
+    setCreatingDestination(true);
+    try {
+      const { error } = await supabase.from('academy_destinations').insert({ name });
+      if (error) {
+        if (error.code === '23505') {
+          sonnerToast.error('Esse destino já existe');
+        } else {
+          sonnerToast.error('Erro ao criar destino');
+        }
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: ['academy-destinations'] });
+      setTrailForm(prev => ({ ...prev, destination: name }));
+      setNewDestinationName('');
+      sonnerToast.success('Destino criado!');
+    } finally {
+      setCreatingDestination(false);
+    }
+  };
+
   const [trailDialogOpen, setTrailDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
@@ -382,11 +422,29 @@ export function AdminAcademyManager() {
             <SelectValue placeholder="Selecione o destino" />
           </SelectTrigger>
           <SelectContent>
-            {POPULAR_DESTINATIONS.map((dest) => (
+            {academyDestinations.map((dest) => (
               <SelectItem key={dest} value={dest}>{dest}</SelectItem>
             ))}
           </SelectContent>
         </Select>
+        <div className="flex gap-2 mt-2">
+          <Input
+            placeholder="Novo destino..."
+            value={newDestinationName}
+            onChange={(e) => setNewDestinationName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCreateDestination())}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleCreateDestination}
+            disabled={!newDestinationName.trim() || creatingDestination}
+          >
+            {creatingDestination ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            Criar
+          </Button>
+        </div>
       </div>
       <div>
         <Label>Descrição</Label>
