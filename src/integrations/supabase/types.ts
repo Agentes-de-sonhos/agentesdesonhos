@@ -310,6 +310,8 @@ export type Database = {
           id: string
           is_active: boolean
           max_auto_items: number | null
+          og_description: string | null
+          og_title: string | null
           showcase_mode: string
           slug: string
           tagline: string | null
@@ -323,6 +325,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           max_auto_items?: number | null
+          og_description?: string | null
+          og_title?: string | null
           showcase_mode?: string
           slug: string
           tagline?: string | null
@@ -336,6 +340,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           max_auto_items?: number | null
+          og_description?: string | null
+          og_title?: string | null
           showcase_mode?: string
           slug?: string
           tagline?: string | null

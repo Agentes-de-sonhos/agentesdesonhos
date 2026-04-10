@@ -1,0 +1,1 @@
+ALTER TABLE public.agency_showcases ADD COLUMN IF NOT EXISTS og_title text, ADD COLUMN IF NOT EXISTS og_description text;
