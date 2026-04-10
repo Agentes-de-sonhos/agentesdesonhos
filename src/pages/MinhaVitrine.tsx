@@ -54,6 +54,8 @@ export default function MinhaVitrine() {
   const [selectedSupplierIds, setSelectedSupplierIds] = useState<string[]>(showcase?.auto_supplier_ids || []);
   const [maxAutoItems, setMaxAutoItems] = useState(showcase?.max_auto_items || 20);
   const [autoCategories, setAutoCategories] = useState<string[]>(showcase?.auto_categories || []);
+  const [ogTitle, setOgTitle] = useState(showcase?.og_title || "");
+  const [ogDescription, setOgDescription] = useState(showcase?.og_description || "");
 
   const PUBLIC_DOMAIN = "https://vitrine.tur.br";
   const publicUrl = showcase ? `${PUBLIC_DOMAIN}/${showcase.slug}` : "";
@@ -227,6 +229,8 @@ export default function MinhaVitrine() {
       auto_supplier_ids: selectedSupplierIds,
       max_auto_items: maxAutoItems,
       auto_categories: autoCategories,
+      og_title: ogTitle || null,
+      og_description: ogDescription || null,
     } as any);
     toast.success("Configurações salvas!");
     setSettingsOpen(false);
@@ -238,11 +242,14 @@ export default function MinhaVitrine() {
     setSelectedSupplierIds(showcase?.auto_supplier_ids || []);
     setMaxAutoItems(showcase?.max_auto_items || 20);
     setAutoCategories(showcase?.auto_categories || []);
+    setOgTitle(showcase?.og_title || "");
+    setOgDescription(showcase?.og_description || "");
     setSettingsOpen(true);
   };
 
   const shareWhatsApp = () => {
-    const text = encodeURIComponent(`Confira nossa vitrine de ofertas: ${publicUrl}`);
+    const ogProxyUrl = `https://mlwwpckahhfsixplxwif.supabase.co/functions/v1/public-og?type=showcase&slug=${showcase?.slug || ""}&url=${encodeURIComponent(publicUrl)}`;
+    const text = encodeURIComponent(`Confira nossa vitrine de ofertas: ${ogProxyUrl}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
@@ -621,6 +628,35 @@ export default function MinhaVitrine() {
                   rows={2}
                 />
                 <p className="text-xs text-muted-foreground mt-1">Exibida abaixo do logo na vitrine pública.</p>
+              </div>
+
+              {/* OG / Social Preview */}
+              <div className="space-y-3 border-t pt-4">
+                <Label className="text-sm font-semibold">Preview ao compartilhar (WhatsApp, redes sociais)</Label>
+                <p className="text-xs text-muted-foreground">Personalize o título e descrição que aparecem ao compartilhar o link da vitrine. Se deixar vazio, será gerado automaticamente com o nome da sua agência.</p>
+                <div>
+                  <Label>Título do link</Label>
+                  <Input
+                    placeholder="Ex: Ofertas exclusivas | Minha Agência"
+                    value={ogTitle}
+                    onChange={e => setOgTitle(e.target.value)}
+                    className="mt-1"
+                    maxLength={80}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">{ogTitle.length}/80 caracteres</p>
+                </div>
+                <div>
+                  <Label>Descrição do link</Label>
+                  <Textarea
+                    placeholder="Ex: Confira as melhores ofertas de viagem selecionadas pela nossa equipe!"
+                    value={ogDescription}
+                    onChange={e => setOgDescription(e.target.value)}
+                    className="mt-1"
+                    rows={2}
+                    maxLength={160}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">{ogDescription.length}/160 caracteres</p>
+                </div>
               </div>
 
               {/* Mode */}
