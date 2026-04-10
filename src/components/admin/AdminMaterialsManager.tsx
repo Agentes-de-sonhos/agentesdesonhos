@@ -242,6 +242,42 @@ export function AdminMaterialsManager() {
     return galleries.find(g => g.key === openGalleryKey) || null;
   }, [openGalleryKey, galleries]);
 
+  // Split galleries by source (must be before early return)
+  const manualGalleries = useMemo(() => galleries.filter(g => g.materials.every((m: any) => !m.batch_id)), [galleries]);
+  const driveGalleries = useMemo(() => galleries.filter(g => g.materials.some((m: any) => !!m.batch_id)), [galleries]);
+
+  // Group Drive galleries by operator/supplier
+  const driveOperatorFolders = useMemo(() => {
+    const map = new Map<string, { name: string; galleries: MaterialGalleryGroup[]; thumbnail: string | null; totalFiles: number }>();
+    driveGalleries.forEach((g) => {
+      const key = g.supplier_id || '__no_supplier__';
+      const name = g.supplier_name || 'Sem operadora';
+      if (!map.has(key)) {
+        map.set(key, { name, galleries: [], thumbnail: null, totalFiles: 0 });
+      }
+      const folder = map.get(key)!;
+      folder.galleries.push(g);
+      folder.totalFiles += g.materials.length;
+      if (!folder.thumbnail && g.thumbnail) {
+        folder.thumbnail = g.thumbnail;
+      }
+    });
+    return Array.from(map.entries())
+      .map(([key, val]) => ({ key, ...val }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [driveGalleries]);
+
+  const activeDriveFolderGalleries = useMemo(() => {
+    if (!openDriveFolder) return [];
+    const folder = driveOperatorFolders.find(f => f.key === openDriveFolder);
+    return folder?.galleries || [];
+  }, [openDriveFolder, driveOperatorFolders]);
+
+  const activeDriveFolderName = useMemo(() => {
+    if (!openDriveFolder) return '';
+    return driveOperatorFolders.find(f => f.key === openDriveFolder)?.name || '';
+  }, [openDriveFolder, driveOperatorFolders]);
+
   // Mutation for saving single material (edit mode)
   const saveSingleMutation = useMutation({
     mutationFn: async (data: MaterialForm) => {
