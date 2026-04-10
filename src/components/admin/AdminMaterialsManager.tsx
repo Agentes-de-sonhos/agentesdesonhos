@@ -497,6 +497,25 @@ export function AdminMaterialsManager() {
     },
   });
 
+  // Mutation to update vitrine category for all materials in a batch/gallery
+  const updateBatchCategoryMutation = useMutation({
+    mutationFn: async ({ ids, category }: { ids: string[]; category: string }) => {
+      const { error } = await supabase
+        .from("materials")
+        .update({ category })
+        .in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-materials"] });
+      queryClient.invalidateQueries({ queryKey: ["materials"] });
+      toast({ title: "Sucesso", description: "Categoria da vitrine atualizada para toda a subpasta" });
+    },
+    onError: () => {
+      toast({ title: "Erro", description: "Não foi possível atualizar a categoria", variant: "destructive" });
+    },
+  });
+
   const [addFilesOpen, setAddFilesOpen] = useState(false);
   const [addFiles, setAddFiles] = useState<UploadedFile[]>([]);
 
