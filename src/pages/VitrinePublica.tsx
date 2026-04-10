@@ -153,7 +153,7 @@ export default function VitrinePublica() {
           <div className="max-w-xl mx-auto w-full">
             <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden mx-4 my-6">
               <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">Seu consultor de viagens</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center notranslate" translate="no">{profile.agency_name || "Seu consultor de viagens"}</p>
               </div>
               <div className="p-6 sm:p-8">
                 <div className="flex flex-col items-center text-center space-y-5">
