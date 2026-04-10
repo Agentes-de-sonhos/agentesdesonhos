@@ -1,0 +1,1 @@
+ALTER TABLE public.agency_showcases ADD COLUMN disclaimer_text text DEFAULT 'Sujeito à disponibilidade e alteração. Consulte-nos para mais informações.';
