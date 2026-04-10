@@ -8132,6 +8132,33 @@ export type Database = {
           },
         ]
       }
+      vitrine_categories: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       whatsapp_community: {
         Row: {
           benefits: string[] | null
