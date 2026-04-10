@@ -103,6 +103,24 @@ async function downloadDriveFile(accessToken: string, fileId: string): Promise<A
   return res.arrayBuffer();
 }
 
+async function trashDriveFile(accessToken: string, fileId: string): Promise<void> {
+  const res = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ trashed: true }),
+    }
+  );
+  if (!res.ok) {
+    const data = await res.json();
+    console.error(`Erro ao mover arquivo ${fileId} para lixeira:`, data);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -366,6 +384,14 @@ async function processFile(
       category,
       status: "success",
     });
+
+    // Move file to trash in Drive after successful import
+    try {
+      await trashDriveFile(accessToken, file.id);
+      console.log(`Arquivo "${file.name}" movido para lixeira do Drive`);
+    } catch (trashErr) {
+      console.error(`Falha ao mover "${file.name}" para lixeira:`, trashErr);
+    }
 
     importedFileIds.add(file.id);
     results.imported++;
