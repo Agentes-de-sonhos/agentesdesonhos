@@ -898,6 +898,39 @@ export function AdminMaterialsManager() {
   const manualGalleries = galleries.filter(g => g.materials.every((m: any) => !m.batch_id));
   const driveGalleries = galleries.filter(g => g.materials.some((m: any) => !!m.batch_id));
 
+  // Group Drive galleries by operator/supplier
+  const driveOperatorFolders = useMemo(() => {
+    const map = new Map<string, { name: string; galleries: MaterialGalleryGroup[]; thumbnail: string | null; totalFiles: number }>();
+    driveGalleries.forEach((g) => {
+      const key = g.supplier_id || '__no_supplier__';
+      const name = g.supplier_name || 'Sem operadora';
+      if (!map.has(key)) {
+        map.set(key, { name, galleries: [], thumbnail: null, totalFiles: 0 });
+      }
+      const folder = map.get(key)!;
+      folder.galleries.push(g);
+      folder.totalFiles += g.materials.length;
+      if (!folder.thumbnail && g.thumbnail) {
+        folder.thumbnail = g.thumbnail;
+      }
+    });
+    return Array.from(map.entries())
+      .map(([key, val]) => ({ key, ...val }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [driveGalleries]);
+
+  // Currently selected operator folder's galleries
+  const activeDriveFolderGalleries = useMemo(() => {
+    if (!openDriveFolder) return [];
+    const folder = driveOperatorFolders.find(f => f.key === openDriveFolder);
+    return folder?.galleries || [];
+  }, [openDriveFolder, driveOperatorFolders]);
+
+  const activeDriveFolderName = useMemo(() => {
+    if (!openDriveFolder) return '';
+    return driveOperatorFolders.find(f => f.key === openDriveFolder)?.name || '';
+  }, [openDriveFolder, driveOperatorFolders]);
+
   const renderGalleryGrid = (items: MaterialGalleryGroup[]) => {
     if (items.length === 0) {
       return (
@@ -917,7 +950,7 @@ export function AdminMaterialsManager() {
           >
             <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden relative">
               {gallery.thumbnail ? (
-                <img src={gallery.thumbnail} alt={gallery.title} className="w-full h-full object-cover" />
+                <img src={gallery.thumbnail} alt={gallery.title} className="w-full h-full object-cover" loading="lazy" />
               ) : (
                 <FolderOpen className="h-10 w-10 text-muted-foreground" />
               )}
@@ -944,6 +977,63 @@ export function AdminMaterialsManager() {
         ))}
       </div>
     );
+  };
+
+  const renderDriveOperatorFolders = () => {
+    if (driveOperatorFolders.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          <CloudDownload className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>Nenhum material sincronizado do Google Drive</p>
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {driveOperatorFolders.map((folder) => (
+          <button
+            key={folder.key}
+            className="group text-left rounded-lg border bg-card overflow-hidden hover:ring-2 hover:ring-primary/50 transition-all"
+            onClick={() => setOpenDriveFolder(folder.key)}
+          >
+            <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden relative">
+              {folder.thumbnail ? (
+                <img src={folder.thumbnail} alt={folder.name} className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <FolderOpen className="h-12 w-12 text-muted-foreground" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-2 left-2 right-2">
+                <p className="text-white text-sm font-semibold truncate">{folder.name}</p>
+                <p className="text-white/80 text-xs">
+                  {folder.galleries.length} galeria{folder.galleries.length > 1 ? 's' : ''} • {folder.totalFiles} arquivo{folder.totalFiles > 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  const renderDriveContent = () => {
+    if (openDriveFolder) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setOpenDriveFolder(null)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h3 className="text-base font-semibold">{activeDriveFolderName}</h3>
+              <p className="text-xs text-muted-foreground">{activeDriveFolderGalleries.length} galeria{activeDriveFolderGalleries.length > 1 ? 's' : ''}</p>
+            </div>
+          </div>
+          {renderGalleryGrid(activeDriveFolderGalleries)}
+        </div>
+      );
+    }
+    return renderDriveOperatorFolders();
   };
 
   // --- Render galleries list view ---
