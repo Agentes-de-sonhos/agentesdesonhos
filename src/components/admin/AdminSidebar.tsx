@@ -60,6 +60,7 @@ const menuGroups: AdminMenuGroup[] = [
     title: "Conteúdo",
     items: [
       { id: "materials", label: "Materiais", icon: FileText },
+      { id: "vitrine", label: "Vitrine", icon: Store },
       { id: "mentorships", label: "Cursos", icon: GraduationCap },
       { id: "academy", label: "Academy", icon: GraduationCap },
       { id: "playbooks", label: "Playbooks", icon: BookOpen },
