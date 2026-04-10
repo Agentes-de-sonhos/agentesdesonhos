@@ -39,6 +39,8 @@ import {
   Pin,
   GraduationCap,
   GripVertical,
+  CloudDownload,
+  Upload,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { supabase } from "@/integrations/supabase/client";
