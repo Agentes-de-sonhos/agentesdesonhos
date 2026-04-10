@@ -175,8 +175,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate a unique batch_id for this sync run
-    const batchId = `sync_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+    // Base sync ID for this run (each folder gets its own batch_id)
+    const syncRunId = `sync_${Date.now()}`;
 
     console.log("=== DRIVE IMPORT START ===");
     console.log("Root folder ID:", rootFolderId);
