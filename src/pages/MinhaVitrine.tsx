@@ -229,6 +229,8 @@ export default function MinhaVitrine() {
       auto_supplier_ids: selectedSupplierIds,
       max_auto_items: maxAutoItems,
       auto_categories: autoCategories,
+      og_title: ogTitle || null,
+      og_description: ogDescription || null,
     } as any);
     toast.success("Configurações salvas!");
     setSettingsOpen(false);
@@ -240,6 +242,8 @@ export default function MinhaVitrine() {
     setSelectedSupplierIds(showcase?.auto_supplier_ids || []);
     setMaxAutoItems(showcase?.max_auto_items || 20);
     setAutoCategories(showcase?.auto_categories || []);
+    setOgTitle(showcase?.og_title || "");
+    setOgDescription(showcase?.og_description || "");
     setSettingsOpen(true);
   };
 
