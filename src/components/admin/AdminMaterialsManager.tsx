@@ -149,6 +149,7 @@ export function AdminMaterialsManager() {
   const [openDriveFolder, setOpenDriveFolder] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { categoryNames: vitrineCategories } = useVitrineCategories();
 
   const { data: materials, isLoading } = useQuery({
     queryKey: ["admin-materials"],
