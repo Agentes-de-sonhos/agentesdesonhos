@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
     console.log("=== DRIVE IMPORT START ===");
     console.log("Root folder ID:", rootFolderId);
     console.log("User ID:", user.id);
-    console.log("Batch ID:", batchId);
+    console.log("Sync Run ID:", syncRunId);
 
     // Get valid access token
     const accessToken = await getValidAccessToken(supabase, user.id);
