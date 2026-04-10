@@ -1204,16 +1204,16 @@ export function AdminMaterialsManager() {
                 <Upload className="h-4 w-4" />
                 Minhas Galerias ({manualGalleries.length})
               </TabsTrigger>
-              <TabsTrigger value="drive" className="gap-2">
+              <TabsTrigger value="drive" className="gap-2" onClick={() => setOpenDriveFolder(null)}>
                 <CloudDownload className="h-4 w-4" />
-                Google Drive ({driveGalleries.length})
+                Google Drive ({driveOperatorFolders.length} operadora{driveOperatorFolders.length !== 1 ? 's' : ''})
               </TabsTrigger>
             </TabsList>
             <TabsContent value="manual">
               {renderGalleryGrid(manualGalleries)}
             </TabsContent>
             <TabsContent value="drive">
-              {renderGalleryGrid(driveGalleries)}
+              {renderDriveContent()}
             </TabsContent>
           </Tabs>
         )}
