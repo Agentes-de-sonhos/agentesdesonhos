@@ -56,6 +56,8 @@ export default function MinhaVitrine() {
   const [autoCategories, setAutoCategories] = useState<string[]>(showcase?.auto_categories || []);
   const [ogTitle, setOgTitle] = useState(showcase?.og_title || "");
   const [ogDescription, setOgDescription] = useState(showcase?.og_description || "");
+  const DEFAULT_DISCLAIMER = "Sujeito à disponibilidade e alteração. Consulte-nos para mais informações.";
+  const [disclaimerText, setDisclaimerText] = useState(showcase?.disclaimer_text ?? DEFAULT_DISCLAIMER);
 
   const PUBLIC_DOMAIN = "https://vitrine.tur.br";
   const publicUrl = showcase ? `${PUBLIC_DOMAIN}/${showcase.slug}` : "";
@@ -231,6 +233,7 @@ export default function MinhaVitrine() {
       auto_categories: autoCategories,
       og_title: ogTitle || null,
       og_description: ogDescription || null,
+      disclaimer_text: disclaimerText || null,
     } as any);
     toast.success("Configurações salvas!");
     setSettingsOpen(false);
@@ -244,6 +247,7 @@ export default function MinhaVitrine() {
     setAutoCategories(showcase?.auto_categories || []);
     setOgTitle(showcase?.og_title || "");
     setOgDescription(showcase?.og_description || "");
+    setDisclaimerText(showcase?.disclaimer_text ?? DEFAULT_DISCLAIMER);
     setSettingsOpen(true);
   };
 
@@ -657,6 +661,20 @@ export default function MinhaVitrine() {
                   />
                   <p className="text-xs text-muted-foreground mt-1">{ogDescription.length}/160 caracteres</p>
                 </div>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="space-y-2">
+                <Label>Texto de aviso (após as ofertas)</Label>
+                <Textarea
+                  placeholder={DEFAULT_DISCLAIMER}
+                  value={disclaimerText}
+                  onChange={e => setDisclaimerText(e.target.value)}
+                  className="mt-1"
+                  rows={2}
+                  maxLength={300}
+                />
+                <p className="text-xs text-muted-foreground">{disclaimerText.length}/300 caracteres · Exibido ao final da vitrine</p>
               </div>
 
               {/* Mode */}

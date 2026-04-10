@@ -307,6 +307,7 @@ export type Database = {
           auto_categories: string[] | null
           auto_supplier_ids: string[] | null
           created_at: string
+          disclaimer_text: string | null
           id: string
           is_active: boolean
           max_auto_items: number | null
@@ -322,6 +323,7 @@ export type Database = {
           auto_categories?: string[] | null
           auto_supplier_ids?: string[] | null
           created_at?: string
+          disclaimer_text?: string | null
           id?: string
           is_active?: boolean
           max_auto_items?: number | null
@@ -337,6 +339,7 @@ export type Database = {
           auto_categories?: string[] | null
           auto_supplier_ids?: string[] | null
           created_at?: string
+          disclaimer_text?: string | null
           id?: string
           is_active?: boolean
           max_auto_items?: number | null
