@@ -348,13 +348,13 @@ export function usePublicShowcase(slug: string | undefined) {
 
       let query = supabase
         .from("materials")
-        .select("id, title, file_url, thumbnail_url, category, destination, supplier_id, is_permanent, created_at, tour_operators(id, name)")
+        .select("id, title, file_url, thumbnail_url, category, destination, supplier_id, is_permanent, created_at, batch_id, order_index, tour_operators(id, name)")
         .eq("is_active", true)
         .is("trail_id", null)
         .in("material_type", ["Imagem", "Lâmina"])
         .or(`created_at.gte.${sevenDaysAgo.toISOString()},is_permanent.eq.true`)
         .order("created_at", { ascending: false })
-        .limit(maxAutoItems);
+        .limit(200);
 
       if (autoSupplierIds.length > 0) {
         query = query.in("supplier_id", autoSupplierIds);
@@ -368,37 +368,101 @@ export function usePublicShowcase(slug: string | undefined) {
         filtered = filtered.filter(m => autoCategories.includes(m.category));
       }
 
-      // Convert materials to ShowcaseItem-like objects
-      return filtered.map((m, i) => ({
-        id: `auto-${m.id}`,
-        showcase_id: showcase!.id,
-        user_id: showcase!.user_id,
-        material_id: m.id,
-        image_url: m.file_url || m.thumbnail_url,
-        gallery_urls: [],
-        category: m.category || "Geral",
-        subcategory: m.destination || null,
-        action_type: "whatsapp",
-        action_url: null,
-        order_index: i,
-        expires_at: null,
-        is_active: true,
-        is_featured: false,
-        featured_order: 0,
-        featured_label: null,
-        created_at: m.created_at,
-        updated_at: m.created_at,
-        materials: {
-          id: m.id,
-          title: m.title,
-          file_url: m.file_url,
-          thumbnail_url: m.thumbnail_url,
+      // Group materials by batch_id into gallery cards
+      const batchMap = new Map<string, typeof filtered>();
+      const unbatched: typeof filtered = [];
+
+      filtered.forEach(m => {
+        if (m.batch_id) {
+          if (!batchMap.has(m.batch_id)) batchMap.set(m.batch_id, []);
+          batchMap.get(m.batch_id)!.push(m);
+        } else {
+          unbatched.push(m);
+        }
+      });
+
+      // Sort each batch by order_index
+      batchMap.forEach(mats => mats.sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)));
+
+      const result: (ShowcaseItem & { _supplierName?: string | null })[] = [];
+      let idx = 0;
+
+      // Batched materials → one card per batch with gallery_urls
+      batchMap.forEach((mats, batchId) => {
+        const first = mats[0];
+        const galleryUrls = mats
+          .map(m => m.file_url || m.thumbnail_url)
+          .filter((url): url is string => !!url);
+        if (galleryUrls.length === 0) return;
+
+        result.push({
+          id: `auto-batch-${batchId}`,
+          showcase_id: showcase!.id,
+          user_id: showcase!.user_id,
+          material_id: first.id,
+          image_url: galleryUrls[0],
+          gallery_urls: galleryUrls,
+          category: first.category || "Geral",
+          subcategory: first.destination || null,
+          action_type: "whatsapp",
+          action_url: null,
+          order_index: idx++,
+          expires_at: null,
           is_active: true,
-          is_permanent: m.is_permanent || false,
+          is_featured: false,
+          featured_order: 0,
+          featured_label: null,
+          created_at: first.created_at,
+          updated_at: first.created_at,
+          materials: {
+            id: first.id,
+            title: first.title,
+            file_url: first.file_url,
+            thumbnail_url: first.thumbnail_url,
+            is_active: true,
+            is_permanent: first.is_permanent || false,
+            created_at: first.created_at,
+          },
+          _supplierName: (first as any).tour_operators?.name || null,
+        } as any);
+      });
+
+      // Unbatched materials → one card each
+      unbatched.forEach(m => {
+        result.push({
+          id: `auto-${m.id}`,
+          showcase_id: showcase!.id,
+          user_id: showcase!.user_id,
+          material_id: m.id,
+          image_url: m.file_url || m.thumbnail_url,
+          gallery_urls: [],
+          category: m.category || "Geral",
+          subcategory: m.destination || null,
+          action_type: "whatsapp",
+          action_url: null,
+          order_index: idx++,
+          expires_at: null,
+          is_active: true,
+          is_featured: false,
+          featured_order: 0,
+          featured_label: null,
           created_at: m.created_at,
-        },
-        _supplierName: (m as any).tour_operators?.name || null,
-      })) as (ShowcaseItem & { _supplierName?: string | null })[];
+          updated_at: m.created_at,
+          materials: {
+            id: m.id,
+            title: m.title,
+            file_url: m.file_url,
+            thumbnail_url: m.thumbnail_url,
+            is_active: true,
+            is_permanent: m.is_permanent || false,
+            created_at: m.created_at,
+          },
+          _supplierName: (m as any).tour_operators?.name || null,
+        } as any);
+      });
+
+      // Limit total cards
+      return result.slice(0, maxAutoItems);
     },
     enabled: !!showcase?.id && isAutoMode && autoSupplierIds.length > 0,
   });
