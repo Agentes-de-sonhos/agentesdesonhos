@@ -72,6 +72,7 @@ const TAB_LABELS: Record<string, string> = {
   surveys: "Pesquisas",
   "drive-import": "Drive",
   "support-mode": "Modo Suporte",
+  vitrine: "Vitrine",
 };
 
 function AdminContent({ tab }: { tab: string }) {
@@ -164,6 +165,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminDriveImportManager />;
     case "support-mode":
       return <AdminSupportMode />;
+    case "vitrine":
+      return <AdminVitrineCategoriesManager />;
     default:
       return <AdminUserManager />;
   }

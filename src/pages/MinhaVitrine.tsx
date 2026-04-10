@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useShowcase, type ShowcaseItem, FEATURED_LABELS, MAX_FEATURED, getFeaturedLabel } from "@/hooks/useShowcase";
+import { useVitrineCategories } from "@/hooks/useVitrineCategories";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
