@@ -57,6 +57,8 @@ export interface Showcase {
   auto_supplier_ids: string[];
   max_auto_items: number;
   auto_categories: string[];
+  og_title: string | null;
+  og_description: string | null;
   created_at: string;
   updated_at: string;
 }
