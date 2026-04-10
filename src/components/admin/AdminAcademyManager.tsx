@@ -49,7 +49,46 @@ export function AdminAcademyManager() {
   const { trails } = useAcademy();
   const { destinations: playbookDestinations } = usePlaybook();
   const { createTrail, updateTrail, deleteTrail, saveTrailMaterial, updateTrailMaterial, reorderTrailMaterials, deleteTrailMaterial, saveTrailSpeaker, updateTrailSpeaker, deleteTrailSpeaker } = useAcademyAdmin();
-  
+  const queryClient = useQueryClient();
+
+  const { data: academyDestinations = [] } = useQuery({
+    queryKey: ['academy-destinations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('academy_destinations')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return (data || []).map((d: any) => d.name as string);
+    },
+  });
+
+  const [newDestinationName, setNewDestinationName] = useState('');
+  const [creatingDestination, setCreatingDestination] = useState(false);
+
+  const handleCreateDestination = async () => {
+    const name = newDestinationName.trim();
+    if (!name) return;
+    setCreatingDestination(true);
+    try {
+      const { error } = await supabase.from('academy_destinations').insert({ name });
+      if (error) {
+        if (error.code === '23505') {
+          sonnerToast.error('Esse destino já existe');
+        } else {
+          sonnerToast.error('Erro ao criar destino');
+        }
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: ['academy-destinations'] });
+      setTrailForm(prev => ({ ...prev, destination: name }));
+      setNewDestinationName('');
+      sonnerToast.success('Destino criado!');
+    } finally {
+      setCreatingDestination(false);
+    }
+  };
+
   const [trailDialogOpen, setTrailDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadingOverviewPdf, setUploadingOverviewPdf] = useState(false);
