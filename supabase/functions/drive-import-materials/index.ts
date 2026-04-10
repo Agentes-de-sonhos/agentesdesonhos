@@ -385,6 +385,14 @@ async function processFile(
       status: "success",
     });
 
+    // Move file to trash in Drive after successful import
+    try {
+      await trashDriveFile(accessToken, file.id);
+      console.log(`Arquivo "${file.name}" movido para lixeira do Drive`);
+    } catch (trashErr) {
+      console.error(`Falha ao mover "${file.name}" para lixeira:`, trashErr);
+    }
+
     importedFileIds.add(file.id);
     results.imported++;
     results.details.push({
