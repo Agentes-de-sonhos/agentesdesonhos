@@ -54,6 +54,8 @@ export default function MinhaVitrine() {
   const [selectedSupplierIds, setSelectedSupplierIds] = useState<string[]>(showcase?.auto_supplier_ids || []);
   const [maxAutoItems, setMaxAutoItems] = useState(showcase?.max_auto_items || 20);
   const [autoCategories, setAutoCategories] = useState<string[]>(showcase?.auto_categories || []);
+  const [ogTitle, setOgTitle] = useState(showcase?.og_title || "");
+  const [ogDescription, setOgDescription] = useState(showcase?.og_description || "");
 
   const PUBLIC_DOMAIN = "https://vitrine.tur.br";
   const publicUrl = showcase ? `${PUBLIC_DOMAIN}/${showcase.slug}` : "";

@@ -83,6 +83,46 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Enrich showcase type with real data
+  if (type === "showcase" && slug) {
+    try {
+      const { data: sc } = await supabase
+        .from("agency_showcases")
+        .select("slug, tagline, og_title, og_description, user_id")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (sc) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("agency_name, agency_logo_url")
+          .eq("user_id", sc.user_id)
+          .maybeSingle();
+
+        const agencyName = profile?.agency_name || "";
+        // Manual OG fields take priority, then auto-generated, then generic fallback
+        if (sc.og_title) {
+          ogTitle = sc.og_title;
+        } else if (agencyName) {
+          ogTitle = `Vitrine de Ofertas | ${agencyName} 🌍`;
+        }
+
+        if (sc.og_description) {
+          ogDescription = sc.og_description;
+        } else if (agencyName) {
+          ogDescription = `Confira as melhores ofertas de viagem selecionadas por ${agencyName}. Destinos incríveis esperam por você!`;
+        }
+
+        if (profile?.agency_logo_url) {
+          ogImage = profile.agency_logo_url;
+        }
+      }
+    } catch {
+      // Fallback to generic
+    }
+  }
+
   // Enrich quote type
   if (type === "quote" && token) {
     try {
