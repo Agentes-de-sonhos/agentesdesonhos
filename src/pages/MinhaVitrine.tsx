@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useShowcase, type ShowcaseItem, FEATURED_LABELS, MAX_FEATURED, getFeaturedLabel } from "@/hooks/useShowcase";
+import { useVitrineCategories } from "@/hooks/useVitrineCategories";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
@@ -19,7 +20,6 @@ import {
   Settings, Share2, Zap, Check
 } from "lucide-react";
 
-const SUGGESTED_CATEGORIES = ["Cruzeiros", "Bloqueios Aéreos", "Pacotes", "Temporadas", "Promoções", "Geral"];
 const SUGGESTED_SUBCATEGORIES = ["Réveillon", "MSC", "Costa Cruzeiros", "Férias de Julho", "Disney", "Europa"];
 
 export default function MinhaVitrine() {
@@ -28,6 +28,7 @@ export default function MinhaVitrine() {
     showcase, items, availableMaterials, allSuppliers, loadingShowcase,
     createShowcase, updateShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage, uploadMultipleImages,
   } = useShowcase();
+  const { categoryNames: SUGGESTED_CATEGORIES } = useVitrineCategories();
 
   const [slug, setSlug] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);

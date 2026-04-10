@@ -40,6 +40,7 @@ import { AdminUserAnalytics } from "@/components/admin/AdminUserAnalytics";
 import { AdminDriveImportManager } from "@/components/admin/AdminDriveImportManager";
 import { AdminCruisesManager } from "@/components/admin/AdminCruisesManager";
 import { AdminSupportMode } from "@/components/admin/AdminSupportMode";
+import { AdminVitrineCategoriesManager } from "@/components/admin/AdminVitrineCategoriesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,6 +72,7 @@ const TAB_LABELS: Record<string, string> = {
   surveys: "Pesquisas",
   "drive-import": "Drive",
   "support-mode": "Modo Suporte",
+  vitrine: "Vitrine",
 };
 
 function AdminContent({ tab }: { tab: string }) {
@@ -163,6 +165,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminDriveImportManager />;
     case "support-mode":
       return <AdminSupportMode />;
+    case "vitrine":
+      return <AdminVitrineCategoriesManager />;
     default:
       return <AdminUserManager />;
   }
