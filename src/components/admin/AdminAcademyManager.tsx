@@ -422,11 +422,29 @@ export function AdminAcademyManager() {
             <SelectValue placeholder="Selecione o destino" />
           </SelectTrigger>
           <SelectContent>
-            {POPULAR_DESTINATIONS.map((dest) => (
+            {academyDestinations.map((dest) => (
               <SelectItem key={dest} value={dest}>{dest}</SelectItem>
             ))}
           </SelectContent>
         </Select>
+        <div className="flex gap-2 mt-2">
+          <Input
+            placeholder="Novo destino..."
+            value={newDestinationName}
+            onChange={(e) => setNewDestinationName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCreateDestination())}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleCreateDestination}
+            disabled={!newDestinationName.trim() || creatingDestination}
+          >
+            {creatingDestination ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            Criar
+          </Button>
+        </div>
       </div>
       <div>
         <Label>Descrição</Label>
