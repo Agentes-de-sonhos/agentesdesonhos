@@ -138,6 +138,13 @@ export default function VitrinePublica() {
             </div>
           </>
         )}
+
+        {/* ─── Disclaimer ─── */}
+        {hasResults && (showcase?.disclaimer_text ?? "Sujeito à disponibilidade e alteração. Consulte-nos para mais informações.") && (
+          <p className="text-[11px] text-muted-foreground text-center pt-4 pb-2 italic">
+            {(showcase as any)?.disclaimer_text ?? "Sujeito à disponibilidade e alteração. Consulte-nos para mais informações."}
+          </p>
+        )}
       </main>
 
       {/* ─── Footer ─── */}

@@ -59,6 +59,7 @@ export interface Showcase {
   auto_categories: string[];
   og_title: string | null;
   og_description: string | null;
+  disclaimer_text: string | null;
   created_at: string;
   updated_at: string;
 }
