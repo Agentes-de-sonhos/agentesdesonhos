@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,10 +26,11 @@ import { Plus, Pencil, Trash2, MapPin, Upload, Loader2, FileText, FolderOpen, Gr
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useAcademy, useAcademyAdmin, useTrailMaterials, useTrailSpeakers } from "@/hooks/useAcademy";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TrailTrainingsManager } from "./TrailTrainingsManager";
 import { TrailLinkedMaterialsManager } from "./TrailLinkedMaterialsManager";
 import { TrailExamManager } from "./TrailExamManager";
-import { POPULAR_DESTINATIONS, MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
+import { MATERIAL_CATEGORIES, type LearningTrail } from "@/types/academy";
 import { usePlaybook } from "@/hooks/usePlaybook";
 import { ImageGalleryPicker } from "./ImageGalleryPicker";
 import { ImageCropDialog } from "./ImageCropDialog";
