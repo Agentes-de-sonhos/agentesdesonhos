@@ -147,20 +147,43 @@ export default function VitrinePublica() {
         )}
       </main>
 
-      {/* ─── Footer ─── */}
-      <footer className="bg-card border-t py-8">
-        <div className="max-w-xl mx-auto px-4 text-center space-y-1.5">
-          <BrandText as="p" className="font-semibold text-sm text-foreground">{profile?.agency_name || profile?.name}</BrandText>
-          {(profile?.city || profile?.state) && (
-            <p className="text-xs text-muted-foreground">
-              {[profile?.city, profile?.state].filter(Boolean).join(" · ")}
-            </p>
-          )}
-          {profile?.phone && (
-            <p className="text-xs text-muted-foreground">Atendimento via WhatsApp</p>
-          )}
-        </div>
-      </footer>
+      {/* ─── Agent Signature Footer ─── */}
+      {profile && (
+        <footer className="bg-card border-t">
+          <div className="max-w-xl mx-auto w-full">
+            <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden mx-4 my-6">
+              <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">Seu consultor de viagens</p>
+              </div>
+              <div className="p-6 sm:p-8">
+                <div className="flex flex-col items-center text-center space-y-5">
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt={profile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
+                  ) : (
+                    <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg ring-2 ring-white">
+                      {profile.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <p className="text-xl font-bold text-foreground">{profile.name}</p>
+                    {profile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{profile.agency_name}</BrandText>}
+                    {(profile.city || profile.state) && (
+                      <p className="text-xs text-muted-foreground">{[profile.city, profile.state].filter(Boolean).join(", ")}</p>
+                    )}
+                  </div>
+                  {profile.phone && (
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
+                      <MessageCircle className="h-5 w-5 fill-white" />
+                      Falar no WhatsApp
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
+      )}
 
       {/* ─── Floating CTA ─── */}
       <ShowcaseFloatingCTA
