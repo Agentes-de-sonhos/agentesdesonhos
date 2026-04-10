@@ -3918,6 +3918,7 @@ export type Database = {
       }
       materials: {
         Row: {
+          batch_id: string | null
           canva_url: string | null
           caption: string | null
           category: string
@@ -3938,6 +3939,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          batch_id?: string | null
           canva_url?: string | null
           caption?: string | null
           category: string
@@ -3958,6 +3960,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          batch_id?: string | null
           canva_url?: string | null
           caption?: string | null
           category?: string
