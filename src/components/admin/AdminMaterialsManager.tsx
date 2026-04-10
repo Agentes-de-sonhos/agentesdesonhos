@@ -773,7 +773,8 @@ export function AdminMaterialsManager() {
                     <Select value={galleryForm.category} onValueChange={(value) => setGalleryForm(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                       <SelectContent>
-                        {CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                        {vitrineCategories.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                        {CATEGORIES.filter(c => !vitrineCategories.includes(c)).map((cat) => (<SelectItem key={`legacy-${cat}`} value={cat}>{cat}</SelectItem>))}
                       </SelectContent>
                     </Select>
                   </div>
