@@ -20,7 +20,7 @@ import {
   Settings, Share2, Zap, Check
 } from "lucide-react";
 
-const SUGGESTED_CATEGORIES = ["Cruzeiros", "Bloqueios Aéreos", "Pacotes", "Temporadas", "Promoções", "Geral"];
+const SUGGESTED_SUBCATEGORIES = ["Réveillon", "MSC", "Costa Cruzeiros", "Férias de Julho", "Disney", "Europa"];
 const SUGGESTED_SUBCATEGORIES = ["Réveillon", "MSC", "Costa Cruzeiros", "Férias de Julho", "Disney", "Europa"];
 
 export default function MinhaVitrine() {
