@@ -175,13 +175,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate a unique batch_id for this sync run
-    const batchId = `sync_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+    // Base sync ID for this run (each folder gets its own batch_id)
+    const syncRunId = `sync_${Date.now()}`;
 
     console.log("=== DRIVE IMPORT START ===");
     console.log("Root folder ID:", rootFolderId);
     console.log("User ID:", user.id);
-    console.log("Batch ID:", batchId);
+    console.log("Sync Run ID:", syncRunId);
 
     // Get valid access token
     const accessToken = await getValidAccessToken(supabase, user.id);
@@ -259,18 +259,24 @@ Deno.serve(async (req) => {
           const files = await listDriveFiles(accessToken, catFolder.id);
           console.log(`  Category "${category}": ${files.length} files`);
           
+          // Each folder gets its own batch_id so files group into one card
+          const folderBatchId = `${syncRunId}_${opFolder.id}_${catFolder.id}`;
+          
           for (const file of files) {
             results.total_files_found++;
-            await processFile(supabase, accessToken, file, supplier, category, opFolder.name, importedFileIds, results, batchId);
+            await processFile(supabase, accessToken, file, supplier, category, opFolder.name, importedFileIds, results, folderBatchId);
           }
         }
       } else {
         const files = await listDriveFiles(accessToken, opFolder.id);
         console.log(`  No categories, direct files: ${files.length}`);
         
+        // Each operator folder gets its own batch_id
+        const folderBatchId = `${syncRunId}_${opFolder.id}`;
+        
         for (const file of files) {
           results.total_files_found++;
-          await processFile(supabase, accessToken, file, supplier, "Geral", opFolder.name, importedFileIds, results, batchId);
+          await processFile(supabase, accessToken, file, supplier, "Geral", opFolder.name, importedFileIds, results, folderBatchId);
         }
       }
     }

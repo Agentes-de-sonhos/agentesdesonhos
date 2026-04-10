@@ -201,8 +201,11 @@ export function AdminMaterialsManager() {
     if (!materials) return [];
     const map = new Map<string, any[]>();
     materials.forEach((m) => {
-      const norm = normalizeTitle(m.title);
-      const key = `${norm}|${m.supplier_id || 'none'}|${(m.destination || '').trim().toLowerCase()}`;
+      // Drive-imported materials: group by batch_id (one card per folder)
+      // Manual materials: group by normalized title + supplier + destination
+      const key = m.batch_id
+        ? `batch:${m.batch_id}`
+        : `manual:${normalizeTitle(m.title)}|${m.supplier_id || 'none'}|${(m.destination || '').trim().toLowerCase()}`;
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(m);
     });
