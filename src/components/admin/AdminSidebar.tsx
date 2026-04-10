@@ -31,6 +31,7 @@ import {
   PanelLeft,
   Gift,
   HardDrive,
+  Store,
   CreditCard,
   Eye,
 } from "lucide-react";
