@@ -10,24 +10,24 @@ export function ShowcaseHeader({ profile, showcase, categories, selectedCategory
   return (
     <header className="bg-card border-b border-border/50 shadow-sm">
       <div className="max-w-xl mx-auto px-5 pt-8 pb-5">
-        {/* Agency identity — left-aligned for brand presence */}
-        <div className="flex items-center gap-4">
+        {/* Agency identity — centered for brand presence */}
+        <div className="flex flex-col items-center gap-3 text-center">
           {profile?.agency_logo_url ? (
             <img
               src={profile.agency_logo_url}
               alt={profile.agency_name || ""}
               translate="no"
-              className="h-16 sm:h-20 w-auto max-w-[60%] object-contain notranslate"
+              className="h-32 sm:h-40 w-auto max-w-[80%] object-contain notranslate"
             />
           ) : (
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xl shrink-0">
+            <div className="h-24 w-24 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-3xl shrink-0">
               {(profile?.agency_name || profile?.name || "V")[0]}
             </div>
           )}
 
           <div className="min-w-0">
             {profile?.agency_name && !profile?.agency_logo_url && (
-              <h1 className="font-bold text-lg text-foreground truncate notranslate" translate="no">{profile.agency_name}</h1>
+              <h1 className="font-bold text-xl text-foreground truncate notranslate" translate="no">{profile.agency_name}</h1>
             )}
             {(profile?.city || profile?.state) && (
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -35,7 +35,7 @@ export function ShowcaseHeader({ profile, showcase, categories, selectedCategory
               </p>
             )}
             {showcase.tagline && (
-              <p className="text-xs text-muted-foreground/80 mt-1 italic line-clamp-2 max-w-xs">
+              <p className="text-xs text-muted-foreground/80 mt-1 italic line-clamp-2 max-w-sm">
                 {showcase.tagline}
               </p>
             )}
