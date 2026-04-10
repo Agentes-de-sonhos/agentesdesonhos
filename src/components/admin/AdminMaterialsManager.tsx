@@ -1039,6 +1039,78 @@ export function AdminMaterialsManager() {
     );
   };
 
+  const renderDriveGalleriesWithCategory = (items: MaterialGalleryGroup[]) => {
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>Nenhuma subpasta nesta operadora</p>
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {items.map((gallery) => {
+          // Determine current vitrine category from first material
+          const currentCategory = gallery.category || "";
+          return (
+            <div
+              key={gallery.key}
+              className="rounded-lg border bg-card overflow-hidden"
+            >
+              <button
+                className="w-full text-left hover:bg-accent/30 transition-colors"
+                onClick={() => setOpenGalleryKey(gallery.key)}
+              >
+                <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden relative">
+                  {gallery.thumbnail ? (
+                    <img src={gallery.thumbnail} alt={gallery.title} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <FolderOpen className="h-10 w-10 text-muted-foreground" />
+                  )}
+                  {gallery.is_permanent && (
+                    <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                      <Pin className="h-3 w-3" />
+                    </div>
+                  )}
+                  <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 text-xs font-medium">
+                    {gallery.materials.length} arquivo{gallery.materials.length > 1 ? 's' : ''}
+                  </div>
+                </div>
+                <div className="p-3 pb-1">
+                  <p className="text-sm font-medium truncate">{gallery.title}</p>
+                </div>
+              </button>
+              <div className="px-3 pb-3 pt-1">
+                <Label className="text-xs text-muted-foreground mb-1 block">Categoria da Vitrine</Label>
+                <Select
+                  value={currentCategory}
+                  onValueChange={(value) => {
+                    const ids = gallery.materials.map((m: any) => m.id);
+                    updateBatchCategoryMutation.mutate({ ids, category: value });
+                  }}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Sem categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vitrineCategories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                    {/* Also show CATEGORIES for backward compat if not in vitrine list */}
+                    {CATEGORIES.filter(c => !vitrineCategories.includes(c)).map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderDriveContent = () => {
     if (openDriveFolder) {
       return (
@@ -1049,10 +1121,10 @@ export function AdminMaterialsManager() {
             </Button>
             <div>
               <h3 className="text-base font-semibold">{activeDriveFolderName}</h3>
-              <p className="text-xs text-muted-foreground">{activeDriveFolderGalleries.length} galeria{activeDriveFolderGalleries.length > 1 ? 's' : ''}</p>
+              <p className="text-xs text-muted-foreground">{activeDriveFolderGalleries.length} subpasta{activeDriveFolderGalleries.length > 1 ? 's' : ''}</p>
             </div>
           </div>
-          {renderGalleryGrid(activeDriveFolderGalleries)}
+          {renderDriveGalleriesWithCategory(activeDriveFolderGalleries)}
         </div>
       );
     }
