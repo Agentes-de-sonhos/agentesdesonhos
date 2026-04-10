@@ -629,6 +629,35 @@ export default function MinhaVitrine() {
                 <p className="text-xs text-muted-foreground mt-1">Exibida abaixo do logo na vitrine pública.</p>
               </div>
 
+              {/* OG / Social Preview */}
+              <div className="space-y-3 border-t pt-4">
+                <Label className="text-sm font-semibold">Preview ao compartilhar (WhatsApp, redes sociais)</Label>
+                <p className="text-xs text-muted-foreground">Personalize o título e descrição que aparecem ao compartilhar o link da vitrine. Se deixar vazio, será gerado automaticamente com o nome da sua agência.</p>
+                <div>
+                  <Label>Título do link</Label>
+                  <Input
+                    placeholder="Ex: Ofertas exclusivas | Minha Agência"
+                    value={ogTitle}
+                    onChange={e => setOgTitle(e.target.value)}
+                    className="mt-1"
+                    maxLength={80}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">{ogTitle.length}/80 caracteres</p>
+                </div>
+                <div>
+                  <Label>Descrição do link</Label>
+                  <Textarea
+                    placeholder="Ex: Confira as melhores ofertas de viagem selecionadas pela nossa equipe!"
+                    value={ogDescription}
+                    onChange={e => setOgDescription(e.target.value)}
+                    className="mt-1"
+                    rows={2}
+                    maxLength={160}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">{ogDescription.length}/160 caracteres</p>
+                </div>
+              </div>
+
               {/* Mode */}
               <div className="space-y-3">
                 <Label>Modo da Vitrine</Label>
