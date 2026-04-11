@@ -110,6 +110,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_quick_access_tokens: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+          token?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_resource_access_logs: {
         Row: {
           action: string
@@ -1632,6 +1659,99 @@ export type Database = {
           requester_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_card_captures: {
+        Row: {
+          address: string | null
+          capture_origin: string | null
+          captured_at: string | null
+          city: string | null
+          company_name: string | null
+          contact_type: string | null
+          country: string | null
+          created_at: string | null
+          crm_contact_id: string | null
+          email: string | null
+          event_origin: string | null
+          geographic_scope: string | null
+          id: string
+          is_existing_client: boolean | null
+          job_title: string | null
+          lead_temperature: string | null
+          logo_url: string | null
+          next_action: string | null
+          notes: string | null
+          person_name: string | null
+          phone: string | null
+          social_links: Json | null
+          state: string | null
+          supplier_category: string | null
+          updated_at: string | null
+          user_id: string
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          capture_origin?: string | null
+          captured_at?: string | null
+          city?: string | null
+          company_name?: string | null
+          contact_type?: string | null
+          country?: string | null
+          created_at?: string | null
+          crm_contact_id?: string | null
+          email?: string | null
+          event_origin?: string | null
+          geographic_scope?: string | null
+          id?: string
+          is_existing_client?: boolean | null
+          job_title?: string | null
+          lead_temperature?: string | null
+          logo_url?: string | null
+          next_action?: string | null
+          notes?: string | null
+          person_name?: string | null
+          phone?: string | null
+          social_links?: Json | null
+          state?: string | null
+          supplier_category?: string | null
+          updated_at?: string | null
+          user_id: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          capture_origin?: string | null
+          captured_at?: string | null
+          city?: string | null
+          company_name?: string | null
+          contact_type?: string | null
+          country?: string | null
+          created_at?: string | null
+          crm_contact_id?: string | null
+          email?: string | null
+          event_origin?: string | null
+          geographic_scope?: string | null
+          id?: string
+          is_existing_client?: boolean | null
+          job_title?: string | null
+          lead_temperature?: string | null
+          logo_url?: string | null
+          next_action?: string | null
+          notes?: string | null
+          person_name?: string | null
+          phone?: string | null
+          social_links?: Json | null
+          state?: string | null
+          supplier_category?: string | null
+          updated_at?: string | null
+          user_id?: string
+          website?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -8412,7 +8532,12 @@ export type Database = {
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
+      save_card_capture_via_token: {
+        Args: { _data: Json; _token: string }
+        Returns: string
+      }
       unaccent: { Args: { "": string }; Returns: string }
+      validate_quick_access_token: { Args: { _token: string }; Returns: string }
       verify_trip_access: {
         Args: { p_password: string; p_token: string }
         Returns: Json
