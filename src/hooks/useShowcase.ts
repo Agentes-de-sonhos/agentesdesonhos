@@ -570,14 +570,33 @@ export function usePublicShowcase(slug: string | undefined) {
     enabled: !!showcase?.id && isAutoMode && autoSupplierIds.length > 0,
   });
 
+  // Apply overrides: filter hidden and reorder auto items
+  const applyOverrides = (autoItems: typeof autoMaterials) => {
+    if (!autoItems) return [];
+    // Filter hidden
+    let filtered = autoItems.filter(item => {
+      const override = overridesMap.get(item.id);
+      return !override?.is_hidden;
+    });
+    // Apply custom order
+    filtered.sort((a, b) => {
+      const oA = overridesMap.get(a.id)?.custom_order;
+      const oB = overridesMap.get(b.id)?.custom_order;
+      if (oA !== null && oA !== undefined && oB !== null && oB !== undefined) return oA - oB;
+      if (oA !== null && oA !== undefined) return -1;
+      if (oB !== null && oB !== undefined) return 1;
+      return 0;
+    });
+    return filtered;
+  };
+
   // Combine manual + auto items
   const items = (() => {
     const manual = manualItems || [];
     if (!isAutoMode) return manual;
-    const auto = autoMaterials || [];
+    const auto = applyOverrides(autoMaterials || []);
     // In combinado mode, manual first then auto. In pure auto, only auto.
     if (showcase?.showcase_mode === "combinado") {
-      // Filter out auto items that are already in manual (by material_id)
       const manualMaterialIds = new Set(manual.map(m => m.material_id).filter(Boolean));
       const uniqueAuto = auto.filter(a => !manualMaterialIds.has(a.material_id));
       return [...manual, ...uniqueAuto];
