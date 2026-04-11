@@ -575,7 +575,16 @@ export default function MinhaVitrine() {
           </div>
         )}
 
-        {/* Edit Dialog */}
+        {/* Auto Items Manager */}
+        {showcase && (showcase.showcase_mode === "auto" || showcase.showcase_mode === "combinado") && (
+          <ShowcaseAutoItemsManager
+            showcaseId={showcase.id}
+            autoItems={autoPreviewItems}
+            isLoading={loadingAutoPreview}
+          />
+        )}
+
+
         <Dialog open={!!editItem} onOpenChange={open => { if (!open) { setEditItem(null); resetForm(); } }}>
           <DialogContent>
             <DialogHeader><DialogTitle>Editar Lâmina</DialogTitle></DialogHeader>
