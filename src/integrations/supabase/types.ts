@@ -6305,6 +6305,47 @@ export type Database = {
         }
         Relationships: []
       }
+      showcase_auto_overrides: {
+        Row: {
+          created_at: string
+          custom_order: number | null
+          id: string
+          is_hidden: boolean
+          material_key: string
+          showcase_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_order?: number | null
+          id?: string
+          is_hidden?: boolean
+          material_key: string
+          showcase_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_order?: number | null
+          id?: string
+          is_hidden?: boolean
+          material_key?: string
+          showcase_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcase_auto_overrides_showcase_id_fkey"
+            columns: ["showcase_id"]
+            isOneToOne: false
+            referencedRelation: "agency_showcases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       showcase_items: {
         Row: {
           action_type: string
