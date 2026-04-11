@@ -127,6 +127,88 @@ export function useShowcase() {
     enabled: !!user?.id,
   });
 
+  // Auto-preview: fetch the same materials the public showcase would show
+  const isAutoOrCombined = showcase?.showcase_mode === "auto" || showcase?.showcase_mode === "combinado";
+  const adminAutoSupplierIds = showcase?.auto_supplier_ids || [];
+  const adminAutoCategories = showcase?.auto_categories || [];
+  const adminMaxAutoItems = showcase?.max_auto_items || 20;
+
+  const { data: autoPreviewItems, isLoading: loadingAutoPreview } = useQuery({
+    queryKey: ["showcase-auto-preview", showcase?.id, adminAutoSupplierIds, adminAutoCategories, adminMaxAutoItems],
+    queryFn: async () => {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      let query = supabase
+        .from("materials")
+        .select("id, title, file_url, thumbnail_url, category, destination, supplier_id, is_permanent, created_at, batch_id, order_index, tour_operators(id, name)")
+        .eq("is_active", true)
+        .is("trail_id", null)
+        .in("material_type", ["Imagem", "Lâmina"])
+        .or(`created_at.gte.${sevenDaysAgo.toISOString()},is_permanent.eq.true`)
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+      if (adminAutoSupplierIds.length > 0) {
+        query = query.in("supplier_id", adminAutoSupplierIds);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      let filtered = data || [];
+      if (adminAutoCategories.length > 0) {
+        filtered = filtered.filter(m => adminAutoCategories.includes(m.category));
+      }
+
+      // Group by batch_id
+      const batchMap = new Map<string, typeof filtered>();
+      const unbatched: typeof filtered = [];
+      filtered.forEach(m => {
+        if (m.batch_id) {
+          if (!batchMap.has(m.batch_id)) batchMap.set(m.batch_id, []);
+          batchMap.get(m.batch_id)!.push(m);
+        } else {
+          unbatched.push(m);
+        }
+      });
+      batchMap.forEach(mats => mats.sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)));
+
+      const result: { material_key: string; image_url: string | null; title: string; supplier_name: string | null; category: string; is_permanent: boolean; created_at: string; gallery_count: number }[] = [];
+
+      batchMap.forEach((mats, batchId) => {
+        const first = mats[0];
+        const urls = mats.map(m => m.file_url || m.thumbnail_url).filter(Boolean);
+        result.push({
+          material_key: `auto-batch-${batchId}`,
+          image_url: urls[0] || null,
+          title: first.title || "Sem título",
+          supplier_name: (first as any).tour_operators?.name || null,
+          category: first.category || "Geral",
+          is_permanent: first.is_permanent || false,
+          created_at: first.created_at,
+          gallery_count: urls.length,
+        });
+      });
+
+      unbatched.forEach(m => {
+        result.push({
+          material_key: `auto-${m.id}`,
+          image_url: m.file_url || m.thumbnail_url || null,
+          title: m.title || "Sem título",
+          supplier_name: (m as any).tour_operators?.name || null,
+          category: m.category || "Geral",
+          is_permanent: m.is_permanent || false,
+          created_at: m.created_at,
+          gallery_count: 1,
+        });
+      });
+
+      return result.slice(0, adminMaxAutoItems);
+    },
+    enabled: !!showcase?.id && isAutoOrCombined && adminAutoSupplierIds.length > 0,
+  });
+
   const createShowcase = useMutation({
     mutationFn: async (slug: string) => {
       const { data, error } = await supabase
@@ -268,8 +350,10 @@ export function useShowcase() {
     items: items || [],
     availableMaterials: availableMaterials || [],
     allSuppliers: allSuppliers || [],
+    autoPreviewItems: autoPreviewItems || [],
     loadingShowcase,
     loadingItems,
+    loadingAutoPreview: loadingAutoPreview && isAutoOrCombined,
     createShowcase,
     updateShowcase,
     addItem,
