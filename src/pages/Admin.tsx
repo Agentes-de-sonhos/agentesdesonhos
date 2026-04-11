@@ -41,6 +41,7 @@ import { AdminDriveImportManager } from "@/components/admin/AdminDriveImportMana
 import { AdminCruisesManager } from "@/components/admin/AdminCruisesManager";
 import { AdminSupportMode } from "@/components/admin/AdminSupportMode";
 import { AdminVitrineCategoriesManager } from "@/components/admin/AdminVitrineCategoriesManager";
+import { AdminCardCaptureManager } from "@/components/admin/AdminCardCaptureManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,7 @@ const TAB_LABELS: Record<string, string> = {
   users: "Usuários",
   crm: "CRM",
   "agenda-events": "Agenda",
+  "card-capture": "Leitor de Cartão",
   "business-cards": "Cartões",
   materials: "Materiais",
   mentorships: "Cursos",
@@ -151,6 +153,8 @@ function AdminContent({ tab }: { tab: string }) {
           <AdminCrmLogs />
         </div>
       );
+    case "card-capture":
+      return <AdminCardCaptureManager />;
     case "benefits":
       return <AdminBenefitsManager />;
     case "registration-links":

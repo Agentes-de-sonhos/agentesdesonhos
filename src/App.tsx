@@ -88,6 +88,7 @@ const Desconto30Off = lazy(() => import("./pages/Desconto30Off"));
 const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
 const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
 const MeusProjetos = lazy(() => import("./pages/MeusProjetos"));
+const CardCaptureQuickAccess = lazy(() => import("./pages/CardCaptureQuickAccess"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -211,6 +212,7 @@ const App = () => (
             <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />
+            <Route path="/captura-cartao/:token" element={<CardCaptureQuickAccess />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:agencySlug/:accessCode" element={<PublicCodeResolver />} />

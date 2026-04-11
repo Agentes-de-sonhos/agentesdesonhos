@@ -53,8 +53,9 @@ const menuGroups: AdminMenuGroup[] = [
     items: [
       { id: "users", label: "Usuários", icon: Users },
       { id: "crm", label: "CRM", icon: Mail },
+      { id: "card-capture", label: "Leitor Cartão", icon: CreditCard },
       { id: "agenda-events", label: "Agenda", icon: CalendarDays },
-      { id: "business-cards", label: "Cartões", icon: CreditCard },
+      { id: "business-cards", label: "Cartões Dig.", icon: CreditCard },
     ],
   },
   {
