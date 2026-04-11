@@ -45,6 +45,7 @@ export type ServiceType =
   | 'other';
 
 export interface FlightLegDetail {
+  leg_date?: string;
   airport_origin?: string;
   airport_destination?: string;
   departure_time?: string;

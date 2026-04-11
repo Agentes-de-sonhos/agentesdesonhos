@@ -60,6 +60,7 @@ function getServiceDetails(service: QuoteService): string[] {
       const retLegs = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
       outLegs.forEach((ob: any, i: number) => {
         const parts: string[] = [];
+        if (ob.leg_date) parts.push(formatDate(ob.leg_date));
         if (ob.flight_number) parts.push(`Voo ${ob.flight_number}`);
         if (ob.airport_origin && ob.airport_destination) parts.push(`${ob.airport_origin} → ${ob.airport_destination}`);
         if (ob.departure_time) parts.push(`Saída ${ob.departure_time}`);
@@ -69,6 +70,7 @@ function getServiceDetails(service: QuoteService): string[] {
       });
       retLegs.forEach((rt: any, i: number) => {
         const parts: string[] = [];
+        if (rt.leg_date) parts.push(formatDate(rt.leg_date));
         if (rt.flight_number) parts.push(`Voo ${rt.flight_number}`);
         if (rt.airport_origin && rt.airport_destination) parts.push(`${rt.airport_origin} → ${rt.airport_destination}`);
         if (rt.departure_time) parts.push(`Saída ${rt.departure_time}`);

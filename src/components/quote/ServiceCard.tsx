@@ -59,13 +59,19 @@ function getServiceDetails(service: QuoteService): string[] {
       outLegs.forEach((ob: any, i: number) => {
         const label = outLegs.length > 1 ? `Voo ida (trecho ${i + 1})` : `Voo ida`;
         if (ob.flight_number) details.push(`${label}: ${ob.flight_number}`);
-        if (ob.airport_origin || ob.airport_destination) details.push(`${ob.airport_origin || ''} → ${ob.airport_destination || ''}`);
+        const legParts: string[] = [];
+        if (ob.leg_date) legParts.push(formatDate(ob.leg_date));
+        if (ob.airport_origin || ob.airport_destination) legParts.push(`${ob.airport_origin || ''} → ${ob.airport_destination || ''}`);
+        if (legParts.length) details.push(legParts.join(' | '));
         if (ob.departure_time || ob.arrival_time) details.push(`Saída: ${ob.departure_time || '-'} | Chegada: ${ob.arrival_time || '-'}`);
       });
       retLegs.forEach((rt: any, i: number) => {
         const label = retLegs.length > 1 ? `Voo volta (trecho ${i + 1})` : `Voo volta`;
         if (rt.flight_number) details.push(`${label}: ${rt.flight_number}`);
-        if (rt.airport_origin || rt.airport_destination) details.push(`${rt.airport_origin || ''} → ${rt.airport_destination || ''}`);
+        const legParts: string[] = [];
+        if (rt.leg_date) legParts.push(formatDate(rt.leg_date));
+        if (rt.airport_origin || rt.airport_destination) legParts.push(`${rt.airport_origin || ''} → ${rt.airport_destination || ''}`);
+        if (legParts.length) details.push(legParts.join(' | '));
         if (rt.departure_time || rt.arrival_time) details.push(`Saída: ${rt.departure_time || '-'} | Chegada: ${rt.arrival_time || '-'}`);
       });
       if (data.includes_baggage) details.push("✓ Bagagem");
