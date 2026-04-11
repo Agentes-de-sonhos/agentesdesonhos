@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.admin-resolve-resource]
 verify_jwt = false
+
+[functions.extract-business-card]
+verify_jwt = false
