@@ -427,6 +427,22 @@ export function usePublicShowcase(slug: string | undefined) {
   const autoCategories = showcase?.auto_categories || [];
   const maxAutoItems = showcase?.max_auto_items || 20;
 
+  // Fetch overrides for this showcase
+  const { data: autoOverrides } = useQuery({
+    queryKey: ["public-showcase-overrides", showcase?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("showcase_auto_overrides")
+        .select("material_key, is_hidden, custom_order")
+        .eq("showcase_id", showcase!.id);
+      if (error) throw error;
+      return data as { material_key: string; is_hidden: boolean; custom_order: number | null }[];
+    },
+    enabled: !!showcase?.id && isAutoMode,
+  });
+
+  const overridesMap = new Map((autoOverrides || []).map(o => [o.material_key, o]));
+
   const { data: autoMaterials } = useQuery({
     queryKey: ["public-showcase-auto", showcase?.id, autoSupplierIds, autoCategories],
     queryFn: async () => {
