@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { ShowcaseAutoItemsManager } from "@/components/showcase/ShowcaseAutoItemsManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +26,7 @@ const SUGGESTED_SUBCATEGORIES = ["Réveillon", "MSC", "Costa Cruzeiros", "Féria
 export default function MinhaVitrine() {
   const { user } = useAuth();
   const {
-    showcase, items, availableMaterials, allSuppliers, loadingShowcase,
+    showcase, items, availableMaterials, allSuppliers, autoPreviewItems, loadingShowcase, loadingAutoPreview,
     createShowcase, updateShowcase, addItem, updateItem, removeItem, reorderItems, uploadImage, uploadMultipleImages,
   } = useShowcase();
   const { categoryNames: SUGGESTED_CATEGORIES } = useVitrineCategories();
