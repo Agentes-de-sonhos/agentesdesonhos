@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${origin}/auth?checkout=success`,
+      success_url: `${origin}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/planos?checkout=cancelled`,
       metadata: { plan },
     });

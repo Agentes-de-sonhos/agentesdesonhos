@@ -6,6 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const PRICE_TO_PLAN: Record<string, string> = {
+  "price_1TLxTbFkGdVt5nie0MpVjQM3": "profissional",
+  "price_1TLxU4FkGdVt5nieNT6rfU3u": "premium",
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -45,147 +50,278 @@ Deno.serve(async (req) => {
     });
   }
 
-  const traceId = event.id; // Use Stripe event ID as trace
+  const traceId = event.id;
   console.log(`[${traceId}] Processing ${event.type}`);
 
-  // Extract customer email based on event type
-  let customerEmail: string | null = null;
-  let sessionId: string | null = null;
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
+  // ─── checkout.session.completed ───
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    customerEmail = session.customer_details?.email || session.customer_email || null;
-    sessionId = session.id;
-  } else if (event.type === "payment_intent.succeeded") {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
-    sessionId = paymentIntent.id;
+    const customerEmail = (session.customer_details?.email || session.customer_email || "").trim().toLowerCase();
+    const sessionId = session.id;
+    const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id || null;
+    const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id || null;
 
-    // buscar checkout session associada
-    try {
-      const sessions = await stripe.checkout.sessions.list({
-        payment_intent: paymentIntent.id,
+    if (!customerEmail) {
+      console.error(`[${traceId}] No customer email in checkout session`);
+      return new Response(JSON.stringify({ error: "No customer email" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-
-      if (sessions.data.length > 0) {
-        const session = sessions.data[0];
-        customerEmail = session.customer_details?.email || session.customer_email || null;
-      }
-    } catch (err) {
-      console.error("Error retrieving checkout session:", err);
     }
 
-    // Try to get email from receipt_email or charges
-    customerEmail = paymentIntent.receipt_email || null;
-
-    if (!customerEmail && paymentIntent.latest_charge) {
+    // Determine plan from metadata or subscription price
+    let plan = session.metadata?.plan || "profissional";
+    if (subscriptionId) {
       try {
-        const charge = await stripe.charges.retrieve(paymentIntent.latest_charge as string);
-        customerEmail = charge.billing_details?.email || null;
-      } catch (chargeErr) {
-        console.error("Error retrieving charge for email:", chargeErr);
-      }
-    }
-
-    // Try customer object as fallback
-    if (!customerEmail && paymentIntent.customer) {
-      try {
-        const customer = await stripe.customers.retrieve(paymentIntent.customer as string);
-        if (customer && !customer.deleted) {
-          customerEmail = (customer as Stripe.Customer).email || null;
+        const sub = await stripe.subscriptions.retrieve(subscriptionId as string);
+        const priceId = sub.items.data[0]?.price?.id;
+        if (priceId && PRICE_TO_PLAN[priceId]) {
+          plan = PRICE_TO_PLAN[priceId];
         }
-      } catch (custErr) {
-        console.error("Error retrieving customer for email:", custErr);
+      } catch (e) {
+        console.error(`[${traceId}] Error fetching subscription:`, e);
       }
     }
-  } else {
-    // Acknowledge other events
+
+    // Check for duplicate
+    const { data: existing } = await adminClient
+      .from("card_activations")
+      .select("id")
+      .eq("stripe_session_id", sessionId)
+      .maybeSingle();
+
+    if (existing) {
+      console.log(`[${traceId}] Activation already exists for session ${sessionId}`);
+      return new Response(JSON.stringify({ received: true, already_processed: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check if user already exists in auth
+    const { data: existingUsers } = await adminClient.auth.admin.listUsers({ perPage: 1 });
+    let existingUserId: string | null = null;
+    
+    // Search by email
+    const { data: userByEmail } = await adminClient
+      .from("profiles")
+      .select("user_id")
+      .eq("user_id", (await adminClient.auth.admin.listUsers()).data?.users?.find(u => u.email?.toLowerCase() === customerEmail)?.id || "00000000-0000-0000-0000-000000000000")
+      .maybeSingle();
+
+    // For existing users: update subscription directly
+    const { data: authUsers } = await adminClient.auth.admin.listUsers();
+    const matchedUser = authUsers?.users?.find(u => u.email?.toLowerCase() === customerEmail);
+    
+    if (matchedUser) {
+      existingUserId = matchedUser.id;
+      console.log(`[${traceId}] Existing user found: ${existingUserId}, upgrading to ${plan}`);
+      
+      // Update subscription for existing user
+      await adminClient
+        .from("subscriptions")
+        .update({
+          plan,
+          is_active: true,
+          stripe_customer_id: customerId,
+          stripe_subscription_id: subscriptionId,
+        })
+        .eq("user_id", existingUserId);
+
+      return new Response(JSON.stringify({ received: true, user_upgraded: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // New user: create activation token
+    const activationToken = crypto.randomUUID();
+    const { error: insertError } = await adminClient.from("card_activations").insert({
+      email: customerEmail,
+      stripe_session_id: sessionId,
+      activation_token: activationToken,
+      payment_status: "paid",
+      used: false,
+      plan,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscriptionId,
+    });
+
+    if (insertError) {
+      console.error(`[${traceId}] Error inserting activation:`, insertError);
+      return new Response(JSON.stringify({ error: "Failed to create activation" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const activationUrl = `https://agentesdesonhos.lovable.app/ativar-cartao?token=${activationToken}`;
+    console.log(`[${traceId}] ✅ Activation token created for ${customerEmail} (${plan}): ${activationUrl}`);
+
+    // Send activation email via Resend
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (resendApiKey) {
+      const planLabel = plan === "premium" ? "Premium" : "Profissional";
+      const emailRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Fernando Nobre <fernando.nobre@agentesdesonhos.com.br>",
+          to: [customerEmail],
+          subject: `Bem-vindo ao Agentes de Sonhos — Ative seu Plano ${planLabel}`,
+          html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+            <h2 style="color: #333;">Seu pagamento do Plano ${planLabel} foi confirmado! 🎉</h2>
+            <p style="font-size: 16px; color: #555;">Agora finalize seu cadastro na plataforma Agentes de Sonhos clicando no botão abaixo:</p>
+            <p style="margin: 24px 0;">
+              <a href="${activationUrl}" style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Criar minha conta</a>
+            </p>
+            <p style="font-size: 14px; color: #888;">Esse link é único e válido por 24 horas.</p>
+            <p style="font-size: 14px; color: #888;">Seu plano: <strong>${planLabel} (R$${plan === "premium" ? "98" : "49"}/mês)</strong></p>
+          </div>`,
+        }),
+      });
+      if (!emailRes.ok) {
+        console.error(`[${traceId}] Resend email error:`, await emailRes.text());
+      } else {
+        console.log(`[${traceId}] 📧 Activation email sent to ${customerEmail}`);
+      }
+    }
+
+    return new Response(JSON.stringify({ received: true, email: customerEmail }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // ─── invoice.paid ───
+  if (event.type === "invoice.paid") {
+    const invoice = event.data.object as Stripe.Invoice;
+    const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+    
+    if (customerId) {
+      try {
+        const customer = await stripe.customers.retrieve(customerId);
+        if (customer && !customer.deleted) {
+          const email = (customer as Stripe.Customer).email?.trim().toLowerCase();
+          if (email) {
+            // Find user and ensure subscription is active
+            const { data: authUsers } = await adminClient.auth.admin.listUsers();
+            const user = authUsers?.users?.find(u => u.email?.toLowerCase() === email);
+            if (user) {
+              await adminClient
+                .from("subscriptions")
+                .update({ is_active: true })
+                .eq("user_id", user.id);
+              console.log(`[${traceId}] invoice.paid: subscription activated for ${email}`);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`[${traceId}] Error processing invoice.paid:`, e);
+      }
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  if (!customerEmail) {
-    console.error(`No customer email found for ${event.type}:`, sessionId);
-    return new Response(JSON.stringify({ error: "No customer email" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  // ─── customer.subscription.updated ───
+  if (event.type === "customer.subscription.updated") {
+    const subscription = event.data.object as Stripe.Subscription;
+    const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id;
+    const priceId = subscription.items.data[0]?.price?.id;
+    const plan = priceId ? PRICE_TO_PLAN[priceId] || "profissional" : "profissional";
+    const isActive = subscription.status === "active" || subscription.status === "trialing";
 
-  const normalizedEmail = customerEmail.trim().toLowerCase();
-  const activationToken = crypto.randomUUID();
-  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    if (customerId) {
+      try {
+        const customer = await stripe.customers.retrieve(customerId);
+        if (customer && !customer.deleted) {
+          const email = (customer as Stripe.Customer).email?.trim().toLowerCase();
+          if (email) {
+            const { data: authUsers } = await adminClient.auth.admin.listUsers();
+            const user = authUsers?.users?.find(u => u.email?.toLowerCase() === email);
+            if (user) {
+              await adminClient
+                .from("subscriptions")
+                .update({
+                  plan,
+                  is_active: isActive,
+                  stripe_subscription_id: subscription.id,
+                })
+                .eq("user_id", user.id);
+              console.log(`[${traceId}] subscription.updated: ${email} -> ${plan} (active: ${isActive})`);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`[${traceId}] Error processing subscription.updated:`, e);
+      }
+    }
 
-  // Check for duplicate to avoid re-processing
-  const { data: existing } = await adminClient
-    .from("card_activations")
-    .select("id")
-    .eq("stripe_session_id", sessionId!)
-    .maybeSingle();
-
-  if (existing) {
-    console.log(`Activation already exists for session ${sessionId}, skipping.`);
-    return new Response(JSON.stringify({ received: true, already_processed: true }), {
+    return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  // Save activation token
-  const { error: insertError } = await adminClient.from("card_activations").insert({
-    email: normalizedEmail,
-    stripe_session_id: sessionId!,
-    activation_token: activationToken,
-    payment_status: "paid",
-    used: false,
-  });
+  // ─── customer.subscription.deleted ───
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription;
+    const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id;
 
-  if (insertError) {
-    console.error("Error inserting activation:", insertError);
-    return new Response(JSON.stringify({ error: "Failed to create activation" }), {
-      status: 500,
+    if (customerId) {
+      try {
+        const customer = await stripe.customers.retrieve(customerId);
+        if (customer && !customer.deleted) {
+          const email = (customer as Stripe.Customer).email?.trim().toLowerCase();
+          if (email) {
+            const { data: authUsers } = await adminClient.auth.admin.listUsers();
+            const user = authUsers?.users?.find(u => u.email?.toLowerCase() === email);
+            if (user) {
+              await adminClient
+                .from("subscriptions")
+                .update({
+                  plan: "start",
+                  is_active: true,
+                  stripe_subscription_id: null,
+                })
+                .eq("user_id", user.id);
+              console.log(`[${traceId}] subscription.deleted: ${email} downgraded to start`);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`[${traceId}] Error processing subscription.deleted:`, e);
+      }
+    }
+
+    return new Response(JSON.stringify({ received: true }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  const activationUrl = `https://agentesdesonhos.lovable.app/ativar-cartao?token=${activationToken}`;
-  console.log(`✅ Activation token created for ${normalizedEmail} via ${event.type}: ${activationUrl}`);
-
-  // Send activation email via Resend
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  if (resendApiKey) {
-    const emailRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Fernando Nobre <fernando.nobre@agentesdesonhos.com.br>",
-        to: [normalizedEmail],
-        subject: "Bem-vindo ao Agentes de Sonhos — Ative sua conta",
-        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-          <h2 style="color: #333;">Seu pagamento foi confirmado com sucesso! 🎉</h2>
-          <p style="font-size: 16px; color: #555;">Agora finalize seu cadastro na plataforma Agentes de Sonhos clicando no botão abaixo:</p>
-          <p style="margin: 24px 0;">
-            <a href="${activationUrl}" style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Criar minha conta</a>
-          </p>
-          <p style="font-size: 14px; color: #888;">Esse link é único e válido por 24 horas.</p>
-        </div>`,
-      }),
+  // ─── customer.subscription.created ───
+  if (event.type === "customer.subscription.created") {
+    const subscription = event.data.object as Stripe.Subscription;
+    console.log(`[${traceId}] subscription.created: ${subscription.id} (handled via checkout.session.completed)`);
+    return new Response(JSON.stringify({ received: true }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-    if (!emailRes.ok) {
-      const errBody = await emailRes.text();
-      console.error("Resend email error:", errBody);
-    } else {
-      console.log(`📧 Activation email sent to ${normalizedEmail}`);
-    }
-  } else {
-    console.warn("RESEND_API_KEY not configured, skipping email");
   }
 
-  return new Response(JSON.stringify({ received: true, email: normalizedEmail }), {
+  // Acknowledge all other events
+  console.log(`[${traceId}] Unhandled event type: ${event.type}`);
+  return new Response(JSON.stringify({ received: true }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });

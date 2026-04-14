@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
 
     const { data: activation, error: queryError } = await adminClient
       .from("card_activations")
-      .select("email, used, expires_at")
+      .select("email, used, expires_at, plan")
       .eq("activation_token", token)
       .single();
 
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ valid: false, error: "Este link de ativação expirou." });
     }
 
-    return jsonResponse({ valid: true, email: activation.email });
+    return jsonResponse({ valid: true, email: activation.email, plan: activation.plan || "profissional" });
   } catch (error) {
     console.error("validate-activation-token error:", error);
     return jsonResponse({ error: "Erro ao validar token." }, 500);

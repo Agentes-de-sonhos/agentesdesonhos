@@ -19,6 +19,8 @@ const normalizePhone = (phone: string) => phone.replace(/\D/g, "").slice(0, 20);
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
 
+const VALID_PLANS = ["start", "profissional", "premium"];
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -95,14 +97,17 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "O e-mail informado não corresponde ao e-mail do pagamento." }, 400);
     }
 
-    // Create user
+    // Determine plan from activation record (backend-controlled, not user-controlled)
+    const activationPlan = VALID_PLANS.includes(activation.plan) ? activation.plan : "profissional";
+
+    // Create user with correct plan
     const { data: newUserData, error: createUserError } = await adminClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: {
         name,
-        target_plan: "profissional",
+        target_plan: activationPlan,
       },
     });
 
@@ -137,12 +142,14 @@ Deno.serve(async (req) => {
       console.error("Erro ao salvar perfil no cadastro de ativação:", profileError);
     }
 
-    // Create subscription
+    // Create subscription with the correct plan from the activation record
     const { error: subscriptionError } = await adminClient.from("subscriptions").upsert(
       {
         user_id: userId,
-        plan: "profissional",
+        plan: activationPlan,
         is_active: true,
+        stripe_customer_id: activation.stripe_customer_id || null,
+        stripe_subscription_id: activation.stripe_subscription_id || null,
       },
       { onConflict: "user_id" },
     );
@@ -162,7 +169,7 @@ Deno.serve(async (req) => {
       console.error("Erro ao marcar token como usado:", markUsedError);
     }
 
-    return jsonResponse({ success: true, user_id: userId });
+    return jsonResponse({ success: true, user_id: userId, plan: activationPlan });
   } catch (error) {
     console.error("activate-card-signup error:", error);
     return jsonResponse({ error: "Erro ao processar ativação." }, 500);
