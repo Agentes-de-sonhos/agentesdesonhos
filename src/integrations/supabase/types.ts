@@ -1078,7 +1078,10 @@ export type Database = {
           expires_at: string
           id: string
           payment_status: string
+          plan: string
+          stripe_customer_id: string | null
           stripe_session_id: string
+          stripe_subscription_id: string | null
           used: boolean
         }
         Insert: {
@@ -1088,7 +1091,10 @@ export type Database = {
           expires_at?: string
           id?: string
           payment_status?: string
+          plan?: string
+          stripe_customer_id?: string | null
           stripe_session_id: string
+          stripe_subscription_id?: string | null
           used?: boolean
         }
         Update: {
@@ -1098,7 +1104,10 @@ export type Database = {
           expires_at?: string
           id?: string
           payment_status?: string
+          plan?: string
+          stripe_customer_id?: string | null
           stripe_session_id?: string
+          stripe_subscription_id?: string | null
           used?: boolean
         }
         Relationships: []
