@@ -126,7 +126,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { role } = useUserRole();
   const isPromotor = role === "promotor";
 
-  const plan: SubscriptionPlan = subscription?.plan || "essencial";
+  const plan: SubscriptionPlan = subscription?.plan || "start";
   const aiLimit = AI_LIMITS[plan];
   const aiUsageCount = subscription?.ai_usage_count || 0;
   const aiUsageRemaining = Math.max(0, aiLimit - aiUsageCount);
@@ -139,8 +139,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, [plan, isPromotor]);
 
   const canUseAI = useCallback((): boolean => {
-    if (plan === "educa_pass" || plan === "cartao_digital" || plan === "essencial") return false;
-    if (plan === "profissional" || plan === "fundador") return true;
+    if (plan === "start" || plan === "educa_pass" || plan === "cartao_digital" || plan === "essencial") return false;
+    if (plan === "premium" || plan === "profissional" || plan === "fundador") return true;
     return aiUsageCount < aiLimit;
   }, [plan, aiUsageCount, aiLimit]);
 

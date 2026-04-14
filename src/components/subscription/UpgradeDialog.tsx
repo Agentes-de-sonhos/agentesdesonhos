@@ -32,26 +32,32 @@ interface UpgradeDialogProps {
 }
 
 const PLAN_ICONS: Record<SubscriptionPlan, React.ReactNode> = {
+  start: <Star className="h-5 w-5" />,
   educa_pass: <Star className="h-5 w-5" />,
   cartao_digital: <Star className="h-5 w-5" />,
   essencial: <Star className="h-5 w-5" />,
   profissional: <Sparkles className="h-5 w-5" />,
+  premium: <Sparkles className="h-5 w-5" />,
   fundador: <Sparkles className="h-5 w-5" />,
 };
 
 const PLAN_COLORS: Record<SubscriptionPlan, string> = {
+  start: "border-muted bg-card",
   educa_pass: "border-muted bg-card",
   cartao_digital: "border-muted bg-card",
   essencial: "border-muted bg-card",
   profissional: "border-primary/50 bg-primary/5",
+  premium: "border-primary/50 bg-primary/5",
   fundador: "border-primary/50 bg-primary/5",
 };
 
 const PLAN_BADGE_COLORS: Record<SubscriptionPlan, string> = {
+  start: "bg-muted text-muted-foreground",
   educa_pass: "bg-muted text-muted-foreground",
   cartao_digital: "bg-muted text-muted-foreground",
   essencial: "bg-muted text-muted-foreground",
   profissional: "bg-primary text-primary-foreground",
+  premium: "bg-primary text-primary-foreground",
   fundador: "bg-primary text-primary-foreground",
 };
 
