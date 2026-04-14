@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Eye, EyeOff, Mail, Lock, User, Phone, CreditCard, CheckCircle, ShieldAlert } from "lucide-react";
+import { Loader2, Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle, ShieldAlert, Sparkles } from "lucide-react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone } from "@/lib/validators";
+
+const PLAN_LABELS: Record<string, string> = {
+  profissional: "Profissional",
+  premium: "Premium",
+  start: "Start",
+};
 
 const translateAuthError = (msg: string): string => {
   if (/already.registered|já está cadastrado/i.test(msg)) return "Este e-mail já está cadastrado. Faça login no app.";
@@ -50,19 +56,23 @@ type SignupData = z.infer<typeof signupSchema>;
 
 const APP_LOGIN_URL = "https://app.agentesdesonhos.com.br/auth";
 
-// Token validation states
-type TokenState = "loading" | "valid" | "invalid" | "expired" | "missing";
+type TokenState = "loading" | "valid" | "invalid" | "expired" | "missing" | "waiting_webhook";
 
 export default function AtivarCartao() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  const sessionId = searchParams.get("session_id");
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [tokenState, setTokenState] = useState<TokenState>(token ? "loading" : "missing");
+  const [tokenState, setTokenState] = useState<TokenState>(
+    token ? "loading" : sessionId ? "waiting_webhook" : "missing"
+  );
   const [tokenEmail, setTokenEmail] = useState<string>("");
+  const [activationPlan, setActivationPlan] = useState<string>("profissional");
+  const [resolvedToken, setResolvedToken] = useState<string | null>(token);
 
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -80,12 +90,44 @@ export default function AtivarCartao() {
     }
   }, [user, authLoading, navigate]);
 
+  // If we have session_id but no token, poll for the activation to be created by webhook
+  useEffect(() => {
+    if (!sessionId || token) return;
+
+    let attempts = 0;
+    const maxAttempts = 15;
+
+    const pollForActivation = async () => {
+      attempts++;
+      try {
+        // Try to find activation by checking with the session - we use a simple approach:
+        // The webhook creates the activation async, so we wait and show a friendly message
+        if (attempts >= maxAttempts) {
+          setTokenState("missing");
+          setError("Estamos processando seu pagamento. Você receberá um e-mail com o link de ativação em breve.");
+          return;
+        }
+
+        // We can't query card_activations directly (RLS), so just show waiting message
+        // The user will get the email from the webhook
+        setTimeout(pollForActivation, 2000);
+      } catch {
+        setTokenState("missing");
+      }
+    };
+
+    // Wait 3 seconds then start showing the message
+    const timer = setTimeout(() => {
+      setTokenState("missing");
+      setError(null);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [sessionId, token]);
+
   // Validate token on mount
   useEffect(() => {
-    if (!token) {
-      setTokenState("missing");
-      return;
-    }
+    if (!token) return;
 
     const validateToken = async () => {
       try {
@@ -105,6 +147,7 @@ export default function AtivarCartao() {
 
         if (data?.valid && data?.email) {
           setTokenEmail(data.email);
+          setActivationPlan(data.plan || "profissional");
           setTokenState("valid");
           form.setValue("email", data.email);
         } else {
@@ -119,7 +162,7 @@ export default function AtivarCartao() {
   }, [token, form]);
 
   const handleSubmit = async (data: SignupData) => {
-    if (!token || tokenState !== "valid") return;
+    if (!resolvedToken || tokenState !== "valid") return;
 
     setError(null);
     setIsLoading(true);
@@ -131,7 +174,7 @@ export default function AtivarCartao() {
           email: data.email.trim().toLowerCase(),
           phone: data.phone,
           password: data.password,
-          activation_token: token,
+          activation_token: resolvedToken,
         },
       });
 
@@ -166,6 +209,42 @@ export default function AtivarCartao() {
     );
   }
 
+  // Waiting for webhook to process
+  if (tokenState === "waiting_webhook") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
+        <Card className="w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
+          <CardHeader className="pt-10 pb-4 text-center space-y-6">
+            <div className="flex flex-col items-center space-y-3">
+              <img src={logoAgentes} alt="Agentes de Sonhos" className="h-28 w-auto" />
+            </div>
+            <div className="flex justify-center">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-semibold">Processando seu pagamento...</CardTitle>
+              <CardDescription className="text-base leading-relaxed">
+                Estamos confirmando seu pagamento. Em instantes você receberá um e-mail com o link para concluir seu cadastro.
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="px-8 pb-10 space-y-3">
+            <p className="text-sm text-muted-foreground text-center">
+              Caso não receba o e-mail em alguns minutos, verifique sua caixa de spam.
+            </p>
+            <Button
+              onClick={() => { window.location.href = APP_LOGIN_URL; }}
+              variant="outline"
+              className="w-full h-12 rounded-xl text-base font-medium"
+            >
+              Ir para o Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Invalid / expired / missing token screen
   if (tokenState !== "valid" && !success) {
     return (
@@ -185,7 +264,7 @@ export default function AtivarCartao() {
                 {tokenState === "expired" && "Link de ativação expirado"}
               </CardTitle>
               <CardDescription className="text-base leading-relaxed">
-                {tokenState === "missing" && "Para ativar sua conta, utilize o link enviado para seu e-mail após o pagamento."}
+                {tokenState === "missing" && (error || "Para ativar sua conta, utilize o link enviado para seu e-mail após o pagamento.")}
                 {tokenState === "invalid" && "Este link de ativação é inválido ou já foi utilizado. Cada link pode ser usado apenas uma vez."}
                 {tokenState === "expired" && "Este link de ativação expirou. Links são válidos por 24 horas após o pagamento. Entre em contato com o suporte para solicitar um novo."}
               </CardDescription>
@@ -206,6 +285,7 @@ export default function AtivarCartao() {
 
   // Success screen
   if (success) {
+    const planLabel = PLAN_LABELS[activationPlan] || "Profissional";
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
         <Card className="w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
@@ -219,7 +299,7 @@ export default function AtivarCartao() {
             <div className="space-y-2">
               <CardTitle className="text-xl font-semibold">Cadastro realizado!</CardTitle>
               <CardDescription className="text-base leading-relaxed">
-                Sua conta foi criada com sucesso. Faça login no app para acessar e configurar seu Cartão Digital.
+                Sua conta foi criada com sucesso com o <strong>Plano {planLabel}</strong>. Faça login para começar a usar a plataforma.
               </CardDescription>
             </div>
           </CardHeader>
@@ -237,6 +317,8 @@ export default function AtivarCartao() {
   }
 
   // Signup form (token is valid)
+  const planLabel = PLAN_LABELS[activationPlan] || "Profissional";
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
@@ -248,14 +330,14 @@ export default function AtivarCartao() {
           </div>
 
           <div className="inline-flex items-center gap-2 mx-auto px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-            <CreditCard className="h-4 w-4" />
-            Cartão Digital
+            <Sparkles className="h-4 w-4" />
+            Plano {planLabel}
           </div>
 
           <div className="space-y-1">
-            <CardTitle className="text-xl font-semibold">Ative seu Cartão Digital</CardTitle>
+            <CardTitle className="text-xl font-semibold">Ative seu Plano {planLabel}</CardTitle>
             <CardDescription className="text-sm">
-              Pagamento confirmado! Preencha seus dados para ativar seu cartão
+              Pagamento confirmado! Preencha seus dados para criar sua conta
             </CardDescription>
           </div>
         </CardHeader>
@@ -407,7 +489,7 @@ export default function AtivarCartao() {
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Criar conta e ativar cartão
+                Criar conta e ativar plano
               </Button>
             </form>
           </Form>
