@@ -29,7 +29,7 @@ const WIZARD_STEPS: WizardStep[] = [
   { key: "social", label: "Redes Sociais" },
 ];
 
-export default function MeuCartao() {
+function MeuCartaoContent() {
   const { card, isLoading, createCard, updateCard, uploadImage } = useBusinessCard();
   const [slug, setSlug] = useState("");
   const [currentStep, setCurrentStep] = useState(0);

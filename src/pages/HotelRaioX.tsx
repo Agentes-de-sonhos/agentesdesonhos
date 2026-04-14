@@ -110,7 +110,7 @@ function CriteriaBar({ label, icon, item }: { label: string; icon: string; item:
   );
 }
 
-export default function HotelRaioX() {
+function HotelRaioXContent() {
   const [hotelName, setHotelName] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("Brasil");

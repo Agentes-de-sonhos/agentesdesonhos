@@ -43,7 +43,7 @@ const LOGO_SIZES: Record<LogoSize, { label: string; factor: number }> = {
 const GRID_COLS = 3;
 const GRID_ROWS = 3;
 
-export default function PersonalizadorLaminas() {
+function PersonalizadorLaminasContent() {
   const { user } = useAuth();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);

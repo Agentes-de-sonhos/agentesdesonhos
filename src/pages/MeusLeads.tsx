@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useLeadCapture, LeadCapture } from "@/hooks/useLeadCapture";

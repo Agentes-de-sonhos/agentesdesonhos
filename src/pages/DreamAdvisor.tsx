@@ -293,6 +293,7 @@ export default function DreamAdvisor() {
   };
 
   return (
+    <SubscriptionGuard feature="travel_advisor">
     <DashboardLayout>
       
       <TooltipProvider>
