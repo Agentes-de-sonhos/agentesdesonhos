@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { generateBusinessCardPdf } from "@/lib/generateBusinessCardPdf";
 import { getCardShareUrl } from "@/lib/cardShareUrl";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -323,5 +324,13 @@ function MeuCartaoContent() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function MeuCartao() {
+  return (
+    <SubscriptionGuard feature="business_card">
+      <MeuCartaoContent />
+    </SubscriptionGuard>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -631,5 +632,13 @@ function PersonalizadorLaminasContent() {
         <canvas ref={canvasRef} className="hidden" />
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function PersonalizadorLaminas() {
+  return (
+    <SubscriptionGuard feature="lamina_customizer">
+      <PersonalizadorLaminasContent />
+    </SubscriptionGuard>
   );
 }

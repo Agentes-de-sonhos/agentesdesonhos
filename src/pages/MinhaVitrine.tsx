@@ -806,3 +806,11 @@ function MinhaVitrineContent() {
     </DashboardLayout>
   );
 }
+
+export default function MinhaVitrine() {
+  return (
+    <SubscriptionGuard feature="showcase">
+      <MinhaVitrineContent />
+    </SubscriptionGuard>
+  );
+}

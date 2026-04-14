@@ -49,7 +49,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   perdido: { label: "Perdido", color: "bg-red-100 text-red-700" },
 };
 
-export default function MeusLeads() {
+function MeusLeadsContent() {
   const { form, leads, leadsLoading, unreadCount, markAsRead, updateStatus, deleteLead } = useLeadCapture();
   const [selectedLead, setSelectedLead] = useState<LeadCapture | null>(null);
   const [searchTerm, setSearchTerm] = useState("");

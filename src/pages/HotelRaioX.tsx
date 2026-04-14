@@ -666,3 +666,11 @@ function HotelRaioXContent() {
     </DashboardLayout>
   );
 }
+
+export default function HotelRaioX() {
+  return (
+    <SubscriptionGuard feature="hotel_raio_x">
+      <HotelRaioXContent />
+    </SubscriptionGuard>
+  );
+}
