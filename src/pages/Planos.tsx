@@ -126,16 +126,9 @@ export default function Planos() {
       return;
     }
 
-    // Paid plan
+    // Paid plan — go directly to Stripe checkout (both logged-in and not)
     setLoadingPlan(plan.id);
     try {
-      if (!user) {
-        // Save target plan in sessionStorage then redirect to signup
-        sessionStorage.setItem("checkout_plan", plan.id);
-        navigate("/auth?signup=true&plan=" + plan.id);
-        return;
-      }
-
       const { data, error } = await supabase.functions.invoke("create-public-checkout", {
         body: { plan: plan.id },
       });
