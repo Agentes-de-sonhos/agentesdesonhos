@@ -80,6 +80,8 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   essencial: [
     'news', 'tourism_map', 'materials', 'agenda', 'trainings_recorded',
     'business_card', 'flight_blocks', 'qa_forum', 'itinerary', 'quote_generator',
+    'benefits', 'notepad', 'showcase', 'lamina_customizer', 'lead_capture',
+    'travel_advisor', 'hotel_raio_x',
   ],
   profissional: PROFISSIONAL_FEATURES,
   premium: ALL_FEATURES,
