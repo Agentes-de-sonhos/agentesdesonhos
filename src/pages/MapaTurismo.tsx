@@ -42,6 +42,7 @@ import { useSuppliersWithSpecialties } from "@/hooks/useSupplierSpecialties";
 import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
 import { useSupplierReviews } from "@/hooks/useSupplierReviews";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
+import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { toast } from "sonner";
 
 interface CategoryDef {
