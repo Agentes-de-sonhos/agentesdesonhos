@@ -19,8 +19,9 @@ import { useNotes } from "@/hooks/useNotes";
 import { useToast } from "@/hooks/use-toast";
 import { Note } from "@/types/notes";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
-export default function BlocoNotas() {
+function BlocoNotasContent() {
   const {
     notes,
     isLoading,
