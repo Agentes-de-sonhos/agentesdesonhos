@@ -205,8 +205,19 @@ export default function MapaTurismo() {
         _source: "cruise" as const,
       };
     });
-    return [...fromSuppliers, ...fromOperators, ...fromCruises];
-  }, [suppliers, tourOperators, cruiseCompanies]);
+    const fromTravelMeet = (travelMeetSuppliers || []).map((tm: any) => ({
+      id: `tm-${tm.id}`,
+      name: tm.name,
+      category: tm.category || "Operadoras de turismo",
+      logo_url: tm.logo_url || null,
+      website_url: tm.website || null,
+      instagram_url: tm.instagram || null,
+      sales_channel: null,
+      specialties: (tm.specialties || []).map((s: string, i: number) => ({ id: `tm-${i}`, name: s })),
+      _source: "travelmeet" as const,
+    }));
+    return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet];
+  }, [suppliers, tourOperators, cruiseCompanies, travelMeetSuppliers]);
 
   // Contextual specialties: only from items matching the active category
   const allSpecialties = useMemo(() => {
