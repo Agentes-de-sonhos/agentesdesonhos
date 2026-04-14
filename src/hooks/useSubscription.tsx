@@ -126,6 +126,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const { role } = useUserRole();
   const isPromotor = role === "promotor";
+  const { hasFeatureAccess: hasExplicitAccess } = useFeatureAccess();
 
   const plan: SubscriptionPlan = subscription?.plan || "start";
   const aiLimit = AI_LIMITS[plan];
@@ -134,10 +135,12 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const hasFeature = useCallback((feature: Feature): boolean => {
     if (isPromotor) return true;
+    // Check explicit grants (additive)
+    if (hasExplicitAccess(feature)) return true;
     const features = PLAN_FEATURES[plan];
     if (!features) return false;
     return features.includes(feature);
-  }, [plan, isPromotor]);
+  }, [plan, isPromotor, hasExplicitAccess]);
 
   const canUseAI = useCallback((): boolean => {
     if (plan === "start" || plan === "educa_pass" || plan === "cartao_digital" || plan === "essencial") return false;
