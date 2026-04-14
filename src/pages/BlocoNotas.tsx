@@ -259,3 +259,11 @@ function BlocoNotasContent() {
     </DashboardLayout>
   );
 }
+
+export default function BlocoNotas() {
+  return (
+    <SubscriptionGuard feature="notepad">
+      <BlocoNotasContent />
+    </SubscriptionGuard>
+  );
+}
