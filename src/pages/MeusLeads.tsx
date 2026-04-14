@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useLeadCapture, LeadCapture } from "@/hooks/useLeadCapture";
@@ -48,7 +49,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   perdido: { label: "Perdido", color: "bg-red-100 text-red-700" },
 };
 
-export default function MeusLeads() {
+function MeusLeadsContent() {
   const { form, leads, leadsLoading, unreadCount, markAsRead, updateStatus, deleteLead } = useLeadCapture();
   const [selectedLead, setSelectedLead] = useState<LeadCapture | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -337,5 +338,13 @@ function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string;
         <span className="font-medium">{value}</span>
       </div>
     </div>
+  );
+}
+
+export default function MeusLeads() {
+  return (
+    <SubscriptionGuard feature="lead_capture">
+      <MeusLeadsContent />
+    </SubscriptionGuard>
   );
 }

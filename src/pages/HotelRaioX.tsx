@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel, RefreshCw, Clock, CalendarDays, FileDown, History } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -110,7 +111,7 @@ function CriteriaBar({ label, icon, item }: { label: string; icon: string; item:
   );
 }
 
-export default function HotelRaioX() {
+function HotelRaioXContent() {
   const [hotelName, setHotelName] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("Brasil");
@@ -664,5 +665,13 @@ export default function HotelRaioX() {
           )}
         </div>
     </DashboardLayout>
+  );
+}
+
+export default function HotelRaioX() {
+  return (
+    <SubscriptionGuard feature="hotel_raio_x">
+      <HotelRaioXContent />
+    </SubscriptionGuard>
   );
 }

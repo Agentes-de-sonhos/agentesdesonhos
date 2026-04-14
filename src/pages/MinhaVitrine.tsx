@@ -20,10 +20,11 @@ import {
   Upload, MessageCircle, Loader2, Store, Copy, Eye, Star, ChevronUp, ChevronDown,
   Settings, Share2, Zap, Check
 } from "lucide-react";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
 const SUGGESTED_SUBCATEGORIES = ["Réveillon", "MSC", "Costa Cruzeiros", "Férias de Julho", "Disney", "Europa"];
 
-export default function MinhaVitrine() {
+function MinhaVitrineContent() {
   const { user } = useAuth();
   const {
     showcase, items, availableMaterials, allSuppliers, autoPreviewItems, loadingShowcase, loadingAutoPreview,
@@ -803,5 +804,13 @@ export default function MinhaVitrine() {
         </Dialog>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function MinhaVitrine() {
+  return (
+    <SubscriptionGuard feature="showcase">
+      <MinhaVitrineContent />
+    </SubscriptionGuard>
   );
 }

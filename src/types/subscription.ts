@@ -38,7 +38,14 @@ export type Feature =
   | 'premium_group'
   | 'fam_tours'
   | 'community'
-  | 'content_creator';
+  | 'content_creator'
+  | 'benefits'
+  | 'notepad'
+  | 'showcase'
+  | 'lamina_customizer'
+  | 'lead_capture'
+  | 'travel_advisor'
+  | 'hotel_raio_x';
 
 const ALL_FEATURES: Feature[] = [
   'news', 'tourism_map', 'materials', 'agenda', 'crm_basic',
@@ -47,10 +54,13 @@ const ALL_FEATURES: Feature[] = [
   'ai_tools', 'trip_wallet', 'reminders', 'trainings_live',
   'ai_unlimited', 'trails_premium', 'certificates', 'ranking',
   'premium_group', 'fam_tours', 'community', 'content_creator',
+  'benefits', 'notepad', 'showcase', 'lamina_customizer',
+  'lead_capture', 'travel_advisor', 'hotel_raio_x',
 ];
 
 const START_FEATURES: Feature[] = [
   'news', 'tourism_map', 'agenda', 'trainings_recorded',
+  'materials', 'benefits',
 ];
 
 const PROFISSIONAL_FEATURES: Feature[] = [
@@ -59,6 +69,8 @@ const PROFISSIONAL_FEATURES: Feature[] = [
   'qa_forum', 'qa_comment', 'itinerary', 'quote_generator',
   'ai_tools', 'trip_wallet', 'reminders', 'trainings_live',
   'trails_premium', 'certificates', 'ranking', 'content_creator',
+  'benefits', 'notepad', 'showcase', 'lamina_customizer',
+  'lead_capture', 'travel_advisor', 'hotel_raio_x',
 ];
 
 export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
@@ -68,6 +80,8 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   essencial: [
     'news', 'tourism_map', 'materials', 'agenda', 'trainings_recorded',
     'business_card', 'flight_blocks', 'qa_forum', 'itinerary', 'quote_generator',
+    'benefits', 'notepad', 'showcase', 'lamina_customizer', 'lead_capture',
+    'travel_advisor', 'hotel_raio_x',
   ],
   profissional: PROFISSIONAL_FEATURES,
   premium: ALL_FEATURES,
@@ -130,15 +144,23 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   premium_group: 'Grupo Premium',
   fam_tours: 'Fam Tours Exclusivos',
   content_creator: 'Criador de Conteúdo',
+  benefits: 'Benefícios e Descontos',
+  notepad: 'Bloco de Notas',
+  showcase: 'Vitrine de Ofertas',
+  lamina_customizer: 'Personalizador de Lâminas',
+  lead_capture: 'Captação de Leads',
+  travel_advisor: 'Travel Advisor',
+  hotel_raio_x: 'Raio-X do Hotel',
 };
 
 export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   news: 'start',
   tourism_map: 'start',
-  materials: 'profissional',
+  materials: 'start',
   agenda: 'start',
-  crm_basic: 'profissional',
+  benefits: 'start',
   trainings_recorded: 'start',
+  crm_basic: 'profissional',
   business_card: 'profissional',
   financial: 'profissional',
   flight_blocks: 'profissional',
@@ -150,14 +172,20 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   trip_wallet: 'profissional',
   reminders: 'profissional',
   trainings_live: 'profissional',
-  ai_unlimited: 'premium',
   trails_premium: 'profissional',
   certificates: 'profissional',
   ranking: 'profissional',
+  content_creator: 'profissional',
+  notepad: 'profissional',
+  showcase: 'profissional',
+  lamina_customizer: 'profissional',
+  lead_capture: 'profissional',
+  travel_advisor: 'profissional',
+  hotel_raio_x: 'profissional',
+  ai_unlimited: 'premium',
   premium_group: 'premium',
   fam_tours: 'premium',
   community: 'premium',
-  content_creator: 'profissional',
 };
 
 export const DAILY_AI_LIMITS: Partial<Record<SubscriptionPlan, number>> = {

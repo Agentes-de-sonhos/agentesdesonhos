@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { generateBusinessCardPdf } from "@/lib/generateBusinessCardPdf";
 import { getCardShareUrl } from "@/lib/cardShareUrl";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -29,7 +30,7 @@ const WIZARD_STEPS: WizardStep[] = [
   { key: "social", label: "Redes Sociais" },
 ];
 
-export default function MeuCartao() {
+function MeuCartaoContent() {
   const { card, isLoading, createCard, updateCard, uploadImage } = useBusinessCard();
   const [slug, setSlug] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
@@ -323,5 +324,13 @@ export default function MeuCartao() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function MeuCartao() {
+  return (
+    <SubscriptionGuard feature="business_card">
+      <MeuCartaoContent />
+    </SubscriptionGuard>
   );
 }
