@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Building2, Search, Loader2, Star, Shield, AlertTriangle, ThumbsUp, ThumbsDown, Users, MapPin, Sparkles, CheckCircle2, Hotel, RefreshCw, Clock, CalendarDays, FileDown, History } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";

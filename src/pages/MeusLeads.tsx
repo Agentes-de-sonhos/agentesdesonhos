@@ -340,3 +340,11 @@ function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string;
     </div>
   );
 }
+
+export default function MeusLeads() {
+  return (
+    <SubscriptionGuard feature="lead_capture">
+      <MeusLeadsContent />
+    </SubscriptionGuard>
+  );
+}
