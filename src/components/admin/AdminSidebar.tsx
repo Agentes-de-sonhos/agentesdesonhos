@@ -104,6 +104,7 @@ const menuGroups: AdminMenuGroup[] = [
       { id: "surveys", label: "Pesquisas", icon: MessageCircle },
       { id: "drive-import", label: "Drive", icon: HardDrive },
       { id: "support-mode", label: "Modo Suporte", icon: Eye },
+      { id: "plan-switcher", label: "Testar Planos", icon: Eye },
     ],
   },
 ];
