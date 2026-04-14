@@ -177,6 +177,7 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminPlanSwitcher />;
     default:
       return <AdminUserManager />;
+  }
 }
 
 export default function Admin() {
