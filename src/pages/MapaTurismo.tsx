@@ -301,7 +301,7 @@ export default function MapaTurismo() {
     return results;
   }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, cruiseQuickFilters, sortBy, reviewStatsMap, getLikeCount]);
 
-  const isLoadingAll = isLoading || loadingOperators || loadingCruises;
+  const isLoadingAll = isLoading || loadingOperators || loadingCruises || loadingTravelMeet;
 
   const handleOpenReview = (supplier: any) => {
     if (!user) {
