@@ -140,7 +140,7 @@ export default function MapaTurismo() {
   };
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
-  
+  const { data: travelMeetSuppliers, isLoading: loadingTravelMeet } = useTravelMeetSuppliers();
 
   const { data: tourOperators, isLoading: loadingOperators } = useQuery({
     queryKey: ["tour-operators-listing"],
