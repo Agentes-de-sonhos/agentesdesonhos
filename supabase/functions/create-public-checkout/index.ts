@@ -5,7 +5,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PROFISSIONAL_PRICE_ID = "price_1TBPu8FkGdVt5nieGrSjI4yp";
+const PRICE_IDS: Record<string, string> = {
+  profissional: "price_1TLxTbFkGdVt5nie0MpVjQM3",
+  premium: "price_1TLxU4FkGdVt5nieNT6rfU3u",
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -20,6 +23,17 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const body = await req.json().catch(() => ({}));
+    const plan = body.plan || "profissional";
+    
+    const priceId = PRICE_IDS[plan];
+    if (!priceId) {
+      return new Response(JSON.stringify({ error: "Plano inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -27,11 +41,11 @@ Deno.serve(async (req) => {
     const origin = req.headers.get("origin") || "https://agentesdesonhos.lovable.app";
 
     const session = await stripe.checkout.sessions.create({
-      line_items: [{ price: PROFISSIONAL_PRICE_ID, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${origin}/auth?checkout=success`,
       cancel_url: `${origin}/planos?checkout=cancelled`,
-      metadata: { plan: "profissional" },
+      metadata: { plan },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
