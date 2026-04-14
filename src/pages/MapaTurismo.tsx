@@ -602,15 +602,21 @@ export default function MapaTurismo() {
                 <Card
                   key={supplier.id}
                   className="group cursor-pointer shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
-                  onClick={() =>
+                  onClick={() => {
+                    if (supplier._source === "travelmeet") {
+                      if (supplier.website_url) {
+                        window.open(supplier.website_url, "_blank");
+                      }
+                      return;
+                    }
                     navigate(
                       supplier._source === "cruise"
                         ? `/mapa-turismo/cruzeiros/${supplier.id}`
                         : supplier._source === "operator"
                         ? `/mapa-turismo/operadora/${supplier.id}`
                         : `/mapa-turismo/${supplier.id}`
-                    )
-                  }
+                    );
+                  }}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
