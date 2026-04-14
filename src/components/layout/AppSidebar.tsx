@@ -124,8 +124,8 @@ const guiasSection: MenuSection = {
   borderColor: "border-emerald-600",
   items: [
     { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
-    { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
+    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass, requiredFeature: "travel_advisor" },
+    { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "benefits" },
     { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
@@ -141,9 +141,9 @@ const recursosVendasSection: MenuSection = {
   textColor: "text-orange-700",
   borderColor: "border-orange-600",
   items: [
-    { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
+    { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane, requiredFeature: "flight_blocks" },
     { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
+    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, requiredFeature: "hotel_raio_x" },
   ],
 };
 
@@ -162,7 +162,7 @@ const criarSection: MenuSection = {
     { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
     { key: "roteiros", title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
     { key: "conteudo", title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
-    { key: "bloco_notas", title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote },
+    { key: "bloco_notas", title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote, requiredFeature: "notepad" },
   ],
 };
 
@@ -212,10 +212,10 @@ const marketingSection: MenuSection = {
   textColor: "text-pink-700",
   borderColor: "border-pink-600",
   items: [
-    { key: "cartao_visitas", title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
-    { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
-    { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
-    { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
+    { key: "cartao_visitas", title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard, requiredFeature: "business_card" },
+    { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store, requiredFeature: "showcase" },
+    { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush, requiredFeature: "lamina_customizer" },
+    { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus, requiredFeature: "lead_capture" },
   ],
 };
 
