@@ -65,7 +65,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         if (error.code === "PGRST116" || !data) {
           const { data: newSub, error: insertError } = await supabase
             .from("subscriptions")
-            .insert({ user_id: user.id, plan: "essencial" })
+            .insert({ user_id: user.id, plan: "start" })
             .select()
             .single();
 
@@ -79,7 +79,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         // No subscription found, create one
         const { data: newSub, error: insertError } = await supabase
           .from("subscriptions")
-          .insert({ user_id: user.id, plan: "essencial" })
+          .insert({ user_id: user.id, plan: "start" })
           .select()
           .single();
 
