@@ -42,6 +42,7 @@ import { useSuppliersWithSpecialties } from "@/hooks/useSupplierSpecialties";
 import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
 import { useSupplierReviews } from "@/hooks/useSupplierReviews";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
+import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { toast } from "sonner";
 
 interface CategoryDef {
@@ -139,7 +140,7 @@ export default function MapaTurismo() {
   };
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
-  
+  const { data: travelMeetSuppliers, isLoading: loadingTravelMeet } = useTravelMeetSuppliers();
 
   const { data: tourOperators, isLoading: loadingOperators } = useQuery({
     queryKey: ["tour-operators-listing"],
@@ -204,8 +205,19 @@ export default function MapaTurismo() {
         _source: "cruise" as const,
       };
     });
-    return [...fromSuppliers, ...fromOperators, ...fromCruises];
-  }, [suppliers, tourOperators, cruiseCompanies]);
+    const fromTravelMeet = (travelMeetSuppliers || []).map((tm: any) => ({
+      id: `tm-${tm.id}`,
+      name: tm.name,
+      category: tm.category || "Operadoras de turismo",
+      logo_url: tm.logo_url || null,
+      website_url: tm.website || null,
+      instagram_url: tm.instagram || null,
+      sales_channel: null,
+      specialties: (tm.specialties || []).map((s: string, i: number) => ({ id: `tm-${i}`, name: s })),
+      _source: "travelmeet" as const,
+    }));
+    return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet];
+  }, [suppliers, tourOperators, cruiseCompanies, travelMeetSuppliers]);
 
   // Contextual specialties: only from items matching the active category
   const allSpecialties = useMemo(() => {
@@ -289,7 +301,7 @@ export default function MapaTurismo() {
     return results;
   }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, cruiseQuickFilters, sortBy, reviewStatsMap, getLikeCount]);
 
-  const isLoadingAll = isLoading || loadingOperators || loadingCruises;
+  const isLoadingAll = isLoading || loadingOperators || loadingCruises || loadingTravelMeet;
 
   const handleOpenReview = (supplier: any) => {
     if (!user) {
@@ -590,15 +602,21 @@ export default function MapaTurismo() {
                 <Card
                   key={supplier.id}
                   className="group cursor-pointer shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
-                  onClick={() =>
+                  onClick={() => {
+                    if (supplier._source === "travelmeet") {
+                      if (supplier.website_url) {
+                        window.open(supplier.website_url, "_blank");
+                      }
+                      return;
+                    }
                     navigate(
                       supplier._source === "cruise"
                         ? `/mapa-turismo/cruzeiros/${supplier.id}`
                         : supplier._source === "operator"
                         ? `/mapa-turismo/operadora/${supplier.id}`
                         : `/mapa-turismo/${supplier.id}`
-                    )
-                  }
+                    );
+                  }}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
