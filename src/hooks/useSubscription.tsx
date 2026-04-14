@@ -11,6 +11,7 @@ import {
   PLAN_LABELS
 } from "@/types/subscription";
 import { useUserRole } from "./useUserRole";
+import { useFeatureAccess } from "./useFeatureAccess";
 
 interface SubscriptionContextType {
   subscription: Subscription | null;
