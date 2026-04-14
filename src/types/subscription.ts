@@ -69,6 +69,8 @@ const PROFISSIONAL_FEATURES: Feature[] = [
   'qa_forum', 'qa_comment', 'itinerary', 'quote_generator',
   'ai_tools', 'trip_wallet', 'reminders', 'trainings_live',
   'trails_premium', 'certificates', 'ranking', 'content_creator',
+  'benefits', 'notepad', 'showcase', 'lamina_customizer',
+  'lead_capture', 'travel_advisor', 'hotel_raio_x',
 ];
 
 export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
