@@ -38,7 +38,14 @@ export type Feature =
   | 'premium_group'
   | 'fam_tours'
   | 'community'
-  | 'content_creator';
+  | 'content_creator'
+  | 'benefits'
+  | 'notepad'
+  | 'showcase'
+  | 'lamina_customizer'
+  | 'lead_capture'
+  | 'travel_advisor'
+  | 'hotel_raio_x';
 
 const ALL_FEATURES: Feature[] = [
   'news', 'tourism_map', 'materials', 'agenda', 'crm_basic',
@@ -47,6 +54,8 @@ const ALL_FEATURES: Feature[] = [
   'ai_tools', 'trip_wallet', 'reminders', 'trainings_live',
   'ai_unlimited', 'trails_premium', 'certificates', 'ranking',
   'premium_group', 'fam_tours', 'community', 'content_creator',
+  'benefits', 'notepad', 'showcase', 'lamina_customizer',
+  'lead_capture', 'travel_advisor', 'hotel_raio_x',
 ];
 
 const START_FEATURES: Feature[] = [
