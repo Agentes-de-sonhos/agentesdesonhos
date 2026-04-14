@@ -160,6 +160,11 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   content_creator: 'profissional',
 };
 
+export const DAILY_AI_LIMITS: Partial<Record<SubscriptionPlan, number>> = {
+  start: 4,         // 2 roteiros + 2 conteúdos
+  profissional: 5,
+};
+
 export const ESSENCIAL_DAILY_LIMITS: Partial<Record<Feature, number>> = {
   itinerary: 1,
   quote_generator: 1,
