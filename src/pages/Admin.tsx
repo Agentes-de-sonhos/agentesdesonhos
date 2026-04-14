@@ -40,6 +40,7 @@ import { AdminUserAnalytics } from "@/components/admin/AdminUserAnalytics";
 import { AdminDriveImportManager } from "@/components/admin/AdminDriveImportManager";
 import { AdminCruisesManager } from "@/components/admin/AdminCruisesManager";
 import { AdminSupportMode } from "@/components/admin/AdminSupportMode";
+import { AdminPlanSwitcher } from "@/components/admin/AdminPlanSwitcher";
 import { AdminVitrineCategoriesManager } from "@/components/admin/AdminVitrineCategoriesManager";
 import { AdminCardCaptureManager } from "@/components/admin/AdminCardCaptureManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -75,6 +76,7 @@ const TAB_LABELS: Record<string, string> = {
   "drive-import": "Drive",
   "support-mode": "Modo Suporte",
   vitrine: "Vitrine",
+  "plan-switcher": "Testar Planos",
 };
 
 function AdminContent({ tab }: { tab: string }) {
@@ -171,9 +173,10 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminSupportMode />;
     case "vitrine":
       return <AdminVitrineCategoriesManager />;
+    case "plan-switcher":
+      return <AdminPlanSwitcher />;
     default:
       return <AdminUserManager />;
-  }
 }
 
 export default function Admin() {
