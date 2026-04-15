@@ -67,7 +67,7 @@ export function AdminTravelMeetManager() {
   });
 
   const actionMutation = useMutation({
-    mutationFn: async ({ id, action }: { id: string; action: "approve" | "reject" }) => {
+    mutationFn: async ({ id, action, supplier }: { id: string; action: "approve" | "reject"; supplier?: TravelMeetSupplier }) => {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
       if (!token) throw new Error("Não autenticado");
@@ -78,7 +78,7 @@ export function AdminTravelMeetManager() {
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ id, action }),
+          body: JSON.stringify({ id, action, supplier }),
         }
       );
       if (!res.ok) {
@@ -199,18 +199,18 @@ export function AdminTravelMeetManager() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="gap-1 text-green-600 hover:text-green-700"
+                            className="gap-1"
                             disabled={actionMutation.isPending}
-                            onClick={() => actionMutation.mutate({ id: s.id, action: "approve" })}
+                            onClick={() => actionMutation.mutate({ id: s.id, action: "approve", supplier: s })}
                           >
                             <CheckCircle className="h-4 w-4" /> Aprovar
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="gap-1 text-destructive hover:text-destructive"
+                            className="gap-1"
                             disabled={actionMutation.isPending}
-                            onClick={() => actionMutation.mutate({ id: s.id, action: "reject" })}
+                            onClick={() => actionMutation.mutate({ id: s.id, action: "reject", supplier: s })}
                           >
                             <XCircle className="h-4 w-4" /> Rejeitar
                           </Button>
