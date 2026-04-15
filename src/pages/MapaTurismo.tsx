@@ -207,8 +207,8 @@ export default function MapaTurismo() {
     });
     const fromTravelMeet = (travelMeetSuppliers || []).map((tm: any) => ({
       id: `tm-${tm.id}`,
-      name: tm.name,
-      category: tm.category || "Operadoras de turismo",
+      name: tm.name || tm.company_name || tm.brand_name || "Sem nome",
+      category: tm.category || tm.business_category || "Operadoras de turismo",
       logo_url: tm.logo_url || null,
       website_url: tm.website || null,
       instagram_url: tm.instagram || null,
