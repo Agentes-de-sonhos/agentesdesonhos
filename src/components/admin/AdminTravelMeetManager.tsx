@@ -46,7 +46,7 @@ export function AdminTravelMeetManager() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
   const queryClient = useQueryClient();
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["travelmeet-admin-suppliers", statusFilter],
     queryFn: async () => {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -136,6 +136,10 @@ export function AdminTravelMeetManager() {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
+        ) : error ? (
+          <p className="text-center text-destructive py-8">
+            {error instanceof Error ? error.message : "Erro ao carregar cadastros do TravelMeet."}
+          </p>
         ) : suppliers.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">
             Nenhum cadastro {STATUS_LABELS[statusFilter].toLowerCase()} encontrado.
