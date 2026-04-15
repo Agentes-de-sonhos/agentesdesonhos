@@ -31,7 +31,6 @@ const TripRemindersCard = lazy(() => import("@/components/dashboard/TripReminder
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
-import { TripRemindersCard } from "@/components/dashboard/TripRemindersCard";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
