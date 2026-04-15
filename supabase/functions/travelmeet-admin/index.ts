@@ -13,7 +13,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -33,7 +32,6 @@ Deno.serve(async (req) => {
 
     const userId = claimsData.claims.sub;
 
-    // Check admin role
     const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", userId).single();
     if (roleData?.role !== "admin") {
       return new Response(JSON.stringify({ error: "Acesso negado" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -65,6 +63,59 @@ Deno.serve(async (req) => {
         body: JSON.stringify(body),
       });
       const data = await resp.json();
+
+      // If approval was successful, sync to local tour_operators table
+      if (resp.ok && body.action === "approve") {
+        try {
+          const serviceClient = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+          );
+
+          // Fetch supplier details from TravelMeet to get full data
+          const detailResp = await fetch(`${TRAVELMEET_ENDPOINT}?status=approved&limit=1&search_id=${body.id}`, {
+            headers: { "x-admin-api-key": adminApiKey },
+          });
+          
+          // Use data from the approval response or fetch details
+          const supplierData = data.supplier || data;
+          
+          const supplierName = supplierData.company_name || supplierData.brand_name || "Fornecedor TravelMeet";
+          
+          // Check if already exists by name to avoid duplicates
+          const { data: existing } = await serviceClient
+            .from("tour_operators")
+            .select("id")
+            .eq("name", supplierName)
+            .maybeSingle();
+
+          if (!existing) {
+            const newOperator: Record<string, unknown> = {
+              name: supplierName,
+              category: supplierData.business_category || "Outros",
+              website: supplierData.website || null,
+              logo_url: supplierData.logo_url || null,
+              commercial_contacts: supplierData.commercial_email 
+                ? `${supplierData.contact_person_name || ""} - ${supplierData.commercial_email}`.trim()
+                : supplierData.contact_person_name || null,
+              specialties: supplierData.short_description || null,
+              is_active: true,
+            };
+
+            await serviceClient.from("tour_operators").insert(newOperator);
+            
+            // Add sync info to response
+            data._synced_to_map = true;
+          } else {
+            data._synced_to_map = false;
+            data._sync_note = "Já existe no Mapa do Turismo";
+          }
+        } catch (syncErr) {
+          console.error("Sync to tour_operators failed:", syncErr);
+          data._sync_error = syncErr.message;
+        }
+      }
+
       return new Response(JSON.stringify(data), { status: resp.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 

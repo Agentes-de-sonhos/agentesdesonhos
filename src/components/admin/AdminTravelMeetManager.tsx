@@ -85,8 +85,20 @@ export function AdminTravelMeetManager() {
       }
       return res.json();
     },
-    onSuccess: (_, variables) => {
-      toast.success(variables.action === "approve" ? "Cadastro aprovado!" : "Cadastro rejeitado!");
+    onSuccess: (data, variables) => {
+      if (variables.action === "approve") {
+        if (data?._synced_to_map) {
+          toast.success("Cadastro aprovado e adicionado ao Mapa do Turismo!");
+        } else if (data?._sync_note) {
+          toast.success("Cadastro aprovado! (já existia no Mapa do Turismo)");
+        } else if (data?._sync_error) {
+          toast.warning("Cadastro aprovado, mas houve erro ao sincronizar com o Mapa do Turismo.");
+        } else {
+          toast.success("Cadastro aprovado!");
+        }
+      } else {
+        toast.success("Cadastro rejeitado!");
+      }
       queryClient.invalidateQueries({ queryKey: ["travelmeet-admin-suppliers"] });
     },
     onError: (err: Error) => {
