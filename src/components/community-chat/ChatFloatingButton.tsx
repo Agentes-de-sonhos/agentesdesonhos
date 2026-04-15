@@ -28,6 +28,7 @@ type ChatView = "menu" | "room" | "dm" | "conversations";
 
 export function ChatFloatingButton() {
   const { hasFeature } = useSubscription();
+  const { isAdmin } = useUserRole();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<ChatView>("menu");
@@ -73,7 +74,7 @@ export function ChatFloatingButton() {
   const touchStartY = useRef<number | null>(null);
   const touchDeltaY = useRef(0);
 
-  if (!hasFeature("community")) return null;
+  if (!isAdmin && !hasFeature("community")) return null;
 
   const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
   const shouldShow = isDashboard || totalUnread > 0 || isOpen;
