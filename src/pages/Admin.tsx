@@ -43,6 +43,7 @@ import { AdminSupportMode } from "@/components/admin/AdminSupportMode";
 import { AdminPlanSwitcher } from "@/components/admin/AdminPlanSwitcher";
 import { AdminVitrineCategoriesManager } from "@/components/admin/AdminVitrineCategoriesManager";
 import { AdminCardCaptureManager } from "@/components/admin/AdminCardCaptureManager";
+import { AdminTravelMeetManager } from "@/components/admin/AdminTravelMeetManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +78,7 @@ const TAB_LABELS: Record<string, string> = {
   "support-mode": "Modo Suporte",
   vitrine: "Vitrine",
   "plan-switcher": "Testar Planos",
+  travelmeet: "TravelMeet",
 };
 
 function AdminContent({ tab }: { tab: string }) {
@@ -175,6 +177,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminVitrineCategoriesManager />;
     case "plan-switcher":
       return <AdminPlanSwitcher />;
+    case "travelmeet":
+      return <AdminTravelMeetManager />;
     default:
       return <AdminUserManager />;
   }
