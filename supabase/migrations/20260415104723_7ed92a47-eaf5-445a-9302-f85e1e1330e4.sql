@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_noticias_published ON public.noticias_dashboard (status, data_publicacao DESC) WHERE status = 'aprovada';
