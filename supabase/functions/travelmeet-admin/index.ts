@@ -43,7 +43,8 @@ Deno.serve(async (req) => {
 
     if (req.method === "GET") {
       const url = new URL(req.url);
-      const status = url.searchParams.get("status") || "pending_approval";
+      const requestedStatus = url.searchParams.get("status") || "pending";
+      const status = requestedStatus === "pending_approval" ? "pending" : requestedStatus;
       const limit = url.searchParams.get("limit") || "50";
       const offset = url.searchParams.get("offset") || "0";
 

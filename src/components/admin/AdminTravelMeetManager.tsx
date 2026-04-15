@@ -26,22 +26,24 @@ interface TravelMeetSupplier {
   logo_url?: string;
 }
 
-type StatusFilter = "pending_approval" | "approved" | "rejected";
+type StatusFilter = "pending" | "approved" | "rejected";
 
-const STATUS_LABELS: Record<StatusFilter, string> = {
+const STATUS_LABELS: Record<StatusFilter | "pending_approval", string> = {
+  pending: "Pendentes",
   pending_approval: "Pendentes",
   approved: "Aprovados",
   rejected: "Rejeitados",
 };
 
 const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive"> = {
+  pending: "default",
   pending_approval: "default",
   approved: "secondary",
   rejected: "destructive",
 };
 
 export function AdminTravelMeetManager() {
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending_approval");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
   const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery({
@@ -124,7 +126,7 @@ export function AdminTravelMeetManager() {
       <CardContent className="space-y-4">
         <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
           <TabsList>
-            <TabsTrigger value="pending_approval">Pendentes</TabsTrigger>
+            <TabsTrigger value="pending">Pendentes</TabsTrigger>
             <TabsTrigger value="approved">Aprovados</TabsTrigger>
             <TabsTrigger value="rejected">Rejeitados</TabsTrigger>
           </TabsList>
@@ -149,7 +151,7 @@ export function AdminTravelMeetManager() {
                   <TableHead>Localização</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead>Status</TableHead>
-                  {statusFilter === "pending_approval" && <TableHead className="text-right">Ações</TableHead>}
+                  {statusFilter === "pending" && <TableHead className="text-right">Ações</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -191,7 +193,7 @@ export function AdminTravelMeetManager() {
                         {STATUS_LABELS[s.status as StatusFilter] || s.status}
                       </Badge>
                     </TableCell>
-                    {statusFilter === "pending_approval" && (
+                    {statusFilter === "pending" && (
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
