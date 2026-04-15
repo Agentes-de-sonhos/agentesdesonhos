@@ -7,6 +7,17 @@ const corsHeaders = {
 
 const TRAVELMEET_ENDPOINT = "https://yapuxdnxbvsvikcdrzmu.supabase.co/functions/v1/admin-suppliers";
 
+const normalizeTravelMeetStatus = (status?: string | null) => {
+  if (!status || status === "pending") return "pending_approval";
+  return status;
+};
+
+const getString = (value: unknown) => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -43,8 +54,8 @@ Deno.serve(async (req) => {
 
     if (req.method === "GET") {
       const url = new URL(req.url);
-      const requestedStatus = url.searchParams.get("status") || "pending";
-      const status = requestedStatus === "pending_approval" ? "pending" : requestedStatus;
+      const requestedStatus = url.searchParams.get("status");
+      const status = normalizeTravelMeetStatus(requestedStatus);
       const limit = url.searchParams.get("limit") || "50";
       const offset = url.searchParams.get("offset") || "0";
 
@@ -52,6 +63,7 @@ Deno.serve(async (req) => {
         headers: { "x-admin-api-key": adminApiKey },
       });
       const data = await resp.json();
+      console.log("travelmeet-admin GET", { requestedStatus, forwardedStatus: status, total: data?.total, returned: Array.isArray(data?.suppliers) ? data.suppliers.length : 0 });
       return new Response(JSON.stringify(data), { status: resp.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -60,11 +72,10 @@ Deno.serve(async (req) => {
       const resp = await fetch(TRAVELMEET_ENDPOINT, {
         method: "POST",
         headers: { "x-admin-api-key": adminApiKey, "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ id: body.id, action: body.action }),
       });
       const data = await resp.json();
 
-      // If approval was successful, sync to local tour_operators table
       if (resp.ok && body.action === "approve") {
         try {
           const serviceClient = createClient(
@@ -72,17 +83,16 @@ Deno.serve(async (req) => {
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
           );
 
-          // Fetch supplier details from TravelMeet to get full data
-          const detailResp = await fetch(`${TRAVELMEET_ENDPOINT}?status=approved&limit=1&search_id=${body.id}`, {
-            headers: { "x-admin-api-key": adminApiKey },
-          });
-          
-          // Use data from the approval response or fetch details
-          const supplierData = data.supplier || data;
-          
-          const supplierName = supplierData.company_name || supplierData.brand_name || "Fornecedor TravelMeet";
-          
-          // Check if already exists by name to avoid duplicates
+          const supplierData = (body.supplier && typeof body.supplier === "object")
+            ? body.supplier
+            : (data?.supplier && typeof data.supplier === "object")
+              ? data.supplier
+              : data;
+
+          const supplierName = getString(supplierData?.company_name) || getString(supplierData?.brand_name) || "Fornecedor TravelMeet";
+          const contactPerson = getString(supplierData?.contact_person_name);
+          const commercialEmail = getString(supplierData?.commercial_email);
+
           const { data: existing } = await serviceClient
             .from("tour_operators")
             .select("id")
@@ -92,27 +102,35 @@ Deno.serve(async (req) => {
           if (!existing) {
             const newOperator: Record<string, unknown> = {
               name: supplierName,
-              category: supplierData.business_category || "Outros",
-              website: supplierData.website || null,
-              logo_url: supplierData.logo_url || null,
-              commercial_contacts: supplierData.commercial_email 
-                ? `${supplierData.contact_person_name || ""} - ${supplierData.commercial_email}`.trim()
-                : supplierData.contact_person_name || null,
-              specialties: supplierData.short_description || null,
+              category: getString(supplierData?.business_category) || "Outros",
+              website: getString(supplierData?.website),
+              logo_url: getString(supplierData?.logo_url),
+              commercial_contacts: commercialEmail
+                ? [contactPerson, commercialEmail].filter(Boolean).join(" - ")
+                : contactPerson,
+              specialties: getString(supplierData?.short_description),
               is_active: true,
             };
 
-            await serviceClient.from("tour_operators").insert(newOperator);
-            
-            // Add sync info to response
+            const { data: insertedOperator, error: insertError } = await serviceClient
+              .from("tour_operators")
+              .insert(newOperator)
+              .select("id")
+              .single();
+
+            if (insertError) throw insertError;
+
             data._synced_to_map = true;
+            data._sync_operator_id = insertedOperator.id;
+            console.log("travelmeet-admin sync success", { supplierName, operatorId: insertedOperator.id });
           } else {
             data._synced_to_map = false;
             data._sync_note = "Já existe no Mapa do Turismo";
+            console.log("travelmeet-admin sync skipped", { supplierName, existingOperatorId: existing.id });
           }
         } catch (syncErr) {
           console.error("Sync to tour_operators failed:", syncErr);
-          data._sync_error = syncErr.message;
+          data._sync_error = syncErr instanceof Error ? syncErr.message : "Erro desconhecido ao sincronizar";
         }
       }
 
@@ -121,6 +139,6 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ error: "Método não suportado" }), { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : "Erro interno" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
