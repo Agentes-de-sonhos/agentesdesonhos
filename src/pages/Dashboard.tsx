@@ -5,8 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { useGamification } from "@/hooks/useGamification";
 import { GamificationPill } from "@/components/layout/GamificationPill";
 import {
-  Route,
-  FileText,
   Plane,
   Building2,
   CreditCard,
@@ -17,31 +15,22 @@ import {
   Loader2,
   User,
   LogOut,
-  StickyNote,
-  Calculator,
-  Users,
-  Wallet,
-  Heart,
-  GraduationCap,
-  Image,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
 
-import { CuratedNewsFeed } from "@/components/dashboard/CuratedNewsFeed";
-import { SupplierCategoriesCard } from "@/components/dashboard/SupplierCategoriesCard";
-import { UpcomingAgendaEventsCard } from "@/components/dashboard/UpcomingAgendaEventsCard";
-import { ClientsManagementCard } from "@/components/dashboard/ClientsManagementCard";
-import { CommunityQACard } from "@/components/dashboard/CommunityQACard";
-import { AgentToolsCard } from "@/components/dashboard/AgentToolsCard";
-import { SectionHeader } from "@/components/dashboard/SectionHeader";
-import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
+// Lazy load heavy dashboard cards to reduce initial bundle
+const CuratedNewsFeed = lazy(() => import("@/components/dashboard/CuratedNewsFeed").then(m => ({ default: m.CuratedNewsFeed })));
+const UpcomingAgendaEventsCard = lazy(() => import("@/components/dashboard/UpcomingAgendaEventsCard").then(m => ({ default: m.UpcomingAgendaEventsCard })));
+const ClientsManagementCard = lazy(() => import("@/components/dashboard/ClientsManagementCard").then(m => ({ default: m.ClientsManagementCard })));
+const CommunityQACard = lazy(() => import("@/components/dashboard/CommunityQACard").then(m => ({ default: m.CommunityQACard })));
+const AgentToolsCard = lazy(() => import("@/components/dashboard/AgentToolsCard").then(m => ({ default: m.AgentToolsCard })));
+const DashboardBanner = lazy(() => import("@/components/dashboard/DashboardBanner").then(m => ({ default: m.DashboardBanner })));
+const TripRemindersCard = lazy(() => import("@/components/dashboard/TripRemindersCard").then(m => ({ default: m.TripRemindersCard })));
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
-import { TripRemindersCard } from "@/components/dashboard/TripRemindersCard";
 import { supabase } from "@/integrations/supabase/client";
 import { LucideIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -186,7 +175,7 @@ export default function Dashboard() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <>
+          <Suspense fallback={<div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
             {/* 1. Banner Rotativo */}
             <DashboardBanner />
 
@@ -207,9 +196,7 @@ export default function Dashboard() {
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><ClientsManagementCard /></div>
               <div className="min-w-0"><AgentToolsCard /></div>
             </section>
-
-
-          </>
+          </Suspense>
         )}
       </div>
       <Suspense fallback={null}>
