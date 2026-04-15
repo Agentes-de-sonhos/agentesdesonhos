@@ -175,7 +175,7 @@ export default function Dashboard() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <>
+          <Suspense fallback={<div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
             {/* 1. Banner Rotativo */}
             <DashboardBanner />
 
@@ -196,9 +196,7 @@ export default function Dashboard() {
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><ClientsManagementCard /></div>
               <div className="min-w-0"><AgentToolsCard /></div>
             </section>
-
-
-          </>
+          </Suspense>
         )}
       </div>
       <Suspense fallback={null}>
