@@ -42,8 +42,17 @@ Deno.serve(async (req) => {
 
     const userId = user.id;
 
-    const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", userId).single();
-    if (roleData?.role !== "admin") {
+    const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+
+    if (roleError) {
+      console.error("travelmeet-admin role check failed", roleError);
+      return new Response(JSON.stringify({ error: "Erro ao validar permissões" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Acesso negado" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
