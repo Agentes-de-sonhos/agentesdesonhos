@@ -34,6 +34,7 @@ import {
   Store,
   CreditCard,
   Eye,
+  Globe,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -87,6 +88,7 @@ const menuGroups: AdminMenuGroup[] = [
       { id: "trade", label: "Trade", icon: TrendingUp },
       { id: "flight-blocks", label: "Bloqueios", icon: Plane },
       { id: "benefits", label: "Benefícios", icon: Gift },
+      { id: "travelmeet", label: "TravelMeet", icon: Globe },
     ],
   },
   {
