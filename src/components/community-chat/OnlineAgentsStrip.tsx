@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePresence, OnlineAgent } from "@/hooks/usePresence";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -131,6 +132,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
   const { onlineUsers, onlineCount, isOnline, isOnlineLoading, toggleOnline } =
     usePresence();
   const { hasFeature } = useSubscription();
+  const { isAdmin } = useUserRole();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -149,7 +151,7 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
     navigate(`/comunidade/agente/${agent.user_id}`);
   };
 
-  if (!hasFeature("community")) return null;
+  if (!isAdmin && !hasFeature("community")) return null;
 
   const maxVisible = isMobile ? 4 : 6;
   const visibleAgents = onlineUsers.slice(0, maxVisible);

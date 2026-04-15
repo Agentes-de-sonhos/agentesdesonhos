@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useDirectMessages } from "@/hooks/useDirectMessages";
 import { useCommunityChat, CommunityRoom } from "@/hooks/useCommunityChat";
 import { usePresence, OnlineAgent } from "@/hooks/usePresence";
@@ -27,6 +28,7 @@ type ChatView = "menu" | "room" | "dm" | "conversations";
 
 export function ChatFloatingButton() {
   const { hasFeature } = useSubscription();
+  const { isAdmin } = useUserRole();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<ChatView>("menu");
@@ -72,7 +74,7 @@ export function ChatFloatingButton() {
   const touchStartY = useRef<number | null>(null);
   const touchDeltaY = useRef(0);
 
-  if (!hasFeature("community")) return null;
+  if (!isAdmin && !hasFeature("community")) return null;
 
   const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
   const shouldShow = isDashboard || totalUnread > 0 || isOpen;
