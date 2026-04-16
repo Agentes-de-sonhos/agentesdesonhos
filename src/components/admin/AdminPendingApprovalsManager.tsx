@@ -42,18 +42,14 @@ export function AdminPendingApprovalsManager() {
   const { data: operators = [], isLoading } = useQuery({
     queryKey: ["admin-pending-approvals", statusFilter],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("tour_operators")
         .select("*")
         .order("created_at", { ascending: false });
-
-      if (statusFilter !== "all") {
-        query = query.eq("approval_status" as any, statusFilter);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
-      return data || [];
+      const all = data || [];
+      if (statusFilter === "all") return all;
+      return all.filter((op: any) => (op.approval_status || "approved") === statusFilter);
     },
   });
 
