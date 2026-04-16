@@ -66,8 +66,22 @@ export default function CadastroFornecedor() {
         },
       });
 
-      if (error || data?.error) {
-        toast.error(data?.error || "Erro ao criar conta.");
+      if (error) {
+        // functions.invoke wraps non-2xx as FunctionsHttpError; try to parse the body
+        let msg = "Erro ao criar conta.";
+        try {
+          const body = typeof error.context === "object" && error.context?.body
+            ? JSON.parse(new TextDecoder().decode(await new Response(error.context.body).arrayBuffer()))
+            : null;
+          if (body?.error) msg = body.error;
+        } catch {}
+        toast.error(msg);
+        setLoading(false);
+        return;
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
         setLoading(false);
         return;
       }
