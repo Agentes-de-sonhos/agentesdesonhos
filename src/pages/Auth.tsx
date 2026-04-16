@@ -127,6 +127,11 @@ export default function Auth() {
       return;
     }
 
+    if (role === "fornecedor") {
+      navigate("/meu-perfil-empresa", { replace: true });
+      return;
+    }
+
     const destination = role === "admin" ? "/admin" : "/dashboard";
     navigate(destination, { replace: true });
   }, [user, role, roleLoading, isNewUser, navigate, plan, subLoading]);
