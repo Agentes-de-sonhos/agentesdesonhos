@@ -46,6 +46,7 @@ const CATEGORIES = [
 const MATERIAL_TYPES = ["Todos", "Lâmina", "PDF", "Imagem", "Vídeo"];
 
 export default function Materiais() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedType, setSelectedType] = useState("Todos");
