@@ -7172,6 +7172,7 @@ export type Database = {
           social_links: Json | null
           specialties: string | null
           updated_at: string | null
+          user_id: string | null
           website: string | null
         }
         Insert: {
@@ -7197,6 +7198,7 @@ export type Database = {
           social_links?: Json | null
           specialties?: string | null
           updated_at?: string | null
+          user_id?: string | null
           website?: string | null
         }
         Update: {
@@ -7222,6 +7224,7 @@ export type Database = {
           social_links?: Json | null
           specialties?: string | null
           updated_at?: string | null
+          user_id?: string | null
           website?: string | null
         }
         Relationships: []
@@ -8579,7 +8582,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "agente" | "promotor"
+      app_role: "admin" | "agente" | "promotor" | "fornecedor"
       subscription_plan:
         | "essencial"
         | "profissional"
@@ -8721,7 +8724,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "agente", "promotor"],
+      app_role: ["admin", "agente", "promotor", "fornecedor"],
       subscription_plan: [
         "essencial",
         "profissional",

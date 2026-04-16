@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useSessionTracker } from "@/hooks/useSessionTracker";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading, signOut } = useAuth();
   const { plan, loading: subLoading } = useSubscription();
+  const { role, loading: roleLoading, isFornecedor } = useUserRole();
   const location = useLocation();
   const checkInterval = useRef<ReturnType<typeof setInterval>>();
   useSessionTracker();
@@ -43,7 +45,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     };
   }, [user, signOut]);
 
-  if (loading || subLoading) {
+  if (loading || subLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -56,6 +58,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  // Fornecedor users can only access /meu-perfil-empresa
+  if (isFornecedor) {
+    if (location.pathname !== "/meu-perfil-empresa") {
+      return <Navigate to="/meu-perfil-empresa" replace />;
+    }
   }
 
   // Educa Pass users can only access /educa-academy and /perfil

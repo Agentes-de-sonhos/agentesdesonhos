@@ -89,6 +89,8 @@ const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
 const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
 const MeusProjetos = lazy(() => import("./pages/MeusProjetos"));
 const CardCaptureQuickAccess = lazy(() => import("./pages/CardCaptureQuickAccess"));
+const CadastroFornecedor = lazy(() => import("./pages/CadastroFornecedor"));
+const SupplierProfileEdit = lazy(() => import("./pages/SupplierProfileEdit"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -138,6 +140,8 @@ const App = () => (
             />
             <Route path="/planos" element={<Planos />} />
             <Route path="/desconto30off" element={<Desconto30Off />} />
+            <Route path="/cadastro-fornecedor" element={<CadastroFornecedor />} />
+            <Route path="/meu-perfil-empresa" element={<ProtectedRoute><SupplierProfileEdit /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/crm" element={<AdminRoute><AdminCRM /></AdminRoute>} />
