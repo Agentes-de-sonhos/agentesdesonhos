@@ -3,9 +3,11 @@ import { ExternalLink } from "lucide-react";
 
 interface RichTextWithLinksProps {
   text: string;
-  /** If true, non-URL lines render as bullet list items */
+  /** Render non-URL lines as bullet list */
   asBullets?: boolean;
-  /** Max visible text lines (CSS line-clamp) */
+  /** Bullet dot color class (default: bg-primary/60) */
+  bulletColor?: string;
+  /** CSS line-clamp number for text mode */
   lineClamp?: number;
 }
 
@@ -24,14 +26,14 @@ function parseLines(text: string): ParsedLine[] {
 
     const url = match[1];
     let label = trimmed.replace(url, "").trim();
-    label = label.replace(/[:;\-–—]+$/, "").trim();
+    label = label.replace(/^[-•*]\s*/, "").replace(/[:;\-–—]+$/, "").trim();
     if (!label) label = "Acessar link";
 
     return { type: "button" as const, label, url };
   });
 }
 
-export function RichTextWithLinks({ text, asBullets, lineClamp }: RichTextWithLinksProps) {
+export function RichTextWithLinks({ text, asBullets, bulletColor = "bg-primary/60", lineClamp }: RichTextWithLinksProps) {
   const parsed = parseLines(text);
   const textLines = parsed.filter((p) => p.type === "text");
   const buttons = parsed.filter((p) => p.type === "button");
@@ -42,9 +44,9 @@ export function RichTextWithLinks({ text, asBullets, lineClamp }: RichTextWithLi
         asBullets ? (
           <ul className="space-y-2">
             {textLines.map((l, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-foreground/90">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
-                <span>{l.label}</span>
+              <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/90">
+                <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${bulletColor}`} />
+                <span className="leading-relaxed">{l.label}</span>
               </li>
             ))}
           </ul>

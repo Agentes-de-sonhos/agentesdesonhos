@@ -11,6 +11,7 @@ import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
 import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
 import { ContactCards } from "@/components/operator/ContactCards";
 import { CompetitiveAdvantagesCard } from "@/components/operator/CompetitiveAdvantagesCard";
+import { RichTextWithLinks } from "@/components/operator/RichTextWithLinks";
 import { BusinessHoursCard } from "@/components/operator/BusinessHoursCard";
 import { CertificationsCard } from "@/components/operator/CertificationsCard";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
