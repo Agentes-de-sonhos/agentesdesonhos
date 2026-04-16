@@ -12,6 +12,7 @@ interface OperatorHeroProps {
 
 export function OperatorHero({
   name,
+  category,
   logoUrl,
   averageRating = 0,
   totalReviews = 0,
