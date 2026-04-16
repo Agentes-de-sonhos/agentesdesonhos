@@ -149,6 +149,7 @@ export default function MapaTurismo() {
         .from("tour_operators")
         .select("*")
         .eq("is_active", true)
+        .eq("approval_status" as any, "approved")
         .order("name");
       if (error) throw error;
       return data;

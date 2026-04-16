@@ -99,7 +99,7 @@ export default function CadastroFornecedor() {
         return;
       }
 
-      toast.success("Conta criada com sucesso! Bem-vindo.");
+      toast.success("Cadastro enviado com sucesso! Seu perfil está em análise e será publicado após aprovação da nossa equipe.");
       navigate("/meu-perfil-empresa");
     } catch {
       toast.error("Erro ao processar solicitação.");

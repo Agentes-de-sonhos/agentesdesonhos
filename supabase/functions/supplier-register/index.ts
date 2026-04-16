@@ -75,6 +75,7 @@ Deno.serve(async (req) => {
         category: category || null,
         user_id: userId,
         is_active: true,
+        approval_status: "pending",
       })
       .select("id")
       .single();
