@@ -25,6 +25,8 @@ import { SocialLinksEditForm } from "@/components/edit-mode/forms/SocialLinksEdi
 import { CompanyInfoEditForm } from "@/components/edit-mode/forms/CompanyInfoEditForm";
 import { BusinessHoursEditForm } from "@/components/edit-mode/forms/BusinessHoursEditForm";
 import { MediaManagerModal } from "@/components/media/MediaManagerModal";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { type Lang, tp, getStoredLang, setStoredLang } from "@/i18n/supplierProfile";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +43,12 @@ interface BusinessHours {
 
 export default function SupplierProfileEdit() {
   const { user, signOut } = useAuth();
+  const [lang, setLang] = useState<Lang>(getStoredLang);
+
+  const changeLang = (l: Lang) => {
+    setLang(l);
+    setStoredLang(l);
+  };
 
   const { data: operator, isLoading } = useQuery({
     queryKey: ["supplier-own-operator", user?.id],
@@ -74,13 +82,16 @@ export default function SupplierProfileEdit() {
 
   if (!operator) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="flex justify-end w-full max-w-lg mb-4">
+          <LanguageSelector value={lang} onChange={changeLang} />
+        </div>
         <div className="text-center">
           <Building2 className="h-16 w-16 text-muted-foreground/40 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold">Perfil não encontrado</h2>
-          <p className="text-muted-foreground mt-2">Nenhum perfil de empresa vinculado à sua conta.</p>
+          <h2 className="text-xl font-semibold">{tp(lang, "not_found_title")}</h2>
+          <p className="text-muted-foreground mt-2">{tp(lang, "not_found_desc")}</p>
           <Button variant="outline" className="mt-6 rounded-xl" onClick={() => signOut()}>
-            Sair
+            {tp(lang, "sign_out")}
           </Button>
         </div>
       </div>
@@ -89,12 +100,12 @@ export default function SupplierProfileEdit() {
 
   return (
     <EditModeProvider defaultEnabled>
-      <SupplierProfileContent operator={operator} signOut={signOut} />
+      <SupplierProfileContent operator={operator} signOut={signOut} lang={lang} onLangChange={changeLang} />
     </EditModeProvider>
   );
 }
 
-function SupplierProfileContent({ operator, signOut }: { operator: any; signOut: () => Promise<void> }) {
+function SupplierProfileContent({ operator, signOut, lang, onLangChange }: { operator: any; signOut: () => Promise<void>; lang: Lang; onLangChange: (l: Lang) => void }) {
   const queryClient = useQueryClient();
   const updateMutation = useOperatorUpdate(operator.id, "tour_operators");
   const [materialsModalOpen, setMaterialsModalOpen] = useState(false);
@@ -164,11 +175,11 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
       await updateMutation.mutateAsync({ logo_url: url });
       queryClient.invalidateQueries({ queryKey: ["supplier-own-operator"] });
     } catch {
-      toast.error("Erro ao atualizar logotipo.");
+      toast.error(tp(lang, "logo_error"));
     }
   };
 
-  const placeholder = <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>;
+  const placeholder = <span className="italic text-muted-foreground">{tp(lang, "edit_click")}</span>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -176,11 +187,12 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Building2 className="h-5 w-5 text-primary" />
-            <span className="font-semibold text-foreground">Perfil da Empresa</span>
+            <span className="font-semibold text-foreground">{tp(lang, "page_title")}</span>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSelector value={lang} onChange={onLangChange} />
             <Button variant="ghost" size="sm" className="rounded-xl text-muted-foreground" onClick={() => signOut()}>
-              <LogOut className="h-4 w-4 mr-2" /> Sair
+              <LogOut className="h-4 w-4 mr-2" /> {tp(lang, "sign_out")}
             </Button>
           </div>
         </div>
@@ -202,7 +214,7 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
                   type="button"
                   onClick={() => setLogoManagerOpen(true)}
                   className="relative group/logo cursor-pointer rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                  title="Trocar logotipo"
+                  title={tp(lang, "change_logo")}
                 >
                   <div className="h-20 w-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 border border-primary/20 flex items-center justify-center shadow-sm overflow-hidden">
                     {editLogo ? (
@@ -217,14 +229,14 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
                 </button>
                 <div>
                   <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl tracking-tight">{operator.name}</h1>
-                  <p className="text-muted-foreground mt-1">{operator.category || "Empresa"}</p>
+                  <p className="text-muted-foreground mt-1">{operator.category || tp(lang, "company")}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={startEditing}
                 className="absolute top-3 right-3 z-10 h-8 w-8 rounded-lg bg-primary/10 hover:bg-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 border border-primary/20"
-                title="Editar dados do cabeçalho"
+                title={tp(lang, "edit_header")}
               >
                 <Pencil className="h-3.5 w-3.5 text-primary" />
               </button>
@@ -235,55 +247,55 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             <EditableSection
-              editForm={<TextEditForm label="Sobre a Empresa (máx 10 linhas)" value={editShortDesc} onChange={setEditShortDesc} />}
+              editForm={<TextEditForm label={tp(lang, "about_label")} value={editShortDesc} onChange={setEditShortDesc} />}
               onSave={async () => { await updateMutation.mutateAsync({ short_description: editShortDesc || null }); }}
               onCancel={() => setEditShortDesc(operator.short_description || "")}
             >
-              <OperatorInfoCard icon={FileText} title="Sobre a Empresa" iconColor="text-sky-600">
+              <OperatorInfoCard icon={FileText} title={tp(lang, "about")} iconColor="text-sky-600">
                 {operator.short_description ? <RichTextWithLinks text={operator.short_description} lineClamp={10} /> : placeholder}
               </OperatorInfoCard>
             </EditableSection>
 
             <EditableSection
-              editForm={<TextEditForm label="Diferenciais Competitivos (1 por linha, máx 7)" value={editAdvantages} onChange={setEditAdvantages} />}
+              editForm={<TextEditForm label={tp(lang, "advantages_label")} value={editAdvantages} onChange={setEditAdvantages} />}
               onSave={async () => { await updateMutation.mutateAsync({ competitive_advantages: editAdvantages || null }); }}
               onCancel={() => setEditAdvantages(operator.competitive_advantages || "")}
             >
               {operator.competitive_advantages ? (
                 <CompetitiveAdvantagesCard advantages={operator.competitive_advantages} />
               ) : (
-                <OperatorInfoCard icon={FileText} title="Diferenciais Competitivos" iconColor="text-amber-600">
+                <OperatorInfoCard icon={FileText} title={tp(lang, "advantages")} iconColor="text-amber-600">
                   {placeholder}
                 </OperatorInfoCard>
               )}
             </EditableSection>
 
             <EditableSection
-              editForm={<TextEditForm label="Como Vender" value={editHowToSell} onChange={setEditHowToSell} />}
+              editForm={<TextEditForm label={tp(lang, "how_to_sell")} value={editHowToSell} onChange={setEditHowToSell} />}
               onSave={async () => { await updateMutation.mutateAsync({ how_to_sell: editHowToSell || null }); }}
               onCancel={() => setEditHowToSell(operator.how_to_sell || "")}
             >
-              <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
+              <OperatorInfoCard icon={ShoppingCart} title={tp(lang, "how_to_sell")}>
                 {operator.how_to_sell ? <RichTextWithLinks text={operator.how_to_sell} /> : placeholder}
               </OperatorInfoCard>
             </EditableSection>
 
             <EditableSection
-              editForm={<TextEditForm label="Canais de Venda" value={editSalesChannels} onChange={setEditSalesChannels} />}
+              editForm={<TextEditForm label={tp(lang, "sales_channels")} value={editSalesChannels} onChange={setEditSalesChannels} />}
               onSave={async () => { await updateMutation.mutateAsync({ sales_channels: editSalesChannels || null }); }}
               onCancel={() => setEditSalesChannels(operator.sales_channels || "")}
             >
-              <OperatorInfoCard icon={Users} title="Canais de Venda">
+              <OperatorInfoCard icon={Users} title={tp(lang, "sales_channels")}>
                 {operator.sales_channels ? <SalesChannelCards salesChannels={operator.sales_channels} /> : placeholder}
               </OperatorInfoCard>
             </EditableSection>
 
             <EditableSection
-              editForm={<TextEditForm label="Contatos Comerciais" value={editContacts} onChange={setEditContacts} />}
+              editForm={<TextEditForm label={tp(lang, "contacts")} value={editContacts} onChange={setEditContacts} />}
               onSave={async () => { await updateMutation.mutateAsync({ commercial_contacts: editContacts || null }); }}
               onCancel={() => setEditContacts(operator.commercial_contacts || "")}
             >
-              <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
+              <OperatorInfoCard icon={Phone} title={tp(lang, "contacts")} iconColor="text-emerald-600">
                 {operator.commercial_contacts ? <ContactCards contacts={operator.commercial_contacts} /> : placeholder}
               </OperatorInfoCard>
             </EditableSection>
@@ -299,7 +311,7 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               {operator.business_hours ? (
                 <BusinessHoursCard hours={operator.business_hours as BusinessHours} />
               ) : (
-                <OperatorInfoCard icon={FileText} title="Horários de Funcionamento" iconColor="text-sky-600">
+                <OperatorInfoCard icon={FileText} title={tp(lang, "business_hours")} iconColor="text-sky-600">
                   {placeholder}
                 </OperatorInfoCard>
               )}
@@ -319,7 +331,7 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               {operator.specialties ? (
                 <OperatorSidebar operator={{ specialties: operator.specialties, category: "", social_links: null }} />
               ) : (
-                <OperatorInfoCard icon={Tag} title="Especialidades" iconColor="text-violet-600">
+                <OperatorInfoCard icon={Tag} title={tp(lang, "specialties")} iconColor="text-violet-600">
                   {placeholder}
                 </OperatorInfoCard>
               )}
@@ -336,7 +348,7 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               {(operator.website || operator.instagram || operator.social_links) ? (
                 <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
               ) : (
-                <OperatorInfoCard icon={Share2} title="Redes Sociais" iconColor="text-primary">
+                <OperatorInfoCard icon={Share2} title={tp(lang, "social_links")} iconColor="text-primary">
                   {placeholder}
                 </OperatorInfoCard>
               )}
@@ -351,14 +363,14 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
             </EditableSection>
 
             <EditableSection
-              editForm={<TextEditForm label="Certificações (1 por linha)" value={editCertifications} onChange={setEditCertifications} />}
+              editForm={<TextEditForm label={tp(lang, "certifications_label")} value={editCertifications} onChange={setEditCertifications} />}
               onSave={async () => { await updateMutation.mutateAsync({ certifications: editCertifications || null }); }}
               onCancel={() => setEditCertifications(operator.certifications || "")}
             >
               {operator.certifications ? (
                 <CertificationsCard certifications={operator.certifications} />
               ) : (
-                <OperatorInfoCard icon={FileText} title="Certificações" iconColor="text-emerald-600">
+                <OperatorInfoCard icon={FileText} title={tp(lang, "certifications")} iconColor="text-emerald-600">
                   {placeholder}
                 </OperatorInfoCard>
               )}
@@ -377,9 +389,9 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
       <Dialog open={materialsModalOpen} onOpenChange={setMaterialsModalOpen}>
         <DialogContent className="rounded-2xl max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg">Materiais de Divulgação</DialogTitle>
+            <DialogTitle className="text-lg">{tp(lang, "materials")}</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground mt-2">
-              Para incluir ou gerenciar materiais de divulgação, entre em contato com a equipe comercial.
+              {tp(lang, "materials_desc")}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4">
@@ -388,7 +400,7 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               <Mail className="h-4 w-4" />
-              Enviar e-mail para a equipe comercial
+              {tp(lang, "materials_email")}
             </a>
             <p className="text-xs text-muted-foreground mt-3">
               fernando.nobre@agentesdesonhos.com.br
