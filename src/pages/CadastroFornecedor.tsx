@@ -8,15 +8,16 @@ import { Building2, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = [
-  "Operadora",
-  "Companhia Aérea",
-  "Rede Hoteleira",
-  "Seguradora",
-  "Receptivo",
-  "Cruzeiro",
-  "Locadora",
+  "Operadora de Turismo",
   "Consolidadora",
-  "Outro",
+  "Companhia Aérea",
+  "Rede Hoteleira/ Resorts /hotéis/ pousadas",
+  "Seguros Viagens",
+  "Cruzeiros",
+  "Locadora de Veículos",
+  "Receptivos",
+  "Parques e Atrações",
+  "Guias de Turismo",
 ];
 
 export default function CadastroFornecedor() {
