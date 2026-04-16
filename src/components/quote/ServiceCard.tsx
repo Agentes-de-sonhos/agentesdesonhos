@@ -84,8 +84,10 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Alimentação: ${data.meal_plan}`);
       break;
     case "car_rental":
-      details.push(`Retirada: ${data.pickup_location}`);
-      details.push(`Devolução: ${data.dropoff_location}`);
+      if (data.pickup_date) details.push(`Retirada: ${formatDate(data.pickup_date)}${data.pickup_time ? ` às ${data.pickup_time}` : ''} — ${data.pickup_location}`);
+      else details.push(`Retirada: ${data.pickup_location}`);
+      if (data.dropoff_date) details.push(`Devolução: ${formatDate(data.dropoff_date)}${data.dropoff_time ? ` às ${data.dropoff_time}` : ''} — ${data.dropoff_location}`);
+      else details.push(`Devolução: ${data.dropoff_location}`);
       break;
     case "transfer": details.push(`Data: ${formatDate(data.date)}`); break;
     case "attraction":
