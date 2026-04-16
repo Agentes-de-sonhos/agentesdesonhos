@@ -51,7 +51,10 @@ export function RichTextWithLinks({ text, asBullets, bulletColor = "bg-primary/6
             ))}
           </ul>
         ) : (
-          <p className={`text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap ${lineClamp ? `line-clamp-${lineClamp}` : ""}`}>
+          <p
+            className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap"
+            style={lineClamp ? { display: "-webkit-box", WebkitLineClamp: lineClamp, WebkitBoxOrient: "vertical", overflow: "hidden" } : undefined}
+          >
             {textLines.map((l) => l.label).join("\n")}
           </p>
         )
