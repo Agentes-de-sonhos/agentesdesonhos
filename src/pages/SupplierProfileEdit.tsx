@@ -96,6 +96,7 @@ export default function SupplierProfileEdit() {
 }
 
 function SupplierProfileContent({ operator, signOut }: { operator: any; signOut: () => Promise<void> }) {
+  const queryClient = useQueryClient();
   const updateMutation = useOperatorUpdate(operator.id, "tour_operators");
   const [materialsModalOpen, setMaterialsModalOpen] = useState(false);
 
