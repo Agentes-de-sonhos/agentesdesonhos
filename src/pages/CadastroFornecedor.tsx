@@ -12,10 +12,12 @@ const CATEGORIES = [
   "Consolidadoras",
   "Companhias aéreas",
   "Hospedagem",
-  "Seguros viagem",
-  "Cruzeiros",
   "Locadoras de veículos",
+  "Cruzeiros",
+  "Seguros viagem",
   "Parques e atrações",
+  "Receptivos",
+  "Guias",
 ];
 
 export default function CadastroFornecedor() {
