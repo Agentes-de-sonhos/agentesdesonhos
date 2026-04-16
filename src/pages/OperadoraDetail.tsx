@@ -5,11 +5,14 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Building2, ShoppingCart, Users, Phone } from "lucide-react";
+import { ArrowLeft, Building2, ShoppingCart, Users, Phone, FileText } from "lucide-react";
 import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
 import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
 import { ContactCards } from "@/components/operator/ContactCards";
+import { CompetitiveAdvantagesCard } from "@/components/operator/CompetitiveAdvantagesCard";
+import { BusinessHoursCard } from "@/components/operator/BusinessHoursCard";
+import { CertificationsCard } from "@/components/operator/CertificationsCard";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
 import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
@@ -19,7 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOperatorUpdate } from "@/hooks/useOperatorUpdate";
 import { toast } from "sonner";
-import { EditModeProvider, useEditMode } from "@/contexts/EditModeContext";
+import { EditModeProvider } from "@/contexts/EditModeContext";
 import { EditModeToggle } from "@/components/edit-mode/EditModeToggle";
 import { EditableSection } from "@/components/edit-mode/EditableSection";
 import { HeroEditForm } from "@/components/edit-mode/forms/HeroEditForm";
@@ -27,6 +30,13 @@ import { TextEditForm } from "@/components/edit-mode/forms/TextEditForm";
 import { TagsEditForm } from "@/components/edit-mode/forms/TagsEditForm";
 import { SocialLinksEditForm } from "@/components/edit-mode/forms/SocialLinksEditForm";
 import { CompanyInfoEditForm } from "@/components/edit-mode/forms/CompanyInfoEditForm";
+import { BusinessHoursEditForm } from "@/components/edit-mode/forms/BusinessHoursEditForm";
+
+interface BusinessHours {
+  commercial?: string;
+  after_hours?: string;
+  emergency?: string;
+}
 
 export default function OperadoraDetail() {
   const { id } = useParams<{ id: string }>();
@@ -119,10 +129,16 @@ export default function OperadoraDetail() {
 }
 
 function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, reviews, reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview, updateMutation }: any) {
-  // Inline edit state
+  // Edit state
   const [editName, setEditName] = useState(operator.name);
   const [editLogo, setEditLogo] = useState(operator.logo_url);
+  const [editShortDesc, setEditShortDesc] = useState(operator.short_description || "");
+  const [editAdvantages, setEditAdvantages] = useState(operator.competitive_advantages || "");
   const [editHowToSell, setEditHowToSell] = useState(operator.how_to_sell || "");
+  const [editBusinessHours, setEditBusinessHours] = useState<BusinessHours>(
+    (operator.business_hours as BusinessHours) || {}
+  );
+  const [editCertifications, setEditCertifications] = useState(operator.certifications || "");
   const [editSalesChannels, setEditSalesChannels] = useState(operator.sales_channels || "");
   const [editContacts, setEditContacts] = useState(operator.commercial_contacts || "");
   const [editSpecialties, setEditSpecialties] = useState<string[]>(
@@ -148,20 +164,21 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
     executive_team: operator.executive_team,
   });
 
-  const makeSection = (
+  const wrap = (
     content: React.ReactNode,
     editForm: React.ReactNode,
     onSave: () => Promise<void>,
-    onCancel: () => void,
-    showEmpty?: boolean
+    onCancel: () => void
   ) => {
-    if (!isAdmin) return content || null;
+    if (!isAdmin) return content;
     return (
       <EditableSection editForm={editForm} onSave={onSave} onCancel={onCancel}>
-        {content || (showEmpty ? content : null)}
+        {content}
       </EditableSection>
     );
   };
+
+  const adminPlaceholder = <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>;
 
   return (
     <DashboardLayout>
@@ -174,21 +191,56 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
         </div>
 
         {/* Hero */}
-        {isAdmin ? (
-          <EditableSection
-            editForm={<HeroEditForm name={editName} logoUrl={editLogo} onNameChange={setEditName} onLogoChange={setEditLogo} />}
-            onSave={async () => { await updateMutation.mutateAsync({ name: editName, logo_url: editLogo }); }}
-            onCancel={() => { setEditName(operator.name); setEditLogo(operator.logo_url); }}
-          >
-            <OperatorHero name={operator.name} category={operator.category} logoUrl={operator.logo_url} averageRating={averageRating} totalReviews={totalReviews} onReviewClick={handleReviewClick} />
-          </EditableSection>
-        ) : (
-          <OperatorHero name={operator.name} category={operator.category} logoUrl={operator.logo_url} averageRating={averageRating} totalReviews={totalReviews} onReviewClick={handleReviewClick} />
+        {wrap(
+          <OperatorHero name={operator.name} category={operator.category} logoUrl={operator.logo_url} averageRating={averageRating} totalReviews={totalReviews} onReviewClick={handleReviewClick} />,
+          <HeroEditForm name={editName} logoUrl={editLogo} onNameChange={setEditName} onLogoChange={setEditLogo} />,
+          async () => { await updateMutation.mutateAsync({ name: editName, logo_url: editLogo }); },
+          () => { setEditName(operator.name); setEditLogo(operator.logo_url); }
         )}
 
         <div className="grid gap-8 lg:grid-cols-3">
+          {/* ===== LEFT COLUMN ===== */}
           <div className="lg:col-span-2 space-y-6">
-            {/* How to sell */}
+
+            {/* 1. Sobre a Operadora */}
+            {isAdmin ? (
+              <EditableSection
+                editForm={<TextEditForm label="Sobre a Operadora (máx 3 linhas)" value={editShortDesc} onChange={setEditShortDesc} />}
+                onSave={async () => { await updateMutation.mutateAsync({ short_description: editShortDesc || null }); }}
+                onCancel={() => setEditShortDesc(operator.short_description || "")}
+              >
+                <OperatorInfoCard icon={FileText} title="Sobre a Operadora" iconColor="text-sky-600">
+                  <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap line-clamp-3">
+                    {operator.short_description || adminPlaceholder}
+                  </p>
+                </OperatorInfoCard>
+              </EditableSection>
+            ) : operator.short_description ? (
+              <OperatorInfoCard icon={FileText} title="Sobre a Operadora" iconColor="text-sky-600">
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap line-clamp-3">{operator.short_description}</p>
+              </OperatorInfoCard>
+            ) : null}
+
+            {/* 2. Diferenciais Competitivos */}
+            {isAdmin ? (
+              <EditableSection
+                editForm={<TextEditForm label="Diferenciais Competitivos (1 por linha, máx 7)" value={editAdvantages} onChange={setEditAdvantages} />}
+                onSave={async () => { await updateMutation.mutateAsync({ competitive_advantages: editAdvantages || null }); }}
+                onCancel={() => setEditAdvantages(operator.competitive_advantages || "")}
+              >
+                {operator.competitive_advantages ? (
+                  <CompetitiveAdvantagesCard advantages={operator.competitive_advantages} />
+                ) : (
+                  <OperatorInfoCard icon={FileText} title="Diferenciais Competitivos" iconColor="text-amber-600">
+                    {adminPlaceholder}
+                  </OperatorInfoCard>
+                )}
+              </EditableSection>
+            ) : operator.competitive_advantages ? (
+              <CompetitiveAdvantagesCard advantages={operator.competitive_advantages} />
+            ) : null}
+
+            {/* 3. Como Vender */}
             {isAdmin ? (
               <EditableSection
                 editForm={<TextEditForm label="Como Vender" value={editHowToSell} onChange={setEditHowToSell} />}
@@ -197,7 +249,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               >
                 <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
                   <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                    {operator.how_to_sell || <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>}
+                    {operator.how_to_sell || adminPlaceholder}
                   </p>
                 </OperatorInfoCard>
               </EditableSection>
@@ -207,7 +259,48 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               </OperatorInfoCard>
             ) : null}
 
-            {/* Sales channels */}
+            {/* 4. Horário Comercial */}
+            {isAdmin ? (
+              <EditableSection
+                editForm={<BusinessHoursEditForm data={editBusinessHours} onChange={setEditBusinessHours} />}
+                onSave={async () => {
+                  const hasData = Object.values(editBusinessHours).some(Boolean);
+                  await updateMutation.mutateAsync({ business_hours: hasData ? editBusinessHours : null });
+                }}
+                onCancel={() => setEditBusinessHours((operator.business_hours as BusinessHours) || {})}
+              >
+                {operator.business_hours ? (
+                  <BusinessHoursCard hours={operator.business_hours as BusinessHours} />
+                ) : (
+                  <OperatorInfoCard icon={FileText} title="Horário Comercial" iconColor="text-sky-600">
+                    {adminPlaceholder}
+                  </OperatorInfoCard>
+                )}
+              </EditableSection>
+            ) : operator.business_hours ? (
+              <BusinessHoursCard hours={operator.business_hours as BusinessHours} />
+            ) : null}
+
+            {/* 5. Certificações */}
+            {isAdmin ? (
+              <EditableSection
+                editForm={<TextEditForm label="Certificações (1 por linha)" value={editCertifications} onChange={setEditCertifications} />}
+                onSave={async () => { await updateMutation.mutateAsync({ certifications: editCertifications || null }); }}
+                onCancel={() => setEditCertifications(operator.certifications || "")}
+              >
+                {operator.certifications ? (
+                  <CertificationsCard certifications={operator.certifications} />
+                ) : (
+                  <OperatorInfoCard icon={FileText} title="Certificações" iconColor="text-emerald-600">
+                    {adminPlaceholder}
+                  </OperatorInfoCard>
+                )}
+              </EditableSection>
+            ) : operator.certifications ? (
+              <CertificationsCard certifications={operator.certifications} />
+            ) : null}
+
+            {/* 6. Canais de Venda */}
             {isAdmin ? (
               <EditableSection
                 editForm={<TextEditForm label="Canais de Venda" value={editSalesChannels} onChange={setEditSalesChannels} />}
@@ -215,7 +308,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                 onCancel={() => setEditSalesChannels(operator.sales_channels || "")}
               >
                 <OperatorInfoCard icon={Users} title="Canais de Venda">
-                  {operator.sales_channels ? <SalesChannelCards salesChannels={operator.sales_channels} /> : <p className="text-sm italic text-muted-foreground">Clique no lápis para adicionar</p>}
+                  {operator.sales_channels ? <SalesChannelCards salesChannels={operator.sales_channels} /> : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.sales_channels ? (
@@ -224,7 +317,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               </OperatorInfoCard>
             ) : null}
 
-            {/* Contacts */}
+            {/* 7. Contatos Comerciais */}
             {isAdmin ? (
               <EditableSection
                 editForm={<TextEditForm label="Contatos Comerciais" value={editContacts} onChange={setEditContacts} />}
@@ -232,7 +325,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                 onCancel={() => setEditContacts(operator.commercial_contacts || "")}
               >
                 <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
-                  {operator.commercial_contacts ? <ContactCards contacts={operator.commercial_contacts} /> : <p className="text-sm italic text-muted-foreground">Clique no lápis para adicionar</p>}
+                  {operator.commercial_contacts ? <ContactCards contacts={operator.commercial_contacts} /> : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.commercial_contacts ? (
@@ -241,11 +334,14 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               </OperatorInfoCard>
             ) : null}
 
+            {/* 8. Avaliações */}
             <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} isAdmin={isAdmin} onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })} isDeleting={deleteReview.isPending} />
+
+            {/* 9. Materiais de Divulgação */}
             <SupplierMaterialsCard supplierId={operator.id} supplierName={operator.name} />
           </div>
 
-          {/* Sidebar */}
+          {/* ===== RIGHT COLUMN (SIDEBAR) ===== */}
           <div className="space-y-5 lg:sticky lg:top-6">
             {/* Specialties */}
             {isAdmin ? (

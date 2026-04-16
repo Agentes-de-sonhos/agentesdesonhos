@@ -7151,8 +7151,11 @@ export type Database = {
       tour_operators: {
         Row: {
           annual_revenue: string | null
+          business_hours: Json | null
           category: string | null
+          certifications: string | null
           commercial_contacts: string | null
+          competitive_advantages: string | null
           created_at: string | null
           employees: number | null
           executive_team: string | null
@@ -7165,6 +7168,7 @@ export type Database = {
           materials: Json | null
           name: string
           sales_channels: string | null
+          short_description: string | null
           social_links: Json | null
           specialties: string | null
           updated_at: string | null
@@ -7172,8 +7176,11 @@ export type Database = {
         }
         Insert: {
           annual_revenue?: string | null
+          business_hours?: Json | null
           category?: string | null
+          certifications?: string | null
           commercial_contacts?: string | null
+          competitive_advantages?: string | null
           created_at?: string | null
           employees?: number | null
           executive_team?: string | null
@@ -7186,6 +7193,7 @@ export type Database = {
           materials?: Json | null
           name: string
           sales_channels?: string | null
+          short_description?: string | null
           social_links?: Json | null
           specialties?: string | null
           updated_at?: string | null
@@ -7193,8 +7201,11 @@ export type Database = {
         }
         Update: {
           annual_revenue?: string | null
+          business_hours?: Json | null
           category?: string | null
+          certifications?: string | null
           commercial_contacts?: string | null
+          competitive_advantages?: string | null
           created_at?: string | null
           employees?: number | null
           executive_team?: string | null
@@ -7207,6 +7218,7 @@ export type Database = {
           materials?: Json | null
           name?: string
           sales_channels?: string | null
+          short_description?: string | null
           social_links?: Json | null
           specialties?: string | null
           updated_at?: string | null
