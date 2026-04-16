@@ -34,9 +34,10 @@ function useSidebarWidth() {
 
 export function WhatsAppSupportButton() {
   const { user } = useAuth();
+  const location = useLocation();
   const sidebarWidth = useSidebarWidth();
 
-  if (!user) return null;
+  if (!user || HIDDEN_ROUTES.includes(location.pathname)) return null;
 
   return (
     <div
