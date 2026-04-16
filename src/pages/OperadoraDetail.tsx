@@ -294,7 +294,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               </OperatorInfoCard>
             ) : null}
 
-            {/* 6. Horário Comercial */}
+            {/* 6. Horários de Funcionamento */}
             {isAdmin ? (
               <EditableSection
                 editForm={<BusinessHoursEditForm data={editBusinessHours} onChange={setEditBusinessHours} />}
@@ -307,7 +307,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                 {operator.business_hours ? (
                   <BusinessHoursCard hours={operator.business_hours as BusinessHours} />
                 ) : (
-                  <OperatorInfoCard icon={FileText} title="Horário Comercial" iconColor="text-sky-600">
+                  <OperatorInfoCard icon={FileText} title="Horários de Funcionamento" iconColor="text-sky-600">
                     {adminPlaceholder}
                   </OperatorInfoCard>
                 )}
