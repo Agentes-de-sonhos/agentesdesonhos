@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 18" role="img" aria-labelledby="title">
+  <title>Bandeira do Brasil</title>
+  <rect width="24" height="18" rx="2" fill="#1F8F3A"/>
+  <polygon points="12,2.5 21,9 12,15.5 3,9" fill="#F4C542"/>
+  <circle cx="12" cy="9" r="3.2" fill="#22408C"/>
+</svg>
