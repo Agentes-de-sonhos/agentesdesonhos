@@ -65,6 +65,7 @@ const TAB_LABELS: Record<string, string> = {
   suppliers: "Links",
   "registration-links": "Links Cadastro",
   "page-banners": "Capas",
+  "pending-approvals": "Aprovações",
   "trade-suppliers": "Diretório",
   hotels: "Hotéis",
   trade: "Trade",
