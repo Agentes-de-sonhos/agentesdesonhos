@@ -39,7 +39,7 @@ export default function CadastroFornecedor() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.company_name.trim() || !form.email.trim() || !form.password || !form.responsible_name.trim()) {
+    if (!form.company_name.trim() || !form.email.trim() || !form.password || !form.responsible_name.trim() || !form.category) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
