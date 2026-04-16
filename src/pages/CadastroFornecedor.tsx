@@ -128,20 +128,20 @@ export default function CadastroFornecedor() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-lg">
-        {/* Header: Logo centered + Language selector */}
-        <div className="relative mb-8">
-          <div className="flex justify-center">
-            <BrandText>
-              <img
-                src={logoTravelMeet}
-                alt="TravelMeet"
-                className="h-30 w-auto"
-              />
-            </BrandText>
-          </div>
-          <div className="absolute right-0 top-0">
-            <LanguageSelector value={lang} onChange={changeLang} />
-          </div>
+        {/* Language selector - top right on all screens */}
+        <div className="flex justify-end mb-4">
+          <LanguageSelector value={lang} onChange={changeLang} />
+        </div>
+
+        {/* Logo - centered */}
+        <div className="flex justify-center mb-8">
+          <BrandText>
+            <img
+              src={logoTravelMeet}
+              alt="TravelMeet"
+              className="h-30 w-auto"
+            />
+          </BrandText>
         </div>
 
         {/* Title */}
