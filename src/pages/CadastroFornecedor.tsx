@@ -132,8 +132,8 @@ export default function CadastroFornecedor() {
         <div className="flex items-center justify-between mb-6">
           <BrandText>
             <img
-              src={logoAgentes}
-              alt="Agentes de Sonhos"
+              src={logoTravelMeet}
+              alt="TravelMeet"
               className="h-10 w-auto"
             />
           </BrandText>
