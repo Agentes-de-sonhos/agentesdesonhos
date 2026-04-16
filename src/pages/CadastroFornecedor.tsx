@@ -8,15 +8,16 @@ import { Building2, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = [
-  "Operadora",
-  "Companhia Aérea",
-  "Rede Hoteleira",
-  "Seguradora",
-  "Receptivo",
-  "Cruzeiro",
-  "Locadora",
+  "Operadora de Turismo",
   "Consolidadora",
-  "Outro",
+  "Companhia Aérea",
+  "Rede Hoteleira/ Resorts /hotéis/ pousadas",
+  "Seguros Viagens",
+  "Cruzeiros",
+  "Locadora de Veículos",
+  "Receptivos",
+  "Parques e Atrações",
+  "Guias de Turismo",
 ];
 
 export default function CadastroFornecedor() {
@@ -38,7 +39,7 @@ export default function CadastroFornecedor() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.company_name.trim() || !form.email.trim() || !form.password || !form.responsible_name.trim()) {
+    if (!form.company_name.trim() || !form.email.trim() || !form.password || !form.responsible_name.trim() || !form.category) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
@@ -133,11 +134,12 @@ export default function CadastroFornecedor() {
           </div>
 
           <div>
-            <Label>Categoria</Label>
+            <Label>Categoria *</Label>
             <select
               value={form.category}
               onChange={(e) => update("category", e.target.value)}
               className="mt-1 flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              required
             >
               <option value="">Selecione a categoria</option>
               {CATEGORIES.map((c) => (
