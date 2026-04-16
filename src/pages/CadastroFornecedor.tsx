@@ -4,26 +4,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-
-const CATEGORIES = [
-  "Operadoras de turismo",
-  "Consolidadoras",
-  "Companhias aéreas",
-  "Hospedagem",
-  "Locadoras de veículos",
-  "Cruzeiros",
-  "Seguros viagem",
-  "Parques e atrações",
-  "Receptivos",
-  "Guias",
-];
+import { BrandText } from "@/components/ui/brand-text";
+import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import {
+  type Lang,
+  t,
+  getStoredLang,
+  setStoredLang,
+  CATEGORY_KEYS,
+  CATEGORY_DB_VALUES,
+} from "@/i18n/cadastroFornecedor";
 
 export default function CadastroFornecedor() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [lang, setLang] = useState<Lang>(getStoredLang);
   const [form, setForm] = useState({
     company_name: "",
     category: "",
@@ -34,46 +33,65 @@ export default function CadastroFornecedor() {
     phone: "",
   });
 
-  const update = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
+  const changeLang = (l: Lang) => {
+    setLang(l);
+    setStoredLang(l);
+  };
+
+  const update = (key: string, value: string) =>
+    setForm((f) => ({ ...f, [key]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.company_name.trim() || !form.email.trim() || !form.password || !form.responsible_name.trim() || !form.category) {
-      toast.error("Preencha todos os campos obrigatórios.");
+    if (
+      !form.company_name.trim() ||
+      !form.email.trim() ||
+      !form.password ||
+      !form.responsible_name.trim() ||
+      !form.category
+    ) {
+      toast.error(t(lang, "err_required"));
       return;
     }
 
     if (form.password.length < 6) {
-      toast.error("A senha deve ter pelo menos 6 caracteres.");
+      toast.error(t(lang, "err_password_length"));
       return;
     }
 
     if (form.password !== form.password_confirm) {
-      toast.error("As senhas não coincidem.");
+      toast.error(t(lang, "err_password_mismatch"));
       return;
     }
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("supplier-register", {
-        body: {
-          company_name: form.company_name.trim(),
-          category: form.category || null,
-          email: form.email.trim().toLowerCase(),
-          password: form.password,
-          responsible_name: form.responsible_name.trim(),
-          phone: form.phone.trim() || null,
-        },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "supplier-register",
+        {
+          body: {
+            company_name: form.company_name.trim(),
+            category: CATEGORY_DB_VALUES[form.category] || form.category || null,
+            email: form.email.trim().toLowerCase(),
+            password: form.password,
+            responsible_name: form.responsible_name.trim(),
+            phone: form.phone.trim() || null,
+          },
+        }
+      );
 
       if (error) {
-        // functions.invoke wraps non-2xx as FunctionsHttpError; try to parse the body
-        let msg = "Erro ao criar conta.";
+        let msg = t(lang, "err_create");
         try {
-          const body = typeof error.context === "object" && error.context?.body
-            ? JSON.parse(new TextDecoder().decode(await new Response(error.context.body).arrayBuffer()))
-            : null;
+          const body =
+            typeof error.context === "object" && error.context?.body
+              ? JSON.parse(
+                  new TextDecoder().decode(
+                    await new Response(error.context.body).arrayBuffer()
+                  )
+                )
+              : null;
           if (body?.error) msg = body.error;
         } catch {}
         toast.error(msg);
@@ -87,108 +105,140 @@ export default function CadastroFornecedor() {
         return;
       }
 
-      // Sign in immediately
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });
 
       if (signInError) {
-        toast.error("Conta criada! Faça login com suas credenciais.");
+        toast.error(t(lang, "success_created"));
         navigate("/auth");
         return;
       }
 
-      toast.success("Cadastro enviado com sucesso! Seu perfil está em análise e será publicado após aprovação da nossa equipe.");
+      toast.success(t(lang, "success_submitted"));
       navigate("/meu-perfil-empresa");
     } catch {
-      toast.error("Erro ao processar solicitação.");
+      toast.error(t(lang, "err_generic"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-lg">
+        {/* Header: Logo + Language selector */}
+        <div className="flex items-center justify-between mb-6">
+          <BrandText>
+            <img
+              src={logoAgentes}
+              alt="Agentes de Sonhos"
+              className="h-10 w-auto"
+            />
+          </BrandText>
+          <LanguageSelector value={lang} onChange={changeLang} />
+        </div>
+
+        {/* Title */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-primary/10 mb-4">
-            <Building2 className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Cadastro de Empresa</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t(lang, "page_title")}
+          </h1>
           <p className="text-muted-foreground mt-2">
-            Crie sua conta para gerenciar o perfil da sua empresa no Mapa do Turismo
+            {t(lang, "page_subtitle")}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-6 space-y-4 shadow-lg">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-card border border-border rounded-2xl p-6 space-y-4 shadow-lg"
+        >
+          {/* Company Name */}
           <div>
-            <Label>Nome da Empresa *</Label>
+            <Label>
+              {t(lang, "company_name")} {t(lang, "required")}
+            </Label>
             <Input
               value={form.company_name}
               onChange={(e) => update("company_name", e.target.value)}
-              placeholder="Ex: Operadora XYZ Turismo"
+              placeholder={t(lang, "company_name_placeholder")}
               className="mt-1 rounded-xl"
               required
             />
           </div>
 
+          {/* Category */}
           <div>
-            <Label>Categoria *</Label>
+            <Label>
+              {t(lang, "category")} {t(lang, "required")}
+            </Label>
             <select
               value={form.category}
               onChange={(e) => update("category", e.target.value)}
               className="mt-1 flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               required
             >
-              <option value="">Selecione a categoria</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+              <option value="">{t(lang, "category_placeholder")}</option>
+              {CATEGORY_KEYS.map((key) => (
+                <option key={key} value={key}>
+                  {t(lang, key)}
+                </option>
               ))}
             </select>
           </div>
 
+          {/* Responsible */}
           <div>
-            <Label>Nome do Responsável *</Label>
+            <Label>
+              {t(lang, "responsible_name")} {t(lang, "required")}
+            </Label>
             <Input
               value={form.responsible_name}
               onChange={(e) => update("responsible_name", e.target.value)}
-              placeholder="Nome completo"
+              placeholder={t(lang, "responsible_name_placeholder")}
               className="mt-1 rounded-xl"
               required
             />
           </div>
 
+          {/* Phone */}
           <div>
-            <Label>Telefone / WhatsApp</Label>
+            <Label>{t(lang, "phone")}</Label>
             <Input
               value={form.phone}
               onChange={(e) => update("phone", e.target.value)}
-              placeholder="(11) 99999-9999"
+              placeholder={t(lang, "phone_placeholder")}
               className="mt-1 rounded-xl"
             />
           </div>
 
+          {/* Email */}
           <div>
-            <Label>E-mail de Acesso *</Label>
+            <Label>
+              {t(lang, "email")} {t(lang, "required")}
+            </Label>
             <Input
               type="email"
               value={form.email}
               onChange={(e) => update("email", e.target.value)}
-              placeholder="email@empresa.com"
+              placeholder={t(lang, "email_placeholder")}
               className="mt-1 rounded-xl"
               required
             />
           </div>
 
+          {/* Password */}
           <div>
-            <Label>Senha *</Label>
+            <Label>
+              {t(lang, "password")} {t(lang, "required")}
+            </Label>
             <div className="relative mt-1">
               <Input
                 type={showPassword ? "text" : "password"}
                 value={form.password}
                 onChange={(e) => update("password", e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder={t(lang, "password_placeholder")}
                 className="rounded-xl pr-10"
                 required
               />
@@ -197,34 +247,51 @@ export default function CadastroFornecedor() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </button>
             </div>
           </div>
 
+          {/* Confirm Password */}
           <div>
-            <Label>Confirmar Senha *</Label>
+            <Label>
+              {t(lang, "password_confirm")} {t(lang, "required")}
+            </Label>
             <div className="relative mt-1">
               <Input
                 type={showPassword ? "text" : "password"}
                 value={form.password_confirm}
                 onChange={(e) => update("password_confirm", e.target.value)}
-                placeholder="Repita a senha"
+                placeholder={t(lang, "password_confirm_placeholder")}
                 className="rounded-xl pr-10"
                 required
               />
             </div>
           </div>
 
-          <Button type="submit" className="w-full rounded-xl h-12 text-base" disabled={loading}>
-            {loading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
-            Criar Conta
+          <Button
+            type="submit"
+            className="w-full rounded-xl h-12 text-base"
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+            ) : null}
+            {t(lang, "submit")}
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            Já tem uma conta?{" "}
-            <button type="button" onClick={() => navigate("/auth")} className="text-primary hover:underline font-medium">
-              Faça login
+            {t(lang, "already_have_account")}{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/auth")}
+              className="text-primary hover:underline font-medium"
+            >
+              {t(lang, "login")}
             </button>
           </p>
         </form>
