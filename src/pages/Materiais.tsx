@@ -64,6 +64,24 @@ export default function Materiais() {
     groupGalleriesByPeriod, 
   } = useMaterials();
 
+  // Apply URL filter param on mount
+  useEffect(() => {
+    const operadoraParam = searchParams.get("operadora");
+    if (operadoraParam && suppliers.length > 0) {
+      const match = suppliers.find(
+        (s) => s.toLowerCase() === operadoraParam.toLowerCase()
+      );
+      if (match) {
+        setSelectedSupplier(match);
+      } else {
+        setSelectedSupplier(operadoraParam);
+      }
+      // Clean URL param after applying
+      searchParams.delete("operadora");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [suppliers, searchParams, setSearchParams]);
+
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   // Filter materials first, then group into galleries
