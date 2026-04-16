@@ -211,14 +211,14 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                 onCancel={() => setEditShortDesc(operator.short_description || "")}
               >
                 <OperatorInfoCard icon={FileText} title="Sobre a Operadora" iconColor="text-sky-600">
-                  <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap line-clamp-3">
-                    {operator.short_description || adminPlaceholder}
-                  </p>
+                  {operator.short_description ? (
+                    <RichTextWithLinks text={operator.short_description} lineClamp={3} />
+                  ) : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.short_description ? (
               <OperatorInfoCard icon={FileText} title="Sobre a Operadora" iconColor="text-sky-600">
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap line-clamp-3">{operator.short_description}</p>
+                <RichTextWithLinks text={operator.short_description} lineClamp={3} />
               </OperatorInfoCard>
             ) : null}
 
@@ -249,14 +249,14 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                 onCancel={() => setEditHowToSell(operator.how_to_sell || "")}
               >
                 <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
-                  <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                    {operator.how_to_sell || adminPlaceholder}
-                  </p>
+                  {operator.how_to_sell ? (
+                    <RichTextWithLinks text={operator.how_to_sell} />
+                  ) : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.how_to_sell ? (
               <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{operator.how_to_sell}</p>
+                <RichTextWithLinks text={operator.how_to_sell} />
               </OperatorInfoCard>
             ) : null}
 
