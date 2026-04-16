@@ -87,6 +87,10 @@ export interface CarRentalData {
   rental_company?: string;
   pickup_location: string;
   dropoff_location: string;
+  pickup_date?: string;
+  pickup_time?: string;
+  dropoff_date?: string;
+  dropoff_time?: string;
   car_type: string;
   days: number;
   price: number;
