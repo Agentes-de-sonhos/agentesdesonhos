@@ -35,6 +35,7 @@ import {
   CreditCard,
   Eye,
   Globe,
+  CheckCircle2,
 } from "lucide-react";
 
 interface AdminMenuItem {
