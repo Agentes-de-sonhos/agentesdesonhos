@@ -10,8 +10,8 @@ const EditModeContext = createContext<EditModeContextValue>({
   toggleEditMode: () => {},
 });
 
-export function EditModeProvider({ children }: { children: ReactNode }) {
-  const [editMode, setEditMode] = useState(false);
+export function EditModeProvider({ children, defaultEnabled = false }: { children: ReactNode; defaultEnabled?: boolean }) {
+  const [editMode, setEditMode] = useState(defaultEnabled);
   return (
     <EditModeContext.Provider value={{ editMode, toggleEditMode: () => setEditMode((v) => !v) }}>
       {children}

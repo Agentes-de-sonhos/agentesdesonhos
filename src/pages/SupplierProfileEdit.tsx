@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -89,13 +89,14 @@ export default function SupplierProfileEdit() {
   }
 
   return (
-    <EditModeProvider>
+    <EditModeProvider defaultEnabled>
       <SupplierProfileContent operator={operator} signOut={signOut} />
     </EditModeProvider>
   );
 }
 
 function SupplierProfileContent({ operator, signOut }: { operator: any; signOut: () => Promise<void> }) {
+  const queryClient = useQueryClient();
   const updateMutation = useOperatorUpdate(operator.id, "tour_operators");
   const [materialsModalOpen, setMaterialsModalOpen] = useState(false);
 
@@ -135,6 +136,27 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
     employees: operator.employees,
     executive_team: operator.executive_team,
   });
+  // Sync edit states when operator data updates (after save + query invalidation)
+  useEffect(() => {
+    setEditName(operator.name);
+    setEditLogo(operator.logo_url);
+    setEditShortDesc(operator.short_description || "");
+    setEditAdvantages(operator.competitive_advantages || "");
+    setEditHowToSell(operator.how_to_sell || "");
+    setEditBusinessHours((operator.business_hours as BusinessHours) || {});
+    setEditCertifications(operator.certifications || "");
+    setEditSalesChannels(operator.sales_channels || "");
+    setEditContacts(operator.commercial_contacts || "");
+    setEditSpecialties(operator.specialties?.split(",").map((s: string) => s.trim()).filter(Boolean) || []);
+    setEditSocialLinks(buildSocialLinks());
+    setEditCompanyInfo({
+      category: operator.category || "",
+      founded_year: operator.founded_year,
+      annual_revenue: operator.annual_revenue,
+      employees: operator.employees,
+      executive_team: operator.executive_team,
+    });
+  }, [operator]);
 
   const placeholder = <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>;
 
@@ -148,7 +170,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
             <span className="font-semibold text-foreground">Perfil da Empresa</span>
           </div>
           <div className="flex items-center gap-3">
-            <EditModeToggle />
             <Button variant="ghost" size="sm" className="rounded-xl text-muted-foreground" onClick={() => signOut()}>
               <LogOut className="h-4 w-4 mr-2" /> Sair
             </Button>
