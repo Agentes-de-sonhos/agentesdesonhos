@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail, Tag, Share2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
 import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
 import { ContactCards } from "@/components/operator/ContactCards";
@@ -18,7 +17,6 @@ import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCa
 import { useOperatorUpdate } from "@/hooks/useOperatorUpdate";
 import { toast } from "sonner";
 import { EditModeProvider } from "@/contexts/EditModeContext";
-import { EditModeToggle } from "@/components/edit-mode/EditModeToggle";
 import { EditableSection } from "@/components/edit-mode/EditableSection";
 import { HeroEditForm } from "@/components/edit-mode/forms/HeroEditForm";
 import { TextEditForm } from "@/components/edit-mode/forms/TextEditForm";
@@ -26,6 +24,7 @@ import { TagsEditForm } from "@/components/edit-mode/forms/TagsEditForm";
 import { SocialLinksEditForm } from "@/components/edit-mode/forms/SocialLinksEditForm";
 import { CompanyInfoEditForm } from "@/components/edit-mode/forms/CompanyInfoEditForm";
 import { BusinessHoursEditForm } from "@/components/edit-mode/forms/BusinessHoursEditForm";
+import { MediaManagerModal } from "@/components/media/MediaManagerModal";
 import {
   Dialog,
   DialogContent,
@@ -99,8 +98,8 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
   const queryClient = useQueryClient();
   const updateMutation = useOperatorUpdate(operator.id, "tour_operators");
   const [materialsModalOpen, setMaterialsModalOpen] = useState(false);
+  const [logoManagerOpen, setLogoManagerOpen] = useState(false);
 
-  // Edit states
   const [editName, setEditName] = useState(operator.name);
   const [editLogo, setEditLogo] = useState(operator.logo_url);
   const [editShortDesc, setEditShortDesc] = useState(operator.short_description || "");
@@ -136,7 +135,7 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
     employees: operator.employees,
     executive_team: operator.executive_team,
   });
-  // Sync edit states when operator data updates (after save + query invalidation)
+
   useEffect(() => {
     setEditName(operator.name);
     setEditLogo(operator.logo_url);
@@ -158,11 +157,21 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
     });
   }, [operator]);
 
+  const handleLogoSelect = async (url: string) => {
+    setEditLogo(url);
+    setLogoManagerOpen(false);
+    try {
+      await updateMutation.mutateAsync({ logo_url: url });
+      queryClient.invalidateQueries({ queryKey: ["supplier-own-operator"] });
+    } catch {
+      toast.error("Erro ao atualizar logotipo.");
+    }
+  };
+
   const placeholder = <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top bar */}
       <div className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -178,7 +187,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
-        {/* Hero - no rating, pencil on logo */}
         <EditableSection
           editForm={<HeroEditForm name={editName} logoUrl={editLogo} onNameChange={setEditName} onLogoChange={setEditLogo} />}
           onSave={async () => { await updateMutation.mutateAsync({ name: editName, logo_url: editLogo }); }}
@@ -192,13 +200,13 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               <div className="relative flex items-center gap-5">
                 <button
                   type="button"
-                  onClick={startEditing}
+                  onClick={() => setLogoManagerOpen(true)}
                   className="relative group/logo cursor-pointer rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                   title="Trocar logotipo"
                 >
                   <div className="h-20 w-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 border border-primary/20 flex items-center justify-center shadow-sm overflow-hidden">
-                    {operator.logo_url ? (
-                      <img src={operator.logo_url} alt={operator.name} className="h-full w-full object-contain p-2" />
+                    {editLogo ? (
+                      <img src={editLogo} alt={operator.name} className="h-full w-full object-contain p-2" />
                     ) : (
                       <span className="text-2xl font-bold text-primary">{operator.name.charAt(0)}</span>
                     )}
@@ -212,14 +220,20 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
                   <p className="text-muted-foreground mt-1">{operator.category || "Empresa"}</p>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={startEditing}
+                className="absolute top-3 right-3 z-10 h-8 w-8 rounded-lg bg-primary/10 hover:bg-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 border border-primary/20"
+                title="Editar dados do cabeçalho"
+              >
+                <Pencil className="h-3.5 w-3.5 text-primary" />
+              </button>
             </div>
           )}
         </EditableSection>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* LEFT COLUMN */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Sobre */}
             <EditableSection
               editForm={<TextEditForm label="Sobre a Empresa (máx 10 linhas)" value={editShortDesc} onChange={setEditShortDesc} />}
               onSave={async () => { await updateMutation.mutateAsync({ short_description: editShortDesc || null }); }}
@@ -230,7 +244,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               </OperatorInfoCard>
             </EditableSection>
 
-            {/* Diferenciais */}
             <EditableSection
               editForm={<TextEditForm label="Diferenciais Competitivos (1 por linha, máx 7)" value={editAdvantages} onChange={setEditAdvantages} />}
               onSave={async () => { await updateMutation.mutateAsync({ competitive_advantages: editAdvantages || null }); }}
@@ -245,7 +258,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               )}
             </EditableSection>
 
-            {/* Como Vender */}
             <EditableSection
               editForm={<TextEditForm label="Como Vender" value={editHowToSell} onChange={setEditHowToSell} />}
               onSave={async () => { await updateMutation.mutateAsync({ how_to_sell: editHowToSell || null }); }}
@@ -256,7 +268,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               </OperatorInfoCard>
             </EditableSection>
 
-            {/* Canais de Venda */}
             <EditableSection
               editForm={<TextEditForm label="Canais de Venda" value={editSalesChannels} onChange={setEditSalesChannels} />}
               onSave={async () => { await updateMutation.mutateAsync({ sales_channels: editSalesChannels || null }); }}
@@ -267,7 +278,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               </OperatorInfoCard>
             </EditableSection>
 
-            {/* Contatos Comerciais */}
             <EditableSection
               editForm={<TextEditForm label="Contatos Comerciais" value={editContacts} onChange={setEditContacts} />}
               onSave={async () => { await updateMutation.mutateAsync({ commercial_contacts: editContacts || null }); }}
@@ -278,7 +288,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               </OperatorInfoCard>
             </EditableSection>
 
-            {/* Horários */}
             <EditableSection
               editForm={<BusinessHoursEditForm data={editBusinessHours} onChange={setEditBusinessHours} />}
               onSave={async () => {
@@ -296,15 +305,12 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               )}
             </EditableSection>
 
-            {/* Materiais - view only with contact modal */}
             <div onClick={() => setMaterialsModalOpen(true)} className="cursor-pointer">
               <SupplierMaterialsCard supplierId={operator.id} supplierName={operator.name} />
             </div>
           </div>
 
-          {/* RIGHT COLUMN */}
           <div className="space-y-5 lg:sticky lg:top-20">
-            {/* Specialties */}
             <EditableSection
               editForm={<TagsEditForm tags={editSpecialties} onChange={setEditSpecialties} />}
               onSave={async () => { await updateMutation.mutateAsync({ specialties: editSpecialties.join(", ") || null }); }}
@@ -319,7 +325,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               )}
             </EditableSection>
 
-            {/* Social links */}
             <EditableSection
               editForm={<SocialLinksEditForm links={editSocialLinks} onChange={setEditSocialLinks} />}
               onSave={async () => {
@@ -337,7 +342,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               )}
             </EditableSection>
 
-            {/* Company info */}
             <EditableSection
               editForm={<CompanyInfoEditForm data={editCompanyInfo} onChange={setEditCompanyInfo} />}
               onSave={async () => { await updateMutation.mutateAsync(editCompanyInfo); }}
@@ -346,7 +350,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               <OperatorSidebar operator={{ category: operator.category, founded_year: operator.founded_year, annual_revenue: operator.annual_revenue, employees: operator.employees, executive_team: operator.executive_team, specialties: null, social_links: null }} />
             </EditableSection>
 
-            {/* Certifications */}
             <EditableSection
               editForm={<TextEditForm label="Certificações (1 por linha)" value={editCertifications} onChange={setEditCertifications} />}
               onSave={async () => { await updateMutation.mutateAsync({ certifications: editCertifications || null }); }}
@@ -364,7 +367,13 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
         </div>
       </div>
 
-      {/* Materials Contact Modal */}
+      <MediaManagerModal
+        open={logoManagerOpen}
+        onOpenChange={setLogoManagerOpen}
+        onSelect={handleLogoSelect}
+        accept="image"
+      />
+
       <Dialog open={materialsModalOpen} onOpenChange={setMaterialsModalOpen}>
         <DialogContent className="rounded-2xl max-w-md">
           <DialogHeader>
