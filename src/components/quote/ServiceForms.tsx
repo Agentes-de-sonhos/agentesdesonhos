@@ -650,21 +650,76 @@ const carRentalSchema = z.object({
   rental_company: z.string().optional(),
   pickup_location: z.string().min(2, "Local de retirada é obrigatório"),
   dropoff_location: z.string().min(2, "Local de devolução é obrigatório"),
+  pickup_date: z.date({ required_error: "Data de retirada é obrigatória" }),
+  pickup_time: z.string().optional(),
+  dropoff_date: z.date({ required_error: "Data de devolução é obrigatória" }),
+  dropoff_time: z.string().optional(),
   car_type: z.string().min(1, "Tipo de carro é obrigatório"),
   days: z.number().min(1, "Mínimo 1 diária"),
   price: z.number().min(0),
   notes: z.string().optional(),
+}).refine((data) => data.dropoff_date >= data.pickup_date, {
+  message: "A data de devolução não pode ser anterior à retirada",
+  path: ["dropoff_date"],
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
   const init = initialData?.service_data;
+  const [pickupOpen, setPickupOpen] = useState(false);
+  const [dropoffOpen, setDropoffOpen] = useState(false);
+  const [daysManual, setDaysManual] = useState(false);
+
   const form = useForm<z.infer<typeof carRentalSchema>>({
     resolver: zodResolver(carRentalSchema),
-    defaultValues: { rental_company: init?.rental_company || "", pickup_location: init?.pickup_location || "", dropoff_location: init?.dropoff_location || "", car_type: init?.car_type || "", days: init?.days || 1, price: init?.price || initialData?.amount || 0, notes: init?.notes || "" },
+    defaultValues: {
+      rental_company: init?.rental_company || "",
+      pickup_location: init?.pickup_location || "",
+      dropoff_location: init?.dropoff_location || "",
+      pickup_date: init?.pickup_date ? parseLocalDate(init.pickup_date) : tripStartDate || new Date(),
+      pickup_time: init?.pickup_time || "10:00",
+      dropoff_date: init?.dropoff_date ? parseLocalDate(init.dropoff_date) : tripEndDate || new Date(),
+      dropoff_time: init?.dropoff_time || "10:00",
+      car_type: init?.car_type || "",
+      days: init?.days || 1,
+      price: init?.price || initialData?.amount || 0,
+      notes: init?.notes || "",
+    },
   });
 
+  // Auto-calculate days when dates change
+  const pickupDate = form.watch("pickup_date");
+  const dropoffDate = form.watch("dropoff_date");
+
+  useEffect(() => {
+    if (!daysManual && pickupDate && dropoffDate && dropoffDate >= pickupDate) {
+      const diffMs = dropoffDate.getTime() - pickupDate.getTime();
+      const diffDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+      form.setValue("days", diffDays);
+    }
+  }, [pickupDate, dropoffDate, daysManual, form]);
+
+  // Check if dates are outside trip period
+  const outsideTripPeriod = tripStartDate && tripEndDate && pickupDate && dropoffDate
+    ? (pickupDate < tripStartDate || dropoffDate > tripEndDate)
+    : false;
+
+  const formatLocalDateStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
   const handleSubmit = (values: z.infer<typeof carRentalSchema>) => {
-    onSubmit({ rental_company: values.rental_company || "", pickup_location: values.pickup_location, dropoff_location: values.dropoff_location, car_type: values.car_type, days: values.days, price: values.price, notes: values.notes || "" }, values.price);
+    onSubmit({
+      rental_company: values.rental_company || "",
+      pickup_location: values.pickup_location,
+      dropoff_location: values.dropoff_location,
+      pickup_date: formatLocalDateStr(values.pickup_date),
+      pickup_time: values.pickup_time || "",
+      dropoff_date: formatLocalDateStr(values.dropoff_date),
+      dropoff_time: values.dropoff_time || "",
+      car_type: values.car_type,
+      days: values.days,
+      price: values.price,
+      notes: values.notes || "",
+    }, values.price);
   };
 
   return (
@@ -688,6 +743,98 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
             <FormItem><FormLabel>Local de Devolução</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
+
+        {/* Date/Time fields */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <FormField control={form.control} name="pickup_date" render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="flex items-center gap-1.5">
+                  <CalendarIcon className="h-3.5 w-3.5" /> Data de Retirada
+                </FormLabel>
+                <Popover open={pickupOpen} onOpenChange={setPickupOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={(d) => {
+                        if (d) {
+                          field.onChange(d);
+                          setDaysManual(false);
+                          const currentDropoff = form.getValues("dropoff_date");
+                          if (currentDropoff && d > currentDropoff) {
+                            form.setValue("dropoff_date", d);
+                          }
+                        }
+                        setPickupOpen(false);
+                      }}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="pickup_time" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hora de Retirada</FormLabel>
+                <FormControl><Input type="time" {...field} /></FormControl>
+              </FormItem>
+            )} />
+          </div>
+          <div className="space-y-2">
+            <FormField control={form.control} name="dropoff_date" render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="flex items-center gap-1.5">
+                  <CalendarIcon className="h-3.5 w-3.5" /> Data de Devolução
+                </FormLabel>
+                <Popover open={dropoffOpen} onOpenChange={setDropoffOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={(d) => { if (d) { field.onChange(d); setDaysManual(false); } setDropoffOpen(false); }}
+                      disabled={(d) => pickupDate ? d < pickupDate : false}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="dropoff_time" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hora de Devolução</FormLabel>
+                <FormControl><Input type="time" {...field} /></FormControl>
+              </FormItem>
+            )} />
+          </div>
+        </div>
+
+        {outsideTripPeriod && (
+          <div className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-400 rounded-md px-3 py-2 flex items-center gap-2">
+            ⚠️ As datas selecionadas estão fora do período da viagem ({tripStartDate && format(tripStartDate, "dd/MM", { locale: ptBR })} a {tripEndDate && format(tripEndDate, "dd/MM/yyyy", { locale: ptBR })})
+          </div>
+        )}
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="car_type" render={({ field }) => (
             <FormItem><FormLabel>Tipo de Carro</FormLabel>
@@ -700,7 +847,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot
               </Select><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="days" render={({ field }) => (
-            <FormItem><FormLabel>Diárias</FormLabel><FormControl><Input type="number" min={1} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 1)} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Diárias</FormLabel><FormControl><Input type="number" min={1} {...field} onChange={(e) => { field.onChange(parseInt(e.target.value) || 1); setDaysManual(true); }} /></FormControl>
+            <p className="text-[10px] text-muted-foreground">Calculado automaticamente pelas datas. Editável se necessário.</p>
+            <FormMessage /></FormItem>
           )} />
         </div>
         <FormField control={form.control} name="price" render={({ field }) => (
