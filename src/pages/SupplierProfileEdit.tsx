@@ -89,7 +89,7 @@ export default function SupplierProfileEdit() {
   }
 
   return (
-    <EditModeProvider>
+    <EditModeProvider defaultEnabled>
       <SupplierProfileContent operator={operator} signOut={signOut} />
     </EditModeProvider>
   );
