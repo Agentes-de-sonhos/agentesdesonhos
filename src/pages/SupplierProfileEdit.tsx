@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail } from "lucide-react";
+import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail, Tag, Share2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
