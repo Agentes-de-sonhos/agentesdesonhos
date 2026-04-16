@@ -40,7 +40,7 @@ export function OperatorHero({
             <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl tracking-tight">
               {name}
             </h1>
-            <p className="text-muted-foreground mt-1">Operadora de Turismo</p>
+            <p className="text-muted-foreground mt-1">{category || "Empresa"}</p>
           </div>
         </div>
 
