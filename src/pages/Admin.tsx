@@ -91,6 +91,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminMenuOrderManager />;
     case "popups":
       return <AdminPopupsManager />;
+    case "pending-approvals":
+      return <AdminPendingApprovalsManager />;
     case "trade-suppliers":
       return (
         <>
