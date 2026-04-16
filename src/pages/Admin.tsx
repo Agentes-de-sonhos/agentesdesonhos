@@ -44,6 +44,7 @@ import { AdminPlanSwitcher } from "@/components/admin/AdminPlanSwitcher";
 import { AdminVitrineCategoriesManager } from "@/components/admin/AdminVitrineCategoriesManager";
 import { AdminCardCaptureManager } from "@/components/admin/AdminCardCaptureManager";
 import { AdminTravelMeetManager } from "@/components/admin/AdminTravelMeetManager";
+import { AdminPendingApprovalsManager } from "@/components/admin/AdminPendingApprovalsManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
