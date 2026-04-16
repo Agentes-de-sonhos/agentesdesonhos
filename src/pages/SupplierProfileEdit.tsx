@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail } from "lucide-react";
+import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail, Tag, Share2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
@@ -157,13 +157,36 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
-        {/* Hero - no rating */}
+        {/* Hero - no rating, pencil on logo */}
         <EditableSection
           editForm={<HeroEditForm name={editName} logoUrl={editLogo} onNameChange={setEditName} onLogoChange={setEditLogo} />}
           onSave={async () => { await updateMutation.mutateAsync({ name: editName, logo_url: editLogo }); }}
           onCancel={() => { setEditName(operator.name); setEditLogo(operator.logo_url); }}
+          className="supplier-hero-edit"
         >
-          <OperatorHero name={operator.name} category={operator.category} logoUrl={operator.logo_url} />
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-border/60 p-8 sm:p-10">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+            <div className="relative flex items-center gap-5">
+              <div className="relative group/logo">
+                <div className="h-20 w-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 border border-primary/20 flex items-center justify-center shadow-sm overflow-hidden">
+                  {operator.logo_url ? (
+                    <img src={operator.logo_url} alt={operator.name} className="h-full w-full object-contain p-2" />
+                  ) : (
+                    <span className="text-2xl font-bold text-primary">{operator.name.charAt(0)}</span>
+                  )}
+                </div>
+                {/* Pencil overlay on logo — visible in edit mode via parent .group hover */}
+                <div className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <Pencil className="h-5 w-5 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl tracking-tight">{operator.name}</h1>
+                <p className="text-muted-foreground mt-1">{operator.category || "Empresa"}</p>
+              </div>
+            </div>
+          </div>
         </EditableSection>
 
         <div className="grid gap-8 lg:grid-cols-3">
@@ -260,7 +283,13 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               onSave={async () => { await updateMutation.mutateAsync({ specialties: editSpecialties.join(", ") || null }); }}
               onCancel={() => setEditSpecialties(operator.specialties?.split(",").map((s: string) => s.trim()).filter(Boolean) || [])}
             >
-              <OperatorSidebar operator={{ specialties: operator.specialties, category: "", social_links: null }} />
+              {operator.specialties ? (
+                <OperatorSidebar operator={{ specialties: operator.specialties, category: "", social_links: null }} />
+              ) : (
+                <OperatorInfoCard icon={Tag} title="Especialidades" iconColor="text-violet-600">
+                  {placeholder}
+                </OperatorInfoCard>
+              )}
             </EditableSection>
 
             {/* Social links */}
@@ -272,7 +301,13 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               }}
               onCancel={() => setEditSocialLinks(buildSocialLinks())}
             >
-              <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+              {(operator.website || operator.instagram || operator.social_links) ? (
+                <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+              ) : (
+                <OperatorInfoCard icon={Share2} title="Redes Sociais" iconColor="text-primary">
+                  {placeholder}
+                </OperatorInfoCard>
+              )}
             </EditableSection>
 
             {/* Company info */}
