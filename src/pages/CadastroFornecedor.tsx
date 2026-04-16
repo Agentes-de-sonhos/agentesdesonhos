@@ -134,11 +134,12 @@ export default function CadastroFornecedor() {
           </div>
 
           <div>
-            <Label>Categoria</Label>
+            <Label>Categoria *</Label>
             <select
               value={form.category}
               onChange={(e) => update("category", e.target.value)}
               className="mt-1 flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              required
             >
               <option value="">Selecione a categoria</option>
               {CATEGORIES.map((c) => (
