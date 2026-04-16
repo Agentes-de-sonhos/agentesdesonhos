@@ -260,7 +260,13 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               onSave={async () => { await updateMutation.mutateAsync({ specialties: editSpecialties.join(", ") || null }); }}
               onCancel={() => setEditSpecialties(operator.specialties?.split(",").map((s: string) => s.trim()).filter(Boolean) || [])}
             >
-              <OperatorSidebar operator={{ specialties: operator.specialties, category: "", social_links: null }} />
+              {operator.specialties ? (
+                <OperatorSidebar operator={{ specialties: operator.specialties, category: "", social_links: null }} />
+              ) : (
+                <OperatorInfoCard icon={Tag} title="Especialidades" iconColor="text-violet-600">
+                  {placeholder}
+                </OperatorInfoCard>
+              )}
             </EditableSection>
 
             {/* Social links */}
@@ -272,7 +278,13 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
               }}
               onCancel={() => setEditSocialLinks(buildSocialLinks())}
             >
-              <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+              {(operator.website || operator.instagram || operator.social_links) ? (
+                <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+              ) : (
+                <OperatorInfoCard icon={Share2} title="Redes Sociais" iconColor="text-primary">
+                  {placeholder}
+                </OperatorInfoCard>
+              )}
             </EditableSection>
 
             {/* Company info */}
