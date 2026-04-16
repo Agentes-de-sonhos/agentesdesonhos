@@ -16,6 +16,7 @@ export function useOperatorUpdate(id: string, table: "tour_operators" | "trade_s
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKey, id] });
+      queryClient.invalidateQueries({ queryKey: ["supplier-own-operator"] });
       toast.success("Atualizado com sucesso");
     },
     onError: (err: any) => {
