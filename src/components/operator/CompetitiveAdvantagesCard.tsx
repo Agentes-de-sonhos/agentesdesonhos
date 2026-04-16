@@ -1,5 +1,6 @@
 import { Award } from "lucide-react";
 import { OperatorInfoCard } from "./OperatorInfoCard";
+import { RichTextWithLinks } from "./RichTextWithLinks";
 
 interface CompetitiveAdvantagesCardProps {
   advantages: string;
@@ -16,14 +17,7 @@ export function CompetitiveAdvantagesCard({ advantages }: CompetitiveAdvantagesC
 
   return (
     <OperatorInfoCard icon={Award} title="Diferenciais Competitivos" iconColor="text-amber-600">
-      <ul className="space-y-2">
-        {items.map((item, i) => (
-          <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/90">
-            <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
-            <span className="leading-relaxed">{item}</span>
-          </li>
-        ))}
-      </ul>
+      <RichTextWithLinks text={items.join("\n")} asBullets bulletColor="bg-amber-500" />
     </OperatorInfoCard>
   );
 }
