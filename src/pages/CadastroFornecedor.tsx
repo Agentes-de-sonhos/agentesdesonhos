@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { BrandText } from "@/components/ui/brand-text";
-import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
+import logoTravelMeet from "@/assets/logo-travelmeet.png";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import {
   type Lang,
