@@ -136,6 +136,27 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
     employees: operator.employees,
     executive_team: operator.executive_team,
   });
+  // Sync edit states when operator data updates (after save + query invalidation)
+  useEffect(() => {
+    setEditName(operator.name);
+    setEditLogo(operator.logo_url);
+    setEditShortDesc(operator.short_description || "");
+    setEditAdvantages(operator.competitive_advantages || "");
+    setEditHowToSell(operator.how_to_sell || "");
+    setEditBusinessHours((operator.business_hours as BusinessHours) || {});
+    setEditCertifications(operator.certifications || "");
+    setEditSalesChannels(operator.sales_channels || "");
+    setEditContacts(operator.commercial_contacts || "");
+    setEditSpecialties(operator.specialties?.split(",").map((s: string) => s.trim()).filter(Boolean) || []);
+    setEditSocialLinks(buildSocialLinks());
+    setEditCompanyInfo({
+      category: operator.category || "",
+      founded_year: operator.founded_year,
+      annual_revenue: operator.annual_revenue,
+      employees: operator.employees,
+      executive_team: operator.executive_team,
+    });
+  }, [operator]);
 
   const placeholder = <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>;
 
