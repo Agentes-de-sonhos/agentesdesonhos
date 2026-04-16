@@ -316,24 +316,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               <BusinessHoursCard hours={operator.business_hours as BusinessHours} />
             ) : null}
 
-            {/* 7. Certificações */}
-            {isAdmin ? (
-              <EditableSection
-                editForm={<TextEditForm label="Certificações (1 por linha)" value={editCertifications} onChange={setEditCertifications} />}
-                onSave={async () => { await updateMutation.mutateAsync({ certifications: editCertifications || null }); }}
-                onCancel={() => setEditCertifications(operator.certifications || "")}
-              >
-                {operator.certifications ? (
-                  <CertificationsCard certifications={operator.certifications} />
-                ) : (
-                  <OperatorInfoCard icon={FileText} title="Certificações" iconColor="text-emerald-600">
-                    {adminPlaceholder}
-                  </OperatorInfoCard>
-                )}
-              </EditableSection>
-            ) : operator.certifications ? (
-              <CertificationsCard certifications={operator.certifications} />
-            ) : null}
+
 
             {/* 8. Avaliações */}
             <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} isAdmin={isAdmin} onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })} isDeleting={deleteReview.isPending} />
@@ -385,6 +368,25 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
             ) : (
               <OperatorSidebar operator={{ category: operator.category, founded_year: operator.founded_year, annual_revenue: operator.annual_revenue, employees: operator.employees, executive_team: operator.executive_team, specialties: null, social_links: null }} />
             )}
+
+            {/* Certificações */}
+            {isAdmin ? (
+              <EditableSection
+                editForm={<TextEditForm label="Certificações (1 por linha)" value={editCertifications} onChange={setEditCertifications} />}
+                onSave={async () => { await updateMutation.mutateAsync({ certifications: editCertifications || null }); }}
+                onCancel={() => setEditCertifications(operator.certifications || "")}
+              >
+                {operator.certifications ? (
+                  <CertificationsCard certifications={operator.certifications} />
+                ) : (
+                  <OperatorInfoCard icon={FileText} title="Certificações" iconColor="text-emerald-600">
+                    {adminPlaceholder}
+                  </OperatorInfoCard>
+                )}
+              </EditableSection>
+            ) : operator.certifications ? (
+              <CertificationsCard certifications={operator.certifications} />
+            ) : null}
           </div>
         </div>
       </div>
