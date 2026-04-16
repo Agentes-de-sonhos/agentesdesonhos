@@ -1,4 +1,4 @@
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface BusinessHours {
   commercial?: string;
@@ -17,18 +17,18 @@ export function BusinessHoursEditForm({ data, onChange }: BusinessHoursEditFormP
 
   return (
     <div className="p-4 space-y-3">
-      <label className="text-xs font-medium text-muted-foreground">Horário Comercial</label>
+      <label className="text-xs font-medium text-muted-foreground">Horários de Funcionamento</label>
       <div>
-        <label className="text-xs text-muted-foreground">Comercial</label>
-        <Input value={data.commercial || ""} onChange={(e) => update("commercial", e.target.value)} className="mt-1 rounded-xl" placeholder="Ex: Seg a Sex, 9h às 18h" />
+        <label className="text-xs text-muted-foreground">Horário comercial</label>
+        <Textarea value={data.commercial || ""} onChange={(e) => update("commercial", e.target.value)} className="mt-1 rounded-xl min-h-[60px]" placeholder="Ex: Segunda a sexta: 09h às 19h30&#10;Sábado: 09h às 13h" />
       </div>
       <div>
-        <label className="text-xs text-muted-foreground">Fora do Horário</label>
-        <Input value={data.after_hours || ""} onChange={(e) => update("after_hours", e.target.value)} className="mt-1 rounded-xl" placeholder="Ex: WhatsApp (11) 99999-9999" />
+        <label className="text-xs text-muted-foreground">Plantão</label>
+        <Textarea value={data.after_hours || ""} onChange={(e) => update("after_hours", e.target.value)} className="mt-1 rounded-xl min-h-[60px]" placeholder="Ex: Segunda a sexta: 18h30 às 22h&#10;Sábado: 13h às 22h" />
       </div>
       <div>
-        <label className="text-xs text-muted-foreground">Emergencial</label>
-        <Input value={data.emergency || ""} onChange={(e) => update("emergency", e.target.value)} className="mt-1 rounded-xl" placeholder="Ex: 0800-XXX-XXXX (24h)" />
+        <label className="text-xs text-muted-foreground">Emergência</label>
+        <Textarea value={data.emergency || ""} onChange={(e) => update("emergency", e.target.value)} className="mt-1 rounded-xl min-h-[60px]" placeholder="Ex: Atendimento ao passageiro em viagem: 24h" />
       </div>
     </div>
   );
