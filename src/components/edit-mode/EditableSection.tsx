@@ -5,7 +5,7 @@ import { useEditMode } from "@/contexts/EditModeContext";
 import { cn } from "@/lib/utils";
 
 interface EditableSectionProps {
-  children: ReactNode;
+  children: ReactNode | ((startEditing: () => void) => ReactNode);
   editForm: ReactNode;
   onSave: () => Promise<void>;
   onCancel?: () => void;
@@ -22,6 +22,8 @@ export function EditableSection({
   const { editMode } = useEditMode();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const startEditing = () => setIsEditing(true);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -69,10 +71,10 @@ export function EditableSection({
 
   return (
     <div className={cn("group relative", className)}>
-      {children}
+      {typeof children === "function" ? children(startEditing) : children}
       {editMode && (
         <button
-          onClick={() => setIsEditing(true)}
+          onClick={startEditing}
           className="absolute top-3 right-3 z-10 h-8 w-8 rounded-lg bg-primary/10 hover:bg-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 border border-primary/20"
           title="Editar"
         >
