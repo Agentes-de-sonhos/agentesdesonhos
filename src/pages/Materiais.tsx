@@ -69,14 +69,13 @@ export default function Materiais() {
     const operadoraParam = searchParams.get("operadora");
     if (operadoraParam && suppliers.length > 0) {
       const match = suppliers.find(
-        (s) => s.toLowerCase() === operadoraParam.toLowerCase()
+        (s: any) => {
+          const name = typeof s === "string" ? s : s.name;
+          return name?.toLowerCase() === operadoraParam.toLowerCase();
+        }
       );
-      if (match) {
-        setSelectedSupplier(match);
-      } else {
-        setSelectedSupplier(operadoraParam);
-      }
-      // Clean URL param after applying
+      const matchName = match ? (typeof match === "string" ? match : match.name) : operadoraParam;
+      setSelectedSupplier(matchName);
       searchParams.delete("operadora");
       setSearchParams(searchParams, { replace: true });
     }
