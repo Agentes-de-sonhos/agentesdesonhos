@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+
+const HIDDEN_ROUTES = ["/cadastro-fornecedor", "/meu-perfil-empresa"];
 
 const WHATSAPP_URL = `https://wa.me/5511982853937?text=${encodeURIComponent(
   "Olá! Estou utilizando a plataforma Agentes de Sonhos (versão beta) e gostaria de reportar um problema ou sugerir uma melhoria."
