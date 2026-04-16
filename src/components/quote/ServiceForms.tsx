@@ -1451,22 +1451,78 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ IMAGE UPLOAD BLOCK ━━━━━━━━━━━━━━━━━━━ */
+import { optimizeImage, validateImageFile, formatFileSize } from "@/utils/imageOptimizer";
+
+const MAX_IMAGES_PER_SERVICE = 5;
+
 function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string>("");
+  const [compressionInfo, setCompressionInfo] = useState<string>("");
+
+  const canAddMore = imageUrls.length < MAX_IMAGES_PER_SERVICE;
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const allowed = ["jpg", "jpeg", "png", "webp", "gif"];
-    if (!allowed.includes(ext)) return;
-    const path = `${crypto.randomUUID()}.${ext}`;
+
+    // Validate
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setUploadStatus(validationError);
+      setTimeout(() => setUploadStatus(""), 4000);
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
+
+    if (!canAddMore) {
+      setUploadStatus(`Máximo de ${MAX_IMAGES_PER_SERVICE} fotos por serviço.`);
+      setTimeout(() => setUploadStatus(""), 3000);
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
+
     setUploading(true);
-    const { error } = await supabase.storage.from("quote-images").upload(path, file, { upsert: true });
-    if (error) { setUploading(false); return; }
-    const { data: urlData } = supabase.storage.from("quote-images").getPublicUrl(path);
-    onImageUrlsChange([...imageUrls, urlData.publicUrl]);
+    setUploadStatus("Otimizando imagem…");
+
+    try {
+      const result = await optimizeImage(file);
+      const reduction = Math.round((1 - result.optimizedSize / result.originalSize) * 100);
+      setCompressionInfo(`${formatFileSize(result.originalSize)} → ${formatFileSize(result.optimizedSize)} (−${reduction}%)`);
+
+      setUploadStatus("Enviando…");
+
+      // Upload full version
+      const fullPath = `${crypto.randomUUID()}.webp`;
+      const { error } = await supabase.storage.from("quote-images").upload(fullPath, result.full, {
+        upsert: true,
+        contentType: "image/webp",
+      });
+
+      if (error) {
+        setUploadStatus("Erro ao enviar. Tente novamente.");
+        setTimeout(() => setUploadStatus(""), 3000);
+        setUploading(false);
+        return;
+      }
+
+      // Upload thumbnail
+      const thumbPath = `thumb_${fullPath}`;
+      await supabase.storage.from("quote-images").upload(thumbPath, result.thumb, {
+        upsert: true,
+        contentType: "image/webp",
+      });
+
+      const { data: urlData } = supabase.storage.from("quote-images").getPublicUrl(fullPath);
+      onImageUrlsChange([...imageUrls, urlData.publicUrl]);
+      setUploadStatus("Upload concluído ✓");
+      setTimeout(() => { setUploadStatus(""); setCompressionInfo(""); }, 3000);
+    } catch {
+      setUploadStatus("Erro ao processar imagem.");
+      setTimeout(() => setUploadStatus(""), 3000);
+    }
+
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -1476,28 +1532,54 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
   };
 
   const handleGooglePhotosSelected = (urls: string[]) => {
-    onImageUrlsChange([...imageUrls, ...urls]);
+    const remaining = MAX_IMAGES_PER_SERVICE - imageUrls.length;
+    onImageUrlsChange([...imageUrls, ...urls.slice(0, remaining)]);
   };
 
-  // Hotel mode: Google photos prioritized + discrete manual upload
+  const statusColor = uploadStatus.includes("Erro") || uploadStatus.includes("Máximo") || uploadStatus.includes("Formato")
+    ? "text-destructive"
+    : uploadStatus.includes("✓")
+      ? "text-green-600 dark:text-green-400"
+      : "text-muted-foreground";
+
+  const imageGrid = imageUrls.length > 0 && (
+    <>
+      {!hotelMode && <p className="text-sm font-medium">Fotos selecionadas ({imageUrls.length}/{MAX_IMAGES_PER_SERVICE})</p>}
+      {hotelMode && <p className="text-sm font-medium">Fotos selecionadas</p>}
+      <div className="flex flex-wrap gap-2">
+        {imageUrls.map((url, i) => (
+          <div key={i} className="relative inline-block group">
+            <img
+              src={url}
+              alt={`Serviço ${i + 1}`}
+              className="h-24 w-32 rounded-lg border border-border object-cover transition-opacity"
+              loading="lazy"
+            />
+            <button
+              type="button"
+              onClick={() => removeImage(i)}
+              className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+
+  const statusLine = (uploadStatus || compressionInfo) && (
+    <div className="flex flex-col gap-0.5">
+      {uploadStatus && <p className={`text-xs ${statusColor} animate-in fade-in`}>{uploadStatus}</p>}
+      {compressionInfo && <p className="text-xs text-muted-foreground">{compressionInfo}</p>}
+    </div>
+  );
+
+  // Hotel mode
   if (hotelMode) {
     return (
       <div className="space-y-2">
-        {imageUrls.length > 0 && (
-          <>
-            <p className="text-sm font-medium">Fotos selecionadas</p>
-            <div className="flex flex-wrap gap-2">
-              {imageUrls.map((url, i) => (
-                <div key={i} className="relative inline-block">
-                  <img src={url} alt={`Hotel ${i + 1}`} className="h-24 w-36 rounded-lg border border-border object-cover" />
-                  <button type="button" onClick={() => removeImage(i)} className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        {imageGrid}
         <div className="flex items-center gap-2">
           {placeId && (
             <div className="flex-1">
@@ -1509,18 +1591,21 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
               />
             </div>
           )}
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors shrink-0"
-            title="Enviar foto própria"
-          >
-            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
-            {uploading ? "Enviando..." : "Upload"}
-          </button>
+          {canAddMore && (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors shrink-0"
+              title="Enviar foto própria"
+            >
+              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
+              {uploading ? "Otimizando..." : "Upload"}
+            </button>
+          )}
         </div>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        {statusLine}
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
         {!placeId && imageUrls.length === 0 && (
           <p className="text-xs text-muted-foreground italic">Selecione um hotel acima para carregar fotos automaticamente</p>
         )}
@@ -1530,27 +1615,39 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium">Fotos do serviço (opcional)</p>
+      <p className="text-sm font-medium">Fotos do serviço <span className="text-muted-foreground font-normal">(opcional — máx. {MAX_IMAGES_PER_SERVICE})</span></p>
       <div className="flex flex-wrap gap-2">
         {imageUrls.map((url, i) => (
           <div key={i} className="relative inline-block">
-            <img src={url} alt={`Serviço ${i + 1}`} className="h-24 w-36 rounded-lg border border-border object-cover" />
-            <button type="button" onClick={() => removeImage(i)} className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+            <img
+              src={url}
+              alt={`Serviço ${i + 1}`}
+              className="h-24 w-32 rounded-lg border border-border object-cover"
+              loading="lazy"
+            />
+            <button
+              type="button"
+              onClick={() => removeImage(i)}
+              className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+            >
               <X className="h-3 w-3" />
             </button>
           </div>
         ))}
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          disabled={uploading}
-          className="flex items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:bg-muted/50 transition-colors h-24"
-        >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
-          {uploading ? "Enviando..." : "Adicionar foto"}
-        </button>
+        {canAddMore && (
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:bg-muted/50 transition-colors h-24 w-32"
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+            <span className="text-xs">{uploading ? "Otimizando..." : "Adicionar"}</span>
+          </button>
+        )}
       </div>
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      {statusLine}
+      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
       {placeId && (
         <GoogleHotelPhotos
           placeId={placeId}
