@@ -107,7 +107,7 @@ export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMate
   };
 
   const handleViewAll = () => {
-    navigate(`/materiais?fornecedor=${encodeURIComponent(supplierName)}`);
+    navigate(`/materiais?operadora=${encodeURIComponent(supplierName)}`);
   };
 
   if (isLoading) {
