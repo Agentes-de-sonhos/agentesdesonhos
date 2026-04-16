@@ -260,7 +260,41 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               </OperatorInfoCard>
             ) : null}
 
-            {/* 4. Horário Comercial */}
+            {/* 4. Canais de Venda */}
+            {isAdmin ? (
+              <EditableSection
+                editForm={<TextEditForm label="Canais de Venda" value={editSalesChannels} onChange={setEditSalesChannels} />}
+                onSave={async () => { await updateMutation.mutateAsync({ sales_channels: editSalesChannels || null }); }}
+                onCancel={() => setEditSalesChannels(operator.sales_channels || "")}
+              >
+                <OperatorInfoCard icon={Users} title="Canais de Venda">
+                  {operator.sales_channels ? <SalesChannelCards salesChannels={operator.sales_channels} /> : adminPlaceholder}
+                </OperatorInfoCard>
+              </EditableSection>
+            ) : operator.sales_channels ? (
+              <OperatorInfoCard icon={Users} title="Canais de Venda">
+                <SalesChannelCards salesChannels={operator.sales_channels} />
+              </OperatorInfoCard>
+            ) : null}
+
+            {/* 5. Contatos Comerciais */}
+            {isAdmin ? (
+              <EditableSection
+                editForm={<TextEditForm label="Contatos Comerciais" value={editContacts} onChange={setEditContacts} />}
+                onSave={async () => { await updateMutation.mutateAsync({ commercial_contacts: editContacts || null }); }}
+                onCancel={() => setEditContacts(operator.commercial_contacts || "")}
+              >
+                <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
+                  {operator.commercial_contacts ? <ContactCards contacts={operator.commercial_contacts} /> : adminPlaceholder}
+                </OperatorInfoCard>
+              </EditableSection>
+            ) : operator.commercial_contacts ? (
+              <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
+                <ContactCards contacts={operator.commercial_contacts} />
+              </OperatorInfoCard>
+            ) : null}
+
+            {/* 6. Horário Comercial */}
             {isAdmin ? (
               <EditableSection
                 editForm={<BusinessHoursEditForm data={editBusinessHours} onChange={setEditBusinessHours} />}
@@ -282,7 +316,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               <BusinessHoursCard hours={operator.business_hours as BusinessHours} />
             ) : null}
 
-            {/* 5. Certificações */}
+            {/* 7. Certificações */}
             {isAdmin ? (
               <EditableSection
                 editForm={<TextEditForm label="Certificações (1 por linha)" value={editCertifications} onChange={setEditCertifications} />}
@@ -299,40 +333,6 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
               </EditableSection>
             ) : operator.certifications ? (
               <CertificationsCard certifications={operator.certifications} />
-            ) : null}
-
-            {/* 6. Canais de Venda */}
-            {isAdmin ? (
-              <EditableSection
-                editForm={<TextEditForm label="Canais de Venda" value={editSalesChannels} onChange={setEditSalesChannels} />}
-                onSave={async () => { await updateMutation.mutateAsync({ sales_channels: editSalesChannels || null }); }}
-                onCancel={() => setEditSalesChannels(operator.sales_channels || "")}
-              >
-                <OperatorInfoCard icon={Users} title="Canais de Venda">
-                  {operator.sales_channels ? <SalesChannelCards salesChannels={operator.sales_channels} /> : adminPlaceholder}
-                </OperatorInfoCard>
-              </EditableSection>
-            ) : operator.sales_channels ? (
-              <OperatorInfoCard icon={Users} title="Canais de Venda">
-                <SalesChannelCards salesChannels={operator.sales_channels} />
-              </OperatorInfoCard>
-            ) : null}
-
-            {/* 7. Contatos Comerciais */}
-            {isAdmin ? (
-              <EditableSection
-                editForm={<TextEditForm label="Contatos Comerciais" value={editContacts} onChange={setEditContacts} />}
-                onSave={async () => { await updateMutation.mutateAsync({ commercial_contacts: editContacts || null }); }}
-                onCancel={() => setEditContacts(operator.commercial_contacts || "")}
-              >
-                <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
-                  {operator.commercial_contacts ? <ContactCards contacts={operator.commercial_contacts} /> : adminPlaceholder}
-                </OperatorInfoCard>
-              </EditableSection>
-            ) : operator.commercial_contacts ? (
-              <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
-                <ContactCards contacts={operator.commercial_contacts} />
-              </OperatorInfoCard>
             ) : null}
 
             {/* 8. Avaliações */}
