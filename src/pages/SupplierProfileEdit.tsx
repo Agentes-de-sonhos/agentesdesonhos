@@ -170,7 +170,6 @@ function SupplierProfileContent({ operator, signOut }: { operator: any; signOut:
             <span className="font-semibold text-foreground">Perfil da Empresa</span>
           </div>
           <div className="flex items-center gap-3">
-            <EditModeToggle />
             <Button variant="ghost" size="sm" className="rounded-xl text-muted-foreground" onClick={() => signOut()}>
               <LogOut className="h-4 w-4 mr-2" /> Sair
             </Button>
