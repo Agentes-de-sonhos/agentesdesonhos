@@ -61,7 +61,7 @@ export function GalleryCard({ gallery, variant = "default", onOpen }: GalleryCar
       className={`group border-0 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden bg-card hover:scale-[1.02] w-full ${
         isLarge 
           ? "min-w-[280px] sm:min-w-[320px] max-w-full sm:max-w-[320px]" 
-          : "min-w-[240px] sm:min-w-[280px] max-w-full sm:max-w-[280px]"
+          : ""
       }`}
       onClick={onOpen}
     >

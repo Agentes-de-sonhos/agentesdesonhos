@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useDebounce } from "@/hooks/useDebounce";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
@@ -45,6 +46,7 @@ const CATEGORIES = [
 const MATERIAL_TYPES = ["Todos", "Lâmina", "PDF", "Imagem", "Vídeo"];
 
 export default function Materiais() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedType, setSelectedType] = useState("Todos");
@@ -61,6 +63,23 @@ export default function Materiais() {
     groupIntoGalleries,
     groupGalleriesByPeriod, 
   } = useMaterials();
+
+  // Apply URL filter param on mount
+  useEffect(() => {
+    const operadoraParam = searchParams.get("operadora");
+    if (operadoraParam && suppliers.length > 0) {
+      const match = suppliers.find(
+        (s: any) => {
+          const name = typeof s === "string" ? s : s.name;
+          return name?.toLowerCase() === operadoraParam.toLowerCase();
+        }
+      );
+      const matchName = match ? (typeof match === "string" ? match : match.name) : operadoraParam;
+      setSelectedSupplier(matchName);
+      searchParams.delete("operadora");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [suppliers, searchParams, setSearchParams]);
 
   const debouncedSearch = useDebounce(searchTerm, 300);
 
