@@ -151,6 +151,7 @@ export default function MapaTurismo() {
         .eq("is_active", true)
         .order("name");
       if (error) throw error;
+      return (data || []).filter((op: any) => op.approval_status === "approved");
       return data;
     },
   });

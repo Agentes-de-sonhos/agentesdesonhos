@@ -7151,6 +7151,7 @@ export type Database = {
       tour_operators: {
         Row: {
           annual_revenue: string | null
+          approval_status: string
           business_hours: Json | null
           category: string | null
           certifications: string | null
@@ -7167,6 +7168,7 @@ export type Database = {
           logo_url: string | null
           materials: Json | null
           name: string
+          rejection_reason: string | null
           sales_channels: string | null
           short_description: string | null
           social_links: Json | null
@@ -7177,6 +7179,7 @@ export type Database = {
         }
         Insert: {
           annual_revenue?: string | null
+          approval_status?: string
           business_hours?: Json | null
           category?: string | null
           certifications?: string | null
@@ -7193,6 +7196,7 @@ export type Database = {
           logo_url?: string | null
           materials?: Json | null
           name: string
+          rejection_reason?: string | null
           sales_channels?: string | null
           short_description?: string | null
           social_links?: Json | null
@@ -7203,6 +7207,7 @@ export type Database = {
         }
         Update: {
           annual_revenue?: string | null
+          approval_status?: string
           business_hours?: Json | null
           category?: string | null
           certifications?: string | null
@@ -7219,6 +7224,7 @@ export type Database = {
           logo_url?: string | null
           materials?: Json | null
           name?: string
+          rejection_reason?: string | null
           sales_channels?: string | null
           short_description?: string | null
           social_links?: Json | null

@@ -35,6 +35,7 @@ import {
   CreditCard,
   Eye,
   Globe,
+  CheckCircle2,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -83,6 +84,7 @@ const menuGroups: AdminMenuGroup[] = [
   {
     title: "Comercial",
     items: [
+      { id: "pending-approvals", label: "Aprovações", icon: CheckCircle2 },
       { id: "trade-suppliers", label: "Diretório", icon: Building2 },
       { id: "hotels", label: "Hotéis", icon: Hotel },
       { id: "trade", label: "Trade", icon: TrendingUp },

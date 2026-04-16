@@ -44,6 +44,7 @@ import { AdminPlanSwitcher } from "@/components/admin/AdminPlanSwitcher";
 import { AdminVitrineCategoriesManager } from "@/components/admin/AdminVitrineCategoriesManager";
 import { AdminCardCaptureManager } from "@/components/admin/AdminCardCaptureManager";
 import { AdminTravelMeetManager } from "@/components/admin/AdminTravelMeetManager";
+import { AdminPendingApprovalsManager } from "@/components/admin/AdminPendingApprovalsManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,6 +65,7 @@ const TAB_LABELS: Record<string, string> = {
   suppliers: "Links",
   "registration-links": "Links Cadastro",
   "page-banners": "Capas",
+  "pending-approvals": "Aprovações",
   "trade-suppliers": "Diretório",
   hotels: "Hotéis",
   trade: "Trade",
@@ -89,6 +91,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminMenuOrderManager />;
     case "popups":
       return <AdminPopupsManager />;
+    case "pending-approvals":
+      return <AdminPendingApprovalsManager />;
     case "trade-suppliers":
       return (
         <>
