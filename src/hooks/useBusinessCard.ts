@@ -80,24 +80,20 @@ export function useBusinessCards() {
         throw new Error(`Você já atingiu o limite de ${MAX_BUSINESS_CARDS} cartões.`);
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("name, phone, agency_name, avatar_url")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
+      // Cards are created blank by default so each one can represent a
+      // different person (partner, employee, salesperson, etc.).
       const { data, error } = await supabase
         .from("business_cards")
         .insert({
           user_id: user.id,
           slug,
           label: label.trim() || "Novo cartão",
-          name: profile?.name || "",
-          agency_name: profile?.agency_name || "",
-          phone: profile?.phone || "",
-          whatsapp: profile?.phone || "",
-          email: user.email || "",
-          photo_url: profile?.avatar_url || null,
+          name: "",
+          agency_name: "",
+          phone: "",
+          whatsapp: "",
+          email: "",
+          photo_url: null,
         })
         .select()
         .single();
