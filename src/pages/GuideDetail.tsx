@@ -77,7 +77,7 @@ export default function GuideDetail() {
                     {guide.professional_name || guide.full_name}
                   </h1>
                   {guide.is_verified && (
-                    <Badge className="bg-blue-500/10 text-blue-600 border-blue-200 gap-1">
+                    <Badge variant="secondary" className="gap-1">
                       <BadgeCheck className="h-3.5 w-3.5" /> Verificado
                     </Badge>
                   )}

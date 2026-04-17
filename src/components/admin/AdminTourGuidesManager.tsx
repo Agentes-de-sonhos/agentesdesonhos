@@ -169,7 +169,7 @@ export function AdminTourGuidesManager() {
                 {previewGuide.website && <div><strong>Site:</strong> {previewGuide.website}</div>}
                 <div>
                   <strong>Idiomas:</strong>{" "}
-                  {(previewGuide.languages || []).map((l: any) => `${l.code} (${l.level})`).join(", ")}
+                  {((previewGuide.languages as any[]) || []).map((l: any) => `${l.code} (${l.level})`).join(", ")}
                 </div>
                 {previewGuide.specialties?.length > 0 && (
                   <div><strong>Especialidades:</strong> {previewGuide.specialties.join(", ")}</div>
