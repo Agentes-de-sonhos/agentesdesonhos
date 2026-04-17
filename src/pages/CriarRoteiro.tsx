@@ -328,6 +328,15 @@ export default function CriarRoteiro() {
                   )}
                 </div>
               )}
+              {generationError ? (
+                <CriticalErrorState
+                  title="Não foi possível gerar o roteiro"
+                  description="A geração foi interrompida. Você pode tentar novamente. Se o erro persistir, resete sua sessão para limpar dados temporários do navegador."
+                  errorMessage={generationError}
+                  onRetry={lastFormData ? handleRetryGeneration : undefined}
+                  retryLabel="Tentar novamente"
+                />
+              ) : null}
               <Card className="max-w-lg">
                 <CardHeader>
                   <CardTitle>Novo Roteiro de Viagem</CardTitle>
