@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Building2, ShoppingCart, Users, Phone, FileText } from "lucide-react";
+import { ArrowLeft, Building2, ShoppingCart, Users, Phone, FileText, Tag, Share2 } from "lucide-react";
 import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
 import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
@@ -334,7 +334,13 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                 onSave={async () => { await updateMutation.mutateAsync({ specialties: editSpecialties.join(", ") || null }); }}
                 onCancel={() => setEditSpecialties(operator.specialties?.split(",").map((s: string) => s.trim()).filter(Boolean) || [])}
               >
-                <OperatorSidebar operator={{ specialties: operator.specialties, category: "", social_links: null }} />
+                {operator.specialties ? (
+                  <OperatorSidebar operator={{ specialties: operator.specialties, category: "", social_links: null }} />
+                ) : (
+                  <OperatorInfoCard icon={Tag} title="Especialidades" iconColor="text-violet-600">
+                    {adminPlaceholder}
+                  </OperatorInfoCard>
+                )}
               </EditableSection>
             ) : (
               operator.specialties && <OperatorSidebar operator={{ specialties: operator.specialties, category: "", social_links: null }} />
@@ -350,10 +356,18 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                 }}
                 onCancel={() => setEditSocialLinks(buildSocialLinks())}
               >
-                <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+                {(operator.website || operator.instagram || operator.social_links) ? (
+                  <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+                ) : (
+                  <OperatorInfoCard icon={Share2} title="Redes Sociais" iconColor="text-primary">
+                    {adminPlaceholder}
+                  </OperatorInfoCard>
+                )}
               </EditableSection>
             ) : (
-              <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+              (operator.website || operator.instagram || operator.social_links) && (
+                <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+              )
             )}
 
             {/* Company info */}
