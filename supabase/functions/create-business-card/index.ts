@@ -185,6 +185,7 @@ Deno.serve(async (req) => {
       .from("business_cards")
       .insert({
         slug: rawSlug,
+        label,
         name,
         title: sanitize(body.title, 100),
         agency_name: sanitize(body.agency_name, 100),
