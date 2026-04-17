@@ -370,7 +370,6 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                     </OperatorInfoCard>
                   );
                 })()}
-                )}
               </EditableSection>
             ) : (
               (operator.website || operator.instagram || operator.social_links) && (
