@@ -219,8 +219,23 @@ export default function MapaTurismo() {
       specialties: (tm.specialties || []).map((s: string, i: number) => ({ id: `tm-${i}`, name: s })),
       _source: "travelmeet" as const,
     }));
-    return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet];
-  }, [suppliers, tourOperators, cruiseCompanies, travelMeetSuppliers]);
+    const fromGuides = (tourGuides || []).map((g: any) => {
+      const langSpecs = (g.languages || []).map((l: any, i: number) => ({ id: `g-lang-${i}`, name: l.code }));
+      const otherSpecs = (g.specialties || []).map((s: string, i: number) => ({ id: `g-spec-${i}`, name: s }));
+      return {
+        id: g.id,
+        name: g.professional_name || g.full_name,
+        category: "Guias",
+        logo_url: g.photo_url || null,
+        website_url: g.website || null,
+        instagram_url: g.instagram || null,
+        sales_channel: null,
+        specialties: [...langSpecs, ...otherSpecs],
+        _source: "guide" as const,
+      };
+    });
+    return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet, ...fromGuides];
+  }, [suppliers, tourOperators, cruiseCompanies, travelMeetSuppliers, tourGuides]);
 
   // Contextual specialties: only from items matching the active category
   const allSpecialties = useMemo(() => {
