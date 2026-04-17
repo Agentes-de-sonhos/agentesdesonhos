@@ -122,6 +122,26 @@ Deno.serve(async (req) => {
       if (data?.user) userId = data.user.id;
     }
 
+    // Defense in depth: enforce 3-card limit per authenticated user
+    if (userId) {
+      const { count: existingCount } = await adminClient
+        .from("business_cards")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      if ((existingCount ?? 0) >= 3) {
+        return new Response(
+          JSON.stringify({
+            error: "Você já atingiu o limite de 3 cartões virtuais. Exclua um existente para criar outro.",
+          }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Sanitize label (optional)
+    const label = sanitize(body.label, 60);
+
     // Sanitize buttons (max 6)
     let buttons: { text: string; url: string }[] = [];
     if (Array.isArray(body.buttons)) {
