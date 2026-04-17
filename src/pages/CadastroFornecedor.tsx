@@ -145,13 +145,24 @@ export default function CadastroFornecedor() {
         </div>
 
         {/* Title */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-foreground">
             {t(lang, "page_title")}
           </h1>
           <p className="text-muted-foreground mt-2">
             {t(lang, "page_subtitle")}
           </p>
+        </div>
+
+        {/* Guia de Turismo CTA */}
+        <div className="mb-6 rounded-2xl border border-border bg-card/60 p-4 flex items-center justify-between gap-3">
+          <div className="text-sm">
+            <p className="font-medium text-foreground">É um Guia de Turismo?</p>
+            <p className="text-muted-foreground text-xs">Use o formulário específico para guias.</p>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => navigate("/cadastro-guia")} className="rounded-xl shrink-0">
+            Cadastrar como Guia
+          </Button>
         </div>
 
         <form

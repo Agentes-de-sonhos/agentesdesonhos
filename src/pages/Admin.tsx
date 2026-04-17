@@ -45,6 +45,7 @@ import { AdminVitrineCategoriesManager } from "@/components/admin/AdminVitrineCa
 import { AdminCardCaptureManager } from "@/components/admin/AdminCardCaptureManager";
 import { AdminTravelMeetManager } from "@/components/admin/AdminTravelMeetManager";
 import { AdminPendingApprovalsManager } from "@/components/admin/AdminPendingApprovalsManager";
+import { AdminTourGuidesManager } from "@/components/admin/AdminTourGuidesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,6 +82,7 @@ const TAB_LABELS: Record<string, string> = {
   vitrine: "Vitrine",
   "plan-switcher": "Testar Planos",
   travelmeet: "TravelMeet",
+  "tour-guides": "Guias de Turismo",
 };
 
 function AdminContent({ tab }: { tab: string }) {
@@ -183,6 +185,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminPlanSwitcher />;
     case "travelmeet":
       return <AdminTravelMeetManager />;
+    case "tour-guides":
+      return <AdminTourGuidesManager />;
     default:
       return <AdminUserManager />;
   }

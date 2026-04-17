@@ -85,6 +85,7 @@ const menuGroups: AdminMenuGroup[] = [
     title: "Comercial",
     items: [
       { id: "pending-approvals", label: "Aprovações", icon: CheckCircle2 },
+      { id: "tour-guides", label: "Guias Turismo", icon: Users },
       { id: "trade-suppliers", label: "Diretório", icon: Building2 },
       { id: "hotels", label: "Hotéis", icon: Hotel },
       { id: "trade", label: "Trade", icon: TrendingUp },
