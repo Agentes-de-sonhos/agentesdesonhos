@@ -16,7 +16,7 @@ import {
 import { CreditCard, Pencil, Share2, Trash2, ExternalLink, Copy } from "lucide-react";
 import { toast } from "sonner";
 import type { BusinessCard } from "@/hooks/useBusinessCard";
-import { getCardShareUrl } from "@/lib/cardShareUrl";
+import { getCardPublicUrl } from "@/lib/cardShareUrl";
 
 interface Props {
   card: BusinessCard;
@@ -26,7 +26,7 @@ interface Props {
 
 export function BusinessCardListItem({ card, onDelete, isDeleting }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const shareUrl = getCardShareUrl(card.slug);
+  const shareUrl = getCardPublicUrl(card.slug);
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareUrl);
