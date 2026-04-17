@@ -16,7 +16,8 @@ interface GuideGalleryUploaderProps {
 export function GuideGalleryUploader({ value, onChange, max = 20, uid }: GuideGalleryUploaderProps) {
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
-  const folder = uid || user?.id || "anon";
+  // Public registration (no auth yet) MUST upload to "temp/" — required by RLS policy.
+  const folder = user?.id ? user.id : `temp/${uid || "anon"}`;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -110,7 +111,7 @@ interface GuidePhotoUploaderProps {
 export function GuidePhotoUploader({ value, onChange, uid }: GuidePhotoUploaderProps) {
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
-  const folder = uid || user?.id || "anon";
+  const folder = user?.id ? user.id : `temp/${uid || "anon"}`;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
