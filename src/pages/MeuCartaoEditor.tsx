@@ -290,7 +290,7 @@ function MeuCartaoEditorContent() {
             <Copy className="h-4 w-4 mr-1" /> Copiar link
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <a href={`/${card.slug}`} target="_blank" rel="noopener noreferrer">
+            <a href={getCardPublicUrl(card.slug)} target="_blank" rel="noopener noreferrer">
               <Eye className="h-4 w-4 mr-1" /> Visualizar
             </a>
           </Button>
