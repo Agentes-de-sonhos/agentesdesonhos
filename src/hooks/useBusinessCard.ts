@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
+export const MAX_BUSINESS_CARDS = 3;
+
 export interface CardButton {
   text: string;
   url: string;
@@ -21,6 +23,7 @@ export interface BusinessCard {
   id: string;
   user_id: string;
   slug: string;
+  label: string | null;
   name: string;
   title: string;
   agency_name: string;
@@ -40,34 +43,43 @@ export interface BusinessCard {
   updated_at: string;
 }
 
-export function useBusinessCard() {
+function normalizeCard(data: any): BusinessCard {
+  return {
+    ...data,
+    label: data.label ?? null,
+    logos: (data.logos as any) || [],
+    buttons: (data.buttons as any) || [],
+    social_links: (data.social_links as any) || {},
+  } as BusinessCard;
+}
+
+/** List all business cards for the current user. */
+export function useBusinessCards() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: card, isLoading } = useQuery({
-    queryKey: ["business-card", user?.id],
+  const { data: cards, isLoading } = useQuery({
+    queryKey: ["business-cards", user?.id],
     queryFn: async () => {
-      if (!user) return null;
+      if (!user) return [];
       const { data, error } = await supabase
         .from("business_cards")
         .select("*")
         .eq("user_id", user.id)
-        .maybeSingle();
+        .order("created_at", { ascending: true });
       if (error) throw error;
-      if (!data) return null;
-      return {
-        ...data,
-        logos: (data.logos as any) || [],
-        buttons: (data.buttons as any) || [],
-        social_links: (data.social_links as any) || {},
-      } as BusinessCard;
+      return (data || []).map(normalizeCard);
     },
     enabled: !!user,
   });
 
   const createCard = useMutation({
-    mutationFn: async (slug: string) => {
+    mutationFn: async ({ slug, label }: { slug: string; label: string }) => {
       if (!user) throw new Error("Não autenticado");
+      if ((cards?.length ?? 0) >= MAX_BUSINESS_CARDS) {
+        throw new Error(`Você já atingiu o limite de ${MAX_BUSINESS_CARDS} cartões.`);
+      }
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("name, phone, agency_name, avatar_url")
@@ -79,6 +91,7 @@ export function useBusinessCard() {
         .insert({
           user_id: user.id,
           slug,
+          label: label.trim() || "Novo cartão",
           name: profile?.name || "",
           agency_name: profile?.agency_name || "",
           phone: profile?.phone || "",
@@ -92,16 +105,66 @@ export function useBusinessCard() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["business-card"] });
+      queryClient.invalidateQueries({ queryKey: ["business-cards"] });
       toast.success("Cartão criado com sucesso!");
     },
     onError: (err: any) => {
-      if (err?.message?.includes("duplicate")) {
+      const msg = err?.message || "";
+      if (msg.includes("Limite de") || msg.includes("limite")) {
+        toast.error(msg);
+      } else if (msg.includes("duplicate") || msg.includes("unique")) {
         toast.error("Esse slug já está em uso. Escolha outro.");
       } else {
         toast.error("Erro ao criar cartão.");
       }
     },
+  });
+
+  const deleteCard = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("business_cards")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["business-cards"] });
+      toast.success("Cartão excluído.");
+    },
+    onError: () => toast.error("Erro ao excluir cartão."),
+  });
+
+  return {
+    cards: cards || [],
+    isLoading,
+    createCard,
+    deleteCard,
+    cardCount: cards?.length ?? 0,
+    canCreate: (cards?.length ?? 0) < MAX_BUSINESS_CARDS,
+  };
+}
+
+/** Load and update a single business card by ID. */
+export function useBusinessCardById(cardId: string | undefined) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: card, isLoading } = useQuery({
+    queryKey: ["business-card", cardId],
+    queryFn: async () => {
+      if (!cardId || !user) return null;
+      const { data, error } = await supabase
+        .from("business_cards")
+        .select("*")
+        .eq("id", cardId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return normalizeCard(data);
+    },
+    enabled: !!cardId && !!user,
   });
 
   const updateCard = useMutation({
@@ -120,7 +183,8 @@ export function useBusinessCard() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["business-card"] });
+      queryClient.invalidateQueries({ queryKey: ["business-card", cardId] });
+      queryClient.invalidateQueries({ queryKey: ["business-cards"] });
       toast.success("Cartão atualizado!");
     },
     onError: () => toast.error("Erro ao atualizar cartão."),
@@ -138,7 +202,69 @@ export function useBusinessCard() {
     return urlData.publicUrl;
   };
 
-  return { card, isLoading, createCard, updateCard, uploadImage };
+  return { card, isLoading, updateCard, uploadImage };
+}
+
+/**
+ * @deprecated Use `useBusinessCards()` and `useBusinessCardById()` instead.
+ * Returns the first card of the user for backward compatibility.
+ */
+export function useBusinessCard() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: card, isLoading } = useQuery({
+    queryKey: ["business-card-legacy", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from("business_cards")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return normalizeCard(data);
+    },
+    enabled: !!user,
+  });
+
+  const updateCard = useMutation({
+    mutationFn: async (updates: Partial<BusinessCard>) => {
+      if (!card) throw new Error("Cartão não encontrado");
+      const { error } = await supabase
+        .from("business_cards")
+        .update({
+          ...updates,
+          logos: updates.logos as any,
+          buttons: updates.buttons as any,
+          social_links: updates.social_links as any,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", card.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["business-card-legacy"] });
+      queryClient.invalidateQueries({ queryKey: ["business-cards"] });
+    },
+  });
+
+  const uploadImage = async (file: File, type: "photo" | "cover" | "logo") => {
+    if (!user) return null;
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/${type}_${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true });
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    return urlData.publicUrl;
+  };
+
+  return { card, isLoading, updateCard, uploadImage };
 }
 
 export function usePublicBusinessCard(slug: string | undefined) {
@@ -161,12 +287,7 @@ export function usePublicBusinessCard(slug: string | undefined) {
         event_type: "page_view",
       }).then();
 
-      return {
-        ...data,
-        logos: (data.logos as any) || [],
-        buttons: (data.buttons as any) || [],
-        social_links: (data.social_links as any) || {},
-      } as BusinessCard;
+      return normalizeCard(data);
     },
     enabled: !!slug,
   });
