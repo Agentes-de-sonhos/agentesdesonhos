@@ -841,6 +841,16 @@ export function AdminTourOperatorsManager() {
       onSelect={handleQuickLogoSelect}
       accept="image/*"
     />
+
+    {accountDialogOperator && (
+      <CreateSupplierAccountDialog
+        open={!!accountDialogOperator}
+        onOpenChange={(o) => { if (!o) setAccountDialogOperator(null); }}
+        operatorId={accountDialogOperator.id}
+        operatorName={accountDialogOperator.name}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] })}
+      />
+    )}
     </>
   );
 }
