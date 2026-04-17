@@ -43,6 +43,7 @@ import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLik
 import { useSupplierReviews } from "@/hooks/useSupplierReviews";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
+import { useApprovedTourGuides } from "@/hooks/useTourGuides";
 import { toast } from "sonner";
 
 interface CategoryDef {
@@ -141,6 +142,7 @@ export default function MapaTurismo() {
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
   const { data: travelMeetSuppliers, isLoading: loadingTravelMeet } = useTravelMeetSuppliers();
+  const { data: tourGuides, isLoading: loadingGuides } = useApprovedTourGuides();
 
   const { data: tourOperators, isLoading: loadingOperators } = useQuery({
     queryKey: ["tour-operators-listing"],
@@ -217,8 +219,23 @@ export default function MapaTurismo() {
       specialties: (tm.specialties || []).map((s: string, i: number) => ({ id: `tm-${i}`, name: s })),
       _source: "travelmeet" as const,
     }));
-    return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet];
-  }, [suppliers, tourOperators, cruiseCompanies, travelMeetSuppliers]);
+    const fromGuides = (tourGuides || []).map((g: any) => {
+      const langSpecs = (g.languages || []).map((l: any, i: number) => ({ id: `g-lang-${i}`, name: l.code }));
+      const otherSpecs = (g.specialties || []).map((s: string, i: number) => ({ id: `g-spec-${i}`, name: s }));
+      return {
+        id: g.id,
+        name: g.professional_name || g.full_name,
+        category: "Guias",
+        logo_url: g.photo_url || null,
+        website_url: g.website || null,
+        instagram_url: g.instagram || null,
+        sales_channel: null,
+        specialties: [...langSpecs, ...otherSpecs],
+        _source: "guide" as const,
+      };
+    });
+    return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet, ...fromGuides];
+  }, [suppliers, tourOperators, cruiseCompanies, travelMeetSuppliers, tourGuides]);
 
   // Contextual specialties: only from items matching the active category
   const allSpecialties = useMemo(() => {
@@ -302,7 +319,7 @@ export default function MapaTurismo() {
     return results;
   }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, cruiseQuickFilters, sortBy, reviewStatsMap, getLikeCount]);
 
-  const isLoadingAll = isLoading || loadingOperators || loadingCruises || loadingTravelMeet;
+  const isLoadingAll = isLoading || loadingOperators || loadingCruises || loadingTravelMeet || loadingGuides;
 
   const handleOpenReview = (supplier: any) => {
     if (!user) {
@@ -575,7 +592,7 @@ export default function MapaTurismo() {
                 <p className="text-lg font-medium text-foreground">Estamos preparando ótimos receptivos para você</p>
                 <p className="text-muted-foreground max-w-md">Em breve você encontrará parceiros incríveis por aqui. Enquanto isso, explore outras categorias!</p>
               </>
-            ) : categoryFilter === "guias" ? (
+            ) : categoryFilter === "Guias" ? (
               <>
                 <span className="text-4xl">👀</span>
                 <p className="text-lg font-medium text-foreground">Ainda não temos guias cadastrados por aqui</p>
@@ -601,7 +618,7 @@ export default function MapaTurismo() {
 
               return (
                 <Card
-                  key={supplier.id}
+                  key={`${supplier._source}-${supplier.id}`}
                   className="group cursor-pointer shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
                   onClick={() => {
                     if (supplier._source === "travelmeet") {
@@ -615,6 +632,8 @@ export default function MapaTurismo() {
                         ? `/mapa-turismo/cruzeiros/${supplier.id}`
                         : supplier._source === "operator"
                         ? `/mapa-turismo/operadora/${supplier.id}`
+                        : supplier._source === "guide"
+                        ? `/mapa-turismo/guia/${supplier.id}`
                         : `/mapa-turismo/${supplier.id}`
                     );
                   }}

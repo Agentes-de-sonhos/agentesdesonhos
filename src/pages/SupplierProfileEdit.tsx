@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOwnTourGuide } from "@/hooks/useTourGuides";
+import { GuideProfileEditor } from "@/components/tour-guides/GuideProfileEditor";
 import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail, Tag, Share2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
@@ -50,7 +52,10 @@ export default function SupplierProfileEdit() {
     setStoredLang(l);
   };
 
-  const { data: operator, isLoading } = useQuery({
+  // Try guide profile first
+  const { data: guide, isLoading: loadingGuide } = useOwnTourGuide(user?.id);
+
+  const { data: operator, isLoading: loadingOperator } = useQuery({
     queryKey: ["supplier-own-operator", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -61,8 +66,10 @@ export default function SupplierProfileEdit() {
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user && !loadingGuide && !guide, // only query operator if not a guide
   });
+
+  const isLoading = loadingGuide || (!guide && loadingOperator);
 
   if (isLoading) {
     return (
@@ -78,6 +85,11 @@ export default function SupplierProfileEdit() {
         </div>
       </div>
     );
+  }
+
+  // Render guide editor if user has a guide profile
+  if (guide) {
+    return <GuideProfileEditor guide={guide} />;
   }
 
   if (!operator) {
