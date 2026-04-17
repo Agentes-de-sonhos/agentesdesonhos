@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Itinerary, ItineraryDay } from "@/types/itinerary";
+import { parseLocalDate } from "@/lib/dateParsing";
 
 const tripTypeLabels: Record<string, string> = {
   familia: "Viagem em Família",
@@ -143,8 +144,8 @@ export function generatePDFContent(
     <div class="header">
       <h1>📍 ${itinerary.destination}</h1>
       <div class="dates">
-        ${format(new Date(itinerary.startDate), "dd 'de' MMMM", { locale: ptBR })} 
-        - ${format(new Date(itinerary.endDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+        ${format(parseLocalDate(itinerary.startDate), "dd 'de' MMMM", { locale: ptBR })} 
+        - ${format(parseLocalDate(itinerary.endDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
       </div>
       <div class="meta">
         <span class="meta-item">👥 ${itinerary.travelersCount} viajante(s)</span>

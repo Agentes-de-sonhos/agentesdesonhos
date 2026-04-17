@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { parseLocalDate } from "@/lib/dateParsing";
 import {
   MapPin,
   Calendar,
@@ -83,9 +84,9 @@ export function ItineraryCard({
             </CardTitle>
             <CardDescription className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              {format(new Date(itinerary.startDate), "dd/MM/yyyy", { locale: ptBR })}
+              {format(parseLocalDate(itinerary.startDate), "dd/MM/yyyy", { locale: ptBR })}
               {" - "}
-              {format(new Date(itinerary.endDate), "dd/MM/yyyy", { locale: ptBR })}
+              {format(parseLocalDate(itinerary.endDate), "dd/MM/yyyy", { locale: ptBR })}
             </CardDescription>
           </div>
           <DropdownMenu>
