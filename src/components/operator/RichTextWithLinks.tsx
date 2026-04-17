@@ -20,14 +20,17 @@ interface ParsedLine {
 function parseLines(text: string): ParsedLine[] {
   return text.split(/\n/).filter((l) => l.trim() !== "").map((line) => {
     const trimmed = line.trim();
-    const urlRegex = /(https?:\/\/[^\s]+)/;
-    const match = trimmed.match(urlRegex);
+    // Match http(s) URLs OR mailto: links — emails alone stay as plain text
+    const linkRegex = /(https?:\/\/[^\s]+|mailto:[^\s]+)/i;
+    const match = trimmed.match(linkRegex);
     if (!match) return { type: "text" as const, label: trimmed };
 
     const url = match[1];
     let label = trimmed.replace(url, "").trim();
     label = label.replace(/^[-•*]\s*/, "").replace(/[:;\-–—]+$/, "").trim();
-    if (!label) label = "Acessar link";
+    if (!label) {
+      label = url.startsWith("mailto:") ? url.replace(/^mailto:/i, "") : "Acessar link";
+    }
 
     return { type: "button" as const, label, url };
   });
