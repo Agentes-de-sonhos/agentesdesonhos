@@ -43,6 +43,7 @@ import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLik
 import { useSupplierReviews } from "@/hooks/useSupplierReviews";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
+import { useApprovedTourGuides } from "@/hooks/useTourGuides";
 import { toast } from "sonner";
 
 interface CategoryDef {
