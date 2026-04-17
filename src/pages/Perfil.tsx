@@ -31,6 +31,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { ResetSessionButton } from "@/components/settings/ResetSessionButton";
+import { LifeBuoy } from "lucide-react";
 
 const brazilianStates = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -571,6 +573,30 @@ export default function Perfil() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Solução de problemas */}
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LifeBuoy className="h-5 w-5 text-muted-foreground" />
+              Solução de problemas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Resetar sessão</p>
+                <p className="text-xs text-muted-foreground max-w-xl">
+                  Use esta opção se a plataforma estiver apresentando comportamento
+                  inesperado: telas em branco, carregamento infinito ou erros que
+                  persistem mesmo após recarregar a página. Encerra sua sessão local
+                  e limpa dados temporários do navegador.
+                </p>
+              </div>
+              <ResetSessionButton />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Save/Cancel buttons when editing */}
         {editing && (
