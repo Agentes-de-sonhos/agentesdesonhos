@@ -57,6 +57,7 @@ const PerguntasRespostas = lazy(() => import("./pages/PerguntasRespostas"));
 const DreamAdvisor = lazy(() => import("./pages/DreamAdvisor"));
 const MinhaVitrine = lazy(() => import("./pages/MinhaVitrine"));
 const MeuCartao = lazy(() => import("./pages/MeuCartao"));
+const MeuCartaoEditor = lazy(() => import("./pages/MeuCartaoEditor"));
 const CriarCartao = lazy(() => import("./pages/CriarCartao"));
 const VitrinePublica = lazy(() => import("./pages/VitrinePublica"));
 const CartaoPublico = lazy(() => import("./pages/CartaoPublico"));
@@ -202,6 +203,7 @@ const App = () => (
             <Route path="/dream-advisor" element={<ProtectedRoute><DreamAdvisor /></ProtectedRoute>} />
             <Route path="/minha-vitrine" element={<ProtectedRoute><MinhaVitrine /></ProtectedRoute>} />
             <Route path="/meu-cartao" element={<ProtectedRoute><MeuCartao /></ProtectedRoute>} />
+            <Route path="/meu-cartao/:id" element={<ProtectedRoute><MeuCartaoEditor /></ProtectedRoute>} />
             <Route path="/gamificacao" element={<ProtectedRoute><Gamificacao /></ProtectedRoute>} />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
