@@ -64,17 +64,24 @@ Deno.serve(async (req) => {
 
     const userId = newUser.user.id;
 
-    // ---------- 2. Set role to fornecedor (UPSERT — trigger may or may not exist) ----------
-    const { error: roleError } = await admin
+    // ---------- 2. Set role to fornecedor ----------
+    // Trigger handle_new_user_role auto-inserts 'agente'. We update it to 'fornecedor'.
+    const { data: existingRoles } = await admin
       .from("user_roles")
-      .upsert(
-        { user_id: userId, role: "fornecedor" },
-        { onConflict: "user_id,role", ignoreDuplicates: false },
-      );
-    if (roleError) {
-      // Fallback: try plain update if upsert constraint differs
-      console.warn("Role upsert warning:", roleError.message);
-      await admin.from("user_roles").update({ role: "fornecedor" }).eq("user_id", userId);
+      .select("id")
+      .eq("user_id", userId);
+
+    if (existingRoles && existingRoles.length > 0) {
+      const { error: updErr } = await admin
+        .from("user_roles")
+        .update({ role: "fornecedor" })
+        .eq("user_id", userId);
+      if (updErr) console.warn("Role update warning:", updErr.message);
+    } else {
+      const { error: insErr } = await admin
+        .from("user_roles")
+        .insert({ user_id: userId, role: "fornecedor" });
+      if (insErr) console.warn("Role insert warning:", insErr.message);
     }
 
     // ---------- 3. Create profile ----------
