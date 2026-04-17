@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOwnTourGuide } from "@/hooks/useTourGuides";
+import { GuideProfileEditor } from "@/components/tour-guides/GuideProfileEditor";
 import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail, Tag, Share2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
