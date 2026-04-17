@@ -8,27 +8,17 @@ const DOMAINS: Record<string, string> = {
 
 const OG_IMAGE = "https://www.vitrine.tur.br/favicon.png";
 
+const DEFAULT_OG = {
+  title: "O seu próximo destino começa aqui 🌍",
+  description: "Tudo que você precisa para sua viagem em um só lugar",
+};
+
 const OG_CONTENT: Record<string, { title: string; description: string }> = {
-  quote: {
-    title: "Seu orçamento de viagem chegou 💰",
-    description: "Confira todos os detalhes da sua viagem e aprove sua próxima experiência.",
-  },
-  itinerary: {
-    title: "Seu roteiro de viagem está pronto ✈️",
-    description: "Acesse seu roteiro completo e viaje com tudo organizado na palma da mão.",
-  },
-  wallet: {
-    title: "Sua viagem organizada em um só lugar 🎒",
-    description: "Acesse seus vouchers, ingressos e documentos de forma simples e segura.",
-  },
-  card: {
-    title: "Seu contato de viagem digital 📲",
-    description: "Tenha acesso rápido ao seu agente e informações importantes da sua viagem.",
-  },
-  showcase: {
-    title: "Conheça esta agência de viagens 🌍",
-    description: "Descubra experiências incríveis e fale com especialistas para sua próxima viagem.",
-  },
+  quote: DEFAULT_OG,
+  itinerary: DEFAULT_OG,
+  wallet: DEFAULT_OG,
+  card: DEFAULT_OG,
+  showcase: DEFAULT_OG,
 };
 
 Deno.serve(async (req) => {
