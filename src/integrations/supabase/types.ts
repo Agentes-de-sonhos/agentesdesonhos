@@ -7151,6 +7151,108 @@ export type Database = {
           },
         ]
       }
+      tour_guides: {
+        Row: {
+          bio: string | null
+          certifications: string[] | null
+          city: string | null
+          country: string | null
+          created_at: string
+          differentials: string | null
+          email: string | null
+          full_name: string
+          gallery_urls: string[] | null
+          id: string
+          instagram: string | null
+          is_featured: boolean | null
+          is_verified: boolean
+          languages: Json | null
+          max_gallery_photos: number | null
+          photo_url: string | null
+          plan_type: string
+          professional_name: string | null
+          regions: string[] | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          search_priority: number | null
+          services: string[] | null
+          specialties: string[] | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          video_url: string | null
+          website: string | null
+          whatsapp: string
+        }
+        Insert: {
+          bio?: string | null
+          certifications?: string[] | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          differentials?: string | null
+          email?: string | null
+          full_name: string
+          gallery_urls?: string[] | null
+          id?: string
+          instagram?: string | null
+          is_featured?: boolean | null
+          is_verified?: boolean
+          languages?: Json | null
+          max_gallery_photos?: number | null
+          photo_url?: string | null
+          plan_type?: string
+          professional_name?: string | null
+          regions?: string[] | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          search_priority?: number | null
+          services?: string[] | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          video_url?: string | null
+          website?: string | null
+          whatsapp: string
+        }
+        Update: {
+          bio?: string | null
+          certifications?: string[] | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          differentials?: string | null
+          email?: string | null
+          full_name?: string
+          gallery_urls?: string[] | null
+          id?: string
+          instagram?: string | null
+          is_featured?: boolean | null
+          is_verified?: boolean
+          languages?: Json | null
+          max_gallery_photos?: number | null
+          photo_url?: string | null
+          plan_type?: string
+          professional_name?: string | null
+          regions?: string[] | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          search_priority?: number | null
+          services?: string[] | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          video_url?: string | null
+          website?: string | null
+          whatsapp?: string
+        }
+        Relationships: []
+      }
       tour_operators: {
         Row: {
           annual_revenue: string | null
@@ -8509,6 +8611,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_tour_guide: { Args: { _id: string }; Returns: Json }
       get_quote_by_public_code: {
         Args: { p_agency_slug: string; p_code: string }
         Returns: Json

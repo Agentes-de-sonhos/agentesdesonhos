@@ -91,6 +91,8 @@ const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
 const MeusProjetos = lazy(() => import("./pages/MeusProjetos"));
 const CardCaptureQuickAccess = lazy(() => import("./pages/CardCaptureQuickAccess"));
 const CadastroFornecedor = lazy(() => import("./pages/CadastroFornecedor"));
+const CadastroGuia = lazy(() => import("./pages/CadastroGuia"));
+const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 const SupplierProfileEdit = lazy(() => import("./pages/SupplierProfileEdit"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
@@ -142,6 +144,7 @@ const App = () => (
             <Route path="/planos" element={<Planos />} />
             <Route path="/desconto30off" element={<Desconto30Off />} />
             <Route path="/cadastro-fornecedor" element={<CadastroFornecedor />} />
+            <Route path="/cadastro-guia" element={<CadastroGuia />} />
             <Route path="/meu-perfil-empresa" element={<ProtectedRoute><SupplierProfileEdit /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
@@ -163,6 +166,7 @@ const App = () => (
             <Route path="/mapa-turismo/cruzeiros" element={<ProtectedRoute><CruisesPage /></ProtectedRoute>} />
             <Route path="/mapa-turismo/cruzeiros/:id" element={<ProtectedRoute><CruiseDetailPage /></ProtectedRoute>} />
             <Route path="/mapa-turismo/operadora/:id" element={<ProtectedRoute><OperadoraDetail /></ProtectedRoute>} />
+            <Route path="/mapa-turismo/guia/:id" element={<ProtectedRoute><GuideDetail /></ProtectedRoute>} />
             <Route path="/mapa-turismo/:id" element={<ProtectedRoute><SupplierDetail /></ProtectedRoute>} />
             <Route path="/noticias" element={<ProtectedRoute><Noticias /></ProtectedRoute>} />
             <Route path="/materiais" element={<ProtectedRoute><Materiais /></ProtectedRoute>} />
