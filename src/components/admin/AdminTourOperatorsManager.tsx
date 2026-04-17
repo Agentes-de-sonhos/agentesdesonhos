@@ -37,6 +37,7 @@ import {
   X,
   Link as LinkIcon,
   ImagePlus,
+  KeyRound,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { SupplierLogoUpload } from "./SupplierLogoUpload";
 import { MediaManagerModal } from "@/components/media/MediaManagerModal";
+import { CreateSupplierAccountDialog } from "./CreateSupplierAccountDialog";
 
 const TEMPLATE_HEADERS = [
   "Operator Name", "Category", "Description", "How to Sell",
@@ -277,6 +279,7 @@ export function AdminTourOperatorsManager() {
   const [activeTab, setActiveTab] = useState("como-vender");
   const [quickLogoOperatorId, setQuickLogoOperatorId] = useState<string | null>(null);
   const [quickLogoOpen, setQuickLogoOpen] = useState(false);
+  const [accountDialogOperator, setAccountDialogOperator] = useState<{ id: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -592,6 +595,15 @@ export function AdminTourOperatorsManager() {
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => navigate(`/mapa-turismo/operadora/${op.id}`)} title="Ver página"><Eye className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => { setQuickLogoOperatorId(op.id); setQuickLogoOpen(true); }} title="Alterar logotipo"><ImagePlus className="h-4 w-4" /></Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setAccountDialogOperator({ id: op.id, name: op.name })}
+                    title={op.user_id ? "Conta de fornecedor já vinculada" : "Criar acesso de fornecedor"}
+                    disabled={!!op.user_id}
+                  >
+                    <KeyRound className={`h-4 w-4 ${op.user_id ? "text-muted-foreground" : "text-primary"}`} />
+                  </Button>
                   <Button variant="ghost" size="icon" onClick={() => openEdit(op)} title="Editar"><Pencil className="h-4 w-4" /></Button>
                   <ConfirmDeleteDialog onConfirm={() => deleteMutation.mutate(op.id)} title="Remover operadora" description="Tem certeza que deseja remover permanentemente esta operadora?">
                     <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
