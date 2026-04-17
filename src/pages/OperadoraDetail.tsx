@@ -356,12 +356,20 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
                 }}
                 onCancel={() => setEditSocialLinks(buildSocialLinks())}
               >
-                {(operator.website || operator.instagram || operator.social_links) ? (
-                  <OperatorSidebar operator={{ social_links: operator.social_links as Record<string, string> | null, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
-                ) : (
-                  <OperatorInfoCard icon={Share2} title="Redes Sociais" iconColor="text-primary">
-                    {adminPlaceholder}
-                  </OperatorInfoCard>
+                {(() => {
+                  const sl = operator.social_links as Record<string, string> | null;
+                  const hasSocial =
+                    !!operator.website ||
+                    !!operator.instagram ||
+                    (sl && typeof sl === "object" && Object.values(sl).some((v) => !!v));
+                  return hasSocial ? (
+                    <OperatorSidebar operator={{ social_links: sl, website: operator.website, instagram: operator.instagram, category: "", specialties: null }} />
+                  ) : (
+                    <OperatorInfoCard icon={Share2} title="Redes Sociais" iconColor="text-primary">
+                      {adminPlaceholder}
+                    </OperatorInfoCard>
+                  );
+                })()}
                 )}
               </EditableSection>
             ) : (
