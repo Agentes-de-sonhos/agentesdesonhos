@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
 import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
+import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
 import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
 import { useItineraries } from "@/hooks/useItineraries";
@@ -43,6 +44,8 @@ export default function CriarRoteiro() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
 
   const {
     itineraries,
@@ -95,6 +98,8 @@ export default function CriarRoteiro() {
     }
     setIsGenerating(true);
     setFormData(data);
+    setLastFormData(data);
+    setGenerationError(null);
 
     try {
       // Create itinerary record
@@ -126,9 +131,20 @@ export default function CriarRoteiro() {
         }
       }
 
-      toast.error(error instanceof Error ? error.message : "Erro ao gerar roteiro");
+      const message = error instanceof Error ? error.message : "Erro ao gerar roteiro";
+      setGenerationError(message);
+      toast.error(message);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleRetryGeneration = () => {
+    if (lastFormData) {
+      setGenerationError(null);
+      handleCreateItinerary(lastFormData);
+    } else {
+      setGenerationError(null);
     }
   };
 
@@ -312,6 +328,15 @@ export default function CriarRoteiro() {
                   )}
                 </div>
               )}
+              {generationError ? (
+                <CriticalErrorState
+                  title="Não foi possível gerar o roteiro"
+                  description="A geração foi interrompida. Você pode tentar novamente. Se o erro persistir, resete sua sessão para limpar dados temporários do navegador."
+                  errorMessage={generationError}
+                  onRetry={lastFormData ? handleRetryGeneration : undefined}
+                  retryLabel="Tentar novamente"
+                />
+              ) : null}
               <Card className="max-w-lg">
                 <CardHeader>
                   <CardTitle>Novo Roteiro de Viagem</CardTitle>
