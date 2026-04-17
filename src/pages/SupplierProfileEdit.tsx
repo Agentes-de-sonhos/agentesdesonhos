@@ -52,7 +52,10 @@ export default function SupplierProfileEdit() {
     setStoredLang(l);
   };
 
-  const { data: operator, isLoading } = useQuery({
+  // Try guide profile first
+  const { data: guide, isLoading: loadingGuide } = useOwnTourGuide(user?.id);
+
+  const { data: operator, isLoading: loadingOperator } = useQuery({
     queryKey: ["supplier-own-operator", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -63,8 +66,10 @@ export default function SupplierProfileEdit() {
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user && !loadingGuide && !guide, // only query operator if not a guide
   });
+
+  const isLoading = loadingGuide || (!guide && loadingOperator);
 
   if (isLoading) {
     return (
