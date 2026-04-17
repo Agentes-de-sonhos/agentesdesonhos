@@ -5,9 +5,7 @@ import { Check, Eye, Copy, Share2, FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useBusinessCard } from "@/hooks/useBusinessCard";
 import { generateBusinessCardPdf } from "@/lib/generateBusinessCardPdf";
-import { getCardShareUrl } from "@/lib/cardShareUrl";
-
-const PUBLIC_DOMAIN = "https://contato.tur.br";
+import { getCardPublicUrl } from "@/lib/cardShareUrl";
 
 interface WizardCompleteProps {
   slug: string;
@@ -17,8 +15,7 @@ interface WizardCompleteProps {
 export function WizardComplete({ slug, onRestart }: WizardCompleteProps) {
   const { card } = useBusinessCard();
   const [generatingPdf, setGeneratingPdf] = useState(false);
-  const publicUrl = `${PUBLIC_DOMAIN}/${slug}`;
-  const shareUrl = getCardShareUrl(slug);
+  const shareUrl = getCardPublicUrl(slug);
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareUrl);

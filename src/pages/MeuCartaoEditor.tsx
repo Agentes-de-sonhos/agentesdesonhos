@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { generateBusinessCardPdf } from "@/lib/generateBusinessCardPdf";
-import { getCardShareUrl } from "@/lib/cardShareUrl";
+import { getCardPublicUrl } from "@/lib/cardShareUrl";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -160,7 +160,7 @@ function MeuCartaoEditorContent() {
 
   const copyLink = () => {
     if (card) {
-      navigator.clipboard.writeText(getCardShareUrl(card.slug));
+      navigator.clipboard.writeText(getCardPublicUrl(card.slug));
       toast.success("Link copiado!");
     }
   };
