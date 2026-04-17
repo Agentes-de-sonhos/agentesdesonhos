@@ -87,6 +87,11 @@ export default function SupplierProfileEdit() {
     );
   }
 
+  // Render guide editor if user has a guide profile
+  if (guide) {
+    return <GuideProfileEditor guide={guide} />;
+  }
+
   if (!operator) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
