@@ -592,7 +592,7 @@ export default function MapaTurismo() {
                 <p className="text-lg font-medium text-foreground">Estamos preparando ótimos receptivos para você</p>
                 <p className="text-muted-foreground max-w-md">Em breve você encontrará parceiros incríveis por aqui. Enquanto isso, explore outras categorias!</p>
               </>
-            ) : categoryFilter === "guias" ? (
+            ) : categoryFilter === "Guias" ? (
               <>
                 <span className="text-4xl">👀</span>
                 <p className="text-lg font-medium text-foreground">Ainda não temos guias cadastrados por aqui</p>
