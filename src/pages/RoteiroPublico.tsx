@@ -5,6 +5,7 @@ import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { Itinerary, ItineraryDay, Activity } from "@/types/itinerary";
 import {
   MapPin, Calendar, Users, Sun, Sunset, Moon, Clock, DollarSign, Loader2,
@@ -365,8 +366,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
           <div className="flex flex-wrap items-center justify-center gap-4 text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {format(new Date(itinerary.startDate), "dd 'de' MMM", { locale: ptBR })} –{" "}
-              {format(new Date(itinerary.endDate), "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
+              {format(parseLocalDate(itinerary.startDate), "dd 'de' MMM", { locale: ptBR })} –{" "}
+              {format(parseLocalDate(itinerary.endDate), "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
