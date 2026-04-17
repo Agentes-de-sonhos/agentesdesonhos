@@ -319,7 +319,7 @@ export default function MapaTurismo() {
     return results;
   }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, cruiseQuickFilters, sortBy, reviewStatsMap, getLikeCount]);
 
-  const isLoadingAll = isLoading || loadingOperators || loadingCruises || loadingTravelMeet;
+  const isLoadingAll = isLoading || loadingOperators || loadingCruises || loadingTravelMeet || loadingGuides;
 
   const handleOpenReview = (supplier: any) => {
     if (!user) {
@@ -618,7 +618,7 @@ export default function MapaTurismo() {
 
               return (
                 <Card
-                  key={supplier.id}
+                  key={`${supplier._source}-${supplier.id}`}
                   className="group cursor-pointer shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
                   onClick={() => {
                     if (supplier._source === "travelmeet") {
@@ -632,6 +632,8 @@ export default function MapaTurismo() {
                         ? `/mapa-turismo/cruzeiros/${supplier.id}`
                         : supplier._source === "operator"
                         ? `/mapa-turismo/operadora/${supplier.id}`
+                        : supplier._source === "guide"
+                        ? `/mapa-turismo/guia/${supplier.id}`
                         : `/mapa-turismo/${supplier.id}`
                     );
                   }}
