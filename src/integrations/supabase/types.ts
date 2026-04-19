@@ -3693,6 +3693,7 @@ export type Database = {
       learning_trails: {
         Row: {
           banner_url: string | null
+          certificate_available: boolean
           certificate_template_url: string | null
           created_at: string
           description: string | null
@@ -3709,6 +3710,7 @@ export type Database = {
         }
         Insert: {
           banner_url?: string | null
+          certificate_available?: boolean
           certificate_template_url?: string | null
           created_at?: string
           description?: string | null
@@ -3725,6 +3727,7 @@ export type Database = {
         }
         Update: {
           banner_url?: string | null
+          certificate_available?: boolean
           certificate_template_url?: string | null
           created_at?: string
           description?: string | null
