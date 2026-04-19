@@ -131,6 +131,7 @@ export function AdminAcademyManager() {
     banner_url: "",
     overview_pdf_url: "",
     certificate_template_url: "",
+    certificate_available: true,
     playbook_destination_id: "" as string,
     order_index: 0,
     is_active: true,
@@ -147,6 +148,7 @@ export function AdminAcademyManager() {
         banner_url: (trail as any).banner_url || "",
         overview_pdf_url: (trail as any).overview_pdf_url || "",
         certificate_template_url: trail.certificate_template_url || "",
+        certificate_available: (trail as any).certificate_available ?? true,
         playbook_destination_id: (trail as any).playbook_destination_id || "",
         order_index: trail.order_index,
         is_active: trail.is_active,
@@ -161,6 +163,7 @@ export function AdminAcademyManager() {
         banner_url: "",
         overview_pdf_url: "",
         certificate_template_url: "",
+        certificate_available: true,
         playbook_destination_id: "",
         order_index: trails.length,
         is_active: true,
@@ -566,6 +569,18 @@ export function AdminAcademyManager() {
               }} className="sr-only" />
             </label>
           )}
+        </div>
+      </div>
+      <div className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30">
+        <Switch
+          checked={trailForm.certificate_available}
+          onCheckedChange={(v) => setTrailForm({ ...trailForm, certificate_available: v })}
+        />
+        <div className="space-y-0.5">
+          <Label className="text-sm font-medium">Certificado disponível</Label>
+          <p className="text-xs text-muted-foreground">
+            Quando desativado, a Prova Final e o Certificado aparecem como "indisponíveis" para os alunos. Use enquanto o conteúdo ou o template ainda não estiver pronto.
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-2">

@@ -9,6 +9,7 @@ export interface LearningTrail {
   is_active: boolean;
   total_hours: number;
   certificate_template_url: string | null;
+  certificate_available: boolean;
   overview_pdf_url: string | null;
   playbook_destination_id: string | null;
   created_at: string;
