@@ -14,6 +14,7 @@ export function TrailCard({ trail, onSelect }: TrailCardProps) {
   const isCertified = trail.hasCertificate;
   const isCompleted = trail.progressPercent === 100;
   const isInProgress = trail.progressPercent > 0 && trail.progressPercent < 100;
+  const certificateAvailable = (trail as any).certificate_available !== false;
 
   const totalMinutes = trail.trainings?.reduce(
     (sum, tt) => sum + (tt.training?.duration_minutes || 0),
@@ -40,7 +41,7 @@ export function TrailCard({ trail, onSelect }: TrailCardProps) {
           </div>
         )}
         {/* Badges */}
-        <div className="absolute top-2 left-2 flex gap-1.5">
+        <div className="absolute top-2 left-2 flex gap-1.5 flex-wrap">
           {isCertified && (
             <Badge className="bg-yellow-500 text-white shadow-md">
               <Award className="h-3 w-3 mr-1" /> Certificado
@@ -52,6 +53,11 @@ export function TrailCard({ trail, onSelect }: TrailCardProps) {
           {isInProgress && (
             <Badge className="bg-primary text-primary-foreground shadow-md text-[10px]">
               ▶ Em andamento
+            </Badge>
+          )}
+          {!certificateAvailable && !isCertified && (
+            <Badge variant="secondary" className="shadow-md text-[10px]">
+              <Clock className="h-3 w-3 mr-1" /> Certificado em breve
             </Badge>
           )}
         </div>

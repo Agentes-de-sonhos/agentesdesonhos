@@ -143,8 +143,9 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const linkedGalleries = groupIntoGalleries(allTrailMaterialsCombined);
 
   const certificate = certificates.find((c) => c.trail_id === trail.id);
-  const canTakeExam = trail.allQuizzesPassed && !trail.examPassed;
-  const canGenerateCertificate = trail.allQuizzesPassed && trail.examPassed && !trail.hasCertificate;
+  const certificateAvailable = (trail as any).certificate_available !== false;
+  const canTakeExam = certificateAvailable && trail.allQuizzesPassed && !trail.examPassed;
+  const canGenerateCertificate = certificateAvailable && trail.allQuizzesPassed && trail.examPassed && !trail.hasCertificate;
   const isCertified = trail.hasCertificate;
 
   useEffect(() => {
@@ -264,7 +265,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             <GraduationCap className="h-4.5 w-4.5 text-success" />
           </div>
           <div>
-            <p className="text-lg font-bold text-foreground leading-tight">{isCertified ? "Sim" : "Disponível"}</p>
+            <p className="text-lg font-bold text-foreground leading-tight">{isCertified ? "Sim" : certificateAvailable ? "Disponível" : "Em breve"}</p>
             <p className="text-[10px] text-muted-foreground font-medium">certificado</p>
           </div>
         </div>
@@ -623,7 +624,17 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {!trail.allQuizzesPassed ? (
+                {!certificateAvailable ? (
+                  <div className="text-center py-8">
+                    <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                      <Clock className="h-8 w-8 text-muted-foreground/60" />
+                    </div>
+                    <p className="text-base font-semibold text-foreground">Prova Final indisponível no momento</p>
+                    <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
+                      A prova final e o certificado desta trilha ainda não foram liberados. Continue acompanhando os módulos — em breve estarão disponíveis aqui.
+                    </p>
+                  </div>
+                ) : !trail.allQuizzesPassed ? (
                   <div className="text-center py-8">
                     <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
                       <Lock className="h-8 w-8 text-muted-foreground/40" />
