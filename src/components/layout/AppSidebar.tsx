@@ -371,6 +371,12 @@ export function AppSidebar() {
         setShowComingSoon(true);
         return;
       }
+      // Start plan: lock specific premium areas
+      if (isStartPlan && startPlanLockedUrls.has(item.url)) {
+        e.preventDefault();
+        setUpgradeFeature(item.requiredFeature ?? "crm_basic");
+        return;
+      }
       if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
         e.preventDefault();
         setUpgradeFeature(item.requiredFeature);
@@ -379,7 +385,7 @@ export function AppSidebar() {
       trackSectionVisit(item.url);
       setCollapsed(true);
     },
-    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital]
+    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, startPlanLockedUrls]
   );
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
