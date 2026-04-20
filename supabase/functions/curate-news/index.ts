@@ -7,11 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// RSS feed sources
+// RSS feed sources com peso de prioridade (maior = mais relevante)
+// Brasilturis usa ?withoutcomments=1 para driblar o bloqueio do Yoast SEO no /feed/
 const RSS_SOURCES = [
-  { name: "Panrotas", url: "https://www.panrotas.com.br/feed" },
-  { name: "Mercado & Eventos", url: "https://www.mercadoeeventos.com.br/feed/" },
-  { name: "Brasilturis", url: "https://brasilturis.com.br/feed/" },
+  { name: "Panrotas", url: "https://www.panrotas.com.br/feed", priority: 3, maxItems: 30 },
+  { name: "Brasilturis", url: "https://brasilturis.com.br/feed/?withoutcomments=1", priority: 2, maxItems: 25 },
+  { name: "Mercado & Eventos", url: "https://www.mercadoeeventos.com.br/feed/", priority: 1, maxItems: 20 },
 ];
 
 interface RawNewsItem {
