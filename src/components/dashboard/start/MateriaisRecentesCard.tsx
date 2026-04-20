@@ -58,9 +58,9 @@ export function MateriaisRecentesCard() {
                 className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all text-left"
               >
                 <div className="aspect-[3/4] bg-muted relative overflow-hidden">
-                  {gallery.thumbnail ? (
+                  {gallery.thumbnail_url ? (
                     <img
-                      src={gallery.thumbnail}
+                      src={gallery.thumbnail_url}
                       alt={gallery.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
@@ -76,7 +76,7 @@ export function MateriaisRecentesCard() {
                 </div>
                 <div className="p-2">
                   <p className="text-xs font-medium text-foreground line-clamp-1">
-                    {gallery.supplierName || "Material"}
+                    {gallery.tour_operators?.name || "Material"}
                   </p>
                   <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">
                     {gallery.title}
