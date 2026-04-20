@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   Headset, Plus, ArrowLeft, Send, Paperclip, Loader2, Clock, MessageSquare, X, CheckCircle2,
+  LifeBuoy,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useSupportTickets, useTicketMessages } from "@/hooks/useSupportTickets";
 import { TICKET_CATEGORIES, TICKET_STATUSES, type TicketCategory, type SupportTicket } from "@/types/support";
+import { ResetSessionButton } from "@/components/settings/ResetSessionButton";
 
 function NewTicketDialog({ onCreated }: { onCreated: (id: string) => void }) {
   const [open, setOpen] = useState(false);
