@@ -4,7 +4,7 @@ import {
   Home, BookOpen, PlusCircle, Users, Menu, X,
   GraduationCap, Newspaper, Map, Compass, Tag, CalendarDays,
   Wallet, Calculator, Route, FileText,
-  ShoppingCart, Lock,
+  ShoppingCart, Lock, Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
@@ -63,6 +63,22 @@ const navItems: NavItem[] = [
   { label: "Menu", icon: Menu, action: "menu" },
 ];
 
+// Start (free) plan users get a simplified bottom nav focused on free features
+const startNavItems: NavItem[] = [
+  { label: "Início", icon: Home, path: "/dashboard-start" },
+  {
+    label: "Conhecimento", icon: BookOpen,
+    color: "text-blue-600", bgColor: "bg-blue-50",
+    subItems: [
+      { label: "EducaTravel Academy", icon: GraduationCap, path: "/educa-academy" },
+      { label: "Notícias do Trade", icon: Newspaper, path: "/noticias", requiredFeature: "news" },
+    ],
+  },
+  { label: "Mapa do Turismo", icon: Map, path: "/mapa-turismo" },
+  { label: "Materiais", icon: Megaphone, path: "/materiais" },
+  { label: "Menu", icon: Menu, action: "menu" },
+];
+
 export function BottomNavBar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,8 +86,11 @@ export function BottomNavBar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePopup, setActivePopup] = useState<string | null>(null);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
-  const { hasFeature } = useSubscription();
+  const { hasFeature, plan, isPromotor } = useSubscription();
   const { trackSectionVisit } = useGamificationLite();
+
+  const isStartPlan = !isPromotor && plan === "start";
+  const items = isStartPlan ? startNavItems : navItems;
 
   const isActive = (item: NavItem) => {
     if (item.path) {
@@ -111,7 +130,7 @@ export function BottomNavBar() {
     navigate(sub.path);
   };
 
-  const activeItem = navItems.find((i) => i.label === activePopup);
+  const activeItem = items.find((i) => i.label === activePopup);
 
   return (
     <>
@@ -183,7 +202,7 @@ export function BottomNavBar() {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="flex items-center justify-around h-16 px-1">
-          {navItems.map((item) => {
+          {items.map((item) => {
             const active = item.action === "menu"
               ? drawerOpen
               : activePopup === item.label
