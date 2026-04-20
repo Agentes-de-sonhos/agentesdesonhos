@@ -6,6 +6,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +27,11 @@ import { Users, MessageCircle, User, Building2, MapPin } from "lucide-react";
 
 interface OnlineAgentsStripProps {
   onAgentClick?: (agent: OnlineAgent) => void;
+  /**
+   * When true, the current user is treated as offline (Start plan).
+   * Any interaction (toggle on, view profile, send message) opens the upgrade dialog.
+   */
+  restrictedMode?: boolean;
 }
 
 function AgentHoverCard({
@@ -128,7 +134,7 @@ function AgentAvatar({
   );
 }
 
-export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
+export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: OnlineAgentsStripProps) {
   const { onlineUsers, onlineCount, isOnline, isOnlineLoading, toggleOnline } =
     usePresence();
   const { hasFeature } = useSubscription();
@@ -136,9 +142,14 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const handleMessage = (agent: OnlineAgent) => {
     setPopoverOpen(false);
+    if (restrictedMode) {
+      setUpgradeOpen(true);
+      return;
+    }
     if (onAgentClick) {
       onAgentClick(agent);
     } else {
@@ -148,17 +159,32 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
 
   const handleViewProfile = (agent: OnlineAgent) => {
     setPopoverOpen(false);
+    if (restrictedMode) {
+      setUpgradeOpen(true);
+      return;
+    }
     navigate(`/comunidade/agente/${agent.user_id}`);
   };
 
-  if (!isAdmin && !hasFeature("community")) return null;
+  if (!restrictedMode && !isAdmin && !hasFeature("community")) return null;
 
   const maxVisible = isMobile ? 4 : 6;
   const visibleAgents = onlineUsers.slice(0, maxVisible);
   const overflowCount = onlineUsers.length - maxVisible;
-  const totalOnline = onlineCount + (isOnline ? 1 : 0);
+  // In restricted mode, current user is always offline regardless of presence state
+  const effectiveIsOnline = restrictedMode ? false : isOnline;
+  const totalOnline = onlineCount + (effectiveIsOnline ? 1 : 0);
+
+  const handleToggle = (checked: boolean) => {
+    if (restrictedMode) {
+      setUpgradeOpen(true);
+      return;
+    }
+    toggleOnline(checked);
+  };
 
   return (
+    <>
     <div className="flex items-center gap-3 bg-card rounded-xl px-4 py-2.5 border border-border shadow-sm">
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
         <div className="relative">
@@ -274,20 +300,28 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1.5">
             <Switch
-              checked={isOnline}
-              onCheckedChange={toggleOnline}
-              disabled={isOnlineLoading}
+              checked={effectiveIsOnline}
+              onCheckedChange={handleToggle}
+              disabled={!restrictedMode && isOnlineLoading}
               className="h-5 w-9 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-muted [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4"
             />
-            <span className={`text-xs font-medium ${isOnline ? "text-emerald-600" : "text-muted-foreground"}`}>
-              {isOnline ? "On" : "Off"}
+            <span className={`text-xs font-medium ${effectiveIsOnline ? "text-emerald-600" : "text-muted-foreground"}`}>
+              {effectiveIsOnline ? "On" : "Off"}
             </span>
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{isOnline ? "Você está visível para outros agentes" : "Você está invisível"}</p>
+          <p>{restrictedMode ? "Disponível em planos pagos — clique para fazer upgrade" : (effectiveIsOnline ? "Você está visível para outros agentes" : "Você está invisível")}</p>
         </TooltipContent>
       </Tooltip>
     </div>
+    <UpgradeDialog
+      open={upgradeOpen}
+      onOpenChange={setUpgradeOpen}
+      requiredFeature="community"
+      title="Recurso exclusivo dos planos pagos"
+      description="Para ficar online, ver perfis e enviar mensagens para outros agentes, faça upgrade do seu plano."
+    />
+    </>
   );
 }
