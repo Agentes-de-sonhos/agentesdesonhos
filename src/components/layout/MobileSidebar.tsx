@@ -480,7 +480,7 @@ export function MobileSidebar() {
         >
           {expanded ? (
             <>
-              <Link to="/dashboard" onClick={() => setExpanded(false)} className="flex items-center gap-3">
+              <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} onClick={() => setExpanded(false)} className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
                   <Cloud className="h-5 w-5 text-primary-foreground" />
                 </div>
