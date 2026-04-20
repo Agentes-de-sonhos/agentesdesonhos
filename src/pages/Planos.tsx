@@ -119,7 +119,7 @@ export default function Planos() {
     // Free plan — just go to signup/dashboard
     if (plan.id === "start") {
       if (user) {
-        navigate("/dashboard");
+        navigate("/dashboard-start");
       } else {
         navigate("/auth?signup=true");
       }

@@ -89,5 +89,17 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
   }
 
+  // Start (free) plan users must NEVER access /dashboard (the full dashboard
+  // for paid plans) or any other plan-restricted dashboard. They are always
+  // redirected to /dashboard-start. Admins are exempt (role === "admin").
+  if (plan === "start" && role !== "admin") {
+    if (
+      location.pathname === "/dashboard" ||
+      location.pathname.startsWith("/dashboard/")
+    ) {
+      return <Navigate to="/dashboard-start" replace />;
+    }
+  }
+
   return <>{children}</>;
 }
