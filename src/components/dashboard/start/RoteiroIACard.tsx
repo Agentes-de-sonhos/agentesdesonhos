@@ -137,7 +137,7 @@ export function RoteiroIACard() {
           </div>
         )}
 
-        {isGenerating && <AIGeneratingOverlay />}
+        <AIGeneratingOverlay visible={isGenerating} />
       </CardContent>
     </Card>
   );
