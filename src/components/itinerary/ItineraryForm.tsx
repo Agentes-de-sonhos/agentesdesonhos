@@ -62,6 +62,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<TravelInterest[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showInterests, setShowInterests] = useState(false);
+  const [showPace, setShowPace] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
   const [clientError, setClientError] = useState("");
 
@@ -269,52 +271,80 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
         </div>
 
         {/* Interests multi-select */}
-        <div className="space-y-2">
-          <Label>Interesses da Viagem</Label>
-          <p className="text-xs text-muted-foreground">Selecione um ou mais interesses</p>
-          <div className="grid grid-cols-2 gap-2">
-            {(Object.entries(TRAVEL_INTEREST_LABELS) as [TravelInterest, string][]).map(
-              ([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => toggleInterest(value)}
-                  className={cn(
-                    "flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
-                    selectedInterests.includes(value)
-                      ? "border-primary bg-primary/10 text-primary font-medium"
-                      : "border-border hover:bg-muted"
-                  )}
-                >
-                  <span>{TRAVEL_INTEREST_ICONS[value]}</span>
-                  <span className="truncate">{label}</span>
-                </button>
-              )
+        {/* Interests multi-select (collapsible) */}
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full justify-between text-muted-foreground"
+          onClick={() => setShowInterests(!showInterests)}
+        >
+          <span>
+            Interesses da viagem
+            {selectedInterests.length > 0 && (
+              <span className="ml-2 text-xs text-primary">({selectedInterests.length} selecionados)</span>
             )}
-          </div>
-        </div>
+          </span>
+          {showInterests ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
 
-        {/* Travel Pace */}
-        <div className="space-y-2">
-          <Label>Ritmo da Viagem</Label>
-          <Select
-            defaultValue="moderado"
-            onValueChange={(value) => form.setValue("travelPace", value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o ritmo" />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.entries(TRAVEL_PACE_LABELS) as [TravelPace, string][]).map(
+        {showInterests && (
+          <div className="space-y-2 rounded-lg border border-border p-4">
+            <p className="text-xs text-muted-foreground">Selecione um ou mais interesses</p>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.entries(TRAVEL_INTEREST_LABELS) as [TravelInterest, string][]).map(
                 ([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => toggleInterest(value)}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
+                      selectedInterests.includes(value)
+                        ? "border-primary bg-primary/10 text-primary font-medium"
+                        : "border-border hover:bg-muted"
+                    )}
+                  >
+                    <span>{TRAVEL_INTEREST_ICONS[value]}</span>
+                    <span className="truncate">{label}</span>
+                  </button>
                 )
               )}
-            </SelectContent>
-          </Select>
-        </div>
+            </div>
+          </div>
+        )}
+
+        {/* Travel Pace (collapsible) */}
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full justify-between text-muted-foreground"
+          onClick={() => setShowPace(!showPace)}
+        >
+          Ritmo da viagem
+          {showPace ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+
+        {showPace && (
+          <div className="space-y-2 rounded-lg border border-border p-4">
+            <Select
+              defaultValue={form.watch("travelPace") || "moderado"}
+              onValueChange={(value) => form.setValue("travelPace", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o ritmo" />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.entries(TRAVEL_PACE_LABELS) as [TravelPace, string][]).map(
+                  ([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Advanced Preferences Toggle */}
         <Button
