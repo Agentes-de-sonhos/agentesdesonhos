@@ -139,7 +139,9 @@ function formatDate(dateStr: string) {
 
 export default function MeusProjetos() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("orcamentos");
+  const { plan, isPromotor } = useSubscription();
+  const isStartPlan = !isPromotor && plan === "start";
+  const [activeTab, setActiveTab] = useState(isStartPlan ? "roteiros" : "orcamentos");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
