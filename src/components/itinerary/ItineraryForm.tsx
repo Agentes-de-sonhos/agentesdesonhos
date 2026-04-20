@@ -316,39 +316,6 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
         )}
 
-        {/* Travel Pace (collapsible) */}
-        <Button
-          type="button"
-          variant="ghost"
-          className="w-full justify-between text-muted-foreground"
-          onClick={() => setShowPace(!showPace)}
-        >
-          Ritmo da viagem
-          {showPace ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </Button>
-
-        {showPace && (
-          <div className="space-y-2 rounded-lg border border-border p-4">
-            <Select
-              defaultValue={form.watch("travelPace") || "moderado"}
-              onValueChange={(value) => form.setValue("travelPace", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o ritmo" />
-              </SelectTrigger>
-              <SelectContent>
-                {(Object.entries(TRAVEL_PACE_LABELS) as [TravelPace, string][]).map(
-                  ([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  )
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
         {/* Advanced Preferences Toggle */}
         <Button
           type="button"
@@ -362,6 +329,27 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
 
         {showAdvanced && (
           <div className="space-y-4 rounded-lg border border-border p-4">
+            <div className="space-y-2">
+              <Label>Ritmo da viagem</Label>
+              <Select
+                defaultValue={form.watch("travelPace") || "moderado"}
+                onValueChange={(value) => form.setValue("travelPace", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o ritmo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.entries(TRAVEL_PACE_LABELS) as [TravelPace, string][]).map(
+                    ([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="dietaryRestrictions">Restrições alimentares</Label>
               <Input
