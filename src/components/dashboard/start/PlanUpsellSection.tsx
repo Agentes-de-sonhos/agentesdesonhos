@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Crown } from "lucide-react";
+import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 
 interface UpsellItem {
   label: string;
@@ -60,10 +61,11 @@ function UpsellGrid({ items, onClick }: { items: UpsellItem[]; onClick: () => vo
 }
 
 export function PlanUpsellSection() {
-  const navigate = useNavigate();
-  const goToPlans = () => navigate("/planos");
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const openUpgrade = () => setUpgradeOpen(true);
 
   return (
+    <>
     <div className="space-y-6">
       {/* Profissional */}
       <Card className="border-0 shadow-card">
@@ -78,7 +80,7 @@ export function PlanUpsellSection() {
           <p className="text-sm text-center text-muted-foreground">
             Todos os recursos do plano start + recursos abaixo.
           </p>
-          <UpsellGrid items={PROFESSIONAL_ITEMS} onClick={goToPlans} />
+          <UpsellGrid items={PROFESSIONAL_ITEMS} onClick={openUpgrade} />
         </CardContent>
       </Card>
 
@@ -95,9 +97,16 @@ export function PlanUpsellSection() {
           <p className="text-sm text-center text-muted-foreground">
             Todos os recursos do plano profissional ilimitado + recursos abaixo.
           </p>
-          <UpsellGrid items={PREMIUM_ITEMS} onClick={goToPlans} />
+          <UpsellGrid items={PREMIUM_ITEMS} onClick={openUpgrade} />
         </CardContent>
       </Card>
     </div>
+    <UpgradeDialog
+      open={upgradeOpen}
+      onOpenChange={setUpgradeOpen}
+      title="Desbloqueie mais recursos"
+      description="Faça upgrade para acessar todos os recursos dos planos Profissional e Premium."
+    />
+    </>
   );
 }
