@@ -233,6 +233,7 @@ export function MobileSidebar() {
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
+  const isStartPlan = !isPromotor && plan === "start";
 
   // Same order as desktop
   const allSections: MenuSection[] = useMemo(
