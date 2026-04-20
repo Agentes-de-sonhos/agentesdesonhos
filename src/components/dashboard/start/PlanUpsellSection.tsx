@@ -150,6 +150,7 @@ export function PlanUpsellSection() {
               Todos os recursos do plano profissional ilimitado + recursos abaixo.
             </p>
             <UpsellGrid items={PREMIUM_ITEMS} onClick={openUpgrade} maxSize={150} layout="flex" />
+            <UpsellGrid items={PREMIUM_ITEMS} onClick={openUpgrade} />
           </CardContent>
         </Card>
       </div>
