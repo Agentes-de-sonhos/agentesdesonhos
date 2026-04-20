@@ -68,7 +68,7 @@ const UPGRADE_PLANS: PlanDisplay[] = [
     price: "R$ 98",
     period: "/mês",
     icon: <Crown className="h-5 w-5" />,
-    badge: "Mais escolhida",
+    badge: "Mais escolhido",
     features: [
       "Tudo do Profissional",
       "IA ilimitada",
