@@ -6,6 +6,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +27,11 @@ import { Users, MessageCircle, User, Building2, MapPin } from "lucide-react";
 
 interface OnlineAgentsStripProps {
   onAgentClick?: (agent: OnlineAgent) => void;
+  /**
+   * When true, the current user is treated as offline (Start plan).
+   * Any interaction (toggle on, view profile, send message) opens the upgrade dialog.
+   */
+  restrictedMode?: boolean;
 }
 
 function AgentHoverCard({
