@@ -13,26 +13,28 @@ import {
   Globe,
   LucideIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface CategoryItem {
+interface CategoryDef {
   title: string;
   icon: LucideIcon;
   category: string;
-  bg: string;
+  color: string;
   iconColor: string;
 }
 
-const CATEGORIES: CategoryItem[] = [
-  { title: "Operadoras", icon: Plane, category: "Operadoras de turismo", bg: "bg-blue-100", iconColor: "text-blue-600" },
-  { title: "Consolidadoras", icon: Building2, category: "Consolidadoras", bg: "bg-violet-100", iconColor: "text-violet-600" },
-  { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", bg: "bg-sky-100", iconColor: "text-sky-600" },
-  { title: "Hospedagem", icon: Hotel, category: "Hospedagem", bg: "bg-amber-100", iconColor: "text-amber-600" },
-  { title: "Locadoras", icon: Car, category: "Locadoras de veículos", bg: "bg-emerald-100", iconColor: "text-emerald-600" },
-  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", bg: "bg-cyan-100", iconColor: "text-cyan-600" },
-  { title: "Seguros", icon: Shield, category: "Seguros viagem", bg: "bg-rose-100", iconColor: "text-rose-600" },
-  { title: "Parques", icon: Ticket, category: "Parques e atrações", bg: "bg-pink-100", iconColor: "text-pink-600" },
-  { title: "Receptivos", icon: MapPin, category: "Receptivos", bg: "bg-orange-100", iconColor: "text-orange-600" },
-  { title: "Guias", icon: Users, category: "Guias", bg: "bg-teal-100", iconColor: "text-teal-600" },
+// Mirror of CATEGORIES_DATA in src/pages/MapaTurismo.tsx (inactive style only)
+const CATEGORIES_DATA: CategoryDef[] = [
+  { title: "Operadoras", icon: Plane, category: "Operadoras de turismo", color: "bg-blue-100 text-blue-700", iconColor: "text-blue-500" },
+  { title: "Consolidadoras", icon: Building2, category: "Consolidadoras", color: "bg-violet-100 text-violet-700", iconColor: "text-violet-500" },
+  { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-100 text-sky-700", iconColor: "text-sky-500" },
+  { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-100 text-amber-700", iconColor: "text-amber-500" },
+  { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-100 text-emerald-700", iconColor: "text-emerald-500" },
+  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", iconColor: "text-cyan-500" },
+  { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-100 text-rose-700", iconColor: "text-rose-500" },
+  { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-pink-100 text-pink-700", iconColor: "text-pink-500" },
+  { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", iconColor: "text-orange-500" },
+  { title: "Guias", icon: Users, category: "Guias", color: "bg-teal-100 text-teal-700", iconColor: "text-teal-500" },
 ];
 
 export function MapaTurismoCard() {
@@ -49,27 +51,27 @@ export function MapaTurismoCard() {
           <div className="mt-2 h-1 w-full rounded-full bg-primary" />
         </div>
 
-        <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.title}
-              onClick={() =>
-                navigate(`/mapa-turismo?categoria=${encodeURIComponent(cat.category)}`)
-              }
-              className="flex flex-col items-center justify-center gap-2 rounded-2xl p-3 transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer aspect-square"
-              aria-label={`Acessar ${cat.title}`}
-              style={{}}
-            >
-              <div className={`flex items-center justify-center w-full h-full rounded-2xl ${cat.bg}`}>
-                <div className="flex flex-col items-center gap-1.5">
-                  <cat.icon className={`h-5 w-5 ${cat.iconColor}`} />
-                  <span className={`text-[10px] sm:text-xs font-medium ${cat.iconColor} text-center leading-tight px-1`}>
-                    {cat.title}
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-3 justify-items-center">
+          {CATEGORIES_DATA.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.category}
+                onClick={() =>
+                  navigate(`/mapa-turismo?categoria=${encodeURIComponent(cat.category)}`)
+                }
+                aria-label={`Acessar ${cat.title}`}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
+                  cat.color,
+                  "border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/50"
+                )}
+              >
+                <Icon className={cn("h-6 w-6", cat.iconColor)} />
+                <span className="text-center leading-tight px-1">{cat.title}</span>
+              </button>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
