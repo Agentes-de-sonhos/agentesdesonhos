@@ -53,11 +53,15 @@ export default function EducaAcademy() {
 
 
 
-  const totalProgress = trailsWithProgress.length > 0
-    ? Math.round(trailsWithProgress.reduce((sum, t) => sum + t.progressPercent, 0) / trailsWithProgress.length)
+  // Start plan users only have access to the 3 most recent trails
+  const isStartPlan = plan === "start";
+  const visibleTrails = isStartPlan ? trailsWithProgress.slice(0, 3) : trailsWithProgress;
+
+  const totalProgress = visibleTrails.length > 0
+    ? Math.round(visibleTrails.reduce((sum, t) => sum + t.progressPercent, 0) / visibleTrails.length)
     : 0;
 
-  const inProgressTrails = trailsWithProgress.filter((t) => t.progressPercent > 0 && !t.hasCertificate);
+  const inProgressTrails = visibleTrails.filter((t) => t.progressPercent > 0 && !t.hasCertificate);
 
   const handleViewCertificate = (certificateId: string) => {
     const cert = certificates.find((c) => c.id === certificateId);
@@ -197,7 +201,7 @@ export default function EducaAcademy() {
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Trilhas Disponíveis</p>
-                        <p className="text-2xl font-bold mt-0.5">{trailsWithProgress.length}</p>
+                        <p className="text-2xl font-bold mt-0.5">{visibleTrails.length}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -352,7 +356,7 @@ export default function EducaAcademy() {
                       </Card>
                     ))}
                   </div>
-                ) : trailsWithProgress.length === 0 ? (
+                ) : visibleTrails.length === 0 ? (
                   <Card>
                     <CardContent className="py-12 text-center">
                       <MapPin className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
@@ -361,11 +365,33 @@ export default function EducaAcademy() {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {trailsWithProgress.map((trail) => (
-                      <TrailCard key={trail.id} trail={trail} onSelect={setSelectedTrail} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {visibleTrails.map((trail) => (
+                        <TrailCard key={trail.id} trail={trail} onSelect={setSelectedTrail} />
+                      ))}
+                    </div>
+                    {isStartPlan && trailsWithProgress.length > 3 && (
+                      <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
+                        <CardContent className="py-6 text-center space-y-2">
+                          <Lock className="h-8 w-8 mx-auto text-primary/70" />
+                          <p className="text-sm font-medium">
+                            Você tem acesso às 3 trilhas mais recentes no plano Start.
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Faça upgrade para acessar todas as {trailsWithProgress.length} trilhas disponíveis.
+                          </p>
+                          <Button
+                            size="sm"
+                            onClick={() => (window.location.href = "/planos")}
+                            className="mt-2"
+                          >
+                            Ver planos
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
                 )}
               </div>
             </div>
