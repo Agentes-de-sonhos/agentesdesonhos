@@ -7,11 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// RSS feed sources
+// RSS feed sources com peso de prioridade (maior = mais relevante)
+// Brasilturis usa ?withoutcomments=1 para driblar o bloqueio do Yoast SEO no /feed/
 const RSS_SOURCES = [
-  { name: "Panrotas", url: "https://www.panrotas.com.br/feed" },
-  { name: "Mercado & Eventos", url: "https://www.mercadoeeventos.com.br/feed/" },
-  { name: "Brasilturis", url: "https://brasilturis.com.br/feed/" },
+  { name: "Panrotas", url: "https://www.panrotas.com.br/feed", priority: 3, maxItems: 30 },
+  { name: "Brasilturis", url: "https://brasilturis.com.br/feed/?withoutcomments=1", priority: 2, maxItems: 25 },
+  { name: "Mercado & Eventos", url: "https://www.mercadoeeventos.com.br/feed/", priority: 1, maxItems: 20 },
 ];
 
 interface RawNewsItem {
@@ -48,28 +49,39 @@ function extractItems(xml: string): string[] {
   return items;
 }
 
-async function fetchRSS(source: { name: string; url: string }): Promise<RawNewsItem[]> {
+async function fetchRSS(source: { name: string; url: string; maxItems: number }): Promise<RawNewsItem[]> {
   try {
     console.log(`Fetching RSS from ${source.name}: ${source.url}`);
     const response = await fetch(source.url, {
-      headers: { "User-Agent": "AgentesdeSonhos/1.0" },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; AgentesdeSonhosBot/1.0; +https://agentesdesonhos.com.br)",
+        "Accept": "application/rss+xml, application/xml, text/xml, */*",
+      },
+      redirect: "follow",
     });
     if (!response.ok) {
-      console.error(`Failed to fetch ${source.name}: ${response.status}`);
+      console.error(`[CURATION] Failed to fetch ${source.name}: HTTP ${response.status} - feed pode estar bloqueado/movido`);
       return [];
     }
     const xml = await response.text();
+    if (!xml || xml.length < 100) {
+      console.error(`[CURATION] ${source.name} retornou corpo vazio (${xml.length} bytes)`);
+      return [];
+    }
     const items = extractItems(xml);
+    console.log(`[CURATION] ${source.name}: ${items.length} items encontrados no feed`);
 
-    return items.slice(0, 10).map((item) => ({
+    const parsed = items.slice(0, source.maxItems).map((item) => ({
       titulo_original: extractTag(item, "title"),
       conteudo: extractTag(item, "description") || extractTag(item, "content:encoded"),
       fonte: source.name,
       url: extractTag(item, "link"),
       data_publicacao: extractTag(item, "pubDate") || null,
     })).filter((n) => n.titulo_original && n.url);
+    console.log(`[CURATION] ${source.name}: ${parsed.length} items válidos (com título + url)`);
+    return parsed;
   } catch (error) {
-    console.error(`Error fetching ${source.name}:`, error);
+    console.error(`[CURATION] Erro ao buscar ${source.name}:`, error);
     return [];
   }
 }
@@ -157,13 +169,17 @@ serve(async (req) => {
     if (delBrutErr) console.error("Error cleaning raw news:", delBrutErr);
     else console.log(`Cleaned ${deletedBrutas?.length || 0} old raw news`);
 
-    // 1. Fetch RSS feeds
-    const allNews: RawNewsItem[] = [];
-    for (const source of RSS_SOURCES) {
-      const items = await fetchRSS(source);
-      allNews.push(...items);
+    // 1. Fetch RSS feeds em paralelo (mais rápido + maior volume)
+    const fetchResults = await Promise.all(RSS_SOURCES.map((s) => fetchRSS(s)));
+    const allNews: RawNewsItem[] = fetchResults.flat();
+    const perSourceCount = RSS_SOURCES.map((s, i) => `${s.name}=${fetchResults[i].length}`).join(", ");
+    console.log(`[CURATION] Fetched ${allNews.length} total items (${perSourceCount})`);
+
+    // Alerta se Brasilturis voltou a falhar
+    const brasilturisIdx = RSS_SOURCES.findIndex((s) => s.name === "Brasilturis");
+    if (brasilturisIdx !== -1 && fetchResults[brasilturisIdx].length === 0) {
+      console.error("[CURATION][ALERTA] Brasilturis não retornou itens — verificar feed");
     }
-    console.log(`Fetched ${allNews.length} total news items`);
 
     if (allNews.length === 0) {
       return new Response(JSON.stringify({ message: "No news fetched", inserted: 0, curated: 0 }), {
@@ -190,13 +206,13 @@ serve(async (req) => {
       console.error("Error inserting raw news:", rawError);
     }
 
-    // 3. Get unprocessed news
+    // 3. Get unprocessed news (limite maior para aumentar volume curado)
     const { data: unprocessed } = await supabase
       .from("noticias_brutas")
       .select("*")
       .eq("processado", false)
       .order("data_coleta", { ascending: false })
-      .limit(15);
+      .limit(40);
 
     if (!unprocessed || unprocessed.length === 0) {
       return new Response(JSON.stringify({ message: "No new news to process", inserted: insertedRaw?.length || 0, curated: 0 }), {
@@ -233,6 +249,10 @@ serve(async (req) => {
       const isAlertaTrade = score >= 9;
       const nivelAlerta = score >= 9 ? "alto" : score >= 7 ? "medio" : "nenhum";
 
+      // Aplica peso de prioridade da fonte ao score (apenas para ordenação/exibição)
+      const sourceWeight = RSS_SOURCES.find((s) => s.name === raw.fonte)?.priority ?? 1;
+      const scoreWithPriority = score + sourceWeight; // Panrotas+3, Brasilturis+2, M&E+1
+
       const { error: curatedError } = await supabase.from("noticias_dashboard").insert({
         noticia_bruta_id: raw.id,
         titulo_curto: ai.titulo_curto || raw.titulo_original.substring(0, 80),
@@ -240,7 +260,7 @@ serve(async (req) => {
         categoria: ai.categoria || "Turismo",
         fonte: raw.fonte,
         url_original: raw.url,
-        relevancia_score: score,
+        relevancia_score: scoreWithPriority,
         tipo_exibicao: isAlertaTrade ? "destaque" : (ai.tipo_exibicao || "secundaria"),
         status: "pendente",
         data_publicacao: raw.data_publicacao || new Date().toISOString(),
