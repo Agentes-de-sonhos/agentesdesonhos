@@ -142,6 +142,7 @@ const planoStartSection: MenuSection = {
     { key: "start_radar_turismo", title: "Radar do Turismo", url: "/noticias", icon: Rss },
     { key: "start_educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
     { key: "start_materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone },
+    { key: "start_criar_roteiros", title: "Criar Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route },
     { key: "start_agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
