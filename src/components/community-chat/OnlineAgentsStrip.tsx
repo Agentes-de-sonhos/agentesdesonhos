@@ -134,7 +134,7 @@ function AgentAvatar({
   );
 }
 
-export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
+export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: OnlineAgentsStripProps) {
   const { onlineUsers, onlineCount, isOnline, isOnlineLoading, toggleOnline } =
     usePresence();
   const { hasFeature } = useSubscription();
@@ -142,9 +142,14 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const handleMessage = (agent: OnlineAgent) => {
     setPopoverOpen(false);
+    if (restrictedMode) {
+      setUpgradeOpen(true);
+      return;
+    }
     if (onAgentClick) {
       onAgentClick(agent);
     } else {
@@ -154,15 +159,29 @@ export function OnlineAgentsStrip({ onAgentClick }: OnlineAgentsStripProps) {
 
   const handleViewProfile = (agent: OnlineAgent) => {
     setPopoverOpen(false);
+    if (restrictedMode) {
+      setUpgradeOpen(true);
+      return;
+    }
     navigate(`/comunidade/agente/${agent.user_id}`);
   };
 
-  if (!isAdmin && !hasFeature("community")) return null;
+  if (!restrictedMode && !isAdmin && !hasFeature("community")) return null;
 
   const maxVisible = isMobile ? 4 : 6;
   const visibleAgents = onlineUsers.slice(0, maxVisible);
   const overflowCount = onlineUsers.length - maxVisible;
-  const totalOnline = onlineCount + (isOnline ? 1 : 0);
+  // In restricted mode, current user is always offline regardless of presence state
+  const effectiveIsOnline = restrictedMode ? false : isOnline;
+  const totalOnline = onlineCount + (effectiveIsOnline ? 1 : 0);
+
+  const handleToggle = (checked: boolean) => {
+    if (restrictedMode) {
+      setUpgradeOpen(true);
+      return;
+    }
+    toggleOnline(checked);
+  };
 
   return (
     <div className="flex items-center gap-3 bg-card rounded-xl px-4 py-2.5 border border-border shadow-sm">
