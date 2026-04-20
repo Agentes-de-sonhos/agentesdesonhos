@@ -272,7 +272,6 @@ export function AppSidebar() {
   // URLs locked specifically for Start plan users (shows lock icon + opens upgrade dialog)
   const startPlanLockedUrls = useMemo(
     () => new Set([
-      "/meus-projetos",
       "/comunidade",
       "/cursos",
       "/beneficios",
