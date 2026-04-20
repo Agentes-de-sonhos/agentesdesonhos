@@ -226,7 +226,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   }, [allSections, standaloneItems, orderMap, isStartPlan]);
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
-  const startPlanLockedUrls = ["/meus-projetos", "/comunidade", "/cursos", "/beneficios"];
+  const startPlanLockedUrls = ["/comunidade", "/cursos", "/beneficios"];
 
   const toggleSection = (title: string) => {
     setUserInteracted(true);
