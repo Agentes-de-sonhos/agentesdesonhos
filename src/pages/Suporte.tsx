@@ -351,6 +351,30 @@ export default function Suporte() {
             </CardContent>
           </Card>
         )}
+
+        {/* Solução de problemas */}
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LifeBuoy className="h-5 w-5 text-muted-foreground" />
+              Solução de problemas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">Resetar sessão</p>
+                <p className="text-xs text-muted-foreground max-w-xl">
+                  Use esta opção se a plataforma estiver apresentando comportamento
+                  inesperado: telas em branco, carregamento infinito ou erros que
+                  persistem mesmo após recarregar a página. Encerra sua sessão local
+                  e limpa dados temporários do navegador.
+                </p>
+              </div>
+              <ResetSessionButton />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
