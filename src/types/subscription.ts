@@ -198,6 +198,10 @@ export const ESSENCIAL_DAILY_LIMITS: Partial<Record<Feature, number>> = {
   quote_generator: 1,
 };
 
+export const START_DAILY_LIMITS: Partial<Record<Feature, number>> = {
+  itinerary: 2,
+};
+
 export const LAUNCH_DATE = new Date('2026-03-16T00:00:00-03:00');
 
 // Stripe price IDs
