@@ -132,7 +132,14 @@ export default function Auth() {
       return;
     }
 
-    const destination = role === "admin" ? "/admin" : "/dashboard";
+    let destination: string;
+    if (role === "admin") {
+      destination = "/admin";
+    } else if (plan === "start") {
+      destination = "/dashboard-start";
+    } else {
+      destination = "/dashboard";
+    }
     navigate(destination, { replace: true });
   }, [user, role, roleLoading, isNewUser, navigate, plan, subLoading]);
 

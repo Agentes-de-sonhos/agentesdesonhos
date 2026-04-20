@@ -16,6 +16,7 @@ import { Loader2 } from "lucide-react";
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const StartDashboard = lazy(() => import("./pages/StartDashboard"));
 const Admin = lazy(() => import("./pages/Admin"));
 const AdminCRM = lazy(() => import("./pages/AdminCRM"));
 const FerramentasIA = lazy(() => import("./pages/FerramentasIA"));
@@ -147,6 +148,7 @@ const App = () => (
             <Route path="/cadastro-guia" element={<CadastroGuia />} />
             <Route path="/meu-perfil-empresa" element={<ProtectedRoute><SupplierProfileEdit /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard-start" element={<ProtectedRoute><StartDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/crm" element={<AdminRoute><AdminCRM /></AdminRoute>} />
             <Route path="/ferramentas-ia" element={<ProtectedRoute><FerramentasIA /></ProtectedRoute>} />
