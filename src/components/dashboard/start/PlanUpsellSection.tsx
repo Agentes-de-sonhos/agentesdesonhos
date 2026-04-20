@@ -149,7 +149,6 @@ export function PlanUpsellSection() {
             <p className="text-sm text-center text-muted-foreground">
               Todos os recursos do plano profissional ilimitado + recursos abaixo.
             </p>
-            <UpsellGrid items={PREMIUM_ITEMS} onClick={openUpgrade} maxSize={150} layout="flex" />
             <UpsellGrid items={PREMIUM_ITEMS} onClick={openUpgrade} />
           </CardContent>
         </Card>
