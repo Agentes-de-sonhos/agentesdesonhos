@@ -41,6 +41,8 @@ import {
   ArrowUpCircle,
   LayoutDashboard,
   FolderOpen,
+  Sparkles,
+  Rss,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -222,6 +224,27 @@ const marketingSection: MenuSection = {
 const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
+
+// Custom section shown ONLY for Start plan users (always at the top)
+const planoStartSection: MenuSection = {
+  title: "Plano Start",
+  key: "section_plano_start",
+  icon: Sparkles,
+  hoverColor: "hover:bg-amber-500 hover:text-white",
+  headerBg: "bg-amber-500 text-white",
+  headerHoverBg: "hover:bg-amber-600",
+  bgColor: "bg-amber-50",
+  textColor: "text-amber-700",
+  borderColor: "border-amber-500",
+  items: [
+    { key: "start_mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map },
+    { key: "start_radar_turismo", title: "Radar do Turismo", url: "/noticias", icon: Rss },
+    { key: "start_educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { key: "start_materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone },
+    { key: "start_agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
+  ],
+};
+
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
@@ -243,6 +266,7 @@ export function AppSidebar() {
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
+  const isStartPlan = !isPromotor && plan === "start";
 
   const allSections: MenuSection[] = useMemo(
     () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
@@ -285,8 +309,18 @@ export function AppSidebar() {
       });
     }
 
-    return entries.sort((a, b) => a.orderIdx - b.orderIdx);
-  }, [allSections, standaloneItems, orderMap]);
+    const sorted = entries.sort((a, b) => a.orderIdx - b.orderIdx);
+
+    // Start plan users get a custom "Plano Start" section pinned to the top
+    if (isStartPlan) {
+      return [
+        { type: "section" as const, section: planoStartSection, orderIdx: -1 },
+        ...sorted,
+      ];
+    }
+
+    return sorted;
+  }, [allSections, standaloneItems, orderMap, isStartPlan]);
 
   const toggleSection = (title: string) => {
     setUserInteracted(true);
