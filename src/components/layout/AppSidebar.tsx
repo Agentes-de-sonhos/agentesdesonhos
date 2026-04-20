@@ -397,7 +397,8 @@ export function AppSidebar() {
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
     const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
-    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
+    const isLockedByStart = isStartPlan && startPlanLockedUrls.has(item.url);
+    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital || isLockedByStart;
     const showLockIcon = isLocked || forceShowLock;
 
     const menuLink = (
