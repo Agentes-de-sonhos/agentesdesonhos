@@ -269,6 +269,17 @@ export function AppSidebar() {
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
   const isStartPlan = !isPromotor && plan === "start";
 
+  // URLs locked specifically for Start plan users (shows lock icon + opens upgrade dialog)
+  const startPlanLockedUrls = useMemo(
+    () => new Set([
+      "/meus-projetos",
+      "/comunidade",
+      "/cursos",
+      "/beneficios",
+    ]),
+    []
+  );
+
   const allSections: MenuSection[] = useMemo(
     () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
     []
@@ -360,6 +371,12 @@ export function AppSidebar() {
         setShowComingSoon(true);
         return;
       }
+      // Start plan: lock specific premium areas
+      if (isStartPlan && startPlanLockedUrls.has(item.url)) {
+        e.preventDefault();
+        setUpgradeFeature(item.requiredFeature ?? "crm_basic");
+        return;
+      }
       if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
         e.preventDefault();
         setUpgradeFeature(item.requiredFeature);
@@ -368,7 +385,7 @@ export function AppSidebar() {
       trackSectionVisit(item.url);
       setCollapsed(true);
     },
-    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital]
+    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, startPlanLockedUrls]
   );
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
@@ -380,7 +397,8 @@ export function AppSidebar() {
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
     const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
-    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
+    const isLockedByStart = isStartPlan && startPlanLockedUrls.has(item.url);
+    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital || isLockedByStart;
     const showLockIcon = isLocked || forceShowLock;
 
     const menuLink = (

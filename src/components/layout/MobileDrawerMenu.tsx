@@ -226,6 +226,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   }, [allSections, standaloneItems, orderMap, isStartPlan]);
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
+  const startPlanLockedUrls = ["/meus-projetos", "/comunidade", "/cursos", "/beneficios"];
 
   const toggleSection = (title: string) => {
     setUserInteracted(true);
@@ -254,6 +255,11 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         setShowComingSoon(true);
         return;
       }
+      if (isStartPlan && startPlanLockedUrls.includes(item.url)) {
+        e.preventDefault();
+        setUpgradeFeature(item.requiredFeature ?? "crm_basic");
+        return;
+      }
       if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
         e.preventDefault();
         setUpgradeFeature(item.requiredFeature);
@@ -263,7 +269,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
       onClose();
       navigate(item.url);
     },
-    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, navigate, onClose]
+    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, navigate, onClose]
   );
 
   const renderMenuItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
@@ -271,7 +277,8 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
     const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
-    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital;
+    const isLockedByStart = isStartPlan && startPlanLockedUrls.includes(item.url);
+    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital || isLockedByStart;
 
     return (
       <button
