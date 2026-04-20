@@ -37,6 +37,7 @@ import {
 import { useQuotes } from "@/hooks/useQuotes";
 import { useTrips } from "@/hooks/useTrips";
 import { useItineraries } from "@/hooks/useItineraries";
+import { useSubscription } from "@/hooks/useSubscription";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
