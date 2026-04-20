@@ -122,37 +122,39 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       <div className="space-y-4">
-        {/* Client Selector */}
-        <div className="space-y-2">
-          <Label>Cliente *</Label>
-          <ClientSelector
-            value={selectedClient}
-            onChange={(c) => { setSelectedClient(c); setClientError(""); }}
-            required
-            error={clientError}
-          />
+        {/* Cliente + Destino */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Cliente *</Label>
+            <ClientSelector
+              value={selectedClient}
+              onChange={(c) => { setSelectedClient(c); setClientError(""); }}
+              required
+              error={clientError}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="destination">Destino</Label>
+            <PlacesAutocomplete
+              value={form.watch("destination") || ""}
+              onChange={(val) => form.setValue("destination", val)}
+              onPlaceSelect={(pred) => form.setValue("destination", pred.name)}
+              placeType="city"
+              placeholder="Ex: Paris, França"
+              fetchDetailsOnSelect={false}
+            />
+            {form.formState.errors.destination && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.destination.message}
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Destination */}
-        <div className="space-y-2">
-          <Label htmlFor="destination">Destino</Label>
-          <PlacesAutocomplete
-            value={form.watch("destination") || ""}
-            onChange={(val) => form.setValue("destination", val)}
-            onPlaceSelect={(pred) => form.setValue("destination", pred.name)}
-            placeType="city"
-            placeholder="Ex: Paris, França"
-            fetchDetailsOnSelect={false}
-          />
-          {form.formState.errors.destination && (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.destination.message}
-            </p>
-          )}
-        </div>
-
-        {/* Date Range */}
-        <div className="space-y-2">
+        {/* Período + Número de Viajantes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4" />
             Período da Viagem
@@ -211,63 +213,64 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           {(form.formState.errors.startDate || form.formState.errors.endDate) && (
             <p className="text-sm text-destructive">Selecione o período completo da viagem</p>
           )}
-        </div>
+          </div>
 
-        {/* Travelers */}
-        <div className="space-y-2">
-          <Label htmlFor="travelersCount">Número de Viajantes</Label>
-          <div className="relative">
-            <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="travelersCount"
-              type="number"
-              min={1}
-              className="pl-10"
-              {...form.register("travelersCount", { valueAsNumber: true })}
-            />
+          <div className="space-y-2">
+            <Label htmlFor="travelersCount">Número de Viajantes</Label>
+            <div className="relative">
+              <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="travelersCount"
+                type="number"
+                min={1}
+                className="pl-10"
+                {...form.register("travelersCount", { valueAsNumber: true })}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Trip Profile */}
-        <div className="space-y-2">
-          <Label>Perfil do Viajante</Label>
-          <Select
-            defaultValue="casal"
-            onValueChange={(value) => form.setValue("tripType", value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o perfil" />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.entries(TRIP_PROFILE_LABELS) as [TripProfile, string][]).map(
-                ([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                )
-              )}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Perfil + Orçamento */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Perfil do Viajante</Label>
+            <Select
+              defaultValue="casal"
+              onValueChange={(value) => form.setValue("tripType", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o perfil" />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.entries(TRIP_PROFILE_LABELS) as [TripProfile, string][]).map(
+                  ([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Budget */}
-        <div className="space-y-2">
-          <Label>Nível de Orçamento</Label>
-          <Select
-            defaultValue="conforto"
-            onValueChange={(value) =>
-              form.setValue("budgetLevel", value as ItineraryFormData["budgetLevel"])
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o orçamento" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="economico">Econômico (3 estrelas)</SelectItem>
-              <SelectItem value="conforto">Conforto (4 estrelas)</SelectItem>
-              <SelectItem value="luxo">Luxo (5 estrelas)</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="space-y-2">
+            <Label>Nível de Orçamento</Label>
+            <Select
+              defaultValue="conforto"
+              onValueChange={(value) =>
+                form.setValue("budgetLevel", value as ItineraryFormData["budgetLevel"])
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o orçamento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="economico">Econômico (3 estrelas)</SelectItem>
+                <SelectItem value="conforto">Conforto (4 estrelas)</SelectItem>
+                <SelectItem value="luxo">Luxo (5 estrelas)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Interests multi-select */}
