@@ -68,15 +68,19 @@ const PREMIUM_ITEMS: UpsellItem[] = [
 
 function UpsellGrid({ items, onClick }: { items: UpsellItem[]; onClick: () => void }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 justify-items-center">
+    <div 
+      className="grid gap-3 w-full"
+      style={{ 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+      }}
+    >
       {items.map((item) => {
         const Icon = item.icon;
         return (
           <button
             key={item.label}
             onClick={onClick}
-            style={{ maxWidth: "175px", maxHeight: "175px" }}
-            className={`${item.bg} ${item.text} w-full aspect-square rounded-2xl p-3 flex flex-col items-center justify-center text-center gap-2 transition-all hover:scale-105 hover:shadow-md cursor-pointer`}
+            className={`${item.bg} ${item.text} w-full aspect-square rounded-2xl p-3 flex flex-col items-center justify-center text-center gap-2 transition-all hover:scale-105 hover:shadow-md cursor-pointer min-w-[140px]`}
           >
             <Icon className="h-7 w-7" strokeWidth={2} />
             <span className="text-xs sm:text-sm font-semibold leading-tight">
