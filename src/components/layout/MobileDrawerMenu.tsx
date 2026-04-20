@@ -370,7 +370,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         {/* Scrollable Navigation */}
         <div className="flex-1 overflow-y-auto py-3 space-y-1">
           <nav className="flex flex-col gap-0.5 px-3">
-            {renderMenuItem(dashboardItem)}
+            {renderMenuItem(isStartPlan ? startDashboardItem : dashboardItem)}
           </nav>
 
           <div className="py-2 px-3">
