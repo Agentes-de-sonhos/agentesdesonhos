@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
+import { useMediaQuery } from "@/hooks/use-mobile";
+
 const HIDDEN_ROUTES = ["/cadastro-fornecedor", "/meu-perfil-empresa", "/cadastro-guia"];
 
 const WHATSAPP_URL = `https://wa.me/5511982853937?text=${encodeURIComponent(
@@ -35,13 +37,14 @@ export function WhatsAppSupportButton() {
   const { user } = useAuth();
   const location = useLocation();
   const sidebarWidth = useSidebarWidth();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   if (!user || HIDDEN_ROUTES.includes(location.pathname)) return null;
 
   return (
     <div
-      className="fixed bottom-24 left-3 lg:bottom-6 z-40 flex items-center gap-3 lg:transition-[left] lg:duration-300 lg:ease-in-out"
-      style={{ left: undefined }}
+      className="fixed bottom-24 left-3 lg:bottom-6 z-40 flex items-center gap-3 transition-[left] duration-300 ease-in-out"
+      style={isDesktop ? { left: `calc(${sidebarWidth}px + 16px)` } : undefined}
     >
       <a
         href={WHATSAPP_URL}
