@@ -35,13 +35,22 @@ export function WhatsAppSupportButton() {
   const { user } = useAuth();
   const location = useLocation();
   const sidebarWidth = useSidebarWidth();
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
 
   if (!user || HIDDEN_ROUTES.includes(location.pathname)) return null;
 
   return (
     <div
-      className="fixed bottom-24 lg:bottom-6 z-40 flex items-center gap-3 transition-[left] duration-300 ease-in-out"
-      style={{ left: `calc(${sidebarWidth}px + 8px)` }}
+      className="fixed bottom-24 left-3 lg:bottom-6 z-40 flex items-center gap-3 transition-[left] duration-300 ease-in-out"
+      style={isDesktop ? { left: `calc(${sidebarWidth}px + 16px)` } : undefined}
     >
       <a
         href={WHATSAPP_URL}
