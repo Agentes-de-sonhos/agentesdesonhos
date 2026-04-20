@@ -21,8 +21,8 @@ export function ExchangeRateCard() {
     queryFn: async (): Promise<ExchangeRate[]> => {
       // Fetch both rates in parallel
       const [usdRes, eurRes] = await Promise.all([
-        fetch("https://api.frankfurter.app/latest?from=USD&to=BRL"),
-        fetch("https://api.frankfurter.app/latest?from=EUR&to=BRL"),
+        fetch("https://api.frankfurter.dev/v1/latest?from=USD&to=BRL"),
+        fetch("https://api.frankfurter.dev/v1/latest?from=EUR&to=BRL"),
       ]);
       if (!usdRes.ok || !eurRes.ok) throw new Error("Failed to fetch rates");
       const [usdData, eurData] = await Promise.all([usdRes.json(), eurRes.json()]);
