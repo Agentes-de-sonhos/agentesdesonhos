@@ -74,7 +74,13 @@ const startNavItems: NavItem[] = [
       { label: "Notícias do Trade", icon: Newspaper, path: "/noticias", requiredFeature: "news" },
     ],
   },
-  { label: "Mapa do Turismo", icon: Map, path: "/mapa-turismo" },
+  {
+    label: "Criar", icon: PlusCircle,
+    color: "text-violet-600", bgColor: "bg-violet-50",
+    subItems: [
+      { label: "Roteiros", icon: Route, path: "/ferramentas-ia/criar-roteiro", requiredFeature: "itinerary" },
+    ],
+  },
   { label: "Materiais", icon: Megaphone, path: "/materiais" },
   { label: "Menu", icon: Menu, action: "menu" },
 ];
