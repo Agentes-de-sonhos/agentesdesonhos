@@ -180,7 +180,15 @@ export function UpgradeDialog({
                   </Badge>
                 )}
                 {plan.badge && !isCurrentPlan && !isRecommended && (
-                  <Badge variant="secondary" className="absolute -top-2.5 left-4">
+                  <Badge
+                    className={cn(
+                      "absolute -top-2.5 left-4",
+                      plan.badge === "Mais escolhido"
+                        ? "bg-yellow-400 text-yellow-950 hover:bg-yellow-400 border-yellow-500 shadow-md"
+                        : ""
+                    )}
+                    variant={plan.badge === "Mais escolhido" ? "default" : "secondary"}
+                  >
                     {plan.badge}
                   </Badge>
                 )}
