@@ -49,28 +49,39 @@ function extractItems(xml: string): string[] {
   return items;
 }
 
-async function fetchRSS(source: { name: string; url: string }): Promise<RawNewsItem[]> {
+async function fetchRSS(source: { name: string; url: string; maxItems: number }): Promise<RawNewsItem[]> {
   try {
     console.log(`Fetching RSS from ${source.name}: ${source.url}`);
     const response = await fetch(source.url, {
-      headers: { "User-Agent": "AgentesdeSonhos/1.0" },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; AgentesdeSonhosBot/1.0; +https://agentesdesonhos.com.br)",
+        "Accept": "application/rss+xml, application/xml, text/xml, */*",
+      },
+      redirect: "follow",
     });
     if (!response.ok) {
-      console.error(`Failed to fetch ${source.name}: ${response.status}`);
+      console.error(`[CURATION] Failed to fetch ${source.name}: HTTP ${response.status} - feed pode estar bloqueado/movido`);
       return [];
     }
     const xml = await response.text();
+    if (!xml || xml.length < 100) {
+      console.error(`[CURATION] ${source.name} retornou corpo vazio (${xml.length} bytes)`);
+      return [];
+    }
     const items = extractItems(xml);
+    console.log(`[CURATION] ${source.name}: ${items.length} items encontrados no feed`);
 
-    return items.slice(0, 10).map((item) => ({
+    const parsed = items.slice(0, source.maxItems).map((item) => ({
       titulo_original: extractTag(item, "title"),
       conteudo: extractTag(item, "description") || extractTag(item, "content:encoded"),
       fonte: source.name,
       url: extractTag(item, "link"),
       data_publicacao: extractTag(item, "pubDate") || null,
     })).filter((n) => n.titulo_original && n.url);
+    console.log(`[CURATION] ${source.name}: ${parsed.length} items válidos (com título + url)`);
+    return parsed;
   } catch (error) {
-    console.error(`Error fetching ${source.name}:`, error);
+    console.error(`[CURATION] Erro ao buscar ${source.name}:`, error);
     return [];
   }
 }
