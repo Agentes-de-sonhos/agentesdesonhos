@@ -130,6 +130,7 @@ const marketingSection: MenuSection = {
 
 const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
+const startDashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard-start", icon: Home };
 
 // Custom section for Start plan users (always pinned to top)
 const planoStartSection: MenuSection = {
@@ -369,7 +370,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         {/* Scrollable Navigation */}
         <div className="flex-1 overflow-y-auto py-3 space-y-1">
           <nav className="flex flex-col gap-0.5 px-3">
-            {renderMenuItem(dashboardItem)}
+            {renderMenuItem(isStartPlan ? startDashboardItem : dashboardItem)}
           </nav>
 
           <div className="py-2 px-3">
