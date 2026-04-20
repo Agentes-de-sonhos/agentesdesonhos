@@ -33,7 +33,7 @@ export function MateriaisRecentesCard() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate("/materiais-divulgacao")}
+            onClick={() => navigate("/materiais")}
             className="text-primary hover:text-primary"
           >
             Ver todos
@@ -54,7 +54,7 @@ export function MateriaisRecentesCard() {
             {recentGalleries.map((gallery) => (
               <button
                 key={gallery.id}
-                onClick={() => navigate("/materiais-divulgacao")}
+                onClick={() => navigate("/materiais")}
                 className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all text-left"
               >
                 <div className="aspect-[3/4] bg-muted relative overflow-hidden">
