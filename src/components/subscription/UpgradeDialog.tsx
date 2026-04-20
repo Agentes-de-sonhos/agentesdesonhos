@@ -50,16 +50,13 @@ const UPGRADE_PLANS: PlanDisplay[] = [
     price: "R$ 49",
     period: "/mês",
     icon: <Sparkles className="h-5 w-5" />,
-    highlighted: true,
     badge: "Mais econômico",
     features: [
-      "CRM completo",
       "Orçamentos",
       "Carteira Digital",
       "Vitrine de Ofertas",
-      "Gestão Financeira",
       "Materiais de divulgação",
-      "IA: até 5 usos/dia",
+      "IA: 2 usos por dia",
     ],
   },
   {
@@ -68,9 +65,12 @@ const UPGRADE_PLANS: PlanDisplay[] = [
     price: "R$ 98",
     period: "/mês",
     icon: <Crown className="h-5 w-5" />,
+    highlighted: true,
     badge: "Mais escolhido",
     features: [
       "Tudo do Profissional",
+      "CRM completo",
+      "Gestão Financeira",
       "IA ilimitada",
       "Comunidade exclusiva",
       "Networking com agentes",
@@ -180,7 +180,15 @@ export function UpgradeDialog({
                   </Badge>
                 )}
                 {plan.badge && !isCurrentPlan && !isRecommended && (
-                  <Badge variant="secondary" className="absolute -top-2.5 left-4">
+                  <Badge
+                    className={cn(
+                      "absolute -top-2.5 left-4",
+                      plan.badge === "Mais escolhido"
+                        ? "bg-yellow-400 text-yellow-950 hover:bg-yellow-400 border-yellow-500 shadow-md"
+                        : ""
+                    )}
+                    variant={plan.badge === "Mais escolhido" ? "default" : "secondary"}
+                  >
                     {plan.badge}
                   </Badge>
                 )}
