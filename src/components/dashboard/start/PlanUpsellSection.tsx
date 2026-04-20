@@ -80,9 +80,9 @@ function UpsellGrid({
   const isFlex = layout === 'flex';
   return (
     <div 
-      className={`${isFlex ? 'flex flex-nowrap overflow-x-auto pb-2' : 'grid'} gap-3 w-full`}
+      className={`${isFlex ? 'flex flex-nowrap overflow-x-auto pb-2' : 'grid justify-start'} gap-3 w-full`}
       style={isFlex ? {} : { 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+        gridTemplateColumns: `repeat(auto-fill, minmax(140px, ${maxSize}px))`,
       }}
     >
       {items.map((item) => {
