@@ -169,6 +169,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
+  const isStartPlan = !isPromotor && plan === "start";
 
   const allSections: MenuSection[] = useMemo(
     () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
@@ -211,8 +212,17 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
       });
     }
 
-    return entries.sort((a, b) => a.orderIdx - b.orderIdx);
-  }, [allSections, standaloneItems, orderMap]);
+    const sorted = entries.sort((a, b) => a.orderIdx - b.orderIdx);
+
+    if (isStartPlan) {
+      return [
+        { type: "section" as const, section: planoStartSection, orderIdx: -1 },
+        ...sorted,
+      ];
+    }
+
+    return sorted;
+  }, [allSections, standaloneItems, orderMap, isStartPlan]);
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
 
