@@ -99,7 +99,7 @@ export default function StartDashboard() {
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
               {getGreeting()}, {firstName}!
             </h1>
-            <OnlineAgentsStrip />
+            <OnlineAgentsStrip restrictedMode />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
