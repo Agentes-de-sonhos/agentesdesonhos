@@ -199,6 +199,21 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         const sectionOrder = orderMap[sectionKey] || {};
         return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
       });
+      // Start plan: pin specific items to first place in their sections
+      if (isStartPlan) {
+        const pinFirstByKey: Record<string, string> = {
+          section_criar: "roteiros",
+          section_recursos_vendas: "materiais",
+        };
+        const pinKey = pinFirstByKey[section.key || ""];
+        if (pinKey) {
+          const idx = sortedItems.findIndex((it) => it.key === pinKey);
+          if (idx > 0) {
+            const [pinned] = sortedItems.splice(idx, 1);
+            sortedItems.unshift(pinned);
+          }
+        }
+      }
       entries.push({
         type: "section",
         section: { ...section, items: sortedItems },
