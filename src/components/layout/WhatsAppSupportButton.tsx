@@ -40,8 +40,8 @@ export function WhatsAppSupportButton() {
 
   return (
     <div
-      className="fixed bottom-24 lg:bottom-6 z-40 flex items-center gap-3 transition-[left] duration-300 ease-in-out"
-      style={{ left: window.innerWidth < 1024 ? '12px' : `calc(${sidebarWidth}px + 16px)` }}
+      className="fixed bottom-24 left-3 lg:bottom-6 z-40 flex items-center gap-3 lg:transition-[left] lg:duration-300 lg:ease-in-out"
+      style={{ left: undefined }}
     >
       <a
         href={WHATSAPP_URL}
