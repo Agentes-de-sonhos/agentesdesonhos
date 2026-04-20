@@ -130,6 +130,7 @@ const marketingSection: MenuSection = {
 
 const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
+const startDashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard-start", icon: Home };
 
 // Custom section for Start plan users (always pinned to top)
 const planoStartSection: MenuSection = {
