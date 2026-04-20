@@ -269,6 +269,17 @@ export function AppSidebar() {
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
   const isStartPlan = !isPromotor && plan === "start";
 
+  // URLs locked specifically for Start plan users (shows lock icon + opens upgrade dialog)
+  const startPlanLockedUrls = useMemo(
+    () => new Set([
+      "/meus-projetos",
+      "/comunidade",
+      "/cursos",
+      "/beneficios",
+    ]),
+    []
+  );
+
   const allSections: MenuSection[] = useMemo(
     () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
     []
