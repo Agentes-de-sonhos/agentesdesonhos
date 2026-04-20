@@ -66,11 +66,22 @@ const PREMIUM_ITEMS: UpsellItem[] = [
   { label: "Viaja com Agente", icon: Plane, bg: "bg-pink-200", text: "text-pink-800" },
 ];
 
-function UpsellGrid({ items, onClick }: { items: UpsellItem[]; onClick: () => void }) {
+function UpsellGrid({ 
+  items, 
+  onClick, 
+  maxSize = 175,
+  layout = 'grid'
+}: { 
+  items: UpsellItem[]; 
+  onClick: () => void;
+  maxSize?: number;
+  layout?: 'grid' | 'flex';
+}) {
+  const isFlex = layout === 'flex';
   return (
     <div 
-      className="grid gap-3 w-full"
-      style={{ 
+      className={`${isFlex ? 'flex flex-nowrap overflow-x-auto pb-2' : 'grid'} gap-3 w-full`}
+      style={isFlex ? {} : { 
         gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
       }}
     >
@@ -80,7 +91,12 @@ function UpsellGrid({ items, onClick }: { items: UpsellItem[]; onClick: () => vo
           <button
             key={item.label}
             onClick={onClick}
-            className={`${item.bg} ${item.text} w-full aspect-square rounded-2xl p-3 flex flex-col items-center justify-center text-center gap-2 transition-all hover:scale-105 hover:shadow-md cursor-pointer min-w-[140px]`}
+            className={`${item.bg} ${item.text} ${isFlex ? 'flex-shrink-0' : 'w-full'} aspect-square rounded-2xl p-3 flex flex-col items-center justify-center text-center gap-2 transition-all hover:scale-105 hover:shadow-md cursor-pointer`}
+            style={{ 
+              maxWidth: `${maxSize}px`, 
+              maxHeight: `${maxSize}px`,
+              minWidth: isFlex ? `${maxSize}px` : '140px',
+            }}
           >
             <Icon className="h-7 w-7" strokeWidth={2} />
             <span className="text-xs sm:text-sm font-semibold leading-tight">
