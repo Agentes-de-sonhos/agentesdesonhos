@@ -119,11 +119,40 @@ serve(async (req) => {
       });
     }
 
-    const { data: canUse } = await supabase.rpc("check_ai_usage", { _user_id: userId });
-    if (!canUse) {
-      return new Response(JSON.stringify({ error: "Cota mensal de IA esgotada.", quota_exceeded: true }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Detecta o plano para aplicar limites adequados (Start = 2/dia via daily_feature_usage)
+    const { data: userPlan } = await supabase.rpc("get_user_plan", { _user_id: userId });
+    const isStart = userPlan === "start";
+
+    if (isStart) {
+      // Limite diário de 2 roteiros para o plano Start (BRT)
+      const now = new Date();
+      const brt = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+      const today = brt.toISOString().split("T")[0];
+
+      const { data: usageRow } = await supabase
+        .from("daily_feature_usage")
+        .select("usage_count")
+        .eq("user_id", userId)
+        .eq("feature", "itinerary")
+        .eq("usage_date", today)
+        .maybeSingle();
+
+      const usageCount = usageRow?.usage_count ?? 0;
+      if (usageCount >= 2) {
+        return new Response(JSON.stringify({
+          error: "Limite diário de 2 roteiros por IA atingido. Tente novamente amanhã ou faça upgrade.",
+          daily_limit_exceeded: true,
+        }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      const { data: canUse } = await supabase.rpc("check_ai_usage", { _user_id: userId });
+      if (!canUse) {
+        return new Response(JSON.stringify({ error: "Cota mensal de IA esgotada.", quota_exceeded: true }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // --- INPUT VALIDATION ---
