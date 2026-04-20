@@ -51,7 +51,7 @@ const UPGRADE_PLANS: PlanDisplay[] = [
     period: "/mês",
     icon: <Sparkles className="h-5 w-5" />,
     highlighted: true,
-    badge: "Mais escolhido",
+    badge: "Mais econômico",
     features: [
       "CRM completo",
       "Orçamentos",
@@ -68,7 +68,7 @@ const UPGRADE_PLANS: PlanDisplay[] = [
     price: "R$ 98",
     period: "/mês",
     icon: <Crown className="h-5 w-5" />,
-    badge: "Mais completo",
+    badge: "A mais escolhida",
     features: [
       "Tudo do Profissional",
       "IA ilimitada",
