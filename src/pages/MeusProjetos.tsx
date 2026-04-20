@@ -370,36 +370,44 @@ export default function MeusProjetos() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="orcamentos" className="gap-2">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Orçamentos</span>
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
-                {getTabCount("orcamentos")}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="carteiras" className="gap-2">
-              <Wallet className="h-4 w-4" />
-              <span className="hidden sm:inline">Carteiras</span>
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
-                {getTabCount("carteiras")}
-              </Badge>
-            </TabsTrigger>
+          <TabsList className={cn("w-full grid", isStartPlan ? "grid-cols-1" : "grid-cols-3")}>
+            {!isStartPlan && (
+              <TabsTrigger value="orcamentos" className="gap-2">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">Orçamentos</span>
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                  {getTabCount("orcamentos")}
+                </Badge>
+              </TabsTrigger>
+            )}
+            {!isStartPlan && (
+              <TabsTrigger value="carteiras" className="gap-2">
+                <Wallet className="h-4 w-4" />
+                <span className="hidden sm:inline">Carteiras</span>
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                  {getTabCount("carteiras")}
+                </Badge>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="roteiros" className="gap-2">
               <Route className="h-4 w-4" />
-              <span className="hidden sm:inline">Roteiros</span>
+              <span className={cn(isStartPlan ? "inline" : "hidden sm:inline")}>Roteiros</span>
               <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
                 {getTabCount("roteiros")}
               </Badge>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="orcamentos" className="mt-4">
-            {renderList(filteredQuotes, quotesLoading)}
-          </TabsContent>
-          <TabsContent value="carteiras" className="mt-4">
-            {renderList(filteredTrips, tripsLoading)}
-          </TabsContent>
+          {!isStartPlan && (
+            <TabsContent value="orcamentos" className="mt-4">
+              {renderList(filteredQuotes, quotesLoading)}
+            </TabsContent>
+          )}
+          {!isStartPlan && (
+            <TabsContent value="carteiras" className="mt-4">
+              {renderList(filteredTrips, tripsLoading)}
+            </TabsContent>
+          )}
           <TabsContent value="roteiros" className="mt-4">
             {renderList(filteredItineraries, itinerariesLoading)}
           </TabsContent>
