@@ -6,6 +6,7 @@ import {
   Store, CreditCard, Wallet, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
   X, Building2, FolderOpen, DollarSign, ShoppingBag, ArrowUpCircle, ArrowDownCircle, LayoutDashboard,
+  Sparkles, Rss,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
