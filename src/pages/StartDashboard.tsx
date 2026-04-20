@@ -28,6 +28,7 @@ import type { TrailWithProgress } from "@/types/academy";
 import { MapaTurismoCard } from "@/components/dashboard/start/MapaTurismoCard";
 import { MateriaisRecentesCard } from "@/components/dashboard/start/MateriaisRecentesCard";
 import { PlanUpsellSection } from "@/components/dashboard/start/PlanUpsellSection";
+import { RoteiroIACard } from "@/components/dashboard/start/RoteiroIACard";
 
 // Reused lazy cards
 const CuratedNewsFeed = lazy(() =>
@@ -217,7 +218,10 @@ export default function StartDashboard() {
         {/* 4. Materiais de Divulgação */}
         <MateriaisRecentesCard />
 
-        {/* 5. Upsell sections */}
+        {/* 5. Roteiro por IA (2 por dia para Start) */}
+        <RoteiroIACard />
+
+        {/* 6. Upsell sections */}
         <PlanUpsellSection />
       </div>
     </DashboardLayout>

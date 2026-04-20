@@ -2,14 +2,29 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useSubscription } from "./useSubscription";
-import { Feature, ESSENCIAL_DAILY_LIMITS } from "@/types/subscription";
+import { Feature, ESSENCIAL_DAILY_LIMITS, START_DAILY_LIMITS } from "@/types/subscription";
+
+/**
+ * Returns YYYY-MM-DD for "today" in São Paulo (BRT/UTC-3, no DST since 2019).
+ * Ensures the daily counter resets at local midnight, not UTC midnight.
+ */
+function getBrtDateString(): string {
+  const now = new Date();
+  const brt = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+  return brt.toISOString().split("T")[0];
+}
 
 export function useDailyLimit(feature: Feature) {
   const { user } = useAuth();
   const { plan } = useSubscription();
   const queryClient = useQueryClient();
 
-  const dailyLimit = plan === "essencial" ? (ESSENCIAL_DAILY_LIMITS[feature] ?? null) : null;
+  let dailyLimit: number | null = null;
+  if (plan === "essencial") {
+    dailyLimit = ESSENCIAL_DAILY_LIMITS[feature] ?? null;
+  } else if (plan === "start") {
+    dailyLimit = START_DAILY_LIMITS[feature] ?? null;
+  }
   const hasLimit = dailyLimit !== null;
 
   const { data: usageCount = 0, isLoading } = useQuery({
@@ -17,7 +32,7 @@ export function useDailyLimit(feature: Feature) {
     queryFn: async () => {
       if (!user || !hasLimit) return 0;
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = getBrtDateString();
       const { data, error } = await supabase
         .from("daily_feature_usage")
         .select("usage_count")
@@ -41,7 +56,7 @@ export function useDailyLimit(feature: Feature) {
   const incrementUsage = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("Not authenticated");
-      const today = new Date().toISOString().split("T")[0];
+      const today = getBrtDateString();
 
       const { data: existing } = await supabase
         .from("daily_feature_usage")

@@ -11,7 +11,8 @@ Usuários do plano **Start** são redirecionados automaticamente após login par
 3. **Radar do Turismo + Minha Agenda**: lado a lado (componentes `CuratedNewsFeed` + `UpcomingAgendaEventsCard` reaproveitados).
 4. **EducaTravel Academy**: mostra apenas as **3 trilhas mais recentes** (limite real, aplicado também em `/educa-academy` via `visibleTrails = trailsWithProgress.slice(0, 3)` quando `plan === "start"`). Card mostra rodapé com CTA para upgrade.
 5. **Materiais de Divulgação** (`MateriaisRecentesCard`): grid responsivo dos últimos 7 dias (4 itens) + botão "Ver todos" → `/materiais`.
-6. **+Recursos Plano Profissional** e **+Recursos Plano Premium** (`PlanUpsellSection`): cards coloridos clicáveis → todos navegam para `/planos`. Replica visual do mockup com tags "*Limitado".
+6. **Roteiro por IA** (`RoteiroIACard`): gerador embutido inline (`ItineraryForm`) com badge de uso `usageCount/dailyLimit`. Limite **2 roteiros/dia** para Start (configurado em `START_DAILY_LIMITS` em `src/types/subscription.ts`). Reset à meia-noite BRT (UTC-3) — implementado via helper `getBrtDateString()` em `useDailyLimit.ts`. Quando o limite é atingido, o formulário é substituído por bloco com `Lock` icon e CTA "Ver planos" → `/planos`.
+7. **+Recursos Plano Profissional** e **+Recursos Plano Premium** (`PlanUpsellSection`): cards coloridos clicáveis → todos navegam para `/planos`. Replica visual do mockup com tags "*Limitado".
 
 ## Restrição Academy no plano Start
 Aplicada tanto no /dashboard-start quanto em `/educa-academy`. Em /educa-academy, abaixo do grid de trilhas aparece um card pontilhado com `Lock` icon e CTA "Ver planos" quando há mais trilhas que as 3 visíveis.
@@ -20,6 +21,7 @@ Aplicada tanto no /dashboard-start quanto em `/educa-academy`. Em /educa-academy
 - `src/components/dashboard/start/MapaTurismoCard.tsx`
 - `src/components/dashboard/start/MateriaisRecentesCard.tsx`
 - `src/components/dashboard/start/PlanUpsellSection.tsx`
+- `src/components/dashboard/start/RoteiroIACard.tsx`
 - `src/pages/StartDashboard.tsx`
 
 ## Roteamento
