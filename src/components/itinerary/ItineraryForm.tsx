@@ -62,6 +62,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<TravelInterest[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showInterests, setShowInterests] = useState(false);
+  const [showPace, setShowPace] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
   const [clientError, setClientError] = useState("");
 
