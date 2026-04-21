@@ -660,6 +660,7 @@ export function AdminUserManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="start">Start (Gratuito)</SelectItem>
                     <SelectItem value="educa_pass">Educa Travel Pass</SelectItem>
                     <SelectItem value="cartao_digital">Cartão Digital Pass</SelectItem>
                     <SelectItem value="essencial">Essencial</SelectItem>
@@ -677,7 +678,7 @@ export function AdminUserManager() {
                   if (editingUser) {
                     updatePlanMutation.mutate({
                       userId: editingUser.user_id,
-                      plan: selectedPlan as "essencial" | "profissional",
+                      plan: selectedPlan as "start" | "essencial" | "profissional",
                     });
                   }
                 }}
