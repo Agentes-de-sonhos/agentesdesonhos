@@ -202,7 +202,6 @@ function PersonalizadorLaminasContent() {
   }, []);
 
   const applySnap = (val: number, others: number[]): { val: number; line: number | null } => {
-    if (!snapEnabled) return { val, line: null };
     let best = { val, line: null as number | null, dist: SNAP_THRESHOLD };
     for (const o of others) {
       const d = Math.abs(val - o);
