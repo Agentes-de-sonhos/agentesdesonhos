@@ -467,23 +467,45 @@ function PersonalizadorLaminasContent() {
     );
   };
 
-  // Estilo dinâmico para texto: cor "auto" -> branco no preview com sombra; HEX -> usa direto.
-  const textStyle = (item: LayoutItem): React.CSSProperties => ({
-    color: textColor === "auto" ? "#FFFFFF" : textColor,
-    textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-    // Tamanho da fonte escala com a altura da própria caixa (cqh) — assim texto cresce ao redimensionar.
-    fontSize: "85cqh",
-    lineHeight: 1,
-    containerType: "size",
-    textAlign: item.align ?? "left",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: item.align === "center" ? "center" : item.align === "right" ? "flex-end" : "flex-start",
-    width: "100%",
-    height: "100%",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-  });
+  const getPreviewTextMetrics = (item: LayoutItem, text: string) => {
+    const boxWidth = Math.max(1, stageSize.w * item.w);
+    const boxHeight = Math.max(1, stageSize.h * item.h);
+    let fontSize = Math.max(8, Math.round(boxHeight * 0.85));
+
+    if (typeof document !== "undefined") {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        const safeFamily = "Inter, Segoe UI, Arial, sans-serif";
+        ctx.font = `${fontSize}px ${safeFamily}`;
+        const measured = ctx.measureText(text || " ").width;
+        if (measured > boxWidth && measured > 0) {
+          fontSize = Math.max(8, Math.floor((fontSize * boxWidth) / measured));
+        }
+      }
+    }
+
+    return { fontSize, boxWidth, boxHeight };
+  };
+
+  // Estilo dinâmico para texto em pixels reais, evitando distorções visuais e garantindo exportação fiel.
+  const textStyle = (item: LayoutItem, text: string): React.CSSProperties => {
+    const { fontSize } = getPreviewTextMetrics(item, text);
+    return {
+      color: textColor === "auto" ? "#FFFFFF" : textColor,
+      textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+      fontSize: `${fontSize}px`,
+      lineHeight: 1,
+      textAlign: item.align ?? "left",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: item.align === "center" ? "center" : item.align === "right" ? "flex-end" : "flex-start",
+      width: "100%",
+      height: "100%",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+    };
+  };
 
   return (
     <DashboardLayout>
