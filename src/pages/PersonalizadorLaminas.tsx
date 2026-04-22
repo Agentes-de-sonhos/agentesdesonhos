@@ -416,9 +416,11 @@ function PersonalizadorLaminasContent() {
         ctx.textBaseline = "top";
 
         const brightness = sampleBrightness(ctx, x, y, w, h);
-        const fillColor = textColor === "light" ? "#FFFFFF"
-          : textColor === "dark" ? "#1a1a2e"
-          : brightness > 128 ? "#1a1a2e" : "#FFFFFF";
+        const isAuto = textColor === "auto";
+        const fillColor = isAuto
+          ? (brightness > 128 ? "#1a1a2e" : "#FFFFFF")
+          : textColor;
+        // Sombra com base na luminosidade do fundo (sempre contraste)
         const shadowColor = brightness > 128 ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.6)";
 
         ctx.shadowColor = shadowColor;
