@@ -101,6 +101,7 @@ function PersonalizadorLaminasContent() {
   const [layout, setLayout] = useState<Layout>(loadStoredLayout);
   const [selected, setSelected] = useState<ElementId | null>(null);
   const [activeGuides, setActiveGuides] = useState<{ v: number[]; h: number[] }>({ v: [], h: [] });
+  const [stageSize, setStageSize] = useState({ w: 0, h: 0 });
 
   // UI / loading
   const [rendering, setRendering] = useState(false);
@@ -113,6 +114,23 @@ function PersonalizadorLaminasContent() {
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layout)); } catch { /* noop */ }
   }, [layout]);
+
+  useEffect(() => {
+    if (!stageRef.current) return;
+    const updateSize = () => {
+      if (!stageRef.current) return;
+      const rect = stageRef.current.getBoundingClientRect();
+      setStageSize({ w: rect.width, h: rect.height });
+    };
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(stageRef.current);
+    window.addEventListener("resize", updateSize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateSize);
+    };
+  }, [baseImage]);
 
   // Pré-preenche dados do perfil
   useEffect(() => {
