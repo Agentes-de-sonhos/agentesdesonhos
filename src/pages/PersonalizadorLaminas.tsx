@@ -468,6 +468,7 @@ function PersonalizadorLaminasContent() {
     const item = layout[id];
     if (!item.visible) return null;
     const isSelected = selected === id;
+    const isText = id !== "logo";
     return (
       <div
         key={id}
@@ -495,6 +496,24 @@ function PersonalizadorLaminasContent() {
                   bottom: corner.startsWith("s") ? -6 : "auto",
                   left: corner.endsWith("w") ? -6 : "auto",
                   right: corner.endsWith("e") ? -6 : "auto",
+                }}
+              />
+            ))}
+          </>
+        )}
+        {isSelected && isText && (
+          <>
+            {(["w", "e"] as const).map((side) => (
+              <div
+                key={side}
+                onPointerDown={(e) => onPointerDownItem(e, id, side)}
+                className="absolute h-6 w-2 rounded-sm bg-primary border-2 border-background z-30"
+                style={{
+                  cursor: "ew-resize",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  left: side === "w" ? -5 : "auto",
+                  right: side === "e" ? -5 : "auto",
                 }}
               />
             ))}
