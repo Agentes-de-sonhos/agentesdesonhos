@@ -37,6 +37,7 @@ import { useQuery } from "@tanstack/react-query";
 
 type TextColor = "auto" | "light" | "dark";
 type ElementId = "logo" | "agencyName" | "phone";
+type TextAlign = "left" | "center" | "right";
 
 // Posições e tamanhos são salvos em fração da lâmina (0..1) — independente de tela.
 interface LayoutItem {
@@ -45,6 +46,7 @@ interface LayoutItem {
   w: number; // 0..1 (largura relativa)
   h: number; // 0..1 (altura relativa)
   visible: boolean;
+  align?: TextAlign; // alinhamento interno do texto (apenas para textos)
 }
 
 interface Layout {
@@ -54,12 +56,13 @@ interface Layout {
 }
 
 const DEFAULT_LAYOUT: Layout = {
+  // Padrão: logo no topo-esquerda e nome/telefone logo abaixo do logo
   logo:        { x: 0.04, y: 0.04, w: 0.18, h: 0.10, visible: true },
-  agencyName:  { x: 0.04, y: 0.86, w: 0.50, h: 0.05, visible: true },
-  phone:       { x: 0.04, y: 0.92, w: 0.40, h: 0.04, visible: true },
+  agencyName:  { x: 0.04, y: 0.16, w: 0.40, h: 0.05, visible: true, align: "left" },
+  phone:       { x: 0.04, y: 0.22, w: 0.40, h: 0.04, visible: true, align: "left" },
 };
 
-const STORAGE_KEY = "lamina-customizer-layout-v2";
+const STORAGE_KEY = "lamina-customizer-layout-v3";
 
 const SNAP_THRESHOLD = 0.012; // 1.2% da lâmina
 const SNAP_LINES = [0, 0.25, 0.5, 0.75, 1];
@@ -192,7 +195,7 @@ function PersonalizadorLaminasContent() {
   // -------- Drag & resize logic --------
   const dragRef = useRef<{
     id: ElementId;
-    mode: "move" | "nw" | "ne" | "sw" | "se";
+    mode: "move" | "nw" | "ne" | "sw" | "se" | "e" | "w";
     startPx: { x: number; y: number };
     startItem: LayoutItem;
     stage: { w: number; h: number };
@@ -215,7 +218,7 @@ function PersonalizadorLaminasContent() {
   const onPointerDownItem = (
     e: React.PointerEvent,
     id: ElementId,
-    mode: "move" | "nw" | "ne" | "sw" | "se"
+    mode: "move" | "nw" | "ne" | "sw" | "se" | "e" | "w"
   ) => {
     e.stopPropagation();
     if (!stageRef.current) return;
@@ -276,12 +279,14 @@ function PersonalizadorLaminasContent() {
       if (drag.mode === "ne") { nw = item.w + dx; nh = item.h - dy; ny = item.y + dy; }
       if (drag.mode === "sw") { nw = item.w - dx; nh = item.h + dy; nx = item.x + dx; }
       if (drag.mode === "nw") { nw = item.w - dx; nh = item.h - dy; nx = item.x + dx; ny = item.y + dy; }
+      if (drag.mode === "e")  { nw = item.w + dx; }
+      if (drag.mode === "w")  { nw = item.w - dx; nx = item.x + dx; }
 
       // limites mínimos
       const minW = drag.id === "logo" ? 0.04 : 0.08;
       const minH = drag.id === "logo" ? 0.03 : 0.02;
       if (nw < minW) {
-        if (drag.mode === "sw" || drag.mode === "nw") nx = item.x + (item.w - minW);
+        if (drag.mode === "sw" || drag.mode === "nw" || drag.mode === "w") nx = item.x + (item.w - minW);
         nw = minW;
       }
       if (nh < minH) {
@@ -411,7 +416,8 @@ function PersonalizadorLaminasContent() {
         const h = item.h * H;
         const fontSize = Math.max(12, Math.round(h * 0.85));
         ctx.font = `${weight} ${fontSize}px 'Inter', 'Segoe UI', sans-serif`;
-        ctx.textAlign = "left";
+        const align: TextAlign = item.align ?? "left";
+        ctx.textAlign = align === "center" ? "center" : align === "right" ? "right" : "left";
         ctx.textBaseline = "top";
 
         const brightness = sampleBrightness(ctx, x, y, w, h);
@@ -425,7 +431,8 @@ function PersonalizadorLaminasContent() {
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         ctx.fillStyle = fillColor;
-        ctx.fillText(text, x, y);
+        const tx = align === "center" ? x + w / 2 : align === "right" ? x + w : x;
+        ctx.fillText(text, tx, y);
         ctx.shadowColor = "transparent";
         ctx.shadowBlur = 0;
       };
@@ -461,6 +468,7 @@ function PersonalizadorLaminasContent() {
     const item = layout[id];
     if (!item.visible) return null;
     const isSelected = selected === id;
+    const isText = id !== "logo";
     return (
       <div
         key={id}
@@ -488,6 +496,24 @@ function PersonalizadorLaminasContent() {
                   bottom: corner.startsWith("s") ? -6 : "auto",
                   left: corner.endsWith("w") ? -6 : "auto",
                   right: corner.endsWith("e") ? -6 : "auto",
+                }}
+              />
+            ))}
+          </>
+        )}
+        {isSelected && isText && (
+          <>
+            {(["w", "e"] as const).map((side) => (
+              <div
+                key={side}
+                onPointerDown={(e) => onPointerDownItem(e, id, side)}
+                className="absolute h-6 w-2 rounded-sm bg-primary border-2 border-background z-30"
+                style={{
+                  cursor: "ew-resize",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  left: side === "w" ? -5 : "auto",
+                  right: side === "e" ? -5 : "auto",
                 }}
               />
             ))}
@@ -574,6 +600,7 @@ function PersonalizadorLaminasContent() {
                           textShadow: "0 1px 3px rgba(0,0,0,0.5)",
                           fontSize: "clamp(10px, 2.2cqw, 32px)",
                           containerType: "inline-size",
+                          textAlign: layout.agencyName.align ?? "left",
                         }}
                       >
                         {agencyName}
@@ -588,6 +615,7 @@ function PersonalizadorLaminasContent() {
                           textShadow: "0 1px 3px rgba(0,0,0,0.5)",
                           fontSize: "clamp(9px, 2cqw, 28px)",
                           containerType: "inline-size",
+                          textAlign: layout.phone.align ?? "left",
                         }}
                       >
                         {phone}
@@ -669,6 +697,30 @@ function PersonalizadorLaminasContent() {
                   <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={centerSelected}>
                     Centralizar
                   </Button>
+                  {selected !== "logo" && (
+                    <>
+                      <Separator orientation="vertical" className="h-6" />
+                      <span className="text-[11px] text-muted-foreground">Texto:</span>
+                      <div className="flex gap-1">
+                        {(["left", "center", "right"] as const).map((a) => {
+                          const Icon = a === "left" ? AlignLeft : a === "center" ? AlignCenter : AlignRight;
+                          const active = (layout[selected].align ?? "left") === a;
+                          return (
+                            <Button
+                              key={a}
+                              size="icon"
+                              variant={active ? "default" : "ghost"}
+                              className="h-8 w-8"
+                              onClick={() => updateItem(selected, { align: a })}
+                              title={`Alinhar texto à ${a === "left" ? "esquerda" : a === "center" ? "centro" : "direita"}`}
+                            >
+                              <Icon className="h-4 w-4" />
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                   <Button
                     size="sm"
                     variant="ghost"
