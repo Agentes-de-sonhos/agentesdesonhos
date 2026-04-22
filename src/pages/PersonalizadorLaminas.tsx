@@ -394,7 +394,7 @@ function PersonalizadorLaminasContent() {
   const renderElementBox = (id: ElementId, content: React.ReactNode) => {
     const item = layout[id];
     if (!item.visible) return null;
-    const isSelected = selected === id;
+    const isSelected = selected === id && !isExportingCapture;
     const isText = id !== "logo";
     return (
       <div
