@@ -60,7 +60,7 @@ const ALL_FEATURES: Feature[] = [
 
 const START_FEATURES: Feature[] = [
   'news', 'tourism_map', 'agenda', 'trainings_recorded',
-  'materials', 'benefits', 'itinerary',
+  'materials', 'benefits', 'itinerary', 'content_creator',
 ];
 
 const PROFISSIONAL_FEATURES: Feature[] = [
@@ -175,7 +175,7 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   trails_premium: 'profissional',
   certificates: 'profissional',
   ranking: 'profissional',
-  content_creator: 'profissional',
+  content_creator: 'start',
   notepad: 'profissional',
   showcase: 'profissional',
   lamina_customizer: 'profissional',
