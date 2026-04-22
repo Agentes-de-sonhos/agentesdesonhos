@@ -76,6 +76,7 @@ function getServiceSummary(service: QuoteService): string {
     case "attraction": return [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name;
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
+    case "circuit": return data.circuit_name || "Circuito";
     case "other": return data.description || "Outros Serviços";
     default: return "Serviço";
   }
@@ -91,6 +92,7 @@ function getServiceName(service: QuoteService): string {
     case "attraction": return data.product_name || data.name;
     case "insurance": return data.provider;
     case "cruise": return data.ship_name;
+    case "circuit": return data.circuit_name || "Circuito";
     case "other": return data.description || "Outros Serviços";
     default: return "Serviço";
   }
@@ -166,6 +168,11 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Rota: ${data.route}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
       details.push(`Cabine: ${data.cabin_type}`);
+      break;
+    case "circuit":
+      if (data.duration) details.push(`Duração: ${data.duration}`);
+      if (data.itinerary) details.push(data.itinerary);
+      if (data.notes) details.push(data.notes);
       break;
     case "other":
       if (data.description) details.push(data.description);

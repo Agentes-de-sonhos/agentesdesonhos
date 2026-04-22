@@ -118,6 +118,12 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
       details.push(`Cabine: ${data.cabin_type}`);
       break;
+    case "circuit":
+      if (data.circuit_name) details.push(`Circuito: ${data.circuit_name}`);
+      if (data.duration) details.push(`Duração: ${data.duration}`);
+      if (data.itinerary) details.push(data.itinerary);
+      if (data.notes) details.push(`Obs: ${data.notes}`);
+      break;
     case "other":
       details.push(data.description);
       break;

@@ -103,6 +103,11 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
       details.push(`Cabine: ${data.cabin_type}`);
       break;
+    case "circuit":
+      if (data.duration) details.push(`Duração: ${data.duration}`);
+      if (data.itinerary) details.push(data.itinerary);
+      if (data.notes) details.push(data.notes);
+      break;
   }
   return details;
 }
