@@ -31,6 +31,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { fetchAgentProfile } from "@/hooks/useAgentProfile";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import html2canvas from "html2canvas";
 
 type ElementId = "logo" | "agencyName" | "phone";
 type TextAlign = "left" | "center" | "right";
@@ -84,7 +85,6 @@ function loadStoredLayout(): Layout {
 
 function PersonalizadorLaminasContent() {
   const { user } = useAuth();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
   // Conteúdo
@@ -107,6 +107,7 @@ function PersonalizadorLaminasContent() {
   const [uploading, setUploading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
+  const [isExportingCapture, setIsExportingCapture] = useState(false);
 
   // Persistência local
   useEffect(() => {
@@ -352,129 +353,34 @@ function PersonalizadorLaminasContent() {
     toast.success("Layout resetado.");
   };
 
-  // -------- Render canvas --------
-  const loadImage = (src: string): Promise<HTMLImageElement> =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = src;
-    });
-
-  const sampleBrightness = (
-    ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number
-  ): number => {
-    try {
-      const sx = clamp(Math.round(x), 0, ctx.canvas.width - 1);
-      const sy = clamp(Math.round(y), 0, ctx.canvas.height - 1);
-      const sw = clamp(Math.round(w), 1, ctx.canvas.width - sx);
-      const sh = clamp(Math.round(h), 1, ctx.canvas.height - sy);
-      const imageData = ctx.getImageData(sx, sy, sw, sh);
-      const d = imageData.data;
-      let sum = 0;
-      for (let i = 0; i < d.length; i += 4) {
-        sum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-      }
-      return sum / (d.length / 4);
-    } catch { return 128; }
-  };
-
   const renderAndDownload = async () => {
-    if (!baseImage || !baseImageNatural) { toast.error("Selecione uma imagem base."); return; }
+    if (!baseImage || !stageRef.current) { toast.error("Selecione uma imagem base."); return; }
     setRendering(true);
+    setIsExportingCapture(true);
     try {
-      // Garante que as fontes estejam carregadas antes de desenhar (evita fallback estranho)
       try { await (document as any).fonts?.ready; } catch { /* noop */ }
+      await new Promise((resolve) => setTimeout(resolve, 80));
 
-      const canvas = canvasRef.current!;
-      const ctx = canvas.getContext("2d")!;
-      const W = baseImageNatural.w;
-      const H = baseImageNatural.h;
-      canvas.width = W;
-      canvas.height = H;
+      const stage = stageRef.current;
+      const canvas = await html2canvas(stage, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false,
+      });
 
-      const baseImg = await loadImage(baseImage);
-      ctx.drawImage(baseImg, 0, 0, W, H);
-
-      // Desenha logo
-      if (logoUrl && layout.logo.visible) {
-        try {
-          const logoImg = await loadImage(logoUrl);
-          const lx = layout.logo.x * W;
-          const ly = layout.logo.y * H;
-          const lw = layout.logo.w * W;
-          // Mantém proporção real do logo
-          const ratio = logoImg.naturalWidth / logoImg.naturalHeight;
-          const lh = lw / ratio;
-          ctx.drawImage(logoImg, lx, ly, lw, lh);
-        } catch { /* ignore */ }
-      }
-
-      // Helper de cor automática
-      const drawText = (text: string, item: LayoutItem, weight: 400 | 600) => {
-        const x = item.x * W;
-        const y = item.y * H;
-        const w = item.w * W;
-        const h = item.h * H;
-        const safeText = String(text ?? "").trim();
-        if (!safeText) return;
-
-        const align: TextAlign = item.align ?? "left";
-        ctx.textAlign = align === "center" ? "center" : align === "right" ? "right" : "left";
-        ctx.textBaseline = "middle";
-
-        // Calcula fontSize que cabe na altura E largura da caixa (idêntico ao preview com cqh)
-        // Começa em 85% da altura e reduz se ultrapassar a largura.
-        const fontFamily = `'Inter', 'Segoe UI', Arial, sans-serif`;
-        let fontSize = Math.max(8, Math.round(h * 0.85));
-        ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
-        let measured = ctx.measureText(safeText).width;
-        if (measured > w && measured > 0) {
-          fontSize = Math.max(8, Math.floor((fontSize * w) / measured));
-          ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
-        }
-
-        // Cor: HEX/nome direto, ou auto via brilho do fundo
-        const brightness = sampleBrightness(ctx, x, y, w, h);
-        const isAuto = textColor === "auto" || !textColor;
-        const fillColor = isAuto
-          ? (brightness > 128 ? "#1a1a2e" : "#FFFFFF")
-          : textColor;
-
-        // Sombra proporcional ao tamanho da fonte (evita "borrão" em fontes muito grandes)
-        const shadowBlur = Math.min(8, Math.max(2, Math.round(fontSize * 0.06)));
-        const shadowColor = brightness > 128 ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.6)";
-        ctx.save();
-        ctx.shadowColor = shadowColor;
-        ctx.shadowBlur = shadowBlur;
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 1;
-        ctx.fillStyle = fillColor;
-
-        const tx = align === "center" ? x + w / 2 : align === "right" ? x + w : x;
-        const ty = y + h / 2; // centralizado verticalmente na caixa
-        ctx.fillText(safeText, tx, ty);
-        ctx.restore();
-      };
-
-      if (agencyName && layout.agencyName.visible) drawText(agencyName, layout.agencyName, 600);
-      if (phone && layout.phone.visible) drawText(phone, layout.phone, 400);
-
-      canvas.toBlob((blob) => {
-        if (!blob) { toast.error("Erro ao gerar imagem."); setRendering(false); return; }
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `lamina-personalizada-${Date.now()}.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast.success("Imagem baixada com sucesso!");
-        setRendering(false);
-      }, "image/png");
+      const url = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `lamina-personalizada-${Date.now()}.png`;
+      a.click();
+      toast.success("Imagem baixada com sucesso!");
     } catch (e: any) {
       toast.error("Erro: " + e.message);
+    } finally {
       setRendering(false);
+      setIsExportingCapture(false);
     }
   };
 
@@ -488,7 +394,7 @@ function PersonalizadorLaminasContent() {
   const renderElementBox = (id: ElementId, content: React.ReactNode) => {
     const item = layout[id];
     if (!item.visible) return null;
-    const isSelected = selected === id;
+    const isSelected = selected === id && !isExportingCapture;
     const isText = id !== "logo";
     return (
       <div
@@ -590,6 +496,7 @@ function PersonalizadorLaminasContent() {
                 onPointerLeave={onPointerUp}
                 onPointerDown={() => setSelected(null)}
                 className="relative rounded-xl overflow-hidden bg-muted/50 min-h-[300px] flex items-center justify-center"
+                data-export-stage="true"
               >
                 {baseImage ? (
                   <>
@@ -602,14 +509,14 @@ function PersonalizadorLaminasContent() {
                     />
 
                     {/* Guias de snap */}
-                    {activeGuides.v.map((g, i) => (
+                    {!isExportingCapture && activeGuides.v.map((g, i) => (
                       <div
                         key={`v-${i}`}
                         className="absolute top-0 bottom-0 w-px bg-primary/80 pointer-events-none z-30"
                         style={{ left: `${g * 100}%` }}
                       />
                     ))}
-                    {activeGuides.h.map((g, i) => (
+                    {!isExportingCapture && activeGuides.h.map((g, i) => (
                       <div
                         key={`h-${i}`}
                         className="absolute left-0 right-0 h-px bg-primary/80 pointer-events-none z-30"
@@ -647,12 +554,12 @@ function PersonalizadorLaminasContent() {
                     ))}
 
                     {/* Remove button */}
-                    <button
+                    {!isExportingCapture && <button
                       onClick={(e) => { e.stopPropagation(); setBaseImage(null); }}
                       className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors z-40"
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </button>}
                   </>
                 ) : (
                   <div className="flex flex-col items-center gap-4 py-16 text-muted-foreground">
@@ -1004,8 +911,6 @@ function PersonalizadorLaminasContent() {
           </div>
         </div>
 
-        {/* Hidden canvas for rendering */}
-        <canvas ref={canvasRef} className="hidden" />
       </div>
     </DashboardLayout>
   );
