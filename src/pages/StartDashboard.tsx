@@ -18,7 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { GraduationCap, ArrowRight } from "lucide-react";
+import { GraduationCap, ArrowRight, Gift, Sparkles } from "lucide-react";
 import { useAcademy } from "@/hooks/useAcademy";
 import { TrailCard } from "@/components/academy/TrailCard";
 import { TrailDetail } from "@/components/academy/TrailDetail";
@@ -220,6 +220,45 @@ export default function StartDashboard() {
 
         {/* 5. Roteiro por IA (2 por dia para Start) */}
         <RoteiroIACard />
+
+        {/* 5b. Atalhos: Benefícios e Criador de Conteúdo */}
+        <section className="grid gap-4 sm:gap-6 sm:grid-cols-2">
+          <button
+            onClick={() => navigate("/beneficios")}
+            className="group flex items-center gap-4 rounded-xl border border-border bg-card p-5 text-left shadow-card transition-all hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 group-hover:bg-emerald-200">
+              <Gift className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-display text-base font-semibold text-foreground">
+                Benefícios e Descontos
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Vantagens exclusivas para agentes
+              </p>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+          </button>
+
+          <button
+            onClick={() => navigate("/ferramentas-ia/criar-conteudo")}
+            className="group flex items-center gap-4 rounded-xl border border-border bg-card p-5 text-left shadow-card transition-all hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-700 group-hover:bg-violet-200">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-display text-base font-semibold text-foreground">
+                Criador de Conteúdo
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Gere posts e textos com IA
+              </p>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+          </button>
+        </section>
 
         {/* 6. Upsell sections */}
         <PlanUpsellSection />
