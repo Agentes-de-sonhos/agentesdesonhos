@@ -577,7 +577,7 @@ function PersonalizadorLaminasContent() {
 
                     {/* Nome agência */}
                     {agencyName && renderElementBox("agencyName", (
-                      <div className="font-semibold" style={textStyle(layout.agencyName)}>
+                      <div className="font-semibold" style={textStyle(layout.agencyName, agencyName)}>
                         <span className="block w-full" style={{ textAlign: layout.agencyName.align ?? "left" }}>
                           {agencyName}
                         </span>
@@ -586,7 +586,7 @@ function PersonalizadorLaminasContent() {
 
                     {/* Telefone */}
                     {phone && renderElementBox("phone", (
-                      <div className="font-normal" style={textStyle(layout.phone)}>
+                      <div className="font-normal" style={textStyle(layout.phone, phone)}>
                         <span className="block w-full" style={{ textAlign: layout.phone.align ?? "left" }}>
                           {phone}
                         </span>
