@@ -55,7 +55,6 @@ const UPGRADE_PLANS: PlanDisplay[] = [
       "Orçamentos",
       "Carteira Digital",
       "Vitrine de Ofertas",
-      "Materiais de divulgação",
       "IA: até 5 usos/dia",
     ],
   },
