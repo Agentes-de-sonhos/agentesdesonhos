@@ -31,6 +31,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { fetchAgentProfile } from "@/hooks/useAgentProfile";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import html2canvas from "html2canvas";
 
 type ElementId = "logo" | "agencyName" | "phone";
 type TextAlign = "left" | "center" | "right";
@@ -84,7 +85,6 @@ function loadStoredLayout(): Layout {
 
 function PersonalizadorLaminasContent() {
   const { user } = useAuth();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
   // Conteúdo
@@ -107,6 +107,7 @@ function PersonalizadorLaminasContent() {
   const [uploading, setUploading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
+  const [isExportingCapture, setIsExportingCapture] = useState(false);
 
   // Persistência local
   useEffect(() => {
