@@ -60,7 +60,7 @@ const plans: PlanConfig[] = [
     period: "/mês",
     description: "Tudo que você precisa para operar sua agência com eficiência.",
     microcopy: "Ideal para operação diária",
-    badge: "Mais escolhido",
+    badge: "MAIS ECONÔMICO",
     highlighted: true,
     icon: Sparkles,
     features: [
@@ -82,7 +82,7 @@ const plans: PlanConfig[] = [
     period: "/mês",
     description: "Para agentes que querem escalar resultados e se conectar com o mercado.",
     microcopy: "Para quem quer crescer mais rápido",
-    badge: "Mais completo",
+    badge: "MAIS ESCOLHIDO",
     icon: Crown,
     features: [
       "Tudo do plano Profissional",
