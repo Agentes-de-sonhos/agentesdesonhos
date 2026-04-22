@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import {
   Upload,
   Download,
@@ -17,11 +16,9 @@ import {
   Loader2,
   X,
   Sun,
-  Moon,
   Paintbrush,
   Eye,
   EyeOff,
-  RotateCcw,
   AlignCenter,
   AlignLeft,
   AlignRight,
@@ -35,7 +32,6 @@ import { fetchAgentProfile } from "@/hooks/useAgentProfile";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
-type TextColor = "auto" | "light" | "dark";
 type ElementId = "logo" | "agencyName" | "phone";
 type TextAlign = "left" | "center" | "right";
 
@@ -98,12 +94,12 @@ function PersonalizadorLaminasContent() {
   const [logoNatural, setLogoNatural] = useState<{ w: number; h: number } | null>(null);
   const [agencyName, setAgencyName] = useState("");
   const [phone, setPhone] = useState("");
-  const [textColor, setTextColor] = useState<TextColor>("auto");
+  // "auto" = contraste automático, ou um HEX (ex: "#ff0000")
+  const [textColor, setTextColor] = useState<string>("auto");
 
   // Layout livre
   const [layout, setLayout] = useState<Layout>(loadStoredLayout);
   const [selected, setSelected] = useState<ElementId | null>(null);
-  const [snapEnabled, setSnapEnabled] = useState(true);
   const [activeGuides, setActiveGuides] = useState<{ v: number[]; h: number[] }>({ v: [], h: [] });
 
   // UI / loading
@@ -206,7 +202,6 @@ function PersonalizadorLaminasContent() {
   }, []);
 
   const applySnap = (val: number, others: number[]): { val: number; line: number | null } => {
-    if (!snapEnabled) return { val, line: null };
     let best = { val, line: null as number | null, dist: SNAP_THRESHOLD };
     for (const o of others) {
       const d = Math.abs(val - o);
@@ -268,11 +263,16 @@ function PersonalizadorLaminasContent() {
       next.y = clamp(next.y, 0, 1 - next.h);
       setActiveGuides({ v: vGuides, h: hGuides });
     } else {
-      // Resize — para o logo mantém proporção
-      const keepRatio = drag.id === "logo" && logoNatural;
-      const ratioPx = keepRatio
+      // Resize — proporção:
+      //  - logo: mantém proporção real da imagem
+      //  - texto: mantém proporção da própria caixa (ao usar cantos), para escalar como elemento gráfico
+      const isCorner = drag.mode === "nw" || drag.mode === "ne" || drag.mode === "sw" || drag.mode === "se";
+      const keepRatio = (drag.id === "logo" && logoNatural) || (drag.id !== "logo" && isCorner);
+      const ratioPx = drag.id === "logo" && logoNatural
         ? (logoNatural!.w / logoNatural!.h) * (drag.stage.h / drag.stage.w)
-        : null;
+        : keepRatio
+          ? (item.w / item.h) // já está em fração da lâmina
+          : null;
 
       let nx = item.x, ny = item.y, nw = item.w, nh = item.h;
       if (drag.mode === "se") { nw = item.w + dx; nh = item.h + dy; }
@@ -421,9 +421,11 @@ function PersonalizadorLaminasContent() {
         ctx.textBaseline = "top";
 
         const brightness = sampleBrightness(ctx, x, y, w, h);
-        const fillColor = textColor === "light" ? "#FFFFFF"
-          : textColor === "dark" ? "#1a1a2e"
-          : brightness > 128 ? "#1a1a2e" : "#FFFFFF";
+        const isAuto = textColor === "auto";
+        const fillColor = isAuto
+          ? (brightness > 128 ? "#1a1a2e" : "#FFFFFF")
+          : textColor;
+        // Sombra com base na luminosidade do fundo (sempre contraste)
         const shadowColor = brightness > 128 ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.6)";
 
         ctx.shadowColor = shadowColor;
@@ -478,12 +480,11 @@ function PersonalizadorLaminasContent() {
           left: `${item.x * 100}%`,
           top: `${item.y * 100}%`,
           width: `${item.w * 100}%`,
-          height: id === "logo" ? `${item.h * 100}%` : "auto",
-          minHeight: id !== "logo" ? `${item.h * 100}%` : undefined,
+          height: `${item.h * 100}%`,
         }}
       >
         {content}
-        {isSelected && id === "logo" && (
+        {isSelected && (
           <>
             {(["nw", "ne", "sw", "se"] as const).map((corner) => (
               <div
@@ -523,7 +524,23 @@ function PersonalizadorLaminasContent() {
     );
   };
 
-  const textColorClass = textColor === "dark" ? "text-foreground" : "text-white";
+  // Estilo dinâmico para texto: cor "auto" -> branco no preview com sombra; HEX -> usa direto.
+  const textStyle = (item: LayoutItem): React.CSSProperties => ({
+    color: textColor === "auto" ? "#FFFFFF" : textColor,
+    textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+    // Tamanho da fonte escala com a altura da própria caixa (cqh) — assim texto cresce ao redimensionar.
+    fontSize: "85cqh",
+    lineHeight: 1,
+    containerType: "size",
+    textAlign: item.align ?? "left",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: item.align === "center" ? "center" : item.align === "right" ? "flex-end" : "flex-start",
+    width: "100%",
+    height: "100%",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+  });
 
   return (
     <DashboardLayout>
@@ -594,31 +611,19 @@ function PersonalizadorLaminasContent() {
 
                     {/* Nome agência */}
                     {agencyName && renderElementBox("agencyName", (
-                      <div
-                        className={`w-full h-full font-semibold leading-tight whitespace-nowrap overflow-hidden ${textColorClass}`}
-                        style={{
-                          textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-                          fontSize: "clamp(10px, 2.2cqw, 32px)",
-                          containerType: "inline-size",
-                          textAlign: layout.agencyName.align ?? "left",
-                        }}
-                      >
-                        {agencyName}
+                      <div className="font-semibold" style={textStyle(layout.agencyName)}>
+                        <span className="block w-full" style={{ textAlign: layout.agencyName.align ?? "left" }}>
+                          {agencyName}
+                        </span>
                       </div>
                     ))}
 
                     {/* Telefone */}
                     {phone && renderElementBox("phone", (
-                      <div
-                        className={`w-full h-full font-normal leading-tight whitespace-nowrap overflow-hidden ${textColorClass}`}
-                        style={{
-                          textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-                          fontSize: "clamp(9px, 2cqw, 28px)",
-                          containerType: "inline-size",
-                          textAlign: layout.phone.align ?? "left",
-                        }}
-                      >
-                        {phone}
+                      <div className="font-normal" style={textStyle(layout.phone)}>
+                        <span className="block w-full" style={{ textAlign: layout.phone.align ?? "left" }}>
+                          {phone}
+                        </span>
                       </div>
                     ))}
 
@@ -919,46 +924,47 @@ function PersonalizadorLaminasContent() {
                 {/* Text color */}
                 <div>
                   <Label className="text-xs text-muted-foreground">Cor do texto</Label>
-                  <div className="flex gap-1.5 mt-1.5">
-                    {([
-                      { value: "auto", label: "Auto", icon: Paintbrush },
-                      { value: "light", label: "Claro", icon: Sun },
-                      { value: "dark", label: "Escuro", icon: Moon },
-                    ] as const).map((opt) => (
+                  <div className="mt-1.5 space-y-2">
+                    <div className="flex items-center gap-2">
                       <Button
-                        key={opt.value}
-                        variant={textColor === opt.value ? "default" : "outline"}
+                        variant={textColor === "auto" ? "default" : "outline"}
                         size="sm"
-                        className="flex-1 text-xs h-8"
-                        onClick={() => setTextColor(opt.value)}
+                        className="text-xs h-9"
+                        onClick={() => setTextColor("auto")}
                       >
-                        <opt.icon className="h-3.5 w-3.5 mr-1" />
-                        {opt.label}
+                        <Sun className="h-3.5 w-3.5 mr-1" />
+                        Auto
                       </Button>
-                    ))}
+                      <div className="relative h-9 w-9 shrink-0">
+                        <input
+                          type="color"
+                          value={textColor.startsWith("#") ? textColor : "#ffffff"}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          className="absolute inset-0 h-full w-full cursor-pointer rounded-md border border-input bg-transparent p-0"
+                          title="Escolher cor"
+                        />
+                      </div>
+                      <Input
+                        value={textColor === "auto" ? "" : textColor}
+                        onChange={(e) => {
+                          const v = e.target.value.trim();
+                          if (!v) { setTextColor("auto"); return; }
+                          // Aceita HEX (#abc, #aabbcc) ou nomes CSS
+                          if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) || /^[a-zA-Z]+$/.test(v)) {
+                            setTextColor(v.startsWith("#") ? v.toLowerCase() : v);
+                          } else {
+                            setTextColor(v); // permite digitar parcial
+                          }
+                        }}
+                        placeholder="#ffffff"
+                        className="h-9 text-xs flex-1"
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Use "Auto" para contraste inteligente ou escolha uma cor personalizada.
+                    </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Editor options */}
-            <Card className="border-0 shadow-card">
-              <CardContent className="pt-5 pb-4 space-y-3">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Grid3X3 className="h-4 w-4 text-primary" />
-                  Editor
-                </h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-xs">Snap de alinhamento</Label>
-                    <p className="text-[11px] text-muted-foreground">Encaixe automático em bordas e centro</p>
-                  </div>
-                  <Switch checked={snapEnabled} onCheckedChange={setSnapEnabled} />
-                </div>
-                <Button variant="outline" size="sm" className="w-full" onClick={resetLayout}>
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                  Resetar posições
-                </Button>
               </CardContent>
             </Card>
 
