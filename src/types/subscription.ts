@@ -60,7 +60,7 @@ const ALL_FEATURES: Feature[] = [
 
 const START_FEATURES: Feature[] = [
   'news', 'tourism_map', 'agenda', 'trainings_recorded',
-  'materials', 'benefits', 'itinerary',
+  'materials', 'benefits', 'itinerary', 'content_creator',
 ];
 
 const PROFISSIONAL_FEATURES: Feature[] = [
