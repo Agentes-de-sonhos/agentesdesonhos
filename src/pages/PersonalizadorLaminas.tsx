@@ -384,6 +384,9 @@ function PersonalizadorLaminasContent() {
     if (!baseImage || !baseImageNatural) { toast.error("Selecione uma imagem base."); return; }
     setRendering(true);
     try {
+      // Garante que as fontes estejam carregadas antes de desenhar (evita fallback estranho)
+      try { await (document as any).fonts?.ready; } catch { /* noop */ }
+
       const canvas = canvasRef.current!;
       const ctx = canvas.getContext("2d")!;
       const W = baseImageNatural.w;
