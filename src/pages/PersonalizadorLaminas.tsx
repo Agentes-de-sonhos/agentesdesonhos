@@ -919,46 +919,47 @@ function PersonalizadorLaminasContent() {
                 {/* Text color */}
                 <div>
                   <Label className="text-xs text-muted-foreground">Cor do texto</Label>
-                  <div className="flex gap-1.5 mt-1.5">
-                    {([
-                      { value: "auto", label: "Auto", icon: Paintbrush },
-                      { value: "light", label: "Claro", icon: Sun },
-                      { value: "dark", label: "Escuro", icon: Moon },
-                    ] as const).map((opt) => (
+                  <div className="mt-1.5 space-y-2">
+                    <div className="flex items-center gap-2">
                       <Button
-                        key={opt.value}
-                        variant={textColor === opt.value ? "default" : "outline"}
+                        variant={textColor === "auto" ? "default" : "outline"}
                         size="sm"
-                        className="flex-1 text-xs h-8"
-                        onClick={() => setTextColor(opt.value)}
+                        className="text-xs h-9"
+                        onClick={() => setTextColor("auto")}
                       >
-                        <opt.icon className="h-3.5 w-3.5 mr-1" />
-                        {opt.label}
+                        <Sun className="h-3.5 w-3.5 mr-1" />
+                        Auto
                       </Button>
-                    ))}
+                      <div className="relative h-9 w-9 shrink-0">
+                        <input
+                          type="color"
+                          value={textColor.startsWith("#") ? textColor : "#ffffff"}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          className="absolute inset-0 h-full w-full cursor-pointer rounded-md border border-input bg-transparent p-0"
+                          title="Escolher cor"
+                        />
+                      </div>
+                      <Input
+                        value={textColor === "auto" ? "" : textColor}
+                        onChange={(e) => {
+                          const v = e.target.value.trim();
+                          if (!v) { setTextColor("auto"); return; }
+                          // Aceita HEX (#abc, #aabbcc) ou nomes CSS
+                          if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) || /^[a-zA-Z]+$/.test(v)) {
+                            setTextColor(v.startsWith("#") ? v.toLowerCase() : v);
+                          } else {
+                            setTextColor(v); // permite digitar parcial
+                          }
+                        }}
+                        placeholder="#ffffff"
+                        className="h-9 text-xs flex-1"
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Use "Auto" para contraste inteligente ou escolha uma cor personalizada.
+                    </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Editor options */}
-            <Card className="border-0 shadow-card">
-              <CardContent className="pt-5 pb-4 space-y-3">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Grid3X3 className="h-4 w-4 text-primary" />
-                  Editor
-                </h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-xs">Snap de alinhamento</Label>
-                    <p className="text-[11px] text-muted-foreground">Encaixe automático em bordas e centro</p>
-                  </div>
-                  <Switch checked={snapEnabled} onCheckedChange={setSnapEnabled} />
-                </div>
-                <Button variant="outline" size="sm" className="w-full" onClick={resetLayout}>
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-                  Resetar posições
-                </Button>
               </CardContent>
             </Card>
 
