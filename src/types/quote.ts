@@ -42,6 +42,7 @@ export type ServiceType =
   | 'attraction'
   | 'insurance'
   | 'cruise'
+  | 'circuit'
   | 'other';
 
 export interface FlightLegDetail {
@@ -144,6 +145,14 @@ export interface OtherServiceData {
   price: number;
 }
 
+export interface CircuitData {
+  circuit_name: string;
+  duration?: string;
+  itinerary: string;
+  notes?: string;
+  price: number;
+}
+
 export type ServiceData = 
   | FlightData 
   | HotelData 
@@ -152,6 +161,7 @@ export type ServiceData =
   | AttractionData 
   | InsuranceData 
   | CruiseData 
+  | CircuitData
   | OtherServiceData;
 
 export interface QuoteFormData {
@@ -175,6 +185,7 @@ export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   attraction: 'Ingressos/Atrações',
   insurance: 'Seguro Viagem',
   cruise: 'Cruzeiro',
+  circuit: 'Circuitos',
   other: 'Outros Serviços',
 };
 

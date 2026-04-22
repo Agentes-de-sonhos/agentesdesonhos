@@ -13,6 +13,7 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   attraction: "Ingressos/Atrações",
   insurance: "Seguro Viagem",
   cruise: "Cruzeiro",
+  circuit: "Circuitos",
   other: "Outros Serviços",
 };
 
@@ -24,6 +25,7 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
   attraction: "🎟️",
   insurance: "🛡️",
   cruise: "🚢",
+  circuit: "🗺️",
   other: "📦",
 };
 
@@ -115,6 +117,12 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Rota: ${data.route}`);
       details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
       details.push(`Cabine: ${data.cabin_type}`);
+      break;
+    case "circuit":
+      if (data.circuit_name) details.push(`Circuito: ${data.circuit_name}`);
+      if (data.duration) details.push(`Duração: ${data.duration}`);
+      if (data.itinerary) details.push(data.itinerary);
+      if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
     case "other":
       details.push(data.description);
