@@ -218,7 +218,7 @@ function PersonalizadorLaminasContent() {
   const onPointerDownItem = (
     e: React.PointerEvent,
     id: ElementId,
-    mode: "move" | "nw" | "ne" | "sw" | "se"
+    mode: "move" | "nw" | "ne" | "sw" | "se" | "e" | "w"
   ) => {
     e.stopPropagation();
     if (!stageRef.current) return;
