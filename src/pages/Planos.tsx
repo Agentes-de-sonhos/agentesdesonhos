@@ -50,6 +50,7 @@ const plans: PlanConfig[] = [
       "Agenda",
       "Mapa do Turismo",
       "Benefícios e descontos",
+      "Materiais de divulgação",
     ],
   },
   {
@@ -64,12 +65,9 @@ const plans: PlanConfig[] = [
     icon: Sparkles,
     features: [
       "Tudo do plano Start",
-      "CRM completo",
       "Orçamentos",
       "Carteira Digital",
       "Vitrine de Ofertas",
-      "Gestão Financeira",
-      "Materiais de divulgação",
       "IA limitada: até 5 usos/dia",
     ],
   },
@@ -86,6 +84,8 @@ const plans: PlanConfig[] = [
     icon: Crown,
     features: [
       "Tudo do plano Profissional",
+      "CRM completo",
+      "Gestão Financeira",
       "IA ilimitada",
       "Comunidade exclusiva",
       "Networking com agentes",
