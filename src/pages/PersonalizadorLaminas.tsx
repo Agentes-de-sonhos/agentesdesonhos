@@ -600,6 +600,7 @@ function PersonalizadorLaminasContent() {
                           textShadow: "0 1px 3px rgba(0,0,0,0.5)",
                           fontSize: "clamp(10px, 2.2cqw, 32px)",
                           containerType: "inline-size",
+                          textAlign: layout.agencyName.align ?? "left",
                         }}
                       >
                         {agencyName}
@@ -614,6 +615,7 @@ function PersonalizadorLaminasContent() {
                           textShadow: "0 1px 3px rgba(0,0,0,0.5)",
                           fontSize: "clamp(9px, 2cqw, 28px)",
                           containerType: "inline-size",
+                          textAlign: layout.phone.align ?? "left",
                         }}
                       >
                         {phone}
