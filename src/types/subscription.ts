@@ -64,8 +64,8 @@ const START_FEATURES: Feature[] = [
 ];
 
 const PROFISSIONAL_FEATURES: Feature[] = [
-  'news', 'tourism_map', 'materials', 'agenda', 'crm_basic',
-  'trainings_recorded', 'financial', 'business_card', 'flight_blocks',
+  'news', 'tourism_map', 'materials', 'agenda',
+  'trainings_recorded', 'business_card', 'flight_blocks',
   'qa_forum', 'qa_comment', 'itinerary', 'quote_generator',
   'ai_tools', 'trip_wallet', 'reminders', 'trainings_live',
   'trails_premium', 'certificates', 'ranking', 'content_creator',
@@ -160,9 +160,9 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   agenda: 'start',
   benefits: 'start',
   trainings_recorded: 'start',
-  crm_basic: 'profissional',
+  crm_basic: 'premium',
   business_card: 'profissional',
-  financial: 'profissional',
+  financial: 'premium',
   flight_blocks: 'profissional',
   qa_forum: 'profissional',
   qa_comment: 'profissional',
