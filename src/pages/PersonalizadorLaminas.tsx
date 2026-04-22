@@ -195,7 +195,7 @@ function PersonalizadorLaminasContent() {
   // -------- Drag & resize logic --------
   const dragRef = useRef<{
     id: ElementId;
-    mode: "move" | "nw" | "ne" | "sw" | "se";
+    mode: "move" | "nw" | "ne" | "sw" | "se" | "e" | "w";
     startPx: { x: number; y: number };
     startItem: LayoutItem;
     stage: { w: number; h: number };
@@ -279,12 +279,14 @@ function PersonalizadorLaminasContent() {
       if (drag.mode === "ne") { nw = item.w + dx; nh = item.h - dy; ny = item.y + dy; }
       if (drag.mode === "sw") { nw = item.w - dx; nh = item.h + dy; nx = item.x + dx; }
       if (drag.mode === "nw") { nw = item.w - dx; nh = item.h - dy; nx = item.x + dx; ny = item.y + dy; }
+      if (drag.mode === "e")  { nw = item.w + dx; }
+      if (drag.mode === "w")  { nw = item.w - dx; nx = item.x + dx; }
 
       // limites mínimos
       const minW = drag.id === "logo" ? 0.04 : 0.08;
       const minH = drag.id === "logo" ? 0.03 : 0.02;
       if (nw < minW) {
-        if (drag.mode === "sw" || drag.mode === "nw") nx = item.x + (item.w - minW);
+        if (drag.mode === "sw" || drag.mode === "nw" || drag.mode === "w") nx = item.x + (item.w - minW);
         nw = minW;
       }
       if (nh < minH) {
