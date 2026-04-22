@@ -475,12 +475,11 @@ function PersonalizadorLaminasContent() {
           left: `${item.x * 100}%`,
           top: `${item.y * 100}%`,
           width: `${item.w * 100}%`,
-          height: id === "logo" ? `${item.h * 100}%` : "auto",
-          minHeight: id !== "logo" ? `${item.h * 100}%` : undefined,
+          height: `${item.h * 100}%`,
         }}
       >
         {content}
-        {isSelected && id === "logo" && (
+        {isSelected && (
           <>
             {(["nw", "ne", "sw", "se"] as const).map((corner) => (
               <div
@@ -520,7 +519,23 @@ function PersonalizadorLaminasContent() {
     );
   };
 
-  const textColorClass = textColor === "dark" ? "text-foreground" : "text-white";
+  // Estilo dinâmico para texto: cor "auto" -> branco no preview com sombra; HEX -> usa direto.
+  const textStyle = (item: LayoutItem): React.CSSProperties => ({
+    color: textColor === "auto" ? "#FFFFFF" : textColor,
+    textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+    // Tamanho da fonte escala com a altura da própria caixa (cqh) — assim texto cresce ao redimensionar.
+    fontSize: "85cqh",
+    lineHeight: 1,
+    containerType: "size",
+    textAlign: item.align ?? "left",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: item.align === "center" ? "center" : item.align === "right" ? "flex-end" : "flex-start",
+    width: "100%",
+    height: "100%",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+  });
 
   return (
     <DashboardLayout>
