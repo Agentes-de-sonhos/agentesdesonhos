@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import { useQuery } from "@tanstack/react-query";
@@ -20,14 +20,14 @@ import { FormattedText } from "@/components/ui/formatted-text";
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", other: "Outros Serviços",
+  cruise: "Cruzeiro", circuit: "Circuitos", other: "Outros Serviços",
 };
 
 const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
   flight: <Plane className="h-5 w-5" />, hotel: <Hotel className="h-5 w-5" />,
   car_rental: <Car className="h-5 w-5" />, transfer: <ArrowRightLeft className="h-5 w-5" />,
   attraction: <Ticket className="h-5 w-5" />, insurance: <Shield className="h-5 w-5" />,
-  cruise: <Ship className="h-5 w-5" />, other: <Package className="h-5 w-5" />,
+  cruise: <Ship className="h-5 w-5" />, circuit: <Map className="h-5 w-5" />, other: <Package className="h-5 w-5" />,
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
@@ -38,6 +38,7 @@ const SERVICE_COLORS: Record<ServiceType, string> = {
   attraction: "from-pink-500/15 to-pink-600/5 text-pink-600",
   insurance: "from-cyan-500/15 to-cyan-600/5 text-cyan-600",
   cruise: "from-primary/10 to-primary/5 text-primary",
+  circuit: "from-indigo-500/15 to-indigo-600/5 text-indigo-600",
   other: "from-muted to-muted/50 text-muted-foreground",
 };
 

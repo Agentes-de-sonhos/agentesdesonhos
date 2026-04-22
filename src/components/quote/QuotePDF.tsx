@@ -13,6 +13,7 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   attraction: "Ingressos/Atrações",
   insurance: "Seguro Viagem",
   cruise: "Cruzeiro",
+  circuit: "Circuitos",
   other: "Outros Serviços",
 };
 
@@ -24,6 +25,7 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
   attraction: "🎟️",
   insurance: "🛡️",
   cruise: "🚢",
+  circuit: "🗺️",
   other: "📦",
 };
 

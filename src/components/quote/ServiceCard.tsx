@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,13 +13,13 @@ import type { QuoteService, ServiceType } from "@/types/quote";
 
 const SERVICE_ICONS: Record<ServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
-  attraction: Ticket, insurance: Shield, cruise: Ship, other: MoreHorizontal,
+  attraction: Ticket, insurance: Shield, cruise: Ship, circuit: Map, other: MoreHorizontal,
 };
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", other: "Outros Serviços",
+  cruise: "Cruzeiro", circuit: "Circuitos", other: "Outros Serviços",
 };
 import { formatQuoteCurrency, type QuoteCurrency } from "@/lib/quoteCurrency";
 
@@ -41,6 +41,7 @@ function getServiceDescription(service: QuoteService): string {
     case "attraction": return `${data.name} (${data.quantity || 1}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
     case "cruise": return `${data.ship_name} - ${data.route}`;
+    case "circuit": return data.circuit_name || "Circuito";
     case "other": return data.description;
     default: return "Serviço";
   }
