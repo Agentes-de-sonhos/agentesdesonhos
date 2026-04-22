@@ -8505,29 +8505,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      _internal_export_users_admin: {
-        Args: never
-        Returns: {
-          address_number: string
-          agency_name: string
-          city: string
-          cnpj: string
-          cpf: string
-          created_at: string
-          email: string
-          is_active: boolean
-          name: string
-          neighborhood: string
-          phone: string
-          plan: string
-          roles: string
-          state: string
-          street: string
-          stripe_customer_id: string
-          stripe_subscription_id: string
-          zip_code: string
-        }[]
-      }
       admin_export_users: {
         Args: never
         Returns: {
