@@ -414,29 +414,45 @@ function PersonalizadorLaminasContent() {
         const y = item.y * H;
         const w = item.w * W;
         const h = item.h * H;
-        const fontSize = Math.max(12, Math.round(h * 0.85));
-        ctx.font = `${weight} ${fontSize}px 'Inter', 'Segoe UI', sans-serif`;
+        const safeText = String(text ?? "").trim();
+        if (!safeText) return;
+
         const align: TextAlign = item.align ?? "left";
         ctx.textAlign = align === "center" ? "center" : align === "right" ? "right" : "left";
-        ctx.textBaseline = "top";
+        ctx.textBaseline = "middle";
 
+        // Calcula fontSize que cabe na altura E largura da caixa (idêntico ao preview com cqh)
+        // Começa em 85% da altura e reduz se ultrapassar a largura.
+        const fontFamily = `'Inter', 'Segoe UI', Arial, sans-serif`;
+        let fontSize = Math.max(8, Math.round(h * 0.85));
+        ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
+        let measured = ctx.measureText(safeText).width;
+        if (measured > w && measured > 0) {
+          fontSize = Math.max(8, Math.floor((fontSize * w) / measured));
+          ctx.font = `${weight} ${fontSize}px ${fontFamily}`;
+        }
+
+        // Cor: HEX/nome direto, ou auto via brilho do fundo
         const brightness = sampleBrightness(ctx, x, y, w, h);
-        const isAuto = textColor === "auto";
+        const isAuto = textColor === "auto" || !textColor;
         const fillColor = isAuto
           ? (brightness > 128 ? "#1a1a2e" : "#FFFFFF")
           : textColor;
-        // Sombra com base na luminosidade do fundo (sempre contraste)
-        const shadowColor = brightness > 128 ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.6)";
 
+        // Sombra proporcional ao tamanho da fonte (evita "borrão" em fontes muito grandes)
+        const shadowBlur = Math.min(8, Math.max(2, Math.round(fontSize * 0.06)));
+        const shadowColor = brightness > 128 ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.6)";
+        ctx.save();
         ctx.shadowColor = shadowColor;
-        ctx.shadowBlur = 4;
+        ctx.shadowBlur = shadowBlur;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         ctx.fillStyle = fillColor;
+
         const tx = align === "center" ? x + w / 2 : align === "right" ? x + w : x;
-        ctx.fillText(text, tx, y);
-        ctx.shadowColor = "transparent";
-        ctx.shadowBlur = 0;
+        const ty = y + h / 2; // centralizado verticalmente na caixa
+        ctx.fillText(safeText, tx, ty);
+        ctx.restore();
       };
 
       if (agencyName && layout.agencyName.visible) drawText(agencyName, layout.agencyName, 600);
