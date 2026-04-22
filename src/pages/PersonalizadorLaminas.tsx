@@ -37,6 +37,7 @@ import { useQuery } from "@tanstack/react-query";
 
 type TextColor = "auto" | "light" | "dark";
 type ElementId = "logo" | "agencyName" | "phone";
+type TextAlign = "left" | "center" | "right";
 
 // Posições e tamanhos são salvos em fração da lâmina (0..1) — independente de tela.
 interface LayoutItem {
@@ -45,6 +46,7 @@ interface LayoutItem {
   w: number; // 0..1 (largura relativa)
   h: number; // 0..1 (altura relativa)
   visible: boolean;
+  align?: TextAlign; // alinhamento interno do texto (apenas para textos)
 }
 
 interface Layout {
@@ -54,12 +56,13 @@ interface Layout {
 }
 
 const DEFAULT_LAYOUT: Layout = {
+  // Padrão: logo no topo-esquerda e nome/telefone logo abaixo do logo
   logo:        { x: 0.04, y: 0.04, w: 0.18, h: 0.10, visible: true },
-  agencyName:  { x: 0.04, y: 0.86, w: 0.50, h: 0.05, visible: true },
-  phone:       { x: 0.04, y: 0.92, w: 0.40, h: 0.04, visible: true },
+  agencyName:  { x: 0.04, y: 0.16, w: 0.40, h: 0.05, visible: true, align: "left" },
+  phone:       { x: 0.04, y: 0.22, w: 0.40, h: 0.04, visible: true, align: "left" },
 };
 
-const STORAGE_KEY = "lamina-customizer-layout-v2";
+const STORAGE_KEY = "lamina-customizer-layout-v3";
 
 const SNAP_THRESHOLD = 0.012; // 1.2% da lâmina
 const SNAP_LINES = [0, 0.25, 0.5, 0.75, 1];
