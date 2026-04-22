@@ -100,7 +100,6 @@ function PersonalizadorLaminasContent() {
   // Layout livre
   const [layout, setLayout] = useState<Layout>(loadStoredLayout);
   const [selected, setSelected] = useState<ElementId | null>(null);
-  const [snapEnabled, setSnapEnabled] = useState(true);
   const [activeGuides, setActiveGuides] = useState<{ v: number[]; h: number[] }>({ v: [], h: [] });
 
   // UI / loading
