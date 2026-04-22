@@ -32,7 +32,6 @@ import { fetchAgentProfile } from "@/hooks/useAgentProfile";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
-type TextColor = "auto" | "light" | "dark";
 type ElementId = "logo" | "agencyName" | "phone";
 type TextAlign = "left" | "center" | "right";
 
@@ -95,7 +94,8 @@ function PersonalizadorLaminasContent() {
   const [logoNatural, setLogoNatural] = useState<{ w: number; h: number } | null>(null);
   const [agencyName, setAgencyName] = useState("");
   const [phone, setPhone] = useState("");
-  const [textColor, setTextColor] = useState<TextColor>("auto");
+  // "auto" = contraste automático, ou um HEX (ex: "#ff0000")
+  const [textColor, setTextColor] = useState<string>("auto");
 
   // Layout livre
   const [layout, setLayout] = useState<Layout>(loadStoredLayout);
