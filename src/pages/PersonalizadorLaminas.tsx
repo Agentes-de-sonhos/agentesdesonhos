@@ -606,31 +606,19 @@ function PersonalizadorLaminasContent() {
 
                     {/* Nome agência */}
                     {agencyName && renderElementBox("agencyName", (
-                      <div
-                        className={`w-full h-full font-semibold leading-tight whitespace-nowrap overflow-hidden ${textColorClass}`}
-                        style={{
-                          textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-                          fontSize: "clamp(10px, 2.2cqw, 32px)",
-                          containerType: "inline-size",
-                          textAlign: layout.agencyName.align ?? "left",
-                        }}
-                      >
-                        {agencyName}
+                      <div className="font-semibold" style={textStyle(layout.agencyName)}>
+                        <span className="block w-full" style={{ textAlign: layout.agencyName.align ?? "left" }}>
+                          {agencyName}
+                        </span>
                       </div>
                     ))}
 
                     {/* Telefone */}
                     {phone && renderElementBox("phone", (
-                      <div
-                        className={`w-full h-full font-normal leading-tight whitespace-nowrap overflow-hidden ${textColorClass}`}
-                        style={{
-                          textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-                          fontSize: "clamp(9px, 2cqw, 28px)",
-                          containerType: "inline-size",
-                          textAlign: layout.phone.align ?? "left",
-                        }}
-                      >
-                        {phone}
+                      <div className="font-normal" style={textStyle(layout.phone)}>
+                        <span className="block w-full" style={{ textAlign: layout.phone.align ?? "left" }}>
+                          {phone}
+                        </span>
                       </div>
                     ))}
 
