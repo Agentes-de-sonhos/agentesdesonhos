@@ -1,55 +1,51 @@
 
 
-# Plano: Destinos dinâmicos na Academy
+## Exportar planilha de usuários da plataforma
 
-## Problema
-Os destinos das trilhas são uma lista fixa no código (`POPULAR_DESTINATIONS`). Não há como criar destinos novos.
+Vou gerar uma planilha Excel (`.xlsx`) com todos os 142 usuários cadastrados na plataforma, contendo os dados principais para você usar no controle financeiro.
 
-## Solução
-Criar uma tabela `academy_destinations` no banco e substituir o Select estático por um que carrega do banco + permite criar novos destinos inline.
+### Colunas da planilha (aba "Usuários")
 
-## Etapas
+| # | Coluna | Origem |
+|---|--------|--------|
+| 1 | Nome | profiles.name |
+| 2 | E-mail | auth.users.email |
+| 3 | Telefone | profiles.phone |
+| 4 | CPF | profiles.cpf |
+| 5 | Agência | profiles.agency_name |
+| 6 | CNPJ | profiles.cnpj |
+| 7 | Endereço completo | rua + número + bairro + cidade + UF + CEP |
+| 8 | Cidade | profiles.city |
+| 9 | UF | profiles.state |
+| 10 | CEP | profiles.zip_code |
+| 11 | Plano atual | subscriptions.plan (start / profissional / premium / fundador) |
+| 12 | Assinatura ativa | Sim / Não |
+| 13 | Stripe Customer ID | subscriptions.stripe_customer_id |
+| 14 | Stripe Subscription ID | subscriptions.stripe_subscription_id |
+| 15 | Papel | user_roles (admin / agente / fornecedor) |
+| 16 | Data de cadastro | profiles.created_at (formato dd/mm/aaaa hh:mm, fuso BRT) |
 
-### 1. Migration — Criar tabela `academy_destinations`
-```sql
-CREATE TABLE public.academy_destinations (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text NOT NULL UNIQUE,
-  created_at timestamptz DEFAULT now()
-);
+### Aba adicional "Resumo"
 
-ALTER TABLE public.academy_destinations ENABLE ROW LEVEL SECURITY;
+- Total de usuários
+- Total de assinaturas ativas
+- Distribuição por plano
+- Distribuição por papel
 
--- Admins podem gerenciar
-CREATE POLICY "Admins full access" ON public.academy_destinations
-  FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+### Formatação
 
--- Todos autenticados podem ler
-CREATE POLICY "Authenticated read" ON public.academy_destinations
-  FOR SELECT TO authenticated USING (true);
+- Cabeçalho em azul escuro com fonte branca
+- Linhas com filtro automático e congelamento de cabeçalho
+- Larguras de coluna ajustadas para leitura confortável
+- Quebra de linha em endereços longos
 
--- Seed com os destinos populares existentes
-INSERT INTO public.academy_destinations (name) VALUES
-  ('Orlando'),('Nova York'),('Miami'),('Paris'),('Londres'),('Roma'),
-  ('Caribe'),('Cancún'),('Punta Cana'),('Buenos Aires'),('Santiago'),
-  ('Dubai'),('Europa'),('Ásia'),('Disney'),('Cruzeiros'),('Destinos Premium');
-```
+### Como vou obter os dados
 
-### 2. Atualizar `AdminAcademyManager.tsx`
-- Carregar destinos do banco via `useQuery` na tabela `academy_destinations`.
-- Substituir o `<Select>` de destinos por um componente com:
-  - Lista dos destinos existentes (do banco).
-  - Campo de input + botão "Criar destino" no final da lista.
-  - Ao criar, insere no banco e seleciona automaticamente.
-- Remover dependência da constante `POPULAR_DESTINATIONS` neste componente.
+O e-mail está no schema protegido `auth.users` e exige uma função segura para ser lido. Vou criar uma função `admin_export_users()` (SECURITY DEFINER, restrita a administradores) que junta `profiles` + `auth.users` + `subscriptions` + `user_roles` em um único retorno. Depois, executo uma chamada para gerar o XLSX.
 
-### 3. Manter `POPULAR_DESTINATIONS` no types
-A constante pode continuar existindo para outros usos no sistema, mas o formulário de trilhas passará a usar exclusivamente o banco.
+Essa função fica disponível também para reutilização futura (ex.: re-exportar a planilha quando precisar atualizar o controle financeiro).
 
-## Detalhes técnicos
-- Tabela simples: `id`, `name` (unique), `created_at`
-- RLS: admin full access, authenticated read
-- UI: Combobox ou Select com opção "Adicionar novo destino" que abre um pequeno input inline
+### Entrega
+
+Um arquivo único: `usuarios_plataforma.xlsx` disponível para download imediato.
 
