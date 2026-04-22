@@ -90,6 +90,8 @@ const plans: PlanConfig[] = [
       "Gestão Financeira",
       "IA ilimitada",
       "Comunidade exclusiva",
+      "Eventos exclusivos",
+      "Oportunidade em Fam Trips",
       "Acesso completo sem limitações",
     ],
   },
