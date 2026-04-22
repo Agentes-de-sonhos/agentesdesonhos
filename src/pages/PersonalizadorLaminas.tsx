@@ -637,7 +637,7 @@ function PersonalizadorLaminasContent() {
               </div>
 
               {/* Toolbar de seleção */}
-              {baseImage && selected && (
+              {false && baseImage && selected && (
                 <div className="mt-3 rounded-xl border bg-background p-2 flex flex-wrap items-center gap-2">
                   <Badge variant="secondary" className="text-xs">{elementLabel[selected]}</Badge>
                   <Separator orientation="vertical" className="h-6" />
