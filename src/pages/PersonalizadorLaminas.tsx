@@ -697,6 +697,30 @@ function PersonalizadorLaminasContent() {
                   <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={centerSelected}>
                     Centralizar
                   </Button>
+                  {selected !== "logo" && (
+                    <>
+                      <Separator orientation="vertical" className="h-6" />
+                      <span className="text-[11px] text-muted-foreground">Texto:</span>
+                      <div className="flex gap-1">
+                        {(["left", "center", "right"] as const).map((a) => {
+                          const Icon = a === "left" ? AlignLeft : a === "center" ? AlignCenter : AlignRight;
+                          const active = (layout[selected].align ?? "left") === a;
+                          return (
+                            <Button
+                              key={a}
+                              size="icon"
+                              variant={active ? "default" : "ghost"}
+                              className="h-8 w-8"
+                              onClick={() => updateItem(selected, { align: a })}
+                              title={`Alinhar texto à ${a === "left" ? "esquerda" : a === "center" ? "centro" : "direita"}`}
+                            >
+                              <Icon className="h-4 w-4" />
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                   <Button
                     size="sm"
                     variant="ghost"
