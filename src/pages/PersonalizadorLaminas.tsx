@@ -7,13 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Upload,
   Download,
@@ -25,6 +19,15 @@ import {
   Sun,
   Moon,
   Paintbrush,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  AlignVerticalJustifyStart,
+  AlignVerticalJustifyCenter,
+  AlignVerticalJustifyEnd,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,38 +35,86 @@ import { fetchAgentProfile } from "@/hooks/useAgentProfile";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
-type LogoSize = "small" | "medium" | "large";
 type TextColor = "auto" | "light" | "dark";
+type ElementId = "logo" | "agencyName" | "phone";
 
-const LOGO_SIZES: Record<LogoSize, { label: string; factor: number }> = {
-  small: { label: "Pequeno", factor: 0.10 },
-  medium: { label: "Médio", factor: 0.16 },
-  large: { label: "Grande", factor: 0.22 },
+// Posições e tamanhos são salvos em fração da lâmina (0..1) — independente de tela.
+interface LayoutItem {
+  x: number; // 0..1 (canto superior-esquerdo)
+  y: number; // 0..1
+  w: number; // 0..1 (largura relativa)
+  h: number; // 0..1 (altura relativa)
+  visible: boolean;
+}
+
+interface Layout {
+  logo: LayoutItem;
+  agencyName: LayoutItem;
+  phone: LayoutItem;
+}
+
+const DEFAULT_LAYOUT: Layout = {
+  logo:        { x: 0.04, y: 0.04, w: 0.18, h: 0.10, visible: true },
+  agencyName:  { x: 0.04, y: 0.86, w: 0.50, h: 0.05, visible: true },
+  phone:       { x: 0.04, y: 0.92, w: 0.40, h: 0.04, visible: true },
 };
 
-const GRID_COLS = 3;
-const GRID_ROWS = 3;
+const STORAGE_KEY = "lamina-customizer-layout-v2";
+
+const SNAP_THRESHOLD = 0.012; // 1.2% da lâmina
+const SNAP_LINES = [0, 0.25, 0.5, 0.75, 1];
+
+function clamp(v: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, v));
+}
+
+function loadStoredLayout(): Layout {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_LAYOUT;
+    const parsed = JSON.parse(raw);
+    return {
+      logo: { ...DEFAULT_LAYOUT.logo, ...parsed.logo },
+      agencyName: { ...DEFAULT_LAYOUT.agencyName, ...parsed.agencyName },
+      phone: { ...DEFAULT_LAYOUT.phone, ...parsed.phone },
+    };
+  } catch {
+    return DEFAULT_LAYOUT;
+  }
+}
 
 function PersonalizadorLaminasContent() {
   const { user } = useAuth();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
 
-  // State
+  // Conteúdo
   const [baseImage, setBaseImage] = useState<string | null>(null);
   const [baseImageNatural, setBaseImageNatural] = useState<{ w: number; h: number } | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoNatural, setLogoNatural] = useState<{ w: number; h: number } | null>(null);
   const [agencyName, setAgencyName] = useState("");
   const [phone, setPhone] = useState("");
-  const [gridPos, setGridPos] = useState<number>(8); // bottom-right default
-  const [logoSize, setLogoSize] = useState<LogoSize>("medium");
   const [textColor, setTextColor] = useState<TextColor>("auto");
+
+  // Layout livre
+  const [layout, setLayout] = useState<Layout>(loadStoredLayout);
+  const [selected, setSelected] = useState<ElementId | null>(null);
+  const [snapEnabled, setSnapEnabled] = useState(true);
+  const [activeGuides, setActiveGuides] = useState<{ v: number[]; h: number[] }>({ v: [], h: [] });
+
+  // UI / loading
   const [rendering, setRendering] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
 
-  // Pre-fill from profile
+  // Persistência local
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layout)); } catch { /* noop */ }
+  }, [layout]);
+
+  // Pré-preenche dados do perfil
   useEffect(() => {
     if (!user) return;
     fetchAgentProfile(user.id, supabase).then((p) => {
@@ -75,7 +126,7 @@ function PersonalizadorLaminasContent() {
     });
   }, [user]);
 
-  // Fetch materials for gallery
+  // Galeria de materiais
   const { data: galleryImages, isLoading: galleryLoading } = useQuery({
     queryKey: ["materials-gallery-picker"],
     enabled: showGallery,
@@ -92,7 +143,7 @@ function PersonalizadorLaminasContent() {
     },
   });
 
-  // Load base image dimensions
+  // Carrega dimensões da imagem base
   useEffect(() => {
     if (!baseImage) { setBaseImageNatural(null); return; }
     const img = new Image();
@@ -101,12 +152,20 @@ function PersonalizadorLaminasContent() {
     img.src = baseImage;
   }, [baseImage]);
 
+  // Carrega dimensões do logo (para manter proporção)
+  useEffect(() => {
+    if (!logoUrl) { setLogoNatural(null); return; }
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => setLogoNatural({ w: img.naturalWidth, h: img.naturalHeight });
+    img.src = logoUrl;
+  }, [logoUrl]);
+
   const handleBaseUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Selecione uma imagem válida."); return; }
     if (file.size > 15 * 1024 * 1024) { toast.error("Imagem muito grande (máx. 15MB)."); return; }
     setUploading(true);
-    const url = URL.createObjectURL(file);
-    setBaseImage(url);
+    setBaseImage(URL.createObjectURL(file));
     setUploading(false);
   };
 
@@ -115,7 +174,6 @@ function PersonalizadorLaminasContent() {
     if (file.size > 5 * 1024 * 1024) { toast.error("Logo muito grande (máx. 5MB)."); return; }
     setUploadingLogo(true);
     try {
-      // Upload to storage for reuse
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
       const path = `logos/${user?.id}/${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
@@ -123,8 +181,7 @@ function PersonalizadorLaminasContent() {
       const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
       setLogoUrl(urlData.publicUrl);
       toast.success("Logo salvo para reutilização!");
-    } catch (e: any) {
-      // Fallback to local blob
+    } catch {
       setLogoUrl(URL.createObjectURL(file));
       toast.info("Logo carregado localmente.");
     } finally {
@@ -132,28 +189,195 @@ function PersonalizadorLaminasContent() {
     }
   };
 
-  // Determine text color based on grid position luminance
-  const getTextFillColor = useCallback((): string => {
-    if (textColor === "light") return "#FFFFFF";
-    if (textColor === "dark") return "#1a1a2e";
-    // Auto: sample the canvas area where text will go
-    return "#FFFFFF"; // default for auto, refined in render
-  }, [textColor]);
+  // -------- Drag & resize logic --------
+  const dragRef = useRef<{
+    id: ElementId;
+    mode: "move" | "nw" | "ne" | "sw" | "se";
+    startPx: { x: number; y: number };
+    startItem: LayoutItem;
+    stage: { w: number; h: number };
+  } | null>(null);
 
-  const sampleBrightness = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number): number => {
-    const imageData = ctx.getImageData(Math.max(0, x), Math.max(0, y), Math.min(w, 100), Math.min(h, 50));
-    const d = imageData.data;
-    let sum = 0;
-    for (let i = 0; i < d.length; i += 4) {
-      sum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+  const updateItem = useCallback((id: ElementId, patch: Partial<LayoutItem>) => {
+    setLayout((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
+  }, []);
+
+  const applySnap = (val: number, others: number[]): { val: number; line: number | null } => {
+    if (!snapEnabled) return { val, line: null };
+    let best = { val, line: null as number | null, dist: SNAP_THRESHOLD };
+    for (const o of others) {
+      const d = Math.abs(val - o);
+      if (d < best.dist) best = { val: o, line: o, dist: d };
     }
-    return sum / (d.length / 4);
+    return { val: best.val, line: best.line };
+  };
+
+  const onPointerDownItem = (
+    e: React.PointerEvent,
+    id: ElementId,
+    mode: "move" | "nw" | "ne" | "sw" | "se"
+  ) => {
+    e.stopPropagation();
+    if (!stageRef.current) return;
+    const rect = stageRef.current.getBoundingClientRect();
+    setSelected(id);
+    dragRef.current = {
+      id,
+      mode,
+      startPx: { x: e.clientX, y: e.clientY },
+      startItem: { ...layout[id] },
+      stage: { w: rect.width, h: rect.height },
+    };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    const dx = (e.clientX - drag.startPx.x) / drag.stage.w;
+    const dy = (e.clientY - drag.startPx.y) / drag.stage.h;
+    const item = drag.startItem;
+    let next: LayoutItem = { ...item };
+
+    if (drag.mode === "move") {
+      next.x = clamp(item.x + dx, 0, 1 - item.w);
+      next.y = clamp(item.y + dy, 0, 1 - item.h);
+      // Snap (left, center, right) e (top, middle, bottom)
+      const cx = next.x + next.w / 2;
+      const cy = next.y + next.h / 2;
+      const sxLeft = applySnap(next.x, SNAP_LINES);
+      const sxCenter = applySnap(cx, SNAP_LINES);
+      const sxRight = applySnap(next.x + next.w, SNAP_LINES);
+      const syTop = applySnap(next.y, SNAP_LINES);
+      const syMid = applySnap(cy, SNAP_LINES);
+      const syBot = applySnap(next.y + next.h, SNAP_LINES);
+
+      const vGuides: number[] = [];
+      const hGuides: number[] = [];
+      if (sxCenter.line !== null) { next.x = sxCenter.val - next.w / 2; vGuides.push(sxCenter.line); }
+      else if (sxLeft.line !== null) { next.x = sxLeft.val; vGuides.push(sxLeft.line); }
+      else if (sxRight.line !== null) { next.x = sxRight.val - next.w; vGuides.push(sxRight.line); }
+      if (syMid.line !== null) { next.y = syMid.val - next.h / 2; hGuides.push(syMid.line); }
+      else if (syTop.line !== null) { next.y = syTop.val; hGuides.push(syTop.line); }
+      else if (syBot.line !== null) { next.y = syBot.val - next.h; hGuides.push(syBot.line); }
+
+      next.x = clamp(next.x, 0, 1 - next.w);
+      next.y = clamp(next.y, 0, 1 - next.h);
+      setActiveGuides({ v: vGuides, h: hGuides });
+    } else {
+      // Resize — para o logo mantém proporção
+      const keepRatio = drag.id === "logo" && logoNatural;
+      const ratioPx = keepRatio
+        ? (logoNatural!.w / logoNatural!.h) * (drag.stage.h / drag.stage.w)
+        : null;
+
+      let nx = item.x, ny = item.y, nw = item.w, nh = item.h;
+      if (drag.mode === "se") { nw = item.w + dx; nh = item.h + dy; }
+      if (drag.mode === "ne") { nw = item.w + dx; nh = item.h - dy; ny = item.y + dy; }
+      if (drag.mode === "sw") { nw = item.w - dx; nh = item.h + dy; nx = item.x + dx; }
+      if (drag.mode === "nw") { nw = item.w - dx; nh = item.h - dy; nx = item.x + dx; ny = item.y + dy; }
+
+      // limites mínimos
+      const minW = drag.id === "logo" ? 0.04 : 0.08;
+      const minH = drag.id === "logo" ? 0.03 : 0.02;
+      if (nw < minW) {
+        if (drag.mode === "sw" || drag.mode === "nw") nx = item.x + (item.w - minW);
+        nw = minW;
+      }
+      if (nh < minH) {
+        if (drag.mode === "ne" || drag.mode === "nw") ny = item.y + (item.h - minH);
+        nh = minH;
+      }
+
+      if (ratioPx) {
+        // Ajusta altura para manter proporção do logo
+        nh = nw / ratioPx;
+        if (drag.mode === "ne" || drag.mode === "nw") {
+          ny = item.y + item.h - nh;
+        }
+      }
+
+      // Mantém dentro da lâmina
+      if (nx < 0) { nw += nx; nx = 0; }
+      if (ny < 0) { nh += ny; ny = 0; }
+      if (nx + nw > 1) nw = 1 - nx;
+      if (ny + nh > 1) nh = 1 - ny;
+
+      next = { ...item, x: nx, y: ny, w: nw, h: nh };
+      setActiveGuides({ v: [], h: [] });
+    }
+
+    updateItem(drag.id, next);
+  };
+
+  const onPointerUp = () => {
+    dragRef.current = null;
+    setActiveGuides({ v: [], h: [] });
+  };
+
+  // Atalhos: alinhar
+  const alignSelected = (
+    axis: "h" | "v",
+    pos: "start" | "center" | "end"
+  ) => {
+    if (!selected) return;
+    const it = layout[selected];
+    let next = { ...it };
+    if (axis === "h") {
+      if (pos === "start") next.x = 0.04;
+      if (pos === "center") next.x = 0.5 - it.w / 2;
+      if (pos === "end") next.x = 1 - 0.04 - it.w;
+    } else {
+      if (pos === "start") next.y = 0.04;
+      if (pos === "center") next.y = 0.5 - it.h / 2;
+      if (pos === "end") next.y = 1 - 0.04 - it.h;
+    }
+    updateItem(selected, next);
+  };
+
+  const centerSelected = () => {
+    if (!selected) return;
+    const it = layout[selected];
+    updateItem(selected, { x: 0.5 - it.w / 2, y: 0.5 - it.h / 2 });
+  };
+
+  const resetLayout = () => {
+    setLayout(DEFAULT_LAYOUT);
+    setSelected(null);
+    toast.success("Layout resetado.");
+  };
+
+  // -------- Render canvas --------
+  const loadImage = (src: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+
+  const sampleBrightness = (
+    ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number
+  ): number => {
+    try {
+      const sx = clamp(Math.round(x), 0, ctx.canvas.width - 1);
+      const sy = clamp(Math.round(y), 0, ctx.canvas.height - 1);
+      const sw = clamp(Math.round(w), 1, ctx.canvas.width - sx);
+      const sh = clamp(Math.round(h), 1, ctx.canvas.height - sy);
+      const imageData = ctx.getImageData(sx, sy, sw, sh);
+      const d = imageData.data;
+      let sum = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        sum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      }
+      return sum / (d.length / 4);
+    } catch { return 128; }
   };
 
   const renderAndDownload = async () => {
     if (!baseImage || !baseImageNatural) { toast.error("Selecione uma imagem base."); return; }
     setRendering(true);
-
     try {
       const canvas = canvasRef.current!;
       const ctx = canvas.getContext("2d")!;
@@ -162,88 +386,53 @@ function PersonalizadorLaminasContent() {
       canvas.width = W;
       canvas.height = H;
 
-      // Draw base image
       const baseImg = await loadImage(baseImage);
       ctx.drawImage(baseImg, 0, 0, W, H);
 
-      // Grid cell
-      const col = gridPos % GRID_COLS;
-      const row = Math.floor(gridPos / GRID_COLS);
-      const cellW = W / GRID_COLS;
-      const cellH = H / GRID_ROWS;
-      const cellX = col * cellW;
-      const cellY = row * cellH;
-      const padding = Math.min(cellW, cellH) * 0.08;
-
-      // Auto text color
-      const brightness = sampleBrightness(ctx, cellX, cellY, cellW, cellH);
-      const fillColor = textColor === "light" ? "#FFFFFF"
-        : textColor === "dark" ? "#1a1a2e"
-        : brightness > 128 ? "#1a1a2e" : "#FFFFFF";
-      const shadowColor = brightness > 128 ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.6)";
-
-      // Determine content height and layout
-      let currentY = cellY + padding;
-      const contentX = col === 2 ? cellX + cellW - padding : col === 1 ? cellX + cellW / 2 : cellX + padding;
-      const textAlign: CanvasTextAlign = col === 2 ? "right" : col === 1 ? "center" : "left";
-
-      // Draw logo
-      if (logoUrl) {
+      // Desenha logo
+      if (logoUrl && layout.logo.visible) {
         try {
           const logoImg = await loadImage(logoUrl);
-          const sizeFactor = LOGO_SIZES[logoSize].factor;
-          const maxLogoW = W * sizeFactor;
-          const scale = maxLogoW / logoImg.naturalWidth;
-          const lw = logoImg.naturalWidth * scale;
-          const lh = logoImg.naturalHeight * scale;
-          let lx = contentX;
-          if (textAlign === "right") lx = contentX - lw;
-          else if (textAlign === "center") lx = contentX - lw / 2;
-
-          // Vertical alignment for bottom row
-          if (row === 2) {
-            currentY = cellY + cellH - padding - lh - (agencyName || phone ? 50 * (H / 1000) : 0);
-          }
-
-          ctx.drawImage(logoImg, lx, currentY, lw, lh);
-          currentY += lh + padding * 0.5;
-        } catch {
-          // Logo load failed, skip
-        }
+          const lx = layout.logo.x * W;
+          const ly = layout.logo.y * H;
+          const lw = layout.logo.w * W;
+          // Mantém proporção real do logo
+          const ratio = logoImg.naturalWidth / logoImg.naturalHeight;
+          const lh = lw / ratio;
+          ctx.drawImage(logoImg, lx, ly, lw, lh);
+        } catch { /* ignore */ }
       }
 
-      // Draw text
-      const hasText = agencyName || phone;
-      if (hasText) {
-        const fontSize = Math.max(14, Math.round(H * 0.022));
-        ctx.font = `600 ${fontSize}px 'Inter', 'Segoe UI', sans-serif`;
-        ctx.textAlign = textAlign;
+      // Helper de cor automática
+      const drawText = (text: string, item: LayoutItem, weight: 400 | 600) => {
+        const x = item.x * W;
+        const y = item.y * H;
+        const w = item.w * W;
+        const h = item.h * H;
+        const fontSize = Math.max(12, Math.round(h * 0.85));
+        ctx.font = `${weight} ${fontSize}px 'Inter', 'Segoe UI', sans-serif`;
+        ctx.textAlign = "left";
         ctx.textBaseline = "top";
 
-        // Shadow for legibility
+        const brightness = sampleBrightness(ctx, x, y, w, h);
+        const fillColor = textColor === "light" ? "#FFFFFF"
+          : textColor === "dark" ? "#1a1a2e"
+          : brightness > 128 ? "#1a1a2e" : "#FFFFFF";
+        const shadowColor = brightness > 128 ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.6)";
+
         ctx.shadowColor = shadowColor;
         ctx.shadowBlur = 4;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         ctx.fillStyle = fillColor;
-
-        if (row === 2 && !logoUrl) {
-          currentY = cellY + cellH - padding - fontSize * (agencyName && phone ? 2.8 : 1.4);
-        }
-
-        if (agencyName) {
-          ctx.fillText(agencyName, contentX, currentY);
-          currentY += fontSize * 1.4;
-        }
-        if (phone) {
-          ctx.font = `400 ${Math.round(fontSize * 0.9)}px 'Inter', 'Segoe UI', sans-serif`;
-          ctx.fillText(phone, contentX, currentY);
-        }
+        ctx.fillText(text, x, y);
         ctx.shadowColor = "transparent";
         ctx.shadowBlur = 0;
-      }
+      };
 
-      // Download
+      if (agencyName && layout.agencyName.visible) drawText(agencyName, layout.agencyName, 600);
+      if (phone && layout.phone.visible) drawText(phone, layout.phone, 400);
+
       canvas.toBlob((blob) => {
         if (!blob) { toast.error("Erro ao gerar imagem."); setRendering(false); return; }
         const url = URL.createObjectURL(blob);
@@ -261,18 +450,58 @@ function PersonalizadorLaminasContent() {
     }
   };
 
-  const loadImage = (src: string): Promise<HTMLImageElement> =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = src;
-    });
+  // -------- UI helpers --------
+  const elementLabel: Record<ElementId, string> = {
+    logo: "Logotipo",
+    agencyName: "Nome da agência",
+    phone: "Telefone / WhatsApp",
+  };
+
+  const renderElementBox = (id: ElementId, content: React.ReactNode) => {
+    const item = layout[id];
+    if (!item.visible) return null;
+    const isSelected = selected === id;
+    return (
+      <div
+        key={id}
+        onPointerDown={(e) => onPointerDownItem(e, id, "move")}
+        className={`absolute cursor-move select-none touch-none ${isSelected ? "ring-2 ring-primary z-20" : "z-10 hover:ring-2 hover:ring-primary/40"}`}
+        style={{
+          left: `${item.x * 100}%`,
+          top: `${item.y * 100}%`,
+          width: `${item.w * 100}%`,
+          height: id === "logo" ? `${item.h * 100}%` : "auto",
+          minHeight: id !== "logo" ? `${item.h * 100}%` : undefined,
+        }}
+      >
+        {content}
+        {isSelected && id === "logo" && (
+          <>
+            {(["nw", "ne", "sw", "se"] as const).map((corner) => (
+              <div
+                key={corner}
+                onPointerDown={(e) => onPointerDownItem(e, id, corner)}
+                className="absolute h-3 w-3 rounded-sm bg-primary border-2 border-background z-30"
+                style={{
+                  cursor: corner === "nw" || corner === "se" ? "nwse-resize" : "nesw-resize",
+                  top: corner.startsWith("n") ? -6 : "auto",
+                  bottom: corner.startsWith("s") ? -6 : "auto",
+                  left: corner.endsWith("w") ? -6 : "auto",
+                  right: corner.endsWith("e") ? -6 : "auto",
+                }}
+              />
+            ))}
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const textColorClass = textColor === "dark" ? "text-foreground" : "text-white";
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
+      <div className="space-y-6 animate-fade-in max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 ring-1 ring-primary/20">
@@ -283,7 +512,7 @@ function PersonalizadorLaminasContent() {
               Personalizador de Lâminas
             </h1>
             <p className="text-sm text-muted-foreground">
-              Adicione seu logo e contato em lâminas de divulgação
+              Arraste e redimensione livremente o logotipo, nome e telefone na lâmina
             </p>
           </div>
         </div>
@@ -292,65 +521,83 @@ function PersonalizadorLaminasContent() {
           {/* Preview Area */}
           <Card className="border-0 shadow-card overflow-hidden">
             <CardContent className="p-4">
-              <div ref={previewRef} className="relative rounded-xl overflow-hidden bg-muted/50 min-h-[300px] flex items-center justify-center">
+              <div
+                ref={stageRef}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerLeave={onPointerUp}
+                onPointerDown={() => setSelected(null)}
+                className="relative rounded-xl overflow-hidden bg-muted/50 min-h-[300px] flex items-center justify-center"
+              >
                 {baseImage ? (
                   <>
                     <img
                       src={baseImage}
                       alt="Lâmina selecionada"
-                      className="w-full h-auto block"
+                      className="w-full h-auto block pointer-events-none"
                       crossOrigin="anonymous"
+                      draggable={false}
                     />
-                    {/* Grid overlay */}
-                    <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
-                      {Array.from({ length: GRID_COLS * GRID_ROWS }).map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setGridPos(i)}
-                          className={`border border-white/20 transition-all duration-150 hover:bg-white/15 ${
-                            gridPos === i
-                              ? "bg-primary/25 ring-2 ring-primary/60"
-                              : ""
-                          }`}
-                          title={`Posição ${i + 1}`}
-                        />
-                      ))}
-                    </div>
-                    {/* Position indicator */}
-                    <div
-                      className="absolute pointer-events-none flex flex-col gap-1 max-w-[33%] p-2"
-                      style={{
-                        left: `${(gridPos % 3) * 33.33}%`,
-                        top: `${Math.floor(gridPos / 3) * 33.33}%`,
-                        textAlign: gridPos % 3 === 2 ? "right" : gridPos % 3 === 1 ? "center" : "left",
-                        alignItems: gridPos % 3 === 2 ? "flex-end" : gridPos % 3 === 1 ? "center" : "flex-start",
-                      }}
-                    >
-                      {logoUrl && (
-                        <img
-                          src={logoUrl}
-                          alt="Logo"
-                          className={`object-contain ${
-                            logoSize === "small" ? "h-6 sm:h-8" : logoSize === "medium" ? "h-8 sm:h-12" : "h-12 sm:h-16"
-                          }`}
-                          style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.3))" }}
-                        />
-                      )}
-                      {(agencyName || phone) && (
-                        <div className={`text-[10px] sm:text-xs font-semibold leading-tight ${
-                          textColor === "dark" ? "text-foreground" : "text-white"
-                        }`}
-                          style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}
-                        >
-                          {agencyName && <div>{agencyName}</div>}
-                          {phone && <div className="font-normal opacity-90">{phone}</div>}
-                        </div>
-                      )}
-                    </div>
+
+                    {/* Guias de snap */}
+                    {activeGuides.v.map((g, i) => (
+                      <div
+                        key={`v-${i}`}
+                        className="absolute top-0 bottom-0 w-px bg-primary/80 pointer-events-none z-30"
+                        style={{ left: `${g * 100}%` }}
+                      />
+                    ))}
+                    {activeGuides.h.map((g, i) => (
+                      <div
+                        key={`h-${i}`}
+                        className="absolute left-0 right-0 h-px bg-primary/80 pointer-events-none z-30"
+                        style={{ top: `${g * 100}%` }}
+                      />
+                    ))}
+
+                    {/* Logo */}
+                    {logoUrl && renderElementBox("logo", (
+                      <img
+                        src={logoUrl}
+                        alt="Logo"
+                        draggable={false}
+                        className="w-full h-full object-contain pointer-events-none"
+                        style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.3))" }}
+                      />
+                    ))}
+
+                    {/* Nome agência */}
+                    {agencyName && renderElementBox("agencyName", (
+                      <div
+                        className={`w-full h-full font-semibold leading-tight whitespace-nowrap overflow-hidden ${textColorClass}`}
+                        style={{
+                          textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+                          fontSize: "clamp(10px, 2.2cqw, 32px)",
+                          containerType: "inline-size",
+                        }}
+                      >
+                        {agencyName}
+                      </div>
+                    ))}
+
+                    {/* Telefone */}
+                    {phone && renderElementBox("phone", (
+                      <div
+                        className={`w-full h-full font-normal leading-tight whitespace-nowrap overflow-hidden ${textColorClass}`}
+                        style={{
+                          textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+                          fontSize: "clamp(9px, 2cqw, 28px)",
+                          containerType: "inline-size",
+                        }}
+                      >
+                        {phone}
+                      </div>
+                    ))}
+
                     {/* Remove button */}
                     <button
-                      onClick={() => setBaseImage(null)}
-                      className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors"
+                      onClick={(e) => { e.stopPropagation(); setBaseImage(null); }}
+                      className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors z-40"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -389,6 +636,50 @@ function PersonalizadorLaminasContent() {
                   </div>
                 )}
               </div>
+
+              {/* Toolbar de seleção */}
+              {baseImage && selected && (
+                <div className="mt-3 rounded-xl border bg-background p-2 flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary" className="text-xs">{elementLabel[selected]}</Badge>
+                  <Separator orientation="vertical" className="h-6" />
+                  <div className="flex gap-1">
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => alignSelected("h", "start")} title="Alinhar à esquerda">
+                      <AlignLeft className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => alignSelected("h", "center")} title="Centralizar horizontalmente">
+                      <AlignCenter className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => alignSelected("h", "end")} title="Alinhar à direita">
+                      <AlignRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <Separator orientation="vertical" className="h-6" />
+                  <div className="flex gap-1">
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => alignSelected("v", "start")} title="Alinhar ao topo">
+                      <AlignVerticalJustifyStart className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => alignSelected("v", "center")} title="Centralizar verticalmente">
+                      <AlignVerticalJustifyCenter className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => alignSelected("v", "end")} title="Alinhar à base">
+                      <AlignVerticalJustifyEnd className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <Separator orientation="vertical" className="h-6" />
+                  <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={centerSelected}>
+                    Centralizar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 text-xs gap-1"
+                    onClick={() => updateItem(selected, { visible: false })}
+                  >
+                    <EyeOff className="h-3.5 w-3.5" />
+                    Ocultar
+                  </Button>
+                </div>
+              )}
 
               {/* Gallery selector */}
               {showGallery && (
@@ -453,6 +744,10 @@ function PersonalizadorLaminasContent() {
                   </Button>
                 </div>
               )}
+
+              <p className="text-xs text-muted-foreground mt-3">
+                Dica: clique em um elemento para selecioná-lo. Arraste para mover, use as alças nos cantos do logo para redimensionar.
+              </p>
             </CardContent>
           </Card>
 
@@ -461,10 +756,20 @@ function PersonalizadorLaminasContent() {
             {/* Logo */}
             <Card className="border-0 shadow-card">
               <CardContent className="pt-5 pb-4 space-y-3">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4 text-primary" />
-                  Logotipo
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4 text-primary" />
+                    Logotipo
+                  </h3>
+                  <button
+                    onClick={() => updateItem("logo", { visible: !layout.logo.visible })}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    title={layout.logo.visible ? "Ocultar" : "Mostrar"}
+                  >
+                    {layout.logo.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                    {layout.logo.visible ? "Visível" : "Oculto"}
+                  </button>
+                </div>
                 {logoUrl ? (
                   <div className="flex items-center gap-3">
                     <div className="h-14 w-14 rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
@@ -512,23 +817,6 @@ function PersonalizadorLaminasContent() {
                     />
                   </label>
                 )}
-
-                {/* Logo size */}
-                {logoUrl && (
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Tamanho do logo</Label>
-                    <Select value={logoSize} onValueChange={(v) => setLogoSize(v as LogoSize)}>
-                      <SelectTrigger className="mt-1 h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(LOGO_SIZES).map(([k, v]) => (
-                          <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
@@ -540,7 +828,16 @@ function PersonalizadorLaminasContent() {
                   Texto
                 </h3>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Nome da agência</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Nome da agência</Label>
+                    <button
+                      onClick={() => updateItem("agencyName", { visible: !layout.agencyName.visible })}
+                      className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                    >
+                      {layout.agencyName.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                      {layout.agencyName.visible ? "Visível" : "Oculto"}
+                    </button>
+                  </div>
                   <Input
                     value={agencyName}
                     onChange={(e) => setAgencyName(e.target.value)}
@@ -549,7 +846,16 @@ function PersonalizadorLaminasContent() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Telefone / WhatsApp</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Telefone / WhatsApp</Label>
+                    <button
+                      onClick={() => updateItem("phone", { visible: !layout.phone.visible })}
+                      className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                    >
+                      {layout.phone.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                      {layout.phone.visible ? "Visível" : "Oculto"}
+                    </button>
+                  </div>
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -583,31 +889,24 @@ function PersonalizadorLaminasContent() {
               </CardContent>
             </Card>
 
-            {/* Position */}
+            {/* Editor options */}
             <Card className="border-0 shadow-card">
               <CardContent className="pt-5 pb-4 space-y-3">
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <Grid3X3 className="h-4 w-4 text-primary" />
-                  Posição
+                  Editor
                 </h3>
-                <p className="text-xs text-muted-foreground">
-                  Clique na grade da imagem ou selecione aqui
-                </p>
-                <div className="grid grid-cols-3 gap-1.5 w-full max-w-[180px]">
-                  {Array.from({ length: 9 }).map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setGridPos(i)}
-                      className={`aspect-square rounded-md border-2 transition-all text-xs font-medium ${
-                        gridPos === i
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-muted/50 text-muted-foreground border-border hover:border-primary/40"
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-xs">Snap de alinhamento</Label>
+                    <p className="text-[11px] text-muted-foreground">Encaixe automático em bordas e centro</p>
+                  </div>
+                  <Switch checked={snapEnabled} onCheckedChange={setSnapEnabled} />
                 </div>
+                <Button variant="outline" size="sm" className="w-full" onClick={resetLayout}>
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                  Resetar posições
+                </Button>
               </CardContent>
             </Card>
 
