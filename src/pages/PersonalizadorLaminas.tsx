@@ -416,7 +416,8 @@ function PersonalizadorLaminasContent() {
         const h = item.h * H;
         const fontSize = Math.max(12, Math.round(h * 0.85));
         ctx.font = `${weight} ${fontSize}px 'Inter', 'Segoe UI', sans-serif`;
-        ctx.textAlign = "left";
+        const align: TextAlign = item.align ?? "left";
+        ctx.textAlign = align === "center" ? "center" : align === "right" ? "right" : "left";
         ctx.textBaseline = "top";
 
         const brightness = sampleBrightness(ctx, x, y, w, h);
@@ -430,7 +431,8 @@ function PersonalizadorLaminasContent() {
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         ctx.fillStyle = fillColor;
-        ctx.fillText(text, x, y);
+        const tx = align === "center" ? x + w / 2 : align === "right" ? x + w : x;
+        ctx.fillText(text, tx, y);
         ctx.shadowColor = "transparent";
         ctx.shadowBlur = 0;
       };
