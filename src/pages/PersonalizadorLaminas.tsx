@@ -496,6 +496,7 @@ function PersonalizadorLaminasContent() {
                 onPointerLeave={onPointerUp}
                 onPointerDown={() => setSelected(null)}
                 className="relative rounded-xl overflow-hidden bg-muted/50 min-h-[300px] flex items-center justify-center"
+                data-export-stage="true"
               >
                 {baseImage ? (
                   <>
@@ -508,14 +509,14 @@ function PersonalizadorLaminasContent() {
                     />
 
                     {/* Guias de snap */}
-                    {activeGuides.v.map((g, i) => (
+                    {!isExportingCapture && activeGuides.v.map((g, i) => (
                       <div
                         key={`v-${i}`}
                         className="absolute top-0 bottom-0 w-px bg-primary/80 pointer-events-none z-30"
                         style={{ left: `${g * 100}%` }}
                       />
                     ))}
-                    {activeGuides.h.map((g, i) => (
+                    {!isExportingCapture && activeGuides.h.map((g, i) => (
                       <div
                         key={`h-${i}`}
                         className="absolute left-0 right-0 h-px bg-primary/80 pointer-events-none z-30"
@@ -553,12 +554,12 @@ function PersonalizadorLaminasContent() {
                     ))}
 
                     {/* Remove button */}
-                    <button
+                    {!isExportingCapture && <button
                       onClick={(e) => { e.stopPropagation(); setBaseImage(null); }}
                       className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors z-40"
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </button>}
                   </>
                 ) : (
                   <div className="flex flex-col items-center gap-4 py-16 text-muted-foreground">
@@ -910,8 +911,6 @@ function PersonalizadorLaminasContent() {
           </div>
         </div>
 
-        {/* Hidden canvas for rendering */}
-        <canvas ref={canvasRef} className="hidden" />
       </div>
     </DashboardLayout>
   );
