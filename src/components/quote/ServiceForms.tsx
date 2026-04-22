@@ -1450,6 +1450,89 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
   );
 }
 
+/* ━━━━━━━━━━━━━━━━━━━ CIRCUIT FORM ━━━━━━━━━━━━━━━━━━━ */
+const circuitSchema = z.object({
+  circuit_name: z.string().min(2, "Nome do circuito é obrigatório"),
+  duration: z.string().optional(),
+  itinerary: z.string().min(5, "Roteiro day by day é obrigatório"),
+  notes: z.string().optional(),
+  price: z.number().min(0),
+});
+
+function CircuitForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+  const init = initialData?.service_data;
+  const form = useForm<z.infer<typeof circuitSchema>>({
+    resolver: zodResolver(circuitSchema),
+    defaultValues: {
+      circuit_name: init?.circuit_name || "",
+      duration: init?.duration || "",
+      itinerary: init?.itinerary || "",
+      notes: init?.notes || "",
+      price: init?.price ?? initialData?.amount ?? 0,
+    },
+  });
+
+  const handleSubmit = (values: z.infer<typeof circuitSchema>) => {
+    onSubmit(
+      {
+        circuit_name: values.circuit_name,
+        duration: values.duration || "",
+        itinerary: values.itinerary,
+        notes: values.notes || "",
+        price: values.price,
+      },
+      values.price,
+    );
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField control={form.control} name="circuit_name" render={({ field }) => (
+          <FormItem><FormLabel>Nome do Circuito</FormLabel><FormControl>
+            <Input placeholder="Ex: Circuito Itália Clássica" {...field} />
+          </FormControl><FormMessage /></FormItem>
+        )} />
+        <FormField control={form.control} name="duration" render={({ field }) => (
+          <FormItem><FormLabel>Duração <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel><FormControl>
+            <Input placeholder="Ex: 10 dias / 9 noites" {...field} />
+          </FormControl><FormMessage /></FormItem>
+        )} />
+        <FormField control={form.control} name="itinerary" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Roteiro Day by Day</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder={"Dia 1 — Chegada em Roma\nDia 2 — City tour pelo Coliseu e Fórum Romano\nDia 3 — Vaticano e Castel Sant'Angelo\n..."}
+                rows={12}
+                className="font-mono text-sm leading-relaxed"
+                {...field}
+              />
+            </FormControl>
+            <p className="text-xs text-muted-foreground">Dica: separe cada dia em uma linha (Dia 1, Dia 2…). Quebras de linha são preservadas no orçamento e PDF.</p>
+            <FormMessage />
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel><FormControl>
+            <Textarea placeholder="Inclusões, exclusões, hotéis previstos, etc." rows={3} {...field} />
+          </FormControl><FormMessage /></FormItem>
+        )} />
+        <FormField control={form.control} name="price" render={({ field }) => (
+          <FormItem><FormLabel>Valor (R$) <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel><FormControl>
+            <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
+          </FormControl><FormMessage /></FormItem>
+        )} />
+        {renderPaymentSlot(paymentSlot, form.watch("price"))}
+        <div className="flex gap-2 justify-end">
+          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
 /* ━━━━━━━━━━━━━━━━━━━ IMAGE UPLOAD BLOCK ━━━━━━━━━━━━━━━━━━━ */
 import { optimizeImage, validateImageFile, formatFileSize } from "@/utils/imageOptimizer";
 
@@ -1700,6 +1783,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     case "attraction": formElement = <AttractionForm {...formProps} />; break;
     case "insurance": formElement = <InsuranceForm {...formProps} />; break;
     case "cruise": formElement = <CruiseForm {...formProps} />; break;
+    case "circuit": formElement = <CircuitForm {...formProps} />; break;
     case "other": formElement = <OtherForm {...formProps} />; break;
     default: return null;
   }
