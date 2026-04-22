@@ -263,11 +263,16 @@ function PersonalizadorLaminasContent() {
       next.y = clamp(next.y, 0, 1 - next.h);
       setActiveGuides({ v: vGuides, h: hGuides });
     } else {
-      // Resize — para o logo mantém proporção
-      const keepRatio = drag.id === "logo" && logoNatural;
-      const ratioPx = keepRatio
+      // Resize — proporção:
+      //  - logo: mantém proporção real da imagem
+      //  - texto: mantém proporção da própria caixa (ao usar cantos), para escalar como elemento gráfico
+      const isCorner = drag.mode === "nw" || drag.mode === "ne" || drag.mode === "sw" || drag.mode === "se";
+      const keepRatio = (drag.id === "logo" && logoNatural) || (drag.id !== "logo" && isCorner);
+      const ratioPx = drag.id === "logo" && logoNatural
         ? (logoNatural!.w / logoNatural!.h) * (drag.stage.h / drag.stage.w)
-        : null;
+        : keepRatio
+          ? (item.w / item.h) // já está em fração da lâmina
+          : null;
 
       let nx = item.x, ny = item.y, nw = item.w, nh = item.h;
       if (drag.mode === "se") { nw = item.w + dx; nh = item.h + dy; }
