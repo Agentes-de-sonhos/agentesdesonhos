@@ -65,6 +65,7 @@ const plans: PlanConfig[] = [
     icon: Sparkles,
     features: [
       "Tudo do plano Start",
+      "Todos os treinamentos da EducaTravel",
       "Orçamentos",
       "Carteira Digital",
       "Vitrine de Ofertas",
