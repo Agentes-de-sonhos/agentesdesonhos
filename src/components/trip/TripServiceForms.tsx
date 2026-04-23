@@ -2630,7 +2630,12 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
             </div>
           ))}
           <div className="grid gap-2 sm:grid-cols-3">
-            <Input placeholder="Nome *" value={newPax.name} onChange={(e) => setNewPax({ ...newPax, name: e.target.value })} />
+            <PassengerNameInput
+              placeholder="Nome *"
+              value={newPax.name}
+              onChange={(name) => setNewPax({ ...newPax, name })}
+              excludeNames={passengers.map((p) => p.name)}
+            />
             <Select value={newPax.ticket_type} onValueChange={(v: any) => setNewPax({ ...newPax, ticket_type: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
