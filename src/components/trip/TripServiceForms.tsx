@@ -440,7 +440,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         ))}
         <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
           <div className="grid gap-2 sm:grid-cols-3">
-            <Input placeholder="Nome completo" value={newPax.name} onChange={(e) => setNewPax({ ...newPax, name: e.target.value })} />
+            <PassengerNameInput
+              value={newPax.name}
+              onChange={(name) => setNewPax({ ...newPax, name })}
+              onSelectPassenger={(name, type) => setNewPax({ ...newPax, name, passenger_type: type ?? newPax.passenger_type })}
+              excludeNames={passengers.map((p) => p.name)}
+            />
             <Select value={newPax.passenger_type} onValueChange={(v: any) => setNewPax({ ...newPax, passenger_type: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
