@@ -175,6 +175,7 @@ export interface QuoteFormData {
   currency?: string;
   currency_mode?: string;
   exchange_rate?: number | null;
+  opportunity_id?: string | null;
 }
 
 export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
