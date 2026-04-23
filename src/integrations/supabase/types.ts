@@ -4986,6 +4986,8 @@ export type Database = {
       }
       opportunities: {
         Row: {
+          adults_count: number
+          children_count: number
           client_id: string
           created_at: string
           destination: string
@@ -5002,6 +5004,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          adults_count?: number
+          children_count?: number
           client_id: string
           created_at?: string
           destination: string
@@ -5018,6 +5022,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          adults_count?: number
+          children_count?: number
           client_id?: string
           created_at?: string
           destination?: string
