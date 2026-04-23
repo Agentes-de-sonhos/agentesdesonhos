@@ -120,6 +120,26 @@ export function QuoteDocuments({ quoteId, userId }: QuoteDocumentsProps) {
     onError: (e: any) => toast.error(e?.message || "Erro ao remover"),
   });
 
+  const togglePublicMutation = useMutation({
+    mutationFn: async ({ id, is_public }: { id: string; is_public: boolean }) => {
+      const { error } = await supabase
+        .from("quote_documents")
+        .update({ is_public })
+        .eq("id", id);
+      if (error) throw error;
+      return { id, is_public };
+    },
+    onSuccess: ({ is_public }) => {
+      toast.success(
+        is_public
+          ? "Documento agora é visível no link público"
+          : "Documento marcado como privado"
+      );
+      queryClient.invalidateQueries({ queryKey: ["quote-documents", quoteId] });
+    },
+    onError: (e: any) => toast.error(e?.message || "Erro ao atualizar visibilidade"),
+  });
+
   const uploadFiles = useCallback(
     async (files: File[]) => {
       for (const file of files) {
