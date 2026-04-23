@@ -19,12 +19,12 @@ export function DestinationIntroPublic({ text, images, destination }: Destinatio
     <section className="space-y-4">
       {/* Images carousel */}
       {hasImages && (
-        <div className="relative rounded-2xl overflow-hidden shadow-sm border border-border/30">
+        <div className="relative rounded-2xl overflow-hidden shadow-sm border border-border/30 bg-muted">
           <div className="flex overflow-hidden">
             <img
               src={images[currentImage]}
               alt={`${destination} - ${currentImage + 1}`}
-              className="w-full h-48 sm:h-64 object-cover transition-all duration-500"
+              className="w-full h-48 sm:h-64 object-contain transition-all duration-500"
             />
           </div>
 
