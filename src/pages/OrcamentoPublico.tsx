@@ -5,8 +5,9 @@ import { usePublicQuote } from "@/hooks/useQuotes";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -296,6 +297,114 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
   </svg>
 );
+
+interface PublicDocument {
+  id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string | null;
+  file_size: number | null;
+}
+
+function getDocIcon(fileType: string | null, fileName: string) {
+  const t = (fileType || "").toLowerCase();
+  const ext = fileName.split(".").pop()?.toLowerCase() || "";
+  if (t.startsWith("image/") || ["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return ImageIcon;
+  if (t.includes("pdf") || ext === "pdf") return FileType;
+  if (t.includes("sheet") || t.includes("excel") || ["xls", "xlsx", "csv"].includes(ext)) return FileSpreadsheet;
+  return FileText;
+}
+
+function formatDocSize(bytes: number | null) {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: ["public-quote-documents", quoteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quote_documents")
+        .select("id, file_name, file_path, file_type, file_size")
+        .eq("quote_id", quoteId)
+        .eq("is_public", true)
+        .order("created_at", { ascending: true });
+      if (error) return [] as PublicDocument[];
+      return (data || []) as PublicDocument[];
+    },
+  });
+
+  const openDoc = async (doc: PublicDocument, download: boolean) => {
+    const { data, error } = await supabase.storage
+      .from("quote-documents")
+      .createSignedUrl(doc.file_path, 60 * 10, {
+        download: download ? doc.file_name : undefined,
+      });
+    if (error || !data?.signedUrl) return;
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
+  if (isLoading || documents.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
+      <div className="flex items-center gap-2 mb-4">
+        <Paperclip className="h-5 w-5 text-primary" />
+        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          Documentos do seu orçamento
+        </h3>
+      </div>
+      <ul className="divide-y divide-border/40 rounded-md border border-border/40 overflow-hidden">
+        {documents.map((doc) => {
+          const Icon = getDocIcon(doc.file_type, doc.file_name);
+          return (
+            <li
+              key={doc.id}
+              className="flex items-center gap-3 px-3 py-3 bg-white hover:bg-muted/30 transition-colors"
+            >
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Icon className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate" title={doc.file_name}>
+                  {doc.file_name}
+                </p>
+                {doc.file_size ? (
+                  <p className="text-xs text-muted-foreground">{formatDocSize(doc.file_size)}</p>
+                ) : null}
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs"
+                  onClick={() => openDoc(doc, false)}
+                  title="Visualizar"
+                >
+                  <Eye className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Ver</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs"
+                  onClick={() => openDoc(doc, true)}
+                  title="Baixar"
+                >
+                  <Download className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Baixar</span>
+                </Button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null } = {}) {
   const params = useParams<{ token: string }>();
@@ -615,6 +724,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         </div>
 
         {/* ─── Agent Signature: photo, name, agency, WhatsApp ─── */}
+        {/* ─── Documentos compartilhados com o cliente ─── */}
+        <PublicQuoteDocuments quoteId={quote.id} />
+
         {agentProfile && (
           <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
             <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
