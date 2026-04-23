@@ -24,6 +24,14 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   cruise: "Cruzeiro", circuit: "Circuitos", other: "Outros Serviços",
 };
 
+function getServiceLabel(service: QuoteService): string {
+  if (service.service_type === "other") {
+    const customTitle = (service.service_data as any)?.custom_title?.trim();
+    if (customTitle) return customTitle;
+  }
+  return SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
+}
+
 const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
   flight: <Plane className="h-5 w-5" />, hotel: <Hotel className="h-5 w-5" />,
   car_rental: <Car className="h-5 w-5" />, transfer: <ArrowRightLeft className="h-5 w-5" />,
@@ -211,7 +219,7 @@ function CollapsibleServiceCard({
           </div>
           <div className="flex flex-col items-start gap-0.5">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold uppercase tracking-wide">{SERVICE_LABELS[type]}</span>
+              <span className="text-sm font-bold uppercase tracking-wide">{getServiceLabel(service)}</span>
               {service.option_label && (
                 <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
                   <Tag className="h-3 w-3" />
@@ -240,7 +248,7 @@ function CollapsibleServiceCard({
           {isOpen && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
-              <ServiceImageCarousel images={imgs} alt={SERVICE_LABELS[type]} />
+              <ServiceImageCarousel images={imgs} alt={getServiceLabel(service)} />
             ) : null;
           })()}
           {isOpen && (() => {

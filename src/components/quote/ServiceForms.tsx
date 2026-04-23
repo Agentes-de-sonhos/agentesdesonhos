@@ -1405,6 +1405,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
 
 /* ━━━━━━━━━━━━━━━━━━━ OTHER FORM ━━━━━━━━━━━━━━━━━━━ */
 const otherSchema = z.object({
+  custom_title: z.string().max(80, "Máximo 80 caracteres").optional(),
   company_name: z.string().optional(),
   description: z.string().min(5, "Descrição é obrigatória"),
   price: z.number().min(0),
@@ -1414,16 +1415,45 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
-    defaultValues: { company_name: init?.company_name || "", description: init?.description || "", price: init?.price || initialData?.amount || 0 },
+    defaultValues: {
+      custom_title: init?.custom_title || "",
+      company_name: init?.company_name || "",
+      description: init?.description || "",
+      price: init?.price || initialData?.amount || 0,
+    },
   });
 
   const handleSubmit = (values: z.infer<typeof otherSchema>) => {
-    onSubmit({ company_name: values.company_name || "", description: values.description, price: values.price }, values.price);
+    onSubmit({
+      custom_title: values.custom_title?.trim() || "",
+      company_name: values.company_name || "",
+      description: values.description,
+      price: values.price,
+    }, values.price);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField control={form.control} name="custom_title" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="flex items-center gap-2">
+              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+              Título do Bloco <span className="text-muted-foreground font-normal">(opcional)</span>
+            </FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Outros Serviços"
+                maxLength={80}
+                {...field}
+              />
+            </FormControl>
+            <p className="text-xs text-muted-foreground">
+              Personalize o nome deste bloco. Ex: "Chip Internacional", "Seguro Viagem", "Ingressos Disney". Se vazio, usaremos "Outros Serviços".
+            </p>
+            <FormMessage />
+          </FormItem>
+        )} />
         <FormField control={form.control} name="company_name" render={({ field }) => (
           <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl>
             <PlacesAutocomplete

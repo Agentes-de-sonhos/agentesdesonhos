@@ -17,6 +17,14 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   other: "Outros Serviços",
 };
 
+function getServiceLabel(service: QuoteService): string {
+  if (service.service_type === "other") {
+    const customTitle = (service.service_data as any)?.custom_title?.trim();
+    if (customTitle) return customTitle;
+  }
+  return SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
+}
+
 const SERVICE_EMOJI: Record<ServiceType, string> = {
   flight: "✈️",
   hotel: "🏨",
@@ -200,7 +208,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
   const servicesHtml =
     quote.services
       ?.map((service) => {
-        const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
+        const label = getServiceLabel(service);
         const emoji = SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
         const details = getServiceDetails(service);
         const data = service.service_data as any;
