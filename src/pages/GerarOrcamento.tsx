@@ -33,6 +33,7 @@ import { ServiceList } from "@/components/quote/ServiceCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
+import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -785,6 +786,9 @@ export default function GerarOrcamento() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Documentos internos do Orçamento */}
+            <QuoteDocuments quoteId={quote.id} userId={quote.user_id} />
 
             {/* Apresentação do Investimento - Collapsible */}
             <Card>
