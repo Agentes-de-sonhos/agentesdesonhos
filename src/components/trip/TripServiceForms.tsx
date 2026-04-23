@@ -1634,7 +1634,13 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
             <div className="grid gap-2 sm:grid-cols-3">
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Nome Completo</label>
-                <Input className="mt-1" placeholder="João Silva" value={d.name} onChange={(e) => { const u = [...drivers]; u[i] = { ...u[i], name: e.target.value }; setDrivers(u); }} />
+                <PassengerNameInput
+                  className="mt-1"
+                  placeholder="João Silva"
+                  value={d.name}
+                  onChange={(name) => { const u = [...drivers]; u[i] = { ...u[i], name }; setDrivers(u); }}
+                  excludeNames={drivers.map((dr) => dr.name).filter((_, idx) => idx !== i)}
+                />
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Documento (CNH/Passaporte)</label>
