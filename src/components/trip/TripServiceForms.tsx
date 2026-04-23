@@ -3169,7 +3169,12 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         ))}
         <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
           <div className="grid gap-2 sm:grid-cols-2">
-            <Input placeholder="Nome completo" value={newInsured.name} onChange={(e) => setNewInsured({ ...newInsured, name: e.target.value })} />
+            <PassengerNameInput
+              placeholder="Nome completo"
+              value={newInsured.name}
+              onChange={(name) => setNewInsured({ ...newInsured, name })}
+              excludeNames={insuredPersons.map((p) => p.name)}
+            />
             <Input type="date" placeholder="Data de nascimento" value={newInsured.birth_date} onChange={(e) => setNewInsured({ ...newInsured, birth_date: e.target.value })} />
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
