@@ -3607,7 +3607,12 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
             </div>
           ))}
           <div className="grid gap-2 sm:grid-cols-2">
-            <Input placeholder="Nome completo *" value={newPaxName} onChange={(e) => setNewPaxName(e.target.value)} />
+            <PassengerNameInput
+              placeholder="Nome completo *"
+              value={newPaxName}
+              onChange={setNewPaxName}
+              excludeNames={passengers.map((p) => p.name)}
+            />
             <Input placeholder="Data de nascimento" value={newPaxBirth} onChange={(e) => setNewPaxBirth(e.target.value)} />
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
