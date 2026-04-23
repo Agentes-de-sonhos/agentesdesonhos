@@ -61,13 +61,13 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
     return (
       <>
         <div
-          className="rounded-xl overflow-hidden border border-border/30 cursor-pointer"
+          className="rounded-xl overflow-hidden border border-border/30 cursor-pointer bg-muted"
           onClick={() => openLightbox(0)}
         >
           <img
             src={images[0]}
             alt={alt}
-            className="w-full aspect-[16/10] object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full aspect-[16/10] object-contain hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
         </div>
@@ -88,7 +88,7 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
     <>
       <div className="relative group">
         {/* Carousel */}
-        <div ref={emblaRef} className="overflow-hidden rounded-xl border border-border/30">
+        <div ref={emblaRef} className="overflow-hidden rounded-xl border border-border/30 bg-muted">
           <div className="flex">
             {images.map((url, i) => (
               <div
@@ -99,7 +99,7 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
                 <img
                   src={url}
                   alt={`${alt} ${i + 1}`}
-                  className="w-full aspect-[16/10] object-cover hover:scale-[1.02] transition-transform duration-300"
+                  className="w-full aspect-[16/10] object-contain hover:scale-[1.02] transition-transform duration-300"
                   loading="lazy"
                 />
               </div>
