@@ -353,6 +353,17 @@ function PublicServiceCard({ service }: { service: TripService }) {
   return (
     <Card className="border-border/40 shadow-sm hover:shadow transition-shadow">
       <CardContent className="p-4">
+        {/* Service image (preserves original aspect ratio — not cropped) */}
+        {service.image_url && (
+          <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted flex items-center justify-center">
+            <img
+              src={service.image_url}
+              alt={title}
+              loading="lazy"
+              className="w-full max-h-80 object-contain"
+            />
+          </div>
+        )}
         <h4 className="font-semibold text-sm mb-1">{title}</h4>
         {dates && (
           <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
