@@ -2,6 +2,7 @@ import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
 import { useState } from "react";
 import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
 import { CollapsibleFormSection } from "@/components/trip/CollapsibleFormSection";
+import { PassengerNameInput } from "@/components/trip/PassengerNameInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
