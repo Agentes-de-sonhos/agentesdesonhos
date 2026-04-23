@@ -298,6 +298,114 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+interface PublicDocument {
+  id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string | null;
+  file_size: number | null;
+}
+
+function getDocIcon(fileType: string | null, fileName: string) {
+  const t = (fileType || "").toLowerCase();
+  const ext = fileName.split(".").pop()?.toLowerCase() || "";
+  if (t.startsWith("image/") || ["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return ImageIcon;
+  if (t.includes("pdf") || ext === "pdf") return FileType;
+  if (t.includes("sheet") || t.includes("excel") || ["xls", "xlsx", "csv"].includes(ext)) return FileSpreadsheet;
+  return FileText;
+}
+
+function formatDocSize(bytes: number | null) {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: ["public-quote-documents", quoteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quote_documents")
+        .select("id, file_name, file_path, file_type, file_size")
+        .eq("quote_id", quoteId)
+        .eq("is_public", true)
+        .order("created_at", { ascending: true });
+      if (error) return [] as PublicDocument[];
+      return (data || []) as PublicDocument[];
+    },
+  });
+
+  const openDoc = async (doc: PublicDocument, download: boolean) => {
+    const { data, error } = await supabase.storage
+      .from("quote-documents")
+      .createSignedUrl(doc.file_path, 60 * 10, {
+        download: download ? doc.file_name : undefined,
+      });
+    if (error || !data?.signedUrl) return;
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
+  if (isLoading || documents.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
+      <div className="flex items-center gap-2 mb-4">
+        <Paperclip className="h-5 w-5 text-primary" />
+        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          Documentos do seu orçamento
+        </h3>
+      </div>
+      <ul className="divide-y divide-border/40 rounded-md border border-border/40 overflow-hidden">
+        {documents.map((doc) => {
+          const Icon = getDocIcon(doc.file_type, doc.file_name);
+          return (
+            <li
+              key={doc.id}
+              className="flex items-center gap-3 px-3 py-3 bg-white hover:bg-muted/30 transition-colors"
+            >
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Icon className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate" title={doc.file_name}>
+                  {doc.file_name}
+                </p>
+                {doc.file_size ? (
+                  <p className="text-xs text-muted-foreground">{formatDocSize(doc.file_size)}</p>
+                ) : null}
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs"
+                  onClick={() => openDoc(doc, false)}
+                  title="Visualizar"
+                >
+                  <Eye className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Ver</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs"
+                  onClick={() => openDoc(doc, true)}
+                  title="Baixar"
+                >
+                  <Download className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Baixar</span>
+                </Button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null } = {}) {
   const params = useParams<{ token: string }>();
   const token = tokenOverride ?? params.token;
