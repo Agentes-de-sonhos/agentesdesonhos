@@ -724,6 +724,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         </div>
 
         {/* ─── Agent Signature: photo, name, agency, WhatsApp ─── */}
+        {/* ─── Documentos compartilhados com o cliente ─── */}
+        <PublicQuoteDocuments quoteId={quote.id} />
+
         {agentProfile && (
           <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
             <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
