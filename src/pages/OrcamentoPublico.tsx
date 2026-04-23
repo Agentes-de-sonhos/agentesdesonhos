@@ -297,6 +297,17 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const isLoading = quoteOverride ? false : isFetching;
   const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(0);
 
+  // Auto-redirect legacy vitrine.tur.br/orcamento/* links to the new domain
+  // so any cached or previously shared link lands on the correct host.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const host = window.location.hostname;
+    if (host === "vitrine.tur.br" || host === "www.vitrine.tur.br") {
+      const target = `${ORCAMENTO_DOMAIN}${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.location.replace(target);
+    }
+  }, []);
+
   useEffect(() => {
     setOgMeta({
       title: "Seu orçamento de viagem chegou 💰",
