@@ -77,7 +77,12 @@ function getServiceSummary(service: QuoteService): string {
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
     case "circuit": return data.circuit_name || "Circuito";
-    case "other": return data.description || "Outros Serviços";
+    case "other": {
+      // Para evitar duplicação, mostra empresa OU primeira linha da descrição (curta)
+      if (data.company_name) return data.company_name;
+      const firstLine = (data.description || "").split("\n")[0].trim();
+      return firstLine.length > 80 ? firstLine.slice(0, 77) + "..." : (firstLine || "Outros Serviços");
+    }
     default: return "Serviço";
   }
 }
@@ -93,7 +98,7 @@ function getServiceName(service: QuoteService): string {
     case "insurance": return data.provider;
     case "cruise": return data.ship_name;
     case "circuit": return data.circuit_name || "Circuito";
-    case "other": return data.description || "Outros Serviços";
+    case "other": return data.company_name || "Outros Serviços";
     default: return "Serviço";
   }
 }
@@ -237,9 +242,12 @@ function CollapsibleServiceCard({
               <ServiceImageCarousel images={imgs} alt={SERVICE_LABELS[type]} />
             ) : null;
           })()}
-          {isOpen && (
-            <p className="text-base font-semibold text-foreground">{getServiceName(service)}</p>
-          )}
+          {isOpen && (() => {
+            const name = getServiceName(service);
+            // Para "other" sem company_name, evita exibir título genérico duplicado
+            if (service.service_type === "other" && !((service.service_data as any)?.company_name)) return null;
+            return <p className="text-base font-semibold text-foreground">{name}</p>;
+          })()}
           {isOpen && details.map((d, i) => (
             <p key={i} className="text-sm text-muted-foreground leading-relaxed">
               <FormattedText>{d}</FormattedText>
