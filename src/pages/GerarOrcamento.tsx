@@ -787,6 +787,9 @@ export default function GerarOrcamento() {
               </CardContent>
             </Card>
 
+            {/* Documentos internos do Orçamento */}
+            <QuoteDocuments quoteId={quote.id} userId={quote.user_id} />
+
             {/* Apresentação do Investimento - Collapsible */}
             <Card>
               <button
