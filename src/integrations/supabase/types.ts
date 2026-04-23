@@ -5993,6 +5993,7 @@ export type Database = {
           full_payment_discount_percent: number | null
           id: string
           installments_count: number | null
+          opportunity_id: string | null
           payment_display_mode: string
           payment_method_label: string | null
           payment_terms: string | null
@@ -6029,6 +6030,7 @@ export type Database = {
           full_payment_discount_percent?: number | null
           id?: string
           installments_count?: number | null
+          opportunity_id?: string | null
           payment_display_mode?: string
           payment_method_label?: string | null
           payment_terms?: string | null
@@ -6065,6 +6067,7 @@ export type Database = {
           full_payment_discount_percent?: number | null
           id?: string
           installments_count?: number | null
+          opportunity_id?: string | null
           payment_display_mode?: string
           payment_method_label?: string | null
           payment_terms?: string | null
@@ -6090,6 +6093,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
         ]
