@@ -242,9 +242,12 @@ function CollapsibleServiceCard({
               <ServiceImageCarousel images={imgs} alt={SERVICE_LABELS[type]} />
             ) : null;
           })()}
-          {isOpen && (
-            <p className="text-base font-semibold text-foreground">{getServiceName(service)}</p>
-          )}
+          {isOpen && (() => {
+            const name = getServiceName(service);
+            // Para "other" sem company_name, evita exibir título genérico duplicado
+            if (service.service_type === "other" && !((service.service_data as any)?.company_name)) return null;
+            return <p className="text-base font-semibold text-foreground">{name}</p>;
+          })()}
           {isOpen && details.map((d, i) => (
             <p key={i} className="text-sm text-muted-foreground leading-relaxed">
               <FormattedText>{d}</FormattedText>
