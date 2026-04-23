@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import {
   FileText,
   Image as ImageIcon,
@@ -15,6 +17,8 @@ import {
   Upload,
   Loader2,
   Paperclip,
+  Lock,
+  Globe,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -44,6 +48,7 @@ interface QuoteDocument {
   file_path: string;
   file_type: string | null;
   file_size: number | null;
+  is_public: boolean;
   created_at: string;
 }
 
