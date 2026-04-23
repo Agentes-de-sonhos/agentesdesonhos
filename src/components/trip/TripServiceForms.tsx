@@ -2,6 +2,7 @@ import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
 import { useState } from "react";
 import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
 import { CollapsibleFormSection } from "@/components/trip/CollapsibleFormSection";
+import { PassengerNameInput } from "@/components/trip/PassengerNameInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -439,7 +440,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
         ))}
         <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
           <div className="grid gap-2 sm:grid-cols-3">
-            <Input placeholder="Nome completo" value={newPax.name} onChange={(e) => setNewPax({ ...newPax, name: e.target.value })} />
+            <PassengerNameInput
+              value={newPax.name}
+              onChange={(name) => setNewPax({ ...newPax, name })}
+              onSelectPassenger={(name, type) => setNewPax({ ...newPax, name, passenger_type: type ?? newPax.passenger_type })}
+              excludeNames={passengers.map((p) => p.name)}
+            />
             <Select value={newPax.passenger_type} onValueChange={(v: any) => setNewPax({ ...newPax, passenger_type: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -1216,7 +1222,12 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         ))}
         <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
           <div className="grid gap-2 sm:grid-cols-3">
-            <Input placeholder="Nome do hóspede" value={newGuest.name} onChange={(e) => setNewGuest({ ...newGuest, name: e.target.value })} />
+            <PassengerNameInput
+              value={newGuest.name}
+              onChange={(name) => setNewGuest({ ...newGuest, name })}
+              placeholder="Nome do hóspede"
+              excludeNames={guests.map((g) => g.name)}
+            />
             <Input placeholder="Idade (opcional)" value={newGuest.age} onChange={(e) => setNewGuest({ ...newGuest, age: e.target.value })} />
             <Input placeholder="Obs (aniversário, lua de mel...)" value={newGuest.notes} onChange={(e) => setNewGuest({ ...newGuest, notes: e.target.value })} />
           </div>
@@ -1623,7 +1634,13 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
             <div className="grid gap-2 sm:grid-cols-3">
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Nome Completo</label>
-                <Input className="mt-1" placeholder="João Silva" value={d.name} onChange={(e) => { const u = [...drivers]; u[i] = { ...u[i], name: e.target.value }; setDrivers(u); }} />
+                <PassengerNameInput
+                  className="mt-1"
+                  placeholder="João Silva"
+                  value={d.name}
+                  onChange={(name) => { const u = [...drivers]; u[i] = { ...u[i], name }; setDrivers(u); }}
+                  excludeNames={drivers.map((dr) => dr.name).filter((_, idx) => idx !== i)}
+                />
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Documento (CNH/Passaporte)</label>
@@ -2152,7 +2169,14 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
             <div className="grid gap-2 sm:grid-cols-3">
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Nome</label>
-                <Input className="mt-1" placeholder="Nome completo" value={p.name} onChange={(e) => { const u = [...passengers]; u[i] = { ...u[i], name: e.target.value }; setPassengers(u); }} />
+                <PassengerNameInput
+                  className="mt-1"
+                  placeholder="Nome completo"
+                  value={p.name}
+                  onChange={(name) => { const u = [...passengers]; u[i] = { ...u[i], name }; setPassengers(u); }}
+                  onSelectPassenger={(name, type) => { const u = [...passengers]; u[i] = { ...u[i], name, passenger_type: type ?? u[i].passenger_type }; setPassengers(u); }}
+                  excludeNames={passengers.map((px) => px.name).filter((_, idx) => idx !== i)}
+                />
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Tipo</label>
@@ -2606,7 +2630,12 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
             </div>
           ))}
           <div className="grid gap-2 sm:grid-cols-3">
-            <Input placeholder="Nome *" value={newPax.name} onChange={(e) => setNewPax({ ...newPax, name: e.target.value })} />
+            <PassengerNameInput
+              placeholder="Nome *"
+              value={newPax.name}
+              onChange={(name) => setNewPax({ ...newPax, name })}
+              excludeNames={passengers.map((p) => p.name)}
+            />
             <Select value={newPax.ticket_type} onValueChange={(v: any) => setNewPax({ ...newPax, ticket_type: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -3140,7 +3169,12 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         ))}
         <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
           <div className="grid gap-2 sm:grid-cols-2">
-            <Input placeholder="Nome completo" value={newInsured.name} onChange={(e) => setNewInsured({ ...newInsured, name: e.target.value })} />
+            <PassengerNameInput
+              placeholder="Nome completo"
+              value={newInsured.name}
+              onChange={(name) => setNewInsured({ ...newInsured, name })}
+              excludeNames={insuredPersons.map((p) => p.name)}
+            />
             <Input type="date" placeholder="Data de nascimento" value={newInsured.birth_date} onChange={(e) => setNewInsured({ ...newInsured, birth_date: e.target.value })} />
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -3573,7 +3607,12 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
             </div>
           ))}
           <div className="grid gap-2 sm:grid-cols-2">
-            <Input placeholder="Nome completo *" value={newPaxName} onChange={(e) => setNewPaxName(e.target.value)} />
+            <PassengerNameInput
+              placeholder="Nome completo *"
+              value={newPaxName}
+              onChange={setNewPaxName}
+              excludeNames={passengers.map((p) => p.name)}
+            />
             <Input placeholder="Data de nascimento" value={newPaxBirth} onChange={(e) => setNewPaxBirth(e.target.value)} />
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -4579,13 +4618,14 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
             </div>
           ))}
           <div className="flex gap-2">
-            <Input
-              placeholder="Nome do passageiro"
-              value={newPassengerName}
-              onChange={(e) => setNewPassengerName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addPassenger(); } }}
-              className="flex-1"
-            />
+            <div className="flex-1">
+              <PassengerNameInput
+                placeholder="Nome do passageiro"
+                value={newPassengerName}
+                onChange={setNewPassengerName}
+                excludeNames={passengers.map((p) => p.name)}
+              />
+            </div>
             <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
               {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar</>}
             </Button>

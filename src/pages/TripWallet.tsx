@@ -11,6 +11,7 @@ import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye,
 import { TripItinerary } from "@/components/trip/itinerary/TripItinerary";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
+import { PassengerPoolProvider } from "@/components/trip/PassengerPoolContext";
 import { TravelImporter } from "@/components/trip/TravelImporter";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { TripWalletList } from "@/components/trip/TripWalletList";
@@ -428,14 +429,16 @@ function TripWalletContent() {
                     <h3 className="font-medium">
                       {editingService ? "Editar " : ""}{SERVICE_TYPE_LABELS[selectedServiceType]}
                     </h3>
-                    <TripServiceForm
-                      serviceType={selectedServiceType}
-                      onSubmit={editingService ? handleUpdateService : handleAddService}
-                      onCancel={handleCancelServiceForm}
-                      isLoading={isAddingService || isUpdatingService || isUploading}
-                      defaultValues={editingService?.service_data as any}
-                      isEditing={!!editingService}
-                    />
+                    <PassengerPoolProvider services={trip.services || []}>
+                      <TripServiceForm
+                        serviceType={selectedServiceType}
+                        onSubmit={editingService ? handleUpdateService : handleAddService}
+                        onCancel={handleCancelServiceForm}
+                        isLoading={isAddingService || isUpdatingService || isUploading}
+                        defaultValues={editingService?.service_data as any}
+                        isEditing={!!editingService}
+                      />
+                    </PassengerPoolProvider>
                   </div>
                 ) : (
                   <>
