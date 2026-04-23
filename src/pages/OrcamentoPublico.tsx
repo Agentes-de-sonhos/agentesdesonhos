@@ -77,7 +77,12 @@ function getServiceSummary(service: QuoteService): string {
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
     case "circuit": return data.circuit_name || "Circuito";
-    case "other": return data.description || "Outros Serviços";
+    case "other": {
+      // Para evitar duplicação, mostra empresa OU primeira linha da descrição (curta)
+      if (data.company_name) return data.company_name;
+      const firstLine = (data.description || "").split("\n")[0].trim();
+      return firstLine.length > 80 ? firstLine.slice(0, 77) + "..." : (firstLine || "Outros Serviços");
+    }
     default: return "Serviço";
   }
 }
@@ -93,7 +98,7 @@ function getServiceName(service: QuoteService): string {
     case "insurance": return data.provider;
     case "cruise": return data.ship_name;
     case "circuit": return data.circuit_name || "Circuito";
-    case "other": return data.description || "Outros Serviços";
+    case "other": return data.company_name || "Outros Serviços";
     default: return "Serviço";
   }
 }
