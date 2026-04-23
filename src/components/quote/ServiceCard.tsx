@@ -23,6 +23,14 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
 };
 import { formatQuoteCurrency, type QuoteCurrency } from "@/lib/quoteCurrency";
 
+function getServiceLabel(service: QuoteService): string {
+  if (service.service_type === "other") {
+    const customTitle = (service.service_data as any)?.custom_title?.trim();
+    if (customTitle) return customTitle;
+  }
+  return SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
+}
+
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
 }
@@ -122,7 +130,7 @@ interface ServiceCardProps {
 export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCardProps) {
   const [open, setOpen] = useState(false);
   const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
-  const label = SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
+  const label = getServiceLabel(service);
   const details = getServiceDetails(service);
   const images = service.image_urls?.length ? service.image_urls : (service.image_url ? [service.image_url] : []);
   const hasExpandableContent = details.length > 0 || service.description || images.length > 0;
