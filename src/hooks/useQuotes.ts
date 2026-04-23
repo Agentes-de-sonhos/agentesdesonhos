@@ -46,6 +46,7 @@ export function useQuotes() {
           currency: formData.currency || "BRL",
           currency_mode: formData.currency_mode || "fixed",
           exchange_rate: formData.exchange_rate ?? null,
+          opportunity_id: formData.opportunity_id || null,
         } as any)
         .select()
         .single();

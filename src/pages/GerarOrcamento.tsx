@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronDown, CloudOff, Cloud } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,6 +118,7 @@ export default function GerarOrcamento() {
   const [destinationDraft, setDestinationDraft] = useState("");
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { quotes, isLoading: quotesLoading, createQuote, isCreating, publishQuote, isPublishing, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
@@ -356,8 +357,23 @@ export default function GerarOrcamento() {
     }
   };
 
+  // Pre-fill data coming from a CRM opportunity (via navigation state)
+  const opportunityPrefill = (location.state as {
+    opportunity_id?: string;
+    client_id?: string;
+    client_name?: string;
+    destination?: string;
+    start_date?: string | null;
+    end_date?: string | null;
+    adults_count?: number;
+    children_count?: number;
+  } | null) || null;
+
   const handleCreateQuote = async (formData: QuoteFormData) => {
-    const newQuote = await createQuote(formData);
+    const newQuote = await createQuote({
+      ...formData,
+      opportunity_id: opportunityPrefill?.opportunity_id || formData.opportunity_id || null,
+    });
     incrementUsage();
     setDraftBanner(null);
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
@@ -517,7 +533,23 @@ export default function GerarOrcamento() {
             <Card className="lg:col-span-2">
               <CardHeader><CardTitle>Novo Orçamento</CardTitle></CardHeader>
               <CardContent>
-                <QuoteClientForm onSubmit={handleCreateQuote} isLoading={isCreating} />
+                <QuoteClientForm
+                  onSubmit={handleCreateQuote}
+                  isLoading={isCreating}
+                  defaults={
+                    opportunityPrefill
+                      ? {
+                          client_id: opportunityPrefill.client_id,
+                          client_name: opportunityPrefill.client_name,
+                          destination: opportunityPrefill.destination,
+                          start_date: opportunityPrefill.start_date,
+                          end_date: opportunityPrefill.end_date,
+                          adults_count: opportunityPrefill.adults_count,
+                          children_count: opportunityPrefill.children_count,
+                        }
+                      : undefined
+                  }
+                />
               </CardContent>
             </Card>
 

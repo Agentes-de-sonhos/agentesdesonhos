@@ -1,0 +1,2 @@
+ALTER TABLE public.quotes ADD COLUMN IF NOT EXISTS opportunity_id uuid REFERENCES public.opportunities(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_quotes_opportunity_id ON public.quotes(opportunity_id) WHERE opportunity_id IS NOT NULL;

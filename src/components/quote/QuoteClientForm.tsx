@@ -66,22 +66,64 @@ type FormValues = z.infer<typeof formSchema>;
 interface QuoteClientFormProps {
   onSubmit: (data: QuoteFormData) => void;
   isLoading?: boolean;
+  /**
+   * Optional initial data for pre-filling the form (e.g., when navigating
+   * here from a CRM opportunity). When provided, these values take precedence
+   * over any locally persisted draft.
+   */
+  defaults?: {
+    client_id?: string | null;
+    client_name?: string | null;
+    destination?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
+    adults_count?: number | null;
+    children_count?: number | null;
+  };
 }
 
-export function QuoteClientForm({ onSubmit, isLoading }: QuoteClientFormProps) {
+export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
+  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(
+    defaults?.client_id && defaults?.client_name
+      ? { id: defaults.client_id, name: defaults.client_name }
+      : null
+  );
   const [clientError, setClientError] = useState("");
   const [currency, setCurrency] = useState<QuoteCurrency>("BRL");
   const [currencyMode, setCurrencyMode] = useState<CurrencyMode>("fixed");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("quote-client");
 
-  const draft = loadDraft();
+  // When defaults are present (e.g., coming from an opportunity), skip the
+  // saved local draft to avoid mixing data from a previous unrelated session.
+  const draft = defaults ? null : loadDraft();
+
+  const parseDateOnly = (s?: string | null): Date | undefined => {
+    if (!s) return undefined;
+    const [y, m, d] = s.split("-").map(Number);
+    if (y && m && d) return new Date(y, m - 1, d);
+    const parsed = new Date(s);
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+  };
+
+  const defaultsFromTrigger = defaults
+    ? {
+        client_name: defaults.client_name || "",
+        adults_count: defaults.adults_count ?? 2,
+        children_count: defaults.children_count ?? 0,
+        destination: defaults.destination || "",
+        trip_type: "round_trip" as const,
+        dateRange: {
+          from: parseDateOnly(defaults.start_date) as any,
+          to: parseDateOnly(defaults.end_date),
+        },
+      }
+    : null;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: defaultsFromTrigger ?? {
       client_name: draft?.client_name || "",
       adults_count: draft?.adults_count || 2,
       children_count: draft?.children_count || 0,
