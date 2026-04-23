@@ -2169,7 +2169,14 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
             <div className="grid gap-2 sm:grid-cols-3">
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Nome</label>
-                <Input className="mt-1" placeholder="Nome completo" value={p.name} onChange={(e) => { const u = [...passengers]; u[i] = { ...u[i], name: e.target.value }; setPassengers(u); }} />
+                <PassengerNameInput
+                  className="mt-1"
+                  placeholder="Nome completo"
+                  value={p.name}
+                  onChange={(name) => { const u = [...passengers]; u[i] = { ...u[i], name }; setPassengers(u); }}
+                  onSelectPassenger={(name, type) => { const u = [...passengers]; u[i] = { ...u[i], name, passenger_type: type ?? u[i].passenger_type }; setPassengers(u); }}
+                  excludeNames={passengers.map((px) => px.name).filter((_, idx) => idx !== i)}
+                />
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Tipo</label>
