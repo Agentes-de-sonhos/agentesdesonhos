@@ -63,6 +63,8 @@ export interface Opportunity {
   start_date: string | null;
   end_date: string | null;
   passengers_count: number;
+  adults_count: number;
+  children_count: number;
   estimated_value: number;
   notes: string | null;
   stage: OpportunityStage;

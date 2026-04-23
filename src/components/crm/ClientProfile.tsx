@@ -454,7 +454,16 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
                         <div key={opp.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                           <div>
                             <p className="font-medium">{opp.destination}</p>
-                            <p className="text-xs text-muted-foreground">{opp.passengers_count} passageiros</p>
+                            <p className="text-xs text-muted-foreground">
+                              {(() => {
+                                const adults = opp.adults_count ?? opp.passengers_count ?? 0;
+                                const children = opp.children_count ?? 0;
+                                const adultsLabel = `${adults} adulto${adults === 1 ? "" : "s"}`;
+                                return children > 0
+                                  ? `${adultsLabel} + ${children} criança${children === 1 ? "" : "s"}`
+                                  : adultsLabel;
+                              })()}
+                            </p>
                           </div>
                           <span className="font-medium">{formatCurrency(opp.estimated_value)}</span>
                         </div>
