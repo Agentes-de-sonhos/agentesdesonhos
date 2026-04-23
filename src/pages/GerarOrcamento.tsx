@@ -33,6 +33,7 @@ import { ServiceList } from "@/components/quote/ServiceCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
+import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
