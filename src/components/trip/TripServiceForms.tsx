@@ -4618,13 +4618,14 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
             </div>
           ))}
           <div className="flex gap-2">
-            <Input
-              placeholder="Nome do passageiro"
-              value={newPassengerName}
-              onChange={(e) => setNewPassengerName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addPassenger(); } }}
-              className="flex-1"
-            />
+            <div className="flex-1">
+              <PassengerNameInput
+                placeholder="Nome do passageiro"
+                value={newPassengerName}
+                onChange={setNewPassengerName}
+                excludeNames={passengers.map((p) => p.name)}
+              />
+            </div>
             <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
               {isEditingPax ? <><Pencil className="h-3 w-3 mr-1" /> Salvar</> : <><Plus className="h-3 w-3 mr-1" /> Adicionar</>}
             </Button>
