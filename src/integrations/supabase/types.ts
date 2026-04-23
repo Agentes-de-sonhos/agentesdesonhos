@@ -5975,6 +5975,7 @@ export type Database = {
           file_size: number | null
           file_type: string | null
           id: string
+          is_public: boolean
           quote_id: string
           user_id: string
         }
@@ -5985,6 +5986,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
+          is_public?: boolean
           quote_id: string
           user_id: string
         }
@@ -5995,6 +5997,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
+          is_public?: boolean
           quote_id?: string
           user_id?: string
         }
