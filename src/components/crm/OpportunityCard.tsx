@@ -79,6 +79,8 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   };
 
   const handleCreateQuote = () => {
+    const adults = opportunity.adults_count ?? opportunity.passengers_count ?? 1;
+    const children = opportunity.children_count ?? 0;
     navigate(`/ferramentas-ia/gerar-orcamento`, {
       state: {
         opportunity_id: opportunity.id,
@@ -87,8 +89,8 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         destination: opportunity.destination,
         start_date: opportunity.start_date,
         end_date: opportunity.end_date,
-        adults_count: opportunity.passengers_count,
-        children_count: 0,
+        adults_count: adults,
+        children_count: children,
       },
     });
   };
@@ -182,10 +184,20 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
             )}
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Users className="h-3.5 w-3.5" />
-                  <span>{opportunity.passengers_count} pax</span>
+                  <span>
+                    {(() => {
+                      const adults = opportunity.adults_count ?? opportunity.passengers_count ?? 0;
+                      const children = opportunity.children_count ?? 0;
+                      const adultsLabel = `${adults} adulto${adults === 1 ? "" : "s"}`;
+                      if (children > 0) {
+                        return `${adultsLabel} + ${children} criança${children === 1 ? "" : "s"}`;
+                      }
+                      return adultsLabel;
+                    })()}
+                  </span>
                 </div>
                 {isOverdue && (
                   <Tooltip>

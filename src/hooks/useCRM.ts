@@ -297,6 +297,8 @@ export function useOpportunities() {
       start_date?: string;
       end_date?: string;
       passengers_count: number;
+      adults_count: number;
+      children_count: number;
       estimated_value: number;
       notes?: string;
       follow_up_date?: string;

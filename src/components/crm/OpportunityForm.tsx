@@ -37,7 +37,8 @@ const opportunitySchema = z.object({
   destination: z.string().min(2, "Destino é obrigatório"),
   start_date: z.date().optional(),
   end_date: z.date().optional(),
-  passengers_count: z.number().min(1, "Mínimo 1 passageiro"),
+  adults_count: z.number().min(1, "Mínimo 1 adulto"),
+  children_count: z.number().min(0, "Não pode ser negativo"),
   estimated_value: z.number().min(0),
   notes: z.string().optional(),
   follow_up_date: z.date().optional(),
@@ -62,7 +63,8 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
       destination: opportunity?.destination || "",
       start_date: opportunity?.start_date ? new Date(opportunity.start_date) : undefined,
       end_date: opportunity?.end_date ? new Date(opportunity.end_date) : undefined,
-      passengers_count: opportunity?.passengers_count || 1,
+      adults_count: opportunity?.adults_count ?? opportunity?.passengers_count ?? 1,
+      children_count: opportunity?.children_count ?? 0,
       estimated_value: opportunity?.estimated_value || 0,
       notes: opportunity?.notes || "",
       follow_up_date: opportunity?.follow_up_date ? new Date(opportunity.follow_up_date) : undefined,
@@ -70,12 +72,15 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
   });
 
   const handleSubmit = async (data: FormData) => {
+    const totalPassengers = (data.adults_count || 0) + (data.children_count || 0);
     const payload = {
       client_id: data.client_id,
       destination: data.destination,
       start_date: data.start_date ? format(data.start_date, "yyyy-MM-dd") : undefined,
       end_date: data.end_date ? format(data.end_date, "yyyy-MM-dd") : undefined,
-      passengers_count: data.passengers_count,
+      adults_count: data.adults_count,
+      children_count: data.children_count,
+      passengers_count: totalPassengers,
       estimated_value: data.estimated_value,
       notes: data.notes,
       follow_up_date: data.follow_up_date ? format(data.follow_up_date, "yyyy-MM-dd") : undefined,
@@ -189,10 +194,10 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
-            name="passengers_count"
+            name="adults_count"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Passageiros</FormLabel>
+                <FormLabel>Adultos</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -207,17 +212,16 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
           />
           <FormField
             control={form.control}
-            name="estimated_value"
+            name="children_count"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Valor Estimado (R$)</FormLabel>
+                <FormLabel>Crianças</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     min={0}
-                    step="0.01"
                     {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -225,6 +229,26 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="estimated_value"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Valor Estimado (R$)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
