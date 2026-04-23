@@ -143,6 +143,8 @@ export interface OtherServiceData {
   company_name?: string;
   description: string;
   price: number;
+  /** Título customizado do bloco "Outros Serviços". Se vazio, usa "Outros Serviços". */
+  custom_title?: string;
 }
 
 export interface CircuitData {
