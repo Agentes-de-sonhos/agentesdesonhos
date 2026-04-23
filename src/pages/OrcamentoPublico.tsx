@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
+import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map } from "lucide-react";
@@ -295,6 +296,17 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const quote = quoteOverride ?? fetchedQuote;
   const isLoading = quoteOverride ? false : isFetching;
   const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(0);
+
+  // Auto-redirect legacy vitrine.tur.br/orcamento/* links to the new domain
+  // so any cached or previously shared link lands on the correct host.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const host = window.location.hostname;
+    if (host === "vitrine.tur.br" || host === "www.vitrine.tur.br") {
+      const target = `${ORCAMENTO_DOMAIN}${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.location.replace(target);
+    }
+  }, []);
 
   useEffect(() => {
     setOgMeta({
