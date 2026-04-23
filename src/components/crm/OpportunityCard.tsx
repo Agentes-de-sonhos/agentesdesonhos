@@ -81,11 +81,14 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const handleCreateQuote = () => {
     navigate(`/ferramentas-ia/gerar-orcamento`, {
       state: {
+        opportunity_id: opportunity.id,
+        client_id: opportunity.client_id,
         client_name: opportunity.client?.name,
         destination: opportunity.destination,
         start_date: opportunity.start_date,
         end_date: opportunity.end_date,
         adults_count: opportunity.passengers_count,
+        children_count: 0,
       },
     });
   };
