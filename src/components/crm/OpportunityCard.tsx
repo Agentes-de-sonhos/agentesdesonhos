@@ -14,6 +14,8 @@ import {
   History,
   Clock,
   AlertTriangle,
+  MessageSquare,
+  Tag,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,7 +50,12 @@ import {
 } from "@/components/ui/tooltip";
 import { OpportunityForm } from "./OpportunityForm";
 import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
+import { OpportunityDetailsDrawer } from "./OpportunityDetailsDrawer";
 import { useOpportunities } from "@/hooks/useCRM";
+import {
+  useOpportunityNotesCounts,
+  useOpportunityLabelAssignments,
+} from "@/hooks/useOpportunityExtras";
 import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, type Opportunity, type OpportunityStage } from "@/types/crm";
 import { cn } from "@/lib/utils";
 
@@ -69,9 +76,15 @@ function formatCurrency(value: number) {
 export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColor }: OpportunityCardProps) {
   const navigate = useNavigate();
   const { deleteOpportunity } = useOpportunities();
+  const notesCounts = useOpportunityNotesCounts();
+  const { byOpportunity } = useOpportunityLabelAssignments();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  const notesCount = notesCounts[opportunity.id] || 0;
+  const appliedLabels = byOpportunity[opportunity.id] || [];
 
   const handleDelete = async () => {
     await deleteOpportunity(opportunity.id);
@@ -116,12 +129,37 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
       <Card
         draggable
         onDragStart={(e) => onDragStart(e, opportunity.id)}
+        onClick={(e) => {
+          // Avoid opening when interacting with menu/buttons
+          if ((e.target as HTMLElement).closest("button, [role='menuitem'], [role='menu']"))
+            return;
+          setShowDetails(true);
+        }}
         className={cn(
           "cursor-grab active:cursor-grabbing transition-all hover:shadow-lg hover:-translate-y-0.5 bg-card border",
           isOverdue && "ring-2 ring-destructive/60 shadow-destructive/10"
         )}
       >
         <CardContent className="p-3.5">
+          {/* Labels strip (top) */}
+          {appliedLabels.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {appliedLabels.slice(0, 4).map((label) => (
+                <span
+                  key={label.id}
+                  className="inline-block h-1.5 w-9 rounded-full"
+                  style={{ backgroundColor: label.color }}
+                  title={label.name}
+                />
+              ))}
+              {appliedLabels.length > 4 && (
+                <span className="text-[10px] text-muted-foreground">
+                  +{appliedLabels.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Header: client name + menu */}
           <div className="flex items-start justify-between gap-2 mb-2.5">
             <div className="flex-1 min-w-0">
@@ -142,6 +180,9 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowDetails(true)}>
+                  <MessageSquare className="mr-2 h-4 w-4" /> Anotações & Etiquetas
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsEditing(true)}>
                   <Edit2 className="mr-2 h-4 w-4" /> Editar
                 </DropdownMenuItem>
@@ -214,9 +255,20 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
             </div>
 
             {/* Time in stage - subtle */}
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground/70 pt-1.5 border-t border-border/50">
-              <Clock className="h-3 w-3" />
-              <span>Há {timeInStage} nesta etapa</span>
+            <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-border/50">
+              <div className="flex items-center gap-1 text-[11px] text-muted-foreground/70">
+                <Clock className="h-3 w-3" />
+                <span>Há {timeInStage} nesta etapa</span>
+              </div>
+              {notesCount > 0 && (
+                <div
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground"
+                  title={`${notesCount} anotação(ões)`}
+                >
+                  <MessageSquare className="h-3 w-3" />
+                  <span>{notesCount}</span>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
@@ -239,6 +291,12 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         opportunityId={opportunity.id}
         open={showHistory}
         onOpenChange={setShowHistory}
+      />
+
+      <OpportunityDetailsDrawer
+        opportunity={opportunity}
+        open={showDetails}
+        onOpenChange={setShowDetails}
       />
 
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>

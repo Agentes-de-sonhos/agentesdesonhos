@@ -5084,6 +5084,107 @@ export type Database = {
           },
         ]
       }
+      opportunity_label_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          label_id: string
+          opportunity_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label_id: string
+          opportunity_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label_id?: string
+          opportunity_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_label_assignments_label_id_fkey"
+            columns: ["label_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_labels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_label_assignments_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_labels: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      opportunity_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          opportunity_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          opportunity_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          opportunity_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_notes_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_banners: {
         Row: {
           banner_url: string | null
