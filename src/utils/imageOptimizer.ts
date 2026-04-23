@@ -4,11 +4,11 @@
  */
 
 const MAX_WIDTH = 1200;
+const MAX_HEIGHT = 1600; // Allow taller images (vertical photos) without cropping
 const QUALITY = 0.75;
 const THUMB_WIDTH = 400;
 const THUMB_QUALITY = 0.6;
 const MAX_FILE_SIZE_MB = 10;
-const ASPECT_RATIO = 4 / 3; // target w/h
 
 export interface OptimizedResult {
   full: Blob;
@@ -41,39 +41,21 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   });
 }
 
-/** Center-crop to target aspect ratio, then resize and compress */
+/** Resize proportionally (no cropping) and compress to WebP */
 function processCanvas(
   img: HTMLImageElement,
   maxWidth: number,
   quality: number
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    // Calculate center crop for 4:3
-    let srcW = img.naturalWidth;
-    let srcH = img.naturalHeight;
-    let cropX = 0;
-    let cropY = 0;
-
-    const currentRatio = srcW / srcH;
-    if (currentRatio > ASPECT_RATIO) {
-      // Too wide — crop sides
-      const newW = Math.round(srcH * ASPECT_RATIO);
-      cropX = Math.round((srcW - newW) / 2);
-      srcW = newW;
-    } else if (currentRatio < ASPECT_RATIO) {
-      // Too tall — crop top/bottom
-      const newH = Math.round(srcW / ASPECT_RATIO);
-      cropY = Math.round((srcH - newH) / 2);
-      srcH = newH;
-    }
-
-    // Target dimensions
-    let outW = srcW;
-    let outH = srcH;
-    if (outW > maxWidth) {
-      outW = maxWidth;
-      outH = Math.round(maxWidth / ASPECT_RATIO);
-    }
+    // Preserve original aspect ratio — no cropping.
+    // Scale down so the longest side fits within the max bounds.
+    const srcW = img.naturalWidth;
+    const srcH = img.naturalHeight;
+    const maxH = Math.round((maxWidth / MAX_WIDTH) * MAX_HEIGHT); // proportional cap for thumbs
+    const scale = Math.min(1, maxWidth / srcW, maxH / srcH);
+    const outW = Math.max(1, Math.round(srcW * scale));
+    const outH = Math.max(1, Math.round(srcH * scale));
 
     const canvas = document.createElement("canvas");
     canvas.width = outW;
@@ -81,7 +63,7 @@ function processCanvas(
     const ctx = canvas.getContext("2d");
     if (!ctx) return reject(new Error("Canvas not supported"));
 
-    ctx.drawImage(img, cropX, cropY, srcW, srcH, 0, 0, outW, outH);
+    ctx.drawImage(img, 0, 0, srcW, srcH, 0, 0, outW, outH);
 
     // Try WebP first, fallback to JPEG
     canvas.toBlob(
@@ -103,7 +85,7 @@ function processCanvas(
   });
 }
 
-/** Optimize an image file: resize, crop 4:3, compress to WebP, generate thumbnail */
+/** Optimize an image file: resize proportionally, compress to WebP, generate thumbnail */
 export async function optimizeImage(file: File): Promise<OptimizedResult> {
   const img = await loadImage(file);
 
@@ -114,13 +96,14 @@ export async function optimizeImage(file: File): Promise<OptimizedResult> {
 
   URL.revokeObjectURL(img.src);
 
+  const scale = Math.min(1, MAX_WIDTH / img.naturalWidth, MAX_HEIGHT / img.naturalHeight);
   return {
     full,
     thumb,
     originalSize: file.size,
     optimizedSize: full.size,
-    width: Math.min(img.naturalWidth, MAX_WIDTH),
-    height: Math.round(Math.min(img.naturalWidth, MAX_WIDTH) / ASPECT_RATIO),
+    width: Math.max(1, Math.round(img.naturalWidth * scale)),
+    height: Math.max(1, Math.round(img.naturalHeight * scale)),
   };
 }
 
