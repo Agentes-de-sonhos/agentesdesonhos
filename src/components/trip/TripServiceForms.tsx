@@ -1222,7 +1222,12 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
         ))}
         <div className="border rounded-lg p-3 space-y-2 bg-muted/10">
           <div className="grid gap-2 sm:grid-cols-3">
-            <Input placeholder="Nome do hóspede" value={newGuest.name} onChange={(e) => setNewGuest({ ...newGuest, name: e.target.value })} />
+            <PassengerNameInput
+              value={newGuest.name}
+              onChange={(name) => setNewGuest({ ...newGuest, name })}
+              placeholder="Nome do hóspede"
+              excludeNames={guests.map((g) => g.name)}
+            />
             <Input placeholder="Idade (opcional)" value={newGuest.age} onChange={(e) => setNewGuest({ ...newGuest, age: e.target.value })} />
             <Input placeholder="Obs (aniversário, lua de mel...)" value={newGuest.notes} onChange={(e) => setNewGuest({ ...newGuest, notes: e.target.value })} />
           </div>
