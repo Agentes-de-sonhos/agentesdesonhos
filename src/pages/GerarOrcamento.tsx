@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronDown, CloudOff, Cloud } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
-import { PUBLIC_DOMAIN } from "@/lib/platform-version";
-import { buildOrcamentoLink } from "@/lib/orcamento-domain";
+import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -373,13 +372,15 @@ export default function GerarOrcamento() {
     if (!quote) return;
 
     const token = quote.share_token || await publishQuote(quote.id);
-    
-    // Use new format if public_access_code exists and agent has agency name
+
+    // Always use the seuorcamento.tur.br domain. Prefer the new format
+    // (agency-slug + access-code) when available; otherwise fall back to the
+    // legacy /orcamento/:token route on the same domain.
     const accessCode = (quote as any).public_access_code;
     const agencyName = agentProfile?.agency_name;
     const publicUrl = accessCode && agencyName
       ? buildOrcamentoLink(agencyName, accessCode)
-      : `${PUBLIC_DOMAIN}/orcamento/${token}`;
+      : `${ORCAMENTO_DOMAIN}/orcamento/${token}`;
 
     clearLocalDraft();
     await navigator.clipboard.writeText(publicUrl);
