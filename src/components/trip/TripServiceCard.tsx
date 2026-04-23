@@ -225,11 +225,11 @@ export function TripServiceCard({
       <CardContent className="p-4">
         {/* Service image banner */}
         {service.image_url && (
-          <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg">
+          <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted flex items-center justify-center">
             <img
               src={service.image_url}
               alt={label}
-              className="w-full h-32 object-cover"
+              className="w-full max-h-64 object-contain"
             />
             {showActions && onRemoveServiceImage && (
               <Button
