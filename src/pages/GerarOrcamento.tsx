@@ -749,10 +749,26 @@ export default function GerarOrcamento() {
 
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-4">
-            {/* Serviços */}
+            {/* Serviços - Collapsible */}
             <Card>
-              <CardHeader><CardTitle>Serviços</CardTitle></CardHeader>
-              <CardContent>
+              <button
+                type="button"
+                onClick={() => toggleSection("services")}
+                className="w-full flex items-center justify-between px-6 py-4 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <Plus className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-base font-semibold">Serviços</span>
+                  {quote.services && quote.services.length > 0 && (
+                    <span className="text-xs font-normal text-muted-foreground">
+                      ({quote.services.length})
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.services && "rotate-180")} />
+              </button>
+              {openSections.services && (
+              <CardContent className="pt-0">
                 {selectedServiceType ? (
                   <div className="space-y-4">
                     <h3 className="font-medium">
