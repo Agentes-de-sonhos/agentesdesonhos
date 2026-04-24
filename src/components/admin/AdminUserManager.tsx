@@ -59,6 +59,24 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { setImpersonationData, type ImpersonationData } from "./ImpersonationBanner";
 import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
+import { PLAN_LABELS, type SubscriptionPlan } from "@/types/subscription";
+
+const ROLE_OPTIONS: { value: "admin" | "agente" | "promotor" | "fornecedor"; label: string }[] = [
+  { value: "agente", label: "Agente" },
+  { value: "admin", label: "Admin" },
+  { value: "promotor", label: "Promotor" },
+  { value: "fornecedor", label: "Fornecedor" },
+];
+
+const PLAN_OPTIONS: { value: SubscriptionPlan; label: string }[] = [
+  { value: "start", label: PLAN_LABELS.start },
+  { value: "educa_pass", label: PLAN_LABELS.educa_pass },
+  { value: "cartao_digital", label: PLAN_LABELS.cartao_digital },
+  { value: "essencial", label: PLAN_LABELS.essencial },
+  { value: "profissional", label: PLAN_LABELS.profissional },
+  { value: "premium", label: PLAN_LABELS.premium },
+  { value: "fundador", label: PLAN_LABELS.fundador },
+];
 
 interface UserWithDetails {
   id: string;
