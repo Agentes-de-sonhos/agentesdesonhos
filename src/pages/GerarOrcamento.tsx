@@ -161,7 +161,13 @@ export default function GerarOrcamento() {
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
-  const [openSection, setOpenSection] = useState<"payment" | "validity" | null>(null);
+  const [openSections, setOpenSections] = useState<Record<"payment" | "validity" | "documents", boolean>>({
+    payment: false,
+    validity: false,
+    documents: false,
+  });
+  const toggleSection = (key: "payment" | "validity" | "documents") =>
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
   // Check for unsaved draft on mount (only on list screen)
