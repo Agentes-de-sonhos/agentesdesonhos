@@ -192,6 +192,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const [showFlightDetails, setShowFlightDetails] = useState(
     !!(init?.outbound_detail || init?.return_detail || init?.outbound_legs?.length || init?.return_legs?.length)
   );
+  const [showPricing, setShowPricing] = useState(
+    !!(init?.adult_price || init?.child_price)
+  );
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
   const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
 
