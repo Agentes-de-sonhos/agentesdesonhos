@@ -886,10 +886,100 @@ export default function GerarOrcamento() {
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                   <span className="text-base font-semibold">Apresentação do Investimento</span>
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.payment && "rotate-180")} />
+                <div className="flex items-center gap-3">
+                  <span
+                    role="switch"
+                    aria-checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex"
+                  >
+                    <Switch
+                      id="show-investment-header"
+                      checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
+                      onCheckedChange={async (checked) => {
+                        if (!quote) return;
+                        setShowInvestmentLocal(checked);
+                        if (!checked) {
+                          // Disabling investment → automatically show detailed prices per service
+                          setShowDetailedLocal(true);
+                          await supabase
+                            .from("quotes")
+                            .update({ show_investment_section: false, show_detailed_prices: true } as any)
+                            .eq("id", quote.id);
+                        } else {
+                          await supabase
+                            .from("quotes")
+                            .update({ show_investment_section: true } as any)
+                            .eq("id", quote.id);
+                        }
+                      }}
+                    />
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.payment && "rotate-180")} />
+                </div>
               </button>
               {openSections.payment && (
                 <CardContent className="space-y-4 pt-0">
+                  {/* Tri-state display selector — centralizes financial display logic */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
+                    {(() => {
+                      const investOn = showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false;
+                      const detailedOn = showDetailed;
+                      const currentMode: "investment" | "detailed" | "both" =
+                        investOn && detailedOn ? "both" : investOn ? "investment" : "detailed";
+                      const modes: { value: "investment" | "detailed" | "both"; label: string; description: string }[] = [
+                        { value: "investment", label: "Apenas Apresentação do Investimento", description: "Mostra valor total e condições de pagamento." },
+                        { value: "detailed", label: "Apenas Valores Detalhados por Serviço", description: "Mostra o valor de cada serviço separadamente." },
+                        { value: "both", label: "Ambos (Apresentação + Valores Detalhados)", description: "Exibe a apresentação e o detalhamento por serviço." },
+                      ];
+                      const applyMode = async (mode: "investment" | "detailed" | "both") => {
+                        if (!quote) return;
+                        const nextInvestment = mode === "investment" || mode === "both";
+                        const nextDetailed = mode === "detailed" || mode === "both";
+                        setShowInvestmentLocal(nextInvestment);
+                        setShowDetailedLocal(nextDetailed);
+                        await supabase
+                          .from("quotes")
+                          .update({
+                            show_investment_section: nextInvestment,
+                            show_detailed_prices: nextDetailed,
+                          } as any)
+                          .eq("id", quote.id);
+                      };
+                      return (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {modes.map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => applyMode(opt.value)}
+                              className={cn(
+                                "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
+                                currentMode === opt.value
+                                  ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                  : "border-border hover:border-border/80 hover:bg-muted/30"
+                              )}
+                            >
+                              <div className={cn(
+                                "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                                currentMode === opt.value ? "border-primary" : "border-muted-foreground/40"
+                              )}>
+                                {currentMode === opt.value && <div className="h-2 w-2 rounded-full bg-primary" />}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{opt.label}</p>
+                                <p className="text-xs text-muted-foreground">{opt.description}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <Separator />
+
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
