@@ -210,8 +210,19 @@ function TripWalletContent() {
   const handleUploadServiceImage = async (serviceId: string, file: File) => {
     try {
       setIsUploading(true);
-      const result = await uploadVoucher(file);
-      await supabase.from("trip_services").update({ image_url: result.url }).eq("id", serviceId);
+      // Upload to public bucket (same pattern as Orçamentos) so the image
+      // can be displayed directly via public URL — no signed URL needed.
+      const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `trip-services/${id}/${crypto.randomUUID()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from("quote-images")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("quote-images").getPublicUrl(path);
+      await supabase
+        .from("trip_services")
+        .update({ image_url: urlData.publicUrl })
+        .eq("id", serviceId);
       queryClient.invalidateQueries({ queryKey: ["trip", id] });
       toast({ title: "Imagem adicionada" });
     } catch (err: any) {
