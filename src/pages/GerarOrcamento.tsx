@@ -978,16 +978,16 @@ export default function GerarOrcamento() {
             <Card>
               <button
                 type="button"
-                onClick={() => setOpenSection(openSection === "validity" ? null : "validity")}
+                onClick={() => toggleSection("validity")}
                 className="w-full flex items-center justify-between px-6 py-4 text-left"
               >
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-base font-semibold">Validade e Termos</span>
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSection === "validity" && "rotate-180")} />
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.validity && "rotate-180")} />
               </button>
-              {openSection === "validity" && (
+              {openSections.validity && (
                 <CardContent className="space-y-3 pt-0">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
@@ -1020,6 +1020,14 @@ export default function GerarOrcamento() {
                 </CardContent>
               )}
             </Card>
+
+            {/* Documentos do Orçamento - Collapsible */}
+            <QuoteDocuments
+              quoteId={quote.id}
+              userId={quote.user_id}
+              isOpen={openSections.documents}
+              onToggle={() => toggleSection("documents")}
+            />
           </div>
           <div className="space-y-4">
             <QuoteSummary quote={quote} />
