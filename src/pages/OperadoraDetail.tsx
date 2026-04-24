@@ -195,7 +195,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
 
         {/* Hero */}
         {wrap(
-          <OperatorHero name={operator.name} category={operator.category} logoUrl={operator.logo_url} averageRating={averageRating} totalReviews={totalReviews} onReviewClick={handleReviewClick} />,
+          <OperatorHero name={operator.name} category={operator.category} logoUrl={operator.logo_url} averageRating={averageRating} totalReviews={totalReviews} onReviewClick={handleReviewClick} hideRating />,
           <HeroEditForm name={editName} logoUrl={editLogo} onNameChange={setEditName} onLogoChange={setEditLogo} />,
           async () => { await updateMutation.mutateAsync({ name: editName, logo_url: editLogo }); },
           () => { setEditName(operator.name); setEditLogo(operator.logo_url); }
@@ -320,8 +320,8 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
 
 
 
-            {/* 8. Avaliações */}
-            <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} isAdmin={isAdmin} onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })} isDeleting={deleteReview.isPending} />
+            {/* 8. Avaliações — desativadas para operadoras (mantidas no banco) */}
+            {/* <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} isAdmin={isAdmin} onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })} isDeleting={deleteReview.isPending} /> */}
 
             {/* 9. Materiais de Divulgação */}
             <SupplierMaterialsCard supplierId={operator.id} supplierName={operator.name} />
@@ -414,7 +414,8 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
         </div>
       </div>
 
-      <OperatorReviewModal open={reviewModalOpen} onOpenChange={setReviewModalOpen} onSubmit={(data: any) => { submitReview.mutate(data, { onSuccess: () => setReviewModalOpen(false) }); }} isSubmitting={submitReview.isPending} existingReview={userReview} operatorName={operator.name} />
+      {/* Modal de avaliação de operadora desativado */}
+      {/* <OperatorReviewModal open={reviewModalOpen} onOpenChange={setReviewModalOpen} onSubmit={(data: any) => { submitReview.mutate(data, { onSuccess: () => setReviewModalOpen(false) }); }} isSubmitting={submitReview.isPending} existingReview={userReview} operatorName={operator.name} /> */}
     </DashboardLayout>
   );
 }
