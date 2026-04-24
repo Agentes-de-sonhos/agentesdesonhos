@@ -83,7 +83,7 @@ function UpsellGrid({
       className={
         isFlex
           ? 'flex flex-nowrap overflow-x-auto pb-2 gap-3 w-full'
-          : 'grid grid-cols-3 sm:grid-cols-4 lg:[grid-template-columns:repeat(auto-fill,minmax(140px,175px))] justify-start gap-3 w-full'
+          : 'grid grid-cols-3 sm:grid-cols-4 lg:[grid-template-columns:repeat(auto-fill,minmax(140px,175px))] justify-items-stretch gap-2 sm:gap-3 w-full'
       }
     >
       {items.map((item) => {
@@ -92,19 +92,19 @@ function UpsellGrid({
           <button
             key={item.label}
             onClick={onClick}
-            className={`${item.bg} ${item.text} ${isFlex ? 'flex-shrink-0' : 'w-full'} aspect-square rounded-2xl p-3 flex flex-col items-center justify-center text-center gap-2 transition-all hover:scale-105 hover:shadow-md cursor-pointer`}
+            className={`${item.bg} ${item.text} ${isFlex ? 'flex-shrink-0' : 'w-full'} aspect-square rounded-2xl p-2 sm:p-3 flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 transition-all hover:scale-105 hover:shadow-md cursor-pointer overflow-hidden`}
             style={{
               maxWidth: `${maxSize}px`,
               maxHeight: `${maxSize}px`,
               minWidth: isFlex ? `${maxSize}px` : undefined,
             }}
           >
-            <Icon className="h-7 w-7" strokeWidth={2} />
-            <span className="text-xs sm:text-sm font-semibold leading-tight">
+            <Icon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0" strokeWidth={2} />
+            <span className="text-[11px] sm:text-sm font-semibold leading-tight line-clamp-3 break-words">
               {item.label}
             </span>
             {item.limited && (
-              <span className="text-[10px] opacity-80">*Limitado</span>
+              <span className="text-[9px] sm:text-[10px] opacity-80 shrink-0">*Limitado</span>
             )}
           </button>
         );
