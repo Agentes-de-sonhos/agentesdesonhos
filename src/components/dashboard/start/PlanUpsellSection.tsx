@@ -80,10 +80,11 @@ function UpsellGrid({
   const isFlex = layout === 'flex';
   return (
     <div 
-      className={`${isFlex ? 'flex flex-nowrap overflow-x-auto pb-2' : 'grid justify-start'} gap-3 w-full`}
-      style={isFlex ? {} : { 
-        gridTemplateColumns: `repeat(auto-fill, minmax(140px, ${maxSize}px))`,
-      }}
+      className={
+        isFlex
+          ? 'flex flex-nowrap overflow-x-auto pb-2 gap-3 w-full'
+          : 'grid grid-cols-3 sm:grid-cols-4 lg:[grid-template-columns:repeat(auto-fill,minmax(140px,175px))] justify-start gap-3 w-full'
+      }
     >
       {items.map((item) => {
         const Icon = item.icon;
@@ -92,10 +93,10 @@ function UpsellGrid({
             key={item.label}
             onClick={onClick}
             className={`${item.bg} ${item.text} ${isFlex ? 'flex-shrink-0' : 'w-full'} aspect-square rounded-2xl p-3 flex flex-col items-center justify-center text-center gap-2 transition-all hover:scale-105 hover:shadow-md cursor-pointer`}
-            style={{ 
-              maxWidth: `${maxSize}px`, 
+            style={{
+              maxWidth: `${maxSize}px`,
               maxHeight: `${maxSize}px`,
-              minWidth: isFlex ? `${maxSize}px` : '140px',
+              minWidth: isFlex ? `${maxSize}px` : undefined,
             }}
           >
             <Icon className="h-7 w-7" strokeWidth={2} />
