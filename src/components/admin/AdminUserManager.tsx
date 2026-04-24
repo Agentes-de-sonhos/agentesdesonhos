@@ -49,6 +49,7 @@ import {
   KeyRound,
   Trash2,
   Eye,
+  EyeOff,
   Settings2,
   LogOut,
 } from "lucide-react";
@@ -103,7 +104,8 @@ export function AdminUserManager() {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [deletingUser, setDeletingUser] = useState<UserWithDetails | null>(null);
-  const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
+  const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial", password: "" });
+  const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [featureAccessUser, setFeatureAccessUser] = useState<UserWithDetails | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -288,7 +290,7 @@ export function AdminUserManager() {
       queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
       toast({ title: "Usuário criado com sucesso!" });
       setShowCreateDialog(false);
-      setNewUser({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
+      setNewUser({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial", password: "" });
     },
     onError: (err: Error) => {
       toast({ title: "Erro ao criar usuário", description: err.message, variant: "destructive" });
@@ -715,7 +717,7 @@ export function AdminUserManager() {
             <DialogHeader>
               <DialogTitle>Adicionar Novo Usuário</DialogTitle>
               <DialogDescription>
-                Crie uma conta para um novo usuário. Ele poderá acessar via magic link.
+                Crie uma conta para um novo usuário. Defina uma senha ou deixe em branco para gerar uma temporária (o usuário poderá redefinir por e-mail).
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -756,6 +758,30 @@ export function AdminUserManager() {
                   className="mt-1"
                 />
               </div>
+              <div>
+                <Label>Senha</Label>
+                <div className="relative mt-1">
+                  <Input
+                    type={showNewUserPassword ? "text" : "password"}
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    placeholder="Mínimo 6 caracteres (opcional)"
+                    className="pr-10"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewUserPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label={showNewUserPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {showNewUserPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Se preenchida, o usuário poderá fazer login imediatamente com esta senha.
+                </p>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Permissão</Label>
@@ -791,7 +817,12 @@ export function AdminUserManager() {
               </Button>
               <Button
                 onClick={() => createUserMutation.mutate(newUser)}
-                disabled={createUserMutation.isPending || !newUser.name || !newUser.email}
+                disabled={
+                  createUserMutation.isPending ||
+                  !newUser.name ||
+                  !newUser.email ||
+                  (newUser.password.length > 0 && newUser.password.length < 6)
+                }
               >
                 {createUserMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Criar Usuário

@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { name, email, phone, agency_name, role, plan } = await req.json();
+    const { name, email, phone, agency_name, role, plan, password } = await req.json();
 
     if (!name || !email) {
       return new Response(JSON.stringify({ error: "Nome e e-mail são obrigatórios" }), {
@@ -61,11 +61,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create user in auth with a random password (user will use magic link)
-    const tempPassword = crypto.randomUUID();
+    // Use the password provided by the admin or fall back to a random temporary one
+    const customPassword = typeof password === "string" ? password.trim() : "";
+    if (customPassword && customPassword.length < 6) {
+      return new Response(JSON.stringify({ error: "A senha deve ter pelo menos 6 caracteres" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const finalPassword = customPassword || crypto.randomUUID();
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
-      password: tempPassword,
+      password: finalPassword,
       email_confirm: true,
       user_metadata: { name },
     });
