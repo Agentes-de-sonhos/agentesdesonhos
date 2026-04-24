@@ -427,6 +427,7 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocum
           </AlertDialogContent>
         </AlertDialog>
       </CardContent>
+      )}
     </Card>
   );
 }
