@@ -15,6 +15,9 @@ interface DestinationIntroEditorProps {
   introText: string | null;
   introImages: string[];
   onUpdate: () => void;
+  /** When true, renders content only (no Card wrapper, no header toggle).
+   *  The parent is responsible for the collapsible shell and the on/off switch. */
+  embedded?: boolean;
 }
 
 export function DestinationIntroEditor({
@@ -24,6 +27,7 @@ export function DestinationIntroEditor({
   introText,
   introImages,
   onUpdate,
+  embedded = false,
 }: DestinationIntroEditorProps) {
   const { toast } = useToast();
   const [enabled, setEnabled] = useState(showIntro);
@@ -153,7 +157,7 @@ export function DestinationIntroEditor({
     setIsUploading(false);
   };
 
-  if (!enabled) {
+  if (!enabled && !embedded) {
     return (
       <Card>
         <CardContent className="py-3 px-4">
@@ -171,6 +175,100 @@ export function DestinationIntroEditor({
           </p>
         </CardContent>
       </Card>
+    );
+  }
+
+  if (embedded) {
+    return (
+      <div className="space-y-4">
+        {/* Toggle inside the collapsible body */}
+        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="show-destination-embedded" className="text-sm font-medium cursor-pointer">
+              Exibir apresentação do destino para o cliente
+            </Label>
+          </div>
+          <Switch
+            id="show-destination-embedded"
+            checked={enabled}
+            onCheckedChange={handleToggle}
+          />
+        </div>
+
+        {enabled && (
+          <>
+            {images.length > 0 ? (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {images.map((url, i) => (
+                  <div key={i} className="relative shrink-0 group">
+                    <img
+                      src={url}
+                      alt={`${destination} ${i + 1}`}
+                      className="h-20 w-28 rounded-lg object-cover border border-border/40"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(i)}
+                      className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : isFetchingPhotos ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Buscando fotos do destino...
+              </div>
+            ) : null}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => e.target.files && handleUploadImages(e.target.files)}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="gap-2"
+              >
+                {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                Adicionar imagem
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGenerate}
+                disabled={isGenerating || isFetchingPhotos}
+                className="gap-2"
+              >
+                {isGenerating || isFetchingPhotos ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" />
+                )}
+                {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
+              </Button>
+            </div>
+
+            <Textarea
+              value={text}
+              onChange={(e) => handleTextChange(e.target.value)}
+              placeholder="Descrição curta e envolvente do destino..."
+              rows={3}
+              className="resize-none text-sm"
+            />
+          </>
+        )}
+      </div>
     );
   }
 

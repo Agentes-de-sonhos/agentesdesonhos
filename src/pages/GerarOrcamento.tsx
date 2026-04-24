@@ -161,12 +161,16 @@ export default function GerarOrcamento() {
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
-  const [openSections, setOpenSections] = useState<Record<"payment" | "validity" | "documents", boolean>>({
+  const [openSections, setOpenSections] = useState<
+    Record<"services" | "destination" | "payment" | "validity" | "documents", boolean>
+  >({
+    services: true,
+    destination: false,
     payment: false,
     validity: false,
     documents: false,
   });
-  const toggleSection = (key: "payment" | "validity" | "documents") =>
+  const toggleSection = (key: "services" | "destination" | "payment" | "validity" | "documents") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
@@ -745,10 +749,26 @@ export default function GerarOrcamento() {
 
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-4">
-            {/* Serviços */}
+            {/* Serviços - Collapsible */}
             <Card>
-              <CardHeader><CardTitle>Serviços</CardTitle></CardHeader>
-              <CardContent>
+              <button
+                type="button"
+                onClick={() => toggleSection("services")}
+                className="w-full flex items-center justify-between px-6 py-4 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <Plus className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-base font-semibold">Serviços</span>
+                  {quote.services && quote.services.length > 0 && (
+                    <span className="text-xs font-normal text-muted-foreground">
+                      ({quote.services.length})
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.services && "rotate-180")} />
+              </button>
+              {openSections.services && (
+              <CardContent className="pt-0">
                 {selectedServiceType ? (
                   <div className="space-y-4">
                     <h3 className="font-medium">
@@ -824,6 +844,35 @@ export default function GerarOrcamento() {
                   </>
                 )}
               </CardContent>
+              )}
+            </Card>
+
+            {/* Apresentação do Destino - Collapsible */}
+            <Card>
+              <button
+                type="button"
+                onClick={() => toggleSection("destination")}
+                className="w-full flex items-center justify-between px-6 py-4 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-base font-semibold">Apresentação do Destino</span>
+                </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.destination && "rotate-180")} />
+              </button>
+              {openSections.destination && (
+                <CardContent className="pt-0">
+                  <DestinationIntroEditor
+                    embedded
+                    quoteId={quote.id}
+                    destination={quote.destination}
+                    showIntro={(quote as any).show_destination_intro !== false}
+                    introText={(quote as any).destination_intro_text || null}
+                    introImages={(quote as any).destination_intro_images || []}
+                    onUpdate={() => {}}
+                  />
+                </CardContent>
+              )}
             </Card>
 
             {/* Apresentação do Investimento - Collapsible */}
@@ -837,10 +886,100 @@ export default function GerarOrcamento() {
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                   <span className="text-base font-semibold">Apresentação do Investimento</span>
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.payment && "rotate-180")} />
+                <div className="flex items-center gap-3">
+                  <span
+                    role="switch"
+                    aria-checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex"
+                  >
+                    <Switch
+                      id="show-investment-header"
+                      checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
+                      onCheckedChange={async (checked) => {
+                        if (!quote) return;
+                        setShowInvestmentLocal(checked);
+                        if (!checked) {
+                          // Disabling investment → automatically show detailed prices per service
+                          setShowDetailedLocal(true);
+                          await supabase
+                            .from("quotes")
+                            .update({ show_investment_section: false, show_detailed_prices: true } as any)
+                            .eq("id", quote.id);
+                        } else {
+                          await supabase
+                            .from("quotes")
+                            .update({ show_investment_section: true } as any)
+                            .eq("id", quote.id);
+                        }
+                      }}
+                    />
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.payment && "rotate-180")} />
+                </div>
               </button>
               {openSections.payment && (
                 <CardContent className="space-y-4 pt-0">
+                  {/* Tri-state display selector — centralizes financial display logic */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
+                    {(() => {
+                      const investOn = showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false;
+                      const detailedOn = showDetailed;
+                      const currentMode: "investment" | "detailed" | "both" =
+                        investOn && detailedOn ? "both" : investOn ? "investment" : "detailed";
+                      const modes: { value: "investment" | "detailed" | "both"; label: string; description: string }[] = [
+                        { value: "investment", label: "Apenas Apresentação do Investimento", description: "Mostra valor total e condições de pagamento." },
+                        { value: "detailed", label: "Apenas Valores Detalhados por Serviço", description: "Mostra o valor de cada serviço separadamente." },
+                        { value: "both", label: "Ambos (Apresentação + Valores Detalhados)", description: "Exibe a apresentação e o detalhamento por serviço." },
+                      ];
+                      const applyMode = async (mode: "investment" | "detailed" | "both") => {
+                        if (!quote) return;
+                        const nextInvestment = mode === "investment" || mode === "both";
+                        const nextDetailed = mode === "detailed" || mode === "both";
+                        setShowInvestmentLocal(nextInvestment);
+                        setShowDetailedLocal(nextDetailed);
+                        await supabase
+                          .from("quotes")
+                          .update({
+                            show_investment_section: nextInvestment,
+                            show_detailed_prices: nextDetailed,
+                          } as any)
+                          .eq("id", quote.id);
+                      };
+                      return (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {modes.map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => applyMode(opt.value)}
+                              className={cn(
+                                "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
+                                currentMode === opt.value
+                                  ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                  : "border-border hover:border-border/80 hover:bg-muted/30"
+                              )}
+                            >
+                              <div className={cn(
+                                "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                                currentMode === opt.value ? "border-primary" : "border-muted-foreground/40"
+                              )}>
+                                {currentMode === opt.value && <div className="h-2 w-2 rounded-full bg-primary" />}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{opt.label}</p>
+                                <p className="text-xs text-muted-foreground">{opt.description}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <Separator />
+
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1031,56 +1170,6 @@ export default function GerarOrcamento() {
           </div>
           <div className="space-y-4">
             <QuoteSummary quote={quote} />
-            <DestinationIntroEditor
-              quoteId={quote.id}
-              destination={quote.destination}
-              showIntro={(quote as any).show_destination_intro !== false}
-              introText={(quote as any).destination_intro_text || null}
-              introImages={(quote as any).destination_intro_images || []}
-              onUpdate={() => {}}
-            />
-            <Card>
-              <CardContent className="py-3 px-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {showDetailed ? <Eye className="h-4 w-4 text-muted-foreground" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-                    <Label htmlFor="show-prices" className="text-sm font-medium cursor-pointer">
-                      Exibir valores detalhados
-                    </Label>
-                  </div>
-                  <Switch id="show-prices" checked={showDetailed} onCheckedChange={handleToggleDetailedPrices} />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1 ml-6">
-                  {showDetailed ? "O cliente verá o valor de cada serviço." : "O cliente verá apenas o total."}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="py-3 px-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4 text-muted-foreground" />
-                    <Label htmlFor="show-investment" className="text-sm font-medium cursor-pointer">
-                      Exibir apresentação do investimento
-                    </Label>
-                  </div>
-                  <Switch
-                    id="show-investment"
-                    checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
-                    onCheckedChange={async (checked) => {
-                      if (!quote) return;
-                      setShowInvestmentLocal(checked);
-                      await supabase.from("quotes").update({ show_investment_section: checked } as any).eq("id", quote.id);
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1 ml-6">
-                  {(showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false)
-                    ? "O cliente verá a seção de investimento e condições de pagamento."
-                    : "Apenas os valores por serviço serão exibidos ao cliente."}
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
