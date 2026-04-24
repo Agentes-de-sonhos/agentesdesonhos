@@ -343,18 +343,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
         </div>
 
         {/* BLOCO 5 — Apresentação do Serviço */}
-        {showOptionLabel && (
-          <FormField control={form.control} name="option_label" render={({ field }) => (
-            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-        )}
-        {photoSlot}
-        <FormField control={form.control} name="service_description" render={({ field }) => (
-          <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-
-        {/* Pricing is always per-person — multiplication is automatic */}
-
+        {/* BLOCO 5 — Financeiro (prioritário) */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adult_price" render={({ field }) => (
             <FormItem>
@@ -401,6 +390,17 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
         )}
 
         {renderPaymentSlot(paymentSlot, totalAmount)}
+
+        {/* BLOCO 6 — Apresentação do Serviço */}
+        {showOptionLabel && (
+          <FormField control={form.control} name="option_label" render={({ field }) => (
+            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        )}
+        {photoSlot}
+        <FormField control={form.control} name="service_description" render={({ field }) => (
+          <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
