@@ -676,7 +676,8 @@ export default function MapaTurismo() {
                     {/* Social interaction bar */}
                     <div className="mt-4 pt-3 border-t border-border/50">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        {/* Rating */}
+                        {/* Rating — oculto para operadoras */}
+                        {supplier._source !== "operator" ? (
                         <div className="flex items-center gap-1.5 text-sm min-w-0">
                           <span className="font-semibold text-foreground whitespace-nowrap">
                             {avgRating ?? "—"}
@@ -696,6 +697,7 @@ export default function MapaTurismo() {
                             {reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"}
                           </span>
                         </div>
+                        ) : <div />}
 
                         {/* Likes */}
                         <button
@@ -711,7 +713,8 @@ export default function MapaTurismo() {
                           <span>{likeCount}</span>
                         </button>
 
-                        {/* Avaliar */}
+                        {/* Avaliar — oculto para operadoras */}
+                        {supplier._source !== "operator" && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -724,6 +727,7 @@ export default function MapaTurismo() {
                           <Star className="h-3 w-3" />
                           Avaliar
                         </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>
