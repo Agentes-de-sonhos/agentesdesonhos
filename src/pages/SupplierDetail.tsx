@@ -10,6 +10,8 @@ import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
 import { ContactCards } from "@/components/operator/ContactCards";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
+import { RichContentEditor } from "@/components/operator/RichContentEditor";
+import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
 import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
 import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
@@ -22,7 +24,6 @@ import { EditModeProvider } from "@/contexts/EditModeContext";
 import { EditModeToggle } from "@/components/edit-mode/EditModeToggle";
 import { EditableSection } from "@/components/edit-mode/EditableSection";
 import { HeroEditForm } from "@/components/edit-mode/forms/HeroEditForm";
-import { TextEditForm } from "@/components/edit-mode/forms/TextEditForm";
 import { TagsEditForm } from "@/components/edit-mode/forms/TagsEditForm";
 import { SocialLinksEditForm } from "@/components/edit-mode/forms/SocialLinksEditForm";
 
@@ -192,38 +193,42 @@ function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpe
             {/* How to sell */}
             {isAdmin ? (
               <EditableSection
-                editForm={<TextEditForm label="Como Vender" value={editHowToSell} onChange={setEditHowToSell} />}
+                editForm={<RichContentEditor label="Como Vender" content={editHowToSell} onChange={setEditHowToSell} placeholder="Dica: cole uma URL em uma linha sozinha para gerar um botão Acessar." />}
                 onSave={async () => { await updateMutation.mutateAsync({ how_to_sell: editHowToSell || null }); }}
                 onCancel={() => setEditHowToSell(supplier.how_to_sell || "")}
               >
                 <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
-                  <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                    {supplier.how_to_sell || <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>}
-                  </p>
+                  {supplier.how_to_sell ? (
+                    <RichContentDisplay content={supplier.how_to_sell} />
+                  ) : (
+                    <p className="text-sm italic text-muted-foreground">Clique no lápis para adicionar</p>
+                  )}
                 </OperatorInfoCard>
               </EditableSection>
             ) : supplier.how_to_sell ? (
               <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{supplier.how_to_sell}</p>
+                <RichContentDisplay content={supplier.how_to_sell} />
               </OperatorInfoCard>
             ) : null}
 
             {/* Sales channel */}
             {isAdmin ? (
               <EditableSection
-                editForm={<TextEditForm label="Canais de Venda" value={editSalesChannel} onChange={setEditSalesChannel} />}
+                editForm={<RichContentEditor label="Canais de Venda" content={editSalesChannel} onChange={setEditSalesChannel} />}
                 onSave={async () => { await updateMutation.mutateAsync({ sales_channel: editSalesChannel || null }); }}
                 onCancel={() => setEditSalesChannel(supplier.sales_channel || "")}
               >
                 <OperatorInfoCard icon={Users} title="Canais de Venda">
-                  <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                    {supplier.sales_channel || <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>}
-                  </p>
+                  {supplier.sales_channel ? (
+                    <RichContentDisplay content={supplier.sales_channel} />
+                  ) : (
+                    <p className="text-sm italic text-muted-foreground">Clique no lápis para adicionar</p>
+                  )}
                 </OperatorInfoCard>
               </EditableSection>
             ) : supplier.sales_channel ? (
               <OperatorInfoCard icon={Users} title="Canais de Venda">
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{supplier.sales_channel}</p>
+                <RichContentDisplay content={supplier.sales_channel} />
               </OperatorInfoCard>
             ) : null}
 
@@ -237,19 +242,21 @@ function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpe
             {/* Practical notes */}
             {isAdmin ? (
               <EditableSection
-                editForm={<TextEditForm label="Observações Práticas" value={editPracticalNotes} onChange={setEditPracticalNotes} />}
+                editForm={<RichContentEditor label="Observações Práticas" content={editPracticalNotes} onChange={setEditPracticalNotes} />}
                 onSave={async () => { await updateMutation.mutateAsync({ practical_notes: editPracticalNotes || null }); }}
                 onCancel={() => setEditPracticalNotes(supplier.practical_notes || "")}
               >
                 <OperatorInfoCard icon={ShoppingCart} title="Observações Práticas">
-                  <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                    {supplier.practical_notes || <span className="italic text-muted-foreground">Clique no lápis para adicionar</span>}
-                  </p>
+                  {supplier.practical_notes ? (
+                    <RichContentDisplay content={supplier.practical_notes} />
+                  ) : (
+                    <p className="text-sm italic text-muted-foreground">Clique no lápis para adicionar</p>
+                  )}
                 </OperatorInfoCard>
               </EditableSection>
             ) : supplier.practical_notes ? (
               <OperatorInfoCard icon={ShoppingCart} title="Observações Práticas">
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{supplier.practical_notes}</p>
+                <RichContentDisplay content={supplier.practical_notes} />
               </OperatorInfoCard>
             ) : null}
 
