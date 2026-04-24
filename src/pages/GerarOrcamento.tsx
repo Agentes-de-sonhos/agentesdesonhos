@@ -161,7 +161,13 @@ export default function GerarOrcamento() {
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
-  const [openSection, setOpenSection] = useState<"payment" | "validity" | null>(null);
+  const [openSections, setOpenSections] = useState<Record<"payment" | "validity" | "documents", boolean>>({
+    payment: false,
+    validity: false,
+    documents: false,
+  });
+  const toggleSection = (key: "payment" | "validity" | "documents") =>
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
   // Check for unsaved draft on mount (only on list screen)
@@ -820,23 +826,20 @@ export default function GerarOrcamento() {
               </CardContent>
             </Card>
 
-            {/* Documentos internos do Orçamento */}
-            <QuoteDocuments quoteId={quote.id} userId={quote.user_id} />
-
             {/* Apresentação do Investimento - Collapsible */}
             <Card>
               <button
                 type="button"
-                onClick={() => setOpenSection(openSection === "payment" ? null : "payment")}
+                onClick={() => toggleSection("payment")}
                 className="w-full flex items-center justify-between px-6 py-4 text-left"
               >
                 <div className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                   <span className="text-base font-semibold">Apresentação do Investimento</span>
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSection === "payment" && "rotate-180")} />
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.payment && "rotate-180")} />
               </button>
-              {openSection === "payment" && (
+              {openSections.payment && (
                 <CardContent className="space-y-4 pt-0">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
@@ -975,16 +978,16 @@ export default function GerarOrcamento() {
             <Card>
               <button
                 type="button"
-                onClick={() => setOpenSection(openSection === "validity" ? null : "validity")}
+                onClick={() => toggleSection("validity")}
                 className="w-full flex items-center justify-between px-6 py-4 text-left"
               >
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-base font-semibold">Validade e Termos</span>
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSection === "validity" && "rotate-180")} />
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.validity && "rotate-180")} />
               </button>
-              {openSection === "validity" && (
+              {openSections.validity && (
                 <CardContent className="space-y-3 pt-0">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
@@ -1017,6 +1020,14 @@ export default function GerarOrcamento() {
                 </CardContent>
               )}
             </Card>
+
+            {/* Documentos do Orçamento - Collapsible */}
+            <QuoteDocuments
+              quoteId={quote.id}
+              userId={quote.user_id}
+              isOpen={openSections.documents}
+              onToggle={() => toggleSection("documents")}
+            />
           </div>
           <div className="space-y-4">
             <QuoteSummary quote={quote} />

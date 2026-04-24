@@ -19,6 +19,7 @@ import {
   Paperclip,
   Lock,
   Globe,
+  ChevronDown,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -38,6 +39,8 @@ import {
 interface QuoteDocumentsProps {
   quoteId: string;
   userId: string;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
 interface QuoteDocument {
@@ -78,7 +81,7 @@ function getIcon(fileType: string | null, fileName: string) {
   return FileText;
 }
 
-export function QuoteDocuments({ quoteId, userId }: QuoteDocumentsProps) {
+export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocumentsProps) {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<{
@@ -217,27 +220,43 @@ export function QuoteDocuments({ quoteId, userId }: QuoteDocumentsProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="flex items-center gap-2 text-base">
+      <button
+        type="button"
+        onClick={() => onToggle?.()}
+        className="w-full flex items-center justify-between px-6 py-4 text-left"
+      >
+        <div className="flex items-center gap-2">
           <Paperclip className="h-4 w-4 text-muted-foreground" />
-          Documentos do Orçamento
+          <span className="text-base font-semibold">Documentos do Orçamento</span>
           {documents.length > 0 && (
             <span className="text-xs font-normal text-muted-foreground">
               ({documents.length})
             </span>
           )}
-        </CardTitle>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => inputRef.current?.click()}
-          disabled={!!uploadProgress}
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          Adicionar documento
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-3">
+        </div>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 text-muted-foreground transition-transform duration-200",
+            isOpen && "rotate-180"
+          )}
+        />
+      </button>
+      {isOpen && (
+      <CardContent className="space-y-3 pt-0">
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              inputRef.current?.click();
+            }}
+            disabled={!!uploadProgress}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Adicionar documento
+          </Button>
+        </div>
         <input
           ref={inputRef}
           type="file"
@@ -408,6 +427,7 @@ export function QuoteDocuments({ quoteId, userId }: QuoteDocumentsProps) {
           </AlertDialogContent>
         </AlertDialog>
       </CardContent>
+      )}
     </Card>
   );
 }
