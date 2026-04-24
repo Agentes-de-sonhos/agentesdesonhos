@@ -347,52 +347,65 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
         {/* BLOCO 5 — Apresentação do Serviço */}
         {/* BLOCO 5 — Financeiro (prioritário) */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="adult_price" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor por adulto (R$)</FormLabel>
-              <FormControl>
-                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
-              </FormControl>
-              {isUnitPrice && adultsCount > 0 && adultPrice > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {adultsCount} adulto{adultsCount > 1 ? "s" : ""} × {formatCurrencyInline(adultPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalAdults)}</span>
-                </p>
-              )}
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="child_price" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor por criança (R$)</FormLabel>
-              <FormControl>
-                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
-              </FormControl>
-              {isUnitPrice && childrenCount > 0 && childPrice > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {childrenCount} criança{childrenCount > 1 ? "s" : ""} × {formatCurrencyInline(childPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalChildren)}</span>
-                </p>
-              )}
-              <FormMessage />
-            </FormItem>
-          )} />
-        </div>
+        <div className="border border-border/60 rounded-lg">
+          <button
+            type="button"
+            onClick={() => setShowPricing(!showPricing)}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <span className="flex-1 text-left">Valores e forma de pagamento</span>
+            <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showPricing && "rotate-180")} />
+          </button>
+          {showPricing && (
+            <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-3">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField control={form.control} name="adult_price" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valor por adulto (R$)</FormLabel>
+                    <FormControl>
+                      <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
+                    </FormControl>
+                    {isUnitPrice && adultsCount > 0 && adultPrice > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {adultsCount} adulto{adultsCount > 1 ? "s" : ""} × {formatCurrencyInline(adultPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalAdults)}</span>
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="child_price" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valor por criança (R$)</FormLabel>
+                    <FormControl>
+                      <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
+                    </FormControl>
+                    {isUnitPrice && childrenCount > 0 && childPrice > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {childrenCount} criança{childrenCount > 1 ? "s" : ""} × {formatCurrencyInline(childPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalChildren)}</span>
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
 
-        {/* Total breakdown */}
-        {(adultPrice > 0 || childPrice > 0) && (
-          <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Total Passagens</span>
-              <span className="text-lg font-bold text-primary">{formatCurrencyInline(totalAmount)}</span>
+              {(adultPrice > 0 || childPrice > 0) && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Total Passagens</span>
+                    <span className="text-lg font-bold text-primary">{formatCurrencyInline(totalAmount)}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {adultsCount} adulto{adultsCount > 1 ? "s" : ""}
+                    {childrenCount > 0 ? ` + ${childrenCount} criança${childrenCount > 1 ? "s" : ""}` : ""}
+                  </p>
+                </div>
+              )}
+
+              {renderPaymentSlot(paymentSlot, totalAmount)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {adultsCount} adulto{adultsCount > 1 ? "s" : ""}
-              {childrenCount > 0 ? ` + ${childrenCount} criança${childrenCount > 1 ? "s" : ""}` : ""}
-            </p>
-          </div>
-        )}
-
-        {renderPaymentSlot(paymentSlot, totalAmount)}
+          )}
+        </div>
 
         {/* BLOCO 6 — Apresentação do Serviço */}
         {showOptionLabel && (
