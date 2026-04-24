@@ -18,6 +18,8 @@ export interface Trip {
   created_at: string;
   updated_at: string;
   services?: TripService[];
+  is_locked?: boolean | null;
+  failed_password_attempts?: number | null;
 }
 
 export interface TripService {

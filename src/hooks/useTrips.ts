@@ -19,7 +19,7 @@ export function useTrips() {
       if (!user) return [];
       const { data, error } = await supabase
         .from("trips")
-        .select("id, user_id, client_name, client_id, destination, start_date, end_date, status, share_token, access_password, slug, short_code, created_at, updated_at")
+        .select("id, user_id, client_name, client_id, destination, start_date, end_date, status, share_token, access_password, slug, short_code, created_at, updated_at, is_locked, failed_password_attempts")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(500);
@@ -164,6 +164,27 @@ export function useTrips() {
     },
   });
 
+  const unlockTripMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("trips")
+        .update({ failed_password_attempts: 0, is_locked: false } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
+      queryClient.invalidateQueries({ queryKey: ["trip"] });
+      toast({
+        title: "Acesso desbloqueado",
+        description: "O cliente já pode acessar a carteira novamente com a senha atual.",
+      });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao desbloquear", description: error.message, variant: "destructive" });
+    },
+  });
+
   return {
     trips,
     isLoading,
@@ -172,6 +193,7 @@ export function useTrips() {
     deleteTrip: deleteTripMutation.mutateAsync,
     updatePassword: updatePasswordMutation.mutateAsync,
     regeneratePassword: regeneratePasswordMutation.mutateAsync,
+    unlockTrip: unlockTripMutation.mutateAsync,
     isCreating: createTripMutation.isPending,
     isUpdating: updateTripMutation.isPending,
   };
