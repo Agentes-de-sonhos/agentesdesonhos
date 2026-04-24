@@ -49,6 +49,7 @@ import {
   KeyRound,
   Trash2,
   Eye,
+  EyeOff,
   Settings2,
   LogOut,
 } from "lucide-react";
@@ -103,7 +104,8 @@ export function AdminUserManager() {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [deletingUser, setDeletingUser] = useState<UserWithDetails | null>(null);
-  const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
+  const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial", password: "" });
+  const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [featureAccessUser, setFeatureAccessUser] = useState<UserWithDetails | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -288,7 +290,7 @@ export function AdminUserManager() {
       queryClient.invalidateQueries({ queryKey: ["admin-users-full"] });
       toast({ title: "Usuário criado com sucesso!" });
       setShowCreateDialog(false);
-      setNewUser({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial" });
+      setNewUser({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial", password: "" });
     },
     onError: (err: Error) => {
       toast({ title: "Erro ao criar usuário", description: err.message, variant: "destructive" });
@@ -715,7 +717,7 @@ export function AdminUserManager() {
             <DialogHeader>
               <DialogTitle>Adicionar Novo Usuário</DialogTitle>
               <DialogDescription>
-                Crie uma conta para um novo usuário. Ele poderá acessar via magic link.
+                Crie uma conta para um novo usuário. Defina uma senha ou deixe em branco para gerar uma temporária (o usuário poderá redefinir por e-mail).
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
