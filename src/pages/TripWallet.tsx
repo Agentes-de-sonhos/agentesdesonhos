@@ -498,6 +498,30 @@ function TripWalletContent() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {trip.is_locked ? (
+                  <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <ShieldAlert className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                      <div className="text-xs text-destructive space-y-1">
+                        <p className="font-semibold">Acesso bloqueado por segurança</p>
+                        <p className="text-destructive/90">
+                          O cliente errou a senha 3 vezes e o acesso público foi bloqueado automaticamente.
+                          Desbloqueie abaixo (mantendo a senha atual) ou regenere uma nova senha.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="w-full h-8 text-xs"
+                      onClick={async () => {
+                        await unlockTrip(trip.id);
+                      }}
+                    >
+                      <Unlock className="mr-1 h-3 w-3" /> Desbloquear acesso
+                    </Button>
+                  </div>
+                ) : null}
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Senha de acesso</p>
                   {editingPassword ? (
