@@ -8,6 +8,7 @@ interface OperatorHeroProps {
   averageRating?: number;
   totalReviews?: number;
   onReviewClick?: () => void;
+  hideRating?: boolean;
 }
 
 export function OperatorHero({
@@ -17,6 +18,7 @@ export function OperatorHero({
   averageRating = 0,
   totalReviews = 0,
   onReviewClick,
+  hideRating = false,
 }: OperatorHeroProps) {
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-border/60 p-8 sm:p-10">
@@ -46,6 +48,7 @@ export function OperatorHero({
         </div>
 
         {/* Right: Rating summary */}
+        {!hideRating && (
         <div className="flex flex-col items-start sm:items-end gap-3 shrink-0">
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -86,6 +89,7 @@ export function OperatorHero({
             Avaliar Empresa
           </Button>
         </div>
+        )}
       </div>
     </div>
   );
