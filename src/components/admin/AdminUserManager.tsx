@@ -758,6 +758,30 @@ export function AdminUserManager() {
                   className="mt-1"
                 />
               </div>
+              <div>
+                <Label>Senha</Label>
+                <div className="relative mt-1">
+                  <Input
+                    type={showNewUserPassword ? "text" : "password"}
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    placeholder="Mínimo 6 caracteres (opcional)"
+                    className="pr-10"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewUserPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label={showNewUserPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {showNewUserPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Se preenchida, o usuário poderá fazer login imediatamente com esta senha.
+                </p>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Permissão</Label>
@@ -793,7 +817,12 @@ export function AdminUserManager() {
               </Button>
               <Button
                 onClick={() => createUserMutation.mutate(newUser)}
-                disabled={createUserMutation.isPending || !newUser.name || !newUser.email}
+                disabled={
+                  createUserMutation.isPending ||
+                  !newUser.name ||
+                  !newUser.email ||
+                  (newUser.password.length > 0 && newUser.password.length < 6)
+                }
               >
                 {createUserMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Criar Usuário
