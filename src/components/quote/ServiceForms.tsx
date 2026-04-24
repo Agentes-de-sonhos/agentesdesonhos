@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign } from "lucide-react";
+import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign, Settings2 } from "lucide-react";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
@@ -194,6 +194,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   );
   const [showPricing, setShowPricing] = useState(
     !!(init?.adult_price || init?.child_price)
+  );
+  const [showExtras, setShowExtras] = useState(
+    !!(initialData?.option_label || initialData?.description || initialData?.image_url || initialData?.image_urls?.length || init?.notes)
   );
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
   const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
@@ -408,19 +411,34 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )}
         </div>
 
-        {/* BLOCO 6 — Apresentação do Serviço */}
-        {showOptionLabel && (
-          <FormField control={form.control} name="option_label" render={({ field }) => (
-            <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-        )}
-        {photoSlot}
-        <FormField control={form.control} name="service_description" render={({ field }) => (
-          <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
+        {/* BLOCO 6 — Outras configurações (recolhível) */}
+        <div className="border border-border/60 rounded-lg">
+          <button
+            type="button"
+            onClick={() => setShowExtras(!showExtras)}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Settings2 className="h-4 w-4" />
+            <span className="flex-1 text-left">Outras configurações</span>
+            <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showExtras && "rotate-180")} />
+          </button>
+          {showExtras && (
+            <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-3">
+              {showOptionLabel && (
+                <FormField control={form.control} name="option_label" render={({ field }) => (
+                  <FormItem><FormLabel>Etiqueta (opcional)</FormLabel><FormControl><Input placeholder="Ex: Melhor custo-benefício" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+              )}
+              {photoSlot}
+              <FormField control={form.control} name="service_description" render={({ field }) => (
+                <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="notes" render={({ field }) => (
+                <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+            </div>
+          )}
+        </div>
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
