@@ -19,6 +19,7 @@ import {
   Paperclip,
   Lock,
   Globe,
+  ChevronDown,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -38,6 +39,8 @@ import {
 interface QuoteDocumentsProps {
   quoteId: string;
   userId: string;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
 interface QuoteDocument {
