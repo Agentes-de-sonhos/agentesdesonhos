@@ -826,23 +826,20 @@ export default function GerarOrcamento() {
               </CardContent>
             </Card>
 
-            {/* Documentos internos do Orçamento */}
-            <QuoteDocuments quoteId={quote.id} userId={quote.user_id} />
-
             {/* Apresentação do Investimento - Collapsible */}
             <Card>
               <button
                 type="button"
-                onClick={() => setOpenSection(openSection === "payment" ? null : "payment")}
+                onClick={() => toggleSection("payment")}
                 className="w-full flex items-center justify-between px-6 py-4 text-left"
               >
                 <div className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                   <span className="text-base font-semibold">Apresentação do Investimento</span>
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSection === "payment" && "rotate-180")} />
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.payment && "rotate-180")} />
               </button>
-              {openSection === "payment" && (
+              {openSections.payment && (
                 <CardContent className="space-y-4 pt-0">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
