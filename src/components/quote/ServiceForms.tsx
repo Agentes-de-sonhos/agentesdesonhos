@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2 } from "lucide-react";
+import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign } from "lucide-react";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
@@ -353,7 +353,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             onClick={() => setShowPricing(!showPricing)}
             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            <span className="flex-1 text-left">Valores e forma de pagamento</span>
+            <DollarSign className="h-4 w-4" />
+            <span className="flex-1 text-left">Adicionar valores e forma de pagamento</span>
             <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showPricing && "rotate-180")} />
           </button>
           {showPricing && (
