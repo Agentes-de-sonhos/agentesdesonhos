@@ -758,7 +758,7 @@ export default function GerarOrcamento() {
               >
                 <div className="flex items-center gap-2">
                   <Plus className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-base font-semibold">Serviços</span>
+                  <span className="text-base font-semibold">Adicionar Serviços</span>
                   {quote.services && quote.services.length > 0 && (
                     <span className="text-xs font-normal text-muted-foreground">
                       ({quote.services.length})
