@@ -81,7 +81,7 @@ function getIcon(fileType: string | null, fileName: string) {
   return FileText;
 }
 
-export function QuoteDocuments({ quoteId, userId }: QuoteDocumentsProps) {
+export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocumentsProps) {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<{
