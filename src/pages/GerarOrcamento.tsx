@@ -844,6 +844,35 @@ export default function GerarOrcamento() {
                   </>
                 )}
               </CardContent>
+              )}
+            </Card>
+
+            {/* Apresentação do Destino - Collapsible */}
+            <Card>
+              <button
+                type="button"
+                onClick={() => toggleSection("destination")}
+                className="w-full flex items-center justify-between px-6 py-4 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-base font-semibold">Apresentação do Destino</span>
+                </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.destination && "rotate-180")} />
+              </button>
+              {openSections.destination && (
+                <CardContent className="pt-0">
+                  <DestinationIntroEditor
+                    embedded
+                    quoteId={quote.id}
+                    destination={quote.destination}
+                    showIntro={(quote as any).show_destination_intro !== false}
+                    introText={(quote as any).destination_intro_text || null}
+                    introImages={(quote as any).destination_intro_images || []}
+                    onUpdate={() => {}}
+                  />
+                </CardContent>
+              )}
             </Card>
 
             {/* Apresentação do Investimento - Collapsible */}
