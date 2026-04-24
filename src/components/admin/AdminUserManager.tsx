@@ -59,6 +59,24 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { setImpersonationData, type ImpersonationData } from "./ImpersonationBanner";
 import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
+import { PLAN_LABELS, type SubscriptionPlan } from "@/types/subscription";
+
+const ROLE_OPTIONS: { value: "admin" | "agente" | "promotor" | "fornecedor"; label: string }[] = [
+  { value: "agente", label: "Agente" },
+  { value: "admin", label: "Admin" },
+  { value: "promotor", label: "Promotor" },
+  { value: "fornecedor", label: "Fornecedor" },
+];
+
+const PLAN_OPTIONS: { value: SubscriptionPlan; label: string }[] = [
+  { value: "start", label: PLAN_LABELS.start },
+  { value: "educa_pass", label: PLAN_LABELS.educa_pass },
+  { value: "cartao_digital", label: PLAN_LABELS.cartao_digital },
+  { value: "essencial", label: PLAN_LABELS.essencial },
+  { value: "profissional", label: PLAN_LABELS.profissional },
+  { value: "premium", label: PLAN_LABELS.premium },
+  { value: "fundador", label: PLAN_LABELS.fundador },
+];
 
 interface UserWithDetails {
   id: string;
@@ -746,8 +764,9 @@ export function AdminUserManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="agente">Agente</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      {ROLE_OPTIONS.map((r) => (
+                        <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -758,8 +777,9 @@ export function AdminUserManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="essencial">Essencial</SelectItem>
-                      <SelectItem value="profissional">Plano Fundador</SelectItem>
+                      {PLAN_OPTIONS.map((p) => (
+                        <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
