@@ -12,7 +12,7 @@ function parseLocalDate(dateStr: string): Date {
 }
 import { ptBR } from "date-fns/locale";
 import {
-  Wallet, Plus, MapPin, Calendar, ExternalLink, Copy, Trash2, Eye, Pencil, Lock, Loader2
+  Wallet, Plus, MapPin, Calendar, ExternalLink, Copy, Trash2, Eye, Pencil, Lock, Loader2, ShieldAlert
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -157,6 +157,11 @@ export function TripWalletList({ agencyName }: { agencyName?: string }) {
                           <Badge variant={status.variant} className="text-xs shrink-0">
                             {status.label}
                           </Badge>
+                          {trip.is_locked ? (
+                            <Badge variant="destructive" className="text-xs shrink-0 gap-1">
+                              <ShieldAlert className="h-3 w-3" /> Bloqueada
+                            </Badge>
+                          ) : null}
                         </div>
                         <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
                           <span className="flex items-center gap-1">
