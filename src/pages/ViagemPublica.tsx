@@ -354,13 +354,17 @@ function PublicServiceCard({ service }: { service: TripService }) {
     <Card className="border-border/40 shadow-sm hover:shadow transition-shadow">
       <CardContent className="p-4">
         {/* Service image (preserves original aspect ratio — not cropped) */}
-        {service.image_url && (
+        {service.image_url && /^https?:\/\//i.test(service.image_url) && (
           <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted flex items-center justify-center">
             <img
               src={service.image_url}
               alt={title}
               loading="lazy"
               className="w-full max-h-80 object-contain"
+              onError={(e) => {
+                const wrapper = e.currentTarget.parentElement;
+                if (wrapper) wrapper.style.display = "none";
+              }}
             />
           </div>
         )}
