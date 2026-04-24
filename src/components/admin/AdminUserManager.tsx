@@ -764,8 +764,9 @@ export function AdminUserManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="agente">Agente</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      {ROLE_OPTIONS.map((r) => (
+                        <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -776,8 +777,9 @@ export function AdminUserManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="essencial">Essencial</SelectItem>
-                      <SelectItem value="profissional">Plano Fundador</SelectItem>
+                      {PLAN_OPTIONS.map((p) => (
+                        <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
