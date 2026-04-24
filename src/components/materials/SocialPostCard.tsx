@@ -224,7 +224,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
       return (
         <video
           src={current.video_url}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
           autoPlay
           muted
           loop
@@ -240,7 +240,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
           alt={current.title}
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       );
     }
@@ -251,7 +251,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
           alt={current.title}
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       );
     }
@@ -356,7 +356,7 @@ export function SocialPostCard({ gallery }: SocialPostCardProps) {
         {/* Media carousel - 4:5 aspect ratio */}
         <div
           ref={containerRef}
-          className="relative w-full bg-black"
+          className="relative w-full bg-muted"
           style={{ aspectRatio: "4 / 5" }}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
