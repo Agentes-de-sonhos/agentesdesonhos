@@ -189,15 +189,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
-  const [showFlightDetails, setShowFlightDetails] = useState(
-    !!(init?.outbound_detail || init?.return_detail || init?.outbound_legs?.length || init?.return_legs?.length)
-  );
-  const [showPricing, setShowPricing] = useState(
-    !!(init?.adult_price || init?.child_price)
-  );
-  const [showExtras, setShowExtras] = useState(
-    !!(initialData?.option_label || initialData?.description || initialData?.image_url || initialData?.image_urls?.length || init?.notes)
-  );
+  const [showFlightDetails, setShowFlightDetails] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
+  const [showExtras, setShowExtras] = useState(false);
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
   const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
 

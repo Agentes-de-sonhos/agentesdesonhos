@@ -164,7 +164,7 @@ export default function GerarOrcamento() {
   const [openSections, setOpenSections] = useState<
     Record<"services" | "destination" | "payment" | "validity" | "documents", boolean>
   >({
-    services: true,
+    services: false,
     destination: false,
     payment: false,
     validity: false,
