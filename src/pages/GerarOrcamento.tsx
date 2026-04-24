@@ -161,12 +161,16 @@ export default function GerarOrcamento() {
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
-  const [openSections, setOpenSections] = useState<Record<"payment" | "validity" | "documents", boolean>>({
+  const [openSections, setOpenSections] = useState<
+    Record<"services" | "destination" | "payment" | "validity" | "documents", boolean>
+  >({
+    services: true,
+    destination: false,
     payment: false,
     validity: false,
     documents: false,
   });
-  const toggleSection = (key: "payment" | "validity" | "documents") =>
+  const toggleSection = (key: "services" | "destination" | "payment" | "validity" | "documents") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
