@@ -12,6 +12,8 @@ import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
 import { ContactCards } from "@/components/operator/ContactCards";
 import { CompetitiveAdvantagesCard } from "@/components/operator/CompetitiveAdvantagesCard";
 import { RichTextWithLinks } from "@/components/operator/RichTextWithLinks";
+import { RichContentEditor } from "@/components/operator/RichContentEditor";
+import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 import { BusinessHoursCard } from "@/components/operator/BusinessHoursCard";
 import { CertificationsCard } from "@/components/operator/CertificationsCard";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
@@ -206,19 +208,19 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
             {/* 1. Sobre a Operadora */}
             {isAdmin ? (
               <EditableSection
-                editForm={<TextEditForm label="Sobre a Operadora (máx 10 linhas)" value={editShortDesc} onChange={setEditShortDesc} />}
+                editForm={<RichContentEditor label="Sobre a Operadora" content={editShortDesc} onChange={setEditShortDesc} />}
                 onSave={async () => { await updateMutation.mutateAsync({ short_description: editShortDesc || null }); }}
                 onCancel={() => setEditShortDesc(operator.short_description || "")}
               >
                 <OperatorInfoCard icon={FileText} title="Sobre a Operadora" iconColor="text-sky-600">
                   {operator.short_description ? (
-                    <RichTextWithLinks text={operator.short_description} lineClamp={10} />
+                    <RichContentDisplay content={operator.short_description} lineClamp={10} />
                   ) : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.short_description ? (
               <OperatorInfoCard icon={FileText} title="Sobre a Operadora" iconColor="text-sky-600">
-                <RichTextWithLinks text={operator.short_description} lineClamp={10} />
+                <RichContentDisplay content={operator.short_description} lineClamp={10} />
               </OperatorInfoCard>
             ) : null}
 
@@ -244,19 +246,19 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
             {/* 3. Como Vender */}
             {isAdmin ? (
               <EditableSection
-                editForm={<TextEditForm label="Como Vender" value={editHowToSell} onChange={setEditHowToSell} />}
+                editForm={<RichContentEditor label="Como Vender" content={editHowToSell} onChange={setEditHowToSell} placeholder="Dica: cole uma URL em uma linha sozinha para gerar um botão Acessar." />}
                 onSave={async () => { await updateMutation.mutateAsync({ how_to_sell: editHowToSell || null }); }}
                 onCancel={() => setEditHowToSell(operator.how_to_sell || "")}
               >
                 <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
                   {operator.how_to_sell ? (
-                    <RichTextWithLinks text={operator.how_to_sell} />
+                    <RichContentDisplay content={operator.how_to_sell} />
                   ) : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.how_to_sell ? (
               <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
-                <RichTextWithLinks text={operator.how_to_sell} />
+                <RichContentDisplay content={operator.how_to_sell} />
               </OperatorInfoCard>
             ) : null}
 
