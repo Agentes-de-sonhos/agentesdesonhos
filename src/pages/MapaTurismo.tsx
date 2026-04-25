@@ -185,7 +185,7 @@ export default function MapaTurismo() {
       _source: "supplier" as const,
       website_url: s.website_url,
       instagram_url: s.instagram_url,
-      _hasProfile: isFilled(s.how_to_sell),
+      _hasProfile: isFilled(s.commercial_contacts),
     }));
     const fromOperators = (tourOperators || []).map((op: any) => ({
       id: op.id,
@@ -199,7 +199,7 @@ export default function MapaTurismo() {
         ? op.specialties.split(",").map((s: string, i: number) => ({ id: `op-${i}`, name: s.trim() }))
         : [],
       _source: "operator" as const,
-      _hasProfile: isFilled(op.how_to_sell),
+      _hasProfile: isFilled(op.commercial_contacts),
     }));
     const fromCruises = (cruiseCompanies || []).map((cm: any) => {
       const specs: string[] = [];
@@ -216,7 +216,7 @@ export default function MapaTurismo() {
         sales_channel: cm.sales_channels,
         specialties: specs.map((s, i) => ({ id: `cruise-${i}`, name: s })),
         _source: "cruise" as const,
-        _hasProfile: isFilled(cm.how_to_sell),
+        _hasProfile: isFilled(cm.commercial_contacts),
       };
     });
     const fromTravelMeet = (travelMeetSuppliers || []).map((tm: any) => ({
