@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Building2, MapPin, ExternalLink, ThumbsUp } from "lucide-react";
+import { Building2, MapPin, ThumbsUp } from "lucide-react";
 import { BENEFIT_CATEGORIES } from "@/types/benefits";
 import type { Benefit } from "@/types/benefits";
 import { format } from "date-fns";
@@ -88,16 +88,6 @@ export function BenefitDetailDialog({
                 <h4 className="font-semibold text-sm mb-1">Requisitos</h4>
                 <p className="text-sm text-muted-foreground whitespace-pre-line">{benefit.requirements}</p>
               </div>
-            )}
-
-            {/* Official link */}
-            {benefit.official_link && (
-              <Button variant="outline" asChild>
-                <a href={benefit.official_link} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Link oficial
-                </a>
-              </Button>
             )}
 
             {/* Author */}
