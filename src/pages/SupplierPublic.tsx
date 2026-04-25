@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Building2, FileText, ShoppingCart, Users, Phone, Tag, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { OperatorHero } from "@/components/operator/OperatorHero";
@@ -45,6 +44,16 @@ export default function SupplierPublic({ slug, preloaded }: SupplierPublicProps)
     };
   }, [slug, preloaded]);
 
+  // Set page metadata (no helmet dependency)
+  useEffect(() => {
+    if (!operator) return;
+    const prevTitle = document.title;
+    document.title = `${operator.name} — Perfil oficial`;
+    return () => {
+      document.title = prevTitle;
+    };
+  }, [operator]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -87,14 +96,6 @@ export default function SupplierPublic({ slug, preloaded }: SupplierPublicProps)
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDesc} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDesc} />
-        {operator.logo_url && <meta property="og:image" content={operator.logo_url} />}
-      </Helmet>
-
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
         <OperatorHero
           name={operator.name}
