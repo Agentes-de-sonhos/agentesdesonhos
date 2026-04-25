@@ -1,5 +1,4 @@
 import DOMPurify from "dompurify";
-import { ExternalLink } from "lucide-react";
 import { RichTextWithLinks } from "./RichTextWithLinks";
 import { useMemo } from "react";
 
@@ -87,6 +86,3 @@ export function RichContentDisplay({ content, lineClamp }: RichContentDisplayPro
     />
   );
 }
-
-// Keep ExternalLink import referenced (for future use); silence unused warning by re-exporting.
-export const __ExternalLinkRef = ExternalLink;
