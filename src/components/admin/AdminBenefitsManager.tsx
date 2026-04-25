@@ -6,27 +6,24 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
-import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { SupplierLogoUpload } from "@/components/admin/SupplierLogoUpload";
-import { BENEFIT_CATEGORIES, BENEFIT_DESTINATIONS } from "@/types/benefits";
+import { BENEFIT_CATEGORIES } from "@/types/benefits";
+import { RichContentEditor } from "@/components/operator/RichContentEditor";
+import { DestinationCombobox } from "@/components/benefits/DestinationCombobox";
 
 interface BenefitForm {
   company_name: string;
   company_logo_url: string | null;
   category: string;
   title: string;
-  short_description: string;
-  full_description: string;
   destination: string;
-  official_link: string;
-  requirements: string;
   how_to_claim: string;
   tags: string;
 }
@@ -36,11 +33,7 @@ const emptyForm: BenefitForm = {
   company_logo_url: null,
   category: "",
   title: "",
-  short_description: "",
-  full_description: "",
   destination: "",
-  official_link: "",
-  requirements: "",
   how_to_claim: "",
   tags: "",
 };
@@ -74,11 +67,7 @@ export function AdminBenefitsManager() {
         company_logo_url: form.company_logo_url,
         category: form.category,
         title: form.title.trim(),
-        short_description: form.short_description.trim() || null,
-        full_description: form.full_description.trim() || null,
-        destination: form.destination || null,
-        official_link: form.official_link.trim() || null,
-        requirements: form.requirements.trim() || null,
+        destination: form.destination.trim() || null,
         how_to_claim: form.how_to_claim.trim() || null,
         tags: form.tags
           .split(",")
@@ -100,6 +89,7 @@ export function AdminBenefitsManager() {
       toast.success(editingId ? "Benefício atualizado!" : "Benefício criado!");
       queryClient.invalidateQueries({ queryKey: ["admin-benefits"] });
       queryClient.invalidateQueries({ queryKey: ["benefits"] });
+      queryClient.invalidateQueries({ queryKey: ["benefit-destinations"] });
       closeDialog();
     },
     onError: (e: Error) => toast.error(e.message || "Erro ao salvar"),
@@ -143,11 +133,7 @@ export function AdminBenefitsManager() {
       company_logo_url: b.company_logo_url || null,
       category: b.category || "",
       title: b.title || "",
-      short_description: b.short_description || "",
-      full_description: b.full_description || "",
       destination: b.destination || "",
-      official_link: b.official_link || "",
-      requirements: b.requirements || "",
       how_to_claim: b.how_to_claim || "",
       tags: (b.tags || []).join(", "),
     });
@@ -208,13 +194,6 @@ export function AdminBenefitsManager() {
                     checked={b.is_active}
                     onCheckedChange={(checked) => toggleActive.mutate({ id: b.id, is_active: checked })}
                   />
-                  {b.official_link && (
-                    <Button variant="ghost" size="icon" asChild>
-                      <a href={b.official_link} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </Button>
-                  )}
                   <Button variant="ghost" size="icon" onClick={() => openEdit(b)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -266,46 +245,30 @@ export function AdminBenefitsManager() {
               </div>
               <div className="space-y-2">
                 <Label>Destino</Label>
-                <Select value={form.destination} onValueChange={(v) => setForm({ ...form, destination: v })}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {BENEFIT_DESTINATIONS.map((d) => (
-                      <SelectItem key={d} value={d}>{d}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <DestinationCombobox
+                  value={form.destination}
+                  onChange={(v) => setForm({ ...form, destination: v })}
+                />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Descrição curta</Label>
-              <Input value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} placeholder="Resumo breve do benefício" />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Descrição completa</Label>
-              <Textarea value={form.full_description} onChange={(e) => setForm({ ...form, full_description: e.target.value })} placeholder="Detalhes completos do benefício" rows={4} />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Requisitos</Label>
-              <Textarea value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} placeholder="Ex: Possuir cadastur ativo" rows={2} />
             </div>
 
             <div className="space-y-2">
               <Label>Como solicitar</Label>
-              <Textarea value={form.how_to_claim} onChange={(e) => setForm({ ...form, how_to_claim: e.target.value })} placeholder="Passo a passo para solicitar" rows={2} />
+              <p className="text-xs text-muted-foreground">
+                Use formatação livre: títulos, negrito, listas, cores, links e botões.
+                Cole uma URL sozinha em uma linha para virar um botão de acesso destacado.
+              </p>
+              <div className="border rounded-lg -mx-1">
+                <RichContentEditor
+                  content={form.how_to_claim}
+                  onChange={(html) => setForm({ ...form, how_to_claim: html })}
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Link oficial</Label>
-                <Input value={form.official_link} onChange={(e) => setForm({ ...form, official_link: e.target.value })} placeholder="https://..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Tags (separadas por vírgula)</Label>
-                <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="cortesia, desconto, agente" />
-              </div>
+            <div className="space-y-2">
+              <Label>Tags (separadas por vírgula)</Label>
+              <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="cortesia, desconto, agente" />
             </div>
 
             <Button onClick={() => upsert.mutate()} disabled={upsert.isPending} className="w-full">
