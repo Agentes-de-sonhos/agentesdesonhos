@@ -5,7 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOwnTourGuide } from "@/hooks/useTourGuides";
 import { GuideProfileEditor } from "@/components/tour-guides/GuideProfileEditor";
-import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail, Tag, Share2, Pencil } from "lucide-react";
+import { Building2, FileText, ShoppingCart, Users, Phone, LogOut, Mail, Tag, Share2, Pencil, Globe, Copy, Check } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
 import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
@@ -211,6 +212,8 @@ function SupplierProfileContent({ operator, signOut, lang, onLangChange }: { ope
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
+        <PublicLinkCard operator={operator} updateMutation={updateMutation} />
+
         <EditableSection
           editForm={<HeroEditForm name={editName} logoUrl={editLogo} onNameChange={setEditName} onLogoChange={setEditLogo} />}
           onSave={async () => { await updateMutation.mutateAsync({ name: editName, logo_url: editLogo }); }}
