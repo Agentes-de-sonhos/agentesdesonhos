@@ -45,24 +45,12 @@ export interface BenefitComment {
 }
 
 export const BENEFIT_CATEGORIES = [
-  { value: 'ingresso', label: 'Ingresso' },
-  { value: 'hotel', label: 'Hotel' },
   { value: 'companhia_aerea', label: 'Companhia Aérea' },
-  { value: 'parque_tematico', label: 'Parque Temático' },
-  { value: 'atracao', label: 'Atração' },
-  { value: 'cruzeiro', label: 'Cruzeiro' },
-  { value: 'treinamento', label: 'Treinamento' },
-  { value: 'tarifa_agente', label: 'Tarifa Agente' },
-  { value: 'outro', label: 'Outro' },
+  { value: 'hospedagem', label: 'Hospedagem' },
+  { value: 'locadora_veiculos', label: 'Locadora de Veículos' },
+  { value: 'cruzeiros', label: 'Cruzeiros' },
+  { value: 'seguro_viagem', label: 'Seguro Viagem' },
+  { value: 'parques_atracoes', label: 'Parques e Atrações' },
+  { value: 'outros', label: 'Outros' },
 ];
 
-export const BENEFIT_DESTINATIONS = [
-  'Orlando',
-  'Nova York',
-  'Europa',
-  'Brasil',
-  'Caribe',
-  'Ásia',
-  'América do Sul',
-  'Outro',
-];
