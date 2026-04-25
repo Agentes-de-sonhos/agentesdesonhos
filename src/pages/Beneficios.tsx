@@ -13,7 +13,6 @@ import { BenefitFilters } from "@/components/benefits/BenefitFilters";
 import { BenefitCard } from "@/components/benefits/BenefitCard";
 import { BenefitDetailDialog } from "@/components/benefits/BenefitDetailDialog";
 import { ShareBenefitDialog } from "@/components/benefits/ShareBenefitDialog";
-import { BenefitContributorsRanking } from "@/components/benefits/BenefitContributorsRanking";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Benefit } from "@/types/benefits";
 
@@ -21,7 +20,6 @@ export default function Beneficios() {
   const {
     benefits, isLoading, userConfirmations,
     createBenefit, isCreating, confirmBenefit,
-    ranking,
   } = useBenefits();
 
   const [search, setSearch] = useState("");
@@ -134,30 +132,25 @@ export default function Beneficios() {
             </Button>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="flex-1">
-              <div className="grid gap-4 md:grid-cols-2">
-                {paginatedBenefits.map((b) => (
-                  <BenefitCard
-                    key={b.id}
-                    benefit={b}
-                    userConfirmationType={getUserConfirmationType(b.id)}
-                    onConfirm={(type) => confirmBenefit({ benefitId: b.id, type })}
-                    onViewDetails={() => setDetailBenefit(b)}
-                  />
-                ))}
-              </div>
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={goToPage}
-                totalItems={totalItems}
-                pageSize={pageSize}
-              />
+          <div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {paginatedBenefits.map((b) => (
+                <BenefitCard
+                  key={b.id}
+                  benefit={b}
+                  userConfirmationType={getUserConfirmationType(b.id)}
+                  onConfirm={(type) => confirmBenefit({ benefitId: b.id, type })}
+                  onViewDetails={() => setDetailBenefit(b)}
+                />
+              ))}
             </div>
-            <div className="lg:w-72 shrink-0">
-              <BenefitContributorsRanking ranking={ranking} />
-            </div>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={goToPage}
+              totalItems={totalItems}
+              pageSize={pageSize}
+            />
           </div>
         )}
       </div>
