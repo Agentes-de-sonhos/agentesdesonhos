@@ -314,3 +314,11 @@ img {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Rich content inline link chips: stronger hover tint when a custom color
+   is provided via the --rich-link-rgb CSS variable (set inline by
+   RichContentDisplay when the editor applies a text color). */
+.rich-content-display a.rich-inline-link[style*="--rich-link-rgb"]:hover {
+  background-color: rgba(var(--rich-link-rgb), 0.20) !important;
+  border-color: rgba(var(--rich-link-rgb), 0.40) !important;
+}
