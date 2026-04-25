@@ -433,3 +433,134 @@ function SupplierProfileContent({ operator, signOut, lang, onLangChange }: { ope
     </div>
   );
 }
+
+function PublicLinkCard({ operator, updateMutation }: { operator: any; updateMutation: ReturnType<typeof useOperatorUpdate> }) {
+  const [editing, setEditing] = useState(false);
+  const [slugDraft, setSlugDraft] = useState<string>(operator.public_slug || "");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setSlugDraft(operator.public_slug || "");
+  }, [operator.public_slug]);
+
+  const url = operator.public_slug ? `https://vitrine.tur.br/${operator.public_slug}` : "";
+  const isPublished = !!operator.is_published;
+
+  const handleCopy = () => {
+    if (!url) return;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast.success("Link copiado!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveSlug = async () => {
+    const cleaned = slugDraft.trim().toLowerCase();
+    if (!cleaned) {
+      toast.error("Informe um slug válido.");
+      return;
+    }
+    try {
+      await updateMutation.mutateAsync({ public_slug: cleaned });
+      setEditing(false);
+    } catch (err: any) {
+      toast.error(err?.message || "Não foi possível salvar o slug.");
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-emerald-50/50 via-card to-sky-50/40 p-5 sm:p-6">
+      <div className="flex items-start gap-4">
+        <div className="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+          <Globe className="h-5 w-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold text-foreground">Seu link público</h3>
+            {isPublished ? (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                Publicado
+              </span>
+            ) : (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                Aguardando publicação
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Use este link para divulgar o seu perfil profissional onde quiser.
+          </p>
+
+          {!editing ? (
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
+              <code className="flex-1 min-w-[200px] text-sm bg-card border border-border/60 rounded-lg px-3 py-2 truncate">
+                {url || `vitrine.tur.br/${operator.public_slug || "—"}`}
+              </code>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCopy}
+                disabled={!isPublished || !url}
+                className="rounded-xl"
+              >
+                {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
+                {copied ? "Copiado" : "Copiar"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditing(true)}
+                className="rounded-xl"
+              >
+                <Pencil className="h-4 w-4 mr-1" /> Editar
+              </Button>
+            </div>
+          ) : (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground shrink-0">vitrine.tur.br/</span>
+                <Input
+                  value={slugDraft}
+                  onChange={(e) => setSlugDraft(e.target.value.toLowerCase())}
+                  placeholder="nome-da-empresa"
+                  className="rounded-xl"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Use letras minúsculas, números e hifens. Acentos serão removidos automaticamente.
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleSaveSlug}
+                  disabled={updateMutation.isPending || !slugDraft.trim() || slugDraft === (operator.public_slug || "")}
+                  className="rounded-xl"
+                >
+                  Salvar
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setEditing(false); setSlugDraft(operator.public_slug || ""); }}
+                  className="rounded-xl"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!isPublished && (
+            <p className="text-xs text-amber-700 mt-3">
+              Seu link só ficará acessível depois que a equipe Agentes de Sonhos publicar o seu perfil.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
