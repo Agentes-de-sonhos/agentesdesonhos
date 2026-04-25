@@ -7,7 +7,6 @@ import { BENEFIT_CATEGORIES } from "@/types/benefits";
 import type { Benefit } from "@/types/benefits";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 
 interface BenefitDetailDialogProps {
@@ -31,8 +30,8 @@ export function BenefitDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+      <DialogContent className="max-w-2xl h-[85vh] max-h-[85vh] flex flex-col overflow-hidden p-0 gap-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b">
           <div className="flex items-start justify-between gap-3 pr-6">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {benefit.company_logo_url ? (
@@ -65,7 +64,7 @@ export function BenefitDetailDialog({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0 px-6">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 [scrollbar-width:thin] [scrollbar-color:hsl(var(--border))_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
           <div className="space-y-5 py-4">
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
@@ -104,7 +103,7 @@ export function BenefitDetailDialog({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
