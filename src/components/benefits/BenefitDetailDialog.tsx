@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Building2, MapPin, ExternalLink, ThumbsUp } from "lucide-react";
+import { Building2, MapPin, ThumbsUp } from "lucide-react";
 import { BENEFIT_CATEGORIES } from "@/types/benefits";
 import type { Benefit } from "@/types/benefits";
 import { format } from "date-fns";
