@@ -671,9 +671,20 @@ export default function MapaTurismo() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-foreground truncate text-base">{supplier.name}</h3>
-                            <Badge variant="secondary" className="mt-1.5 text-xs">
-                              {supplier.category}
-                            </Badge>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                              <Badge variant="secondary" className="text-xs">
+                                {supplier.category}
+                              </Badge>
+                              {supplier._hasProfile && (
+                                <span
+                                  className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/60 px-2 py-0.5 text-[10px] font-medium"
+                                  title="Esta empresa possui perfil completo no Mapa do Turismo"
+                                >
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Perfil completo
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 flex-shrink-0 mt-0.5" />
                         </div>
