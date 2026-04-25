@@ -1,12 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BENEFIT_CATEGORIES, BENEFIT_DESTINATIONS } from "@/types/benefits";
+import { BENEFIT_CATEGORIES } from "@/types/benefits";
 import { useState } from "react";
 import { RichContentEditor } from "@/components/operator/RichContentEditor";
+import { DestinationCombobox } from "@/components/benefits/DestinationCombobox";
 
 interface ShareBenefitDialogProps {
   open: boolean;
@@ -19,13 +19,9 @@ export function ShareBenefitDialog({ open, onClose, onSubmit, isSubmitting }: Sh
   const [form, setForm] = useState({
     company_name: "",
     title: "",
-    short_description: "",
-    full_description: "",
     destination: "",
-    category: "outro",
-    requirements: "",
+    category: "outros",
     how_to_claim: "",
-    official_link: "",
     tags: "",
   });
 
@@ -36,7 +32,7 @@ export function ShareBenefitDialog({ open, onClose, onSubmit, isSubmitting }: Sh
       ...form,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
     });
-    setForm({ company_name: "", title: "", short_description: "", full_description: "", destination: "", category: "outro", requirements: "", how_to_claim: "", official_link: "", tags: "" });
+    setForm({ company_name: "", title: "", destination: "", category: "outros", how_to_claim: "", tags: "" });
     onClose();
   };
 
@@ -70,32 +66,17 @@ export function ShareBenefitDialog({ open, onClose, onSubmit, isSubmitting }: Sh
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
           </div>
           <div className="space-y-1.5">
-            <Label>Descrição curta</Label>
-            <Input value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Destino</Label>
-              <Select value={form.destination} onValueChange={(v) => setForm({ ...form, destination: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                <SelectContent>
-                  {BENEFIT_DESTINATIONS.map((d) => (
-                    <SelectItem key={d} value={d}>{d}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Link oficial</Label>
-              <Input value={form.official_link} onChange={(e) => setForm({ ...form, official_link: e.target.value })} placeholder="https://..." />
-            </div>
+            <Label>Destino</Label>
+            <DestinationCombobox
+              value={form.destination}
+              onChange={(v) => setForm({ ...form, destination: v })}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Digite para buscar destinos já cadastrados ou criar um novo.
+            </p>
           </div>
           <div className="space-y-1.5">
-            <Label>Requisitos</Label>
-            <Textarea value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} placeholder="Ex: Cadastur ativo, IATA válida..." />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Conteúdo do benefício</Label>
+            <Label>Como solicitar</Label>
             <p className="text-xs text-muted-foreground">
               Use formatação livre: títulos, negrito, listas, cores, links e botões.
             </p>
