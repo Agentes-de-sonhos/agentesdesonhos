@@ -58,12 +58,72 @@ export function RichContentDisplay({ content, lineClamp }: RichContentDisplayPro
       node.parentNode?.replaceChild(frag, node);
     });
 
+    // Helpers to convert any CSS color (hex, rgb, hsl, named) to rgba with alpha.
+    const parseColorToRgb = (color: string): { r: number; g: number; b: number } | null => {
+      if (!color) return null;
+      const c = color.trim();
+      // #rgb / #rrggbb
+      const hexMatch = c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+      if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) hex = hex.split("").map((ch) => ch + ch).join("");
+        const num = parseInt(hex, 16);
+        return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+      }
+      // rgb()/rgba()
+      const rgbMatch = c.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/i);
+      if (rgbMatch) {
+        return { r: +rgbMatch[1], g: +rgbMatch[2], b: +rgbMatch[3] };
+      }
+      // Fallback: let the browser resolve named/hsl colors via a temp element.
+      try {
+        const tmp = doc.createElement("span");
+        tmp.style.color = c;
+        doc.body.appendChild(tmp);
+        const computed = tmp.style.color; // browsers normalize to rgb(...) when valid
+        tmp.remove();
+        const m = computed.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/i);
+        if (m) return { r: +m[1], g: +m[2], b: +m[3] };
+      } catch {
+        /* ignore */
+      }
+      return null;
+    };
+
+    // Find the nearest inherited text color, walking up through parent <span>/<p>/etc.
+    const getInheritedColor = (el: HTMLElement): string | null => {
+      let cur: HTMLElement | null = el;
+      while (cur && cur !== doc.body) {
+        const inline = cur.getAttribute("style") || "";
+        const m = inline.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i);
+        if (m) return m[1].trim();
+        cur = cur.parentElement;
+      }
+      return null;
+    };
+
     // Style every <a>: open in new tab, secure rel, and mark as inline button.
+    // If a text color is inherited from the surrounding rich text, derive the
+    // button colors from it (text = main color, bg = light tint, border = main).
     Array.from(doc.body.querySelectorAll("a")).forEach((a) => {
       a.setAttribute("target", "_blank");
       a.setAttribute("rel", "noopener noreferrer");
       const existing = a.getAttribute("class") || "";
       a.setAttribute("class", `${existing} rich-inline-link`.trim());
+
+      const inheritedColor = getInheritedColor(a);
+      const rgb = inheritedColor ? parseColorToRgb(inheritedColor) : null;
+      if (rgb) {
+        const { r, g, b } = rgb;
+        const styleParts: string[] = [];
+        // Preserve any existing inline style the editor may have set.
+        const prev = a.getAttribute("style") || "";
+        if (prev) styleParts.push(prev.replace(/;\s*$/, ""));
+        styleParts.push(`color: rgb(${r}, ${g}, ${b})`);
+        styleParts.push(`background-color: rgba(${r}, ${g}, ${b}, 0.12)`);
+        styleParts.push(`border: 1px solid rgba(${r}, ${g}, ${b}, 0.25)`);
+        a.setAttribute("style", styleParts.join("; "));
+      }
     });
 
     return DOMPurify.sanitize(doc.body.innerHTML, {
