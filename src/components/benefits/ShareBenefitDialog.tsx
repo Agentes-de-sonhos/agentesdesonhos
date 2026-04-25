@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BENEFIT_CATEGORIES, BENEFIT_DESTINATIONS } from "@/types/benefits";
 import { useState } from "react";
+import { RichContentEditor } from "@/components/operator/RichContentEditor";
 
 interface ShareBenefitDialogProps {
   open: boolean;
@@ -72,10 +73,6 @@ export function ShareBenefitDialog({ open, onClose, onSubmit, isSubmitting }: Sh
             <Label>Descrição curta</Label>
             <Input value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
           </div>
-          <div className="space-y-1.5">
-            <Label>Descrição completa</Label>
-            <Textarea value={form.full_description} onChange={(e) => setForm({ ...form, full_description: e.target.value })} />
-          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Destino</Label>
@@ -98,8 +95,17 @@ export function ShareBenefitDialog({ open, onClose, onSubmit, isSubmitting }: Sh
             <Textarea value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} placeholder="Ex: Cadastur ativo, IATA válida..." />
           </div>
           <div className="space-y-1.5">
-            <Label>Como solicitar</Label>
-            <Textarea value={form.how_to_claim} onChange={(e) => setForm({ ...form, how_to_claim: e.target.value })} />
+            <Label>Conteúdo do benefício</Label>
+            <p className="text-xs text-muted-foreground">
+              Use formatação livre: títulos, negrito, listas, cores, links e botões.
+            </p>
+            <div className="-mx-4">
+              <RichContentEditor
+                content={form.how_to_claim}
+                onChange={(html) => setForm({ ...form, how_to_claim: html })}
+                placeholder="💡 Cole uma URL sozinha em uma linha para virar um botão de acesso destacado."
+              />
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label>Tags (separadas por vírgula)</Label>
