@@ -38,6 +38,8 @@ import {
   Link as LinkIcon,
   ImagePlus,
   KeyRound,
+  Globe,
+  Copy,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { toast } from "sonner";
@@ -280,6 +282,8 @@ export function AdminTourOperatorsManager() {
   const [quickLogoOperatorId, setQuickLogoOperatorId] = useState<string | null>(null);
   const [quickLogoOpen, setQuickLogoOpen] = useState(false);
   const [accountDialogOperator, setAccountDialogOperator] = useState<{ id: string; name: string } | null>(null);
+  const [slugDialogOperator, setSlugDialogOperator] = useState<{ id: string; name: string; public_slug: string | null; is_published: boolean } | null>(null);
+  const [slugDraft, setSlugDraft] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -308,6 +312,34 @@ export function AdminTourOperatorsManager() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] }),
+  });
+
+  const togglePublishedMutation = useMutation({
+    mutationFn: async ({ id, is_published }: { id: string; is_published: boolean }) => {
+      const { error } = await supabase.from("tour_operators").update({ is_published } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+      toast.success(vars.is_published ? "Perfil publicado!" : "Perfil despublicado.");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const updateSlugMutation = useMutation({
+    mutationFn: async ({ id, public_slug }: { id: string; public_slug: string }) => {
+      const { error } = await supabase
+        .from("tour_operators")
+        .update({ public_slug } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+      toast.success("Link público atualizado!");
+      setSlugDialogOperator(null);
+    },
+    onError: (err: any) => toast.error(err.message),
   });
 
   const quickLogoMutation = useMutation({
