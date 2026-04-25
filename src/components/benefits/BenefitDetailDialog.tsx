@@ -64,7 +64,7 @@ export function BenefitDetailDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 [scrollbar-width:thin] [scrollbar-color:hsl(var(--border))_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 [scrollbar-width:thin] [scrollbar-color:hsl(var(--muted-foreground)/0.6)_hsl(var(--muted))] [&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-track]:bg-muted [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/60 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/80">
           <div className="space-y-5 py-4">
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
