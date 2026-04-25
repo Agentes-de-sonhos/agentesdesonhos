@@ -21,7 +21,7 @@ export default function Beneficios() {
   const {
     benefits, isLoading, userConfirmations,
     createBenefit, isCreating, confirmBenefit,
-    useComments, addComment, isAddingComment, ranking,
+    ranking,
   } = useBenefits();
 
   const [search, setSearch] = useState("");
@@ -60,9 +60,6 @@ export default function Beneficios() {
     const c = userConfirmations.find((uc) => uc.benefit_id === benefitId);
     return c?.confirmation_type || null;
   };
-
-  // Comments for detail dialog
-  const commentsQuery = useComments(detailBenefit?.id || null);
 
   if (isLoading) {
     return (
@@ -176,10 +173,6 @@ export default function Beneficios() {
         benefit={detailBenefit}
         open={!!detailBenefit}
         onClose={() => setDetailBenefit(null)}
-        comments={commentsQuery.data || []}
-        isLoadingComments={commentsQuery.isLoading}
-        onAddComment={(content) => detailBenefit && addComment({ benefitId: detailBenefit.id, content })}
-        isAddingComment={isAddingComment}
         userConfirmationType={detailBenefit ? getUserConfirmationType(detailBenefit.id) : null}
         onConfirm={(type) => detailBenefit && confirmBenefit({ benefitId: detailBenefit.id, type })}
       />
