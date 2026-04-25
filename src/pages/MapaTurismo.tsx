@@ -35,6 +35,7 @@ import {
   Anchor,
   Waves,
   Compass,
+  CheckCircle2,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -173,11 +174,18 @@ export default function MapaTurismo() {
   });
 
   const allItems = useMemo(() => {
+    const isFilled = (v: any) => {
+      if (!v) return false;
+      if (typeof v !== "string") return true;
+      // remove whitespace e tags HTML básicas para detectar conteúdo real
+      return v.replace(/<[^>]*>/g, "").trim().length > 0;
+    };
     const fromSuppliers = (suppliers || []).map((s: any) => ({
       ...s,
       _source: "supplier" as const,
       website_url: s.website_url,
       instagram_url: s.instagram_url,
+      _hasProfile: isFilled(s.how_to_sell),
     }));
     const fromOperators = (tourOperators || []).map((op: any) => ({
       id: op.id,
@@ -191,6 +199,7 @@ export default function MapaTurismo() {
         ? op.specialties.split(",").map((s: string, i: number) => ({ id: `op-${i}`, name: s.trim() }))
         : [],
       _source: "operator" as const,
+      _hasProfile: isFilled(op.how_to_sell),
     }));
     const fromCruises = (cruiseCompanies || []).map((cm: any) => {
       const specs: string[] = [];
@@ -207,6 +216,7 @@ export default function MapaTurismo() {
         sales_channel: cm.sales_channels,
         specialties: specs.map((s, i) => ({ id: `cruise-${i}`, name: s })),
         _source: "cruise" as const,
+        _hasProfile: isFilled(cm.how_to_sell),
       };
     });
     const fromTravelMeet = (travelMeetSuppliers || []).map((tm: any) => ({
@@ -219,6 +229,7 @@ export default function MapaTurismo() {
       sales_channel: null,
       specialties: (tm.specialties || []).map((s: string, i: number) => ({ id: `tm-${i}`, name: s })),
       _source: "travelmeet" as const,
+      _hasProfile: false,
     }));
     const fromGuides = (tourGuides || []).map((g: any) => {
       const langSpecs = (g.languages || []).map((l: any, i: number) => ({ id: `g-lang-${i}`, name: l.code }));
@@ -233,6 +244,7 @@ export default function MapaTurismo() {
         sales_channel: null,
         specialties: [...langSpecs, ...otherSpecs],
         _source: "guide" as const,
+        _hasProfile: isFilled(g.bio) || isFilled(g.about),
       };
     });
     return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet, ...fromGuides];
@@ -303,18 +315,25 @@ export default function MapaTurismo() {
 
     // Sort
     results = [...results].sort((a, b) => {
+      // Prioridade 1: empresas com perfil preenchido vêm primeiro
+      if (a._hasProfile !== b._hasProfile) {
+        return a._hasProfile ? -1 : 1;
+      }
       if (sortBy === "alpha") return a.name.localeCompare(b.name);
       if (sortBy === "rating") {
         const ra = reviewStatsMap[a.id];
         const rb = reviewStatsMap[b.id];
         const avgA = ra ? ra.total / ra.count : 0;
         const avgB = rb ? rb.total / rb.count : 0;
-        return avgB - avgA;
+        if (avgB !== avgA) return avgB - avgA;
+        return a.name.localeCompare(b.name);
       }
       if (sortBy === "likes") {
-        return getLikeCount(b.id, b._source) - getLikeCount(a.id, a._source);
+        const diff = getLikeCount(b.id, b._source) - getLikeCount(a.id, a._source);
+        if (diff !== 0) return diff;
+        return a.name.localeCompare(b.name);
       }
-      return 0;
+      return a.name.localeCompare(b.name);
     });
 
     return results;
@@ -652,9 +671,20 @@ export default function MapaTurismo() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-foreground truncate text-base">{supplier.name}</h3>
-                            <Badge variant="secondary" className="mt-1.5 text-xs">
-                              {supplier.category}
-                            </Badge>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                              <Badge variant="secondary" className="text-xs">
+                                {supplier.category}
+                              </Badge>
+                              {supplier._hasProfile && (
+                                <span
+                                  className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/60 px-2 py-0.5 text-[10px] font-medium"
+                                  title="Esta empresa possui perfil completo no Mapa do Turismo"
+                                >
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Perfil completo
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 flex-shrink-0 mt-0.5" />
                         </div>
