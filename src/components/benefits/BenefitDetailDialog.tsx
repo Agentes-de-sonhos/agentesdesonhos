@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Building2, MapPin, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Building2, MapPin, ExternalLink, ThumbsUp } from "lucide-react";
 import { BENEFIT_CATEGORIES } from "@/types/benefits";
 import type { Benefit } from "@/types/benefits";
 import { format } from "date-fns";
@@ -76,17 +76,6 @@ export function BenefitDetailDialog({
               >
                 <ThumbsUp className="h-4 w-4" />
                 Funciona ({benefit.confirmations_count})
-              </button>
-              <button
-                onClick={() => onConfirm("not_available")}
-                className={`flex items-center gap-2 text-sm px-4 py-2 rounded-full border transition-colors ${
-                  userConfirmationType === "not_available"
-                    ? "bg-red-100 border-red-300 text-red-700"
-                    : "border-border hover:bg-muted"
-                }`}
-              >
-                <ThumbsDown className="h-4 w-4" />
-                Indisponível ({benefit.not_available_count})
               </button>
             </div>
 
