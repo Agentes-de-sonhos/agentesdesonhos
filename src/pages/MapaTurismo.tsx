@@ -174,11 +174,18 @@ export default function MapaTurismo() {
   });
 
   const allItems = useMemo(() => {
+    const isFilled = (v: any) => {
+      if (!v) return false;
+      if (typeof v !== "string") return true;
+      // remove whitespace e tags HTML básicas para detectar conteúdo real
+      return v.replace(/<[^>]*>/g, "").trim().length > 0;
+    };
     const fromSuppliers = (suppliers || []).map((s: any) => ({
       ...s,
       _source: "supplier" as const,
       website_url: s.website_url,
       instagram_url: s.instagram_url,
+      _hasProfile: isFilled(s.how_to_sell),
     }));
     const fromOperators = (tourOperators || []).map((op: any) => ({
       id: op.id,
@@ -192,6 +199,7 @@ export default function MapaTurismo() {
         ? op.specialties.split(",").map((s: string, i: number) => ({ id: `op-${i}`, name: s.trim() }))
         : [],
       _source: "operator" as const,
+      _hasProfile: isFilled(op.how_to_sell),
     }));
     const fromCruises = (cruiseCompanies || []).map((cm: any) => {
       const specs: string[] = [];
@@ -208,6 +216,7 @@ export default function MapaTurismo() {
         sales_channel: cm.sales_channels,
         specialties: specs.map((s, i) => ({ id: `cruise-${i}`, name: s })),
         _source: "cruise" as const,
+        _hasProfile: isFilled(cm.how_to_sell),
       };
     });
     const fromTravelMeet = (travelMeetSuppliers || []).map((tm: any) => ({
@@ -220,6 +229,7 @@ export default function MapaTurismo() {
       sales_channel: null,
       specialties: (tm.specialties || []).map((s: string, i: number) => ({ id: `tm-${i}`, name: s })),
       _source: "travelmeet" as const,
+      _hasProfile: false,
     }));
     const fromGuides = (tourGuides || []).map((g: any) => {
       const langSpecs = (g.languages || []).map((l: any, i: number) => ({ id: `g-lang-${i}`, name: l.code }));
@@ -234,6 +244,7 @@ export default function MapaTurismo() {
         sales_channel: null,
         specialties: [...langSpecs, ...otherSpecs],
         _source: "guide" as const,
+        _hasProfile: isFilled(g.bio) || isFilled(g.about),
       };
     });
     return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet, ...fromGuides];
