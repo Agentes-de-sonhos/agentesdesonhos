@@ -315,18 +315,25 @@ export default function MapaTurismo() {
 
     // Sort
     results = [...results].sort((a, b) => {
+      // Prioridade 1: empresas com perfil preenchido vêm primeiro
+      if (a._hasProfile !== b._hasProfile) {
+        return a._hasProfile ? -1 : 1;
+      }
       if (sortBy === "alpha") return a.name.localeCompare(b.name);
       if (sortBy === "rating") {
         const ra = reviewStatsMap[a.id];
         const rb = reviewStatsMap[b.id];
         const avgA = ra ? ra.total / ra.count : 0;
         const avgB = rb ? rb.total / rb.count : 0;
-        return avgB - avgA;
+        if (avgB !== avgA) return avgB - avgA;
+        return a.name.localeCompare(b.name);
       }
       if (sortBy === "likes") {
-        return getLikeCount(b.id, b._source) - getLikeCount(a.id, a._source);
+        const diff = getLikeCount(b.id, b._source) - getLikeCount(a.id, a._source);
+        if (diff !== 0) return diff;
+        return a.name.localeCompare(b.name);
       }
-      return 0;
+      return a.name.localeCompare(b.name);
     });
 
     return results;
