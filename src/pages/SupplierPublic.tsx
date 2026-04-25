@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Building2, FileText, ShoppingCart, Users, Phone, Tag, Share2 } from "lucide-react";
+import { Building2, FileText, ShoppingCart, Users, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
@@ -88,11 +88,6 @@ export default function SupplierPublic({ slug, preloaded }: SupplierPublicProps)
     !!operator.website ||
     !!operator.instagram ||
     (sl && typeof sl === "object" && Object.values(sl).some((v) => !!v));
-
-  const pageTitle = `${operator.name} — Perfil oficial`;
-  const pageDesc =
-    operator.short_description?.replace(/<[^>]*>/g, "").slice(0, 155) ||
-    `Conheça ${operator.name} no Mapa do Turismo.`;
 
   return (
     <div className="min-h-screen bg-background">
