@@ -90,39 +90,69 @@ export function RichContentDisplay({ content, lineClamp }: RichContentDisplayPro
       return null;
     };
 
-    // Find the nearest inherited text color, walking up through parent <span>/<p>/etc.
-    const getInheritedColor = (el: HTMLElement): string | null => {
-      let cur: HTMLElement | null = el;
+    // Find an explicit text color associated with this <a>:
+    //  1) on the <a> itself
+    //  2) on any descendant (TipTap often wraps the link text in <span style="color: ...">)
+    //  3) on any ancestor up the tree
+    const extractColorFromStyle = (el: Element): string | null => {
+      const inline = el.getAttribute("style") || "";
+      const m = inline.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i);
+      return m ? m[1].trim() : null;
+    };
+    const getAssociatedColor = (el: HTMLElement): string | null => {
+      const own = extractColorFromStyle(el);
+      if (own) return own;
+      const descendantWithColor = el.querySelector("[style*='color']");
+      if (descendantWithColor) {
+        const c = extractColorFromStyle(descendantWithColor);
+        if (c) return c;
+      }
+      let cur: HTMLElement | null = el.parentElement;
       while (cur && cur !== doc.body) {
-        const inline = cur.getAttribute("style") || "";
-        const m = inline.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i);
-        if (m) return m[1].trim();
+        const c = extractColorFromStyle(cur);
+        if (c) return c;
         cur = cur.parentElement;
       }
       return null;
     };
 
     // Style every <a>: open in new tab, secure rel, and mark as inline button.
-    // If a text color is inherited from the surrounding rich text, derive the
-    // button colors from it (text = main color, bg = light tint, border = main).
+    // If a text color is associated with the rich text, derive the button colors
+    // from it (text = main color, bg = light tint, border = soft tint). Use
+    // !important to win over the default Tailwind chip styling on the wrapper.
     Array.from(doc.body.querySelectorAll("a")).forEach((a) => {
       a.setAttribute("target", "_blank");
       a.setAttribute("rel", "noopener noreferrer");
       const existing = a.getAttribute("class") || "";
       a.setAttribute("class", `${existing} rich-inline-link`.trim());
 
-      const inheritedColor = getInheritedColor(a);
-      const rgb = inheritedColor ? parseColorToRgb(inheritedColor) : null;
+      const associatedColor = getAssociatedColor(a);
+      const rgb = associatedColor ? parseColorToRgb(associatedColor) : null;
       if (rgb) {
         const { r, g, b } = rgb;
-        const styleParts: string[] = [];
-        // Preserve any existing inline style the editor may have set.
-        const prev = a.getAttribute("style") || "";
-        if (prev) styleParts.push(prev.replace(/;\s*$/, ""));
-        styleParts.push(`color: rgb(${r}, ${g}, ${b})`);
-        styleParts.push(`background-color: rgba(${r}, ${g}, ${b}, 0.12)`);
-        styleParts.push(`border: 1px solid rgba(${r}, ${g}, ${b}, 0.25)`);
-        a.setAttribute("style", styleParts.join("; "));
+        // Strip any color/background-color/border the editor may have left on
+        // the <a> so our derived chip styling is the single source of truth.
+        const prev = (a.getAttribute("style") || "")
+          .split(";")
+          .map((s) => s.trim())
+          .filter((s) => s && !/^(color|background(-color)?|border(-[a-z]+)?)\s*:/i.test(s));
+        prev.push(`color: rgb(${r}, ${g}, ${b}) !important`);
+        prev.push(`background-color: rgba(${r}, ${g}, ${b}, 0.12) !important`);
+        prev.push(`border: 1px solid rgba(${r}, ${g}, ${b}, 0.28) !important`);
+        // Custom property powers the :hover rule defined on the wrapper.
+        prev.push(`--rich-link-rgb: ${r}, ${g}, ${b}`);
+        a.setAttribute("style", prev.join("; "));
+        // Also strip color from any inner <span> so the <a>'s color wins
+        // visually (avoids double-rendering in case of nested overrides).
+        Array.from(a.querySelectorAll("[style*='color']")).forEach((child) => {
+          const cleaned = (child.getAttribute("style") || "")
+            .split(";")
+            .map((s) => s.trim())
+            .filter((s) => s && !/^color\s*:/i.test(s))
+            .join("; ");
+          if (cleaned) child.setAttribute("style", cleaned);
+          else child.removeAttribute("style");
+        });
       }
     });
 
