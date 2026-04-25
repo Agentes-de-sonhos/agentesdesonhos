@@ -7434,9 +7434,11 @@ export type Database = {
           id: string
           instagram: string | null
           is_active: boolean | null
+          is_published: boolean
           logo_url: string | null
           materials: Json | null
           name: string
+          public_slug: string | null
           rejection_reason: string | null
           sales_channels: string | null
           short_description: string | null
@@ -7462,9 +7464,11 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_active?: boolean | null
+          is_published?: boolean
           logo_url?: string | null
           materials?: Json | null
           name: string
+          public_slug?: string | null
           rejection_reason?: string | null
           sales_channels?: string | null
           short_description?: string | null
@@ -7490,9 +7494,11 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_active?: boolean | null
+          is_published?: boolean
           logo_url?: string | null
           materials?: Json | null
           name?: string
+          public_slug?: string | null
           rejection_reason?: string | null
           sales_channels?: string | null
           short_description?: string | null
@@ -8707,6 +8713,10 @@ export type Database = {
       generate_public_access_code: { Args: never; Returns: string }
       generate_quote_access_code: { Args: never; Returns: string }
       generate_secure_share_token: { Args: never; Returns: string }
+      generate_supplier_slug: {
+        Args: { p_existing_id?: string; p_name: string }
+        Returns: string
+      }
       generate_trip_short_code: { Args: never; Returns: string }
       generate_trip_slug: {
         Args: {
@@ -8799,6 +8809,10 @@ export type Database = {
         }[]
       }
       get_public_tour_guide: { Args: { _id: string }; Returns: Json }
+      get_published_supplier_by_slug: {
+        Args: { p_slug: string }
+        Returns: Json
+      }
       get_quote_by_public_code: {
         Args: { p_agency_slug: string; p_code: string }
         Returns: Json
