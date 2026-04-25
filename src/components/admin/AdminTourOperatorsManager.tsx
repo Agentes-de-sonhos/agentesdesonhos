@@ -620,6 +620,9 @@ export function AdminTourOperatorsManager() {
                     <p className="text-xs text-muted-foreground">{op.category}</p>
                   </div>
                   <Badge variant={op.is_active ? "default" : "outline"}>{op.is_active ? "Ativo" : "Inativo"}</Badge>
+                  {op.is_published && (
+                    <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200">Publicado</Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 ml-4">
                   <Button variant="ghost" size="icon" onClick={() => toggleActiveMutation.mutate({ id: op.id, is_active: !op.is_active })} title={op.is_active ? "Desativar" : "Ativar"}>
@@ -627,6 +630,17 @@ export function AdminTourOperatorsManager() {
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => navigate(`/mapa-turismo/operadora/${op.id}`)} title="Ver página"><Eye className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => { setQuickLogoOperatorId(op.id); setQuickLogoOpen(true); }} title="Alterar logotipo"><ImagePlus className="h-4 w-4" /></Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setSlugDialogOperator({ id: op.id, name: op.name, public_slug: op.public_slug ?? null, is_published: !!op.is_published });
+                      setSlugDraft(op.public_slug ?? "");
+                    }}
+                    title="Link público / publicar"
+                  >
+                    <Globe className={`h-4 w-4 ${op.is_published ? "text-emerald-600" : "text-muted-foreground"}`} />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -882,6 +896,95 @@ export function AdminTourOperatorsManager() {
         operatorName={accountDialogOperator.name}
         onSuccess={() => queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] })}
       />
+    )}
+
+    {slugDialogOperator && (
+      <Dialog open={!!slugDialogOperator} onOpenChange={(o) => { if (!o) setSlugDialogOperator(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Link público — {slugDialogOperator.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs text-muted-foreground">URL pública</Label>
+              <div className="flex items-center gap-2 mt-1">
+                <code className="flex-1 text-xs bg-muted rounded px-2 py-2 truncate">
+                  vitrine.tur.br/{slugDraft || "—"}
+                </code>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  disabled={!slugDraft || !slugDialogOperator.is_published}
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://vitrine.tur.br/${slugDraft}`);
+                    toast.success("Link copiado!");
+                  }}
+                  title="Copiar"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              {!slugDialogOperator.is_published && (
+                <p className="text-xs text-amber-600 mt-1">
+                  O link só funciona após publicar o perfil.
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="slug-input">Slug (parte da URL)</Label>
+              <Input
+                id="slug-input"
+                value={slugDraft}
+                onChange={(e) => setSlugDraft(e.target.value.toLowerCase())}
+                placeholder="ex: cvc-corp"
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use letras minúsculas, números e hifens. Será normalizado automaticamente.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between border-t pt-4">
+              <div>
+                <p className="text-sm font-medium">Status</p>
+                <p className="text-xs text-muted-foreground">
+                  {slugDialogOperator.is_published ? "Publicado e visível na URL pública." : "Não publicado."}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant={slugDialogOperator.is_published ? "outline" : "default"}
+                onClick={() => {
+                  togglePublishedMutation.mutate(
+                    { id: slugDialogOperator.id, is_published: !slugDialogOperator.is_published },
+                    {
+                      onSuccess: () =>
+                        setSlugDialogOperator((prev) =>
+                          prev ? { ...prev, is_published: !prev.is_published } : prev
+                        ),
+                    }
+                  );
+                }}
+                disabled={togglePublishedMutation.isPending}
+              >
+                {slugDialogOperator.is_published ? "Despublicar" : "Publicar"}
+              </Button>
+            </div>
+
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => updateSlugMutation.mutate({ id: slugDialogOperator.id, public_slug: slugDraft.trim() })}
+              disabled={updateSlugMutation.isPending || !slugDraft.trim() || slugDraft === slugDialogOperator.public_slug}
+            >
+              {updateSlugMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Salvar slug
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     )}
     </>
   );
