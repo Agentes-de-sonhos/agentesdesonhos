@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, ThumbsDown, Building2, MapPin } from "lucide-react";
+import { ThumbsUp, Building2, MapPin } from "lucide-react";
 import { BENEFIT_CATEGORIES } from "@/types/benefits";
 import type { Benefit } from "@/types/benefits";
 
@@ -76,17 +76,6 @@ export function BenefitCard({ benefit, userConfirmationType, onConfirm, onViewDe
           >
             <ThumbsUp className="h-3.5 w-3.5" />
             <span>{benefit.confirmations_count}</span>
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onConfirm("not_available"); }}
-            className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors ${
-              userConfirmationType === "not_available"
-                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                : "text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <ThumbsDown className="h-3.5 w-3.5" />
-            <span>{benefit.not_available_count}</span>
           </button>
         </div>
       </CardContent>
