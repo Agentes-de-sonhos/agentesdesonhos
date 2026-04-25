@@ -1,43 +1,33 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Building2, MapPin, ExternalLink, ThumbsUp, ThumbsDown, Send } from "lucide-react";
+import { Building2, MapPin, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
 import { BENEFIT_CATEGORIES } from "@/types/benefits";
-import type { Benefit, BenefitComment } from "@/types/benefits";
-import { useState } from "react";
+import type { Benefit } from "@/types/benefits";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 
 interface BenefitDetailDialogProps {
   benefit: Benefit | null;
   open: boolean;
   onClose: () => void;
-  comments: BenefitComment[];
-  isLoadingComments: boolean;
-  onAddComment: (content: string) => void;
-  isAddingComment: boolean;
   userConfirmationType: string | null;
   onConfirm: (type: "works" | "not_available") => void;
 }
 
 export function BenefitDetailDialog({
-  benefit, open, onClose, comments, isLoadingComments,
-  onAddComment, isAddingComment, userConfirmationType, onConfirm,
+  benefit, open, onClose, userConfirmationType, onConfirm,
 }: BenefitDetailDialogProps) {
-  const [comment, setComment] = useState("");
-
   if (!benefit) return null;
 
   const categoryLabel = BENEFIT_CATEGORIES.find((c) => c.value === benefit.category)?.label || benefit.category;
 
-  const handleSubmitComment = () => {
-    if (!comment.trim()) return;
-    onAddComment(comment.trim());
-    setComment("");
-  };
+  // Rich content: prefer how_to_claim (legacy field used as the editable rich content),
+  // fall back to full_description for older records.
+  const richContent = benefit.how_to_claim || benefit.full_description || "";
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -100,27 +90,14 @@ export function BenefitDetailDialog({
               </button>
             </div>
 
-            {/* Description */}
-            {benefit.full_description && (
-              <div>
-                <h4 className="font-semibold text-sm mb-1">Descrição</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{benefit.full_description}</p>
-              </div>
-            )}
+            {/* Rich content (free-form formatted text) */}
+            {richContent && <RichContentDisplay content={richContent} />}
 
-            {/* Requirements */}
+            {/* Requirements (kept as plain field) */}
             {benefit.requirements && (
               <div>
                 <h4 className="font-semibold text-sm mb-1">Requisitos</h4>
                 <p className="text-sm text-muted-foreground whitespace-pre-line">{benefit.requirements}</p>
-              </div>
-            )}
-
-            {/* How to claim */}
-            {benefit.how_to_claim && (
-              <div>
-                <h4 className="font-semibold text-sm mb-1">Como solicitar</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{benefit.how_to_claim}</p>
               </div>
             )}
 
@@ -145,40 +122,6 @@ export function BenefitDetailDialog({
                 <span>· {format(new Date(benefit.created_at), "dd MMM yyyy", { locale: ptBR })}</span>
               </div>
             )}
-
-            {/* Comments */}
-            <div className="space-y-3 pt-2 border-t">
-              <h4 className="font-semibold text-sm">Comentários da comunidade</h4>
-              {comments.length === 0 && !isLoadingComments && (
-                <p className="text-sm text-muted-foreground">Nenhum comentário ainda. Seja o primeiro!</p>
-              )}
-              {comments.map((c) => (
-                <div key={c.id} className="flex gap-2">
-                  <Avatar className="h-7 w-7 mt-0.5">
-                    <AvatarImage src={c.profile?.avatar_url || undefined} />
-                    <AvatarFallback className="text-xs">{c.profile?.name?.charAt(0) || "U"}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 bg-muted rounded-lg p-2.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{c.profile?.name || "Usuário"}</span>
-                      <span className="text-xs text-muted-foreground">{format(new Date(c.created_at), "dd/MM HH:mm")}</span>
-                    </div>
-                    <p className="text-sm mt-0.5">{c.content}</p>
-                  </div>
-                </div>
-              ))}
-              <div className="flex gap-2">
-                <Textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Escreva um comentário..."
-                  className="min-h-[60px] text-sm"
-                />
-                <Button size="icon" onClick={handleSubmitComment} disabled={!comment.trim() || isAddingComment} className="shrink-0 self-end">
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
           </div>
         </ScrollArea>
       </DialogContent>
