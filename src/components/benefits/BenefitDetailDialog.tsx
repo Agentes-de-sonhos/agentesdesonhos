@@ -90,16 +90,6 @@ export function BenefitDetailDialog({
               </div>
             )}
 
-            {/* Official link */}
-            {benefit.official_link && (
-              <Button variant="outline" asChild>
-                <a href={benefit.official_link} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Link oficial
-                </a>
-              </Button>
-            )}
-
             {/* Author */}
             {benefit.profile && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
