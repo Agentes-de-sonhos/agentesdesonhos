@@ -73,7 +73,9 @@ export function RichTextWithLinks({ text, asBullets, bulletColor = "bg-primary/6
                 <ExternalLink className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{btn.label}</p>
+                <p className="text-sm font-medium text-foreground leading-snug [overflow-wrap:break-word] [word-break:normal] [hyphens:none]">
+                  {btn.label}
+                </p>
               </div>
               <Button
                 size="sm"
