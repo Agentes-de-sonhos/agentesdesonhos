@@ -182,6 +182,7 @@ function formatDisplayDate(isoDate: string): string {
 // 13-col: A-M (no Cia Aérea, no Disp) → col 12 = Operadora
 // 14-col: A-N (has Cia Aérea) → col 12 = Cia, col 13 = Operadora
 // 15-col: A-O (full) → col 12 = Cia, col 13 = Disp, col 14 = Operadora
+// 16-col RCA: A-P → col 12 = Cia, col 13 = Empresa/Operadora, col 14 = Tarifa, col 15 = Lugares
 
 function extractAirportCode(raw: string): string {
   if (!raw) return "";
@@ -191,14 +192,22 @@ function extractAirportCode(raw: string): string {
   return str.split(/[\s(]/)[0] || str;
 }
 
-function detectFormat(header: any[]): "13" | "14" | "15" {
+function detectFormat(header: any[]): "13" | "14" | "15" | "16-rca" {
   const colCount = header.filter((c) => c != null && String(c).trim() !== "").length;
-  // Check if any header contains "cia"
-  const hasCia = header.some((c) => String(c || "").toLowerCase().includes("cia"));
-  // Check if any header contains "disp"
-  const hasDisp = header.some((c) => String(c || "").toLowerCase().includes("disp"));
+  const lower = header.map((c) => String(c || "").toLowerCase());
+  const hasCia = lower.some((c) => c.includes("cia") || c.includes("companhia"));
+  const hasDisp = lower.some((c) => c.includes("disp"));
+  const hasEmpresa = lower.some((c) => c.includes("empresa"));
+  const hasTarifa = lower.some((c) => c.includes("tarifa") || c.includes("preço") || c.includes("preco"));
+  const hasLugares = lower.some((c) => c.includes("lugar") || c.includes("assento"));
+
+  // RCA layout: 16 cols with Cia + Empresa + Tarifa + Lugares
+  if (hasCia && hasEmpresa && hasTarifa && hasLugares) return "16-rca";
+  if (hasCia && hasEmpresa && hasLugares && colCount >= 16) return "16-rca";
+
   if (hasCia && hasDisp) return "15";
   if (hasCia) return "14";
+  if (colCount >= 16) return "16-rca";
   if (colCount >= 15) return "15";
   if (colCount >= 14) return "14";
   return "13";
@@ -210,6 +219,8 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
   if (rows.length > 0) {
     const firstCell = String(rows[0][0] || "").toLowerCase();
     if (firstCell.includes("origem") || firstCell.includes("partida") || firstCell.includes("coluna")) startIdx = 1;
+    // Also detect RCA header "Aeroporto Ida"
+    if (firstCell.includes("aeroporto")) startIdx = 1;
   }
 
   const header = rows[0] || [];
@@ -233,8 +244,15 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
     let airline = "NÃO INFORMADO";
     let seats = "0";
     let operadora = "";
+    let priceText = "";
 
-    if (fmt === "15") {
+    if (fmt === "16-rca") {
+      // M(12)=Cia, N(13)=Empresa/Operadora, O(14)=Tarifa, P(15)=Lugares
+      airline = String(r[12] || "").trim().toUpperCase() || "NÃO INFORMADO";
+      operadora = String(r[13] || "").trim().toUpperCase();
+      priceText = String(r[14] || "").trim();
+      seats = String(r[15] || "0").trim();
+    } else if (fmt === "15") {
       // M(12)=Cia, N(13)=Disp, O(14)=Operadora
       airline = String(r[12] || "").trim().toUpperCase() || "NÃO INFORMADO";
       seats = String(r[13] || "0").trim();
@@ -265,7 +283,7 @@ function parseExcelRows(rows: any[][]): ParsedBlock[] {
       block_code: "",
       price: "",
       currency: "BRL",
-      price_text: "",
+      price_text: priceText,
       deadline: "",
       seats_available: seats,
       operator: operadora,
