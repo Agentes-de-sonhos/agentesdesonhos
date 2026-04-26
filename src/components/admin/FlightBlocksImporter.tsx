@@ -498,6 +498,7 @@ export function FlightBlocksImporter() {
                         <TableHead className="text-xs">Volta Chegada</TableHead>
                         <TableHead className="text-xs">Cia</TableHead>
                         <TableHead className="text-xs">Lug.</TableHead>
+                        <TableHead className="text-xs">Tarifa</TableHead>
                         <TableHead className="w-[36px]"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -539,6 +540,9 @@ export function FlightBlocksImporter() {
                           </TableCell>
                           <TableCell className="p-1">
                             <Input value={block.seats_available} onChange={(e) => updateBlock(idx, "seats_available", e.target.value)} className="h-8 text-xs px-1 w-12 text-center" type="number" />
+                          </TableCell>
+                          <TableCell className="p-1">
+                            <Input value={block.price_text} onChange={(e) => updateBlock(idx, "price_text", e.target.value)} className="h-8 text-xs px-1 w-48" placeholder="Ex: R$ 870 + R$ 90 TXS" />
                           </TableCell>
                           <TableCell className="p-1">
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeBlock(idx)}>
