@@ -193,21 +193,25 @@ function extractAirportCode(raw: string): string {
 }
 
 function detectFormat(header: any[]): "13" | "14" | "15" | "16-rca" {
-  const colCount = header.filter((c) => c != null && String(c).trim() !== "").length;
+  // Use the longest filled position rather than count to support sparse headers
+  let lastFilled = 0;
+  header.forEach((c, i) => {
+    if (c != null && String(c).trim() !== "") lastFilled = Math.max(lastFilled, i + 1);
+  });
+  const colCount = lastFilled;
   const lower = header.map((c) => String(c || "").toLowerCase());
   const hasCia = lower.some((c) => c.includes("cia") || c.includes("companhia"));
   const hasDisp = lower.some((c) => c.includes("disp"));
-  const hasEmpresa = lower.some((c) => c.includes("empresa"));
-  const hasTarifa = lower.some((c) => c.includes("tarifa") || c.includes("preço") || c.includes("preco"));
+  const hasEmpresa = lower.some((c) => c.includes("empresa") || c.includes("operadora"));
+  const hasTarifa = lower.some((c) => c.includes("tarifa") || c.includes("preço") || c.includes("preco") || c.includes("valor"));
   const hasLugares = lower.some((c) => c.includes("lugar") || c.includes("assento"));
 
-  // RCA layout: 16 cols with Cia + Empresa + Tarifa + Lugares
-  if (hasCia && hasEmpresa && hasTarifa && hasLugares) return "16-rca";
-  if (hasCia && hasEmpresa && hasLugares && colCount >= 16) return "16-rca";
+  // Prefer 16-col layout whenever there are 16 columns or the Tarifa/Lugares headers are present
+  if (colCount >= 16) return "16-rca";
+  if (hasCia && (hasTarifa || hasLugares)) return "16-rca";
 
   if (hasCia && hasDisp) return "15";
   if (hasCia) return "14";
-  if (colCount >= 16) return "16-rca";
   if (colCount >= 15) return "15";
   if (colCount >= 14) return "14";
   return "13";
