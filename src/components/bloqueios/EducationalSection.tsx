@@ -19,9 +19,9 @@ export function EducationalSection() {
         type="button"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
-        className="w-full flex items-center justify-between gap-2 p-5 text-left hover:bg-[hsl(var(--section-flights))]/10 transition-colors"
+        className="w-full flex items-center justify-between gap-2 p-5 text-left transition-colors"
       >
-        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+        <h2 className="text-lg font-normal text-foreground flex items-center gap-2">
           ✈️ Por que usar bloqueios aéreos?
         </h2>
         <ChevronDown
