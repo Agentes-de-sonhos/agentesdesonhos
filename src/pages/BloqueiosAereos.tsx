@@ -136,11 +136,13 @@ export default function BloqueiosAereos() {
   const operators = [...new Set(blocks?.map((b) => b.operator).filter(Boolean) || [])] as string[];
   const airlines = [...new Set(blocks?.map((b) => b.airline).filter(Boolean) || [])] as string[];
 
-  // Dashboard data: when user has searched, reflect filtered results; otherwise show full overview
+  // Dashboard data: only visible BEFORE a search is performed.
+  // Once the user searches (or clicks a dashboard item), the dashboard hides
+  // and the page shows only the search results.
   const dashboardBlocks = useMemo(() => {
-    if (hasSearched) return sortedBlocks;
+    if (hasSearched) return [];
     return blocks || [];
-  }, [hasSearched, sortedBlocks, blocks]);
+  }, [hasSearched, blocks]);
 
   const formatShortDate = (dateStr: string | null) => {
     if (!dateStr) return "";
@@ -162,19 +164,37 @@ export default function BloqueiosAereos() {
     setHasSearched(true);
   };
 
-  // Dashboard clicks open results in a NEW TAB with filters as query params
-  const openInNewTab = (params: Record<string, string>) => {
-    const qs = new URLSearchParams(params).toString();
-    window.open(`/bloqueios-aereos?${qs}`, "_blank", "noopener,noreferrer");
+  // Dashboard clicks: filter in the SAME page/tab and hide the dashboard.
+  // Behaves as if the user had typed those criteria in the search form.
+  const applyFilterInPlace = (apply: () => void) => {
+    // Reset filters to "Todas" so the new selection is the only active criterion
+    setSelectedAirline("Todas");
+    setSelectedOperator("Todas");
+    setOriginTerm("");
+    setDestinationTerm("");
+    setActiveSeason(null);
+    apply();
+    setHasSearched(true);
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   };
 
-  const handleFilterAirline = (airline: string) => openInNewTab({ airline });
-  const handleFilterOperator = (operator: string) => openInNewTab({ operator });
-  const handleFilterOrigin = (origin: string) => openInNewTab({ origin });
-  const handleFilterDestination = (destination: string) => openInNewTab({ destination });
+  const handleFilterAirline = (airline: string) =>
+    applyFilterInPlace(() => setSelectedAirline(airline));
+  const handleFilterOperator = (operator: string) =>
+    applyFilterInPlace(() => setSelectedOperator(operator));
+  const handleFilterOrigin = (origin: string) =>
+    applyFilterInPlace(() => setOriginTerm(origin));
+  const handleFilterDestination = (destination: string) =>
+    applyFilterInPlace(() => setDestinationTerm(destination));
   const handleFilterRoute = (origin: string, destination: string) =>
-    openInNewTab({ origin, destination });
-  const handleFilterSeason = (season: SeasonRange) => openInNewTab({ season: season.key });
+    applyFilterInPlace(() => {
+      setOriginTerm(origin);
+      setDestinationTerm(destination);
+    });
+  const handleFilterSeason = (season: SeasonRange) =>
+    applyFilterInPlace(() => setActiveSeason(season));
 
   // Apply filters from URL query params (when opened from dashboard in new tab)
   useEffect(() => {
