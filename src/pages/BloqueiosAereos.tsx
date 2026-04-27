@@ -222,15 +222,8 @@ export default function BloqueiosAereos() {
           onDateFromChange={(d) => { setDateFrom(d); setActiveSeason(null); setHasSearched(false); }}
           onDateToChange={(d) => { setDateTo(d); setActiveSeason(null); setHasSearched(false); }}
           onSearch={handleSearch}
+          showEmptyHint={!hasSearched && !isLoading}
         />
-
-        {!hasSearched && !isLoading && (
-          <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
-            <Plane className="h-12 w-12 mb-4 opacity-40" />
-            <p className="text-base font-medium text-foreground">Faça uma busca para visualizar os bloqueios</p>
-            <p className="text-sm mt-1">Informe origem, destino ou datas no buscador acima.</p>
-          </div>
-        )}
 
         {/* Strategic Dashboard — always visible, reacts to filters */}
         {!isLoading && dashboardBlocks.length > 0 && (
