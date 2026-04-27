@@ -4665,6 +4665,51 @@ export type Database = {
         }
         Relationships: []
       }
+      news_curation_feedback: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          created_by: string | null
+          decisao: string
+          fonte: string | null
+          id: string
+          motivo: string | null
+          noticia_id: string | null
+          resumo: string | null
+          score_final: number | null
+          score_ia: number | null
+          titulo: string
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          created_by?: string | null
+          decisao: string
+          fonte?: string | null
+          id?: string
+          motivo?: string | null
+          noticia_id?: string | null
+          resumo?: string | null
+          score_final?: number | null
+          score_ia?: number | null
+          titulo: string
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          created_by?: string | null
+          decisao?: string
+          fonte?: string | null
+          id?: string
+          motivo?: string | null
+          noticia_id?: string | null
+          resumo?: string | null
+          score_final?: number | null
+          score_ia?: number | null
+          titulo?: string
+        }
+        Relationships: []
+      }
       news_likes: {
         Row: {
           created_at: string
