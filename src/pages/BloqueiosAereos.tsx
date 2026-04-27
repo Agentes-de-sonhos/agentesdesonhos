@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
@@ -11,7 +11,8 @@ import { BlockSearchForm } from "@/components/bloqueios/BlockSearchForm";
 import { BlockFilters } from "@/components/bloqueios/BlockFilters";
 import { BlockResultCard } from "@/components/bloqueios/BlockResultCard";
 import { BlockEmptyState } from "@/components/bloqueios/BlockEmptyState";
-import { BlockDashboard, type SeasonRange } from "@/components/bloqueios/BlockDashboard";
+import { BlockDashboard, STRATEGIC_SEASONS, type SeasonRange } from "@/components/bloqueios/BlockDashboard";
+import { useSearchParams } from "react-router-dom";
 
 export default function BloqueiosAereos() {
   const { getAirport } = useAirports();
@@ -29,6 +30,7 @@ export default function BloqueiosAereos() {
 
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const [activeSeason, setActiveSeason] = useState<SeasonRange | null>(null);
+  const [searchParams] = useSearchParams();
 
   const { data: blocks, isLoading } = useQuery({
     queryKey: ["air-blocks"],
