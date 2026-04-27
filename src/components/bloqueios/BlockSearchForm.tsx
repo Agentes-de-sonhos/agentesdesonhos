@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, CalendarIcon, Search, Lightbulb, X, PlaneTakeoff, PlaneLanding } from "lucide-react";
+import { MapPin, CalendarIcon, Search, Lightbulb, X, PlaneTakeoff, PlaneLanding, Plane } from "lucide-react";
 import { useAirports } from "@/hooks/useAirports";
 import { getAirportsMap } from "@/lib/airports";
 
@@ -21,6 +21,7 @@ interface BlockSearchFormProps {
   onDateFromChange: (d: Date | undefined) => void;
   onDateToChange: (d: Date | undefined) => void;
   onSearch: () => void;
+  showEmptyHint?: boolean;
 }
 
 type Suggestion = { code: string; city: string; name: string };
@@ -181,7 +182,7 @@ function AirportInput({
 
 export function BlockSearchForm({
   originTerm, destinationTerm, dateFrom, dateTo,
-  onOriginChange, onDestinationChange, onDateFromChange, onDateToChange, onSearch,
+  onOriginChange, onDestinationChange, onDateFromChange, onDateToChange, onSearch, showEmptyHint,
 }: BlockSearchFormProps) {
   return (
     <Card className="border-0 shadow-md">
@@ -230,11 +231,25 @@ export function BlockSearchForm({
           </Popover>
         </div>
 
-        {/* Search button */}
-        <Button onClick={onSearch} className="w-full sm:w-auto bg-[hsl(var(--section-flights))] hover:bg-[hsl(var(--section-flights))]/90">
-          <Search className="h-4 w-4 mr-2" />
-          Buscar bloqueios
-        </Button>
+        {/* Action row + empty hint */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <Button onClick={onSearch} className="w-full sm:w-auto bg-[hsl(var(--section-flights))] hover:bg-[hsl(var(--section-flights))]/90">
+            <Search className="h-4 w-4 mr-2" />
+            Buscar bloqueios
+          </Button>
+
+          {showEmptyHint && (
+            <div className="flex items-center gap-3 sm:ml-auto rounded-lg border border-dashed bg-muted/40 px-3 py-2">
+              <div className="p-1.5 rounded-md bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))] shrink-0">
+                <Plane className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium leading-tight">Faça uma busca para visualizar os bloqueios</p>
+                <p className="text-xs text-muted-foreground leading-tight mt-0.5">Informe origem, destino ou datas acima.</p>
+              </div>
+            </div>
+          )}
+        </div>
 
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
