@@ -12,15 +12,17 @@ interface BlockFiltersProps {
   selectedOperator: string;
   selectedAirline: string;
   sortBy: string;
+  minSeats?: string;
   onOperatorChange: (v: string) => void;
   onAirlineChange: (v: string) => void;
   onSortChange: (v: string) => void;
+  onMinSeatsChange?: (v: string) => void;
 }
 
 export function BlockFilters({
   operators, airlines,
-  selectedOperator, selectedAirline, sortBy,
-  onOperatorChange, onAirlineChange, onSortChange,
+  selectedOperator, selectedAirline, sortBy, minSeats,
+  onOperatorChange, onAirlineChange, onSortChange, onMinSeatsChange,
 }: BlockFiltersProps) {
   return (
     <div className="flex flex-wrap gap-3">
@@ -47,6 +49,21 @@ export function BlockFilters({
           ))}
         </SelectContent>
       </Select>
+
+      {onMinSeatsChange && (
+        <Select value={minSeats || "0"} onValueChange={onMinSeatsChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Disponibilidade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0">Qualquer disponibilidade</SelectItem>
+            <SelectItem value="1">1+ lugares</SelectItem>
+            <SelectItem value="5">5+ lugares</SelectItem>
+            <SelectItem value="10">10+ lugares</SelectItem>
+            <SelectItem value="20">20+ lugares</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
 
       <Select value={sortBy} onValueChange={onSortChange}>
         <SelectTrigger className="w-[180px]">
