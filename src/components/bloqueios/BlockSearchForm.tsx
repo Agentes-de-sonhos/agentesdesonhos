@@ -187,9 +187,9 @@ export function BlockSearchForm({
   return (
     <Card className="border-0 shadow-md">
       <CardContent className="pt-6">
-        <div className={cn("grid gap-6", showEmptyHint ? "lg:grid-cols-2" : "grid-cols-1")}>
+        <div className={cn("grid gap-6", showEmptyHint ? "lg:grid-cols-5" : "grid-cols-1")}>
           {/* Left column: form */}
-          <div className="space-y-4">
+          <div className={cn("space-y-4", showEmptyHint && "lg:col-span-3")}>
             <div className="grid gap-3 sm:grid-cols-2">
               {/* Origin */}
               <AirportInput
@@ -247,7 +247,7 @@ export function BlockSearchForm({
 
           {/* Right column: highlighted empty hint */}
           {showEmptyHint && (
-            <div className="flex items-center justify-center rounded-xl border border-dashed bg-gradient-to-br from-[hsl(var(--section-flights))]/5 to-transparent p-6 text-center min-h-[200px]">
+            <div className="lg:col-span-2 flex items-center justify-center rounded-xl border border-dashed bg-gradient-to-br from-[hsl(var(--section-flights))]/5 to-transparent p-6 text-center min-h-[200px]">
               <div className="flex flex-col items-center gap-3 max-w-sm">
                 <div className="p-4 rounded-full bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
                   <Plane className="h-10 w-10" />
