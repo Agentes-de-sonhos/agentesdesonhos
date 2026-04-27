@@ -100,6 +100,32 @@ async function processWithAI(newsItems: RawNewsItem[]): Promise<any[]> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
+  // Buscar exemplos de feedback recentes para aprendizado
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const sb = createClient(supabaseUrl, supabaseServiceKey);
+  const { data: feedbackExamples } = await sb
+    .from("news_curation_feedback")
+    .select("titulo, categoria, decisao, motivo, score_final, score_ia")
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  const aprovados = (feedbackExamples || []).filter((f: any) => f.decisao === "aprovado").slice(0, 12);
+  const rejeitados = (feedbackExamples || []).filter((f: any) => f.decisao === "rejeitado").slice(0, 12);
+
+  let learningSection = "";
+  if (aprovados.length > 0 || rejeitados.length > 0) {
+    learningSection = `\n\n=== APRENDIZADO COM CURADORIA HUMANA ===
+Use os exemplos abaixo (decisões reais do curador editorial) para calibrar o seu score e identificar padrões.
+
+APROVADAS pelo curador (replicar este padrão de relevância):
+${aprovados.map((f: any, i: number) => `${i + 1}. [${f.categoria || "?"}] "${f.titulo}" — score curador: ${f.score_final ?? "?"}/10`).join("\n")}
+
+REJEITADAS pelo curador (NÃO sugerir scores altos para padrões similares):
+${rejeitados.map((f: any, i: number) => `${i + 1}. [${f.categoria || "?"}] "${f.titulo}" — motivo: ${f.motivo || "não informado"}`).join("\n")}
+=== FIM DO APRENDIZADO ===\n`;
+  }
+
   const prompt = `Você é um curador de notícias especializado no mercado de turismo B2B brasileiro.
 Analise as seguintes notícias e para cada uma, retorne um JSON com:
 - titulo_curto: título curto e atrativo (máximo 12 palavras)
@@ -107,8 +133,8 @@ Analise as seguintes notícias e para cada uma, retorne um JSON com:
 - categoria: uma de [Aéreo, Turismo, Destinos, Cruzeiros, Mercado, Eventos]
 - relevancia_score: score de 0 a 10 de relevância para agentes de viagens
 - tipo_exibicao: "destaque" ou "secundaria"
-- ignorar: true se for conteúdo promocional ou irrelevante para o trade turístico
-
+- ignorar: sempre false (o curador humano vai decidir)
+${learningSection}
 Retorne APENAS um array JSON válido, sem markdown.
 
 Notícias:
@@ -241,14 +267,13 @@ serve(async (req) => {
 
     const aiResults = await processWithAI(newsForAI);
 
-    // 5. Insert curated news (only score >= 7 and not ignored)
+    // 5. Insert ALL curated news as pending (curador humano decide depois)
     let curatedCount = 0;
     for (let i = 0; i < aiResults.length; i++) {
       const ai = aiResults[i];
       const raw = unprocessed[i];
 
-      if (!raw || !ai || ai.ignorar || ai.relevancia_score < 7) {
-        // Mark as processed
+      if (!raw || !ai) {
         if (raw) {
           await supabase.from("noticias_brutas").update({ processado: true }).eq("id", raw.id);
         }
