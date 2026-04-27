@@ -149,53 +149,45 @@ export default function BloqueiosAereos() {
     setHasSearched(true);
   };
 
-  const scrollToResults = () => {
-    setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
+  // Dashboard clicks open results in a NEW TAB with filters as query params
+  const openInNewTab = (params: Record<string, string>) => {
+    const qs = new URLSearchParams(params).toString();
+    window.open(`/bloqueios-aereos?${qs}`, "_blank", "noopener,noreferrer");
   };
 
-  const handleFilterAirline = (airline: string) => {
-    setSelectedAirline(airline);
-    setActiveSeason(null);
-    setHasSearched(true);
-    scrollToResults();
-  };
+  const handleFilterAirline = (airline: string) => openInNewTab({ airline });
+  const handleFilterOperator = (operator: string) => openInNewTab({ operator });
+  const handleFilterOrigin = (origin: string) => openInNewTab({ origin });
+  const handleFilterDestination = (destination: string) => openInNewTab({ destination });
+  const handleFilterRoute = (origin: string, destination: string) =>
+    openInNewTab({ origin, destination });
+  const handleFilterSeason = (season: SeasonRange) => openInNewTab({ season: season.key });
 
-  const handleFilterOperator = (operator: string) => {
-    setSelectedOperator(operator);
-    setActiveSeason(null);
-    setHasSearched(true);
-    scrollToResults();
-  };
+  // Apply filters from URL query params (when opened from dashboard in new tab)
+  useEffect(() => {
+    const origin = searchParams.get("origin");
+    const destination = searchParams.get("destination");
+    const airline = searchParams.get("airline");
+    const operator = searchParams.get("operator");
+    const seasonKey = searchParams.get("season");
 
-  const handleFilterOrigin = (origin: string) => {
-    setOriginTerm(origin);
-    setActiveSeason(null);
-    setHasSearched(true);
-    scrollToResults();
-  };
-
-  const handleFilterDestination = (destination: string) => {
-    setDestinationTerm(destination);
-    setActiveSeason(null);
-    setHasSearched(true);
-    scrollToResults();
-  };
-
-  const handleFilterRoute = (origin: string, destination: string) => {
-    setOriginTerm(origin);
-    setDestinationTerm(destination);
-    setActiveSeason(null);
-    setHasSearched(true);
-    scrollToResults();
-  };
-
-  const handleFilterSeason = (season: SeasonRange) => {
-    setActiveSeason(season);
-    setHasSearched(true);
-    scrollToResults();
-  };
+    let didApply = false;
+    if (origin) { setOriginTerm(origin); didApply = true; }
+    if (destination) { setDestinationTerm(destination); didApply = true; }
+    if (airline) { setSelectedAirline(airline); didApply = true; }
+    if (operator) { setSelectedOperator(operator); didApply = true; }
+    if (seasonKey) {
+      const s = STRATEGIC_SEASONS.find((x) => x.key === seasonKey);
+      if (s) { setActiveSeason(s); didApply = true; }
+    }
+    if (didApply) {
+      setHasSearched(true);
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 250);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const initialBlocks = useMemo(() => {
     if (hasSearched || !blocks) return [];
