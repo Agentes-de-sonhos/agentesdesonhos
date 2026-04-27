@@ -300,7 +300,7 @@ export function FlightBlocksImporter() {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<"preview" | "done">("preview");
   const [parsedBlocks, setParsedBlocks] = useState<ParsedBlock[]>([]);
-  const [importResult, setImportResult] = useState({ success: 0, errors: 0, skipped: 0 });
+  const [importResult, setImportResult] = useState({ success: 0, errors: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -310,26 +310,7 @@ export function FlightBlocksImporter() {
     mutationFn: async (rows: ParsedBlock[]) => {
       let success = 0;
       let errors = 0;
-      const existingKeys = new Set<string>();
-
-      const { data: existing } = await supabase
-        .from("air_blocks")
-        .select("origin, destination, departure_date, departure_time, airline");
-
-      if (existing) {
-        for (const e of existing) {
-          existingKeys.add(`${e.origin}|${e.destination}|${e.departure_date}|${e.departure_time}|${e.airline}`);
-        }
-      }
-
-      let skipped = 0;
       for (const row of rows) {
-        const key = `${row.origin}|${row.destination}|${row.departure_date}|${row.departure_time}|${row.airline}`;
-        if (existingKeys.has(key)) {
-          skipped++;
-          continue;
-        }
-
         try {
           const { error } = await supabase.from("air_blocks").insert({
             origin: row.origin,
@@ -355,10 +336,10 @@ export function FlightBlocksImporter() {
           } as any);
 
           if (error) { errors++; console.error("Error importing block:", error); }
-          else { success++; existingKeys.add(key); }
+          else { success++; }
         } catch { errors++; }
       }
-      return { success, errors, skipped };
+      return { success, errors };
     },
     onSuccess: (result) => {
       setImportResult(result);
@@ -368,7 +349,7 @@ export function FlightBlocksImporter() {
       queryClient.invalidateQueries({ queryKey: ["air-blocks"] });
       toast({
         title: "Importação concluída!",
-        description: `${result.success} importado(s)${result.skipped > 0 ? `, ${result.skipped} duplicado(s)` : ""}${result.errors > 0 ? `, ${result.errors} erro(s)` : ""}`,
+        description: `${result.success} importado(s)${result.errors > 0 ? `, ${result.errors} erro(s)` : ""}`,
       });
     },
     onError: () => {
@@ -425,7 +406,7 @@ export function FlightBlocksImporter() {
   const resetImporter = () => {
     setStep("preview");
     setParsedBlocks([]);
-    setImportResult({ success: 0, errors: 0, skipped: 0 });
+    setImportResult({ success: 0, errors: 0 });
   };
 
   const handleClose = () => {
@@ -585,12 +566,6 @@ export function FlightBlocksImporter() {
                   <p className="text-3xl font-bold text-primary">{importResult.success}</p>
                   <p className="text-sm text-muted-foreground">Importados</p>
                 </div>
-                {importResult.skipped > 0 && (
-                  <div>
-                    <p className="text-3xl font-bold text-warning">{importResult.skipped}</p>
-                    <p className="text-sm text-muted-foreground">Duplicados</p>
-                  </div>
-                )}
                 {importResult.errors > 0 && (
                   <div>
                     <p className="text-3xl font-bold text-destructive">{importResult.errors}</p>
