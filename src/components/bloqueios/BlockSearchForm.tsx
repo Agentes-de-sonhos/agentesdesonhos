@@ -186,75 +186,82 @@ export function BlockSearchForm({
 }: BlockSearchFormProps) {
   return (
     <Card className="border-0 shadow-md">
-      <CardContent className="pt-6 space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Origin */}
-          <AirportInput
-            value={originTerm}
-            onChange={onOriginChange}
-            placeholder="Origem (ex: São Paulo, GRU)"
-            icon={PlaneTakeoff}
-          />
+      <CardContent className="pt-6">
+        <div className={cn("grid gap-6", showEmptyHint ? "lg:grid-cols-2" : "grid-cols-1")}>
+          {/* Left column: form */}
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {/* Origin */}
+              <AirportInput
+                value={originTerm}
+                onChange={onOriginChange}
+                placeholder="Origem (ex: São Paulo, GRU)"
+                icon={PlaneTakeoff}
+              />
 
-          {/* Destination */}
-          <AirportInput
-            value={destinationTerm}
-            onChange={onDestinationChange}
-            placeholder="Destino (ex: Salvador, SSA)"
-            icon={PlaneLanding}
-          />
+              {/* Destination */}
+              <AirportInput
+                value={destinationTerm}
+                onChange={onDestinationChange}
+                placeholder="Destino (ex: Salvador, SSA)"
+                icon={PlaneLanding}
+              />
 
-          {/* Date From */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dateFrom && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data inicial"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={dateFrom} onSelect={onDateFromChange} locale={ptBR} className="p-3 pointer-events-auto" />
-            </PopoverContent>
-          </Popover>
+              {/* Date From */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dateFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data inicial"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={dateFrom} onSelect={onDateFromChange} locale={ptBR} className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
 
-          {/* Date To */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dateTo && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data final"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={dateTo} onSelect={onDateToChange} locale={ptBR} defaultMonth={dateFrom} disabled={(d) => dateFrom ? d < dateFrom : false} className="p-3 pointer-events-auto" />
-            </PopoverContent>
-          </Popover>
-        </div>
+              {/* Date To */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dateTo && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data final"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={dateTo} onSelect={onDateToChange} locale={ptBR} defaultMonth={dateFrom} disabled={(d) => dateFrom ? d < dateFrom : false} className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </div>
 
-        {/* Action row + empty hint */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <Button onClick={onSearch} className="w-full sm:w-auto bg-[hsl(var(--section-flights))] hover:bg-[hsl(var(--section-flights))]/90">
-            <Search className="h-4 w-4 mr-2" />
-            Buscar bloqueios
-          </Button>
+            <Button onClick={onSearch} className="w-full sm:w-auto bg-[hsl(var(--section-flights))] hover:bg-[hsl(var(--section-flights))]/90">
+              <Search className="h-4 w-4 mr-2" />
+              Buscar bloqueios
+            </Button>
 
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+              Dica: busque por cidade (ex: "Porto Alegre"), sigla (ex: "POA") ou nome do aeroporto. Origem e destino podem ser preenchidos separadamente 😉
+            </p>
+          </div>
+
+          {/* Right column: highlighted empty hint */}
           {showEmptyHint && (
-            <div className="flex items-center gap-3 sm:ml-auto rounded-lg border border-dashed bg-muted/40 px-3 py-2">
-              <div className="p-1.5 rounded-md bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))] shrink-0">
-                <Plane className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium leading-tight">Faça uma busca para visualizar os bloqueios</p>
-                <p className="text-xs text-muted-foreground leading-tight mt-0.5">Informe origem, destino ou datas acima.</p>
+            <div className="flex items-center justify-center rounded-xl border border-dashed bg-gradient-to-br from-[hsl(var(--section-flights))]/5 to-transparent p-6 text-center min-h-[200px]">
+              <div className="flex flex-col items-center gap-3 max-w-sm">
+                <div className="p-4 rounded-full bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
+                  <Plane className="h-10 w-10" />
+                </div>
+                <p className="text-lg font-semibold text-foreground leading-snug">
+                  Faça uma busca para visualizar os bloqueios
+                </p>
+                <p className="text-sm text-muted-foreground leading-snug">
+                  Informe origem, destino ou datas.
+                </p>
               </div>
             </div>
           )}
         </div>
-
-        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-          <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
-          Dica: busque por cidade (ex: "Porto Alegre"), sigla (ex: "POA") ou nome do aeroporto. Origem e destino podem ser preenchidos separadamente 😉
-        </p>
       </CardContent>
     </Card>
   );
