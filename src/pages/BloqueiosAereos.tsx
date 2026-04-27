@@ -11,6 +11,7 @@ import { BlockSearchForm } from "@/components/bloqueios/BlockSearchForm";
 import { BlockFilters } from "@/components/bloqueios/BlockFilters";
 import { BlockResultCard } from "@/components/bloqueios/BlockResultCard";
 import { BlockEmptyState } from "@/components/bloqueios/BlockEmptyState";
+import { BlockDashboard } from "@/components/bloqueios/BlockDashboard";
 
 export default function BloqueiosAereos() {
   const { getAirport } = useAirports();
@@ -24,6 +25,7 @@ export default function BloqueiosAereos() {
   const [selectedOperator, setSelectedOperator] = useState("Todas");
   const [selectedAirline, setSelectedAirline] = useState("Todas");
   const [sortBy, setSortBy] = useState("date_asc");
+  const [minSeats, setMinSeats] = useState("0");
 
   const { data: blocks, isLoading } = useQuery({
     queryKey: ["air-blocks"],
@@ -77,9 +79,11 @@ export default function BloqueiosAereos() {
       if (!matchesDateRange(b.departure_date)) return false;
       if (selectedOperator !== "Todas" && b.operator !== selectedOperator) return false;
       if (selectedAirline !== "Todas" && b.airline !== selectedAirline) return false;
+      const min = parseInt(minSeats || "0", 10);
+      if (min > 0 && (b.seats_available || 0) < min) return false;
       return true;
     });
-  }, [blocks, originTerm, destinationTerm, dateFrom, dateTo, selectedOperator, selectedAirline, hasSearched]);
+  }, [blocks, originTerm, destinationTerm, dateFrom, dateTo, selectedOperator, selectedAirline, minSeats, hasSearched]);
 
   // Fallback: same origin + date range, any destination
   const fallbackBlocks = useMemo(() => {
@@ -105,6 +109,12 @@ export default function BloqueiosAereos() {
 
   const operators = [...new Set(blocks?.map((b) => b.operator).filter(Boolean) || [])] as string[];
   const airlines = [...new Set(blocks?.map((b) => b.airline).filter(Boolean) || [])] as string[];
+
+  // Dashboard data: when user has searched, reflect filtered results; otherwise show full overview
+  const dashboardBlocks = useMemo(() => {
+    if (hasSearched) return sortedBlocks;
+    return blocks || [];
+  }, [hasSearched, sortedBlocks, blocks]);
 
   const formatShortDate = (dateStr: string | null) => {
     if (!dateStr) return "";
@@ -161,6 +171,11 @@ export default function BloqueiosAereos() {
           onSearch={handleSearch}
         />
 
+        {/* Strategic Dashboard — always visible, reacts to filters */}
+        {!isLoading && dashboardBlocks.length > 0 && (
+          <BlockDashboard blocks={dashboardBlocks as any} getCityLabel={getCityLabel} />
+        )}
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--section-flights))]" />
@@ -175,8 +190,8 @@ export default function BloqueiosAereos() {
                   </p>
                   <BlockFilters
                     operators={operators} airlines={airlines}
-                    selectedOperator={selectedOperator} selectedAirline={selectedAirline} sortBy={sortBy}
-                    onOperatorChange={setSelectedOperator} onAirlineChange={setSelectedAirline} onSortChange={setSortBy}
+                    selectedOperator={selectedOperator} selectedAirline={selectedAirline} sortBy={sortBy} minSeats={minSeats}
+                    onOperatorChange={setSelectedOperator} onAirlineChange={setSelectedAirline} onSortChange={setSortBy} onMinSeatsChange={setMinSeats}
                   />
                 </div>
 
