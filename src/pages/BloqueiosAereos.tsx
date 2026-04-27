@@ -224,6 +224,14 @@ export default function BloqueiosAereos() {
           onSearch={handleSearch}
         />
 
+        {!hasSearched && !isLoading && (
+          <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+            <Plane className="h-12 w-12 mb-4 opacity-40" />
+            <p className="text-base font-medium text-foreground">Faça uma busca para visualizar os bloqueios</p>
+            <p className="text-sm mt-1">Informe origem, destino ou datas no buscador acima.</p>
+          </div>
+        )}
+
         {/* Strategic Dashboard — always visible, reacts to filters */}
         {!isLoading && dashboardBlocks.length > 0 && (
           <BlockDashboard
@@ -291,13 +299,7 @@ export default function BloqueiosAereos() {
               />
             )}
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
-            <Plane className="h-12 w-12 mb-4 opacity-40" />
-            <p className="text-base font-medium text-foreground">Faça uma busca para visualizar os bloqueios</p>
-            <p className="text-sm mt-1">Informe origem, destino ou datas no buscador acima.</p>
-          </div>
-        )}
+        ) : null}
       </div>
     </DashboardLayout>
   );
