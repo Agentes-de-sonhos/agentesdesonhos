@@ -11,7 +11,7 @@ import { BlockSearchForm } from "@/components/bloqueios/BlockSearchForm";
 import { BlockFilters } from "@/components/bloqueios/BlockFilters";
 import { BlockResultCard } from "@/components/bloqueios/BlockResultCard";
 import { BlockEmptyState } from "@/components/bloqueios/BlockEmptyState";
-import { BlockDashboard, STRATEGIC_SEASONS, type SeasonRange } from "@/components/bloqueios/BlockDashboard";
+import { BlockDashboard, type SeasonRange } from "@/components/bloqueios/BlockDashboard";
 
 export default function BloqueiosAereos() {
   const { getAirport } = useAirports();
