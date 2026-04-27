@@ -263,7 +263,8 @@ serve(async (req) => {
       // Peso de prioridade da fonte é aplicado apenas para ordenação interna,
       // mas o score final exibido nunca pode passar de 10.
       const sourceWeight = RSS_SOURCES.find((s) => s.name === raw.fonte)?.priority ?? 1;
-      const scoreWithPriority = Math.min(10, rawScore + sourceWeight * 0.1);
+      // A coluna relevancia_score é INTEGER, então arredondamos para garantir compatibilidade.
+      const scoreWithPriority = Math.min(10, Math.round(rawScore + sourceWeight * 0.1));
 
       const { error: curatedError } = await supabase.from("noticias_dashboard").insert({
         noticia_bruta_id: raw.id,
