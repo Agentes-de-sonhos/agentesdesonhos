@@ -16,12 +16,23 @@ export function AdminAirBlocksTable() {
   const { data: blocks, isLoading } = useQuery({
     queryKey: ["admin-air-blocks"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("air_blocks")
-        .select("*")
-        .order("departure_date", { ascending: true });
-      if (error) throw error;
-      return data;
+      // Supabase limita a 1000 linhas por query — paginamos para trazer tudo.
+      const PAGE_SIZE = 1000;
+      let all: any[] = [];
+      let from = 0;
+      while (true) {
+        const { data, error } = await supabase
+          .from("air_blocks")
+          .select("*")
+          .order("departure_date", { ascending: true })
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        all = all.concat(data);
+        if (data.length < PAGE_SIZE) break;
+        from += PAGE_SIZE;
+      }
+      return all;
     },
   });
 
