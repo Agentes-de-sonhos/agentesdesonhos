@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
@@ -11,7 +11,7 @@ import { BlockSearchForm } from "@/components/bloqueios/BlockSearchForm";
 import { BlockFilters } from "@/components/bloqueios/BlockFilters";
 import { BlockResultCard } from "@/components/bloqueios/BlockResultCard";
 import { BlockEmptyState } from "@/components/bloqueios/BlockEmptyState";
-import { BlockDashboard } from "@/components/bloqueios/BlockDashboard";
+import { BlockDashboard, type SeasonRange } from "@/components/bloqueios/BlockDashboard";
 
 export default function BloqueiosAereos() {
   const { getAirport } = useAirports();
@@ -26,6 +26,9 @@ export default function BloqueiosAereos() {
   const [selectedAirline, setSelectedAirline] = useState("Todas");
   const [sortBy, setSortBy] = useState("date_asc");
   const [minSeats, setMinSeats] = useState("0");
+
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+  const [activeSeason, setActiveSeason] = useState<SeasonRange | null>(null);
 
   const { data: blocks, isLoading } = useQuery({
     queryKey: ["air-blocks"],
@@ -81,9 +84,17 @@ export default function BloqueiosAereos() {
       if (selectedAirline !== "Todas" && b.airline !== selectedAirline) return false;
       const min = parseInt(minSeats || "0", 10);
       if (min > 0 && (b.seats_available || 0) < min) return false;
+      if (activeSeason) {
+        const mmdd = (b.departure_date || "").slice(5);
+        const { start, end } = activeSeason;
+        const inSeason = start <= end
+          ? mmdd >= start && mmdd <= end
+          : mmdd >= start || mmdd <= end;
+        if (!inSeason) return false;
+      }
       return true;
     });
-  }, [blocks, originTerm, destinationTerm, dateFrom, dateTo, selectedOperator, selectedAirline, minSeats, hasSearched]);
+  }, [blocks, originTerm, destinationTerm, dateFrom, dateTo, selectedOperator, selectedAirline, minSeats, hasSearched, activeSeason]);
 
   // Fallback: same origin + date range, any destination
   const fallbackBlocks = useMemo(() => {
@@ -136,6 +147,54 @@ export default function BloqueiosAereos() {
     setHasSearched(true);
   };
 
+  const scrollToResults = () => {
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
+
+  const handleFilterAirline = (airline: string) => {
+    setSelectedAirline(airline);
+    setActiveSeason(null);
+    setHasSearched(true);
+    scrollToResults();
+  };
+
+  const handleFilterOperator = (operator: string) => {
+    setSelectedOperator(operator);
+    setActiveSeason(null);
+    setHasSearched(true);
+    scrollToResults();
+  };
+
+  const handleFilterOrigin = (origin: string) => {
+    setOriginTerm(origin);
+    setActiveSeason(null);
+    setHasSearched(true);
+    scrollToResults();
+  };
+
+  const handleFilterDestination = (destination: string) => {
+    setDestinationTerm(destination);
+    setActiveSeason(null);
+    setHasSearched(true);
+    scrollToResults();
+  };
+
+  const handleFilterRoute = (origin: string, destination: string) => {
+    setOriginTerm(origin);
+    setDestinationTerm(destination);
+    setActiveSeason(null);
+    setHasSearched(true);
+    scrollToResults();
+  };
+
+  const handleFilterSeason = (season: SeasonRange) => {
+    setActiveSeason(season);
+    setHasSearched(true);
+    scrollToResults();
+  };
+
   const initialBlocks = useMemo(() => {
     if (hasSearched || !blocks) return [];
     return [...blocks].sort((a, b) => {
@@ -164,16 +223,25 @@ export default function BloqueiosAereos() {
           destinationTerm={destinationTerm}
           dateFrom={dateFrom}
           dateTo={dateTo}
-          onOriginChange={(v) => { setOriginTerm(v); setHasSearched(false); }}
-          onDestinationChange={(v) => { setDestinationTerm(v); setHasSearched(false); }}
-          onDateFromChange={(d) => { setDateFrom(d); setHasSearched(false); }}
-          onDateToChange={(d) => { setDateTo(d); setHasSearched(false); }}
+          onOriginChange={(v) => { setOriginTerm(v); setActiveSeason(null); setHasSearched(false); }}
+          onDestinationChange={(v) => { setDestinationTerm(v); setActiveSeason(null); setHasSearched(false); }}
+          onDateFromChange={(d) => { setDateFrom(d); setActiveSeason(null); setHasSearched(false); }}
+          onDateToChange={(d) => { setDateTo(d); setActiveSeason(null); setHasSearched(false); }}
           onSearch={handleSearch}
         />
 
         {/* Strategic Dashboard — always visible, reacts to filters */}
         {!isLoading && dashboardBlocks.length > 0 && (
-          <BlockDashboard blocks={dashboardBlocks as any} getCityLabel={getCityLabel} />
+          <BlockDashboard
+            blocks={dashboardBlocks as any}
+            getCityLabel={getCityLabel}
+            onFilterAirline={handleFilterAirline}
+            onFilterOperator={handleFilterOperator}
+            onFilterOrigin={handleFilterOrigin}
+            onFilterDestination={handleFilterDestination}
+            onFilterRoute={handleFilterRoute}
+            onFilterSeason={handleFilterSeason}
+          />
         )}
 
         {isLoading ? (
@@ -181,12 +249,23 @@ export default function BloqueiosAereos() {
             <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--section-flights))]" />
           </div>
         ) : hasSearched ? (
-          <>
+          <div ref={resultsRef}>
             {sortedBlocks.length > 0 && (
               <>
-                <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
                   <p className="text-sm text-muted-foreground">
                     {sortedBlocks.length} bloqueio{sortedBlocks.length !== 1 ? "s" : ""} encontrado{sortedBlocks.length !== 1 ? "s" : ""}
+                    {activeSeason && (
+                      <span className="ml-2 inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
+                        Período: {activeSeason.label}
+                        <button
+                          onClick={() => setActiveSeason(null)}
+                          className="ml-1 hover:underline"
+                        >
+                          limpar
+                        </button>
+                      </span>
+                    )}
                   </p>
                   <BlockFilters
                     operators={operators} airlines={airlines}
@@ -195,7 +274,7 @@ export default function BloqueiosAereos() {
                   />
                 </div>
 
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-700 dark:text-amber-400">
+                <div className="flex items-start gap-2 p-3 mb-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-700 dark:text-amber-400">
                   <Info className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>Os valores e disponibilidade apresentados não refletem o estoque em tempo real. Consulte a operadora para confirmar disponibilidade e condições.</span>
                 </div>
@@ -217,7 +296,7 @@ export default function BloqueiosAereos() {
                 onSuggestionClick={handleSuggestionClick}
               />
             )}
-          </>
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
             <Plane className="h-12 w-12 mb-4 opacity-40" />
