@@ -79,7 +79,17 @@ async function fetchRSS(source: { name: string; url: string; maxItems: number })
       data_publicacao: extractTag(item, "pubDate") || null,
     })).filter((n) => n.titulo_original && n.url);
     console.log(`[CURATION] ${source.name}: ${parsed.length} items válidos (com título + url)`);
-    return parsed;
+
+    // Filtrar apenas notícias das últimas 24h (com base em pubDate)
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const recent = parsed.filter((n) => {
+      if (!n.data_publicacao) return false; // Sem data confiável → descartar
+      const ts = new Date(n.data_publicacao).getTime();
+      if (Number.isNaN(ts)) return false;
+      return ts >= cutoff;
+    });
+    console.log(`[CURATION] ${source.name}: ${recent.length} items das últimas 24h`);
+    return recent;
   } catch (error) {
     console.error(`[CURATION] Erro ao buscar ${source.name}:`, error);
     return [];
@@ -245,13 +255,15 @@ serve(async (req) => {
         continue;
       }
 
-      const score = ai.relevancia_score || 0;
-      const isAlertaTrade = score >= 9;
-      const nivelAlerta = score >= 9 ? "alto" : score >= 7 ? "medio" : "nenhum";
+      // Garante que o score informado pela IA fique entre 0 e 10
+      const rawScore = Math.max(0, Math.min(10, Number(ai.relevancia_score) || 0));
+      const isAlertaTrade = rawScore >= 9;
+      const nivelAlerta = rawScore >= 9 ? "alto" : rawScore >= 7 ? "medio" : "nenhum";
 
-      // Aplica peso de prioridade da fonte ao score (apenas para ordenação/exibição)
+      // Peso de prioridade da fonte é aplicado apenas para ordenação interna,
+      // mas o score final exibido nunca pode passar de 10.
       const sourceWeight = RSS_SOURCES.find((s) => s.name === raw.fonte)?.priority ?? 1;
-      const scoreWithPriority = score + sourceWeight; // Panrotas+3, Brasilturis+2, M&E+1
+      const scoreWithPriority = Math.min(10, rawScore + sourceWeight * 0.1);
 
       const { error: curatedError } = await supabase.from("noticias_dashboard").insert({
         noticia_bruta_id: raw.id,
