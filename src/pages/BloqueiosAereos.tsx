@@ -204,39 +204,11 @@ export default function BloqueiosAereos() {
             )}
           </>
         ) : (
-          <>
-            {initialBlocks.length > 0 && (
-              <>
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    {initialBlocks.length} bloqueio{initialBlocks.length !== 1 ? "s" : ""} disponíve{initialBlocks.length !== 1 ? "is" : "l"}
-                  </p>
-                  <BlockFilters
-                    operators={operators} airlines={airlines}
-                    selectedOperator={selectedOperator} selectedAirline={selectedAirline} sortBy={sortBy}
-                    onOperatorChange={setSelectedOperator} onAirlineChange={setSelectedAirline} onSortChange={setSortBy}
-                  />
-                </div>
-
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-700 dark:text-amber-400">
-                  <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                  <span>Os valores e disponibilidade apresentados não refletem o estoque em tempo real. Consulte a operadora para confirmar disponibilidade e condições.</span>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {initialBlocks
-                    .filter((b) => {
-                      if (selectedOperator !== "Todas" && b.operator !== selectedOperator) return false;
-                      if (selectedAirline !== "Todas" && b.airline !== selectedAirline) return false;
-                      return true;
-                    })
-                    .map((block) => (
-                      <BlockResultCard key={block.id} block={block} getCityLabel={getCityLabel} formatShortDate={formatShortDate} formatPrice={formatPrice} />
-                    ))}
-                </div>
-              </>
-            )}
-          </>
+          <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
+            <Plane className="h-12 w-12 mb-4 opacity-40" />
+            <p className="text-base font-medium text-foreground">Faça uma busca para visualizar os bloqueios</p>
+            <p className="text-sm mt-1">Informe origem, destino ou datas no buscador acima.</p>
+          </div>
         )}
       </div>
     </DashboardLayout>
