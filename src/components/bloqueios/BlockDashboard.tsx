@@ -141,12 +141,12 @@ function PaginatedList({
             {shown.map((item) => {
               const content = (
                 <>
-                  <span className="truncate text-sm font-medium">
+                  <span className="truncate text-sm font-medium text-foreground">
                     {renderLabel ? renderLabel(item) : item.label}
                   </span>
                   <Badge
                     variant="secondary"
-                    className="shrink-0 bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]"
+                    className="shrink-0 bg-sky-100 text-foreground hover:bg-sky-100"
                   >
                     {item.value.toLocaleString("pt-BR")} {unit}
                   </Badge>
@@ -157,7 +157,7 @@ function PaginatedList({
                   {onItemClick ? (
                     <button
                       onClick={() => onItemClick(item)}
-                      className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-accent transition-colors text-left"
+                      className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-sky-100 transition-colors text-left"
                     >
                       {content}
                     </button>
@@ -373,10 +373,10 @@ export function BlockDashboard({
               {stats.topRoutes.map((r) => {
                 const content = (
                   <>
-                    <span className="truncate text-sm font-medium">
+                    <span className="truncate text-sm font-medium text-foreground">
                       {getCityLabel(r.origin)} → {getCityLabel(r.destination)}
                     </span>
-                    <Badge variant="secondary" className="shrink-0">
+                    <Badge variant="secondary" className="shrink-0 bg-sky-100 text-foreground hover:bg-sky-100">
                       {r.count} {r.count === 1 ? "bloqueio" : "bloqueios"}
                     </Badge>
                   </>
@@ -386,7 +386,7 @@ export function BlockDashboard({
                     {onFilterRoute ? (
                       <button
                         onClick={() => onFilterRoute(r.origin, r.destination)}
-                        className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-accent transition-colors text-left"
+                        className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-sky-100 transition-colors text-left"
                       >
                         {content}
                       </button>
@@ -419,16 +419,16 @@ export function BlockDashboard({
               {stats.seasonStats.map((s) => {
                 const content = (
                   <>
-                    <span className="truncate text-sm font-medium">
+                    <span className="truncate text-sm font-medium text-foreground">
                       {s.season.label}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs text-foreground hover:bg-secondary">
                         {s.blocks} {s.blocks === 1 ? "bloqueio" : "bloqueios"}
                       </Badge>
                       <Badge
                         variant="secondary"
-                        className="text-xs bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]"
+                        className="text-xs bg-sky-100 text-foreground hover:bg-sky-100"
                       >
                         {s.seats} lugares
                       </Badge>
@@ -440,7 +440,7 @@ export function BlockDashboard({
                     {onFilterSeason ? (
                       <button
                         onClick={() => onFilterSeason(s.season)}
-                        className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-accent transition-colors text-left"
+                        className="w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-sky-100 transition-colors text-left"
                       >
                         {content}
                       </button>
