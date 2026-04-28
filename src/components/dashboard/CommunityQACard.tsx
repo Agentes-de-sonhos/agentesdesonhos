@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   ArrowRight,
   ChevronDown,
+  ChevronUp,
   Loader2,
   Star,
   Trash2,
