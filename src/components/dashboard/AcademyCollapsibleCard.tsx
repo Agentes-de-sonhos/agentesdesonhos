@@ -43,12 +43,12 @@ function HorizontalTrailCard({
 
   return (
     <Card
-      className="group cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary/40"
+      className="group cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary/40 h-full"
       onClick={() => onSelect(trail)}
     >
-      <div className="flex flex-col sm:flex-row">
+      <div className="flex flex-col sm:flex-row h-full">
         {/* Image left */}
-        <div className="relative sm:w-40 sm:flex-shrink-0 aspect-video sm:aspect-auto sm:self-stretch bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
+        <div className="relative sm:w-40 sm:flex-shrink-0 aspect-video sm:aspect-auto sm:self-stretch sm:h-auto bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
           {trail.image_url ? (
             <img
               src={trail.image_url}
@@ -169,7 +169,7 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 Nenhuma trilha disponível no momento.
               </div>
             ) : (
-              <div className="space-y-3 overflow-y-auto pr-1 flex-1 min-h-0">
+              <div className="grid grid-cols-1 auto-rows-fr gap-3 overflow-y-auto pr-1 flex-1 min-h-0">
                 {visibleTrails.map((trail) => (
                   <HorizontalTrailCard
                     key={trail.id}
