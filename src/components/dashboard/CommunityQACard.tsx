@@ -331,13 +331,10 @@ export function CommunityQACard() {
           </Button>
         </div>
         {/* Engagement banner — sempre visível (teaser da comunidade) */}
-        <div className="rounded-xl bg-[hsl(var(--section-community))]/5 border border-[hsl(var(--section-community))]/15 p-3.5 space-y-1.5">
-          <p className="text-sm font-semibold text-foreground">🚀 Essa é a sua comunidade!</p>
+        <div className="rounded-xl bg-[hsl(var(--section-community))]/5 border border-[hsl(var(--section-community))]/15 px-3 py-2 space-y-0.5 w-full">
+          <p className="text-sm font-semibold text-foreground leading-tight">🚀 Essa é a sua comunidade!</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Tem dúvida, ideia ou dica? Joga aqui 👇 Pode ser simples: destino, fornecedor, cliente difícil…
-          </p>
-          <p className="text-[11px] text-muted-foreground/80 italic">
-            👉 Quem pergunta aprende. Quem responde cresce.
+            Tem dúvida, ideia ou dica? Joga aqui 👇 destino, fornecedor, cliente difícil…
           </p>
         </div>
         {!collapsed && (
