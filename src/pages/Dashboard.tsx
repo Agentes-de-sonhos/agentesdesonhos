@@ -192,15 +192,19 @@ export default function Dashboard() {
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
             </section>
 
-            {/* 4. Minha Meta & Ferramentas do Agente */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-4">
-              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><ClientsManagementCard /></div>
-              <div className="min-w-0"><AgentToolsCard /></div>
+            {/* 4. Minha Meta */}
+            <section className="order-4">
+              <ClientsManagementCard />
             </section>
 
             {/* 5. Mapa do Turismo */}
             <section className="order-5">
               <MapaTurismoCard />
+            </section>
+
+            {/* 6. Ferramentas do Agente */}
+            <section className="order-6">
+              <AgentToolsCard />
             </section>
           </Suspense>
         )}
