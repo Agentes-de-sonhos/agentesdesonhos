@@ -28,6 +28,7 @@ const AgentToolsCard = lazy(() => import("@/components/dashboard/AgentToolsCard"
 const DashboardBanner = lazy(() => import("@/components/dashboard/DashboardBanner").then(m => ({ default: m.DashboardBanner })));
 const TripRemindersCard = lazy(() => import("@/components/dashboard/TripRemindersCard").then(m => ({ default: m.TripRemindersCard })));
 const MapaTurismoCard = lazy(() => import("@/components/dashboard/start/MapaTurismoCard").then(m => ({ default: m.MapaTurismoCard })));
+const AcademyCollapsibleCard = lazy(() => import("@/components/dashboard/AcademyCollapsibleCard").then(m => ({ default: m.AcademyCollapsibleCard })));
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
@@ -186,10 +187,15 @@ export default function Dashboard() {
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
             </section>
 
-            {/* 3. Radar do Turismo & Perguntas da Comunidade */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
+            {/* 3. Radar do Turismo & EducaTravel Academy */}
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-3">
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><CuratedNewsFeed /></div>
-              <div className="min-w-0"><CommunityQACard /></div>
+              <div className="min-w-0"><AcademyCollapsibleCard /></div>
+            </section>
+
+            {/* 3b. Perguntas da Comunidade */}
+            <section className="order-[3.5]">
+              <CommunityQACard />
             </section>
 
             {/* 4. Minha Meta */}
