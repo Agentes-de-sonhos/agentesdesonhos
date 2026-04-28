@@ -63,7 +63,7 @@ export function AgentToolsCard() {
         </div>
 
         {!collapsed && (
-          <div className="grid gap-3 w-full grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
+          <div className="grid gap-3 w-full grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
             {TOOL_ITEMS.map((item) => {
               const Icon = item.icon;
               return (
