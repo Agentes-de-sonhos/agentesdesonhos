@@ -47,6 +47,7 @@ import { Label } from "@/components/ui/label";
 import { ItineraryDay, Activity } from "@/types/itinerary";
 import { cn } from "@/lib/utils";
 import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItineraryPeriodImages";
+import { parseLocalDate } from "@/lib/dateParsing";
 
 const periodIcons = {
   manha: Sun,
