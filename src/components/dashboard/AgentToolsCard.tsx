@@ -1,91 +1,106 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wallet, FileText, Route, Image, Wrench } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Wrench,
+  Wallet,
+  FileText,
+  Route,
+  Image as ImageIcon,
+  StickyNote,
+  ChevronDown,
+  LucideIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const tools = [
-  {
-    label: "Carteira Digital",
-    icon: Wallet,
-    path: "/ferramentas-ia/trip-wallet",
-    description: "Crie uma carteira digital para o seu cliente.",
-    color: "198 93% 40%",
-  },
-  {
-    label: "Orçamento",
-    icon: FileText,
-    path: "/ferramentas-ia/gerar-orcamento",
-    description: "Crie orçamentos para os seus clientes.",
-    color: "142 64% 38%",
-  },
-  {
-    label: "Roteiros",
-    icon: Route,
-    path: "/ferramentas-ia/criar-roteiro",
-    description: "Crie roteiros de viagem personalizados com IA.",
-    color: "262 60% 50%",
-  },
-  {
-    label: "Conteúdo",
-    icon: Image,
-    path: "/ferramentas-ia/criar-conteudo",
-    description: "Crie conteúdos para redes sociais.",
-    color: "25 90% 50%",
-  },
+interface ToolItem {
+  title: string;
+  icon: LucideIcon;
+  url: string;
+}
+
+const TOOL_ITEMS: ToolItem[] = [
+  { title: "Orçamento", icon: FileText, url: "/ferramentas-ia/gerar-orcamento" },
+  { title: "Carteira Digital", icon: Wallet, url: "/ferramentas-ia/trip-wallet" },
+  { title: "Roteiros", icon: Route, url: "/ferramentas-ia/criar-roteiro" },
+  { title: "Conteúdo", icon: ImageIcon, url: "/ferramentas-ia/criar-conteudo" },
+  { title: "Bloco de Notas", icon: StickyNote, url: "/bloco-notas" },
 ];
 
 export function AgentToolsCard() {
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(true);
 
   return (
     <Card className="border-0 shadow-card">
-      <CardContent className="pt-5 pb-4 space-y-4">
-        <div className="w-fit">
-          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-            <Wrench className="h-5 w-5 text-[hsl(var(--section-tools))]" />
-            Ferramentas do Agente
-          </h2>
-          <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-tools))]" />
+      <CardContent className="pt-5 pb-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+          <div className="flex items-start justify-between gap-3 sm:justify-start sm:flex-shrink-0">
+            <div className="w-fit">
+              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                <Wrench className="h-5 w-5 text-purple-600" />
+                Ferramentas do Agente
+              </h2>
+              <div className="mt-2 h-1 w-full rounded-full bg-purple-600" />
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform sm:hidden"
+              onClick={() => setCollapsed((v) => !v)}
+              aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
+              aria-expanded={!collapsed}
+            >
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3 sm:flex-1 min-w-0 w-full">
+            <div className="rounded-xl bg-purple-600/5 border border-purple-600/15 px-3 py-2 space-y-0.5 min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground leading-tight">🛠️ Crie e organize suas vendas</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Monte orçamentos, roteiros e conteúdos em poucos cliques e gerencie tudo em um só lugar.
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground transition-transform hidden sm:inline-flex flex-shrink-0"
+              onClick={() => setCollapsed((v) => !v)}
+              aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
+              aria-expanded={!collapsed}
+            >
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
+            </Button>
+          </div>
         </div>
 
-        <TooltipProvider delayDuration={200}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {tools.map((tool) => (
-              <Tooltip key={tool.label}>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => navigate(tool.path)}
-                    className="group flex flex-col items-center gap-2 rounded-xl p-3 transition-all duration-200 cursor-pointer"
-                    style={{ ["--tool-color" as string]: tool.color }}
-                  >
-                    <div
-                      className="flex h-11 w-11 items-center justify-center rounded-xl transition-colors"
-                      style={{
-                        backgroundColor: `hsl(${tool.color} / 0.1)`,
-                      }}
-                    >
-                      <tool.icon
-                        className="h-5 w-5"
-                        style={{ color: `hsl(${tool.color})` }}
-                      />
-                    </div>
-                    <span className="text-xs font-medium text-foreground text-center leading-tight">
-                      {tool.label}
-                    </span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-[200px] text-center">
-                  <p>{tool.description}</p>
-                </TooltipContent>
-              </Tooltip>
-            ))}
+        {!collapsed && (
+          <div
+            className="grid gap-3 w-full"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}
+          >
+            {TOOL_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.url}
+                  onClick={() => navigate(item.url)}
+                  aria-label={`Acessar ${item.title}`}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-3 rounded-2xl w-full aspect-square p-4 text-sm font-semibold transition-all duration-200 border border-transparent",
+                    "bg-purple-100 text-purple-700",
+                    "hover:scale-[1.02] hover:shadow-md hover:border-border/50"
+                  )}
+                >
+                  <Icon className="h-10 w-10 text-purple-500" strokeWidth={2} />
+                  <span className="text-center leading-tight px-1">{item.title}</span>
+                </button>
+              );
+            })}
           </div>
-        </TooltipProvider>
+        )}
       </CardContent>
     </Card>
   );
