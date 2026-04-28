@@ -17,6 +17,13 @@ serve(async (req) => {
       });
     }
 
+    // Support multi-destination strings like "Paris, Roma, Florença".
+    const cities = destination
+      .split(",")
+      .map((s: string) => s.trim())
+      .filter(Boolean);
+    const isMulti = cities.length > 1;
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -31,7 +38,19 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Você é um copywriter especializado em viagens. Gere uma descrição curta e atrativa sobre um destino de viagem.
+            content: isMulti
+              ? `Você é um copywriter especializado em viagens. Gere uma descrição curta e atrativa sobre um roteiro combinado de várias cidades.
+
+Regras:
+- Máximo de 5 linhas (um único parágrafo)
+- Linguagem simples, leve e envolvente
+- NÃO parecer texto de guia turístico ou Wikipedia
+- NÃO usar termos técnicos
+- Mencionar todas as cidades de forma fluida, destacando a complementaridade entre elas (sem listar uma por uma de forma robótica)
+- Criar conexão emocional leve, sem exageros
+- Escrever em português do Brasil
+- Retornar APENAS o parágrafo, sem título ou formatação`
+              : `Você é um copywriter especializado em viagens. Gere uma descrição curta e atrativa sobre um destino de viagem.
 
 Regras:
 - Máximo de 4 linhas (um único parágrafo curto)
@@ -45,7 +64,9 @@ Regras:
           },
           {
             role: "user",
-            content: `Gere uma descrição curta e envolvente sobre: ${destination.trim()}`,
+            content: isMulti
+              ? `Gere uma descrição curta e envolvente sobre um roteiro combinado entre as cidades: ${cities.join(", ")}.`
+              : `Gere uma descrição curta e envolvente sobre: ${destination.trim()}`,
           },
         ],
       }),
