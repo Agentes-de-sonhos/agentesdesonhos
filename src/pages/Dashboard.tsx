@@ -27,6 +27,7 @@ const CommunityQACard = lazy(() => import("@/components/dashboard/CommunityQACar
 const AgentToolsCard = lazy(() => import("@/components/dashboard/AgentToolsCard").then(m => ({ default: m.AgentToolsCard })));
 const DashboardBanner = lazy(() => import("@/components/dashboard/DashboardBanner").then(m => ({ default: m.DashboardBanner })));
 const TripRemindersCard = lazy(() => import("@/components/dashboard/TripRemindersCard").then(m => ({ default: m.TripRemindersCard })));
+const MapaTurismoCard = lazy(() => import("@/components/dashboard/start/MapaTurismoCard").then(m => ({ default: m.MapaTurismoCard })));
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
@@ -195,6 +196,11 @@ export default function Dashboard() {
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-4">
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><ClientsManagementCard /></div>
               <div className="min-w-0"><AgentToolsCard /></div>
+            </section>
+
+            {/* 5. Mapa do Turismo */}
+            <section className="order-5">
+              <MapaTurismoCard />
             </section>
           </Suspense>
         )}
