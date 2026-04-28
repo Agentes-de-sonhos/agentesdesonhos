@@ -78,7 +78,7 @@ export function AcademyCollapsibleCard({ limit, defaultOpen = false }: AcademyCo
       </Card>
 
       {selectedTrail && (
-        <TrailDetail trail={selectedTrail} onClose={() => setSelectedTrail(null)} />
+        <TrailDetail trail={selectedTrail} onBack={() => setSelectedTrail(null)} />
       )}
     </>
   );
