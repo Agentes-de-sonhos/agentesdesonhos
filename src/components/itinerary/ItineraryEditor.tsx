@@ -177,7 +177,7 @@ export function ItineraryEditor({
                     Dia {day.dayNumber}
                   </CardTitle>
                   <CardDescription>
-                    {format(new Date(day.date), "EEEE, dd 'de' MMMM", {
+                    {format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", {
                       locale: ptBR,
                     })}
                   </CardDescription>
