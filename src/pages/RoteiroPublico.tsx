@@ -47,7 +47,7 @@ function CollapsibleDayCard({
 }: {
   day: ItineraryDay; periodImages: Record<string, string>; isOpen: boolean; onToggle: () => void;
 }) {
-  const dateFormatted = format(new Date(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR });
+  const dateFormatted = format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR });
 
   return (
     <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">

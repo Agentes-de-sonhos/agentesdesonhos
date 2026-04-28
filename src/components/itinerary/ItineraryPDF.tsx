@@ -160,7 +160,7 @@ export function generatePDFContent(
       <div class="day">
         <div class="day-header">
           <h2>Dia ${day.dayNumber}</h2>
-          <div class="date">${format(new Date(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}</div>
+          <div class="date">${format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}</div>
         </div>
         <div class="day-content">
           ${(["manha", "tarde", "noite"] as const)

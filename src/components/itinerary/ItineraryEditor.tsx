@@ -47,6 +47,7 @@ import { Label } from "@/components/ui/label";
 import { ItineraryDay, Activity } from "@/types/itinerary";
 import { cn } from "@/lib/utils";
 import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItineraryPeriodImages";
+import { parseLocalDate } from "@/lib/dateParsing";
 
 const periodIcons = {
   manha: Sun,
@@ -176,7 +177,7 @@ export function ItineraryEditor({
                     Dia {day.dayNumber}
                   </CardTitle>
                   <CardDescription>
-                    {format(new Date(day.date), "EEEE, dd 'de' MMMM", {
+                    {format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", {
                       locale: ptBR,
                     })}
                   </CardDescription>
