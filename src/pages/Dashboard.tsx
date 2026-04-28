@@ -22,7 +22,6 @@ import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip
 // Lazy load heavy dashboard cards to reduce initial bundle
 const CuratedNewsFeed = lazy(() => import("@/components/dashboard/CuratedNewsFeed").then(m => ({ default: m.CuratedNewsFeed })));
 const UpcomingAgendaEventsCard = lazy(() => import("@/components/dashboard/UpcomingAgendaEventsCard").then(m => ({ default: m.UpcomingAgendaEventsCard })));
-const ClientsManagementCard = lazy(() => import("@/components/dashboard/ClientsManagementCard").then(m => ({ default: m.ClientsManagementCard })));
 const CommunityQACard = lazy(() => import("@/components/dashboard/CommunityQACard").then(m => ({ default: m.CommunityQACard })));
 const AgentToolsCard = lazy(() => import("@/components/dashboard/AgentToolsCard").then(m => ({ default: m.AgentToolsCard })));
 const DashboardBanner = lazy(() => import("@/components/dashboard/DashboardBanner").then(m => ({ default: m.DashboardBanner })));
@@ -30,6 +29,8 @@ const TripRemindersCard = lazy(() => import("@/components/dashboard/TripReminder
 const MapaTurismoCard = lazy(() => import("@/components/dashboard/start/MapaTurismoCard").then(m => ({ default: m.MapaTurismoCard })));
 const AcademyCollapsibleCard = lazy(() => import("@/components/dashboard/AcademyCollapsibleCard").then(m => ({ default: m.AcademyCollapsibleCard })));
 const MarketingCard = lazy(() => import("@/components/dashboard/MarketingCard").then(m => ({ default: m.MarketingCard })));
+const ClientesCard = lazy(() => import("@/components/dashboard/ClientesCard").then(m => ({ default: m.ClientesCard })));
+const FinanceiroCard = lazy(() => import("@/components/dashboard/FinanceiroCard").then(m => ({ default: m.FinanceiroCard })));
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
@@ -194,10 +195,15 @@ export default function Dashboard() {
               <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AcademyCollapsibleCard /></div>
             </section>
 
-            {/* 3b. Perguntas da Comunidade & Minha Meta */}
+            {/* 3b. Perguntas da Comunidade */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-[3.5]">
               <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CommunityQACard /></div>
-              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><ClientsManagementCard /></div>
+            </section>
+
+            {/* 4. Clientes + Financeiro lado a lado */}
+            <section className="order-4 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+              <div className="min-w-0"><ClientesCard /></div>
+              <div className="min-w-0"><FinanceiroCard /></div>
             </section>
 
             {/* 5. Mapa do Turismo */}
