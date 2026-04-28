@@ -75,7 +75,10 @@ export function MarketingCard() {
         </div>
 
         {!collapsed && (
-          <div className="grid gap-3 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            className="grid gap-3 w-full"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}
+          >
             {MARKETING_ITEMS.map((item) => {
               const Icon = item.icon;
               return (
@@ -84,13 +87,13 @@ export function MarketingCard() {
                   onClick={() => navigate(item.url)}
                   aria-label={`Acessar ${item.title}`}
                   className={cn(
-                    "flex items-center justify-center gap-2 rounded-2xl w-full min-h-[64px] px-4 py-3 text-sm font-medium transition-all duration-200 border border-transparent",
+                    "flex flex-col items-center justify-center gap-3 rounded-2xl w-full aspect-square p-4 text-sm font-semibold transition-all duration-200 border border-transparent",
                     "bg-pink-100 text-pink-700",
                     "hover:scale-[1.02] hover:shadow-md hover:border-border/50"
                   )}
                 >
-                  <Icon className="h-5 w-5 text-pink-500 flex-shrink-0" />
-                  <span className="text-center leading-tight">{item.title}</span>
+                  <Icon className="h-10 w-10 text-pink-500" strokeWidth={2} />
+                  <span className="text-center leading-tight px-1">{item.title}</span>
                 </button>
               );
             })}
