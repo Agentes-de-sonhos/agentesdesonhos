@@ -497,6 +497,7 @@ export default function CriarRoteiro() {
 
             {currentItinerary.days && currentItinerary.days.length > 0 && (
               <ItineraryEditor
+                itineraryId={currentItinerary.id}
                 days={currentItinerary.days}
                 onUpdateActivity={handleUpdateActivity}
                 onDeleteActivity={handleDeleteActivity}
