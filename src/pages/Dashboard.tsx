@@ -188,9 +188,9 @@ export default function Dashboard() {
             </section>
 
             {/* 3. Radar do Turismo & EducaTravel Academy */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-3">
-              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><CuratedNewsFeed /></div>
-              <div className="min-w-0"><AcademyCollapsibleCard /></div>
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
+              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CuratedNewsFeed /></div>
+              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AcademyCollapsibleCard /></div>
             </section>
 
             {/* 3b. Perguntas da Comunidade */}
