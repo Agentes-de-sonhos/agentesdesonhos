@@ -44,7 +44,7 @@ export function CommunityQACard() {
 
   // Quick ask state
   const [showAskForm, setShowAskForm] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [askTitle, setAskTitle] = useState("");
   const [askDescription, setAskDescription] = useState("");
   const [askCategory, setAskCategory] = useState("");
@@ -322,17 +322,15 @@ export function CommunityQACard() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground"
+            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform"
             onClick={() => setCollapsed((v) => !v)}
             aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
             aria-expanded={!collapsed}
           >
-            {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
           </Button>
         </div>
-        {!collapsed && (
-        <>
-        {/* Engagement banner */}
+        {/* Engagement banner — sempre visível (teaser da comunidade) */}
         <div className="rounded-xl bg-[hsl(var(--section-community))]/5 border border-[hsl(var(--section-community))]/15 p-3.5 space-y-1.5">
           <p className="text-sm font-semibold text-foreground">🚀 Essa é a sua comunidade!</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -342,6 +340,8 @@ export function CommunityQACard() {
             👉 Quem pergunta aprende. Quem responde cresce.
           </p>
         </div>
+        {!collapsed && (
+        <>
 
         {/* Quick Ask Bar */}
         {!showAskForm ? (
