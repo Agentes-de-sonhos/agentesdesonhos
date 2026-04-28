@@ -29,6 +29,7 @@ const DashboardBanner = lazy(() => import("@/components/dashboard/DashboardBanne
 const TripRemindersCard = lazy(() => import("@/components/dashboard/TripRemindersCard").then(m => ({ default: m.TripRemindersCard })));
 const MapaTurismoCard = lazy(() => import("@/components/dashboard/start/MapaTurismoCard").then(m => ({ default: m.MapaTurismoCard })));
 const AcademyCollapsibleCard = lazy(() => import("@/components/dashboard/AcademyCollapsibleCard").then(m => ({ default: m.AcademyCollapsibleCard })));
+const MarketingCard = lazy(() => import("@/components/dashboard/MarketingCard").then(m => ({ default: m.MarketingCard })));
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
@@ -202,6 +203,11 @@ export default function Dashboard() {
             {/* 5. Mapa do Turismo */}
             <section className="order-5">
               <MapaTurismoCard />
+            </section>
+
+            {/* 5b. Marketing */}
+            <section className="order-[5.5]">
+              <MarketingCard />
             </section>
 
             {/* 6. Ferramentas do Agente */}
