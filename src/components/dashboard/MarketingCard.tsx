@@ -17,15 +17,13 @@ interface MarketingItem {
   title: string;
   icon: LucideIcon;
   url: string;
-  color: string;
-  iconColor: string;
 }
 
 const MARKETING_ITEMS: MarketingItem[] = [
-  { title: "Vitrine de Ofertas", icon: Store, url: "/minha-vitrine", color: "bg-pink-100 text-pink-700", iconColor: "text-pink-500" },
-  { title: "Cartão de Visitas", icon: CreditCard, url: "/meu-cartao", color: "bg-rose-100 text-rose-700", iconColor: "text-rose-500" },
-  { title: "Personalizador de Lâminas", icon: Paintbrush, url: "/personalizador-laminas", color: "bg-fuchsia-100 text-fuchsia-700", iconColor: "text-fuchsia-500" },
-  { title: "Captação de Leads", icon: UserPlus, url: "/meus-leads", color: "bg-red-100 text-red-700", iconColor: "text-red-500" },
+  { title: "Vitrine de Ofertas", icon: Store, url: "/minha-vitrine" },
+  { title: "Cartão de Visitas", icon: CreditCard, url: "/meu-cartao" },
+  { title: "Personalizador de Lâminas", icon: Paintbrush, url: "/personalizador-laminas" },
+  { title: "Captação de Leads", icon: UserPlus, url: "/meus-leads" },
 ];
 
 export function MarketingCard() {
@@ -77,10 +75,7 @@ export function MarketingCard() {
         </div>
 
         {!collapsed && (
-          <div
-            className="grid gap-3 w-full"
-            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))" }}
-          >
+          <div className="grid gap-3 w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {MARKETING_ITEMS.map((item) => {
               const Icon = item.icon;
               return (
@@ -89,13 +84,13 @@ export function MarketingCard() {
                   onClick={() => navigate(item.url)}
                   aria-label={`Acessar ${item.title}`}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border p-2",
-                    item.color,
-                    "border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/50"
+                    "flex items-center justify-center gap-2 rounded-2xl w-full min-h-[64px] px-4 py-3 text-sm font-medium transition-all duration-200 border border-transparent",
+                    "bg-pink-100 text-pink-700",
+                    "hover:scale-[1.02] hover:shadow-md hover:border-border/50"
                   )}
                 >
-                  <Icon className={cn("h-6 w-6", item.iconColor)} />
-                  <span className="text-center leading-tight px-1">{item.title}</span>
+                  <Icon className="h-5 w-5 text-pink-500 flex-shrink-0" />
+                  <span className="text-center leading-tight">{item.title}</span>
                 </button>
               );
             })}
