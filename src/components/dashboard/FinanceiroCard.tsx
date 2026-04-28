@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   DollarSign,
   LayoutDashboard,
   ShoppingBag,
   ArrowUpCircle,
   ArrowDownCircle,
+  ChevronDown,
   LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +28,7 @@ const ITEMS: FinItem[] = [
 
 export function FinanceiroCard() {
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(true);
 
   return (
     <Card className="border-0 shadow-card">
@@ -37,6 +41,16 @@ export function FinanceiroCard() {
             </h2>
             <div className="mt-2 h-1 w-full rounded-full bg-emerald-600" />
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform flex-shrink-0"
+            onClick={() => setCollapsed((v) => !v)}
+            aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
+            aria-expanded={!collapsed}
+          >
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
+          </Button>
         </div>
 
         <div className="rounded-xl bg-emerald-600/5 border border-emerald-600/15 px-3 py-2 space-y-0.5 w-full">
@@ -46,6 +60,7 @@ export function FinanceiroCard() {
           </p>
         </div>
 
+        {!collapsed && (
         <div className="grid gap-3 w-full grid-cols-2 sm:grid-cols-4">
           {ITEMS.map((item) => {
             const Icon = item.icon;
@@ -66,6 +81,7 @@ export function FinanceiroCard() {
             );
           })}
         </div>
+        )}
       </CardContent>
     </Card>
   );
