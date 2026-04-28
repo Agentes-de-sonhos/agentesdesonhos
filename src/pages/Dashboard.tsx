@@ -195,20 +195,16 @@ export default function Dashboard() {
               <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AcademyCollapsibleCard /></div>
             </section>
 
-            {/* 3b. Perguntas da Comunidade */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-[3.5]">
-              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CommunityQACard /></div>
+            {/* 3b. Perguntas da Comunidade & Mapa do Turismo */}
+            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-[3.5]">
+              <div className="min-w-0"><CommunityQACard /></div>
+              <div className="min-w-0"><MapaTurismoCard /></div>
             </section>
 
             {/* 4. Clientes + Financeiro lado a lado */}
             <section className="order-4 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
               <div className="min-w-0"><ClientesCard /></div>
               <div className="min-w-0"><FinanceiroCard /></div>
-            </section>
-
-            {/* 5. Mapa do Turismo */}
-            <section className="order-5">
-              <MapaTurismoCard />
             </section>
 
             {/* 5b. Marketing + Ferramentas do Agente lado a lado (alturas independentes) */}
