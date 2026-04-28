@@ -61,10 +61,7 @@ export function MarketingCard() {
         </div>
 
         {!collapsed && (
-          <div
-            className="grid gap-3 w-full grid-cols-2 sm:grid-cols-3"
-            style={{ gridTemplateColumns: undefined }}
-          >
+          <div className="grid gap-3 w-full grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
             {MARKETING_ITEMS.map((item) => {
               const Icon = item.icon;
               return (
