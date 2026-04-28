@@ -180,16 +180,16 @@ export default function Dashboard() {
             {/* 1. Banner Rotativo */}
             <DashboardBanner />
 
-            {/* 2. Notícias e Minha Agenda - lado a lado */}
+            {/* 2. Minha Agenda & Próximas Viagens */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
-              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><CuratedNewsFeed /></div>
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
+              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
             </section>
 
-            {/* 3. Perguntas da Comunidade & Próximas Viagens */}
+            {/* 3. Radar do Turismo & Perguntas da Comunidade */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
+              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><CuratedNewsFeed /></div>
               <div className="min-w-0"><CommunityQACard /></div>
-              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
             </section>
 
             {/* 4. Minha Meta */}
