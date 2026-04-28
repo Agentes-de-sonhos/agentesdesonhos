@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Users, ShoppingCart, Target, TrendingUp, Loader2 } from "lucide-react";
+import { Users, ShoppingCart, Target, TrendingUp, Loader2, ChevronDown } from "lucide-react";
 import { useSalesGoals, useSalesStats } from "@/hooks/useCRM";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,7 @@ const ITEMS = [
 
 export function ClientesCard() {
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(true);
   const now = new Date();
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
@@ -40,6 +42,16 @@ export function ClientesCard() {
             </h2>
             <div className="mt-2 h-1 w-full rounded-full bg-cyan-600" />
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform flex-shrink-0"
+            onClick={() => setCollapsed((v) => !v)}
+            aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
+            aria-expanded={!collapsed}
+          >
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
+          </Button>
         </div>
 
         <div className="rounded-xl bg-cyan-600/5 border border-cyan-600/15 px-3 py-2 space-y-0.5 w-full">
@@ -49,6 +61,7 @@ export function ClientesCard() {
           </p>
         </div>
 
+        {!collapsed && (
         <div className="grid gap-3 sm:grid-cols-2">
           {/* Botões */}
           <div className="grid grid-cols-2 gap-3">
@@ -139,6 +152,7 @@ export function ClientesCard() {
             )}
           </div>
         </div>
+        )}
       </CardContent>
     </Card>
   );
