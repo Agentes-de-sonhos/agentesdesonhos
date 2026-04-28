@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
+import { MultiDestinationInput } from "@/components/quote/MultiDestinationInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -247,16 +248,12 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
             <FormItem>
               <FormLabel className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Destino Principal
+                Destinos
               </FormLabel>
               <FormControl>
-                <PlacesAutocomplete
+                <MultiDestinationInput
                   value={field.value || ""}
                   onChange={field.onChange}
-                  onPlaceSelect={(pred) => field.onChange(pred.name)}
-                  placeType="city"
-                  placeholder="Ex: Paris, França"
-                  fetchDetailsOnSelect={false}
                 />
               </FormControl>
               <FormMessage />
