@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -12,6 +12,9 @@ import {
   MapPin,
   Clock,
   DollarSign,
+  ImagePlus,
+  Loader2,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +46,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { ItineraryDay, Activity } from "@/types/itinerary";
 import { cn } from "@/lib/utils";
+import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItineraryPeriodImages";
 
 const periodIcons = {
   manha: Sun,
@@ -57,6 +61,7 @@ const periodLabels = {
 };
 
 interface ItineraryEditorProps {
+  itineraryId?: string;
   days: ItineraryDay[];
   onUpdateActivity: (activityId: string, updates: Partial<Activity>) => void;
   onDeleteActivity: (activityId: string) => void;
@@ -65,6 +70,7 @@ interface ItineraryEditorProps {
 }
 
 export function ItineraryEditor({
+  itineraryId,
   days,
   onUpdateActivity,
   onDeleteActivity,
@@ -73,6 +79,26 @@ export function ItineraryEditor({
 }: ItineraryEditorProps) {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
+  const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading } =
+    useItineraryPeriodImages(itineraryId);
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const handleFileChange = async (
+    dayDate: string,
+    period: ItineraryPeriod,
+    file: File | undefined
+  ) => {
+    if (!file) return;
+    const key = `${dayDate}-${period}`;
+    setUploadingKey(key);
+    try {
+      await setPeriodImage({ dayDate, period, file });
+    } finally {
+      setUploadingKey(null);
+    }
+  };
+
   const [newActivity, setNewActivity] = useState<Partial<Activity>>({
     period: "manha",
     title: "",
