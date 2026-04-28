@@ -44,6 +44,7 @@ export function CommunityQACard() {
 
   // Quick ask state
   const [showAskForm, setShowAskForm] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [askTitle, setAskTitle] = useState("");
   const [askDescription, setAskDescription] = useState("");
   const [askCategory, setAskCategory] = useState("");
@@ -310,13 +311,27 @@ export function CommunityQACard() {
   return (
     <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/20 via-[hsl(var(--section-community))]/10 to-[hsl(var(--section-community))]/[0.03]">
       <CardContent className="pt-5 pb-4 space-y-4">
-        <div className="w-fit">
-          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-[hsl(var(--section-community))]" />
-            Perguntas da Comunidade
-          </h2>
-          <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
+        <div className="flex items-start justify-between gap-3">
+          <div className="w-fit">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-[hsl(var(--section-community))]" />
+              Perguntas da Comunidade
+            </h2>
+            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground"
+            onClick={() => setCollapsed((v) => !v)}
+            aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+          </Button>
         </div>
+        {!collapsed && (
+        <>
         {/* Engagement banner */}
         <div className="rounded-xl bg-[hsl(var(--section-community))]/5 border border-[hsl(var(--section-community))]/15 p-3.5 space-y-1.5">
           <p className="text-sm font-semibold text-foreground">🚀 Essa é a sua comunidade!</p>
@@ -613,6 +628,8 @@ export function CommunityQACard() {
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
+        </>
+        )}
       </CardContent>
     </Card>
   );
