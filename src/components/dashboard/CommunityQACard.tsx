@@ -44,6 +44,7 @@ export function CommunityQACard() {
 
   // Quick ask state
   const [showAskForm, setShowAskForm] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [askTitle, setAskTitle] = useState("");
   const [askDescription, setAskDescription] = useState("");
   const [askCategory, setAskCategory] = useState("");
