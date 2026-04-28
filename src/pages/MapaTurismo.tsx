@@ -383,7 +383,10 @@ export default function MapaTurismo() {
         />
 
         {/* Category grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-3 justify-items-center">
+        <div
+          className="grid gap-3 w-full"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))" }}
+        >
           {CATEGORIES_DATA.map((cat) => {
             const Icon = cat.icon;
             const isActive = categoryFilter === cat.category;
