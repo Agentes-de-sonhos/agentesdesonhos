@@ -169,7 +169,7 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 Nenhuma trilha disponível no momento.
               </div>
             ) : (
-              <div className="space-y-3 overflow-y-auto pr-1 flex-1 min-h-0">
+              <div className="grid grid-cols-1 auto-rows-fr gap-3 overflow-y-auto pr-1 flex-1 min-h-0">
                 {visibleTrails.map((trail) => (
                   <HorizontalTrailCard
                     key={trail.id}
