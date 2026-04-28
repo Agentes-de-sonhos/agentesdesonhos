@@ -151,26 +151,15 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
     <>
       <Card className="border-0 shadow-card h-full">
         <CardContent className="pt-5 pb-5 space-y-4 h-full flex flex-col">
-          <div className="flex items-start justify-between gap-3 flex-wrap">
-            <div className="w-fit">
-              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-emerald-600" />
-                EducaTravel Academy
-              </h2>
-              <div className="mt-2 h-1 w-full rounded-full bg-emerald-600" />
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/educa-academy")}
-              className="text-emerald-700 hover:text-emerald-800"
-            >
-              Ver Academy
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+          <div className="w-fit">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-emerald-600" />
+              EducaTravel Academy
+            </h2>
+            <div className="mt-2 h-1 w-full rounded-full bg-emerald-600" />
           </div>
 
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-h-0">
             {isLoading ? (
               <div className="flex items-center justify-center py-8 flex-1">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -180,7 +169,7 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 Nenhuma trilha disponível no momento.
               </div>
             ) : (
-              <div className="space-y-3 overflow-y-auto pr-1">
+              <div className="space-y-3 overflow-y-auto pr-1 flex-1 min-h-0">
                 {visibleTrails.map((trail) => (
                   <HorizontalTrailCard
                     key={trail.id}
@@ -190,6 +179,18 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Footer */}
+          <div className="pt-2 border-t">
+            <Button
+              variant="ghost"
+              className="w-full text-emerald-700 hover:text-emerald-800 hover:bg-emerald-600/5"
+              onClick={() => navigate("/educa-academy")}
+            >
+              Mais treinamentos
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
           </div>
         </CardContent>
       </Card>
