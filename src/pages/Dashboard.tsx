@@ -205,14 +205,10 @@ export default function Dashboard() {
               <MapaTurismoCard />
             </section>
 
-            {/* 5b. Marketing */}
-            <section className="order-[5.5]">
-              <MarketingCard />
-            </section>
-
-            {/* 6. Ferramentas do Agente */}
-            <section className="order-6">
-              <AgentToolsCard />
+            {/* 5b. Marketing + Ferramentas do Agente lado a lado */}
+            <section className="order-[5.5] grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch">
+              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><MarketingCard /></div>
+              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AgentToolsCard /></div>
             </section>
           </Suspense>
         )}
