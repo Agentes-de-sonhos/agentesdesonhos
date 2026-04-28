@@ -205,10 +205,10 @@ export default function Dashboard() {
               <MapaTurismoCard />
             </section>
 
-            {/* 5b. Marketing + Ferramentas do Agente lado a lado */}
-            <section className="order-[5.5] grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch">
-              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><MarketingCard /></div>
-              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AgentToolsCard /></div>
+            {/* 5b. Marketing + Ferramentas do Agente lado a lado (alturas independentes) */}
+            <section className="order-[5.5] grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+              <div className="min-w-0"><MarketingCard /></div>
+              <div className="min-w-0"><AgentToolsCard /></div>
             </section>
           </Suspense>
         )}
