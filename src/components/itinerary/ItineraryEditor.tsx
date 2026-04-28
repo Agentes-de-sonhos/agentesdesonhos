@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -12,6 +12,9 @@ import {
   MapPin,
   Clock,
   DollarSign,
+  ImagePlus,
+  Loader2,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +46,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { ItineraryDay, Activity } from "@/types/itinerary";
 import { cn } from "@/lib/utils";
+import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItineraryPeriodImages";
 
 const periodIcons = {
   manha: Sun,
@@ -57,6 +61,7 @@ const periodLabels = {
 };
 
 interface ItineraryEditorProps {
+  itineraryId?: string;
   days: ItineraryDay[];
   onUpdateActivity: (activityId: string, updates: Partial<Activity>) => void;
   onDeleteActivity: (activityId: string) => void;
@@ -65,6 +70,7 @@ interface ItineraryEditorProps {
 }
 
 export function ItineraryEditor({
+  itineraryId,
   days,
   onUpdateActivity,
   onDeleteActivity,
@@ -73,6 +79,26 @@ export function ItineraryEditor({
 }: ItineraryEditorProps) {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
+  const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading } =
+    useItineraryPeriodImages(itineraryId);
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const handleFileChange = async (
+    dayDate: string,
+    period: ItineraryPeriod,
+    file: File | undefined
+  ) => {
+    if (!file) return;
+    const key = `${dayDate}-${period}`;
+    setUploadingKey(key);
+    try {
+      await setPeriodImage({ dayDate, period, file });
+    } finally {
+      setUploadingKey(null);
+    }
+  };
+
   const [newActivity, setNewActivity] = useState<Partial<Activity>>({
     period: "manha",
     title: "",
@@ -270,6 +296,9 @@ export function ItineraryEditor({
                   (a) => a.period === period
                 );
                 const Icon = periodIcons[period];
+                const periodImage = itineraryId ? getImageForPeriod(day.date, period) : null;
+                const inputKey = `${day.date}-${period}`;
+                const isThisUploading = uploadingKey === inputKey;
 
                 return (
                   <div key={period} className="space-y-2">
@@ -277,6 +306,69 @@ export function ItineraryEditor({
                       <Icon className="h-4 w-4" />
                       {periodLabels[period]}
                     </div>
+                    {itineraryId && (
+                      <div className="ml-6">
+                        <input
+                          ref={(el) => (fileInputs.current[inputKey] = el)}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) =>
+                            handleFileChange(day.date, period, e.target.files?.[0])
+                          }
+                        />
+                        {periodImage ? (
+                          <div className="relative w-full max-w-xs overflow-hidden rounded-lg border bg-muted">
+                            <img
+                              src={periodImage}
+                              alt={`${periodLabels[period]} - dia ${day.dayNumber}`}
+                              className="h-32 w-full object-cover"
+                            />
+                            <div className="absolute right-1 top-1 flex gap-1">
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="secondary"
+                                className="h-7 w-7"
+                                onClick={() => fileInputs.current[inputKey]?.click()}
+                                disabled={isThisUploading}
+                              >
+                                {isThisUploading ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Pencil className="h-3 w-3" />
+                                )}
+                              </Button>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="destructive"
+                                className="h-7 w-7"
+                                onClick={() => removePeriodImage({ dayDate: day.date, period })}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8"
+                            onClick={() => fileInputs.current[inputKey]?.click()}
+                            disabled={isThisUploading}
+                          >
+                            {isThisUploading ? (
+                              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                            ) : (
+                              <ImagePlus className="mr-2 h-3 w-3" />
+                            )}
+                            Adicionar foto
+                          </Button>
+                        )}
+                      </div>
+                    )}
                     {periodActivities.length === 0 ? (
                       <p className="text-sm text-muted-foreground italic pl-6">
                         Nenhuma atividade

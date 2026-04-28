@@ -3598,6 +3598,44 @@ export type Database = {
           },
         ]
       }
+      itinerary_period_images: {
+        Row: {
+          created_at: string
+          day_date: string
+          id: string
+          image_url: string
+          itinerary_id: string
+          period: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_date: string
+          id?: string
+          image_url: string
+          itinerary_id: string
+          period: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_date?: string
+          id?: string
+          image_url?: string
+          itinerary_id?: string
+          period?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itinerary_period_images_itinerary_id_fkey"
+            columns: ["itinerary_id"]
+            isOneToOne: false
+            referencedRelation: "itineraries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_capture_forms: {
         Row: {
           created_at: string | null
