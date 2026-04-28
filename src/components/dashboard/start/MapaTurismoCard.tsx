@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Plane,
   Building2,
@@ -11,6 +13,7 @@ import {
   MapPin,
   Users,
   Globe,
+  ChevronDown,
   LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -40,18 +43,40 @@ const CATEGORIES_DATA: CategoryDef[] = [
 
 export function MapaTurismoCard() {
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(true);
 
   return (
     <Card className="border-0 shadow-card">
       <CardContent className="pt-5 pb-5 space-y-4">
-        <div className="w-fit">
-          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-            <Globe className="h-5 w-5 text-primary" />
-            Mapa do Turismo
-          </h2>
-          <div className="mt-2 h-1 w-full rounded-full bg-primary" />
+        <div className="flex items-start justify-between gap-3">
+          <div className="w-fit">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+              <Globe className="h-5 w-5 text-primary" />
+              Mapa do Turismo
+            </h2>
+            <div className="mt-2 h-1 w-full rounded-full bg-primary" />
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform"
+            onClick={() => setCollapsed((v) => !v)}
+            aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
+            aria-expanded={!collapsed}
+          >
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
+          </Button>
         </div>
 
+        {/* Engagement banner — sempre visível (teaser) */}
+        <div className="rounded-xl bg-primary/5 border border-primary/15 p-3.5 space-y-1.5">
+          <p className="text-sm font-semibold text-foreground">🌍 Encontre seus parceiros ideais</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Busque, filtre e conecte-se com fornecedores do turismo em poucos cliques.
+          </p>
+        </div>
+
+        {!collapsed && (
         <div
           className="grid gap-3 w-full"
           style={{
@@ -79,6 +104,7 @@ export function MapaTurismoCard() {
             );
           })}
         </div>
+        )}
       </CardContent>
     </Card>
   );
