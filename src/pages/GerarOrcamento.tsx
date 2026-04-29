@@ -1198,6 +1198,11 @@ export default function GerarOrcamento() {
           </div>
         </div>
       </div>
+      <AIImportServiceModal
+        open={showAIImport}
+        onOpenChange={setShowAIImport}
+        onImport={handleAIImport}
+      />
     </DashboardLayout>
   );
 }
