@@ -4,7 +4,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Plane, Hotel, Car, Bus, Ticket, Shield, Ship, FileText, TrainFront,
-  Trash2, Download, ExternalLink, Pencil, Upload, X, RefreshCw, Camera, Image as ImageIcon
+  Trash2, Download, ExternalLink, Pencil, Upload, X, RefreshCw, Camera, Image as ImageIcon,
+  GripVertical, ChevronUp, ChevronDown
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { TripService, TripServiceType } from "@/types/trip";
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext, sortableKeyboardCoordinates, useSortable,
+  verticalListSortingStrategy, arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
@@ -179,12 +189,17 @@ interface TripServiceCardProps {
   onUploadServiceImage?: (serviceId: string, file: File) => void;
   onRemoveServiceImage?: (serviceId: string) => void;
   showActions?: boolean;
+  dragHandle?: React.ReactNode;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 }
 
 export function TripServiceCard({ 
   service, onDelete, onEdit, onReplaceVoucher, onRemoveVoucher, 
   onAddAttachment, onRemoveAttachment, onUploadServiceImage, onRemoveServiceImage,
-  showActions = true 
+  showActions = true, dragHandle, onMoveUp, onMoveDown, canMoveUp, canMoveDown,
 }: TripServiceCardProps) {
   const Icon = SERVICE_ICONS[service.service_type] || FileText;
   const label = SERVICE_LABELS[service.service_type] || "Serviço";
@@ -251,6 +266,37 @@ export function TripServiceCard({
 
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
+            {(dragHandle || onMoveUp || onMoveDown) && (
+              <div className="flex flex-col items-center gap-0.5 shrink-0 -ml-1">
+                {dragHandle}
+                {(onMoveUp || onMoveDown) && (
+                  <div className="flex flex-col">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                      onClick={() => onMoveUp?.()}
+                      disabled={!canMoveUp}
+                      aria-label="Mover para cima"
+                    >
+                      <ChevronUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                      onClick={() => onMoveDown?.()}
+                      disabled={!canMoveDown}
+                      aria-label="Mover para baixo"
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
               <Icon className="h-5 w-5 text-primary" />
             </div>
@@ -406,18 +452,34 @@ interface TripServiceListProps {
   onRemoveServiceImage?: (serviceId: string) => void;
   showActions?: boolean;
   groupByType?: boolean;
+  onReorder?: (orderedIds: string[]) => void;
 }
 
 export function TripServiceList({ 
   services, onDeleteService, onEditService, onReplaceVoucher, onRemoveVoucher, 
   onAddAttachment, onRemoveAttachment, onUploadServiceImage, onRemoveServiceImage,
-  showActions = true, groupByType = false 
+  showActions = true, groupByType = false, onReorder,
 }: TripServiceListProps) {
   if (services.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         Nenhum serviço adicionado ainda
       </div>
+    );
+  }
+
+  // Sortable mode: flat reorderable list
+  if (onReorder && !groupByType) {
+    return (
+      <SortableTripServices
+        services={services}
+        onReorder={onReorder}
+        cardProps={{
+          onDeleteService, onEditService, onReplaceVoucher, onRemoveVoucher,
+          onAddAttachment, onRemoveAttachment, onUploadServiceImage, onRemoveServiceImage,
+          showActions,
+        }}
+      />
     );
   }
 
@@ -480,6 +542,125 @@ export function TripServiceList({
           showActions={showActions}
         />
       ))}
+    </div>
+  );
+}
+
+// === Sortable wrapper ===
+interface SortableCardProps {
+  onDeleteService?: (id: string) => void;
+  onEditService?: (service: TripService) => void;
+  onReplaceVoucher?: (serviceId: string, file: File) => void;
+  onRemoveVoucher?: (serviceId: string) => void;
+  onAddAttachment?: (serviceId: string, file: File) => void;
+  onRemoveAttachment?: (serviceId: string, index: number) => void;
+  onUploadServiceImage?: (serviceId: string, file: File) => void;
+  onRemoveServiceImage?: (serviceId: string) => void;
+  showActions?: boolean;
+}
+
+function SortableTripServices({
+  services, onReorder, cardProps,
+}: {
+  services: TripService[];
+  onReorder: (orderedIds: string[]) => void;
+  cardProps: SortableCardProps;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const ids = services.map((s) => s.id);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = ids.indexOf(String(active.id));
+    const newIndex = ids.indexOf(String(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(ids, oldIndex, newIndex);
+    onReorder(reordered);
+  };
+
+  const move = (index: number, dir: -1 | 1) => {
+    const newIndex = index + dir;
+    if (newIndex < 0 || newIndex >= ids.length) return;
+    onReorder(arrayMove(ids, index, newIndex));
+  };
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+        <div className="space-y-3">
+          {services.map((service, idx) => (
+            <SortableTripServiceItem
+              key={service.id}
+              service={service}
+              cardProps={cardProps}
+              onMoveUp={() => move(idx, -1)}
+              onMoveDown={() => move(idx, 1)}
+              canMoveUp={idx > 0}
+              canMoveDown={idx < services.length - 1}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+function SortableTripServiceItem({
+  service, cardProps, onMoveUp, onMoveDown, canMoveUp, canMoveDown,
+}: {
+  service: TripService;
+  cardProps: SortableCardProps;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: service.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 10 : "auto",
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <TripServiceCard
+        service={service}
+        onDelete={cardProps.onDeleteService}
+        onEdit={cardProps.onEditService}
+        onReplaceVoucher={cardProps.onReplaceVoucher}
+        onRemoveVoucher={cardProps.onRemoveVoucher}
+        onAddAttachment={cardProps.onAddAttachment}
+        onRemoveAttachment={cardProps.onRemoveAttachment}
+        onUploadServiceImage={cardProps.onUploadServiceImage}
+        onRemoveServiceImage={cardProps.onRemoveServiceImage}
+        showActions={cardProps.showActions}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
+        dragHandle={
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="touch-none cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 -m-1 rounded"
+            aria-label="Arrastar para reordenar"
+            title="Arrastar para reordenar"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+        }
+      />
     </div>
   );
 }

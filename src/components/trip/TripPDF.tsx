@@ -401,15 +401,26 @@ export async function generateTripPDF(
     }
   }
 
-  // Group services by type
-  const grouped = (trip.services || []).reduce((acc, service) => {
+  // Group services by type, but preserve user-defined order:
+  // - services within each group keep their order_index
+  // - groups themselves are sorted by the lowest order_index of their first service
+  const sortedServices = [...(trip.services || [])].sort(
+    (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
+  );
+  const grouped = sortedServices.reduce((acc, service) => {
     const type = service.service_type;
     if (!acc[type]) acc[type] = [];
     acc[type].push(service);
     return acc;
   }, {} as Record<string, TripService[]>);
+  const orderedTypes = Object.keys(grouped).sort((a, b) => {
+    const aMin = grouped[a][0]?.order_index ?? 0;
+    const bMin = grouped[b][0]?.order_index ?? 0;
+    return aMin - bMin;
+  });
 
-  const servicesHtml = Object.entries(grouped).map(([type, services]) => {
+  const servicesHtml = orderedTypes.map((type) => {
+    const services = grouped[type];
     const label = SERVICE_LABELS[type as TripServiceType] || "Serviço";
     
     const servicesItems = services.map((service) => {
