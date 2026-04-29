@@ -147,6 +147,7 @@ export default function GerarOrcamento() {
     persisted?.editingService || null
   );
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+  const [showAIImport, setShowAIImport] = useState(false);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
   const [validityDisclaimer, setValidityDisclaimer] = useState("");
