@@ -350,18 +350,52 @@ export function AdminNewsCurationManager() {
             <Sparkles className="h-5 w-5 text-primary" />
             Curadoria IA de Notícias
           </CardTitle>
-          <Button
-            size="sm"
-            onClick={() => collectMutation.mutate()}
-            disabled={collectMutation.isPending}
-          >
-            {collectMutation.isPending ? (
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-1" />
-            )}
-            Coletar Agora
-          </Button>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline" disabled={resetMutation.isPending}>
+                  {resetMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-1" />
+                  )}
+                  Limpar notícias
+                  <ChevronDown className="h-3 w-3 ml-1 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setResetScope("todas")}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Apagar todas
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setResetScope("pendente")}>
+                  Apagar apenas pendentes
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setResetScope("rejeitado")}>
+                  Apagar apenas rejeitadas
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setResetScope("aprovado")}>
+                  Apagar apenas aprovadas
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              size="sm"
+              onClick={() => collectMutation.mutate()}
+              disabled={collectMutation.isPending}
+            >
+              {collectMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-1" />
+              )}
+              Coletar Agora
+            </Button>
+          </div>
         </div>
         <div className="flex items-start gap-2 p-3 rounded-md bg-blue-50 border border-blue-200 text-xs text-blue-900">
           <Brain className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-600" />
