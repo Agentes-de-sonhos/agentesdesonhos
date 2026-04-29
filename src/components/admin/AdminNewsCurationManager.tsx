@@ -43,6 +43,9 @@ interface NoticiasDashboard {
   fonte: string;
   url_original: string;
   relevancia_score: number;
+  score_perfil: number | null;
+  aderencia_perfil: string | null;
+  score_explicacao: string | null;
   tipo_exibicao: string;
   status: string;
   data_publicacao: string;
