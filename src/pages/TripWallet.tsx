@@ -64,7 +64,8 @@ function TripWalletContent() {
   const { createTrip, isCreating, updateTrip, isUpdating, updatePassword, regeneratePassword, deleteTrip, unlockTrip } = useTrips();
   const { 
     trip, addService, updateService, deleteService, uploadVoucher, 
-    replaceVoucher, removeVoucher, isAddingService, isUpdatingService, editHistory 
+    replaceVoucher, removeVoucher, isAddingService, isUpdatingService, editHistory,
+    reorderServices,
   } = useTrip(id && id !== "nova" ? id : undefined);
 
   const { activities: itineraryActivities } = useItineraryActivities(id && id !== "nova" ? id : undefined);
