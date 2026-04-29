@@ -545,3 +545,122 @@ export function TripServiceList({
     </div>
   );
 }
+
+// === Sortable wrapper ===
+interface SortableCardProps {
+  onDeleteService?: (id: string) => void;
+  onEditService?: (service: TripService) => void;
+  onReplaceVoucher?: (serviceId: string, file: File) => void;
+  onRemoveVoucher?: (serviceId: string) => void;
+  onAddAttachment?: (serviceId: string, file: File) => void;
+  onRemoveAttachment?: (serviceId: string, index: number) => void;
+  onUploadServiceImage?: (serviceId: string, file: File) => void;
+  onRemoveServiceImage?: (serviceId: string) => void;
+  showActions?: boolean;
+}
+
+function SortableTripServices({
+  services, onReorder, cardProps,
+}: {
+  services: TripService[];
+  onReorder: (orderedIds: string[]) => void;
+  cardProps: SortableCardProps;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const ids = services.map((s) => s.id);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = ids.indexOf(String(active.id));
+    const newIndex = ids.indexOf(String(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(ids, oldIndex, newIndex);
+    onReorder(reordered);
+  };
+
+  const move = (index: number, dir: -1 | 1) => {
+    const newIndex = index + dir;
+    if (newIndex < 0 || newIndex >= ids.length) return;
+    onReorder(arrayMove(ids, index, newIndex));
+  };
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+        <div className="space-y-3">
+          {services.map((service, idx) => (
+            <SortableTripServiceItem
+              key={service.id}
+              service={service}
+              cardProps={cardProps}
+              onMoveUp={() => move(idx, -1)}
+              onMoveDown={() => move(idx, 1)}
+              canMoveUp={idx > 0}
+              canMoveDown={idx < services.length - 1}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+function SortableTripServiceItem({
+  service, cardProps, onMoveUp, onMoveDown, canMoveUp, canMoveDown,
+}: {
+  service: TripService;
+  cardProps: SortableCardProps;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: service.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 10 : "auto",
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <TripServiceCard
+        service={service}
+        onDelete={cardProps.onDeleteService}
+        onEdit={cardProps.onEditService}
+        onReplaceVoucher={cardProps.onReplaceVoucher}
+        onRemoveVoucher={cardProps.onRemoveVoucher}
+        onAddAttachment={cardProps.onAddAttachment}
+        onRemoveAttachment={cardProps.onRemoveAttachment}
+        onUploadServiceImage={cardProps.onUploadServiceImage}
+        onRemoveServiceImage={cardProps.onRemoveServiceImage}
+        showActions={cardProps.showActions}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
+        dragHandle={
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="touch-none cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 -m-1 rounded"
+            aria-label="Arrastar para reordenar"
+            title="Arrastar para reordenar"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+        }
+      />
+    </div>
+  );
+}
