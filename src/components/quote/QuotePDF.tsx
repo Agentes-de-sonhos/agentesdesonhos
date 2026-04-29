@@ -160,7 +160,7 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
 function generateAgentSignature(profile: AgentProfile | null): string {
   if (!profile) {
     return `
-      <div style="text-align:center;padding:24px 0;border-top:2px solid #f1f5f9;margin-top:40px;">
+      <div class="pdf-block agent-signature" style="text-align:center;padding:20px 0;border-top:2px solid #f1f5f9;margin-top:28px;">
         <p style="font-size:13px;color:#94a3b8;">Agentes de Sonhos • Sua viagem começa aqui</p>
       </div>
     `;
@@ -176,7 +176,7 @@ function generateAgentSignature(profile: AgentProfile | null): string {
     : "";
 
   return `
-    <div style="margin-top:40px;padding:32px 24px;border-top:2px solid #f1f5f9;text-align:center;">
+    <div class="pdf-block agent-signature" style="margin-top:28px;padding:24px;border-top:2px solid #f1f5f9;text-align:center;">
       <div style="display:inline-block;">${avatarHtml}</div>
       <p style="font-size:16px;font-weight:700;color:#1e293b;margin:12px 0 2px;">${profile.name}</p>
       ${profile.agency_name ? `<p style="font-size:13px;color:#64748b;margin:0;">${profile.agency_name}</p>` : ""}
