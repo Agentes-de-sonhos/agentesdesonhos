@@ -405,55 +405,37 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           if (mode === "installments") {
             const iv = total / (installments || 1);
             paymentHtml = `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;text-align:left;">
-                <div style="flex:1;min-width:160px;">
-                  <p style="font-size:13px;opacity:0.85;font-weight:500;margin-bottom:2px;">Investimento Total</p>
-                  <p style="font-size:13px;opacity:0.7;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
-                </div>
-                <div style="text-align:right;">
-                  <p style="font-size:22px;font-weight:700;opacity:0.9;line-height:1;">${installments}x de</p>
-                  <p style="font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1;">${formatCurrency(iv)}</p>
-                </div>
-              </div>
+              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
+              <p style="font-size:20px;font-weight:700;opacity:0.95;margin:2px 0 0;line-height:1.2;">${installments}x de</p>
+              <p style="font-size:38px;font-weight:800;letter-spacing:-1px;margin:0;line-height:1.15;">${formatCurrency(iv)}</p>
+              <p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
             `;
           } else if (mode === "installments_with_entry") {
             const entryValue = total * (entryPct / 100);
             const remainder = total - entryValue;
             const iv = remainder / (installments || 1);
             paymentHtml = `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;text-align:left;">
-                <div style="flex:1;min-width:160px;">
-                  <p style="font-size:13px;opacity:0.85;font-weight:500;margin-bottom:2px;">Investimento Total</p>
-                  <p style="font-size:13px;opacity:0.7;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
-                </div>
-                <div style="text-align:right;">
-                  <p style="font-size:20px;font-weight:700;opacity:0.9;line-height:1;">Entrada de ${formatCurrency(entryValue)}</p>
-                  <p style="font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.1;">+ ${installments}x de ${formatCurrency(iv)}</p>
-                </div>
-              </div>
+              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
+              <p style="font-size:18px;font-weight:700;opacity:0.95;margin:2px 0 0;line-height:1.2;">Entrada de ${formatCurrency(entryValue)}</p>
+              <p style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0;line-height:1.15;">+ ${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
             `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;text-align:left;">
-                <div style="flex:1;min-width:160px;">
-                  <p style="font-size:13px;opacity:0.85;font-weight:500;margin-bottom:2px;">Investimento Total</p>
-                  ${discountPct > 0 ? `<p style="font-size:13px;opacity:0.7;text-decoration:line-through;">${formatCurrency(total)}</p><p style="font-size:13px;opacity:0.85;">🎉 ${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
-                  ${discountPct === 0 && methodLabel ? `<p style="font-size:13px;opacity:0.7;">${methodLabel}</p>` : ""}
-                </div>
-                <div style="text-align:right;">
-                  <p style="font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1;">${formatCurrency(discountedTotal)}</p>
-                </div>
-              </div>
+              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
+              <p style="font-size:40px;font-weight:800;letter-spacing:-1px;margin:2px 0 0;line-height:1.15;">${formatCurrency(discountedTotal)}</p>
+              ${discountPct > 0 ? `<p style="font-size:13px;opacity:0.7;text-decoration:line-through;margin:2px 0 0;line-height:1.3;">${formatCurrency(total)}</p><p style="font-size:13px;opacity:0.9;margin:2px 0 0;line-height:1.3;">🎉 ${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
+              ${discountPct === 0 && methodLabel ? `<p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">${methodLabel}</p>` : ""}
             `;
           }
 
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:16px 24px;margin-bottom:20px;">
+            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:14px 20px;margin-bottom:20px;text-align:center;">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:12px;opacity:0.7;margin-top:8px;text-align:center;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:12px;opacity:0.75;margin:4px 0 0;line-height:1.3;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
             </div>
           `;
         })()}
