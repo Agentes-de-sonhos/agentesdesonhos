@@ -51,6 +51,8 @@ import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
+import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
+import { Sparkles } from "lucide-react";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
@@ -145,6 +147,7 @@ export default function GerarOrcamento() {
     persisted?.editingService || null
   );
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+  const [showAIImport, setShowAIImport] = useState(false);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
   const [validityDisclaimer, setValidityDisclaimer] = useState("");
@@ -826,6 +829,14 @@ export default function GerarOrcamento() {
                 ) : (
                   <>
                     <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+                      <Button
+                        size="sm"
+                        className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
+                        onClick={() => setShowAIImport(true)}
+                      >
+                        <Sparkles className="mr-1 h-3 w-3 shrink-0" />
+                        <span className="truncate">Importar com IA</span>
+                      </Button>
                       {(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((type) => (
                         <Button key={type} variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9" onClick={() => setSelectedServiceType(type)}>
                           <Plus className="mr-1 h-3 w-3 shrink-0" />

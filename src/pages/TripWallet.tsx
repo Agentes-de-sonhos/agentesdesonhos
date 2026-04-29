@@ -20,6 +20,8 @@ import { TripEditHistory } from "@/components/trip/TripEditHistory";
 import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
+import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
+import { Sparkles } from "lucide-react";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -80,6 +82,7 @@ function TripWalletContent() {
   const [newPassword, setNewPassword] = useState("");
   const [isEditingTrip, setIsEditingTrip] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAIImport, setShowAIImport] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -202,6 +205,13 @@ function TripWalletContent() {
   const handleCancelServiceForm = () => {
     setSelectedServiceType(null);
     setEditingService(null);
+  };
+
+  const handleAIImport = async (result: AIImportResult) => {
+    await addService({
+      service_type: result.service_type as TripServiceType,
+      service_data: result.service_data as any,
+    });
   };
 
   const handleReplaceVoucher = async (serviceId: string, file: File) => {
@@ -454,7 +464,19 @@ function TripWalletContent() {
                   </div>
                 ) : (
                   <>
-                    {/* TravelImporter hidden per user request */}
+                    {/* AI Import banner */}
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-4 mt-2 flex items-start gap-3">
+                      <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">Importar serviço com IA</div>
+                        <p className="text-xs text-muted-foreground">
+                          Envie um voucher, confirmação, PDF, imagem ou texto para a IA preencher os dados do serviço automaticamente.
+                        </p>
+                      </div>
+                      <Button size="sm" onClick={() => setShowAIImport(true)}>
+                        <Sparkles className="h-3.5 w-3.5 mr-1" /> Importar com IA
+                      </Button>
+                    </div>
                     <div className="flex flex-wrap gap-2 mb-6 mt-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as TripServiceType[]).map((type) => (
                         <Button key={type} variant="outline" size="sm" onClick={() => setSelectedServiceType(type)}>
@@ -614,6 +636,13 @@ function TripWalletContent() {
 
         {/* Share Modal */}
         <ShareTripModal trip={trip} agencyName={agentProfile?.agency_name || undefined} open={showShareModal} onOpenChange={setShowShareModal} />
+
+        {/* AI Import Modal */}
+        <AIImportServiceModal
+          open={showAIImport}
+          onOpenChange={setShowAIImport}
+          onImport={handleAIImport}
+        />
       </div>
     </DashboardLayout>
   );
