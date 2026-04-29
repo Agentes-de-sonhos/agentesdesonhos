@@ -196,14 +196,16 @@ export function AdminNewsCurationManager() {
       // (a FK noticia_id está marcada como nullable e ON DELETE SET NULL não é necessária —
       // testamos a cascata abaixo). Para evitar qualquer risco, fazemos UPDATE antes de DELETE.
       // Primeiro, desvinculamos o noticia_id no feedback (caso haja FK CASCADE).
-      let query = supabase.from("noticias_dashboard").delete();
+      let query = supabase
+        .from("noticias_dashboard")
+        .delete({ count: "exact" });
       if (scope !== "todas") {
         query = query.eq("status", scope);
       } else {
         // delete all → precisa de filtro no PostgREST; usamos um filtro sempre verdadeiro
         query = query.not("id", "is", null);
       }
-      const { error, count } = await query.select("id", { count: "exact" });
+      const { error, count } = await query;
       if (error) throw error;
       return count || 0;
     },
