@@ -160,7 +160,7 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
 function generateAgentSignature(profile: AgentProfile | null): string {
   if (!profile) {
     return `
-      <div style="text-align:center;padding:24px 0;border-top:2px solid #f1f5f9;margin-top:40px;">
+      <div class="pdf-block agent-signature" style="text-align:center;padding:20px 0;border-top:2px solid #f1f5f9;margin-top:28px;">
         <p style="font-size:13px;color:#94a3b8;">Agentes de Sonhos • Sua viagem começa aqui</p>
       </div>
     `;
@@ -176,7 +176,7 @@ function generateAgentSignature(profile: AgentProfile | null): string {
     : "";
 
   return `
-    <div style="margin-top:40px;padding:32px 24px;border-top:2px solid #f1f5f9;text-align:center;">
+    <div class="pdf-block agent-signature" style="margin-top:28px;padding:24px;border-top:2px solid #f1f5f9;text-align:center;">
       <div style="display:inline-block;">${avatarHtml}</div>
       <p style="font-size:16px;font-weight:700;color:#1e293b;margin:12px 0 2px;">${profile.name}</p>
       ${profile.agency_name ? `<p style="font-size:13px;color:#64748b;margin:0;">${profile.agency_name}</p>` : ""}
@@ -221,8 +221,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         const extraCount = ((service.image_urls || []).length + (service.image_url && !(service.image_urls || []).includes(service.image_url) ? 1 : 0)) - 6;
 
         const photosHtml = allImages.length > 0 ? `
-          <div style="padding-left:34px;margin:12px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-            ${allImages.map((url: string) => `<img src="${url}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;" />`).join("")}
+          <div class="pdf-block pdf-gallery" style="padding-left:34px;margin:10px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            ${allImages.map((url: string) => `<img src="${url}" style="width:100%;height:110px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;" />`).join("")}
           </div>
           ${extraCount > 0 ? `<p style="padding-left:34px;font-size:11px;color:#94a3b8;margin:4px 0 8px;">+${extraCount} foto(s) disponíveis no link completo</p>` : ""}
         ` : "";
@@ -235,7 +235,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             const display = getServicePaymentDisplay(service.amount, payConfig);
             if (display) {
               paymentHtml = `
-                <div style="padding-left:34px;margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;">
+                <div class="pdf-block pdf-payment" style="padding-left:34px;margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;">
                   <p style="font-size:13px;font-weight:600;color:#0f766e;">💳 ${display}</p>
                 </div>
               `;
@@ -243,21 +243,42 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           }
         }
 
+        // Decompose service card into sub-blocks (safe break points).
+        // Header is "keep with next"; gallery, details, notes, payment are independent
+        // safe-break blocks. The wrapper is NOT break-inside:avoid (large cards
+        // would otherwise push to next page leaving whitespace — this is the
+        // exact bug we're fixing).
+        const detailsHtml = details.length > 0 ? `
+          <div class="pdf-block pdf-details" style="padding-left:34px;word-wrap:break-word;overflow-wrap:break-word;">
+            ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.55;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+          </div>
+        ` : "";
+
+        const descHtml = descText ? `
+          <div class="pdf-block pdf-desc" style="padding-left:34px;margin-top:6px;word-wrap:break-word;overflow-wrap:break-word;">
+            <p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.55;white-space:pre-wrap;word-break:break-word;">${descText}</p>
+          </div>
+        ` : "";
+
+        const notesHtml = notesText ? `
+          <div class="pdf-block pdf-notes" style="padding-left:34px;margin-top:6px;">
+            <p style="margin:3px 0;font-size:13px;color:#64748b;line-height:1.55;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
+          </div>
+        ` : "";
+
         return `
-        <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:12px;page-break-inside:avoid;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;gap:8px;">
+        <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
               <span style="font-size:18px;">${emoji}</span>
               <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;">${label}</span>
             </div>
-            <span style="font-size:18px;font-weight:700;color:#0f766e;">${formatCurrency(service.amount)}</span>
+            <span style="font-size:18px;font-weight:700;color:#0f766e;white-space:nowrap;">${formatCurrency(service.amount)}</span>
           </div>
           ${photosHtml}
-          <div style="padding-left:34px;word-wrap:break-word;overflow-wrap:break-word;">
-            ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
-            ${descText ? `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${descText}</p>` : ""}
-            ${notesText ? `<p style="margin:8px 0 3px;font-size:13px;color:#64748b;line-height:1.6;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>` : ""}
-          </div>
+          ${detailsHtml}
+          ${descHtml}
+          ${notesHtml}
           ${paymentHtml}
         </div>
       `;
@@ -273,9 +294,63 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; }
+        img { max-width:100%; height:auto; }
+
+        /* ----- SMART PAGINATION (briefing) -----
+           Idea: do NOT wrap large cards in break-inside:avoid (that causes the
+           giant whitespace bug). Instead, mark only SAFE atomic sub-blocks as
+           unbreakable, and keep titles glued to what comes next.            */
         @media print {
-          body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-          .page-break { page-break-before:always; }
+          @page { size: A4; margin: 12mm; }
+          html, body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: #fff !important;
+          }
+          .page-break { page-break-before: always; break-before: page; }
+
+          /* Atomic sub-blocks — never split these in the middle */
+          .pdf-block,
+          .pdf-header,
+          .pdf-gallery,
+          .pdf-payment,
+          .pdf-notes,
+          .investment-card,
+          .agent-signature,
+          .overview-card,
+          .payment-terms,
+          img {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          /* Titles stay with the content that follows them */
+          .pdf-title,
+          .section-title,
+          .service-title {
+            break-after: avoid;
+            page-break-after: avoid;
+          }
+
+          /* Service card wrapper is intentionally breakable so long cards
+             flow naturally across pages instead of being pushed whole. */
+          .pdf-card,
+          .service-card,
+          .pdf-details,
+          .pdf-desc,
+          .long-text {
+            break-inside: auto;
+            page-break-inside: auto;
+          }
+
+          /* Avoid orphan headings */
+          h1, h2, h3 {
+            break-after: avoid;
+            page-break-after: avoid;
+          }
+
+          /* Avoid widow lines inside paragraphs */
+          p { orphans: 3; widows: 3; }
         }
       </style>
     </head>
@@ -284,7 +359,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         ${generateAgencyHeader(profile || null)}
 
         <!-- Hero -->
-        <div style="text-align:center;padding:36px 0 32px;">
+        <div class="pdf-block pdf-hero" style="text-align:center;padding:28px 0 24px;">
           <p style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#0f766e;font-weight:600;margin-bottom:12px;">Proposta de Viagem</p>
           <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin-bottom:8px;letter-spacing:-0.5px;">${quote.destination}</h1>
           <p style="font-size:15px;color:#64748b;">
@@ -293,7 +368,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         </div>
 
         <!-- Overview -->
-        <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+        <div class="pdf-block overview-card" style="background:#f8fafc;border-radius:16px;padding:20px 22px;margin-bottom:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
           <div>
             <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Destino</p>
             <p style="font-size:14px;font-weight:600;">${quote.destination}</p>
@@ -310,8 +385,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         </div>
 
         <!-- Services -->
-        <div style="margin-bottom:36px;">
-          <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #f1f5f9;">Serviços Incluídos</h3>
+        <div style="margin-bottom:28px;">
+          <h3 class="pdf-title section-title" style="font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #f1f5f9;">Serviços Incluídos</h3>
           ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
         </div>
 
@@ -358,7 +433,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
+            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:28px;text-align:center;margin-bottom:24px;">
               ${paymentHtml}
               ${quote.services && quote.services.length > 0 ? `<p style="font-size:13px;opacity:0.7;margin-top:6px;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
             </div>
@@ -367,7 +442,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
 
         <!-- Payment Terms -->
         ${quote.show_investment_section !== false && quote.payment_terms ? `
-          <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <div class="pdf-block payment-terms" style="border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:18px;">
             <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px;">💳 Condições de Pagamento</p>
             <p style="font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
           </div>
