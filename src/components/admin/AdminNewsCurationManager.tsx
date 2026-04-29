@@ -309,6 +309,26 @@ export function AdminNewsCurationManager() {
             exemplo na próxima coleta — quanto mais você curar, mais preciso fica o score.
           </div>
         </div>
+        {stats && (
+          <div className="flex items-center gap-3 p-3 rounded-md border bg-gradient-to-r from-violet-50 to-blue-50 text-xs flex-wrap">
+            <Brain className="h-4 w-4 text-violet-600" />
+            <span className="font-semibold text-violet-900">IA ajustada ao seu perfil:</span>
+            <Badge
+              className={
+                stats.nivel_aderencia === "alta"
+                  ? "bg-emerald-600 hover:bg-emerald-600"
+                  : stats.nivel_aderencia === "media"
+                  ? "bg-amber-500 hover:bg-amber-500"
+                  : "bg-slate-400 hover:bg-slate-400"
+              }
+            >
+              Aderência {stats.nivel_aderencia}
+            </Badge>
+            <span className="text-muted-foreground">
+              {stats.total_feedback} decisões treinadas ({stats.total_aprovados} aprovadas, {stats.total_rejeitados} rejeitadas) — {stats.feedback_30d} nos últimos 30 dias
+            </span>
+          </div>
+        )}
         <div className="flex items-center gap-2 flex-wrap">
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-[130px]">
