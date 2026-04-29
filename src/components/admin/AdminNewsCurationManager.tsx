@@ -109,6 +109,7 @@ export function AdminNewsCurationManager() {
   const [motivo, setMotivo] = useState<string>("");
   const [scoreFinal, setScoreFinal] = useState<number>(0);
   const [motivoCustom, setMotivoCustom] = useState<string>("");
+  const [resetScope, setResetScope] = useState<null | "todas" | "pendente" | "rejeitado" | "aprovado">(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
