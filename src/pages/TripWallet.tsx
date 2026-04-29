@@ -636,6 +636,13 @@ function TripWalletContent() {
 
         {/* Share Modal */}
         <ShareTripModal trip={trip} agencyName={agentProfile?.agency_name || undefined} open={showShareModal} onOpenChange={setShowShareModal} />
+
+        {/* AI Import Modal */}
+        <AIImportServiceModal
+          open={showAIImport}
+          onOpenChange={setShowAIImport}
+          onImport={handleAIImport}
+        />
       </div>
     </DashboardLayout>
   );
