@@ -96,7 +96,7 @@ async function fetchRSS(source: { name: string; url: string; maxItems: number })
   }
 }
 
-async function processWithAI(newsItems: RawNewsItem[]): Promise<any[]> {
+async function processWithAI(newsItems: RawNewsItem[]): Promise<{ results: any[]; nivelAderencia: "baixa" | "media" | "alta" }> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -108,20 +108,27 @@ async function processWithAI(newsItems: RawNewsItem[]): Promise<any[]> {
     .from("news_curation_feedback")
     .select("titulo, categoria, decisao, motivo, score_final, score_ia")
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(120);
 
-  const aprovados = (feedbackExamples || []).filter((f: any) => f.decisao === "aprovado").slice(0, 12);
-  const rejeitados = (feedbackExamples || []).filter((f: any) => f.decisao === "rejeitado").slice(0, 12);
+  const aprovados = (feedbackExamples || []).filter((f: any) => f.decisao === "aprovado").slice(0, 30);
+  const rejeitados = (feedbackExamples || []).filter((f: any) => f.decisao === "rejeitado").slice(0, 30);
+  const totalFeedback = (feedbackExamples || []).length;
+
+  // Nível de aderência baseado em volume (espelha get_news_curation_stats)
+  let nivelAderencia: "baixa" | "media" | "alta" = "baixa";
+  if (totalFeedback >= 100) nivelAderencia = "alta";
+  else if (totalFeedback >= 30) nivelAderencia = "media";
 
   let learningSection = "";
   if (aprovados.length > 0 || rejeitados.length > 0) {
-    learningSection = `\n\n=== APRENDIZADO COM CURADORIA HUMANA ===
-Use os exemplos abaixo (decisões reais do curador editorial) para calibrar o seu score e identificar padrões.
+    learningSection = `\n\n=== APRENDIZADO COM CURADORIA HUMANA (${totalFeedback} decisões; aderência atual: ${nivelAderencia}) ===
+Use os exemplos abaixo (decisões reais do curador editorial) como BASE DE TREINAMENTO.
+Identifique padrões de TÍTULO, CATEGORIA, FONTE e TEMA que o curador valoriza vs. rejeita.
 
-APROVADAS pelo curador (replicar este padrão de relevância):
+APROVADAS pelo curador (replicar este padrão de relevância — score_perfil deve ser ALTO para padrões similares):
 ${aprovados.map((f: any, i: number) => `${i + 1}. [${f.categoria || "?"}] "${f.titulo}" — score curador: ${f.score_final ?? "?"}/10`).join("\n")}
 
-REJEITADAS pelo curador (NÃO sugerir scores altos para padrões similares):
+REJEITADAS pelo curador (score_perfil deve ser BAIXO para padrões similares):
 ${rejeitados.map((f: any, i: number) => `${i + 1}. [${f.categoria || "?"}] "${f.titulo}" — motivo: ${f.motivo || "não informado"}`).join("\n")}
 === FIM DO APRENDIZADO ===\n`;
   }
@@ -131,7 +138,9 @@ Analise as seguintes notícias e para cada uma, retorne um JSON com:
 - titulo_curto: título curto e atrativo (máximo 12 palavras)
 - resumo: resumo em até 2 linhas
 - categoria: uma de [Aéreo, Turismo, Destinos, Cruzeiros, Mercado, Eventos]
-- relevancia_score: score de 0 a 10 de relevância para agentes de viagens
+- relevancia_score: score BRUTO de 0 a 10 de relevância geral para agentes de viagens (sem considerar o histórico humano)
+- score_perfil: score de 0 a 10 AJUSTADO ao padrão do curador humano com base nos exemplos do "APRENDIZADO". Quanto mais semelhante a APROVADAS → score alto. Quanto mais semelhante a REJEITADAS → score baixo. Se não houver histórico suficiente, use o mesmo valor de relevancia_score.
+- score_explicacao: 1 frase curta (até 15 palavras) explicando por que o score_perfil é alto ou baixo, citando o padrão aprendido (ex: "Padrão similar a aprovadas sobre operadoras").
 - tipo_exibicao: "destaque" ou "secundaria"
 - ignorar: sempre false (o curador humano vai decidir)
 ${learningSection}
@@ -167,10 +176,10 @@ ${newsItems.map((n, i) => `${i + 1}. Título: ${n.titulo_original}\nConteúdo: $
   // Clean potential markdown wrapping
   const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
   try {
-    return JSON.parse(cleaned);
+    return { results: JSON.parse(cleaned), nivelAderencia };
   } catch {
     console.error("Failed to parse AI response:", cleaned);
-    return [];
+    return { results: [], nivelAderencia };
   }
 }
 
@@ -265,7 +274,7 @@ serve(async (req) => {
       data_publicacao: n.data_publicacao,
     }));
 
-    const aiResults = await processWithAI(newsForAI);
+    const { results: aiResults, nivelAderencia } = await processWithAI(newsForAI);
 
     // 5. Insert ALL curated news as pending (curador humano decide depois)
     let curatedCount = 0;
@@ -291,6 +300,11 @@ serve(async (req) => {
       // A coluna relevancia_score é INTEGER, então arredondamos para garantir compatibilidade.
       const scoreWithPriority = Math.min(10, Math.round(rawScore + sourceWeight * 0.1));
 
+      const rawPerfilScore = ai.score_perfil != null
+        ? Math.max(0, Math.min(10, Number(ai.score_perfil) || 0))
+        : rawScore;
+      const scorePerfilFinal = Math.round(rawPerfilScore);
+
       const { error: curatedError } = await supabase.from("noticias_dashboard").insert({
         noticia_bruta_id: raw.id,
         titulo_curto: ai.titulo_curto || raw.titulo_original.substring(0, 80),
@@ -299,6 +313,9 @@ serve(async (req) => {
         fonte: raw.fonte,
         url_original: raw.url,
         relevancia_score: scoreWithPriority,
+        score_perfil: scorePerfilFinal,
+        aderencia_perfil: nivelAderencia,
+        score_explicacao: typeof ai.score_explicacao === "string" ? ai.score_explicacao.slice(0, 200) : null,
         tipo_exibicao: isAlertaTrade ? "destaque" : (ai.tipo_exibicao || "secundaria"),
         status: "pendente",
         data_publicacao: raw.data_publicacao || new Date().toISOString(),

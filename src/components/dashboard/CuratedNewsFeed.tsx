@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ExternalLink, Loader2, ArrowRight, Newspaper,
   Flame, Zap, Star, TrendingUp, ThumbsUp,
-  Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree,
+  Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Brain,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ interface CuratedNews {
   fonte: string;
   url_original: string;
   relevancia_score: number;
+  score_perfil: number | null;
+  aderencia_perfil: string | null;
   tipo_exibicao: string;
   data_publicacao: string;
   alerta_trade: boolean;
@@ -96,6 +98,24 @@ function NewsMetaRow({ item, isTopTrending }: { item: CuratedNews; isTopTrending
     );
   }
 
+  // Selo "IA ajustada ao seu perfil": aparece quando o aprendizado já tem volume (média/alta)
+  // e o score perfil é alto (≥7). Indica que o sistema reconheceu padrão alinhado.
+  if (
+    item.score_perfil != null &&
+    item.score_perfil >= 7 &&
+    (item.aderencia_perfil === "media" || item.aderencia_perfil === "alta")
+  ) {
+    tags.push(
+      <span
+        key="perfil"
+        title={`IA ajustada ao seu perfil (aderência ${item.aderencia_perfil}) — score ${item.score_perfil}/10`}
+        className="inline-flex items-center gap-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200 px-1.5 py-0 text-[9px] font-bold leading-4"
+      >
+        <Brain className="h-2.5 w-2.5" /> Perfil
+      </span>
+    );
+  }
+
   if (isTopTrending && !item.is_noticia_do_dia) {
     tags.push(
       <span key="alta" className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 text-destructive px-1.5 py-0 text-[9px] font-bold leading-4">
@@ -129,6 +149,7 @@ export function CuratedNewsFeed() {
         .select("*")
         .eq("status", "aprovado")
         .gte("data_publicacao", twentyFourHoursAgo)
+        .order("score_perfil", { ascending: false, nullsFirst: false })
         .order("relevancia_score", { ascending: false })
         .order("data_publicacao", { ascending: false })
         .limit(5);
@@ -138,6 +159,8 @@ export function CuratedNewsFeed() {
         is_noticia_do_dia: d.is_noticia_do_dia ?? false,
         top5_position: d.top5_position ?? null,
         alerta_trade: d.alerta_trade ?? false,
+        score_perfil: d.score_perfil ?? null,
+        aderencia_perfil: d.aderencia_perfil ?? null,
       })) as CuratedNews[];
     },
     refetchInterval: 5 * 60 * 1000,

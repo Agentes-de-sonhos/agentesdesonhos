@@ -4879,6 +4879,7 @@ export type Database = {
       }
       noticias_dashboard: {
         Row: {
+          aderencia_perfil: string | null
           alerta_trade: boolean
           aprovado_em: string | null
           aprovado_por: string | null
@@ -4892,6 +4893,8 @@ export type Database = {
           noticia_bruta_id: string | null
           relevancia_score: number
           resumo: string
+          score_explicacao: string | null
+          score_perfil: number | null
           status: string
           tipo_exibicao: string
           titulo_curto: string
@@ -4900,6 +4903,7 @@ export type Database = {
           url_original: string
         }
         Insert: {
+          aderencia_perfil?: string | null
           alerta_trade?: boolean
           aprovado_em?: string | null
           aprovado_por?: string | null
@@ -4913,6 +4917,8 @@ export type Database = {
           noticia_bruta_id?: string | null
           relevancia_score?: number
           resumo: string
+          score_explicacao?: string | null
+          score_perfil?: number | null
           status?: string
           tipo_exibicao?: string
           titulo_curto: string
@@ -4921,6 +4927,7 @@ export type Database = {
           url_original: string
         }
         Update: {
+          aderencia_perfil?: string | null
           alerta_trade?: boolean
           aprovado_em?: string | null
           aprovado_por?: string | null
@@ -4934,6 +4941,8 @@ export type Database = {
           noticia_bruta_id?: string | null
           relevancia_score?: number
           resumo?: string
+          score_explicacao?: string | null
+          score_perfil?: number | null
           status?: string
           tipo_exibicao?: string
           titulo_curto?: string
@@ -8855,6 +8864,7 @@ export type Database = {
           user_name: string
         }[]
       }
+      get_news_curation_stats: { Args: never; Returns: Json }
       get_online_premium_users: {
         Args: { _exclude_user_id?: string }
         Returns: {
