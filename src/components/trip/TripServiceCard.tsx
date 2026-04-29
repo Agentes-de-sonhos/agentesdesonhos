@@ -189,12 +189,17 @@ interface TripServiceCardProps {
   onUploadServiceImage?: (serviceId: string, file: File) => void;
   onRemoveServiceImage?: (serviceId: string) => void;
   showActions?: boolean;
+  dragHandle?: React.ReactNode;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 }
 
 export function TripServiceCard({ 
   service, onDelete, onEdit, onReplaceVoucher, onRemoveVoucher, 
   onAddAttachment, onRemoveAttachment, onUploadServiceImage, onRemoveServiceImage,
-  showActions = true 
+  showActions = true, dragHandle, onMoveUp, onMoveDown, canMoveUp, canMoveDown,
 }: TripServiceCardProps) {
   const Icon = SERVICE_ICONS[service.service_type] || FileText;
   const label = SERVICE_LABELS[service.service_type] || "Serviço";
