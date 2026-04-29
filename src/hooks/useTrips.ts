@@ -449,6 +449,42 @@ export function useTrip(id: string | undefined) {
     },
   });
 
+  const reorderServicesMutation = useMutation({
+    mutationFn: async (orderedServiceIds: string[]) => {
+      if (!id) throw new Error("Trip ID is required");
+      // Update each service's order_index in parallel
+      const updates = orderedServiceIds.map((sid, index) =>
+        supabase.from("trip_services").update({ order_index: index }).eq("id", sid)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r) => r.error);
+      if (firstError?.error) throw firstError.error;
+    },
+    onMutate: async (orderedServiceIds: string[]) => {
+      await queryClient.cancelQueries({ queryKey: ["trip", id] });
+      const previous = queryClient.getQueryData<any>(["trip", id]);
+      if (previous?.services) {
+        const map = new Map(previous.services.map((s: any) => [s.id, s]));
+        const reordered = orderedServiceIds
+          .map((sid, idx) => {
+            const s = map.get(sid);
+            return s ? { ...s, order_index: idx } : null;
+          })
+          .filter(Boolean);
+        queryClient.setQueryData(["trip", id], { ...previous, services: reordered });
+      }
+      return { previous };
+    },
+    onError: (error, _vars, context: any) => {
+      if (context?.previous) queryClient.setQueryData(["trip", id], context.previous);
+      toast({ title: "Erro ao reordenar", description: error.message, variant: "destructive" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+      toast({ title: "Ordem atualizada", description: "A nova sequência dos serviços foi salva." });
+    },
+  });
+
   const uploadVoucher = async (file: File): Promise<{ url: string; name: string }> => {
     if (!user) throw new Error("User not authenticated");
     const fileExt = file.name.split('.').pop();
@@ -468,8 +504,10 @@ export function useTrip(id: string | undefined) {
     replaceVoucher: replaceVoucherMutation.mutateAsync,
     removeVoucher: removeVoucherMutation.mutateAsync,
     uploadVoucher,
+    reorderServices: reorderServicesMutation.mutate,
     isAddingService: addServiceMutation.isPending,
     isUpdatingService: updateServiceMutation.isPending,
+    isReorderingServices: reorderServicesMutation.isPending,
   };
 }
 
