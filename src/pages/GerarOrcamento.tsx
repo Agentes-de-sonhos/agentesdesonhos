@@ -51,6 +51,8 @@ import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
+import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
+import { Sparkles } from "lucide-react";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
