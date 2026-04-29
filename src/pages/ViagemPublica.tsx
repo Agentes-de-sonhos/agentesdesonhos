@@ -50,7 +50,6 @@ const SERVICE_LABELS: Record<TripServiceType, string> = {
   cruise: "Cruzeiro", train: "Trem", other: "Outros Serviços",
 };
 
-const TAB_ORDER: TripServiceType[] = ["flight", "train", "hotel", "attraction", "insurance", "car_rental", "transfer", "cruise", "other"];
 
 // Context for passing voucher access credentials to nested components
 interface VoucherAccessContext {
