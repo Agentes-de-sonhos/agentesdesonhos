@@ -274,7 +274,7 @@ serve(async (req) => {
       data_publicacao: n.data_publicacao,
     }));
 
-    const aiResults = await processWithAI(newsForAI);
+    const { results: aiResults, nivelAderencia } = await processWithAI(newsForAI);
 
     // 5. Insert ALL curated news as pending (curador humano decide depois)
     let curatedCount = 0;
