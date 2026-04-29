@@ -728,6 +728,48 @@ export function AdminNewsCurationManager() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Confirmação de limpeza */}
+      <AlertDialog open={!!resetScope} onOpenChange={(open) => !open && setResetScope(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {resetScope === "todas" && "Apagar TODAS as notícias?"}
+              {resetScope === "pendente" && "Apagar notícias pendentes?"}
+              {resetScope === "rejeitado" && "Apagar notícias rejeitadas?"}
+              {resetScope === "aprovado" && "Apagar notícias aprovadas?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                {resetScope === "todas"
+                  ? "Tem certeza que deseja apagar TODAS as notícias coletadas (pendentes, aprovadas e rejeitadas)? Essa ação não pode ser desfeita."
+                  : "Tem certeza que deseja apagar essas notícias? Essa ação não pode ser desfeita."}
+              </span>
+              <span className="block text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded p-2">
+                ✓ O histórico de aprendizado da IA (suas decisões anteriores) será preservado e continuará treinando o sistema nas próximas coletas.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resetMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (resetScope) resetMutation.mutate(resetScope);
+              }}
+              disabled={resetMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {resetMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Confirmar exclusão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
