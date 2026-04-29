@@ -482,6 +482,20 @@ export default function GerarOrcamento() {
     setDeleteConfirmId(null);
   };
 
+  const handleAIImport = async (result: AIImportResult) => {
+    const sd: any = result.service_data || {};
+    const amount =
+      Number(sd.price) ||
+      Number(sd.adult_price) ||
+      Number(sd.total) ||
+      0;
+    await addService({
+      service_type: result.service_type as ServiceType,
+      service_data: sd,
+      amount,
+    });
+  };
+
   const handleDuplicate = async (qId: string) => {
     const dup = await duplicateQuote(qId);
     navigate(`/ferramentas-ia/gerar-orcamento/${dup.id}`);
@@ -1184,6 +1198,11 @@ export default function GerarOrcamento() {
           </div>
         </div>
       </div>
+      <AIImportServiceModal
+        open={showAIImport}
+        onOpenChange={setShowAIImport}
+        onImport={handleAIImport}
+      />
     </DashboardLayout>
   );
 }
