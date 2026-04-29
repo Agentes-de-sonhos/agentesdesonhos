@@ -131,7 +131,7 @@ export function ChatFloatingButton() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-24 left-3 lg:left-auto lg:bottom-6 lg:right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center"
+        className="fixed bottom-24 right-3 lg:bottom-6 lg:right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center"
       >
         {isOpen ? (
           <X className="h-6 w-6" />
