@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const activationUrl = `https://agentesdesonhos.lovable.app/ativar-cartao?token=${activationToken}`;
+    const activationUrl = `https://app.agentesdesonhos.com.br/ativar-cartao?token=${activationToken}`;
     console.log(`[${traceId}] ✅ Activation token created for ${customerEmail} (${plan}): ${activationUrl}`);
 
     // Send activation email via Resend
