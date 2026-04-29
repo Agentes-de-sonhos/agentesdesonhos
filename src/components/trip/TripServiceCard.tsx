@@ -4,7 +4,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Plane, Hotel, Car, Bus, Ticket, Shield, Ship, FileText, TrainFront,
-  Trash2, Download, ExternalLink, Pencil, Upload, X, RefreshCw, Camera, Image as ImageIcon
+  Trash2, Download, ExternalLink, Pencil, Upload, X, RefreshCw, Camera, Image as ImageIcon,
+  GripVertical, ChevronUp, ChevronDown
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { TripService, TripServiceType } from "@/types/trip";
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext, sortableKeyboardCoordinates, useSortable,
+  verticalListSortingStrategy, arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
