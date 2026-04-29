@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ExternalLink, Loader2, ArrowRight, Newspaper,
   Flame, Zap, Star, TrendingUp, ThumbsUp,
-  Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree,
+  Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Brain,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ interface CuratedNews {
   fonte: string;
   url_original: string;
   relevancia_score: number;
+  score_perfil: number | null;
+  aderencia_perfil: string | null;
   tipo_exibicao: string;
   data_publicacao: string;
   alerta_trade: boolean;
