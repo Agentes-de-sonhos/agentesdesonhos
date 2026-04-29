@@ -472,7 +472,8 @@ function TripWalletContent() {
                       onRemoveAttachment={handleRemoveAttachment}
                       onUploadServiceImage={handleUploadServiceImage}
                       onRemoveServiceImage={handleRemoveServiceImage}
-                      groupByType={true}
+                      groupByType={false}
+                      onReorder={(orderedIds) => reorderServices(orderedIds)}
                     />
                   </>
                 )}
