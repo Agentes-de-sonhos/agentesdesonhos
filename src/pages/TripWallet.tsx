@@ -20,6 +20,8 @@ import { TripEditHistory } from "@/components/trip/TripEditHistory";
 import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
+import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
+import { Sparkles } from "lucide-react";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -80,6 +82,7 @@ function TripWalletContent() {
   const [newPassword, setNewPassword] = useState("");
   const [isEditingTrip, setIsEditingTrip] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAIImport, setShowAIImport] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -202,6 +205,13 @@ function TripWalletContent() {
   const handleCancelServiceForm = () => {
     setSelectedServiceType(null);
     setEditingService(null);
+  };
+
+  const handleAIImport = async (result: AIImportResult) => {
+    await addService({
+      service_type: result.service_type as TripServiceType,
+      service_data: result.service_data as any,
+    });
   };
 
   const handleReplaceVoucher = async (serviceId: string, file: File) => {
