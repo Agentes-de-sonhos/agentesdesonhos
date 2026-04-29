@@ -464,7 +464,7 @@ export function useTrip(id: string | undefined) {
       await queryClient.cancelQueries({ queryKey: ["trip", id] });
       const previous = queryClient.getQueryData<any>(["trip", id]);
       if (previous?.services) {
-        const map = new Map(previous.services.map((s: any) => [s.id, s]));
+        const map = new Map<string, any>(previous.services.map((s: any) => [s.id, s]));
         const reordered = orderedServiceIds
           .map((sid, idx) => {
             const s = map.get(sid);
