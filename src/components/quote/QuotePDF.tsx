@@ -142,17 +142,17 @@ function getServiceDetails(service: QuoteService): string[] {
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
-      <div style="text-align:center;padding:24px 0 20px;border-bottom:2px solid #f1f5f9;">
-        <p style="font-size:20px;font-weight:700;color:#0f766e;margin:0;letter-spacing:-0.3px;">
+      <div style="text-align:center;padding:6px 0 10px;border-bottom:2px solid #f1f5f9;">
+        <p style="font-size:24px;font-weight:700;color:#0f766e;margin:0;letter-spacing:-0.3px;">
           ${profile?.agency_name || "Agentes de Sonhos"}
         </p>
       </div>
     `;
   }
   return `
-    <div style="text-align:center;padding:24px 0 20px;border-bottom:2px solid #f1f5f9;">
+    <div style="text-align:center;padding:4px 0 10px;border-bottom:2px solid #f1f5f9;">
       <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
-        style="max-height:120px;max-width:400px;object-fit:contain;" />
+        style="max-height:240px;max-width:560px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
   `;
 }
