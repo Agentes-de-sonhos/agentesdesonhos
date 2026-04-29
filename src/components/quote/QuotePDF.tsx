@@ -294,9 +294,63 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; }
+        img { max-width:100%; height:auto; }
+
+        /* ----- SMART PAGINATION (briefing) -----
+           Idea: do NOT wrap large cards in break-inside:avoid (that causes the
+           giant whitespace bug). Instead, mark only SAFE atomic sub-blocks as
+           unbreakable, and keep titles glued to what comes next.            */
         @media print {
-          body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-          .page-break { page-break-before:always; }
+          @page { size: A4; margin: 12mm; }
+          html, body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: #fff !important;
+          }
+          .page-break { page-break-before: always; break-before: page; }
+
+          /* Atomic sub-blocks — never split these in the middle */
+          .pdf-block,
+          .pdf-header,
+          .pdf-gallery,
+          .pdf-payment,
+          .pdf-notes,
+          .investment-card,
+          .agent-signature,
+          .overview-card,
+          .payment-terms,
+          img {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          /* Titles stay with the content that follows them */
+          .pdf-title,
+          .section-title,
+          .service-title {
+            break-after: avoid;
+            page-break-after: avoid;
+          }
+
+          /* Service card wrapper is intentionally breakable so long cards
+             flow naturally across pages instead of being pushed whole. */
+          .pdf-card,
+          .service-card,
+          .pdf-details,
+          .pdf-desc,
+          .long-text {
+            break-inside: auto;
+            page-break-inside: auto;
+          }
+
+          /* Avoid orphan headings */
+          h1, h2, h3 {
+            break-after: avoid;
+            page-break-after: avoid;
+          }
+
+          /* Avoid widow lines inside paragraphs */
+          p { orphans: 3; widows: 3; }
         }
       </style>
     </head>
@@ -305,7 +359,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         ${generateAgencyHeader(profile || null)}
 
         <!-- Hero -->
-        <div style="text-align:center;padding:36px 0 32px;">
+        <div class="pdf-block pdf-hero" style="text-align:center;padding:28px 0 24px;">
           <p style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#0f766e;font-weight:600;margin-bottom:12px;">Proposta de Viagem</p>
           <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin-bottom:8px;letter-spacing:-0.5px;">${quote.destination}</h1>
           <p style="font-size:15px;color:#64748b;">
@@ -314,7 +368,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         </div>
 
         <!-- Overview -->
-        <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+        <div class="pdf-block overview-card" style="background:#f8fafc;border-radius:16px;padding:20px 22px;margin-bottom:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
           <div>
             <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Destino</p>
             <p style="font-size:14px;font-weight:600;">${quote.destination}</p>
@@ -331,8 +385,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         </div>
 
         <!-- Services -->
-        <div style="margin-bottom:36px;">
-          <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #f1f5f9;">Serviços Incluídos</h3>
+        <div style="margin-bottom:28px;">
+          <h3 class="pdf-title section-title" style="font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #f1f5f9;">Serviços Incluídos</h3>
           ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
         </div>
 
@@ -379,7 +433,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
+            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:28px;text-align:center;margin-bottom:24px;">
               ${paymentHtml}
               ${quote.services && quote.services.length > 0 ? `<p style="font-size:13px;opacity:0.7;margin-top:6px;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
             </div>
@@ -388,7 +442,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
 
         <!-- Payment Terms -->
         ${quote.show_investment_section !== false && quote.payment_terms ? `
-          <div style="border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px;">
+          <div class="pdf-block payment-terms" style="border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:18px;">
             <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px;">💳 Condições de Pagamento</p>
             <p style="font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
           </div>
