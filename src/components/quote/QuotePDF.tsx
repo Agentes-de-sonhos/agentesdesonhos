@@ -142,7 +142,7 @@ function getServiceDetails(service: QuoteService): string[] {
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
-      <div style="text-align:center;padding:6px 0 10px;border-bottom:2px solid #f1f5f9;">
+      <div style="text-align:center;padding:0 0 6px;border-bottom:2px solid #f1f5f9;">
         <p style="font-size:24px;font-weight:700;color:#0f766e;margin:0;letter-spacing:-0.3px;">
           ${profile?.agency_name || "Agentes de Sonhos"}
         </p>
@@ -150,9 +150,9 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
     `;
   }
   return `
-    <div style="text-align:center;padding:4px 0 10px;border-bottom:2px solid #f1f5f9;">
+    <div style="text-align:center;padding:0 0 6px;border-bottom:2px solid #f1f5f9;">
       <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
-        style="max-height:240px;max-width:560px;object-fit:contain;display:block;margin:0 auto;" />
+        style="max-height:140px;max-width:420px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
   `;
 }
@@ -355,13 +355,13 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       </style>
     </head>
     <body>
-      <div style="max-width:800px;margin:0 auto;padding:40px;">
+      <div style="max-width:800px;margin:0 auto;padding:16px 40px 40px;">
         ${generateAgencyHeader(profile || null)}
 
         <!-- Hero -->
-        <div class="pdf-block pdf-hero" style="text-align:center;padding:14px 0 14px;">
-          <p style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#0f766e;font-weight:600;margin-bottom:8px;">Proposta de Viagem</p>
-          <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin-bottom:6px;letter-spacing:-0.5px;">${quote.destination}</h1>
+        <div class="pdf-block pdf-hero" style="text-align:center;padding:8px 0 10px;">
+          <p style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#0f766e;font-weight:600;margin-bottom:4px;">Proposta de Viagem</p>
+          <h1 style="font-size:30px;font-weight:800;color:#1e293b;margin-bottom:4px;letter-spacing:-0.5px;">${quote.destination}</h1>
           <p style="font-size:15px;color:#64748b;">
             Preparado especialmente para <strong style="color:#1e293b;">${quote.client_name}</strong>
           </p>
@@ -405,55 +405,37 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           if (mode === "installments") {
             const iv = total / (installments || 1);
             paymentHtml = `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;text-align:left;">
-                <div style="flex:1;min-width:160px;">
-                  <p style="font-size:13px;opacity:0.85;font-weight:500;margin-bottom:2px;">Investimento Total</p>
-                  <p style="font-size:13px;opacity:0.7;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
-                </div>
-                <div style="text-align:right;">
-                  <p style="font-size:22px;font-weight:700;opacity:0.9;line-height:1;">${installments}x de</p>
-                  <p style="font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1;">${formatCurrency(iv)}</p>
-                </div>
-              </div>
+              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
+              <p style="font-size:20px;font-weight:700;opacity:0.95;margin:2px 0 0;line-height:1.2;">${installments}x de</p>
+              <p style="font-size:38px;font-weight:800;letter-spacing:-1px;margin:0;line-height:1.15;">${formatCurrency(iv)}</p>
+              <p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
             `;
           } else if (mode === "installments_with_entry") {
             const entryValue = total * (entryPct / 100);
             const remainder = total - entryValue;
             const iv = remainder / (installments || 1);
             paymentHtml = `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;text-align:left;">
-                <div style="flex:1;min-width:160px;">
-                  <p style="font-size:13px;opacity:0.85;font-weight:500;margin-bottom:2px;">Investimento Total</p>
-                  <p style="font-size:13px;opacity:0.7;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
-                </div>
-                <div style="text-align:right;">
-                  <p style="font-size:20px;font-weight:700;opacity:0.9;line-height:1;">Entrada de ${formatCurrency(entryValue)}</p>
-                  <p style="font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.1;">+ ${installments}x de ${formatCurrency(iv)}</p>
-                </div>
-              </div>
+              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
+              <p style="font-size:18px;font-weight:700;opacity:0.95;margin:2px 0 0;line-height:1.2;">Entrada de ${formatCurrency(entryValue)}</p>
+              <p style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0;line-height:1.15;">+ ${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
             `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;text-align:left;">
-                <div style="flex:1;min-width:160px;">
-                  <p style="font-size:13px;opacity:0.85;font-weight:500;margin-bottom:2px;">Investimento Total</p>
-                  ${discountPct > 0 ? `<p style="font-size:13px;opacity:0.7;text-decoration:line-through;">${formatCurrency(total)}</p><p style="font-size:13px;opacity:0.85;">🎉 ${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
-                  ${discountPct === 0 && methodLabel ? `<p style="font-size:13px;opacity:0.7;">${methodLabel}</p>` : ""}
-                </div>
-                <div style="text-align:right;">
-                  <p style="font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1;">${formatCurrency(discountedTotal)}</p>
-                </div>
-              </div>
+              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
+              <p style="font-size:40px;font-weight:800;letter-spacing:-1px;margin:2px 0 0;line-height:1.15;">${formatCurrency(discountedTotal)}</p>
+              ${discountPct > 0 ? `<p style="font-size:13px;opacity:0.7;text-decoration:line-through;margin:2px 0 0;line-height:1.3;">${formatCurrency(total)}</p><p style="font-size:13px;opacity:0.9;margin:2px 0 0;line-height:1.3;">🎉 ${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
+              ${discountPct === 0 && methodLabel ? `<p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">${methodLabel}</p>` : ""}
             `;
           }
 
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:16px 24px;margin-bottom:20px;">
+            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:14px 20px;margin-bottom:20px;text-align:center;">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:12px;opacity:0.7;margin-top:8px;text-align:center;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:12px;opacity:0.75;margin:4px 0 0;line-height:1.3;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
             </div>
           `;
         })()}
