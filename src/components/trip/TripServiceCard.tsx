@@ -452,18 +452,34 @@ interface TripServiceListProps {
   onRemoveServiceImage?: (serviceId: string) => void;
   showActions?: boolean;
   groupByType?: boolean;
+  onReorder?: (orderedIds: string[]) => void;
 }
 
 export function TripServiceList({ 
   services, onDeleteService, onEditService, onReplaceVoucher, onRemoveVoucher, 
   onAddAttachment, onRemoveAttachment, onUploadServiceImage, onRemoveServiceImage,
-  showActions = true, groupByType = false 
+  showActions = true, groupByType = false, onReorder,
 }: TripServiceListProps) {
   if (services.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         Nenhum serviço adicionado ainda
       </div>
+    );
+  }
+
+  // Sortable mode: flat reorderable list
+  if (onReorder && !groupByType) {
+    return (
+      <SortableTripServices
+        services={services}
+        onReorder={onReorder}
+        cardProps={{
+          onDeleteService, onEditService, onReplaceVoucher, onRemoveVoucher,
+          onAddAttachment, onRemoveAttachment, onUploadServiceImage, onRemoveServiceImage,
+          showActions,
+        }}
+      />
     );
   }
 
