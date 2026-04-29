@@ -98,6 +98,24 @@ function NewsMetaRow({ item, isTopTrending }: { item: CuratedNews; isTopTrending
     );
   }
 
+  // Selo "IA ajustada ao seu perfil": aparece quando o aprendizado já tem volume (média/alta)
+  // e o score perfil é alto (≥7). Indica que o sistema reconheceu padrão alinhado.
+  if (
+    item.score_perfil != null &&
+    item.score_perfil >= 7 &&
+    (item.aderencia_perfil === "media" || item.aderencia_perfil === "alta")
+  ) {
+    tags.push(
+      <span
+        key="perfil"
+        title={`IA ajustada ao seu perfil (aderência ${item.aderencia_perfil}) — score ${item.score_perfil}/10`}
+        className="inline-flex items-center gap-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200 px-1.5 py-0 text-[9px] font-bold leading-4"
+      >
+        <Brain className="h-2.5 w-2.5" /> Perfil
+      </span>
+    );
+  }
+
   if (isTopTrending && !item.is_noticia_do_dia) {
     tags.push(
       <span key="alta" className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 text-destructive px-1.5 py-0 text-[9px] font-bold leading-4">
