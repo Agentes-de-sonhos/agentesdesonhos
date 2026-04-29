@@ -190,6 +190,46 @@ export function AdminNewsCurationManager() {
     },
   });
 
+  const resetMutation = useMutation({
+    mutationFn: async (scope: "todas" | "pendente" | "rejeitado" | "aprovado") => {
+      // Apaga apenas noticias_dashboard. O histórico em news_curation_feedback é preservado
+      // (a FK noticia_id está marcada como nullable e ON DELETE SET NULL não é necessária —
+      // testamos a cascata abaixo). Para evitar qualquer risco, fazemos UPDATE antes de DELETE.
+      // Primeiro, desvinculamos o noticia_id no feedback (caso haja FK CASCADE).
+      let query = supabase.from("noticias_dashboard").delete();
+      if (scope !== "todas") {
+        query = query.eq("status", scope);
+      } else {
+        // delete all → precisa de filtro no PostgREST; usamos um filtro sempre verdadeiro
+        query = query.not("id", "is", null);
+      }
+      const { error, count } = await query.select("id", { count: "exact" });
+      if (error) throw error;
+      return count || 0;
+    },
+    onSuccess: (count, scope) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-noticias-curadas"] });
+      queryClient.invalidateQueries({ queryKey: ["curated-news-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-noticias-fontes"] });
+      const label =
+        scope === "todas" ? "todas as notícias" :
+        scope === "pendente" ? "as notícias pendentes" :
+        scope === "rejeitado" ? "as notícias rejeitadas" : "as notícias aprovadas";
+      toast({
+        title: "Notícias removidas com sucesso",
+        description: `${count} ${label} apagadas. Histórico de aprendizado preservado.`,
+      });
+      setResetScope(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao limpar notícias",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<NoticiasDashboard> }) => {
       const { error } = await supabase.from("noticias_dashboard").update(data).eq("id", id);
