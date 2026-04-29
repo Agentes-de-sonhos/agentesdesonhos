@@ -464,7 +464,19 @@ function TripWalletContent() {
                   </div>
                 ) : (
                   <>
-                    {/* TravelImporter hidden per user request */}
+                    {/* AI Import banner */}
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-4 mt-2 flex items-start gap-3">
+                      <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">Importar serviço com IA</div>
+                        <p className="text-xs text-muted-foreground">
+                          Envie um voucher, confirmação, PDF, imagem ou texto para a IA preencher os dados do serviço automaticamente.
+                        </p>
+                      </div>
+                      <Button size="sm" onClick={() => setShowAIImport(true)}>
+                        <Sparkles className="h-3.5 w-3.5 mr-1" /> Importar com IA
+                      </Button>
+                    </div>
                     <div className="flex flex-wrap gap-2 mb-6 mt-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as TripServiceType[]).map((type) => (
                         <Button key={type} variant="outline" size="sm" onClick={() => setSelectedServiceType(type)}>
