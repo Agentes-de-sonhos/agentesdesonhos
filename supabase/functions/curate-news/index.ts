@@ -96,7 +96,7 @@ async function fetchRSS(source: { name: string; url: string; maxItems: number })
   }
 }
 
-async function processWithAI(newsItems: RawNewsItem[]): Promise<any[]> {
+async function processWithAI(newsItems: RawNewsItem[]): Promise<{ results: any[]; nivelAderencia: "baixa" | "media" | "alta" }> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -176,10 +176,10 @@ ${newsItems.map((n, i) => `${i + 1}. Título: ${n.titulo_original}\nConteúdo: $
   // Clean potential markdown wrapping
   const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
   try {
-    return JSON.parse(cleaned);
+    return { results: JSON.parse(cleaned), nivelAderencia };
   } catch {
     console.error("Failed to parse AI response:", cleaned);
-    return [];
+    return { results: [], nivelAderencia };
   }
 }
 
