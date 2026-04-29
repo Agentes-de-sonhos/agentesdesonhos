@@ -94,6 +94,23 @@ export function AdminNewsCurationManager() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  // Estatísticas de aprendizado da curadoria
+  const { data: stats } = useQuery({
+    queryKey: ["news-curation-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_news_curation_stats");
+      if (error) throw error;
+      return data as {
+        total_feedback: number;
+        total_aprovados: number;
+        total_rejeitados: number;
+        feedback_30d: number;
+        nivel_aderencia: "baixa" | "media" | "alta";
+      };
+    },
+    staleTime: 60_000,
+  });
+
   const { data: noticias, isLoading } = useQuery({
     queryKey: ["admin-noticias-curadas", filterStatus, sortOrder, filterCategoria, filterFonte],
     queryFn: async () => {
