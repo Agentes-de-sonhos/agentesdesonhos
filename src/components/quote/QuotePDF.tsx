@@ -359,9 +359,9 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         ${generateAgencyHeader(profile || null)}
 
         <!-- Hero -->
-        <div class="pdf-block pdf-hero" style="text-align:center;padding:28px 0 24px;">
-          <p style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#0f766e;font-weight:600;margin-bottom:12px;">Proposta de Viagem</p>
-          <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin-bottom:8px;letter-spacing:-0.5px;">${quote.destination}</h1>
+        <div class="pdf-block pdf-hero" style="text-align:center;padding:14px 0 14px;">
+          <p style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#0f766e;font-weight:600;margin-bottom:8px;">Proposta de Viagem</p>
+          <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin-bottom:6px;letter-spacing:-0.5px;">${quote.destination}</h1>
           <p style="font-size:15px;color:#64748b;">
             Preparado especialmente para <strong style="color:#1e293b;">${quote.client_name}</strong>
           </p>
