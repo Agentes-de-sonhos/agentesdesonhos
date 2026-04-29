@@ -266,6 +266,37 @@ export function TripServiceCard({
 
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
+            {(dragHandle || onMoveUp || onMoveDown) && (
+              <div className="flex flex-col items-center gap-0.5 shrink-0 -ml-1">
+                {dragHandle}
+                {(onMoveUp || onMoveDown) && (
+                  <div className="flex flex-col">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                      onClick={() => onMoveUp?.()}
+                      disabled={!canMoveUp}
+                      aria-label="Mover para cima"
+                    >
+                      <ChevronUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                      onClick={() => onMoveDown?.()}
+                      disabled={!canMoveDown}
+                      aria-label="Mover para baixo"
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
               <Icon className="h-5 w-5 text-primary" />
             </div>
