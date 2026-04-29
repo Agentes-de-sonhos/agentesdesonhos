@@ -1410,16 +1410,23 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const startDate = parseLocal(tripData.start_date);
   const endDate = parseLocal(tripData.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  const services = tripData.services || [];
+  // Sort by user-defined order_index (with creation-date fallback for legacy records)
+  const services = [...(tripData.services || [])].sort(
+    (a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0)
+  );
 
-  // Group services by type
+  // Group services by type (entries inside each group preserve order_index)
   const grouped = services.reduce((acc, s) => {
     if (!acc[s.service_type]) acc[s.service_type] = [];
     acc[s.service_type].push(s);
     return acc;
   }, {} as Record<TripServiceType, TripService[]>);
 
-  const availableTabs = TAB_ORDER.filter(t => grouped[t]?.length > 0);
+  // Tabs: respect user-defined ordering. Types not in TAB_ORDER are appended.
+  const userOrderedTypes = Array.from(
+    new Set(services.map((s) => s.service_type as TripServiceType))
+  );
+  const availableTabs = userOrderedTypes.filter((t) => grouped[t]?.length > 0);
 
   const voucherCtx: VoucherAccessContext = {
     slug: tripData.slug,
