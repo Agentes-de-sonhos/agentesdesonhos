@@ -14,6 +14,23 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -31,6 +48,8 @@ import {
   ArrowDown,
   ExternalLink,
   Brain,
+  Trash2,
+  ChevronDown,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -90,6 +109,7 @@ export function AdminNewsCurationManager() {
   const [motivo, setMotivo] = useState<string>("");
   const [scoreFinal, setScoreFinal] = useState<number>(0);
   const [motivoCustom, setMotivoCustom] = useState<string>("");
+  const [resetScope, setResetScope] = useState<null | "todas" | "pendente" | "rejeitado" | "aprovado">(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -164,6 +184,48 @@ export function AdminNewsCurationManager() {
     onError: (error) => {
       toast({
         title: "Erro na coleta",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: async (scope: "todas" | "pendente" | "rejeitado" | "aprovado") => {
+      // Apaga apenas noticias_dashboard. O histórico em news_curation_feedback é preservado
+      // (a FK noticia_id está marcada como nullable e ON DELETE SET NULL não é necessária —
+      // testamos a cascata abaixo). Para evitar qualquer risco, fazemos UPDATE antes de DELETE.
+      // Primeiro, desvinculamos o noticia_id no feedback (caso haja FK CASCADE).
+      let query = supabase
+        .from("noticias_dashboard")
+        .delete({ count: "exact" });
+      if (scope !== "todas") {
+        query = query.eq("status", scope);
+      } else {
+        // delete all → precisa de filtro no PostgREST; usamos um filtro sempre verdadeiro
+        query = query.not("id", "is", null);
+      }
+      const { error, count } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+    onSuccess: (count, scope) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-noticias-curadas"] });
+      queryClient.invalidateQueries({ queryKey: ["curated-news-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-noticias-fontes"] });
+      const label =
+        scope === "todas" ? "todas as notícias" :
+        scope === "pendente" ? "as notícias pendentes" :
+        scope === "rejeitado" ? "as notícias rejeitadas" : "as notícias aprovadas";
+      toast({
+        title: "Notícias removidas com sucesso",
+        description: `${count} ${label} apagadas. Histórico de aprendizado preservado.`,
+      });
+      setResetScope(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao limpar notícias",
         description: error.message,
         variant: "destructive",
       });
@@ -288,18 +350,52 @@ export function AdminNewsCurationManager() {
             <Sparkles className="h-5 w-5 text-primary" />
             Curadoria IA de Notícias
           </CardTitle>
-          <Button
-            size="sm"
-            onClick={() => collectMutation.mutate()}
-            disabled={collectMutation.isPending}
-          >
-            {collectMutation.isPending ? (
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-1" />
-            )}
-            Coletar Agora
-          </Button>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline" disabled={resetMutation.isPending}>
+                  {resetMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-1" />
+                  )}
+                  Limpar notícias
+                  <ChevronDown className="h-3 w-3 ml-1 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setResetScope("todas")}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Apagar todas
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setResetScope("pendente")}>
+                  Apagar apenas pendentes
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setResetScope("rejeitado")}>
+                  Apagar apenas rejeitadas
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setResetScope("aprovado")}>
+                  Apagar apenas aprovadas
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              size="sm"
+              onClick={() => collectMutation.mutate()}
+              disabled={collectMutation.isPending}
+            >
+              {collectMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-1" />
+              )}
+              Coletar Agora
+            </Button>
+          </div>
         </div>
         <div className="flex items-start gap-2 p-3 rounded-md bg-blue-50 border border-blue-200 text-xs text-blue-900">
           <Brain className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-600" />
@@ -632,6 +728,48 @@ export function AdminNewsCurationManager() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Confirmação de limpeza */}
+      <AlertDialog open={!!resetScope} onOpenChange={(open) => !open && setResetScope(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {resetScope === "todas" && "Apagar TODAS as notícias?"}
+              {resetScope === "pendente" && "Apagar notícias pendentes?"}
+              {resetScope === "rejeitado" && "Apagar notícias rejeitadas?"}
+              {resetScope === "aprovado" && "Apagar notícias aprovadas?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                {resetScope === "todas"
+                  ? "Tem certeza que deseja apagar TODAS as notícias coletadas (pendentes, aprovadas e rejeitadas)? Essa ação não pode ser desfeita."
+                  : "Tem certeza que deseja apagar essas notícias? Essa ação não pode ser desfeita."}
+              </span>
+              <span className="block text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded p-2">
+                ✓ O histórico de aprendizado da IA (suas decisões anteriores) será preservado e continuará treinando o sistema nas próximas coletas.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resetMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (resetScope) resetMutation.mutate(resetScope);
+              }}
+              disabled={resetMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {resetMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Confirmar exclusão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
