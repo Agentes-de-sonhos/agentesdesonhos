@@ -400,6 +400,21 @@ export function AdminNewsCurationManager() {
                       <Star className="h-3 w-3 inline mr-0.5" />
                       {item.relevancia_score}/10
                     </span>
+                    {item.score_perfil != null && (
+                      <span
+                        title={item.score_explicacao || "Score ajustado ao seu padrão de curadoria"}
+                        className={`text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 border ${
+                          item.score_perfil >= 8
+                            ? "bg-violet-100 text-violet-700 border-violet-300"
+                            : item.score_perfil >= 5
+                            ? "bg-violet-50 text-violet-600 border-violet-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
+                        }`}
+                      >
+                        <Brain className="h-3 w-3" />
+                        Perfil {item.score_perfil}/10
+                      </span>
+                    )}
                     {item.tipo_exibicao === "destaque" && (
                       <Badge className="bg-primary/20 text-primary border-primary/30">Destaque</Badge>
                     )}
@@ -407,6 +422,12 @@ export function AdminNewsCurationManager() {
                   </div>
                   <h4 className="font-medium text-foreground leading-tight">{item.titulo_curto}</h4>
                   <p className="text-sm text-muted-foreground line-clamp-2">{item.resumo}</p>
+                  {item.score_explicacao && (
+                    <p className="text-[11px] text-violet-700 italic flex items-start gap-1">
+                      <Brain className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      {item.score_explicacao}
+                    </p>
+                  )}
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{new Date(item.data_publicacao).toLocaleDateString("pt-BR")}</span>
                     <a
