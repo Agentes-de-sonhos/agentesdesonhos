@@ -131,6 +131,7 @@ export function CuratedNewsFeed() {
         .select("*")
         .eq("status", "aprovado")
         .gte("data_publicacao", twentyFourHoursAgo)
+        .order("score_perfil", { ascending: false, nullsFirst: false })
         .order("relevancia_score", { ascending: false })
         .order("data_publicacao", { ascending: false })
         .limit(5);
@@ -140,6 +141,8 @@ export function CuratedNewsFeed() {
         is_noticia_do_dia: d.is_noticia_do_dia ?? false,
         top5_position: d.top5_position ?? null,
         alerta_trade: d.alerta_trade ?? false,
+        score_perfil: d.score_perfil ?? null,
+        aderencia_perfil: d.aderencia_perfil ?? null,
       })) as CuratedNews[];
     },
     refetchInterval: 5 * 60 * 1000,
