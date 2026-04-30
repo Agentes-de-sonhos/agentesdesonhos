@@ -322,7 +322,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       <title>Orçamento — ${quote.client_name}</title>
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; }
+        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:#f8fafc; }
         img { max-width:100%; height:auto; }
 
         /* ----- SMART PAGINATION (briefing) -----
@@ -384,38 +384,50 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       </style>
     </head>
     <body>
-      <div style="max-width:800px;margin:0 auto;padding:16px 40px 40px;">
+      <div style="max-width:820px;margin:0 auto;padding:0 0 40px;">
         ${generateAgencyHeader(profile || null)}
 
+        <div style="padding:28px 40px 0;">
         <!-- Hero -->
-        <div class="pdf-block pdf-hero" style="text-align:center;padding:8px 0 10px;">
-          <p style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#0f766e;font-weight:600;margin-bottom:4px;">Proposta de Viagem</p>
-          <h1 style="font-size:30px;font-weight:800;color:#1e293b;margin-bottom:4px;letter-spacing:-0.5px;">${quote.destination}</h1>
-          <p style="font-size:15px;color:#64748b;">
+        <div class="pdf-block pdf-hero" style="text-align:center;padding:6px 0 18px;">
+          <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:6px 16px;border-radius:9999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px;">
+            📍 Proposta de Viagem
+          </div>
+          ${(quote as any).trip_title ? `
+            <h1 style="font-size:38px;font-weight:800;color:#1e293b;margin:0 0 4px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
+            <p style="font-size:20px;font-weight:600;color:#64748b;margin:0 0 6px;">${quote.destination}</p>
+          ` : `
+            <h1 style="font-size:38px;font-weight:800;color:#1e293b;margin:0 0 4px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
+          `}
+          <p style="font-size:15px;color:#64748b;margin-top:8px;">
             Preparado especialmente para <strong style="color:#1e293b;">${quote.client_name}</strong>
           </p>
         </div>
 
         <!-- Overview -->
-        <div class="pdf-block overview-card" style="background:#f8fafc;border-radius:16px;padding:20px 22px;margin-bottom:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+        <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;padding:22px 24px;margin-bottom:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
           <div>
-            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Destino</p>
-            <p style="font-size:14px;font-weight:600;">${quote.destination}</p>
+            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
+            <p style="font-size:14px;font-weight:700;color:#1e293b;">${quote.destination}</p>
           </div>
-          <div>
-            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Período</p>
-            <p style="font-size:14px;font-weight:600;">${formatDate(quote.start_date)} — ${formatDate(quote.end_date)}</p>
-            <p style="font-size:12px;color:#94a3b8;">${days} dias</p>
+          <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
+            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 Período</p>
+            <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatDate(quote.start_date)} — ${formatDate(quote.end_date)}</p>
+            <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} dias</p>
           </div>
-          <div>
-            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Viajantes</p>
-            <p style="font-size:14px;font-weight:600;">${quote.adults_count} adulto${quote.adults_count > 1 ? "s" : ""}${quote.children_count > 0 ? ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}` : ""}</p>
+          <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
+            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👥 Viajantes</p>
+            <p style="font-size:14px;font-weight:700;color:#1e293b;">${quote.adults_count} adulto${quote.adults_count > 1 ? "s" : ""}${quote.children_count > 0 ? ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}` : ""}</p>
           </div>
         </div>
 
         <!-- Services -->
         <div style="margin-bottom:28px;">
-          <h3 class="pdf-title section-title" style="font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #f1f5f9;">Serviços Incluídos</h3>
+          <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+            <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Serviços Incluídos</h3>
+            <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+          </div>
           ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
         </div>
 
@@ -462,23 +474,23 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:14px 20px;margin-bottom:20px;text-align:center;">
+            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:20px;padding:28px 24px;margin-bottom:24px;text-align:center;box-shadow:0 10px 24px rgba(15,118,110,0.18);">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:12px;opacity:0.75;margin:4px 0 0;line-height:1.3;">${quote.services.length} serviço(s) incluído(s)</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:12px;opacity:0.7;margin:8px 0 0;line-height:1.3;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
             </div>
           `;
         })()}
 
         <!-- Payment Terms -->
         ${quote.show_investment_section !== false && quote.payment_terms ? `
-          <div class="pdf-block payment-terms" style="border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:18px;">
-            <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px;">💳 Condições de Pagamento</p>
+          <div class="pdf-block payment-terms" style="border:1px solid #e2e8f0;border-radius:20px;padding:22px 24px;margin-bottom:20px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin-bottom:10px;">💳 Condições de Pagamento</p>
             <p style="font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
           </div>
         ` : ""}
 
         <!-- Validity -->
-        <p style="text-align:center;font-size:12px;color:#94a3b8;margin-bottom:16px;">
+        <p style="text-align:center;font-size:12px;color:#94a3b8;margin:8px 0 16px;">
           ${quote.valid_until ? `Proposta válida até ${formatDate(quote.valid_until)}` : "Este orçamento é válido por 7 dias."}
           ${quote.validity_disclaimer ? `<br/>${quote.validity_disclaimer}` : " Valores sujeitos a alteração conforme disponibilidade."}
         </p>
@@ -487,10 +499,11 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         ${generateAgentSignature(profile || null)}
 
         <!-- Footer -->
-        <div style="text-align:center;padding-top:16px;">
+        <div style="text-align:center;padding-top:20px;">
           <p style="font-size:10px;color:#cbd5e1;">
             Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} • Agentes de Sonhos
           </p>
+        </div>
         </div>
       </div>
     </body>
