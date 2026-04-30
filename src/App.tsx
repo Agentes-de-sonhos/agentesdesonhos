@@ -77,6 +77,10 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const CadastroLink = lazy(() => import("./pages/CadastroLink"));
 const LeadFormPublic = lazy(() => import("./pages/LeadFormPublic"));
 const MeusLeads = lazy(() => import("./pages/MeusLeads"));
+const CaptacaoLeads = lazy(() => import("./pages/CaptacaoLeads"));
+const SalesLandings = lazy(() => import("./pages/SalesLandings"));
+const SalesLandingEditor = lazy(() => import("./pages/SalesLandingEditor"));
+const SalesLandingPublic = lazy(() => import("./pages/SalesLandingPublic"));
 const Suporte = lazy(() => import("./pages/Suporte"));
 const TradeConnectHub = lazy(() => import("./pages/TradeConnectHub"));
 const TradeConnectProfile = lazy(() => import("./pages/TradeConnectProfile"));
@@ -137,6 +141,8 @@ const App = () => (
               element={
                 window.location.hostname.startsWith("ativar-cartao") ? (
                   <AtivarCartao />
+                ) : window.location.hostname.startsWith("lp.") ? (
+                  <SalesLandingPublic />
                 ) : (
                   <LandingPage />
                 )
@@ -219,7 +225,12 @@ const App = () => (
             <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
             <Route path="/cadastro/:token" element={<CadastroLink />} />
             <Route path="/formulario/:token" element={<LeadFormPublic />} />
-            <Route path="/meus-leads" element={<ProtectedRoute><MeusLeads /></ProtectedRoute>} />
+            <Route path="/meus-leads" element={<ProtectedRoute><CaptacaoLeads /></ProtectedRoute>} />
+            <Route path="/meus-leads/conversacional" element={<ProtectedRoute><MeusLeads /></ProtectedRoute>} />
+            <Route path="/meus-leads/landings" element={<ProtectedRoute><SalesLandings /></ProtectedRoute>} />
+            <Route path="/meus-leads/landings/nova" element={<ProtectedRoute><SalesLandingEditor /></ProtectedRoute>} />
+            <Route path="/meus-leads/landings/:id/editar" element={<ProtectedRoute><SalesLandingEditor /></ProtectedRoute>} />
+            <Route path="/lp/:slug" element={<SalesLandingPublic />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
