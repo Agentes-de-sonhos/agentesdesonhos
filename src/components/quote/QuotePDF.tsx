@@ -37,6 +37,20 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
   other: "📦",
 };
 
+// Cores de gradiente do header de cada serviço — alinhadas ao link público
+// (SERVICE_COLORS no OrcamentoPublico). Mapeia para gradiente + cor da label.
+const SERVICE_GRADIENTS: Record<ServiceType, { bg: string; fg: string; iconBg: string }> = {
+  flight:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.15),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
+  hotel:      { bg: "linear-gradient(90deg,rgba(245,158,11,0.18),rgba(217,119,6,0.05))",  fg: "#b45309", iconBg: "rgba(255,255,255,0.85)" },
+  car_rental: { bg: "linear-gradient(90deg,rgba(16,185,129,0.18),rgba(5,150,105,0.05))",  fg: "#047857", iconBg: "rgba(255,255,255,0.85)" },
+  transfer:   { bg: "linear-gradient(90deg,rgba(139,92,246,0.18),rgba(124,58,237,0.05))", fg: "#6d28d9", iconBg: "rgba(255,255,255,0.85)" },
+  attraction: { bg: "linear-gradient(90deg,rgba(236,72,153,0.18),rgba(219,39,119,0.05))", fg: "#be185d", iconBg: "rgba(255,255,255,0.85)" },
+  insurance:  { bg: "linear-gradient(90deg,rgba(6,182,212,0.18),rgba(8,145,178,0.05))",   fg: "#0e7490", iconBg: "rgba(255,255,255,0.85)" },
+  cruise:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.12),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
+  circuit:    { bg: "linear-gradient(90deg,rgba(99,102,241,0.18),rgba(79,70,229,0.05))",  fg: "#4338ca", iconBg: "rgba(255,255,255,0.85)" },
+  other:      { bg: "linear-gradient(90deg,rgba(148,163,184,0.18),rgba(100,116,139,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
+};
+
 function formatLabel(value: string) {
   if (!value) return value;
   return value.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase());
