@@ -226,6 +226,11 @@ const App = () => (
             <Route path="/cadastro/:token" element={<CadastroLink />} />
             <Route path="/formulario/:token" element={<LeadFormPublic />} />
             <Route path="/meus-leads" element={<ProtectedRoute><MeusLeads /></ProtectedRoute>} />
+            <Route path="/meus-leads/conversacional" element={<ProtectedRoute><MeusLeads /></ProtectedRoute>} />
+            <Route path="/meus-leads/landings" element={<ProtectedRoute><SalesLandings /></ProtectedRoute>} />
+            <Route path="/meus-leads/landings/nova" element={<ProtectedRoute><SalesLandingEditor /></ProtectedRoute>} />
+            <Route path="/meus-leads/landings/:id/editar" element={<ProtectedRoute><SalesLandingEditor /></ProtectedRoute>} />
+            <Route path="/lp/:slug" element={<SalesLandingPublic />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
