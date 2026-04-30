@@ -225,10 +225,24 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       ?.map((service) => {
         const label = getServiceLabel(service);
         const emoji = SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
+        const grad = SERVICE_GRADIENTS[service.service_type as ServiceType] || SERVICE_GRADIENTS.other;
         const details = getServiceDetails(service);
         const data = service.service_data as any;
         const notesText = service.service_type === "attraction" ? data?.notes : null;
         const descText = service.description || null;
+        // Summary alinhado ao link público
+        let summary = "";
+        switch (service.service_type) {
+          case "flight": summary = `${data.airline || ""}${data.origin_city ? ` | ${data.origin_city} → ${data.destination_city}` : ""}`.trim(); break;
+          case "hotel": summary = `${data.hotel_name || ""}${data.city ? ` — ${data.city}` : ""}`; break;
+          case "car_rental": summary = `${data.car_type || ""}${data.days ? ` | ${data.days} diária(s)` : ""}`; break;
+          case "transfer": summary = `${data.transfer_type === "arrival" ? "Chegada" : "Saída"}${data.location ? ` — ${data.location}` : ""}`; break;
+          case "attraction": summary = [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name || ""; break;
+          case "insurance": summary = data.provider || ""; break;
+          case "cruise": summary = `${data.ship_name || ""}${data.route ? ` — ${data.route}` : ""}`; break;
+          case "circuit": summary = data.circuit_name || "Circuito"; break;
+          case "other": summary = data.company_name || (data.description || "").split("\n")[0].slice(0, 80) || "Outros Serviços"; break;
+        }
         const allImages = [
           ...(service.image_urls || []),
           ...(service.image_url && !(service.image_urls || []).includes(service.image_url) ? [service.image_url] : []),
@@ -236,10 +250,10 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         const extraCount = ((service.image_urls || []).length + (service.image_url && !(service.image_urls || []).includes(service.image_url) ? 1 : 0)) - 6;
 
         const photosHtml = allImages.length > 0 ? `
-          <div class="pdf-block pdf-gallery" style="padding-left:34px;margin:10px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-            ${allImages.map((url: string) => `<img src="${url}" style="width:100%;height:110px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;" />`).join("")}
+          <div class="pdf-block pdf-gallery" style="margin:14px 0 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            ${allImages.map((url: string) => `<img src="${url}" style="width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;" />`).join("")}
           </div>
-          ${extraCount > 0 ? `<p style="padding-left:34px;font-size:11px;color:#94a3b8;margin:4px 0 8px;">+${extraCount} foto(s) disponíveis no link completo</p>` : ""}
+          ${extraCount > 0 ? `<p style="font-size:11px;color:#94a3b8;margin:4px 0 8px;">+${extraCount} foto(s) disponíveis no link completo</p>` : ""}
         ` : "";
 
         // Per-service payment display
@@ -250,7 +264,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             const display = getServicePaymentDisplay(service.amount, payConfig);
             if (display) {
               paymentHtml = `
-                <div class="pdf-block pdf-payment" style="padding-left:34px;margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;">
+                <div class="pdf-block pdf-payment" style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
                   <p style="font-size:13px;font-weight:600;color:#0f766e;">💳 ${display}</p>
                 </div>
               `;
@@ -258,43 +272,43 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           }
         }
 
-        // Decompose service card into sub-blocks (safe break points).
-        // Header is "keep with next"; gallery, details, notes, payment are independent
-        // safe-break blocks. The wrapper is NOT break-inside:avoid (large cards
-        // would otherwise push to next page leaving whitespace — this is the
-        // exact bug we're fixing).
         const detailsHtml = details.length > 0 ? `
-          <div class="pdf-block pdf-details" style="padding-left:34px;word-wrap:break-word;overflow-wrap:break-word;">
+          <div class="pdf-block pdf-details" style="word-wrap:break-word;overflow-wrap:break-word;">
             ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.55;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
           </div>
         ` : "";
 
         const descHtml = descText ? `
-          <div class="pdf-block pdf-desc" style="padding-left:34px;margin-top:6px;word-wrap:break-word;overflow-wrap:break-word;">
+          <div class="pdf-block pdf-desc" style="margin-top:6px;word-wrap:break-word;overflow-wrap:break-word;">
             <p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.55;white-space:pre-wrap;word-break:break-word;">${descText}</p>
           </div>
         ` : "";
 
         const notesHtml = notesText ? `
-          <div class="pdf-block pdf-notes" style="padding-left:34px;margin-top:6px;">
+          <div class="pdf-block pdf-notes" style="margin-top:6px;">
             <p style="margin:3px 0;font-size:13px;color:#64748b;line-height:1.55;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
           </div>
         ` : "";
 
         return `
-        <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:12px;">
-          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
-            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-              <span style="font-size:18px;">${emoji}</span>
-              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;">${label}</span>
+        <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:16px;margin-bottom:14px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:12px 18px;color:${grad.fg};">
+            <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
+              <div style="width:40px;height:40px;border-radius:10px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
+              <div style="min-width:0;">
+                <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
+                ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
+              </div>
             </div>
-            <span style="font-size:18px;font-weight:700;color:#0f766e;white-space:nowrap;">${formatCurrency(service.amount)}</span>
+            <span style="font-size:18px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>
           </div>
-          ${photosHtml}
-          ${detailsHtml}
-          ${descHtml}
-          ${notesHtml}
-          ${paymentHtml}
+          <div style="padding:16px 20px;">
+            ${photosHtml}
+            ${detailsHtml}
+            ${descHtml}
+            ${notesHtml}
+            ${paymentHtml}
+          </div>
         </div>
       `;
       })
