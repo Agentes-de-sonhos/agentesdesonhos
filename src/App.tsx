@@ -225,7 +225,7 @@ const App = () => (
             <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
             <Route path="/cadastro/:token" element={<CadastroLink />} />
             <Route path="/formulario/:token" element={<LeadFormPublic />} />
-            <Route path="/meus-leads" element={<ProtectedRoute><MeusLeads /></ProtectedRoute>} />
+            <Route path="/meus-leads" element={<ProtectedRoute><CaptacaoLeads /></ProtectedRoute>} />
             <Route path="/meus-leads/conversacional" element={<ProtectedRoute><MeusLeads /></ProtectedRoute>} />
             <Route path="/meus-leads/landings" element={<ProtectedRoute><SalesLandings /></ProtectedRoute>} />
             <Route path="/meus-leads/landings/nova" element={<ProtectedRoute><SalesLandingEditor /></ProtectedRoute>} />
