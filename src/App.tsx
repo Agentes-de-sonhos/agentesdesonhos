@@ -239,7 +239,16 @@ const App = () => (
             <Route path="/certificate-test" element={<CertificateTest />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:agencySlug/:accessCode" element={<PublicCodeResolver />} />
-            <Route path="/:slug" element={<SlugResolver />} />
+            <Route
+              path="/:slug"
+              element={
+                window.location.hostname.startsWith("lp.") ? (
+                  <SalesLandingPublic />
+                ) : (
+                  <SlugResolver />
+                )
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
