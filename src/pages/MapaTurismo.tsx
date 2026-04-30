@@ -66,8 +66,7 @@ const CATEGORIES_DATA: CategoryDef[] = [
   { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500" },
   { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-100 text-rose-700", activeColor: "bg-rose-500 text-white", iconColor: "text-rose-500" },
   { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-pink-100 text-pink-700", activeColor: "bg-pink-500 text-white", iconColor: "text-pink-500" },
-  // Receptivos ocultados temporariamente do Mapa do Turismo (não excluído)
-  // { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", activeColor: "bg-orange-500 text-white", iconColor: "text-orange-500" },
+  { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", activeColor: "bg-orange-500 text-white", iconColor: "text-orange-500" },
   { title: "Guias", icon: Users, category: "Guias", color: "bg-teal-100 text-teal-700", activeColor: "bg-teal-500 text-white", iconColor: "text-teal-500" },
 ];
 
