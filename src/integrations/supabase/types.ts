@@ -6588,6 +6588,150 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_landing_leads: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          id: string
+          landing_id: string
+          lead_name: string
+          lead_phone: string
+          opportunity_id: string | null
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          landing_id: string
+          lead_name: string
+          lead_phone: string
+          opportunity_id?: string | null
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          landing_id?: string
+          lead_name?: string
+          lead_phone?: string
+          opportunity_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_landing_leads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_landing_leads_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "sales_landings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_landing_leads_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_landing_views: {
+        Row: {
+          created_at: string
+          id: string
+          landing_id: string
+          session_hash: string
+          viewed_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          landing_id: string
+          session_hash: string
+          viewed_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          landing_id?: string
+          session_hash?: string
+          viewed_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_landing_views_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "sales_landings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_landings: {
+        Row: {
+          agent_name: string | null
+          agent_whatsapp: string
+          created_at: string
+          cta_text: string
+          description: string | null
+          headline: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          leads_count: number
+          primary_color: string
+          slug: string
+          subheadline: string | null
+          updated_at: string
+          user_id: string
+          views_count: number
+        }
+        Insert: {
+          agent_name?: string | null
+          agent_whatsapp: string
+          created_at?: string
+          cta_text?: string
+          description?: string | null
+          headline: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          leads_count?: number
+          primary_color?: string
+          slug: string
+          subheadline?: string | null
+          updated_at?: string
+          user_id: string
+          views_count?: number
+        }
+        Update: {
+          agent_name?: string | null
+          agent_whatsapp?: string
+          created_at?: string
+          cta_text?: string
+          description?: string | null
+          headline?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          leads_count?: number
+          primary_color?: string
+          slug?: string
+          subheadline?: string | null
+          updated_at?: string
+          user_id?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
       sellers: {
         Row: {
           created_at: string
@@ -8901,6 +9045,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_sales_landing: { Args: { p_slug: string }; Returns: Json }
       get_public_tour_guide: { Args: { _id: string }; Returns: Json }
       get_published_supplier_by_slug: {
         Args: { p_slug: string }
@@ -8971,6 +9116,14 @@ export type Database = {
       save_card_capture_via_token: {
         Args: { _data: Json; _token: string }
         Returns: string
+      }
+      submit_sales_landing_lead: {
+        Args: { p_lead_name: string; p_lead_phone: string; p_slug: string }
+        Returns: Json
+      }
+      track_sales_landing_view: {
+        Args: { p_session_hash: string; p_slug: string }
+        Returns: undefined
       }
       unaccent: { Args: { "": string }; Returns: string }
       validate_quick_access_token: { Args: { _token: string }; Returns: string }
