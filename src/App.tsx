@@ -141,6 +141,8 @@ const App = () => (
               element={
                 window.location.hostname.startsWith("ativar-cartao") ? (
                   <AtivarCartao />
+                ) : window.location.hostname.startsWith("lp.") ? (
+                  <SalesLandingPublic />
                 ) : (
                   <LandingPage />
                 )
