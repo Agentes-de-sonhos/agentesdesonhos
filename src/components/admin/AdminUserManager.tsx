@@ -52,6 +52,7 @@ import {
   EyeOff,
   Settings2,
   LogOut,
+  Download,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -409,10 +410,43 @@ export function AdminUserManager() {
               Visualize, filtre e gerencie os usuários da plataforma
             </CardDescription>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
-            <UserPlus className="h-4 w-4" />
-            Adicionar Usuário
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const headers = ["Nome","E-mail","Telefone","Agência","Cidade","Estado","Permissão","Plano","Ativo","Pago no Mês","Cadastrado em"];
+                const escape = (v: any) => {
+                  const s = v === null || v === undefined ? "" : String(v);
+                  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+                };
+                const rows = filteredUsers.map((u) => [
+                  u.name, u.email, u.phone, u.agency_name, u.city, u.state,
+                  u.role, u.plan, u.is_active ? "Sim" : "Não", u.monthly_paid ? "Sim" : "Não",
+                  u.created_at ? format(new Date(u.created_at), "yyyy-MM-dd HH:mm") : "",
+                ].map(escape).join(";"));
+                const csv = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `usuarios-${format(new Date(), "yyyy-MM-dd")}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast({ title: `${filteredUsers.length} usuários exportados` });
+              }}
+              className="gap-2"
+              disabled={filteredUsers.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              Baixar CSV
+            </Button>
+            <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              Adicionar Usuário
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
