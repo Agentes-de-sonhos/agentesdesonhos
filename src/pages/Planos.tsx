@@ -65,7 +65,7 @@ const plans: PlanConfig[] = [
     period: "/mês",
     description: "Para agentes que querem escalar resultados e se conectar com o mercado.",
     microcopy: "Para quem quer crescer mais rápido",
-    badge: "50% OFF • MAIS ESCOLHIDO",
+    badge: "MAIS ESCOLHIDO",
     highlighted: true,
     icon: Crown,
     features: [
