@@ -94,6 +94,7 @@ const Desconto30Off = lazy(() => import("./pages/Desconto30Off"));
 const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
 const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
 const MeusProjetos = lazy(() => import("./pages/MeusProjetos"));
+const Sorteador = lazy(() => import("./pages/Sorteador"));
 const CardCaptureQuickAccess = lazy(() => import("./pages/CardCaptureQuickAccess"));
 const CadastroFornecedor = lazy(() => import("./pages/CadastroFornecedor"));
 const CadastroGuia = lazy(() => import("./pages/CadastroGuia"));
