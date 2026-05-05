@@ -160,6 +160,7 @@ const App = () => (
             <Route path="/admin/crm" element={<AdminRoute><AdminCRM /></AdminRoute>} />
             <Route path="/ferramentas-ia" element={<ProtectedRoute><FerramentasIA /></ProtectedRoute>} />
             <Route path="/meus-projetos" element={<ProtectedRoute><MeusProjetos /></ProtectedRoute>} />
+            <Route path="/sorteador" element={<ProtectedRoute><Sorteador /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-roteiro" element={<ProtectedRoute><CriarRoteiro /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-roteiro/:id" element={<ProtectedRoute><CriarRoteiro /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-conteudo" element={<ProtectedRoute><CriarConteudo /></ProtectedRoute>} />
