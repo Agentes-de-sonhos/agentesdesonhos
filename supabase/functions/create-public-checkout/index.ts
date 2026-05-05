@@ -25,6 +25,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const plan = body.plan || "profissional";
+    const coupon = body.coupon as string | undefined;
     
     const priceId = PRICE_IDS[plan];
     if (!priceId) {
@@ -43,6 +44,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
+      discounts: coupon ? [{ coupon }] : undefined,
       success_url: `${origin}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/planos?checkout=cancelled`,
       metadata: { plan },

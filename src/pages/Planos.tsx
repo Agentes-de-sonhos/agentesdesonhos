@@ -23,6 +23,7 @@ interface PlanConfig {
   name: string;
   price: string;
   priceValue: number;
+  originalPrice?: string;
   period: string;
   description: string;
   microcopy: string;
@@ -34,38 +35,20 @@ interface PlanConfig {
 
 const plans: PlanConfig[] = [
   {
-    id: "start",
-    name: "Start",
-    price: "0",
-    priceValue: 0,
-    period: "",
-    description: "Comece gratuitamente e teste as principais funcionalidades.",
-    microcopy: "Sem custo. Comece agora.",
-    icon: Star,
-    features: [
-      "3 últimos treinamentos da EducaTravel",
-      "Notícias do trade",
-      "2 roteiros com IA por dia",
-      "2 conteúdos com IA por dia",
-      "Agenda",
-      "Mapa do Turismo",
-      "Benefícios e descontos",
-      "Materiais de divulgação",
-    ],
-  },
-  {
     id: "profissional",
     name: "Profissional",
     price: "49",
     priceValue: 49,
+    originalPrice: "98",
     period: "/mês",
     description: "Tudo que você precisa para operar sua agência com eficiência.",
     microcopy: "Ideal para operação diária",
-    badge: "MAIS ECONÔMICO",
+    badge: "50% OFF",
     icon: Sparkles,
     features: [
-      "Tudo do plano Start",
       "Todos os treinamentos da EducaTravel e materiais complementares",
+      "Notícias do trade, Agenda e Mapa do Turismo",
+      "Materiais de divulgação e Benefícios",
       "Orçamentos",
       "Carteira Digital",
       "Vitrine de Ofertas",
@@ -78,10 +61,11 @@ const plans: PlanConfig[] = [
     name: "Premium",
     price: "98",
     priceValue: 98,
+    originalPrice: "196",
     period: "/mês",
     description: "Para agentes que querem escalar resultados e se conectar com o mercado.",
     microcopy: "Para quem quer crescer mais rápido",
-    badge: "MAIS ESCOLHIDO",
+    badge: "50% OFF • MAIS ESCOLHIDO",
     highlighted: true,
     icon: Crown,
     features: [
@@ -119,21 +103,11 @@ export default function Planos() {
   const handleAction = async (plan: PlanConfig) => {
     if (loadingPlan) return;
 
-    // Free plan — just go to signup/dashboard
-    if (plan.id === "start") {
-      if (user) {
-        navigate("/dashboard-start");
-      } else {
-        navigate("/auth?signup=true");
-      }
-      return;
-    }
-
     // Paid plan — go directly to Stripe checkout (both logged-in and not)
     setLoadingPlan(plan.id);
     try {
       const { data, error } = await supabase.functions.invoke("create-public-checkout", {
-        body: { plan: plan.id },
+        body: { plan: plan.id, coupon: "xpQWf16X" },
       });
       if (error) throw error;
       if (data?.url) {
@@ -160,7 +134,6 @@ export default function Planos() {
       return { label: "Plano inferior", disabled: true };
     }
 
-    if (plan.id === "start") return { label: "Começar grátis", disabled: false };
     if (plan.id === "premium") return { label: "Assinar Premium", disabled: false };
     return { label: "Assinar plano", disabled: false };
   };
@@ -254,6 +227,16 @@ export default function Planos() {
 
                   {/* Price */}
                   <div className="mb-1">
+                    {plan.originalPrice && (
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-sm text-muted-foreground line-through">
+                          R$ {plan.originalPrice}
+                        </span>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wide">
+                          50% OFF
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-baseline gap-1">
                       <span className="text-muted-foreground text-base">R$</span>
                       <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
