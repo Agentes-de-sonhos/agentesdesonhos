@@ -72,11 +72,21 @@ export default function Sorteador() {
         Object.keys(rows[0]).find((k) =>
           ["nome", "name", "participante", "agente", "aluno"].includes(k.toLowerCase().trim()),
         ) || Object.keys(rows[0])[0];
-      const agencyKey = Object.keys(rows[0]).find((k) =>
-        ["agencia", "agência", "agency", "empresa", "loja"].includes(
-          k.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
-        ),
-      );
+      const norm = (s: string) =>
+        s.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const agencyKey = Object.keys(rows[0]).find((k) => {
+        const n = norm(k);
+        return (
+          n.includes("agencia") ||
+          n.includes("agency") ||
+          n.includes("empresa") ||
+          n.includes("loja") ||
+          n.includes("operadora")
+        );
+      });
+      if (!agencyKey) {
+        console.log("Colunas detectadas:", Object.keys(rows[0]));
+      }
       const list: Participant[] = rows
         .map((r) => ({
           ...r,
