@@ -16,6 +16,7 @@ import { ptBR } from "date-fns/locale";
 
 interface Participant {
   name: string;
+  agency?: string;
   [k: string]: any;
 }
 
@@ -71,8 +72,17 @@ export default function Sorteador() {
         Object.keys(rows[0]).find((k) =>
           ["nome", "name", "participante", "agente", "aluno"].includes(k.toLowerCase().trim()),
         ) || Object.keys(rows[0])[0];
+      const agencyKey = Object.keys(rows[0]).find((k) =>
+        ["agencia", "agência", "agency", "empresa", "loja"].includes(
+          k.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+        ),
+      );
       const list: Participant[] = rows
-        .map((r) => ({ ...r, name: String(r[nameKey] || "").trim() }))
+        .map((r) => ({
+          ...r,
+          name: String(r[nameKey] || "").trim(),
+          agency: agencyKey ? String(r[agencyKey] || "").trim() : undefined,
+        }))
         .filter((p) => p.name);
       if (!list.length) {
         toast.error("Nenhum nome encontrado. Verifique a coluna 'nome'.");
@@ -256,6 +266,11 @@ export default function Sorteador() {
                       <div className="text-4xl md:text-6xl font-bold text-primary mt-2">
                         {winner.name}
                       </div>
+                      {winner.agency && (
+                        <div className="text-lg md:text-xl text-muted-foreground mt-2">
+                          {winner.agency}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-center text-muted-foreground">
@@ -323,6 +338,11 @@ export default function Sorteador() {
                           <div className="font-medium text-sm">
                             #{history.length - i} {w.winner_name}
                           </div>
+                          {(w.winner_data as any)?.agency && (
+                            <div className="text-xs text-muted-foreground">
+                              {(w.winner_data as any).agency}
+                            </div>
+                          )}
                           <div className="text-xs text-muted-foreground">
                             {format(new Date(w.drawn_at), "dd/MM HH:mm", { locale: ptBR })}
                           </div>
