@@ -6,8 +6,8 @@ const corsHeaders = {
 };
 
 const PRICE_IDS: Record<string, string> = {
-  profissional: "price_1TLxTbFkGdVt5nie0MpVjQM3",
-  premium: "price_1TLxU4FkGdVt5nieNT6rfU3u",
+  profissional: "price_1TToCFFkGdVt5nieNMQEBoo1",
+  premium: "price_1TToClFkGdVt5niefGXbFhpe",
 };
 
 Deno.serve(async (req) => {
@@ -25,7 +25,6 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const plan = body.plan || "profissional";
-    const coupon = body.coupon as string | undefined;
     
     const priceId = PRICE_IDS[plan];
     if (!priceId) {
@@ -44,7 +43,6 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      discounts: coupon ? [{ coupon }] : undefined,
       success_url: `${origin}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/planos?checkout=cancelled`,
       metadata: { plan },
