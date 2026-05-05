@@ -9,6 +9,8 @@ const corsHeaders = {
 const PRICE_TO_PLAN: Record<string, string> = {
   "price_1TLxTbFkGdVt5nie0MpVjQM3": "profissional",
   "price_1TLxU4FkGdVt5nieNT6rfU3u": "premium",
+  "price_1TToCFFkGdVt5nieNMQEBoo1": "profissional",
+  "price_1TToClFkGdVt5niefGXbFhpe": "premium",
 };
 
 Deno.serve(async (req) => {
