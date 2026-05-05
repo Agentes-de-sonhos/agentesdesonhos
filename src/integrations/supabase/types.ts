@@ -6306,6 +6306,71 @@ export type Database = {
           },
         ]
       }
+      raffle_winners: {
+        Row: {
+          drawn_at: string
+          id: string
+          raffle_id: string
+          user_id: string
+          winner_data: Json | null
+          winner_name: string
+        }
+        Insert: {
+          drawn_at?: string
+          id?: string
+          raffle_id: string
+          user_id: string
+          winner_data?: Json | null
+          winner_name: string
+        }
+        Update: {
+          drawn_at?: string
+          id?: string
+          raffle_id?: string
+          user_id?: string
+          winner_data?: Json | null
+          winner_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raffle_winners_raffle_id_fkey"
+            columns: ["raffle_id"]
+            isOneToOne: false
+            referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raffles: {
+        Row: {
+          created_at: string
+          id: string
+          participants: Json
+          participants_count: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          participants?: Json
+          participants_count?: number
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          participants?: Json
+          participants_count?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       regioes: {
         Row: {
           ativo: boolean
