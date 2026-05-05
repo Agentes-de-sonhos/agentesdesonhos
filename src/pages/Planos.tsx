@@ -107,7 +107,7 @@ export default function Planos() {
     setLoadingPlan(plan.id);
     try {
       const { data, error } = await supabase.functions.invoke("create-public-checkout", {
-        body: { plan: plan.id, coupon: "xpQWf16X" },
+        body: { plan: plan.id },
       });
       if (error) throw error;
       if (data?.url) {
