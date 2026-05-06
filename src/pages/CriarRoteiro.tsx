@@ -223,7 +223,7 @@ export default function CriarRoteiro() {
   const handleGeneratePDF = async (itineraryId: string) => {
     try {
       const data = await getItineraryWithDetails(itineraryId);
-      downloadPDF(data);
+      downloadPDF(data, agentProfile);
     } catch (error) {
       toast.error("Erro ao gerar PDF");
     }
