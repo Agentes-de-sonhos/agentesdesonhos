@@ -144,7 +144,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 });
 
 
-function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
@@ -652,7 +652,7 @@ interface HotelGuestInput {
 
 const emptyGuest = (): HotelGuestInput => ({ name: '', age: '', notes: '' });
 
-function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [guests, setGuests] = useState<HotelGuestInput[]>(
@@ -1343,7 +1343,7 @@ interface CarDriverInput {
 
 const emptyDriver = (): CarDriverInput => ({ name: '', document: '', age: '', notes: '' });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [drivers, setDrivers] = useState<CarDriverInput[]>(
     defaultValues?.drivers?.length > 0 ? defaultValues.drivers : [emptyDriver()]
@@ -1798,7 +1798,7 @@ const emptyTransferPassenger = (): TransferPassengerInput => ({
   name: '', age: '', passenger_type: 'adulto', needs_child_seat: 'nao', notes: '',
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<TransferPassengerInput[]>(
     defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
@@ -2295,7 +2295,7 @@ interface AttractionPassengerInput {
   notes: string;
 }
 
-function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
@@ -2833,7 +2833,7 @@ interface InsuredPersonInput {
 
 const emptyInsured = (): InsuredPersonInput => ({ name: '', birth_date: '', document: '', coverage_type: '', notes: '' });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [insuredPersons, setInsuredPersons] = useState<InsuredPersonInput[]>(
@@ -3312,7 +3312,7 @@ const cruiseSchema = z.object({
   ship_website: z.string().optional(),
 });
 
-function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; birth_date?: string; document?: string; notes?: string }[]>(
@@ -3903,7 +3903,7 @@ const OTHER_SERVICE_TYPES = [
   { value: 'personalizado', label: '⭐ Personalizado' },
 ];
 
-function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
 
@@ -4412,7 +4412,7 @@ const trainSchema = z.object({
   destination_maps_url: z.string().optional(),
 });
 
-function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; notes?: string }[]>(
