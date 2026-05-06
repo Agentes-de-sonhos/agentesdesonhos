@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { TripItinerary } from "@/components/trip/itinerary/TripItinerary";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
@@ -440,15 +441,14 @@ function TripWalletContent() {
           </Card>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Services Section */}
-          <div className="lg:col-span-2 space-y-4">
-            <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle>Serviços da Viagem</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {selectedServiceType ? (
+        <Accordion type="multiple" className="space-y-3">
+          {/* 1. Serviços da Viagem */}
+          <AccordionItem value="services" className="border border-border rounded-lg overflow-hidden bg-card">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
+              <span className="text-base font-semibold">Serviços da Viagem</span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              {selectedServiceType ? (
                   <div className="space-y-4">
                     <h3 className="font-medium">
                       {editingService ? "Editar " : ""}{SERVICE_TYPE_LABELS[selectedServiceType]}
@@ -506,29 +506,34 @@ function TripWalletContent() {
                     />
                   </>
                 )}
-              </CardContent>
-            </Card>
+            </AccordionContent>
+          </AccordionItem>
 
-            {/* Day by Day Itinerary */}
-            <TripItinerary
-              tripId={trip.id}
-              destination={trip.destination}
-              startDate={trip.start_date}
-              endDate={trip.end_date}
-              services={trip.services || []}
-            />
-          </div>
+          {/* 2. Roteiro dia a dia */}
+          <AccordionItem value="itinerary" className="border border-border rounded-lg overflow-hidden bg-card">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
+              <span className="text-base font-semibold">Roteiro dia a dia</span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <TripItinerary
+                tripId={trip.id}
+                destination={trip.destination}
+                startDate={trip.start_date}
+                endDate={trip.end_date}
+                services={trip.services || []}
+              />
+            </AccordionContent>
+          </AccordionItem>
 
-          {/* Sidebar */}
-          <div className="space-y-4">
-            {/* Access Card */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Lock className="h-4 w-4" /> Acesso do Cliente
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
+          {/* 3. Acesso do Cliente */}
+          <AccordionItem value="access" className="border border-border rounded-lg overflow-hidden bg-card">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
+              <span className="text-base font-semibold flex items-center gap-2">
+                <Lock className="h-4 w-4" /> Acesso do Cliente
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <div className="space-y-3">
                 {trip.is_locked ? (
                   <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 space-y-2">
                     <div className="flex items-start gap-2">
@@ -600,15 +605,17 @@ function TripWalletContent() {
                     </p>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-            {/* Summary Card */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Resumo</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
+          {/* 4. Resumo */}
+          <AccordionItem value="summary" className="border border-border rounded-lg overflow-hidden bg-card">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
+              <span className="text-base font-semibold">Resumo</span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Cliente</span>
                   <span className="font-medium">{trip.client_name}</span>
@@ -633,13 +640,20 @@ function TripWalletContent() {
                   <span className="text-muted-foreground">Status</span>
                   <span className="font-medium">{trip.status === "archived" ? "Arquivada" : "Ativa"}</span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-            {/* Edit History */}
-            <TripEditHistory history={editHistory} />
-          </div>
-        </div>
+          {/* 5. Histórico de Alterações */}
+          <AccordionItem value="history" className="border border-border rounded-lg overflow-hidden bg-card">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
+              <span className="text-base font-semibold">Histórico de Alterações</span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <TripEditHistory history={editHistory} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         {/* Share Modal */}
         <ShareTripModal trip={trip} agencyName={agentProfile?.agency_name || undefined} open={showShareModal} onOpenChange={setShowShareModal} />
