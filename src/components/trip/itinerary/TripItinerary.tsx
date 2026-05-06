@@ -59,6 +59,18 @@ const ORIGIN_BADGE: Record<string, { label: string; className: string }> = {
   manual: { label: "Atividade", className: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
 };
 
+function PeriodDroppable({ dateStr, period, children }: { dateStr: string; period: Period; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `period:${dateStr}:${period}`,
+    data: { period, dateStr },
+  });
+  return (
+    <div ref={setNodeRef} className={cn("min-h-[8px] rounded-md transition-colors", isOver && "bg-primary/5")}>
+      {children}
+    </div>
+  );
+}
+
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(year, month - 1, day);
