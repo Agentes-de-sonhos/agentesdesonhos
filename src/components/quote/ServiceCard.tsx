@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { QuoteService, ServiceType } from "@/types/quote";
@@ -172,9 +173,15 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
               <Button variant="ghost" size="icon" onClick={() => onEdit(service)} className="text-muted-foreground hover:text-primary h-8 w-8">
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => onDelete(service.id)} disabled={isDeleting} className="text-muted-foreground hover:text-destructive h-8 w-8">
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <ConfirmDeleteDialog
+                onConfirm={() => onDelete(service.id)}
+                title="Remover serviço?"
+                description="Este serviço será removido permanentemente do orçamento. Tem certeza?"
+              >
+                <Button variant="ghost" size="icon" disabled={isDeleting} className="text-muted-foreground hover:text-destructive h-8 w-8">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </ConfirmDeleteDialog>
             </div>
           </div>
 
