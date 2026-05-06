@@ -145,13 +145,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
 
   const days = useMemo(() => generateDays(startDate, endDate), [startDate, endDate]);
 
-  // Auto-expand first day and days with activities
-  useMemo(() => {
-    const initial = new Set<string>();
-    if (days.length > 0) initial.add(days[0].dateStr);
-    activities.forEach((a) => initial.add(a.day_date));
-    setExpandedDays(initial);
-  }, [days.length, activities.length]);
+  // Todos os dias começam recolhidos por padrão
 
   const activitiesByDay = useMemo(() => {
     const map: Record<string, ItineraryActivity[]> = {};
