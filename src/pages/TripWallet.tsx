@@ -588,13 +588,8 @@ function TripWalletContent() {
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground mb-1">Compartilhar</p>
                   <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => setShowShareModal(true)}>
-                    <Share2 className="mr-2 h-3 w-3" /> Link, QR Code e Senha
+                    <Share2 className="mr-2 h-3 w-3" /> Compartilhar
                   </Button>
-                  {trip.slug && (
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      /c/{trip.slug}
-                    </p>
-                  )}
                 </div>
               </div>
             </AccordionContent>
