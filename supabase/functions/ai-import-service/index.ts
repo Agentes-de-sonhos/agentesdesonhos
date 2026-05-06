@@ -12,7 +12,17 @@ const corsHeaders = {
 const MAX_FILE_BASE64 = 10_000_000; // ~10MB
 const MAX_TEXT_LEN = 30_000;
 const ALLOWED_MIME = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp"];
-const ALLOWED_TYPES = ["flight", "hotel"] as const;
+const ALLOWED_TYPES = [
+  "flight",
+  "hotel",
+  "car_rental",
+  "transfer",
+  "attraction",
+  "insurance",
+  "cruise",
+  "train",
+  "other",
+] as const;
 type ImportType = typeof ALLOWED_TYPES[number];
 
 /**
@@ -186,6 +196,13 @@ const HOTEL_SCHEMA = {
 const SCHEMAS: Record<ImportType, unknown> = {
   flight: FLIGHT_SCHEMA,
   hotel: HOTEL_SCHEMA,
+  car_rental: CAR_RENTAL_SCHEMA,
+  transfer: TRANSFER_SCHEMA,
+  attraction: ATTRACTION_SCHEMA,
+  insurance: INSURANCE_SCHEMA,
+  cruise: CRUISE_SCHEMA,
+  train: TRAIN_SCHEMA,
+  other: OTHER_SCHEMA,
 };
 
 const SYSTEM_PROMPTS: Record<ImportType, string> = {
@@ -205,6 +222,13 @@ REGRAS CRÍTICAS:
 - Datas SEMPRE no formato YYYY-MM-DD. Horários HH:MM.
 - Para "suggested": preencha apenas dados públicos confiáveis do hotel identificado (site oficial, telefone, endereço completo, categoria). Em caso de dúvida, deixe vazio.
 - Em "confidence_notes" liste o que ficou incerto.`,
+  car_rental: `Você é especialista em vouchers de LOCAÇÃO DE VEÍCULO. Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente locadora, código, placa ou condutor.`,
+  transfer: `Você é especialista em vouchers de TRANSFER (receptivo). Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente motorista, placa, voo ou ponto de encontro.`,
+  attraction: `Você é especialista em vouchers de INGRESSOS / ATRAÇÕES / PASSEIOS. Preencha apenas com evidência clara. Datas YYYY-MM-DD. Nunca invente código de ingresso, atração, data ou horário.`,
+  insurance: `Você é especialista em apólices de SEGURO VIAGEM. Preencha apenas com evidência clara. Datas YYYY-MM-DD. Nunca invente número de apólice, seguradora, coberturas ou telefones.`,
+  cruise: `Você é especialista em vouchers de CRUZEIRO. Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente navio, cabine, código ou portos.`,
+  train: `Você é especialista em bilhetes de TREM. Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente código, vagão, assento ou estação.`,
+  other: `Você é especialista em interpretar QUALQUER tipo de serviço turístico (restaurante, guia, chip, experiência, evento, spa, concierge, etc.). Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente dados.`,
 };
 
 function errorResponse(error: string, status = 400) {
