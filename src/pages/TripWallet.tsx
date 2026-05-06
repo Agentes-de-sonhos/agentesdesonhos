@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { TripItinerary } from "@/components/trip/itinerary/TripItinerary";
 import { TripForm } from "@/components/trip/TripForm";
@@ -86,6 +86,29 @@ function TripWalletContent() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
   const [showImportQuote, setShowImportQuote] = useState(false);
+
+  // Inline edit state for the Resumo block
+  const [editingField, setEditingField] = useState<null | "client_name" | "destination" | "start_date" | "end_date" | "status">(null);
+  const [fieldDraft, setFieldDraft] = useState<string>("");
+
+  const startEditField = (field: typeof editingField, currentValue: string) => {
+    setEditingField(field);
+    setFieldDraft(currentValue ?? "");
+  };
+
+  const cancelEditField = () => {
+    setEditingField(null);
+    setFieldDraft("");
+  };
+
+  const saveEditField = async () => {
+    if (!id || !editingField) return;
+    const val = fieldDraft.trim();
+    if (editingField !== "status" && !val) return;
+    await updateTrip({ id, [editingField]: val } as any);
+    setEditingField(null);
+    setFieldDraft("");
+  };
 
   useEffect(() => {
     if (user?.id) {
