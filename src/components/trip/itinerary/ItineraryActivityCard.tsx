@@ -21,6 +21,7 @@ interface Props {
   onEdit: () => void;
   onDelete: () => void;
   readOnly?: boolean;
+  originBadge?: { label: string; className: string };
 }
 
 function getDocFileName(url: string) {
@@ -42,7 +43,7 @@ function getMapsLink(mapsUrl: string): string {
   return `https://www.google.com/maps/search/${encodeURIComponent(mapsUrl)}`;
 }
 
-export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelete, readOnly }: Props) {
+export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelete, readOnly, originBadge }: Props) {
   const hasDocuments = activity.document_urls && activity.document_urls.length > 0;
   const hasMapsUrl = !!activity.maps_url;
 
@@ -67,6 +68,11 @@ export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelet
                   </span>
                 )}
                 <span className="font-medium text-sm">{activity.title}</span>
+                {originBadge && (
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${originBadge.className}`}>
+                    {originBadge.label}
+                  </span>
+                )}
               </div>
               {activity.description && (
                 <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>
