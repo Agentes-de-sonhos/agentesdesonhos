@@ -186,19 +186,19 @@ function generateAgentSignature(profile: AgentProfile | null): string {
     : "";
 
   return `
-    <div class="pdf-block agent-signature" style="margin-top:24px;border:1px solid #e2e8f0;border-radius:20px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:12px 24px;text-align:center;">
-        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
+    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
       </div>
-      <div style="padding:28px 24px;text-align:center;">
-        ${avatarHtml}
-        <p style="font-size:20px;font-weight:800;color:#1e293b;margin:14px 0 2px;">${profile.name}</p>
-        ${profile.agency_name ? `<p style="font-size:13px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
-        ${profile.city || profile.state ? `<p style="font-size:12px;color:#94a3b8;margin:4px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
+      <div style="padding:14px 18px;text-align:center;">
+        ${avatarHtml.replace(/width:96px;height:96px/g, "width:68px;height:68px").replace(/font-size:36px/g, "font-size:26px")}
+        <p style="font-size:17px;font-weight:800;color:#1e293b;margin:8px 0 1px;">${profile.name}</p>
+        ${profile.agency_name ? `<p style="font-size:12px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
+        ${profile.city || profile.state ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
         ${
           whatsappLink
-            ? `<div style="margin-top:18px;">
-                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:12px 32px;border-radius:9999px;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
+            ? `<div style="margin-top:10px;">
+                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
                   💬 Falar no WhatsApp
                 </a>
               </div>`
