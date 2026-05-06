@@ -3,12 +3,13 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X, Sparkles, RefreshCw, Plane, Hotel, Bus, AlertTriangle } from "lucide-react";
+import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X, Sparkles, RefreshCw, Plane, Hotel, Bus, AlertTriangle, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
 import { AIItineraryModal, type OverwriteMode } from "./AIItineraryModal";
+import { ImportItineraryModal } from "./ImportItineraryModal";
 import { servicesToActivities } from "@/utils/serviceToItinerary";
 import type { TripService } from "@/types/trip";
 import { toast } from "sonner";
@@ -139,6 +140,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
   const [addingFor, setAddingFor] = useState<{ dateStr: string; period: Period } | null>(null);
   const [editingActivity, setEditingActivity] = useState<ItineraryActivity | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [serviceEditWarning, setServiceEditWarning] = useState<ItineraryActivity | null>(null);
 
@@ -327,9 +329,9 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                 {isSyncing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
                 Sincronizar serviços
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setAiModalOpen(true)}>
-                <Sparkles className="mr-1.5 h-4 w-4" />
-                Gerar roteiro com IA
+              <Button variant="outline" size="sm" onClick={() => setImportModalOpen(true)}>
+                <Download className="mr-1.5 h-4 w-4" />
+                Importar roteiro
               </Button>
             </div>
           )}
