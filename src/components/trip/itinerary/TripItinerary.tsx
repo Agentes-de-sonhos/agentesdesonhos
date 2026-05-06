@@ -426,6 +426,11 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
 
               {/* Day content */}
               {isExpanded && (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(e) => handleDragEnd(day.dateStr, e)}
+                >
                 <div className="px-4 py-3 space-y-4">
                   {(["morning", "afternoon", "evening"] as Period[]).map((period) => {
                     const PeriodIcon = PERIOD_CONFIG[period].icon;
@@ -443,6 +448,8 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                         </div>
 
                         {/* Activities */}
+                        <PeriodDroppable dateStr={day.dateStr} period={period}>
+                        <SortableContext items={periodActivities.map((a) => a.id)} strategy={verticalListSortingStrategy}>
                         {periodActivities.map((activity) => {
                           if (editingActivity?.id === activity.id) {
                             return (
@@ -460,7 +467,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                           const originBadge = ORIGIN_BADGE[activity.origin] || ORIGIN_BADGE.manual;
                           return (
                             <div key={activity.id} className="ml-4">
-                              <ItineraryActivityCard
+                              <SortableActivity
                                 activity={activity}
                                 linkedService={activity.linked_service_id ? services.find((s) => s.id === activity.linked_service_id) : undefined}
                                 onEdit={() => handleEditClick(activity)}
@@ -471,6 +478,8 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                             </div>
                           );
                         })}
+                        </SortableContext>
+                        </PeriodDroppable>
 
                         {/* Empty state for period */}
                         {periodActivities.length === 0 && !isAddingHere && (
@@ -515,6 +524,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                     );
                   })}
                 </div>
+                </DndContext>
               )}
             </div>
           );
