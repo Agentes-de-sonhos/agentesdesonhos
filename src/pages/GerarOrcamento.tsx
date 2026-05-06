@@ -1213,6 +1213,7 @@ export default function GerarOrcamento() {
       <AIImportServiceModal
         open={showAIImport}
         onOpenChange={setShowAIImport}
+        allowedTypes={["flight","hotel","car_rental","transfer","attraction","insurance","cruise","other"]}
         onImport={handleAIImport}
       />
       <ExportQuoteToWalletDialog
