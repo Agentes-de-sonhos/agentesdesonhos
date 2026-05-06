@@ -21,7 +21,8 @@ import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
-import { Sparkles } from "lucide-react";
+import { Sparkles, FileText as FileTextIcon } from "lucide-react";
+import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -83,6 +84,7 @@ function TripWalletContent() {
   const [isEditingTrip, setIsEditingTrip] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
+  const [showImportQuote, setShowImportQuote] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -473,9 +475,14 @@ function TripWalletContent() {
                           Envie um voucher, confirmação, PDF, imagem ou texto para a IA preencher os dados do serviço automaticamente.
                         </p>
                       </div>
-                      <Button size="sm" onClick={() => setShowAIImport(true)}>
-                        <Sparkles className="h-3.5 w-3.5 mr-1" /> Importar com IA
-                      </Button>
+                      <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                        <Button size="sm" variant="outline" onClick={() => setShowImportQuote(true)}>
+                          <FileTextIcon className="h-3.5 w-3.5 mr-1" /> De um orçamento
+                        </Button>
+                        <Button size="sm" onClick={() => setShowAIImport(true)}>
+                          <Sparkles className="h-3.5 w-3.5 mr-1" /> Importar com IA
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-6 mt-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as TripServiceType[]).map((type) => (
@@ -642,6 +649,12 @@ function TripWalletContent() {
           open={showAIImport}
           onOpenChange={setShowAIImport}
           onImport={handleAIImport}
+        />
+        <ImportQuoteIntoWalletDialog
+          open={showImportQuote}
+          onOpenChange={setShowImportQuote}
+          tripId={trip.id}
+          currentServiceCount={trip.services?.length || 0}
         />
       </div>
     </DashboardLayout>
