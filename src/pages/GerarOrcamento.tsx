@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, CloudOff, Cloud } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
@@ -119,6 +120,7 @@ export default function GerarOrcamento() {
   const [editingDestination, setEditingDestination] = useState(false);
   const [destinationDraft, setDestinationDraft] = useState("");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { id } = useParams();
   const location = useLocation();
   const { toast } = useToast();
@@ -701,8 +703,12 @@ export default function GerarOrcamento() {
                       onChange={(e) => setDestinationDraft(e.target.value)}
                       onKeyDown={async (e) => {
                         if (e.key === "Enter" && destinationDraft.trim()) {
-                          await supabase.from("quotes").update({ destination: destinationDraft.trim() } as any).eq("id", quote.id);
+                          const { error } = await supabase.from("quotes").update({ destination: destinationDraft.trim() } as any).eq("id", quote.id);
+                          if (error) { toast({ title: "Erro ao salvar destino", description: error.message, variant: "destructive" }); return; }
+                          await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
+                          await queryClient.invalidateQueries({ queryKey: ["quotes"] });
                           setEditingDestination(false);
+                          toast({ title: "Destino atualizado" });
                         }
                         if (e.key === "Escape") setEditingDestination(false);
                       }}
@@ -710,7 +716,11 @@ export default function GerarOrcamento() {
                     />
                     <Button variant="ghost" size="icon" className="h-5 w-5" onClick={async () => {
                       if (destinationDraft.trim()) {
-                        await supabase.from("quotes").update({ destination: destinationDraft.trim() } as any).eq("id", quote.id);
+                        const { error } = await supabase.from("quotes").update({ destination: destinationDraft.trim() } as any).eq("id", quote.id);
+                        if (error) { toast({ title: "Erro ao salvar destino", description: error.message, variant: "destructive" }); return; }
+                        await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
+                        await queryClient.invalidateQueries({ queryKey: ["quotes"] });
+                        toast({ title: "Destino atualizado" });
                       }
                       setEditingDestination(false);
                     }}>✓</Button>
