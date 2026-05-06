@@ -473,10 +473,12 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             page-break-inside: auto;
           }
 
-          /* Small service cards should stay together; large ones still flow. */
+          /* Service cards flow continuously across pages to avoid large
+             trailing whitespace at the bottom of pages. The header stays
+             glued to the following content via .service-title rules above. */
           .service-card {
-            break-inside: avoid;
-            page-break-inside: avoid;
+            break-inside: auto;
+            page-break-inside: auto;
           }
 
           /* Avoid orphan headings */
