@@ -44,7 +44,7 @@ const PERIOD_CONFIG: Record<Period, { label: string; icon: typeof Sun; color: st
 const ORIGIN_BADGE: Record<string, { label: string; className: string }> = {
   servico: { label: "Serviço", className: "bg-blue-500/10 text-blue-600 border-blue-200" },
   ia: { label: "IA", className: "bg-purple-500/10 text-purple-600 border-purple-200" },
-  manual: { label: "Manual", className: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
+  manual: { label: "Atividade", className: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
 };
 
 function parseLocalDate(dateStr: string): Date {
