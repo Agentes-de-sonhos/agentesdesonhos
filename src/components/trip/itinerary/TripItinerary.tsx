@@ -8,11 +8,22 @@ import { cn } from "@/lib/utils";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
+import { SortableActivity } from "./SortableActivity";
 import { AIItineraryModal, type OverwriteMode } from "./AIItineraryModal";
 import { ImportItineraryModal } from "./ImportItineraryModal";
 import { servicesToActivities } from "@/utils/serviceToItinerary";
 import type { TripService } from "@/types/trip";
 import { toast } from "sonner";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -135,7 +146,8 @@ function PeriodImageUpload({
 }
 
 export function TripItinerary({ tripId, destination, startDate, endDate, services, readOnly = false, onRequestAddService }: Props) {
-  const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
+  const { activities, isLoading, addActivity, updateActivity, deleteActivity, reorderActivities, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [addingFor, setAddingFor] = useState<{ dateStr: string; period: Period } | null>(null);
   const [editingActivity, setEditingActivity] = useState<ItineraryActivity | null>(null);
