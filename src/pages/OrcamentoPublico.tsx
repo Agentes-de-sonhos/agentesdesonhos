@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
@@ -412,7 +412,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const { quote: fetchedQuote, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
   const quote = quoteOverride ?? fetchedQuote;
   const isLoading = quoteOverride ? false : isFetching;
-  const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(0);
+  const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
+  const servicesInitialized = useRef(false);
+
+  // Initialize all services as open on first load
+  useEffect(() => {
+    if (!servicesInitialized.current && quote?.services?.length) {
+      setOpenServiceIndices(new Set(quote.services.map((_, i) => i)));
+      servicesInitialized.current = true;
+    }
+  }, [quote?.services]);
 
   // Auto-redirect legacy vitrine.tur.br/orcamento/* links to the new domain
   // so any cached or previously shared link lands on the correct host.
@@ -484,7 +493,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     : "";
 
   const handleToggleService = (index: number) => {
-    setOpenServiceIndex(prev => prev === index ? null : index);
+    setOpenServiceIndices(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
   };
 
   return (
@@ -595,7 +609,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   key={service.id}
                   service={service}
                   showPrice={showDetailedPrices}
-                  isOpen={openServiceIndex === index}
+                  isOpen={openServiceIndices.has(index)}
                   onToggle={() => handleToggleService(index)}
                   showPaymentPerService={useServicePayment}
                 />
