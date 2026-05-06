@@ -401,7 +401,7 @@ export default function CriarRoteiro() {
                 {currentItinerary.status === "approved" && (
                   <Button onClick={() => handlePublish(currentItinerary.id)}>
                     <Link2 className="mr-2 h-4 w-4" />
-                    Publicar
+                    Compartilhar Link
                   </Button>
                 )}
                 {currentItinerary.status === "published" && currentItinerary.shareToken && (
