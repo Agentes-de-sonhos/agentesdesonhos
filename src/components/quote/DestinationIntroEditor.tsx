@@ -41,9 +41,24 @@ export function DestinationIntroEditor({
 
   useEffect(() => {
     setEnabled(showIntro);
-    setText(introText || "");
-    setImages(introImages || []);
-  }, [showIntro, introText, introImages]);
+  }, [showIntro]);
+
+  // Only sync text from props when it actually differs (avoids wiping local edits
+  // when the parent re-renders with a new array/string reference).
+  useEffect(() => {
+    const incoming = introText || "";
+    setText((prev) => (prev === incoming ? prev : incoming));
+  }, [introText]);
+
+  useEffect(() => {
+    const incoming = introImages || [];
+    setImages((prev) => {
+      if (prev.length === incoming.length && prev.every((u, i) => u === incoming[i])) {
+        return prev;
+      }
+      return incoming;
+    });
+  }, [introImages]);
 
   const saveToDb = useCallback(
     async (updates: Record<string, any>) => {
@@ -53,9 +68,11 @@ export function DestinationIntroEditor({
         .eq("id", quoteId);
       if (error) {
         toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+        return;
       }
+      onUpdate?.();
     },
-    [quoteId, toast]
+    [quoteId, toast, onUpdate]
   );
 
   const debouncedSaveText = useCallback(
