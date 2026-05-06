@@ -84,6 +84,7 @@ export function ItineraryCard({
   onPublish,
   onCopyLink,
 }: ItineraryCardProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
@@ -136,7 +137,10 @@ export function ItineraryCard({
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => onDelete(itinerary.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setConfirmOpen(true);
+                }}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -146,6 +150,25 @@ export function ItineraryCard({
           </DropdownMenu>
         </div>
       </CardHeader>
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir roteiro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O roteiro de {itinerary.destination} será excluído permanentemente. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => onDelete(itinerary.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <CardContent>
         <div className="flex flex-wrap items-center gap-2">
           <Badge className={statusColors[itinerary.status]} variant="secondary">
