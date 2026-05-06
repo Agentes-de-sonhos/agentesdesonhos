@@ -306,8 +306,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
                   .map(
                     (src) => `
                       <td style="width:20%;vertical-align:middle;padding:3px;">
-                        <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
-                          <img src="${src}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                        <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;text-align:center;line-height:78px;font-size:0;">
+                          <img src="${src}" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:inline-block;" />
                         </div>
                       </td>
                     `
