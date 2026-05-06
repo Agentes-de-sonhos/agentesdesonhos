@@ -650,6 +650,12 @@ function TripWalletContent() {
           onOpenChange={setShowAIImport}
           onImport={handleAIImport}
         />
+        <ImportQuoteIntoWalletDialog
+          open={showImportQuote}
+          onOpenChange={setShowImportQuote}
+          tripId={trip.id}
+          currentServiceCount={trip.services?.length || 0}
+        />
       </div>
     </DashboardLayout>
   );
