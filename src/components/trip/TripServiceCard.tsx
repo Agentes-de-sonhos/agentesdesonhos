@@ -238,32 +238,6 @@ export function TripServiceCard({
   return (
     <Card>
       <CardContent className="p-4">
-        {/* Service image banner — only render if URL is a valid http(s) URL */}
-        {service.image_url && /^https?:\/\//i.test(service.image_url) && (
-          <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted flex items-center justify-center">
-            <img
-              src={service.image_url}
-              alt={label}
-              className="w-full max-h-64 object-contain"
-              onError={(e) => {
-                // Hide entire banner if image fails to load
-                const wrapper = e.currentTarget.parentElement;
-                if (wrapper) wrapper.style.display = "none";
-              }}
-            />
-            {showActions && onRemoveServiceImage && (
-              <Button
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 h-7 w-7 opacity-80 hover:opacity-100"
-                onClick={() => onRemoveServiceImage(service.id)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        )}
-
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             {(dragHandle || onMoveUp || onMoveDown) && (
@@ -344,49 +318,6 @@ export function TripServiceCard({
                 </div>
               )}
 
-              {/* Action buttons row */}
-              {showActions && (
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  {onAddAttachment && (
-                    <>
-                      <input
-                        ref={addFileInputRef}
-                        type="file"
-                        className="hidden"
-                        accept=".pdf,.jpg,.jpeg,.png,.webp"
-                        onChange={handleAddFile}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 text-xs px-2"
-                        onClick={() => addFileInputRef.current?.click()}
-                      >
-                        <Upload className="h-3 w-3 mr-1" /> {attachments.length > 0 ? "Adicionar arquivo" : "Anexar arquivo"}
-                      </Button>
-                    </>
-                  )}
-                  {onUploadServiceImage && (
-                    <>
-                      <input
-                        ref={imageInputRef}
-                        type="file"
-                        className="hidden"
-                        accept="image/jpeg,image/png,image/webp"
-                        onChange={handleImageUpload}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 text-xs px-2"
-                        onClick={() => imageInputRef.current?.click()}
-                      >
-                        <Camera className="h-3 w-3 mr-1" /> {service.image_url ? "Trocar imagem" : "Adicionar imagem"}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           </div>
           
