@@ -355,16 +355,6 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                   <span className="text-sm text-muted-foreground">
                     — {format(day.date, "dd 'de' MMMM", { locale: ptBR })}
                   </span>
-                  {activityCount > 0 && (
-                    <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
-                      {activityCount} {activityCount === 1 ? "atividade" : "atividades"}
-                    </span>
-                  )}
-                  {serviceCount > 0 && (
-                    <span className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded-full font-medium">
-                      {serviceCount} serviço{serviceCount !== 1 ? "s" : ""}
-                    </span>
-                  )}
                 </div>
                 <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isExpanded && "rotate-180")} />
               </button>
