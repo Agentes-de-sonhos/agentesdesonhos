@@ -31,6 +31,7 @@ interface Props {
   endDate: string;
   services: TripService[];
   readOnly?: boolean;
+  onRequestAddService?: () => void;
 }
 
 type Period = "morning" | "afternoon" | "evening";
@@ -44,7 +45,7 @@ const PERIOD_CONFIG: Record<Period, { label: string; icon: typeof Sun; color: st
 const ORIGIN_BADGE: Record<string, { label: string; className: string }> = {
   servico: { label: "Serviço", className: "bg-blue-500/10 text-blue-600 border-blue-200" },
   ia: { label: "IA", className: "bg-purple-500/10 text-purple-600 border-purple-200" },
-  manual: { label: "Manual", className: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
+  manual: { label: "Atividade", className: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
 };
 
 function parseLocalDate(dateStr: string): Date {
@@ -133,7 +134,7 @@ function PeriodImageUpload({
   );
 }
 
-export function TripItinerary({ tripId, destination, startDate, endDate, services, readOnly = false }: Props) {
+export function TripItinerary({ tripId, destination, startDate, endDate, services, readOnly = false, onRequestAddService }: Props) {
   const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading: isPeriodUploading } = usePeriodImages(tripId);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
@@ -446,14 +447,26 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                           </div>
                         ) : (
                           !readOnly && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="ml-4 mt-1 text-xs text-muted-foreground h-7"
-                              onClick={() => setAddingFor({ dateStr: day.dateStr, period })}
-                            >
-                              <Plus className="mr-1 h-3 w-3" /> Adicionar atividade
-                            </Button>
+                            <div className="flex flex-wrap gap-1 ml-4 mt-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs text-muted-foreground h-7"
+                                onClick={() => setAddingFor({ dateStr: day.dateStr, period })}
+                              >
+                                <Plus className="mr-1 h-3 w-3" /> Adicionar atividade
+                              </Button>
+                              {onRequestAddService && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-xs text-muted-foreground h-7"
+                                  onClick={onRequestAddService}
+                                >
+                                  <Plus className="mr-1 h-3 w-3" /> Adicionar serviço
+                                </Button>
+                              )}
+                            </div>
                           )
                         )}
                       </div>
