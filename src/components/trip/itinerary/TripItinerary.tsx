@@ -312,6 +312,57 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
     }
   };
 
+  const handleDragEnd = async (dateStr: string, event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    if (active.id === over.id) return;
+
+    const dayActs = (activitiesByDay[dateStr] || []).slice();
+    const activeAct = dayActs.find((a) => a.id === active.id);
+    if (!activeAct) return;
+
+    // Determine target period: dropping on another activity uses that activity's period;
+    // dropping on an empty-period container uses the period from droppable id.
+    const overData: any = over.data?.current;
+    const overIsPeriod = typeof over.id === "string" && (over.id as string).startsWith("period:");
+    const targetPeriod: Period = overIsPeriod
+      ? ((over.id as string).split(":")[2] as Period)
+      : (overData?.period as Period) || activeAct.period;
+
+    // Build new ordered list per period
+    const byPeriod: Record<Period, typeof dayActs> = {
+      morning: dayActs.filter((a) => a.period === "morning" && a.id !== active.id).sort((a, b) => a.order_index - b.order_index),
+      afternoon: dayActs.filter((a) => a.period === "afternoon" && a.id !== active.id).sort((a, b) => a.order_index - b.order_index),
+      evening: dayActs.filter((a) => a.period === "evening" && a.id !== active.id).sort((a, b) => a.order_index - b.order_index),
+    };
+
+    // Insert active at the right index in target period
+    let insertIdx = byPeriod[targetPeriod].length;
+    if (!overIsPeriod) {
+      const idx = byPeriod[targetPeriod].findIndex((a) => a.id === over.id);
+      if (idx >= 0) insertIdx = idx;
+    }
+    byPeriod[targetPeriod].splice(insertIdx, 0, { ...activeAct, period: targetPeriod });
+
+    // Build update list
+    const updates: { id: string; order_index: number; period?: string }[] = [];
+    (["morning", "afternoon", "evening"] as Period[]).forEach((p) => {
+      byPeriod[p].forEach((a, i) => {
+        const periodChanged = a.period !== p || a.id === active.id;
+        if (a.order_index !== i || periodChanged) {
+          updates.push({ id: a.id, order_index: i, period: p });
+        }
+      });
+    });
+
+    if (updates.length === 0) return;
+    try {
+      await reorderActivities(updates);
+    } catch {
+      toast.error("Erro ao reordenar atividades");
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
