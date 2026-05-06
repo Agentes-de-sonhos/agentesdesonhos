@@ -21,7 +21,8 @@ import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
-import { Sparkles } from "lucide-react";
+import { Sparkles, FileText as FileTextIcon } from "lucide-react";
+import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -83,6 +84,7 @@ function TripWalletContent() {
   const [isEditingTrip, setIsEditingTrip] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
+  const [showImportQuote, setShowImportQuote] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
