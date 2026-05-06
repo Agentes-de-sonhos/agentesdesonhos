@@ -416,11 +416,11 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                           }
                           const originBadge = ORIGIN_BADGE[activity.origin] || ORIGIN_BADGE.manual;
                           return (
-                            <div key={activity.id} className="ml-4 relative">
-                              {/* Origin badge */}
-                              <div className="absolute -left-1 top-1.5 z-10">
+                            <div key={activity.id} className="ml-4">
+                              {/* Origin badge — exibido inline acima do card para não sobrepor */}
+                              <div className="mb-1 ml-5">
                                 <span className={cn(
-                                  "text-[9px] font-semibold px-1.5 py-0.5 rounded-full border",
+                                  "inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border",
                                   originBadge.className
                                 )}>
                                   {originBadge.label}
