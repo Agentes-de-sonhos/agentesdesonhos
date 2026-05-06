@@ -408,42 +408,12 @@ function TripWalletContent() {
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => setIsEditingTrip(true)}>
-              <Pencil className="mr-2 h-4 w-4" /> Editar Carteira
-            </Button>
             <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
               <FileText className="mr-2 h-4 w-4" /> PDF
             </Button>
             <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)}>
               <Share2 className="mr-2 h-4 w-4" /> Compartilhar
             </Button>
-            <Button variant="outline" size="sm" onClick={handleArchiveTrip}>
-              <Archive className="mr-2 h-4 w-4" /> {trip.status === "archived" ? "Reativar" : "Arquivar"}
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Excluir carteira permanentemente?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    A carteira de <strong>{trip.client_name}</strong> será excluída permanentemente, incluindo todos os serviços, documentos e histórico. Esta ação não pode ser desfeita.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteTrip}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    Excluir Permanentemente
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
         </div>
 
