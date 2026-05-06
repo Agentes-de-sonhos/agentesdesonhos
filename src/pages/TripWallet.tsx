@@ -86,6 +86,14 @@ function TripWalletContent() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
   const [showImportQuote, setShowImportQuote] = useState(false);
+  const [accordionValue, setAccordionValue] = useState<string[]>(["services"]);
+
+  const openServicesAccordion = () => {
+    setAccordionValue((prev) => (prev.includes("services") ? prev : [...prev, "services"]));
+    setTimeout(() => {
+      document.getElementById("trip-services-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+  };
 
   // Inline edit state for the Resumo block
   const [editingField, setEditingField] = useState<null | "client_name" | "destination" | "start_date" | "end_date" | "status">(null);
@@ -434,9 +442,9 @@ function TripWalletContent() {
           </Card>
         )}
 
-        <Accordion type="multiple" className="space-y-3">
+        <Accordion type="multiple" className="space-y-3" value={accordionValue} onValueChange={(v) => setAccordionValue(v as string[])}>
           {/* 1. Serviços da Viagem */}
-          <AccordionItem value="services" className="border border-border rounded-lg overflow-hidden bg-card">
+          <AccordionItem value="services" id="trip-services-section" className="border border-border rounded-lg overflow-hidden bg-card">
             <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
               <span className="text-base font-semibold">Serviços da Viagem</span>
             </AccordionTrigger>
@@ -514,6 +522,7 @@ function TripWalletContent() {
                 startDate={trip.start_date}
                 endDate={trip.end_date}
                 services={trip.services || []}
+                onRequestAddService={openServicesAccordion}
               />
             </AccordionContent>
           </AccordionItem>
