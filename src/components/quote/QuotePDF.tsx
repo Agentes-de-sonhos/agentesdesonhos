@@ -243,18 +243,12 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           case "circuit": summary = data.circuit_name || "Circuito"; break;
           case "other": summary = data.company_name || (data.description || "").split("\n")[0].slice(0, 80) || "Outros Serviços"; break;
         }
+        // PDF: usar APENAS a primeira imagem cadastrada para economizar espaço vertical
         const allImages = [
           ...(service.image_urls || []),
           ...(service.image_url && !(service.image_urls || []).includes(service.image_url) ? [service.image_url] : []),
-        ].slice(0, 6);
-        const extraCount = ((service.image_urls || []).length + (service.image_url && !(service.image_urls || []).includes(service.image_url) ? 1 : 0)) - 6;
-
-        const photosHtml = allImages.length > 0 ? `
-          <div class="pdf-block pdf-gallery" style="margin:14px 0 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-            ${allImages.map((url: string) => `<img src="${url}" style="width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;" />`).join("")}
-          </div>
-          ${extraCount > 0 ? `<p style="font-size:11px;color:#94a3b8;margin:4px 0 8px;">+${extraCount} foto(s) disponíveis no link completo</p>` : ""}
-        ` : "";
+        ];
+        const firstImage = allImages[0] || null;
 
         // Per-service payment display
         let paymentHtml = "";
@@ -274,21 +268,44 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
 
         const detailsHtml = details.length > 0 ? `
           <div class="pdf-block pdf-details" style="word-wrap:break-word;overflow-wrap:break-word;">
-            ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.55;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+            ${details.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
           </div>
         ` : "";
 
         const descHtml = descText ? `
-          <div class="pdf-block pdf-desc" style="margin-top:6px;word-wrap:break-word;overflow-wrap:break-word;">
-            <p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.55;white-space:pre-wrap;word-break:break-word;">${descText}</p>
+          <div class="pdf-block pdf-desc" style="margin-top:4px;word-wrap:break-word;overflow-wrap:break-word;">
+            <p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${descText}</p>
           </div>
         ` : "";
 
         const notesHtml = notesText ? `
-          <div class="pdf-block pdf-notes" style="margin-top:6px;">
-            <p style="margin:3px 0;font-size:13px;color:#64748b;line-height:1.55;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
+          <div class="pdf-block pdf-notes" style="margin-top:4px;">
+            <p style="margin:2px 0;font-size:12px;color:#64748b;line-height:1.45;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:10px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
           </div>
         ` : "";
+
+        // Layout 2 colunas: imagem (≈30%) + conteúdo (≈70%) usando <table>
+        // pois é mais confiável que flex/grid em renderização de impressão.
+        const bodyInner = `
+          ${detailsHtml}
+          ${descHtml}
+          ${notesHtml}
+          ${paymentHtml}
+        `;
+        const bodyHtml = firstImage
+          ? `
+            <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
+              <tr>
+                <td style="width:30%;vertical-align:top;padding:0 14px 0 0;">
+                  <img src="${firstImage}" style="width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;display:block;" />
+                </td>
+                <td style="vertical-align:top;">
+                  ${bodyInner}
+                </td>
+              </tr>
+            </table>
+          `
+          : bodyInner;
 
         return `
         <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:16px;margin-bottom:14px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
@@ -302,12 +319,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             </div>
             <span style="font-size:18px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>
           </div>
-          <div style="padding:16px 20px;">
-            ${photosHtml}
-            ${detailsHtml}
-            ${descHtml}
-            ${notesHtml}
-            ${paymentHtml}
+          <div style="padding:12px 16px;">
+            ${bodyHtml}
           </div>
         </div>
       `;
