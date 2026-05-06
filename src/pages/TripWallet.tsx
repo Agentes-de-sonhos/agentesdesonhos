@@ -467,22 +467,18 @@ function TripWalletContent() {
                   </div>
                 ) : (
                   <>
-                    {/* Import actions */}
-                    <div className="flex items-center justify-end gap-2 mb-4 mt-2">
-                      <span className="text-sm font-medium text-muted-foreground mr-1">Importar serviço</span>
-                      <Button size="sm" variant="outline" onClick={() => setShowImportQuote(true)}>
-                        <FileTextIcon className="h-3.5 w-3.5 mr-1" /> De um orçamento
-                      </Button>
-                      <Button size="sm" onClick={() => setShowAIImport(true)}>
-                        <Sparkles className="h-3.5 w-3.5 mr-1" /> Importar com IA
-                      </Button>
-                    </div>
                     <div className="flex flex-wrap gap-2 mb-6 mt-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as TripServiceType[]).map((type) => (
                         <Button key={type} variant="outline" size="sm" onClick={() => setSelectedServiceType(type)}>
                           <Plus className="mr-1 h-3 w-3" /> {SERVICE_TYPE_LABELS[type]}
                         </Button>
                       ))}
+                      <Button size="sm" variant="outline" onClick={() => setShowImportQuote(true)}>
+                        <FileTextIcon className="mr-1 h-3 w-3" /> Importar orçamento
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setShowAIImport(true)}>
+                        <Sparkles className="mr-1 h-3 w-3" /> Importar com IA
+                      </Button>
                     </div>
                     <TripServiceList
                       services={trip.services || []}
