@@ -299,23 +299,6 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         `;
         const hotelGalleryHtml = isHotel && hotelImages.length > 0
           ? (() => {
-              const cells = hotelImages
-                .map(
-                  (src) => `
-                    <td style="width:20%;vertical-align:middle;padding:3px;">
-                      <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;display:table;">
-                        <div style="display:table-cell;vertical-align:middle;text-align:center;">
-                          <img src="${src}" style="max-width:100%;max-height:78px;object-fit:contain;border-radius:6px;display:inline-block;vertical-align:middle;" />
-                        </div>
-                      </div>
-                    </td>
-                  `
-                )
-                .join("");
-              // pad to multiple of 5 for alignment
-              const remainder = hotelImages.length % 5;
-              const pads = remainder === 0 ? "" : Array(5 - remainder).fill('<td style="width:20%;padding:3px;"></td>').join("");
-              // chunk into rows of 5
               const allCells: string[] = [];
               for (let i = 0; i < hotelImages.length; i += 5) {
                 const row = hotelImages.slice(i, i + 5);
