@@ -430,8 +430,11 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           .agent-signature { margin-top: 10px !important; }
           .agent-signature > div:last-child { padding: 10px 16px !important; }
 
-          /* Trim the trailing footer so it never pushes a new page alone */
-          body > div > div > div:last-child { padding-top: 10px !important; }
+          /* Trim trailing footer + remove bottom paddings/margins so the
+             very last element doesn't overflow into a blank trailing page. */
+          body > div > div > div:last-child { padding-top: 6px !important; padding-bottom: 0 !important; }
+          body > div { padding-bottom: 0 !important; margin-bottom: 0 !important; }
+          body, html { margin: 0 !important; padding: 0 !important; }
 
           /* Atomic sub-blocks — never split these in the middle */
           .pdf-block,
