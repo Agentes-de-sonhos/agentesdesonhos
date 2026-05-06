@@ -756,12 +756,12 @@ export default function GerarOrcamento() {
           <div className="space-y-4">
             {/* Serviços - Collapsible */}
             <Card>
-              <button
-                type="button"
-                onClick={() => toggleSection("services")}
-                className="w-full flex items-center justify-between px-6 py-4 text-left"
-              >
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() => toggleSection("services")}
+                  className="flex items-center gap-2 text-left flex-1"
+                >
                   <Plus className="h-4 w-4 text-muted-foreground" />
                   <span className="text-base font-semibold">Adicionar Serviços</span>
                   {quote.services && quote.services.length > 0 && (
@@ -769,9 +769,28 @@ export default function GerarOrcamento() {
                       ({quote.services.length})
                     </span>
                   )}
+                </button>
+                <div className="flex items-center gap-2">
+                  {!selectedServiceType && (
+                    <Button
+                      size="sm"
+                      className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
+                      onClick={(e) => { e.stopPropagation(); setShowAIImport(true); }}
+                    >
+                      <Sparkles className="mr-1 h-3 w-3 shrink-0" />
+                      <span className="hidden sm:inline truncate">Importar com IA</span>
+                      <span className="sm:hidden truncate">IA</span>
+                    </Button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => toggleSection("services")}
+                    className="p-1"
+                  >
+                    <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.services && "rotate-180")} />
+                  </button>
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.services && "rotate-180")} />
-              </button>
+              </div>
               {openSections.services && (
               <CardContent className="pt-0">
                 {selectedServiceType ? (
@@ -831,14 +850,6 @@ export default function GerarOrcamento() {
                 ) : (
                   <>
                     <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
-                      <Button
-                        size="sm"
-                        className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
-                        onClick={() => setShowAIImport(true)}
-                      >
-                        <Sparkles className="mr-1 h-3 w-3 shrink-0" />
-                        <span className="truncate">Importar com IA</span>
-                      </Button>
                       {(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((type) => (
                         <Button key={type} variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9" onClick={() => setSelectedServiceType(type)}>
                           <Plus className="mr-1 h-3 w-3 shrink-0" />
