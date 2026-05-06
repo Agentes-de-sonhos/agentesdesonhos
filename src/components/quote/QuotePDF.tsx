@@ -445,25 +445,38 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           const hasImages = introImages.length > 0;
           if (!showIntro || (!hasText && !hasImages)) return "";
 
-          const imagesToShow = introImages.slice(0, 5);
-          const galleryHtml = hasImages
-            ? (imagesToShow.length === 1
-                ? `<div class="pdf-block" style="border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;background:#f1f5f9;margin-bottom:14px;">
-                     <img src="${imagesToShow[0]}" alt="${quote.destination}" style="width:100%;max-height:340px;object-fit:cover;display:block;" />
-                   </div>`
-                : `<div class="pdf-block" style="display:grid;grid-template-columns:repeat(${Math.min(imagesToShow.length, 3)},1fr);gap:8px;margin-bottom:14px;">
-                     ${imagesToShow.map((url) => `<img src="${url}" alt="${quote.destination}" style="width:100%;height:160px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;display:block;" />`).join("")}
-                   </div>`)
+          // PDF: APENAS a primeira imagem; layout 2 colunas (img 25% / texto 75%)
+          const firstImg = hasImages ? introImages[0] : null;
+          const safeText = hasText
+            ? introText.replace(/</g, "&lt;").replace(/\n/g, "<br/>")
             : "";
 
-          const textHtml = hasText
-            ? `<p style="font-size:14px;color:#475569;line-height:1.7;text-align:center;margin:0 auto;max-width:680px;white-space:pre-wrap;word-break:break-word;">${introText.replace(/</g, "&lt;").replace(/\n/g, "<br/>")}</p>`
-            : "";
-
+          if (firstImg && hasText) {
+            return `
+              <div class="pdf-block destination-intro" style="margin-bottom:20px;">
+                <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
+                  <tr>
+                    <td style="width:25%;vertical-align:top;padding:0 16px 0 0;">
+                      <img src="${firstImg}" alt="${quote.destination}" style="width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid #e2e8f0;display:block;" />
+                    </td>
+                    <td style="vertical-align:top;">
+                      <p style="font-size:13px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            `;
+          }
+          if (firstImg) {
+            return `
+              <div class="pdf-block destination-intro" style="margin-bottom:20px;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
+                <img src="${firstImg}" alt="${quote.destination}" style="width:100%;max-height:240px;object-fit:cover;display:block;" />
+              </div>
+            `;
+          }
           return `
-            <div class="pdf-block destination-intro" style="margin-bottom:28px;">
-              ${galleryHtml}
-              ${textHtml}
+            <div class="pdf-block destination-intro" style="margin-bottom:20px;">
+              <p style="font-size:13px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</p>
             </div>
           `;
         })()}
