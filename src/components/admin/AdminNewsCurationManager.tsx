@@ -220,65 +220,56 @@ export function AdminNewsCurationManager() {
     },
   });
 
-  const openDecisionDialog = (
-    item: NoticiasDashboard,
-    decisao: "aprovado" | "rejeitado",
-    tipo?: string
-  ) => {
-    setDecisionDialog({ item, decisao, tipo });
-    setMotivo("");
-    setMotivoCustom("");
-    setScoreFinal(item.relevancia_score);
-  };
-
   const decisionMutation = useMutation({
-    mutationFn: async () => {
-      if (!decisionDialog) return;
-      const { item, decisao, tipo } = decisionDialog;
-      const motivoFinal = motivo === "Outro" ? motivoCustom : motivo;
-
-      // Atualiza notícia
+    mutationFn: async ({
+      ids,
+      decisao,
+      tipo,
+    }: {
+      ids: string[];
+      decisao: "aprovado" | "rejeitado";
+      tipo?: "destaque" | "secundaria";
+    }) => {
       const updateData: any = { status: decisao };
       if (decisao === "aprovado") {
         updateData.tipo_exibicao = tipo || "secundaria";
-        if (scoreFinal !== item.relevancia_score) {
-          updateData.relevancia_score = scoreFinal;
-        }
       }
-      const { error: upErr } = await supabase
+      const { error } = await supabase
         .from("noticias_dashboard")
         .update(updateData)
-        .eq("id", item.id);
-      if (upErr) throw upErr;
-
-      // Salva feedback para aprendizado da IA
-      const { error: fbErr } = await supabase.from("news_curation_feedback").insert({
-        noticia_id: item.id,
-        titulo: item.titulo_curto,
-        resumo: item.resumo,
-        categoria: item.categoria,
-        fonte: item.fonte,
-        score_ia: item.relevancia_score,
-        score_final: decisao === "aprovado" ? scoreFinal : null,
-        decisao,
-        motivo: motivoFinal || null,
-        created_by: user?.id,
-      });
-      if (fbErr) throw fbErr;
+        .in("id", ids);
+      if (error) throw error;
+      return { count: ids.length, decisao };
     },
-    onSuccess: () => {
+    onSuccess: ({ count, decisao }) => {
       queryClient.invalidateQueries({ queryKey: ["admin-noticias-curadas"] });
       queryClient.invalidateQueries({ queryKey: ["curated-news-dashboard"] });
       toast({
-        title: decisionDialog?.decisao === "aprovado" ? "Notícia aprovada!" : "Notícia rejeitada",
-        description: "A IA vai aprender com essa decisão na próxima coleta.",
+        title:
+          decisao === "aprovado"
+            ? `${count} ${count === 1 ? "notícia aprovada" : "notícias aprovadas"}`
+            : `${count} ${count === 1 ? "notícia rejeitada" : "notícias rejeitadas"}`,
       });
-      setDecisionDialog(null);
+      setSelectedIds(new Set());
     },
     onError: (error: any) => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     },
   });
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const pendentes = (noticias || []).filter((n) => n.status === "pendente").map((n) => n.id);
+    setSelectedIds((prev) => (prev.size === pendentes.length ? new Set() : new Set(pendentes)));
+  };
 
   const handleEdit = (item: NoticiasDashboard) => {
     setEditingItem(item);
