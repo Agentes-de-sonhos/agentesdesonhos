@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, MapPin, Calendar } from "lucide-react";
+import { Loader2, Download, MapPin, Calendar, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
 import { useItineraries } from "@/hooks/useItineraries";
 import type { CreateActivityData } from "@/hooks/useItineraryActivities";
 import type { OverwriteMode } from "./AIItineraryModal";
@@ -40,6 +41,7 @@ interface Props {
 
 export function ImportItineraryModal({ open, onOpenChange, tripId, startDate, hasExistingActivities, onImported }: Props) {
   const { itineraries, isLoading, getItineraryWithDetails } = useItineraries();
+  const navigate = useNavigate();
   const [importingId, setImportingId] = useState<string | null>(null);
   const [pending, setPending] = useState<CreateActivityData[] | null>(null);
   const [showOverwrite, setShowOverwrite] = useState(false);
@@ -138,11 +140,18 @@ export function ImportItineraryModal({ open, onOpenChange, tripId, startDate, ha
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : validated.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Nenhum roteiro validado disponível. Crie e aprove um roteiro em "Criar Roteiro" para importá-lo aqui.
+            <div className="py-6 text-center space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Você ainda não possui roteiros validados. Gere um novo roteiro com IA e aprove-o para importá-lo aqui.
+              </p>
+              <Button onClick={() => navigate("/ferramentas-ia/criar-roteiro")}>
+                <Sparkles className="mr-1.5 h-4 w-4" />
+                Gerar novo roteiro
+              </Button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
+              <div className="space-y-2">
               {validated.map((it) => (
                 <button
                   key={it.id}
@@ -169,6 +178,15 @@ export function ImportItineraryModal({ open, onOpenChange, tripId, startDate, ha
                   )}
                 </button>
               ))}
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate("/ferramentas-ia/criar-roteiro")}
+              >
+                <Sparkles className="mr-1.5 h-4 w-4" />
+                Gerar novo roteiro
+              </Button>
             </div>
           )}
         </DialogContent>
