@@ -156,17 +156,17 @@ function getServiceDetails(service: QuoteService): string[] {
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
-      <div style="text-align:center;padding:18px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
-        <p style="font-size:26px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
+      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
+        <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
           ${profile?.agency_name || "Proposta de Viagem"}
         </p>
       </div>
     `;
   }
   return `
-    <div style="text-align:center;padding:18px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;">
+    <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;">
       <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
-        style="max-height:160px;max-width:400px;object-fit:contain;display:block;margin:0 auto;" />
+        style="max-height:90px;max-width:260px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
   `;
 }
@@ -186,19 +186,19 @@ function generateAgentSignature(profile: AgentProfile | null): string {
     : "";
 
   return `
-    <div class="pdf-block agent-signature" style="margin-top:24px;border:1px solid #e2e8f0;border-radius:20px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:12px 24px;text-align:center;">
-        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
+    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
       </div>
-      <div style="padding:28px 24px;text-align:center;">
-        ${avatarHtml}
-        <p style="font-size:20px;font-weight:800;color:#1e293b;margin:14px 0 2px;">${profile.name}</p>
-        ${profile.agency_name ? `<p style="font-size:13px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
-        ${profile.city || profile.state ? `<p style="font-size:12px;color:#94a3b8;margin:4px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
+      <div style="padding:14px 18px;text-align:center;">
+        ${avatarHtml.replace(/width:96px;height:96px/g, "width:68px;height:68px").replace(/font-size:36px/g, "font-size:26px")}
+        <p style="font-size:17px;font-weight:800;color:#1e293b;margin:8px 0 1px;">${profile.name}</p>
+        ${profile.agency_name ? `<p style="font-size:12px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
+        ${profile.city || profile.state ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
         ${
           whatsappLink
-            ? `<div style="margin-top:18px;">
-                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:12px 32px;border-radius:9999px;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
+            ? `<div style="margin-top:10px;">
+                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
                   💬 Falar no WhatsApp
                 </a>
               </div>`
@@ -243,18 +243,12 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           case "circuit": summary = data.circuit_name || "Circuito"; break;
           case "other": summary = data.company_name || (data.description || "").split("\n")[0].slice(0, 80) || "Outros Serviços"; break;
         }
+        // PDF: usar APENAS a primeira imagem cadastrada para economizar espaço vertical
         const allImages = [
           ...(service.image_urls || []),
           ...(service.image_url && !(service.image_urls || []).includes(service.image_url) ? [service.image_url] : []),
-        ].slice(0, 6);
-        const extraCount = ((service.image_urls || []).length + (service.image_url && !(service.image_urls || []).includes(service.image_url) ? 1 : 0)) - 6;
-
-        const photosHtml = allImages.length > 0 ? `
-          <div class="pdf-block pdf-gallery" style="margin:14px 0 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-            ${allImages.map((url: string) => `<img src="${url}" style="width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;" />`).join("")}
-          </div>
-          ${extraCount > 0 ? `<p style="font-size:11px;color:#94a3b8;margin:4px 0 8px;">+${extraCount} foto(s) disponíveis no link completo</p>` : ""}
-        ` : "";
+        ];
+        const firstImage = allImages[0] || null;
 
         // Per-service payment display
         let paymentHtml = "";
@@ -274,40 +268,59 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
 
         const detailsHtml = details.length > 0 ? `
           <div class="pdf-block pdf-details" style="word-wrap:break-word;overflow-wrap:break-word;">
-            ${details.map((d) => `<p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.55;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+            ${details.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
           </div>
         ` : "";
 
         const descHtml = descText ? `
-          <div class="pdf-block pdf-desc" style="margin-top:6px;word-wrap:break-word;overflow-wrap:break-word;">
-            <p style="margin:3px 0;font-size:13px;color:#475569;line-height:1.55;white-space:pre-wrap;word-break:break-word;">${descText}</p>
+          <div class="pdf-block pdf-desc" style="margin-top:4px;word-wrap:break-word;overflow-wrap:break-word;">
+            <p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${descText}</p>
           </div>
         ` : "";
 
         const notesHtml = notesText ? `
-          <div class="pdf-block pdf-notes" style="margin-top:6px;">
-            <p style="margin:3px 0;font-size:13px;color:#64748b;line-height:1.55;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:12px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
+          <div class="pdf-block pdf-notes" style="margin-top:4px;">
+            <p style="margin:2px 0;font-size:12px;color:#64748b;line-height:1.45;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:10px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
           </div>
         ` : "";
 
+        // Layout 2 colunas: imagem (≈30%) + conteúdo (≈70%) usando <table>
+        // pois é mais confiável que flex/grid em renderização de impressão.
+        const bodyInner = `
+          ${detailsHtml}
+          ${descHtml}
+          ${notesHtml}
+          ${paymentHtml}
+        `;
+        const bodyHtml = firstImage
+          ? `
+            <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
+              <tr>
+                <td style="width:30%;vertical-align:top;padding:0 14px 0 0;">
+                  <img src="${firstImage}" style="width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;display:block;" />
+                </td>
+                <td style="vertical-align:top;">
+                  ${bodyInner}
+                </td>
+              </tr>
+            </table>
+          `
+          : bodyInner;
+
         return `
-        <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:16px;margin-bottom:14px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:12px 18px;color:${grad.fg};">
+        <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:8px 14px;color:${grad.fg};">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
-              <div style="width:40px;height:40px;border-radius:10px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
+              <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
               <div style="min-width:0;">
                 <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
                 ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
               </div>
             </div>
-            <span style="font-size:18px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>
+            <span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>
           </div>
-          <div style="padding:16px 20px;">
-            ${photosHtml}
-            ${detailsHtml}
-            ${descHtml}
-            ${notesHtml}
-            ${paymentHtml}
+          <div style="padding:12px 16px;">
+            ${bodyHtml}
           </div>
         </div>
       `;
@@ -330,7 +343,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
            giant whitespace bug). Instead, mark only SAFE atomic sub-blocks as
            unbreakable, and keep titles glued to what comes next.            */
         @media print {
-          @page { size: A4; margin: 12mm; }
+          @page { size: A4; margin: 10mm 10mm 10mm 10mm; }
           html, body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -384,28 +397,28 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       </style>
     </head>
     <body>
-      <div style="max-width:820px;margin:0 auto;padding:0 0 40px;">
+      <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
         ${generateAgencyHeader(profile || null)}
 
-        <div style="padding:28px 40px 0;">
+        <div style="padding:18px 32px 0;">
         <!-- Hero -->
-        <div class="pdf-block pdf-hero" style="text-align:center;padding:6px 0 18px;">
-          <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:6px 16px;border-radius:9999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px;">
+        <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
+          <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
             📍 Proposta de Viagem
           </div>
           ${(quote as any).trip_title ? `
-            <h1 style="font-size:38px;font-weight:800;color:#1e293b;margin:0 0 4px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
-            <p style="font-size:20px;font-weight:600;color:#64748b;margin:0 0 6px;">${quote.destination}</p>
+            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
+            <p style="font-size:17px;font-weight:600;color:#64748b;margin:0 0 4px;">${quote.destination}</p>
           ` : `
-            <h1 style="font-size:38px;font-weight:800;color:#1e293b;margin:0 0 4px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
+            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
           `}
-          <p style="font-size:15px;color:#64748b;margin-top:8px;">
+          <p style="font-size:14px;color:#64748b;margin-top:4px;">
             Preparado especialmente para <strong style="color:#1e293b;">${quote.client_name}</strong>
           </p>
         </div>
 
         <!-- Overview -->
-        <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;padding:22px 24px;margin-bottom:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
           <div>
             <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
             <p style="font-size:14px;font-weight:700;color:#1e293b;">${quote.destination}</p>
@@ -432,32 +445,45 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           const hasImages = introImages.length > 0;
           if (!showIntro || (!hasText && !hasImages)) return "";
 
-          const imagesToShow = introImages.slice(0, 5);
-          const galleryHtml = hasImages
-            ? (imagesToShow.length === 1
-                ? `<div class="pdf-block" style="border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;background:#f1f5f9;margin-bottom:14px;">
-                     <img src="${imagesToShow[0]}" alt="${quote.destination}" style="width:100%;max-height:340px;object-fit:cover;display:block;" />
-                   </div>`
-                : `<div class="pdf-block" style="display:grid;grid-template-columns:repeat(${Math.min(imagesToShow.length, 3)},1fr);gap:8px;margin-bottom:14px;">
-                     ${imagesToShow.map((url) => `<img src="${url}" alt="${quote.destination}" style="width:100%;height:160px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;display:block;" />`).join("")}
-                   </div>`)
+          // PDF: APENAS a primeira imagem; layout 2 colunas (img 25% / texto 75%)
+          const firstImg = hasImages ? introImages[0] : null;
+          const safeText = hasText
+            ? introText.replace(/</g, "&lt;").replace(/\n/g, "<br/>")
             : "";
 
-          const textHtml = hasText
-            ? `<p style="font-size:14px;color:#475569;line-height:1.7;text-align:center;margin:0 auto;max-width:680px;white-space:pre-wrap;word-break:break-word;">${introText.replace(/</g, "&lt;").replace(/\n/g, "<br/>")}</p>`
-            : "";
-
+          if (firstImg && hasText) {
+            return `
+              <div class="pdf-block destination-intro" style="margin-bottom:20px;">
+                <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
+                  <tr>
+                    <td style="width:25%;vertical-align:top;padding:0 16px 0 0;">
+                      <img src="${firstImg}" alt="${quote.destination}" style="width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid #e2e8f0;display:block;" />
+                    </td>
+                    <td style="vertical-align:top;">
+                      <p style="font-size:13px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            `;
+          }
+          if (firstImg) {
+            return `
+              <div class="pdf-block destination-intro" style="margin-bottom:20px;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
+                <img src="${firstImg}" alt="${quote.destination}" style="width:100%;max-height:240px;object-fit:cover;display:block;" />
+              </div>
+            `;
+          }
           return `
-            <div class="pdf-block destination-intro" style="margin-bottom:28px;">
-              ${galleryHtml}
-              ${textHtml}
+            <div class="pdf-block destination-intro" style="margin-bottom:20px;">
+              <p style="font-size:13px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</p>
             </div>
           `;
         })()}
 
         <!-- Services -->
-        <div style="margin-bottom:28px;">
-          <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+        <div style="margin-bottom:18px;">
+          <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
             <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Serviços Incluídos</h3>
             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
@@ -508,9 +534,9 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:20px;padding:28px 24px;margin-bottom:24px;text-align:center;box-shadow:0 10px 24px rgba(15,118,110,0.18);">
+            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:18px 20px;margin-bottom:16px;text-align:center;box-shadow:0 8px 18px rgba(15,118,110,0.18);">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:12px;opacity:0.7;margin:8px 0 0;line-height:1.3;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:11px;opacity:0.7;margin:4px 0 0;line-height:1.3;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
             </div>
           `;
         })()}
