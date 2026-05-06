@@ -421,10 +421,10 @@ function TripWalletContent() {
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
-              <FileText className="mr-2 h-4 w-4" /> PDF
+              <FileText className="mr-2 h-4 w-4" /> Gerar PDF
             </Button>
             <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)}>
-              <Share2 className="mr-2 h-4 w-4" /> Compartilhar
+              <Share2 className="mr-2 h-4 w-4" /> Compartilhar link
             </Button>
           </div>
         </div>
