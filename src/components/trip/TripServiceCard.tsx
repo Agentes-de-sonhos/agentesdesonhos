@@ -318,49 +318,6 @@ export function TripServiceCard({
                 </div>
               )}
 
-              {/* Action buttons row */}
-              {showActions && (
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  {onAddAttachment && (
-                    <>
-                      <input
-                        ref={addFileInputRef}
-                        type="file"
-                        className="hidden"
-                        accept=".pdf,.jpg,.jpeg,.png,.webp"
-                        onChange={handleAddFile}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 text-xs px-2"
-                        onClick={() => addFileInputRef.current?.click()}
-                      >
-                        <Upload className="h-3 w-3 mr-1" /> {attachments.length > 0 ? "Adicionar arquivo" : "Anexar arquivo"}
-                      </Button>
-                    </>
-                  )}
-                  {onUploadServiceImage && (
-                    <>
-                      <input
-                        ref={imageInputRef}
-                        type="file"
-                        className="hidden"
-                        accept="image/jpeg,image/png,image/webp"
-                        onChange={handleImageUpload}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 text-xs px-2"
-                        onClick={() => imageInputRef.current?.click()}
-                      >
-                        <Camera className="h-3 w-3 mr-1" /> {service.image_url ? "Trocar imagem" : "Adicionar imagem"}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           </div>
           
