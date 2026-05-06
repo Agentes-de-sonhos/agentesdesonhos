@@ -347,7 +347,7 @@ serve(async (req) => {
 
     const serviceType = body?.service_type;
     if (!ALLOWED_TYPES.includes(serviceType)) {
-      return errorResponse("Tipo de serviço inválido. Suportados: flight, hotel.");
+      return errorResponse("Tipo de serviço inválido.");
     }
 
     const fileBase64: string | undefined = body?.file_base64;
