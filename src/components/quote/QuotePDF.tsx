@@ -220,6 +220,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
   const useServicePayment = (quote as any).use_service_payment || 
     quote.services?.some((s: any) => s.is_custom_payment === true) || false;
 
+  const showDetailedPrices = (quote as any).show_detailed_prices !== false;
+
   const servicesHtml =
     quote.services
       ?.map((service) => {
@@ -252,7 +254,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
 
         // Per-service payment display
         let paymentHtml = "";
-        if (useServicePayment) {
+        if (useServicePayment && showDetailedPrices) {
           const payConfig = extractServicePaymentConfig(service);
           if (payConfig.is_custom_payment) {
             const display = getServicePaymentDisplay(service.amount, payConfig);
@@ -317,7 +319,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
                 ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
               </div>
             </div>
-            <span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>
+            ${showDetailedPrices ? `<span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>` : ""}
           </div>
           <div style="padding:12px 16px;">
             ${bodyHtml}
