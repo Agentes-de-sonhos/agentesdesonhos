@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { QuoteDateEditor } from "./QuoteDateEditor";
+import { ClientSelector } from "@/components/shared/ClientSelector";
 import type { Quote } from "@/types/quote";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencyFlag } from "@/lib/quoteCurrency";
 
@@ -60,10 +61,15 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
     toast({ title: "Título atualizado" });
   };
 
-  const saveClient = async () => {
-    const val = clientDraft.trim();
-    if (!val) return;
-    const { error } = await supabase.from("quotes").update({ client_name: val } as any).eq("id", quote.id);
+  const saveClient = async (selected: { id: string; name: string } | null) => {
+    if (!selected) {
+      toast({ title: "Selecione um cliente", description: "Escolha um cliente cadastrado ou crie um novo.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase
+      .from("quotes")
+      .update({ client_name: selected.name, client_id: selected.id } as any)
+      .eq("id", quote.id);
     if (error) { toast({ title: "Erro ao salvar cliente", description: error.message, variant: "destructive" }); return; }
     await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
     await queryClient.invalidateQueries({ queryKey: ["quotes"] });
@@ -109,18 +115,15 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Cliente:</span>
             {editingClient ? (
-              <span className="flex items-center gap-1 flex-1">
-                <Input
-                  className="h-7 text-sm"
-                  value={clientDraft}
-                  onChange={(e) => setClientDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") saveClient();
-                    if (e.key === "Escape") { setClientDraft(quote.client_name); setEditingClient(false); }
-                  }}
-                  autoFocus
-                />
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveClient} title="Salvar">
+              <span className="flex items-center gap-1 flex-1 min-w-[200px]">
+                <div className="flex-1">
+                  <ClientSelector
+                    value={(quote as any).client_id ? { id: (quote as any).client_id, name: quote.client_name } : null}
+                    onChange={(c) => { if (c) saveClient(c); }}
+                    required
+                  />
+                </div>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingClient(false)} title="Cancelar">
                   <Check className="h-3.5 w-3.5" />
                 </Button>
               </span>
