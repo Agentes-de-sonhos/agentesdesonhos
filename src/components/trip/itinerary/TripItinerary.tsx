@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X, Sparkles, RefreshCw, Plane, Hotel, Bus, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
-import { usePeriodImages } from "@/hooks/usePeriodImages";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
 import { AIItineraryModal, type OverwriteMode } from "./AIItineraryModal";
@@ -136,7 +135,6 @@ function PeriodImageUpload({
 
 export function TripItinerary({ tripId, destination, startDate, endDate, services, readOnly = false, onRequestAddService }: Props) {
   const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
-  const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading: isPeriodUploading } = usePeriodImages(tripId);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [addingFor, setAddingFor] = useState<{ dateStr: string; period: Period } | null>(null);
   const [editingActivity, setEditingActivity] = useState<ItineraryActivity | null>(null);
@@ -380,8 +378,6 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                       .filter((a) => a.period === period)
                       .sort((a, b) => a.order_index - b.order_index);
                     const isAddingHere = addingFor?.dateStr === day.dateStr && addingFor?.period === period;
-                    const periodImageUrl = getImageForPeriod(day.dateStr, period);
-
                     return (
                       <div key={period}>
                         <div className="flex items-center gap-2 mb-2">
@@ -390,15 +386,6 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                             {PERIOD_CONFIG[period].label}
                           </span>
                         </div>
-
-                        {/* Period image */}
-                        <PeriodImageUpload
-                          imageUrl={periodImageUrl}
-                          onUpload={(file) => setPeriodImage({ dayDate: day.dateStr, period, file })}
-                          onRemove={() => removePeriodImage({ dayDate: day.dateStr, period })}
-                          isUploading={isPeriodUploading}
-                          readOnly={readOnly}
-                        />
 
                         {/* Activities */}
                         {periodActivities.map((activity) => {
