@@ -569,22 +569,20 @@ function TripWalletContent() {
                       <code className="bg-muted px-2 py-1 rounded text-sm font-mono flex-1">
                         {showPassword ? trip.access_password : "••••••"}
                       </code>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowPassword(!showPassword)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowPassword(!showPassword)} title={showPassword ? "Ocultar senha" : "Mostrar senha"}>
                         {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopyPassword}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopyPassword} title="Copiar senha">
                         <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingPassword(true)} title="Editar senha">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleRegeneratePassword} title="Regenerar senha">
+                        <RefreshCw className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   )}
-                  <div className="flex gap-2 mt-2">
-                    <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => setEditingPassword(true)}>
-                      Editar senha
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-xs h-7" onClick={handleRegeneratePassword}>
-                      <RefreshCw className="mr-1 h-3 w-3" /> Regenerar
-                    </Button>
-                  </div>
                 </div>
 
                 <div className="space-y-2">
