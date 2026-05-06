@@ -238,8 +238,8 @@ export function TripServiceCard({
   return (
     <Card>
       <CardContent className="p-4">
-        <div className="flex items-stretch justify-between gap-3">
-          <div className="flex items-stretch gap-3 flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             {(dragHandle || onMoveUp || onMoveDown) && (
               <div className="flex flex-col items-center justify-center gap-0.5 shrink-0 -ml-1 self-stretch">
                 {dragHandle}
