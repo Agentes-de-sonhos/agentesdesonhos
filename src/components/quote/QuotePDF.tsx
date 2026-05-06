@@ -156,17 +156,17 @@ function getServiceDetails(service: QuoteService): string[] {
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
-      <div style="text-align:center;padding:18px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
-        <p style="font-size:26px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
+      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
+        <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
           ${profile?.agency_name || "Proposta de Viagem"}
         </p>
       </div>
     `;
   }
   return `
-    <div style="text-align:center;padding:18px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;">
+    <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;">
       <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
-        style="max-height:160px;max-width:400px;object-fit:contain;display:block;margin:0 auto;" />
+        style="max-height:90px;max-width:260px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
   `;
 }
@@ -343,7 +343,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
            giant whitespace bug). Instead, mark only SAFE atomic sub-blocks as
            unbreakable, and keep titles glued to what comes next.            */
         @media print {
-          @page { size: A4; margin: 12mm; }
+          @page { size: A4; margin: 10mm 10mm 10mm 10mm; }
           html, body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
