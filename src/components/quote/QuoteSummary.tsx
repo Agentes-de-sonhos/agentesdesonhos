@@ -127,7 +127,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
             ) : (
               <>
                 <span className="font-medium truncate">{quote.client_name}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={() => { setClientDraft(quote.client_name); setEditingClient(true); }} title="Editar cliente">
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setClientDraft(quote.client_name); setEditingClient(true); }} title="Editar cliente">
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
               </>
@@ -163,7 +163,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
                 >
                   {(quote as any).trip_title || <span className="text-muted-foreground italic font-normal">Adicionar título</span>}
                 </span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={() => { setTitleDraft((quote as any).trip_title || ""); setEditingTitle(true); }} title="Editar título">
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setTitleDraft((quote as any).trip_title || ""); setEditingTitle(true); }} title="Editar título">
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
               </>
@@ -207,7 +207,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
                   <span>{quote.children_count} criança(s)</span>
                 </div>
               )}
-              <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={() => { setAdultsDraft(quote.adults_count); setChildrenDraft(quote.children_count); setEditingPax(true); }} title="Editar passageiros">
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setAdultsDraft(quote.adults_count); setChildrenDraft(quote.children_count); setEditingPax(true); }} title="Editar passageiros">
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -241,7 +241,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
                 >
                   {quote.destination}
                 </span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={() => { setDestDraft(quote.destination); setEditingDest(true); }} title="Editar destino">
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setDestDraft(quote.destination); setEditingDest(true); }} title="Editar destino">
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
               </>
