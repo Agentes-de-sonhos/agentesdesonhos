@@ -176,8 +176,9 @@ export function useQuotes() {
       if (error) throw error;
       return shareToken;
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
+      queryClient.invalidateQueries({ queryKey: ["quote", id] });
       toast({ title: "Orçamento publicado", description: "O link de compartilhamento foi gerado." });
     },
     onError: (error) => {
