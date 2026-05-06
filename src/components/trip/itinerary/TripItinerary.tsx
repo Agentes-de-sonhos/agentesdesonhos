@@ -417,21 +417,13 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                           const originBadge = ORIGIN_BADGE[activity.origin] || ORIGIN_BADGE.manual;
                           return (
                             <div key={activity.id} className="ml-4">
-                              {/* Origin badge — exibido inline acima do card para não sobrepor */}
-                              <div className="mb-1 ml-5">
-                                <span className={cn(
-                                  "inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border",
-                                  originBadge.className
-                                )}>
-                                  {originBadge.label}
-                                </span>
-                              </div>
                               <ItineraryActivityCard
                                 activity={activity}
                                 linkedService={activity.linked_service_id ? services.find((s) => s.id === activity.linked_service_id) : undefined}
                                 onEdit={() => handleEditClick(activity)}
                                 onDelete={() => deleteActivity(activity.id)}
                                 readOnly={readOnly}
+                                originBadge={originBadge}
                               />
                             </div>
                           );
