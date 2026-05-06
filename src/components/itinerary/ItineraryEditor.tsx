@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import {
   Card,
   CardContent,
@@ -527,14 +528,19 @@ export function ItineraryEditor({
                                   </DialogFooter>
                                 </DialogContent>
                               </Dialog>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-destructive hover:text-destructive"
-                                onClick={() => onDeleteActivity(activity.id!)}
+                              <ConfirmDeleteDialog
+                                onConfirm={() => onDeleteActivity(activity.id!)}
+                                title="Excluir atividade?"
+                                description="Esta atividade será removida permanentemente do roteiro. Tem certeza?"
                               >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </ConfirmDeleteDialog>
                             </div>
                           </div>
                         </div>
