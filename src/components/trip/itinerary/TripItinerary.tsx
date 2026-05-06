@@ -470,6 +470,15 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
         onGenerated={handleAIGenerated}
       />
 
+      <ImportItineraryModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        tripId={tripId}
+        startDate={startDate}
+        hasExistingActivities={activities.length > 0}
+        onImported={handleAIGenerated}
+      />
+
       {/* Service edit warning */}
       <AlertDialog open={!!serviceEditWarning} onOpenChange={(open) => !open && setServiceEditWarning(null)}>
         <AlertDialogContent>
