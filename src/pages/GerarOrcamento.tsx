@@ -808,7 +808,7 @@ export default function GerarOrcamento() {
               })()
             ) : (
               <Button size="sm" className="sm:size-default" onClick={handlePublish} disabled={isPublishing}>
-                <LinkIcon className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Publicar</span><span className="sm:hidden">Publicar</span>
+                <LinkIcon className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Gerar Link</span><span className="sm:hidden">Gerar Link</span>
               </Button>
             )}
           </div>
