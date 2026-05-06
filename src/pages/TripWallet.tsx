@@ -86,7 +86,7 @@ function TripWalletContent() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
   const [showImportQuote, setShowImportQuote] = useState(false);
-  const [accordionValue, setAccordionValue] = useState<string[]>(["services"]);
+  const [accordionValue, setAccordionValue] = useState<string[]>([]);
 
   const openServicesAccordion = () => {
     setAccordionValue((prev) => (prev.includes("services") ? prev : [...prev, "services"]));
