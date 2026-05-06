@@ -343,16 +343,60 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         /* ----- SMART PAGINATION (briefing) -----
            Idea: do NOT wrap large cards in break-inside:avoid (that causes the
            giant whitespace bug). Instead, mark only SAFE atomic sub-blocks as
-           unbreakable, and keep titles glued to what comes next.            */
+           unbreakable, keep titles glued to what comes next, and apply a
+           subtle vertical compression so we don't waste space at the bottom
+           of pages and avoid almost-empty trailing pages.                   */
         @media print {
-          @page { size: A4; margin: 25mm 10mm 10mm 10mm; }
-          @page :first { margin-top: 10mm; }
+          @page { size: A4; margin: 14mm 10mm 10mm 10mm; }
+          @page :first { margin-top: 8mm; }
           html, body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             background: #fff !important;
+            line-height: 1.42 !important;
           }
           .page-break { page-break-before: always; break-before: page; }
+
+          /* --- Adaptive Vertical Compression ---
+             Slight, proportional reductions to vertical rhythm. Keeps
+             premium look while reclaiming whitespace at the end of pages. */
+          .pdf-hero { padding-top: 0 !important; padding-bottom: 6px !important; }
+          .pdf-hero h1 { font-size: 26px !important; line-height: 1.05 !important; margin-bottom: 2px !important; }
+          .pdf-hero p { margin-top: 2px !important; }
+
+          .overview-card {
+            padding: 10px 14px !important;
+            margin-bottom: 12px !important;
+          }
+
+          .destination-intro { margin-bottom: 14px !important; }
+          .destination-intro p { line-height: 1.5 !important; }
+
+          .service-card {
+            margin-bottom: 7px !important;
+          }
+          .service-card > div:last-child { padding: 9px 14px !important; }
+          .service-title { padding: 6px 12px !important; }
+          .pdf-details p, .pdf-desc p, .pdf-notes p {
+            margin: 1px 0 !important;
+            line-height: 1.38 !important;
+          }
+
+          .investment-card {
+            padding: 14px 18px !important;
+            margin-bottom: 12px !important;
+          }
+          .payment-terms {
+            padding: 14px 18px !important;
+            margin-bottom: 12px !important;
+          }
+          .payment-terms p { line-height: 1.5 !important; }
+
+          .agent-signature { margin-top: 10px !important; }
+          .agent-signature > div:last-child { padding: 10px 16px !important; }
+
+          /* Trim the trailing footer so it never pushes a new page alone */
+          body > div > div > div:last-child { padding-top: 10px !important; }
 
           /* Atomic sub-blocks — never split these in the middle */
           .pdf-block,
@@ -364,10 +408,17 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           .agent-signature,
           .overview-card,
           .payment-terms,
+          .destination-intro,
           img {
             break-inside: avoid;
             page-break-inside: avoid;
           }
+
+          /* Prevent the consultant block + footer from being orphaned alone
+             on a final page — pull them up with the previous content. */
+          .investment-card { break-after: avoid; page-break-after: avoid; }
+          .payment-terms   { break-before: avoid; page-break-before: avoid; }
+          .agent-signature { break-before: avoid; page-break-before: avoid; }
 
           /* Titles stay with the content that follows them */
           .pdf-title,
@@ -380,12 +431,17 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           /* Service card wrapper is intentionally breakable so long cards
              flow naturally across pages instead of being pushed whole. */
           .pdf-card,
-          .service-card,
           .pdf-details,
           .pdf-desc,
           .long-text {
             break-inside: auto;
             page-break-inside: auto;
+          }
+
+          /* Small service cards should stay together; large ones still flow. */
+          .service-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
           }
 
           /* Avoid orphan headings */
@@ -394,7 +450,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             page-break-after: avoid;
           }
 
-          /* Avoid widow lines inside paragraphs */
+          /* Avoid widow/orphan lines inside paragraphs */
           p { orphans: 3; widows: 3; }
         }
       </style>
