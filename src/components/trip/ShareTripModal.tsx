@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildCarteiraLink } from "@/lib/carteira-domain";
-import { Copy, Check, Link, Share2 } from "lucide-react";
+import { Copy, Check, Link, Share2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -20,6 +20,7 @@ interface ShareTripModalProps {
 export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTripModalProps) {
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const origin = PUBLIC_DOMAIN;
   
@@ -97,8 +98,17 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
               <label className="text-xs font-medium text-muted-foreground">🔒 Senha do Cliente</label>
               <div className="flex items-center gap-2">
                 <code className="flex-1 bg-muted px-3 py-2 rounded-md text-sm font-mono tracking-wider select-all">
-                  {trip.access_password}
+                  {showPassword ? trip.access_password : "••••••••"}
                 </code>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => setShowPassword((v) => !v)}
+                  title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </Button>
                 <CopyButton text={trip.access_password} field="password" />
               </div>
             </div>
