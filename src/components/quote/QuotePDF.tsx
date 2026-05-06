@@ -343,7 +343,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
            giant whitespace bug). Instead, mark only SAFE atomic sub-blocks as
            unbreakable, and keep titles glued to what comes next.            */
         @media print {
-          @page { size: A4; margin: 10mm 10mm 10mm 10mm; }
+          @page { size: A4; margin: 25mm 10mm 10mm 10mm; }
+          @page :first { margin-top: 10mm; }
           html, body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
