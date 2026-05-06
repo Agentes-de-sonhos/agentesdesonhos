@@ -1,5 +1,6 @@
 import { Clock, MapPin, Pencil, Trash2, Link2, StickyNote, Image, Paperclip, ExternalLink, Download, FileText, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import type { ItineraryActivity } from "@/hooks/useItineraryActivities";
 import type { TripService, TripServiceType } from "@/types/trip";
 
@@ -154,9 +155,15 @@ export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelet
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
                 <Pencil className="h-3 w-3" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onDelete}>
-                <Trash2 className="h-3 w-3" />
-              </Button>
+              <ConfirmDeleteDialog
+                onConfirm={onDelete}
+                title="Excluir atividade?"
+                description="Esta atividade será removida permanentemente do roteiro. Tem certeza?"
+              >
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive">
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </ConfirmDeleteDialog>
             </div>
           )}
         </div>
