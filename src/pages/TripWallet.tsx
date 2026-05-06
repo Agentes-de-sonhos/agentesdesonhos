@@ -25,6 +25,7 @@ import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles, FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
+import { ClientSelector } from "@/components/shared/ClientSelector";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -668,17 +669,18 @@ function TripWalletContent() {
                   <span className="text-muted-foreground">Cliente:</span>
                   {editingField === "client_name" ? (
                     <>
-                      <Input
-                        value={fieldDraft}
-                        onChange={(e) => setFieldDraft(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
-                        className="h-7 text-sm flex-1 min-w-[160px]"
-                        autoFocus
-                      />
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
-                        <Check className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
+                      <div className="flex-1 min-w-[200px]">
+                        <ClientSelector
+                          value={(trip as any).client_id ? { id: (trip as any).client_id, name: trip.client_name } : null}
+                          onChange={async (c) => {
+                            if (!c) return;
+                            await updateTrip({ id: trip.id, client_name: c.name, client_id: c.id } as any);
+                            cancelEditField();
+                          }}
+                          required
+                        />
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Fechar">
                         <X className="h-3.5 w-3.5" />
                       </Button>
                     </>
