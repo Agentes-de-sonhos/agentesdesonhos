@@ -709,6 +709,18 @@ export default function GerarOrcamento() {
           <Button variant="outline" size="sm" className="sm:size-default" onClick={handleGeneratePDF}>
             <FileText className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Gerar PDF</span><span className="sm:hidden">Gerar PDF</span>
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="sm:size-default"
+            onClick={() => setShowExportWallet(true)}
+            disabled={!quote.services || quote.services.length === 0}
+            title="Reaproveitar serviços numa Carteira Digital"
+          >
+            <Wallet className="mr-1 sm:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Gerar Carteira</span>
+            <span className="sm:hidden">Carteira</span>
+          </Button>
           {quote.share_token ? (
             (() => {
               const accessCode = (quote as any).public_access_code;
