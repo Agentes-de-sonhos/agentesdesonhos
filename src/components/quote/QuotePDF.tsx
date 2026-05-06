@@ -251,6 +251,9 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           ...(service.image_url && !(service.image_urls || []).includes(service.image_url) ? [service.image_url] : []),
         ];
         const firstImage = allImages[0] || null;
+        // Hotel: use a gallery grid (max 10) above the description
+        const isHotel = service.service_type === "hotel";
+        const hotelImages = isHotel ? allImages.slice(0, 10) : [];
 
         // Per-service payment display
         let paymentHtml = "";
@@ -294,7 +297,41 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           ${notesHtml}
           ${paymentHtml}
         `;
-        const bodyHtml = firstImage
+        const hotelGalleryHtml = isHotel && hotelImages.length > 0
+          ? (() => {
+              const allCells: string[] = [];
+              for (let i = 0; i < hotelImages.length; i += 5) {
+                const row = hotelImages.slice(i, i + 5);
+                const rowHtml = row
+                  .map(
+                    (src) => `
+                      <td style="width:20%;vertical-align:middle;padding:3px;">
+                        <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;display:table;">
+                          <div style="display:table-cell;vertical-align:middle;text-align:center;">
+                            <img src="${src}" style="max-width:100%;max-height:76px;object-fit:contain;border-radius:6px;display:inline-block;" />
+                          </div>
+                        </div>
+                      </td>
+                    `
+                  )
+                  .join("");
+                const padCount = 5 - row.length;
+                const padHtml = padCount > 0 ? Array(padCount).fill('<td style="width:20%;padding:3px;"></td>').join("") : "";
+                allCells.push(`<tr>${rowHtml}${padHtml}</tr>`);
+              }
+              return `
+                <div class="pdf-block pdf-hotel-gallery" style="margin-bottom:8px;">
+                  <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
+                    ${allCells.join("")}
+                  </table>
+                </div>
+              `;
+            })()
+          : "";
+
+        const bodyHtml = isHotel
+          ? `${hotelGalleryHtml}${bodyInner}`
+          : firstImage
           ? `
             <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
               <tr>
