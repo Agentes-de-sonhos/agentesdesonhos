@@ -768,9 +768,49 @@ export default function GerarOrcamento() {
             <Button variant="outline" size="sm" className="sm:size-default" onClick={handleGeneratePDF}>
               <FileText className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">PDF</span><span className="sm:hidden">PDF</span>
             </Button>
-            <Button size="sm" className="sm:size-default" onClick={handlePublish} disabled={isPublishing}>
-              <LinkIcon className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">{quote.share_token ? "Copiar Link" : "Publicar"}</span><span className="sm:hidden">{quote.share_token ? "Link" : "Publicar"}</span>
-            </Button>
+            {quote.share_token ? (
+              (() => {
+                const accessCode = (quote as any).public_access_code;
+                const agencyName = agentProfile?.agency_name;
+                const publicUrl = accessCode && agencyName
+                  ? buildOrcamentoLink(agencyName, accessCode)
+                  : `${ORCAMENTO_DOMAIN}/orcamento/${quote.share_token}`;
+                return (
+                  <div className="flex items-center gap-1 rounded-md border bg-muted/40 pl-2 pr-1 py-1 max-w-full">
+                    <LinkIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <input
+                      readOnly
+                      value={publicUrl}
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="bg-transparent text-xs outline-none w-[180px] sm:w-[280px] truncate"
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2"
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(publicUrl);
+                        toast({ title: "Link copiado", description: "URL pública copiada para a área de transferência." });
+                      }}
+                    >
+                      Copiar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2"
+                      onClick={() => window.open(publicUrl, "_blank", "noopener,noreferrer")}
+                    >
+                      Abrir
+                    </Button>
+                  </div>
+                );
+              })()
+            ) : (
+              <Button size="sm" className="sm:size-default" onClick={handlePublish} disabled={isPublishing}>
+                <LinkIcon className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Publicar</span><span className="sm:hidden">Publicar</span>
+              </Button>
+            )}
           </div>
         </div>
 
