@@ -308,16 +308,16 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           : bodyInner;
 
         return `
-        <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:16px;margin-bottom:14px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:12px 18px;color:${grad.fg};">
+        <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:8px 14px;color:${grad.fg};">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
-              <div style="width:40px;height:40px;border-radius:10px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
+              <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
               <div style="min-width:0;">
                 <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
                 ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
               </div>
             </div>
-            <span style="font-size:18px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>
+            <span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>
           </div>
           <div style="padding:12px 16px;">
             ${bodyHtml}
