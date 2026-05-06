@@ -45,6 +45,7 @@ interface TripServiceFormProps {
   isLoading?: boolean;
   defaultValues?: any;
   isEditing?: boolean;
+  imageSlot?: React.ReactNode;
 }
 
 interface MultiFileUploadProps {
@@ -143,7 +144,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 });
 
 
-function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
@@ -272,7 +273,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* FlightAutoImport hidden per user request */}
 
-        <CollapsibleFormSection title="✈️ Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="✈️ Informações Principais">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="main_airline" render={({ field }) => (
@@ -650,7 +652,7 @@ interface HotelGuestInput {
 
 const emptyGuest = (): HotelGuestInput => ({ name: '', age: '', notes: '' });
 
-function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [guests, setGuests] = useState<HotelGuestInput[]>(
@@ -738,7 +740,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🏨 Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🏨 Informações Principais">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
@@ -1340,7 +1343,7 @@ interface CarDriverInput {
 
 const emptyDriver = (): CarDriverInput => ({ name: '', document: '', age: '', notes: '' });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [drivers, setDrivers] = useState<CarDriverInput[]>(
     defaultValues?.drivers?.length > 0 ? defaultValues.drivers : [emptyDriver()]
@@ -1416,7 +1419,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚗 Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🚗 Informações Principais">
+        {imageSlot}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="rental_company" render={({ field }) => (
             <FormItem><FormLabel>Locadora *</FormLabel><FormControl><Input placeholder="Hertz, Alamo, Localiza..." {...field} /></FormControl><FormMessage /></FormItem>
@@ -1794,7 +1798,7 @@ const emptyTransferPassenger = (): TransferPassengerInput => ({
   name: '', age: '', passenger_type: 'adulto', needs_child_seat: 'nao', notes: '',
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<TransferPassengerInput[]>(
     defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
@@ -1870,7 +1874,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚐 Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🚐 Informações Principais">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="transfer_type" render={({ field }) => (
@@ -2290,7 +2295,7 @@ interface AttractionPassengerInput {
   notes: string;
 }
 
-function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
@@ -2387,7 +2392,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🎟️ Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🎟️ Informações Principais">
+        {imageSlot}
 
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
@@ -2827,7 +2833,7 @@ interface InsuredPersonInput {
 
 const emptyInsured = (): InsuredPersonInput => ({ name: '', birth_date: '', document: '', coverage_type: '', notes: '' });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [insuredPersons, setInsuredPersons] = useState<InsuredPersonInput[]>(
@@ -2899,7 +2905,8 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🛡️ Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🛡️ Informações Principais">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="provider" render={({ field }) => (
@@ -3305,7 +3312,7 @@ const cruiseSchema = z.object({
   ship_website: z.string().optional(),
 });
 
-function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; birth_date?: string; document?: string; notes?: string }[]>(
@@ -3419,7 +3426,8 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚢 Informações do Cruzeiro" defaultOpen>
+        <CollapsibleFormSection title="🚢 Informações do Cruzeiro">
+        {imageSlot}
 
         <FormField control={form.control} name="cruise_company" render={({ field }) => (
           <FormItem>
@@ -3895,7 +3903,7 @@ const OTHER_SERVICE_TYPES = [
   { value: 'personalizado', label: '⭐ Personalizado' },
 ];
 
-function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
 
@@ -3993,7 +4001,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🛎️ Informações do Serviço" defaultOpen>
+        <CollapsibleFormSection title="🛎️ Informações do Serviço">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="service_name" render={({ field }) => (
@@ -4403,7 +4412,7 @@ const trainSchema = z.object({
   destination_maps_url: z.string().optional(),
 });
 
-function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: Omit<TripServiceFormProps, "serviceType">) {
+function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; notes?: string }[]>(
@@ -4679,8 +4688,8 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
 }
 
 // Main Service Form component
-export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, defaultValues, isEditing }: TripServiceFormProps) {
-  const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing };
+export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: TripServiceFormProps) {
+  const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot };
   switch (serviceType) {
     case "flight": return <FlightForm {...props} />;
     case "hotel": return <HotelForm {...props} />;
