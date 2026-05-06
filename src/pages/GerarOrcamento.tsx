@@ -679,71 +679,6 @@ export default function GerarOrcamento() {
                   </Badge>
                 )}
               </div>
-              {/* Trip Title inline edit */}
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Input
-                  className="h-6 text-xs border-dashed w-48"
-                  placeholder="Título da viagem (opcional)"
-                  defaultValue={(quote as any).trip_title || ""}
-                  onBlur={async (e) => {
-                    const val = e.target.value.trim() || null;
-                    if (val !== ((quote as any).trip_title || null)) {
-                      await supabase.from("quotes").update({ trip_title: val } as any).eq("id", quote.id);
-                    }
-                  }}
-                />
-              </div>
-              <p className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1 sm:gap-2 flex-wrap">
-                <MapPin className="h-3.5 w-3.5 shrink-0" />
-                {editingDestination ? (
-                  <span className="flex items-center gap-1">
-                    <Input
-                      className="h-6 text-xs w-40"
-                      value={destinationDraft}
-                      onChange={(e) => setDestinationDraft(e.target.value)}
-                      onKeyDown={async (e) => {
-                        if (e.key === "Enter" && destinationDraft.trim()) {
-                          const { error } = await supabase.from("quotes").update({ destination: destinationDraft.trim() } as any).eq("id", quote.id);
-                          if (error) { toast({ title: "Erro ao salvar destino", description: error.message, variant: "destructive" }); return; }
-                          await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
-                          await queryClient.invalidateQueries({ queryKey: ["quotes"] });
-                          setEditingDestination(false);
-                          toast({ title: "Destino atualizado" });
-                        }
-                        if (e.key === "Escape") setEditingDestination(false);
-                      }}
-                      autoFocus
-                    />
-                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={async () => {
-                      if (destinationDraft.trim()) {
-                        const { error } = await supabase.from("quotes").update({ destination: destinationDraft.trim() } as any).eq("id", quote.id);
-                        if (error) { toast({ title: "Erro ao salvar destino", description: error.message, variant: "destructive" }); return; }
-                        await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
-                        await queryClient.invalidateQueries({ queryKey: ["quotes"] });
-                        toast({ title: "Destino atualizado" });
-                      }
-                      setEditingDestination(false);
-                    }}>✓</Button>
-                  </span>
-                ) : (
-                  <span className="truncate cursor-pointer hover:underline" onClick={() => { setDestinationDraft(quote.destination); setEditingDestination(true); }}>{quote.destination}</span>
-                )}
-                <span className="text-xs">•</span>
-                <span className="whitespace-nowrap">{formatDateShort(quote.start_date)} — {formatDateShort(quote.end_date)}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 ml-0.5 shrink-0" onClick={() => setHeaderEditDates(true)} title="Editar datas">
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-              </p>
-              {headerEditDates && (
-                <div className="mt-2">
-                  <QuoteDateEditor
-                    quoteId={quote.id}
-                    startDateStr={quote.start_date}
-                    endDateStr={quote.end_date}
-                    onClose={() => setHeaderEditDates(false)}
-                  />
-                </div>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0 flex-wrap">
@@ -1245,9 +1180,10 @@ export default function GerarOrcamento() {
               isOpen={openSections.documents}
               onToggle={() => toggleSection("documents")}
             />
+
+            <QuoteSummary quote={quote} />
           </div>
           <div className="space-y-4">
-            <QuoteSummary quote={quote} />
           </div>
         </div>
       </div>
