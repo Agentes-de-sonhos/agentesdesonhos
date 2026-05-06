@@ -164,7 +164,7 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
     `;
   }
   return `
-      <div style="text-align:center;padding:4px 0 2px;background:#ffffff;border-bottom:1px solid #e2e8f0;">
+      <div style="text-align:center;padding:4px 0 2px;background:#ffffff;">
       <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
         style="max-height:180px;max-width:520px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
