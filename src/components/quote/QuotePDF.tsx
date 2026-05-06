@@ -397,28 +397,28 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       </style>
     </head>
     <body>
-      <div style="max-width:820px;margin:0 auto;padding:0 0 40px;">
+      <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
         ${generateAgencyHeader(profile || null)}
 
-        <div style="padding:28px 40px 0;">
+        <div style="padding:18px 32px 0;">
         <!-- Hero -->
-        <div class="pdf-block pdf-hero" style="text-align:center;padding:6px 0 18px;">
-          <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:6px 16px;border-radius:9999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px;">
+        <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
+          <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
             📍 Proposta de Viagem
           </div>
           ${(quote as any).trip_title ? `
-            <h1 style="font-size:38px;font-weight:800;color:#1e293b;margin:0 0 4px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
-            <p style="font-size:20px;font-weight:600;color:#64748b;margin:0 0 6px;">${quote.destination}</p>
+            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
+            <p style="font-size:17px;font-weight:600;color:#64748b;margin:0 0 4px;">${quote.destination}</p>
           ` : `
-            <h1 style="font-size:38px;font-weight:800;color:#1e293b;margin:0 0 4px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
+            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
           `}
-          <p style="font-size:15px;color:#64748b;margin-top:8px;">
+          <p style="font-size:14px;color:#64748b;margin-top:4px;">
             Preparado especialmente para <strong style="color:#1e293b;">${quote.client_name}</strong>
           </p>
         </div>
 
         <!-- Overview -->
-        <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;padding:22px 24px;margin-bottom:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
           <div>
             <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
             <p style="font-size:14px;font-weight:700;color:#1e293b;">${quote.destination}</p>
@@ -482,8 +482,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
         })()}
 
         <!-- Services -->
-        <div style="margin-bottom:28px;">
-          <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+        <div style="margin-bottom:18px;">
+          <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
             <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Serviços Incluídos</h3>
             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
@@ -534,9 +534,9 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:20px;padding:28px 24px;margin-bottom:24px;text-align:center;box-shadow:0 10px 24px rgba(15,118,110,0.18);">
+            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:18px 20px;margin-bottom:16px;text-align:center;box-shadow:0 8px 18px rgba(15,118,110,0.18);">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:12px;opacity:0.7;margin:8px 0 0;line-height:1.3;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:11px;opacity:0.7;margin:4px 0 0;line-height:1.3;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
             </div>
           `;
         })()}
