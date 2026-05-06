@@ -31,6 +31,11 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const [destDraft, setDestDraft] = useState(quote.destination);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState((quote as any).trip_title || "");
+  const [editingClient, setEditingClient] = useState(false);
+  const [clientDraft, setClientDraft] = useState(quote.client_name);
+  const [editingPax, setEditingPax] = useState(false);
+  const [adultsDraft, setAdultsDraft] = useState<number>(quote.adults_count);
+  const [childrenDraft, setChildrenDraft] = useState<number>(quote.children_count);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -53,6 +58,28 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
     await queryClient.invalidateQueries({ queryKey: ["quotes"] });
     setEditingTitle(false);
     toast({ title: "Título atualizado" });
+  };
+
+  const saveClient = async () => {
+    const val = clientDraft.trim();
+    if (!val) return;
+    const { error } = await supabase.from("quotes").update({ client_name: val } as any).eq("id", quote.id);
+    if (error) { toast({ title: "Erro ao salvar cliente", description: error.message, variant: "destructive" }); return; }
+    await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
+    await queryClient.invalidateQueries({ queryKey: ["quotes"] });
+    setEditingClient(false);
+    toast({ title: "Cliente atualizado" });
+  };
+
+  const savePax = async () => {
+    const a = Math.max(1, Number(adultsDraft) || 1);
+    const c = Math.max(0, Number(childrenDraft) || 0);
+    const { error } = await supabase.from("quotes").update({ adults_count: a, children_count: c } as any).eq("id", quote.id);
+    if (error) { toast({ title: "Erro ao salvar passageiros", description: error.message, variant: "destructive" }); return; }
+    await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
+    await queryClient.invalidateQueries({ queryKey: ["quotes"] });
+    setEditingPax(false);
+    toast({ title: "Passageiros atualizados" });
   };
 
   const displayStart = parseLocalDate(quote.start_date);
