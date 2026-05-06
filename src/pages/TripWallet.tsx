@@ -520,81 +520,6 @@ function TripWalletContent() {
               </DialogHeader>
               {editingService && selectedServiceType && (
                 <div className="space-y-4">
-                  <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-3">
-                    {editingService.image_url && /^https?:\/\//i.test(editingService.image_url) && (
-                      <div className="relative overflow-hidden rounded-md bg-muted flex items-center justify-center">
-                        <img
-                          src={editingService.image_url}
-                          alt="Imagem do serviço"
-                          className="w-full max-h-48 object-contain"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2 h-7 w-7 opacity-80 hover:opacity-100"
-                          onClick={() => handleRemoveServiceImage(editingService.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    )}
-                    {(editingService.attachments && editingService.attachments.length > 0) && (
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium text-muted-foreground">Arquivos anexados</p>
-                        {editingService.attachments.map((att, idx) => (
-                          <div key={idx} className="flex items-center justify-between gap-2 text-xs bg-background rounded px-2 py-1 border">
-                            <span className="truncate flex-1">{att.name}</span>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs px-2 text-destructive hover:text-destructive"
-                              onClick={() => handleRemoveAttachment(editingService.id, idx)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex gap-2 flex-wrap">
-                      <label className="inline-flex">
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept=".pdf,.jpg,.jpeg,.png,.webp"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleAddAttachment(editingService.id, file);
-                            e.target.value = "";
-                          }}
-                        />
-                        <Button type="button" variant="outline" size="sm" asChild>
-                          <span className="cursor-pointer">
-                            <Upload className="h-3.5 w-3.5 mr-1" /> Adicionar Arquivo
-                          </span>
-                        </Button>
-                      </label>
-                      <label className="inline-flex">
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept="image/jpeg,image/png,image/webp"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleUploadServiceImage(editingService.id, file);
-                            e.target.value = "";
-                          }}
-                        />
-                        <Button type="button" variant="outline" size="sm" asChild>
-                          <span className="cursor-pointer">
-                            <Camera className="h-3.5 w-3.5 mr-1" /> {editingService.image_url ? "Trocar Imagem" : "Adicionar Imagem"}
-                          </span>
-                        </Button>
-                      </label>
-                    </div>
-                  </div>
                   <PassengerPoolProvider services={trip.services || []}>
                     <TripServiceForm
                       serviceType={selectedServiceType}
@@ -603,6 +528,45 @@ function TripWalletContent() {
                       isLoading={isAddingService || isUpdatingService || isUploading}
                       defaultValues={editingService.service_data as any}
                       isEditing={true}
+                      imageSlot={
+                        <div className="space-y-2">
+                          {editingService.image_url && /^https?:\/\//i.test(editingService.image_url) && (
+                            <div className="relative overflow-hidden rounded-md bg-muted flex items-center justify-center">
+                              <img
+                                src={editingService.image_url}
+                                alt="Imagem do serviço"
+                                className="w-full max-h-48 object-contain"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-2 right-2 h-7 w-7 opacity-80 hover:opacity-100"
+                                onClick={() => handleRemoveServiceImage(editingService.id)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
+                          <label className="inline-flex">
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleUploadServiceImage(editingService.id, file);
+                                e.target.value = "";
+                              }}
+                            />
+                            <Button type="button" variant="outline" size="sm" asChild>
+                              <span className="cursor-pointer">
+                                <Camera className="h-3.5 w-3.5 mr-1" /> {editingService.image_url ? "Trocar Imagem" : "Adicionar Imagem"}
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
+                      }
                     />
                   </PassengerPoolProvider>
                 </div>
