@@ -616,28 +616,28 @@ function TripWalletContent() {
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cliente</span>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">Cliente:</span>
                   <span className="font-medium">{trip.client_name}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Destino</span>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">Destino:</span>
                   <span className="font-medium">{trip.destination}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Período</span>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">Período:</span>
                   <span className="font-medium">{days} dias</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Serviços</span>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">Serviços:</span>
                   <span className="font-medium">{trip.services?.length || 0}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Documentos</span>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">Documentos:</span>
                   <span className="font-medium">{trip.services?.filter(s => s.voucher_url).length || 0}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Status</span>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">Status:</span>
                   <span className="font-medium">{trip.status === "archived" ? "Arquivada" : "Ativa"}</span>
                 </div>
               </div>
