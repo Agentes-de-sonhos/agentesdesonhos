@@ -8,11 +8,22 @@ import { cn } from "@/lib/utils";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
+import { SortableActivity } from "./SortableActivity";
 import { AIItineraryModal, type OverwriteMode } from "./AIItineraryModal";
 import { ImportItineraryModal } from "./ImportItineraryModal";
 import { servicesToActivities } from "@/utils/serviceToItinerary";
 import type { TripService } from "@/types/trip";
 import { toast } from "sonner";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,6 +58,18 @@ const ORIGIN_BADGE: Record<string, { label: string; className: string }> = {
   ia: { label: "IA", className: "bg-purple-500/10 text-purple-600 border-purple-200" },
   manual: { label: "Atividade", className: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
 };
+
+function PeriodDroppable({ dateStr, period, children }: { dateStr: string; period: Period; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `period:${dateStr}:${period}`,
+    data: { period, dateStr },
+  });
+  return (
+    <div ref={setNodeRef} className={cn("min-h-[8px] rounded-md transition-colors", isOver && "bg-primary/5")}>
+      {children}
+    </div>
+  );
+}
 
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split("-").map(Number);
@@ -135,7 +158,8 @@ function PeriodImageUpload({
 }
 
 export function TripItinerary({ tripId, destination, startDate, endDate, services, readOnly = false, onRequestAddService }: Props) {
-  const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
+  const { activities, isLoading, addActivity, updateActivity, deleteActivity, reorderActivities, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [addingFor, setAddingFor] = useState<{ dateStr: string; period: Period } | null>(null);
   const [editingActivity, setEditingActivity] = useState<ItineraryActivity | null>(null);
@@ -300,6 +324,57 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
     }
   };
 
+  const handleDragEnd = async (dateStr: string, event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    if (active.id === over.id) return;
+
+    const dayActs = (activitiesByDay[dateStr] || []).slice();
+    const activeAct = dayActs.find((a) => a.id === active.id);
+    if (!activeAct) return;
+
+    // Determine target period: dropping on another activity uses that activity's period;
+    // dropping on an empty-period container uses the period from droppable id.
+    const overData: any = over.data?.current;
+    const overIsPeriod = typeof over.id === "string" && (over.id as string).startsWith("period:");
+    const targetPeriod: Period = overIsPeriod
+      ? ((over.id as string).split(":")[2] as Period)
+      : (overData?.period as Period) || activeAct.period;
+
+    // Build new ordered list per period
+    const byPeriod: Record<Period, typeof dayActs> = {
+      morning: dayActs.filter((a) => a.period === "morning" && a.id !== active.id).sort((a, b) => a.order_index - b.order_index),
+      afternoon: dayActs.filter((a) => a.period === "afternoon" && a.id !== active.id).sort((a, b) => a.order_index - b.order_index),
+      evening: dayActs.filter((a) => a.period === "evening" && a.id !== active.id).sort((a, b) => a.order_index - b.order_index),
+    };
+
+    // Insert active at the right index in target period
+    let insertIdx = byPeriod[targetPeriod].length;
+    if (!overIsPeriod) {
+      const idx = byPeriod[targetPeriod].findIndex((a) => a.id === over.id);
+      if (idx >= 0) insertIdx = idx;
+    }
+    byPeriod[targetPeriod].splice(insertIdx, 0, { ...activeAct, period: targetPeriod });
+
+    // Build update list
+    const updates: { id: string; order_index: number; period?: string }[] = [];
+    (["morning", "afternoon", "evening"] as Period[]).forEach((p) => {
+      byPeriod[p].forEach((a, i) => {
+        const periodChanged = a.period !== p || a.id === active.id;
+        if (a.order_index !== i || periodChanged) {
+          updates.push({ id: a.id, order_index: i, period: p });
+        }
+      });
+    });
+
+    if (updates.length === 0) return;
+    try {
+      await reorderActivities(updates);
+    } catch {
+      toast.error("Erro ao reordenar atividades");
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -363,6 +438,11 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
 
               {/* Day content */}
               {isExpanded && (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(e) => handleDragEnd(day.dateStr, e)}
+                >
                 <div className="px-4 py-3 space-y-4">
                   {(["morning", "afternoon", "evening"] as Period[]).map((period) => {
                     const PeriodIcon = PERIOD_CONFIG[period].icon;
@@ -380,6 +460,8 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                         </div>
 
                         {/* Activities */}
+                        <PeriodDroppable dateStr={day.dateStr} period={period}>
+                        <SortableContext items={periodActivities.map((a) => a.id)} strategy={verticalListSortingStrategy}>
                         {periodActivities.map((activity) => {
                           if (editingActivity?.id === activity.id) {
                             return (
@@ -397,7 +479,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                           const originBadge = ORIGIN_BADGE[activity.origin] || ORIGIN_BADGE.manual;
                           return (
                             <div key={activity.id} className="ml-4">
-                              <ItineraryActivityCard
+                              <SortableActivity
                                 activity={activity}
                                 linkedService={activity.linked_service_id ? services.find((s) => s.id === activity.linked_service_id) : undefined}
                                 onEdit={() => handleEditClick(activity)}
@@ -408,6 +490,8 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                             </div>
                           );
                         })}
+                        </SortableContext>
+                        </PeriodDroppable>
 
                         {/* Empty state for period */}
                         {periodActivities.length === 0 && !isAddingHere && (
@@ -452,6 +536,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                     );
                   })}
                 </div>
+                </DndContext>
               )}
             </div>
           );
