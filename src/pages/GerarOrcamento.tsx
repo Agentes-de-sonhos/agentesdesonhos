@@ -53,7 +53,8 @@ import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Wallet } from "lucide-react";
+import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
