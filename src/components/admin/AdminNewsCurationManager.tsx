@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -73,27 +74,6 @@ interface NoticiasDashboard {
 
 const CATEGORIAS = ["Aéreo", "Turismo", "Destinos", "Cruzeiros", "Mercado", "Eventos"];
 
-const MOTIVOS_REJEICAO = [
-  "Irrelevante para agentes",
-  "Promocional / publicitária",
-  "Duplicada",
-  "Pouco interesse para o trade",
-  "Fora do tema turismo B2B",
-  "Conteúdo de baixa qualidade",
-  "Notícia muito antiga",
-  "Outro",
-];
-
-const MOTIVOS_APROVACAO = [
-  "Alta relevância para o trade",
-  "Tendência de mercado",
-  "Impacto comercial direto",
-  "Notícia de destino estratégico",
-  "Movimento de operadora/cia aérea",
-  "Evento importante",
-  "Outro",
-];
-
 export function AdminNewsCurationManager() {
   const [editingItem, setEditingItem] = useState<NoticiasDashboard | null>(null);
   const [editForm, setEditForm] = useState({ titulo_curto: "", resumo: "", categoria: "", tipo_exibicao: "" });
@@ -101,18 +81,11 @@ export function AdminNewsCurationManager() {
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [filterCategoria, setFilterCategoria] = useState<string>("todas");
   const [filterFonte, setFilterFonte] = useState<string>("todas");
-  const [decisionDialog, setDecisionDialog] = useState<{
-    item: NoticiasDashboard;
-    decisao: "aprovado" | "rejeitado";
-    tipo?: string;
-  } | null>(null);
-  const [motivo, setMotivo] = useState<string>("");
-  const [scoreFinal, setScoreFinal] = useState<number>(0);
-  const [motivoCustom, setMotivoCustom] = useState<string>("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [resetScope, setResetScope] = useState<null | "todas" | "pendente" | "rejeitado" | "aprovado">(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  useAuth();
 
   // Estatísticas de aprendizado da curadoria
   const { data: stats } = useQuery({
