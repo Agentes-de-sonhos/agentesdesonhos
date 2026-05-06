@@ -31,6 +31,11 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const [destDraft, setDestDraft] = useState(quote.destination);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState((quote as any).trip_title || "");
+  const [editingClient, setEditingClient] = useState(false);
+  const [clientDraft, setClientDraft] = useState(quote.client_name);
+  const [editingPax, setEditingPax] = useState(false);
+  const [adultsDraft, setAdultsDraft] = useState<number>(quote.adults_count);
+  const [childrenDraft, setChildrenDraft] = useState<number>(quote.children_count);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -55,6 +60,28 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
     toast({ title: "Título atualizado" });
   };
 
+  const saveClient = async () => {
+    const val = clientDraft.trim();
+    if (!val) return;
+    const { error } = await supabase.from("quotes").update({ client_name: val } as any).eq("id", quote.id);
+    if (error) { toast({ title: "Erro ao salvar cliente", description: error.message, variant: "destructive" }); return; }
+    await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
+    await queryClient.invalidateQueries({ queryKey: ["quotes"] });
+    setEditingClient(false);
+    toast({ title: "Cliente atualizado" });
+  };
+
+  const savePax = async () => {
+    const a = Math.max(1, Number(adultsDraft) || 1);
+    const c = Math.max(0, Number(childrenDraft) || 0);
+    const { error } = await supabase.from("quotes").update({ adults_count: a, children_count: c } as any).eq("id", quote.id);
+    if (error) { toast({ title: "Erro ao salvar passageiros", description: error.message, variant: "destructive" }); return; }
+    await queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
+    await queryClient.invalidateQueries({ queryKey: ["quotes"] });
+    setEditingPax(false);
+    toast({ title: "Passageiros atualizados" });
+  };
+
   const displayStart = parseLocalDate(quote.start_date);
   const displayEnd = parseLocalDate(quote.end_date);
   const days = Math.ceil((displayEnd.getTime() - displayStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -77,10 +104,34 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
       {open && (
       <CardContent className="space-y-4 pt-0">
         <div className="space-y-3">
+          {/* Cliente editável */}
           <div className="flex items-center gap-2 text-sm">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Cliente:</span>
-            <span className="font-medium">{quote.client_name}</span>
+            {editingClient ? (
+              <span className="flex items-center gap-1 flex-1">
+                <Input
+                  className="h-7 text-sm"
+                  value={clientDraft}
+                  onChange={(e) => setClientDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveClient();
+                    if (e.key === "Escape") { setClientDraft(quote.client_name); setEditingClient(false); }
+                  }}
+                  autoFocus
+                />
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveClient} title="Salvar">
+                  <Check className="h-3.5 w-3.5" />
+                </Button>
+              </span>
+            ) : (
+              <>
+                <span className="font-medium truncate">{quote.client_name}</span>
+                <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={() => { setClientDraft(quote.client_name); setEditingClient(true); }} title="Editar cliente">
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Título da viagem (opcional) */}
@@ -119,18 +170,48 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
             )}
           </div>
           
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
+          {/* Passageiros editáveis */}
+          {editingPax ? (
+            <div className="flex items-center gap-2 text-sm flex-wrap">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span>{quote.adults_count} adulto(s)</span>
+              <label className="text-muted-foreground">Adultos:</label>
+              <Input
+                type="number"
+                min={1}
+                className="h-7 w-16 text-sm"
+                value={adultsDraft}
+                onChange={(e) => setAdultsDraft(Number(e.target.value))}
+              />
+              <Baby className="h-4 w-4 text-muted-foreground" />
+              <label className="text-muted-foreground">Crianças:</label>
+              <Input
+                type="number"
+                min={0}
+                className="h-7 w-16 text-sm"
+                value={childrenDraft}
+                onChange={(e) => setChildrenDraft(Number(e.target.value))}
+              />
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={savePax} title="Salvar">
+                <Check className="h-3.5 w-3.5" />
+              </Button>
             </div>
-            {quote.children_count > 0 && (
+          ) : (
+            <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <Baby className="h-4 w-4 text-muted-foreground" />
-                <span>{quote.children_count} criança(s)</span>
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <span>{quote.adults_count} adulto(s)</span>
               </div>
-            )}
-          </div>
+              {quote.children_count > 0 && (
+                <div className="flex items-center gap-2">
+                  <Baby className="h-4 w-4 text-muted-foreground" />
+                  <span>{quote.children_count} criança(s)</span>
+                </div>
+              )}
+              <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={() => { setAdultsDraft(quote.adults_count); setChildrenDraft(quote.children_count); setEditingPax(true); }} title="Editar passageiros">
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
 
           {/* Destino editável */}
           <div className="flex items-center gap-2 text-sm">
