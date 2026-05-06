@@ -447,14 +447,26 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                           </div>
                         ) : (
                           !readOnly && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="ml-4 mt-1 text-xs text-muted-foreground h-7"
-                              onClick={() => setAddingFor({ dateStr: day.dateStr, period })}
-                            >
-                              <Plus className="mr-1 h-3 w-3" /> Adicionar atividade
-                            </Button>
+                            <div className="flex flex-wrap gap-1 ml-4 mt-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs text-muted-foreground h-7"
+                                onClick={() => setAddingFor({ dateStr: day.dateStr, period })}
+                              >
+                                <Plus className="mr-1 h-3 w-3" /> Adicionar atividade
+                              </Button>
+                              {onRequestAddService && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-xs text-muted-foreground h-7"
+                                  onClick={onRequestAddService}
+                                >
+                                  <Plus className="mr-1 h-3 w-3" /> Adicionar serviço
+                                </Button>
+                              )}
+                            </div>
                           )
                         )}
                       </div>
