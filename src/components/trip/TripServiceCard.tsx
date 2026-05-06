@@ -238,32 +238,6 @@ export function TripServiceCard({
   return (
     <Card>
       <CardContent className="p-4">
-        {/* Service image banner — only render if URL is a valid http(s) URL */}
-        {service.image_url && /^https?:\/\//i.test(service.image_url) && (
-          <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted flex items-center justify-center">
-            <img
-              src={service.image_url}
-              alt={label}
-              className="w-full max-h-64 object-contain"
-              onError={(e) => {
-                // Hide entire banner if image fails to load
-                const wrapper = e.currentTarget.parentElement;
-                if (wrapper) wrapper.style.display = "none";
-              }}
-            />
-            {showActions && onRemoveServiceImage && (
-              <Button
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 h-7 w-7 opacity-80 hover:opacity-100"
-                onClick={() => onRemoveServiceImage(service.id)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        )}
-
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             {(dragHandle || onMoveUp || onMoveDown) && (
