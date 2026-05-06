@@ -645,8 +645,8 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
 
         <!-- Validity -->
         <p style="text-align:center;font-size:12px;color:#94a3b8;margin:8px 0 16px;">
-          ${quote.valid_until ? `Proposta válida até ${formatDate(quote.valid_until)}` : "Este orçamento é válido por 7 dias."}
-          ${quote.validity_disclaimer ? `<br/>${quote.validity_disclaimer}` : " Valores sujeitos a alteração conforme disponibilidade."}
+          ${quote.valid_until ? `Proposta válida até ${formatDate(quote.valid_until)}` : ""}
+          ${quote.validity_disclaimer ? `<br/>${quote.validity_disclaimer}` : (quote.valid_until ? " Valores sujeitos a alteração conforme disponibilidade." : "")}
         </p>
 
         <!-- Agent Signature -->
