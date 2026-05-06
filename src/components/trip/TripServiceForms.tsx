@@ -45,6 +45,7 @@ interface TripServiceFormProps {
   isLoading?: boolean;
   defaultValues?: any;
   isEditing?: boolean;
+  imageSlot?: React.ReactNode;
 }
 
 interface MultiFileUploadProps {
@@ -272,7 +273,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* FlightAutoImport hidden per user request */}
 
-        <CollapsibleFormSection title="✈️ Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="✈️ Informações Principais">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="main_airline" render={({ field }) => (
@@ -738,7 +740,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🏨 Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🏨 Informações Principais">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
@@ -1416,7 +1419,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚗 Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🚗 Informações Principais">
+        {imageSlot}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="rental_company" render={({ field }) => (
             <FormItem><FormLabel>Locadora *</FormLabel><FormControl><Input placeholder="Hertz, Alamo, Localiza..." {...field} /></FormControl><FormMessage /></FormItem>
@@ -1870,7 +1874,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚐 Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🚐 Informações Principais">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="transfer_type" render={({ field }) => (
@@ -2387,7 +2392,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🎟️ Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🎟️ Informações Principais">
+        {imageSlot}
 
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
@@ -2899,7 +2905,8 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🛡️ Informações Principais" defaultOpen>
+        <CollapsibleFormSection title="🛡️ Informações Principais">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="provider" render={({ field }) => (
@@ -3419,7 +3426,8 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚢 Informações do Cruzeiro" defaultOpen>
+        <CollapsibleFormSection title="🚢 Informações do Cruzeiro">
+        {imageSlot}
 
         <FormField control={form.control} name="cruise_company" render={({ field }) => (
           <FormItem>
@@ -3993,7 +4001,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing }: 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🛎️ Informações do Serviço" defaultOpen>
+        <CollapsibleFormSection title="🛎️ Informações do Serviço">
+        {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="service_name" render={({ field }) => (
