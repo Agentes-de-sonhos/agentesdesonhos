@@ -1215,6 +1215,11 @@ export default function GerarOrcamento() {
         onOpenChange={setShowAIImport}
         onImport={handleAIImport}
       />
+      <ExportQuoteToWalletDialog
+        open={showExportWallet}
+        onOpenChange={setShowExportWallet}
+        quote={quote}
+      />
     </DashboardLayout>
   );
 }
