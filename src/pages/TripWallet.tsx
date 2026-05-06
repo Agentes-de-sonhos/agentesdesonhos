@@ -475,9 +475,14 @@ function TripWalletContent() {
                           Envie um voucher, confirmação, PDF, imagem ou texto para a IA preencher os dados do serviço automaticamente.
                         </p>
                       </div>
-                      <Button size="sm" onClick={() => setShowAIImport(true)}>
-                        <Sparkles className="h-3.5 w-3.5 mr-1" /> Importar com IA
-                      </Button>
+                      <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                        <Button size="sm" variant="outline" onClick={() => setShowImportQuote(true)}>
+                          <FileTextIcon className="h-3.5 w-3.5 mr-1" /> De um orçamento
+                        </Button>
+                        <Button size="sm" onClick={() => setShowAIImport(true)}>
+                          <Sparkles className="h-3.5 w-3.5 mr-1" /> Importar com IA
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-6 mt-4">
                       {(Object.keys(SERVICE_TYPE_LABELS) as TripServiceType[]).map((type) => (
