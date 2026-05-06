@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildCarteiraLink } from "@/lib/carteira-domain";
-import { QRCodeSVG } from "qrcode.react";
-import { Copy, Check, Link, QrCode, ExternalLink, Share2 } from "lucide-react";
+import { Copy, Check, Link, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -64,7 +63,7 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
             Compartilhar Carteira
           </DialogTitle>
           <DialogDescription>
-            Envie o link ou QR Code para o seu cliente acessar a carteira de viagem.
+            Envie o link e a senha para o seu cliente acessar a carteira de viagem.
           </DialogDescription>
         </DialogHeader>
 
@@ -92,21 +91,6 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
             </div>
           )}
 
-          {/* Short link */}
-          {displayShortLink && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <ExternalLink className="h-3 w-3" /> Link Curto
-              </label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 bg-muted px-3 py-2 rounded-md text-sm font-mono break-all select-all">
-                  {displayShortLink}
-                </code>
-                <CopyButton text={displayShortLink} field="short" />
-              </div>
-            </div>
-          )}
-
           {/* Password */}
           {trip.access_password && (
             <div className="space-y-1.5">
@@ -119,26 +103,6 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
               </div>
             </div>
           )}
-
-          {/* QR Code */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-              <QrCode className="h-3 w-3" /> QR Code da Viagem
-            </label>
-            <div className="flex justify-center p-4 bg-white rounded-lg border">
-              <QRCodeSVG
-                value={displayShortLink || primaryLink}
-                size={180}
-                level="M"
-                includeMargin
-                bgColor="#ffffff"
-                fgColor="#000000"
-              />
-            </div>
-            <p className="text-[11px] text-center text-muted-foreground">
-              O cliente pode escanear para acessar a carteira
-            </p>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
