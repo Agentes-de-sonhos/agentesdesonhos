@@ -31,6 +31,7 @@ interface Props {
   endDate: string;
   services: TripService[];
   readOnly?: boolean;
+  onRequestAddService?: () => void;
 }
 
 type Period = "morning" | "afternoon" | "evening";
@@ -133,7 +134,7 @@ function PeriodImageUpload({
   );
 }
 
-export function TripItinerary({ tripId, destination, startDate, endDate, services, readOnly = false }: Props) {
+export function TripItinerary({ tripId, destination, startDate, endDate, services, readOnly = false, onRequestAddService }: Props) {
   const { activities, isLoading, addActivity, updateActivity, deleteActivity, isAdding, uploadPhoto, uploadDocument } = useItineraryActivities(tripId);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading: isPeriodUploading } = usePeriodImages(tripId);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
