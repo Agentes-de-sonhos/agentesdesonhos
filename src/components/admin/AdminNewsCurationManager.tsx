@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -73,27 +74,6 @@ interface NoticiasDashboard {
 
 const CATEGORIAS = ["Aéreo", "Turismo", "Destinos", "Cruzeiros", "Mercado", "Eventos"];
 
-const MOTIVOS_REJEICAO = [
-  "Irrelevante para agentes",
-  "Promocional / publicitária",
-  "Duplicada",
-  "Pouco interesse para o trade",
-  "Fora do tema turismo B2B",
-  "Conteúdo de baixa qualidade",
-  "Notícia muito antiga",
-  "Outro",
-];
-
-const MOTIVOS_APROVACAO = [
-  "Alta relevância para o trade",
-  "Tendência de mercado",
-  "Impacto comercial direto",
-  "Notícia de destino estratégico",
-  "Movimento de operadora/cia aérea",
-  "Evento importante",
-  "Outro",
-];
-
 export function AdminNewsCurationManager() {
   const [editingItem, setEditingItem] = useState<NoticiasDashboard | null>(null);
   const [editForm, setEditForm] = useState({ titulo_curto: "", resumo: "", categoria: "", tipo_exibicao: "" });
@@ -101,18 +81,11 @@ export function AdminNewsCurationManager() {
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [filterCategoria, setFilterCategoria] = useState<string>("todas");
   const [filterFonte, setFilterFonte] = useState<string>("todas");
-  const [decisionDialog, setDecisionDialog] = useState<{
-    item: NoticiasDashboard;
-    decisao: "aprovado" | "rejeitado";
-    tipo?: string;
-  } | null>(null);
-  const [motivo, setMotivo] = useState<string>("");
-  const [scoreFinal, setScoreFinal] = useState<number>(0);
-  const [motivoCustom, setMotivoCustom] = useState<string>("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [resetScope, setResetScope] = useState<null | "todas" | "pendente" | "rejeitado" | "aprovado">(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  useAuth();
 
   // Estatísticas de aprendizado da curadoria
   const { data: stats } = useQuery({
@@ -247,65 +220,56 @@ export function AdminNewsCurationManager() {
     },
   });
 
-  const openDecisionDialog = (
-    item: NoticiasDashboard,
-    decisao: "aprovado" | "rejeitado",
-    tipo?: string
-  ) => {
-    setDecisionDialog({ item, decisao, tipo });
-    setMotivo("");
-    setMotivoCustom("");
-    setScoreFinal(item.relevancia_score);
-  };
-
   const decisionMutation = useMutation({
-    mutationFn: async () => {
-      if (!decisionDialog) return;
-      const { item, decisao, tipo } = decisionDialog;
-      const motivoFinal = motivo === "Outro" ? motivoCustom : motivo;
-
-      // Atualiza notícia
+    mutationFn: async ({
+      ids,
+      decisao,
+      tipo,
+    }: {
+      ids: string[];
+      decisao: "aprovado" | "rejeitado";
+      tipo?: "destaque" | "secundaria";
+    }) => {
       const updateData: any = { status: decisao };
       if (decisao === "aprovado") {
         updateData.tipo_exibicao = tipo || "secundaria";
-        if (scoreFinal !== item.relevancia_score) {
-          updateData.relevancia_score = scoreFinal;
-        }
       }
-      const { error: upErr } = await supabase
+      const { error } = await supabase
         .from("noticias_dashboard")
         .update(updateData)
-        .eq("id", item.id);
-      if (upErr) throw upErr;
-
-      // Salva feedback para aprendizado da IA
-      const { error: fbErr } = await supabase.from("news_curation_feedback").insert({
-        noticia_id: item.id,
-        titulo: item.titulo_curto,
-        resumo: item.resumo,
-        categoria: item.categoria,
-        fonte: item.fonte,
-        score_ia: item.relevancia_score,
-        score_final: decisao === "aprovado" ? scoreFinal : null,
-        decisao,
-        motivo: motivoFinal || null,
-        created_by: user?.id,
-      });
-      if (fbErr) throw fbErr;
+        .in("id", ids);
+      if (error) throw error;
+      return { count: ids.length, decisao };
     },
-    onSuccess: () => {
+    onSuccess: ({ count, decisao }) => {
       queryClient.invalidateQueries({ queryKey: ["admin-noticias-curadas"] });
       queryClient.invalidateQueries({ queryKey: ["curated-news-dashboard"] });
       toast({
-        title: decisionDialog?.decisao === "aprovado" ? "Notícia aprovada!" : "Notícia rejeitada",
-        description: "A IA vai aprender com essa decisão na próxima coleta.",
+        title:
+          decisao === "aprovado"
+            ? `${count} ${count === 1 ? "notícia aprovada" : "notícias aprovadas"}`
+            : `${count} ${count === 1 ? "notícia rejeitada" : "notícias rejeitadas"}`,
       });
-      setDecisionDialog(null);
+      setSelectedIds(new Set());
     },
     onError: (error: any) => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     },
   });
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const pendentes = (noticias || []).filter((n) => n.status === "pendente").map((n) => n.id);
+    setSelectedIds((prev) => (prev.size === pendentes.length ? new Set() : new Set(pendentes)));
+  };
 
   const handleEdit = (item: NoticiasDashboard) => {
     setEditingItem(item);
@@ -483,11 +447,69 @@ export function AdminNewsCurationManager() {
           </div>
         ) : (
           <div className="space-y-3">
+            {(() => {
+              const pendentes = (noticias || []).filter((n) => n.status === "pendente");
+              const allSelected = pendentes.length > 0 && selectedIds.size === pendentes.length;
+              return (
+                <div className="flex items-center justify-between gap-3 p-3 rounded-md border bg-muted/40 sticky top-0 z-10">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={() => toggleSelectAll()}
+                      disabled={pendentes.length === 0}
+                    />
+                    <span className="text-muted-foreground">
+                      {selectedIds.size > 0
+                        ? `${selectedIds.size} selecionada${selectedIds.size === 1 ? "" : "s"}`
+                        : "Selecionar todas pendentes"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      disabled={selectedIds.size === 0 || decisionMutation.isPending}
+                      onClick={() =>
+                        decisionMutation.mutate({
+                          ids: Array.from(selectedIds),
+                          decisao: "aprovado",
+                          tipo: "secundaria",
+                        })
+                      }
+                    >
+                      <Check className="h-3 w-3 mr-1" />
+                      Aprovar selecionadas
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={selectedIds.size === 0 || decisionMutation.isPending}
+                      onClick={() =>
+                        decisionMutation.mutate({
+                          ids: Array.from(selectedIds),
+                          decisao: "rejeitado",
+                        })
+                      }
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Rejeitar selecionadas
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
             {noticias?.map((item) => (
               <div
                 key={item.id}
                 className="flex flex-col sm:flex-row sm:items-start gap-3 p-4 rounded-lg border bg-card"
               >
+                {item.status === "pendente" && (
+                  <Checkbox
+                    className="mt-1"
+                    checked={selectedIds.has(item.id)}
+                    onCheckedChange={() => toggleSelect(item.id)}
+                  />
+                )}
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="secondary">{item.categoria}</Badge>
@@ -541,8 +563,10 @@ export function AdminNewsCurationManager() {
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => openDecisionDialog(item, "aprovado", "destaque")}
-                      disabled={updateMutation.isPending}
+                      onClick={() =>
+                        decisionMutation.mutate({ ids: [item.id], decisao: "aprovado", tipo: "destaque" })
+                      }
+                      disabled={decisionMutation.isPending}
                       className="text-xs"
                     >
                       <Star className="h-3 w-3 mr-1" />
@@ -551,8 +575,10 @@ export function AdminNewsCurationManager() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      onClick={() => openDecisionDialog(item, "aprovado", "secundaria")}
-                      disabled={updateMutation.isPending}
+                      onClick={() =>
+                        decisionMutation.mutate({ ids: [item.id], decisao: "aprovado", tipo: "secundaria" })
+                      }
+                      disabled={decisionMutation.isPending}
                       className="text-xs"
                     >
                       <Check className="h-3 w-3 mr-1" />
@@ -570,8 +596,10 @@ export function AdminNewsCurationManager() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => openDecisionDialog(item, "rejeitado")}
-                      disabled={updateMutation.isPending}
+                      onClick={() =>
+                        decisionMutation.mutate({ ids: [item.id], decisao: "rejeitado" })
+                      }
+                      disabled={decisionMutation.isPending}
                       className="text-xs text-destructive hover:text-destructive"
                     >
                       <X className="h-3 w-3 mr-1" />
@@ -641,91 +669,6 @@ export function AdminNewsCurationManager() {
               Salvar Alterações
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Decision Dialog (aprovar/rejeitar com motivo) */}
-      <Dialog open={!!decisionDialog} onOpenChange={(open) => !open && setDecisionDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {decisionDialog?.decisao === "aprovado" ? (
-                <><Check className="h-5 w-5 text-green-600" /> Aprovar notícia</>
-              ) : (
-                <><X className="h-5 w-5 text-destructive" /> Rejeitar notícia</>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          {decisionDialog && (
-            <div className="space-y-4">
-              <div className="p-3 bg-muted rounded text-sm">
-                <p className="font-medium">{decisionDialog.item.titulo_curto}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {decisionDialog.item.fonte} · IA sugeriu nota {decisionDialog.item.relevancia_score}/10
-                </p>
-              </div>
-
-              {decisionDialog.decisao === "aprovado" && (
-                <div>
-                  <Label>Sua nota final (0-10)</Label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Input
-                      type="number"
-                      min={0}
-                      max={10}
-                      value={scoreFinal}
-                      onChange={(e) => setScoreFinal(Math.max(0, Math.min(10, Number(e.target.value))))}
-                    />
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      A IA aprende com sua nota
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <Label>
-                  Motivo {decisionDialog.decisao === "rejeitado" ? "(obrigatório)" : "(opcional)"}
-                </Label>
-                <Select value={motivo} onValueChange={setMotivo}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Selecione um motivo..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(decisionDialog.decisao === "aprovado" ? MOTIVOS_APROVACAO : MOTIVOS_REJEICAO).map((m) => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {motivo === "Outro" && (
-                <div>
-                  <Label>Descreva o motivo</Label>
-                  <Textarea
-                    value={motivoCustom}
-                    onChange={(e) => setMotivoCustom(e.target.value)}
-                    rows={2}
-                    placeholder="Explique brevemente..."
-                  />
-                </div>
-              )}
-
-              <Button
-                onClick={() => decisionMutation.mutate()}
-                className="w-full"
-                variant={decisionDialog.decisao === "aprovado" ? "default" : "destructive"}
-                disabled={
-                  decisionMutation.isPending ||
-                  (decisionDialog.decisao === "rejeitado" && !motivo) ||
-                  (motivo === "Outro" && !motivoCustom.trim())
-                }
-              >
-                {decisionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Confirmar {decisionDialog.decisao === "aprovado" ? "aprovação" : "rejeição"}
-              </Button>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
 
