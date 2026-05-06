@@ -164,7 +164,7 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
     `;
   }
   return `
-    <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;">
+      <div style="text-align:center;padding:4px 0 2px;background:#ffffff;border-bottom:1px solid #e2e8f0;">
       <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
         style="max-height:180px;max-width:520px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
@@ -401,7 +401,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
       <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
         ${generateAgencyHeader(profile || null)}
 
-        <div style="padding:18px 32px 0;">
+        <div style="padding:6px 32px 0;">
         <!-- Hero -->
         <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
           <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
