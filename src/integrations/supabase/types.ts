@@ -1021,7 +1021,7 @@ export type Database = {
           social_links: Json | null
           title: string | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
           website: string | null
           whatsapp: string | null
         }
@@ -1044,7 +1044,7 @@ export type Database = {
           social_links?: Json | null
           title?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
           website?: string | null
           whatsapp?: string | null
         }
@@ -1067,7 +1067,7 @@ export type Database = {
           social_links?: Json | null
           title?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
           website?: string | null
           whatsapp?: string | null
         }
@@ -8970,7 +8970,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      community_members_public: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          entry_method: string | null
+          id: string | null
+          segments: string[] | null
+          specialties: string[] | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string | null
+          entry_method?: string | null
+          id?: string | null
+          segments?: string[] | null
+          specialties?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string | null
+          entry_method?: string | null
+          id?: string | null
+          segments?: string[] | null
+          specialties?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_export_users: {
