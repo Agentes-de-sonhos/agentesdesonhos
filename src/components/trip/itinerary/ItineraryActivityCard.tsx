@@ -1,4 +1,4 @@
-import { Clock, MapPin, Pencil, Trash2, Link2, StickyNote, Image, Paperclip, ExternalLink, Download, FileText, ImageIcon } from "lucide-react";
+import { Clock, MapPin, Pencil, Trash2, Link2, StickyNote, Image, Paperclip, ExternalLink, Download, FileText, ImageIcon, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import type { ItineraryActivity } from "@/hooks/useItineraryActivities";
@@ -22,6 +22,11 @@ interface Props {
   onDelete: () => void;
   readOnly?: boolean;
   originBadge?: { label: string; className: string };
+  dragHandleProps?: {
+    attributes?: Record<string, any>;
+    listeners?: Record<string, any>;
+    setActivatorNodeRef?: (el: HTMLElement | null) => void;
+  };
 }
 
 function getDocFileName(url: string) {
@@ -43,7 +48,7 @@ function getMapsLink(mapsUrl: string): string {
   return `https://www.google.com/maps/search/${encodeURIComponent(mapsUrl)}`;
 }
 
-export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelete, readOnly, originBadge }: Props) {
+export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelete, readOnly, originBadge, dragHandleProps }: Props) {
   const hasDocuments = activity.document_urls && activity.document_urls.length > 0;
   const hasMapsUrl = !!activity.maps_url;
 
@@ -170,6 +175,19 @@ export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelet
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </ConfirmDeleteDialog>
+              {dragHandleProps && (
+                <Button
+                  ref={(el) => dragHandleProps.setActivatorNodeRef?.(el)}
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 cursor-grab active:cursor-grabbing touch-none"
+                  title="Arrastar para reordenar"
+                  {...(dragHandleProps.attributes || {})}
+                  {...(dragHandleProps.listeners || {})}
+                >
+                  <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              )}
             </div>
           )}
         </div>
