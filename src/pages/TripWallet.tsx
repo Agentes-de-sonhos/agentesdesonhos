@@ -75,7 +75,10 @@ function TripWalletContent() {
   const { activities: itineraryActivities } = useItineraryActivities(id && id !== "nova" ? id : undefined);
 
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
-  const [editingService, setEditingService] = useState<TripService | null>(null);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  const editingService = editingServiceId
+    ? trip?.services?.find((s) => s.id === editingServiceId) ?? null
+    : null;
   const [isUploading, setIsUploading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
@@ -177,7 +180,7 @@ function TripWalletContent() {
   };
 
   const handleEditService = (service: TripService) => {
-    setEditingService(service);
+    setEditingServiceId(service.id);
     setSelectedServiceType(service.service_type);
   };
 
@@ -202,7 +205,7 @@ function TripWalletContent() {
           attachments: [...(editingService.attachments || []), ...newAttachments],
         } : {}),
       });
-      setEditingService(null);
+      setEditingServiceId(null);
       setSelectedServiceType(null);
     } finally {
       setIsUploading(false);
@@ -238,7 +241,7 @@ function TripWalletContent() {
 
   const handleCancelServiceForm = () => {
     setSelectedServiceType(null);
-    setEditingService(null);
+    setEditingServiceId(null);
   };
 
   const handleAIImport = async (result: AIImportResult) => {
