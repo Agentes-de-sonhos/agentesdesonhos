@@ -12,7 +12,17 @@ const corsHeaders = {
 const MAX_FILE_BASE64 = 10_000_000; // ~10MB
 const MAX_TEXT_LEN = 30_000;
 const ALLOWED_MIME = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp"];
-const ALLOWED_TYPES = ["flight", "hotel"] as const;
+const ALLOWED_TYPES = [
+  "flight",
+  "hotel",
+  "car_rental",
+  "transfer",
+  "attraction",
+  "insurance",
+  "cruise",
+  "train",
+  "other",
+] as const;
 type ImportType = typeof ALLOWED_TYPES[number];
 
 /**
@@ -186,7 +196,50 @@ const HOTEL_SCHEMA = {
 const SCHEMAS: Record<ImportType, unknown> = {
   flight: FLIGHT_SCHEMA,
   hotel: HOTEL_SCHEMA,
+  car_rental: makeSchema([
+    "rental_company","reservation_code","reservation_status","pickup_location","pickup_address","pickup_city","pickup_country","pickup_date","pickup_time","pickup_terminal","pickup_instructions","pickup_phone","dropoff_location","dropoff_address","dropoff_city","dropoff_country","dropoff_date","dropoff_time","dropoff_instructions","car_type","car_model","transmission","fuel_type","doors","passenger_capacity","luggage_capacity","plate","basic_insurance","full_insurance","deductible","deposit_amount","deposit_method","payment_method","fuel_policy","required_documents","minimum_age","notes",
+  ], { drivers: ["name","document","age","notes"] }),
+  transfer: makeSchema([
+    "transfer_type","transfer_mode","transfer_status","city","date","time","origin_location","destination_location","company_name","reservation_code","flight_number","arrival_time","arrival_airport","arrival_terminal","hotel_departure_time","departure_flight_time","departure_airport","pickup_address","destination_address","driver_name","driver_phone","driver_language","vehicle_plate","vehicle_type","vehicle_capacity","adults_count","children_count","location","notes",
+  ], { passengers: ["name","age","passenger_type","notes"] }),
+  attraction: makeSchema([
+    "name","attraction_type","city","country","date","status","entry_time","usage_window","duration","access_type","ticket_code","confirmation_code","order_number","address","venue_name","maps_url","entry_point","cancellation_policy","attraction_rules","required_documents","attraction_contact","agency_notes","notes",
+  ], { passengers: ["name","ticket_type","document","notes"] }),
+  insurance: makeSchema([
+    "provider","plan_name","policy_number","destination_covered","coverage_type","start_date","end_date","status","medical_assistance","hospital_expenses","lost_baggage","trip_cancellation","dental_assistance","medical_repatriation","covid_coverage","coverage","emergency_phone","emergency_whatsapp","emergency_email","emergency_24h","insurer_website","how_to_activate","notes",
+  ], { insured_persons: ["name","birth_date","document","notes"] }),
+  cruise: makeSchema([
+    "cruise_company","ship_name","route","embarkation_port","disembarkation_port","start_date","end_date","booking_number","cabin_type","cabin_number","cabin_category","deck","occupancy","meal_plan","checkin_url","boarding_terminal","port_address","recommended_arrival","required_documents","baggage_policy","dress_code",
+  ], {
+    passengers: ["name","document","notes"],
+    itinerary: ["date","port","arrival_time","departure_time","stop_type"],
+  }),
+  train: makeSchema([
+    "origin_city","origin_station","destination_city","destination_station","travel_date","departure_time","arrival_time","train_company","train_number","travel_class","coach","seat","platform","boarding_notes",
+  ], { passengers: ["name","notes"] }),
+  other: makeSchema([
+    "service_name","other_service_type","custom_type_name","city","country","date","time","duration","status","location_name","address","maps_url","meeting_point","contact_name","contact_company","contact_phone","contact_whatsapp","contact_email","reservation_code","description","notes",
+  ]),
 };
+
+function makeSchema(stringFields: string[], arrayFields: Record<string, string[]> = {}) {
+  const props: Record<string, unknown> = {};
+  for (const f of stringFields) props[f] = { type: "string" };
+  for (const [k, sub] of Object.entries(arrayFields)) {
+    const itemProps: Record<string, unknown> = {};
+    for (const s of sub) itemProps[s] = { type: "string" };
+    props[k] = { type: "array", items: { type: "object", properties: itemProps } };
+  }
+  return {
+    type: "object",
+    properties: {
+      extracted: { type: "object", properties: props, description: "Dados encontrados explicitamente no documento/texto." },
+      suggested: { type: "object", properties: {}, description: "Sugestões opcionais baseadas em conhecimento público; vazio em caso de dúvida." },
+      confidence_notes: { type: "string" },
+    },
+    required: ["extracted"],
+  };
+}
 
 const SYSTEM_PROMPTS: Record<ImportType, string> = {
   flight: `Você é um assistente especialista em ler vouchers, e-mails e confirmações de PASSAGENS AÉREAS.
@@ -205,6 +258,13 @@ REGRAS CRÍTICAS:
 - Datas SEMPRE no formato YYYY-MM-DD. Horários HH:MM.
 - Para "suggested": preencha apenas dados públicos confiáveis do hotel identificado (site oficial, telefone, endereço completo, categoria). Em caso de dúvida, deixe vazio.
 - Em "confidence_notes" liste o que ficou incerto.`,
+  car_rental: `Você é especialista em vouchers de LOCAÇÃO DE VEÍCULO. Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente locadora, código, placa ou condutor.`,
+  transfer: `Você é especialista em vouchers de TRANSFER (receptivo). Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente motorista, placa, voo ou ponto de encontro.`,
+  attraction: `Você é especialista em vouchers de INGRESSOS / ATRAÇÕES / PASSEIOS. Preencha apenas com evidência clara. Datas YYYY-MM-DD. Nunca invente código de ingresso, atração, data ou horário.`,
+  insurance: `Você é especialista em apólices de SEGURO VIAGEM. Preencha apenas com evidência clara. Datas YYYY-MM-DD. Nunca invente número de apólice, seguradora, coberturas ou telefones.`,
+  cruise: `Você é especialista em vouchers de CRUZEIRO. Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente navio, cabine, código ou portos.`,
+  train: `Você é especialista em bilhetes de TREM. Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente código, vagão, assento ou estação.`,
+  other: `Você é especialista em interpretar QUALQUER tipo de serviço turístico (restaurante, guia, chip, experiência, evento, spa, concierge, etc.). Preencha apenas com evidência clara. Datas YYYY-MM-DD, horários HH:MM. Nunca invente dados.`,
 };
 
 function errorResponse(error: string, status = 400) {
@@ -287,7 +347,7 @@ serve(async (req) => {
 
     const serviceType = body?.service_type;
     if (!ALLOWED_TYPES.includes(serviceType)) {
-      return errorResponse("Tipo de serviço inválido. Suportados: flight, hotel.");
+      return errorResponse("Tipo de serviço inválido.");
     }
 
     const fileBase64: string | undefined = body?.file_base64;

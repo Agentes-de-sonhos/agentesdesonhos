@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,35 +10,86 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, Upload, FileText, Loader2, AlertCircle, Plane, BedDouble, ArrowLeft, Wand2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sparkles,
+  Upload,
+  FileText,
+  Loader2,
+  AlertCircle,
+  ArrowLeft,
+  Wand2,
+  Plane,
+  BedDouble,
+  Car,
+  Bus,
+  Ticket,
+  Shield,
+  Ship,
+  TrainFront,
+  Package,
+  CheckCircle2,
+  X,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-export type AIImportServiceType = "flight" | "hotel";
+export type AIImportServiceType =
+  | "flight"
+  | "hotel"
+  | "car_rental"
+  | "transfer"
+  | "attraction"
+  | "insurance"
+  | "cruise"
+  | "train"
+  | "other";
 
 export interface AIImportResult {
   service_type: AIImportServiceType;
-  /** Merged service_data ready to be saved (extracted + accepted suggestions). */
   service_data: Record<string, any>;
 }
 
 interface AIImportServiceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Restrict the picker to a subset (defaults to flight + hotel). */
   allowedTypes?: AIImportServiceType[];
   onImport: (result: AIImportResult) => Promise<void> | void;
 }
 
-const TYPE_LABELS: Record<AIImportServiceType, string> = {
-  flight: "Passagem aérea",
-  hotel: "Hospedagem",
+const TYPE_META: Record<AIImportServiceType, { label: string; icon: any }> = {
+  flight: { label: "Passagem aérea", icon: Plane },
+  hotel: { label: "Hospedagem", icon: BedDouble },
+  car_rental: { label: "Locação de veículo", icon: Car },
+  transfer: { label: "Transfer", icon: Bus },
+  attraction: { label: "Ingressos / Atrações", icon: Ticket },
+  insurance: { label: "Seguro viagem", icon: Shield },
+  cruise: { label: "Cruzeiro", icon: Ship },
+  train: { label: "Trem", icon: TrainFront },
+  other: { label: "Outros", icon: Package },
 };
 
-const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8MB
+const DEFAULT_TYPES: AIImportServiceType[] = [
+  "flight",
+  "hotel",
+  "car_rental",
+  "transfer",
+  "attraction",
+  "insurance",
+  "cruise",
+  "train",
+  "other",
+];
+
+const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const ALLOWED_MIME = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp"];
 
 type Step = "form" | "processing" | "review";
@@ -46,7 +97,7 @@ type Step = "form" | "processing" | "review";
 export function AIImportServiceModal({
   open,
   onOpenChange,
-  allowedTypes = ["flight", "hotel"],
+  allowedTypes = DEFAULT_TYPES,
   onImport,
 }: AIImportServiceModalProps) {
   const { toast } = useToast();
@@ -62,6 +113,8 @@ export function AIImportServiceModal({
   const [edited, setEdited] = useState<Record<string, any>>({});
   const [acceptedSuggestions, setAcceptedSuggestions] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
     setStep("form");
@@ -74,6 +127,7 @@ export function AIImportServiceModal({
     setEdited({});
     setAcceptedSuggestions({});
     setSaving(false);
+    setIsDragging(false);
   };
 
   const handleClose = (next: boolean) => {
@@ -92,25 +146,32 @@ export function AIImportServiceModal({
       r.readAsDataURL(f);
     });
 
+  const validateFile = (f: File): boolean => {
+    if (f.size > MAX_FILE_BYTES) {
+      toast({ title: "Arquivo muito grande", description: "Limite de 8MB.", variant: "destructive" });
+      return false;
+    }
+    if (!ALLOWED_MIME.includes(f.type)) {
+      toast({ title: "Formato não suportado", description: "Use PDF, PNG, JPG ou WEBP.", variant: "destructive" });
+      return false;
+    }
+    return true;
+  };
+
   const handleAnalyze = async () => {
     if (inputMode === "file" && !file) {
       toast({ title: "Anexe um arquivo", description: "Envie PDF, PNG, JPG ou WEBP.", variant: "destructive" });
       return;
     }
     if (inputMode === "text" && text.trim().length < 20) {
-      toast({ title: "Texto muito curto", description: "Cole o texto completo do voucher/confirmação.", variant: "destructive" });
+      toast({
+        title: "Texto muito curto",
+        description: "Cole o texto completo do voucher/confirmação.",
+        variant: "destructive",
+      });
       return;
     }
-    if (file) {
-      if (file.size > MAX_FILE_BYTES) {
-        toast({ title: "Arquivo muito grande", description: "Limite de 8MB.", variant: "destructive" });
-        return;
-      }
-      if (!ALLOWED_MIME.includes(file.type)) {
-        toast({ title: "Formato não suportado", description: "Use PDF, PNG, JPG ou WEBP.", variant: "destructive" });
-        return;
-      }
-    }
+    if (file && !validateFile(file)) return;
 
     setStep("processing");
     setProgressMsg("Lendo documento com IA...");
@@ -125,7 +186,7 @@ export function AIImportServiceModal({
         payload.text = text;
       }
 
-      setProgressMsg("Analisando dados...");
+      setProgressMsg("Interpretando dados do serviço...");
       const { data, error } = await supabase.functions.invoke("ai-import-service", { body: payload });
 
       if (error || !data || (data as any).error) {
@@ -135,12 +196,11 @@ export function AIImportServiceModal({
         return;
       }
 
-      setProgressMsg("Preparando sugestões...");
+      setProgressMsg("Preparando preview...");
       setExtracted((data as any).extracted || {});
       setSuggested((data as any).suggested || {});
       setConfidenceNotes((data as any).confidence_notes || "");
       setEdited({ ...((data as any).extracted || {}) });
-      // Pre-accept all non-empty suggestions but the user can untoggle
       const accepted: Record<string, boolean> = {};
       Object.entries((data as any).suggested || {}).forEach(([k, v]) => {
         if (v && typeof v === "string" && v.trim().length > 0) accepted[k] = true;
@@ -154,7 +214,6 @@ export function AIImportServiceModal({
   };
 
   const handleSave = async () => {
-    // Merge edited (user-confirmed extracted) + accepted suggestions
     const finalData: Record<string, any> = { ...edited };
     Object.entries(suggested).forEach(([k, v]) => {
       if (acceptedSuggestions[k] && v && (!finalData[k] || finalData[k] === "")) {
@@ -168,36 +227,35 @@ export function AIImportServiceModal({
       toast({ title: "Serviço importado", description: "Revise e ajuste o que precisar." });
       handleClose(false);
     } catch (err: any) {
-      toast({ title: "Erro ao salvar", description: err?.message || "Tente novamente.", variant: "destructive" });
+      toast({
+        title: "Erro ao salvar",
+        description: err?.message || "Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  // List of simple string fields to render in the review step.
-  // Arrays (segments, passengers, guests) are presented as a summary count.
-  const reviewFields = (() => {
-    const data: Record<string, any> = edited;
-    return Object.entries(data).filter(([_, v]) => typeof v === "string");
-  })();
+  const reviewFields = Object.entries(edited).filter(([_, v]) => typeof v === "string");
+  const arrayFields = Object.entries(edited).filter(([_, v]) => Array.isArray(v) && v.length > 0);
+  const filledCount = reviewFields.filter(([_, v]) => (v as string).trim().length > 0).length;
 
-  const arrayFields = (() => {
-    const data: Record<string, any> = edited;
-    return Object.entries(data).filter(([_, v]) => Array.isArray(v) && v.length > 0);
-  })();
-
-  const TypeIcon = serviceType === "flight" ? Plane : BedDouble;
+  const TypeIcon = TYPE_META[serviceType].icon;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <div className="rounded-lg bg-primary/10 p-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
             Importar serviço com IA
           </DialogTitle>
           <DialogDescription>
-            Envie um voucher, confirmação, PDF, imagem ou texto para a IA preencher os dados do serviço automaticamente.
+            Envie um voucher, confirmação, PDF, imagem, print ou cole o texto. A IA identifica e
+            preenche os campos automaticamente.
           </DialogDescription>
         </DialogHeader>
 
@@ -205,29 +263,35 @@ export function AIImportServiceModal({
           <div className="space-y-5">
             {/* Type selector */}
             <div className="space-y-2">
-              <Label>Tipo de serviço</Label>
-              <RadioGroup
+              <Label htmlFor="ai-import-type-select">Tipo de serviço</Label>
+              <Select
                 value={serviceType}
                 onValueChange={(v) => setServiceType(v as AIImportServiceType)}
-                className="grid grid-cols-2 gap-2"
               >
-                {allowedTypes.map((t) => (
-                  <label
-                    key={t}
-                    htmlFor={`ai-import-type-${t}`}
-                    className={cn(
-                      "flex items-center gap-2 rounded-md border p-3 cursor-pointer transition-colors",
-                      serviceType === t ? "border-primary bg-primary/5" : "border-input hover:bg-muted/40",
-                    )}
-                  >
-                    <RadioGroupItem value={t} id={`ai-import-type-${t}`} />
-                    {t === "flight" ? <Plane className="h-4 w-4" /> : <BedDouble className="h-4 w-4" />}
-                    <span className="text-sm font-medium">{TYPE_LABELS[t]}</span>
-                  </label>
-                ))}
-              </RadioGroup>
+                <SelectTrigger id="ai-import-type-select" className="h-11">
+                  <SelectValue>
+                    <div className="flex items-center gap-2">
+                      <TypeIcon className="h-4 w-4 text-primary" />
+                      <span>{TYPE_META[serviceType].label}</span>
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {allowedTypes.map((t) => {
+                    const Icon = TYPE_META[t].icon;
+                    return (
+                      <SelectItem key={t} value={t}>
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-4 w-4 text-muted-foreground" />
+                          <span>{TYPE_META[t].label}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
               <p className="text-xs text-muted-foreground">
-                Nesta primeira fase, suportamos {allowedTypes.map((t) => TYPE_LABELS[t]).join(" e ")}. Outros tipos chegarão em breve.
+                A IA adapta a leitura conforme o tipo de serviço selecionado.
               </p>
             </div>
 
@@ -235,39 +299,99 @@ export function AIImportServiceModal({
             <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as "file" | "text")}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="file">
-                  <Upload className="h-4 w-4 mr-1" /> Arquivo (PDF/Imagem)
+                  <Upload className="h-4 w-4 mr-1.5" /> Arquivo / Imagem
                 </TabsTrigger>
                 <TabsTrigger value="text">
-                  <FileText className="h-4 w-4 mr-1" /> Colar texto
+                  <FileText className="h-4 w-4 mr-1.5" /> Colar texto
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="file" className="space-y-2 pt-3">
-                <Label htmlFor="ai-import-file">Anexar arquivo</Label>
-                <Input
-                  id="ai-import-file"
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Aceitamos PDF, PNG, JPG, JPEG e WEBP (até 8MB).
-                </p>
-                {file && (
-                  <p className="text-xs text-muted-foreground truncate">
-                    Selecionado: <strong>{file.name}</strong> ({(file.size / 1024).toFixed(0)} KB)
-                  </p>
-                )}
+
+              <TabsContent value="file" className="pt-3">
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const f = e.dataTransfer.files?.[0];
+                    if (f && validateFile(f)) setFile(f);
+                  }}
+                  className={cn(
+                    "relative cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-all",
+                    isDragging
+                      ? "border-primary bg-primary/5"
+                      : file
+                      ? "border-primary/50 bg-primary/5"
+                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
+                  )}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f && validateFile(f)) setFile(f);
+                    }}
+                    className="hidden"
+                  />
+                  {file ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="rounded-full bg-primary/10 p-3">
+                        <CheckCircle2 className="h-6 w-6 text-primary" />
+                      </div>
+                      <p className="text-sm font-medium truncate max-w-full">{file.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(file.size / 1024).toFixed(0)} KB · clique para trocar
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFile(null);
+                        }}
+                        className="mt-1 h-7 text-xs"
+                      >
+                        <X className="h-3 w-3 mr-1" /> Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="rounded-full bg-muted p-3">
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm font-medium">
+                        Clique para enviar ou arraste o arquivo aqui
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        PDF, PNG, JPG ou WEBP · até 8MB
+                      </p>
+                    </div>
+                  )}
+                </div>
               </TabsContent>
+
               <TabsContent value="text" className="space-y-2 pt-3">
-                <Label htmlFor="ai-import-text">Cole o texto do voucher/confirmação</Label>
+                <Label htmlFor="ai-import-text" className="sr-only">
+                  Cole o texto
+                </Label>
                 <Textarea
                   id="ai-import-text"
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Cole aqui o e-mail, voucher ou confirmação do serviço..."
-                  className="min-h-[180px]"
+                  placeholder="Cole aqui o e-mail, voucher, confirmação, mensagem do WhatsApp ou qualquer texto contendo os dados do serviço..."
+                  className="min-h-[200px]"
                   maxLength={30000}
                 />
+                <p className="text-xs text-muted-foreground">
+                  {text.length}/30.000 caracteres
+                </p>
               </TabsContent>
             </Tabs>
 
@@ -275,8 +399,8 @@ export function AIImportServiceModal({
               <Button variant="outline" onClick={() => handleClose(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleAnalyze}>
-                <Wand2 className="h-4 w-4 mr-1" />
+              <Button onClick={handleAnalyze} className="gap-1.5">
+                <Wand2 className="h-4 w-4" />
                 Analisar com IA
               </Button>
             </div>
@@ -284,30 +408,44 @@ export function AIImportServiceModal({
         )}
 
         {step === "processing" && (
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-sm font-medium">{progressMsg || "Processando..."}</p>
-            <p className="text-xs text-muted-foreground">Isso pode levar alguns segundos.</p>
+          <div className="flex flex-col items-center justify-center py-14 gap-4">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+              <div className="relative rounded-full bg-primary/10 p-4">
+                <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+              </div>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium">{progressMsg || "Processando..."}</p>
+              <p className="text-xs text-muted-foreground">
+                Lendo, fazendo OCR e interpretando o conteúdo
+              </p>
+            </div>
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           </div>
         )}
 
         {step === "review" && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 rounded-md border border-amber-300/40 bg-amber-50 dark:bg-amber-900/10 p-3 text-sm">
-              <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
-              <span className="text-amber-900 dark:text-amber-200">
-                Revise os dados encontrados antes de salvar. A IA pode errar — confirme antes de criar o serviço.
+            <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted/30 p-3">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <TypeIcon className="h-4 w-4 text-primary" />
+                {TYPE_META[serviceType].label}
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {filledCount} campo(s) identificado(s)
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <TypeIcon className="h-4 w-4 text-primary" />
-              {TYPE_LABELS[serviceType]}
+            <div className="flex items-start gap-2 rounded-lg border border-amber-300/40 bg-amber-50 dark:bg-amber-900/10 p-3 text-sm">
+              <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <span className="text-amber-900 dark:text-amber-200 text-xs leading-relaxed">
+                Revise os dados antes de salvar. A IA pode errar — confirme os campos críticos.
+              </span>
             </div>
 
-            {/* Extracted fields */}
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold">Dados encontrados no documento</h3>
+              <h3 className="text-sm font-semibold">Dados encontrados</h3>
               {reviewFields.length === 0 && arrayFields.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
                   Nenhum campo extraído. Você pode preencher manualmente após salvar.
@@ -316,11 +454,11 @@ export function AIImportServiceModal({
                 <div className="grid sm:grid-cols-2 gap-3">
                   {reviewFields.map(([key, value]) => (
                     <div key={key} className="space-y-1">
-                      <Label className="text-xs capitalize">{humanizeKey(key)}</Label>
+                      <Label className="text-xs">{humanizeKey(key)}</Label>
                       <Input
                         value={(value as string) || ""}
                         onChange={(e) => setEdited((prev) => ({ ...prev, [key]: e.target.value }))}
-                        placeholder="Não encontrado — preencha se desejar"
+                        placeholder="Não encontrado"
                         className={cn(
                           "text-sm",
                           !value && "border-dashed text-muted-foreground placeholder:text-muted-foreground/60",
@@ -334,14 +472,14 @@ export function AIImportServiceModal({
                 <div className="rounded-md border bg-muted/30 p-2 text-xs space-y-1">
                   {arrayFields.map(([key, value]) => (
                     <div key={key}>
-                      <strong>{humanizeKey(key)}:</strong> {(value as any[]).length} item(s) detectado(s) — serão criados automaticamente.
+                      <strong>{humanizeKey(key)}:</strong> {(value as any[]).length} item(s)
+                      detectado(s) — serão criados automaticamente.
                     </div>
                   ))}
                 </div>
               )}
             </section>
 
-            {/* Suggestions */}
             {Object.keys(suggested).length > 0 && (
               <section className="space-y-2">
                 <h3 className="text-sm font-semibold flex items-center gap-1">
@@ -349,7 +487,7 @@ export function AIImportServiceModal({
                   Sugestões da IA
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Sugestão baseada em dados públicos, revise antes de salvar.
+                  Sugestões baseadas em dados públicos. Revise antes de aceitar.
                 </p>
                 <div className="space-y-2">
                   {Object.entries(suggested).map(([key, value]) => {
@@ -363,7 +501,10 @@ export function AIImportServiceModal({
                           type="checkbox"
                           checked={!!acceptedSuggestions[key]}
                           onChange={(e) =>
-                            setAcceptedSuggestions((prev) => ({ ...prev, [key]: e.target.checked }))
+                            setAcceptedSuggestions((prev) => ({
+                              ...prev,
+                              [key]: e.target.checked,
+                            }))
                           }
                           className="mt-1"
                         />
@@ -381,7 +522,9 @@ export function AIImportServiceModal({
             {confidenceNotes && (
               <section className="rounded-md border border-muted bg-muted/20 p-3">
                 <div className="text-xs font-semibold mb-1">Observações da IA</div>
-                <p className="text-xs text-muted-foreground whitespace-pre-line">{confidenceNotes}</p>
+                <p className="text-xs text-muted-foreground whitespace-pre-line">
+                  {confidenceNotes}
+                </p>
               </section>
             )}
 
