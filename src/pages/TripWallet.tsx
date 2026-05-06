@@ -639,29 +639,162 @@ function TripWalletContent() {
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-2 text-sm">
-                <div className="flex gap-2">
+                {/* Cliente — editável */}
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-muted-foreground">Cliente:</span>
-                  <span className="font-medium">{trip.client_name}</span>
+                  {editingField === "client_name" ? (
+                    <>
+                      <Input
+                        value={fieldDraft}
+                        onChange={(e) => setFieldDraft(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
+                        className="h-7 text-sm flex-1 min-w-[160px]"
+                        autoFocus
+                      />
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium">{trip.client_name}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("client_name", trip.client_name)} title="Editar cliente">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div className="flex gap-2">
+
+                {/* Destino — editável */}
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-muted-foreground">Destino:</span>
-                  <span className="font-medium">{trip.destination}</span>
+                  {editingField === "destination" ? (
+                    <>
+                      <Input
+                        value={fieldDraft}
+                        onChange={(e) => setFieldDraft(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
+                        className="h-7 text-sm flex-1 min-w-[160px]"
+                        autoFocus
+                      />
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium">{trip.destination}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("destination", trip.destination)} title="Editar destino">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div className="flex gap-2">
+
+                {/* Período — editáveis (data início + fim) */}
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-muted-foreground">Período:</span>
-                  <span className="font-medium">{days} dias</span>
+                  {editingField === "start_date" ? (
+                    <>
+                      <Input
+                        type="date"
+                        value={fieldDraft}
+                        onChange={(e) => setFieldDraft(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
+                        className="h-7 text-sm w-[160px]"
+                        autoFocus
+                      />
+                      <span className="text-muted-foreground">a</span>
+                      <span className="font-medium">{format(endDate, "dd/MM/yyyy", { locale: ptBR })}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : editingField === "end_date" ? (
+                    <>
+                      <span className="font-medium">{format(startDate, "dd/MM/yyyy", { locale: ptBR })}</span>
+                      <span className="text-muted-foreground">a</span>
+                      <Input
+                        type="date"
+                        value={fieldDraft}
+                        onChange={(e) => setFieldDraft(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
+                        className="h-7 text-sm w-[160px]"
+                        autoFocus
+                      />
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium">
+                        {format(startDate, "dd/MM/yyyy", { locale: ptBR })} a {format(endDate, "dd/MM/yyyy", { locale: ptBR })}
+                      </span>
+                      <span className="text-muted-foreground">({days} dias)</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("start_date", trip.start_date)} title="Editar data de início">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("end_date", trip.end_date)} title="Editar data de fim">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div className="flex gap-2">
+
+                {/* Serviços — somente leitura (calculado) */}
+                <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">Serviços:</span>
                   <span className="font-medium">{trip.services?.length || 0}</span>
                 </div>
-                <div className="flex gap-2">
+
+                {/* Documentos — somente leitura (calculado) */}
+                <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">Documentos:</span>
                   <span className="font-medium">{trip.services?.filter(s => s.voucher_url).length || 0}</span>
                 </div>
-                <div className="flex gap-2">
+
+                {/* Status — toggle editável */}
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-muted-foreground">Status:</span>
-                  <span className="font-medium">{trip.status === "archived" ? "Arquivada" : "Ativa"}</span>
+                  {editingField === "status" ? (
+                    <>
+                      <select
+                        value={fieldDraft}
+                        onChange={(e) => setFieldDraft(e.target.value)}
+                        className="h-7 text-sm rounded border border-input bg-background px-2"
+                        autoFocus
+                      >
+                        <option value="active">Ativa</option>
+                        <option value="archived">Arquivada</option>
+                      </select>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium">{trip.status === "archived" ? "Arquivada" : "Ativa"}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("status", trip.status)} title="Editar status">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </AccordionContent>
