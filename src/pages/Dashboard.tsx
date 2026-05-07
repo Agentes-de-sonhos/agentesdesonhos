@@ -31,6 +31,8 @@ const AcademyCollapsibleCard = lazy(() => import("@/components/dashboard/Academy
 const MarketingCard = lazy(() => import("@/components/dashboard/MarketingCard").then(m => ({ default: m.MarketingCard })));
 const ClientesCard = lazy(() => import("@/components/dashboard/ClientesCard").then(m => ({ default: m.ClientesCard })));
 const FinanceiroCard = lazy(() => import("@/components/dashboard/FinanceiroCard").then(m => ({ default: m.FinanceiroCard })));
+const SalesResourcesCard = lazy(() => import("@/components/dashboard/SalesResourcesCard").then(m => ({ default: m.SalesResourcesCard })));
+const GuidesReferencesCard = lazy(() => import("@/components/dashboard/GuidesReferencesCard").then(m => ({ default: m.GuidesReferencesCard })));
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
@@ -211,6 +213,12 @@ export default function Dashboard() {
             <section className="order-[5.5] grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
               <div className="min-w-0"><MarketingCard /></div>
               <div className="min-w-0"><AgentToolsCard /></div>
+            </section>
+
+            {/* 6. Recursos de Vendas + Guias e Referências lado a lado */}
+            <section className="order-6 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+              <div className="min-w-0"><SalesResourcesCard /></div>
+              <div className="min-w-0"><GuidesReferencesCard /></div>
             </section>
           </Suspense>
         )}
