@@ -1301,6 +1301,22 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [loading, setLoading] = useState(false);
   const [usedPassword, setUsedPassword] = useState(preLoadedPassword || "");
   const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
+  const [gateAttempts, setGateAttempts] = useState(0);
+  const [gateLocked, setGateLocked] = useState(false);
+  const [gateBranding, setGateBranding] = useState<AgentProfile | null>(null);
+
+  // Load public branding (logo, agency, agent) for the password gate
+  useEffect(() => {
+    if (authenticated || !token) return;
+    (async () => {
+      try {
+        const { data } = await supabase.rpc('get_trip_public_branding', { p_token: token });
+        const result = data as any;
+        if (result?.agent_profile) setGateBranding(result.agent_profile);
+        if (result?.is_locked) setGateLocked(true);
+      } catch {}
+    })();
+  }, [token, authenticated]);
 
   // Fetch itinerary activities when trip is loaded
   useEffect(() => {
@@ -1357,7 +1373,24 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       setAuthenticated(true);
       setUsedPassword(password);
     } catch (err: any) {
-      setError(err.message || "Senha incorreta");
+      const msg: string = err?.message || "Senha incorreta";
+      const isLockMsg = /bloqueado/i.test(msg);
+      if (isLockMsg) {
+        setGateLocked(true);
+        setError(msg);
+      } else {
+        const next = gateAttempts + 1;
+        setGateAttempts(next);
+        const remaining = Math.max(0, 3 - next);
+        if (remaining === 2) {
+          setError("Senha incorreta. Você tem mais 2 tentativas.");
+        } else if (remaining === 1) {
+          setError("Senha incorreta. Você tem mais 1 tentativa antes do bloqueio.");
+        } else {
+          setGateLocked(true);
+          setError("Acesso bloqueado por segurança. Entre em contato com a agência responsável.");
+        }
+      }
     } finally {
       setLoading(false);
     }
