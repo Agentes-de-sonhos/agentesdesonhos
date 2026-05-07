@@ -24,6 +24,23 @@ const SERVICE_LABELS: Record<TripServiceType, string> = {
   other: "Outros Serviços",
 };
 
+// Emoji + gradiente por serviço (alinhado ao QuotePDF para consistência visual)
+const SERVICE_EMOJI: Record<TripServiceType, string> = {
+  flight: "✈️", hotel: "🏨", car_rental: "🚗", transfer: "🚐",
+  attraction: "🎟️", insurance: "🛡️", cruise: "🚢", train: "🚆", other: "📦",
+};
+const SERVICE_GRADIENTS: Record<TripServiceType, { bg: string; fg: string; iconBg: string }> = {
+  flight:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.15),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
+  hotel:      { bg: "linear-gradient(90deg,rgba(245,158,11,0.18),rgba(217,119,6,0.05))",  fg: "#b45309", iconBg: "rgba(255,255,255,0.85)" },
+  car_rental: { bg: "linear-gradient(90deg,rgba(16,185,129,0.18),rgba(5,150,105,0.05))",  fg: "#047857", iconBg: "rgba(255,255,255,0.85)" },
+  transfer:   { bg: "linear-gradient(90deg,rgba(139,92,246,0.18),rgba(124,58,237,0.05))", fg: "#6d28d9", iconBg: "rgba(255,255,255,0.85)" },
+  attraction: { bg: "linear-gradient(90deg,rgba(236,72,153,0.18),rgba(219,39,119,0.05))", fg: "#be185d", iconBg: "rgba(255,255,255,0.85)" },
+  insurance:  { bg: "linear-gradient(90deg,rgba(6,182,212,0.18),rgba(8,145,178,0.05))",   fg: "#0e7490", iconBg: "rgba(255,255,255,0.85)" },
+  cruise:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.12),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
+  train:      { bg: "linear-gradient(90deg,rgba(100,116,139,0.18),rgba(71,85,105,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
+  other:      { bg: "linear-gradient(90deg,rgba(148,163,184,0.18),rgba(100,116,139,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
+};
+
 function formatDate(dateStr: string) {
   try {
     const [y, m, d] = dateStr.split('-').map(Number);
@@ -235,47 +252,49 @@ function getServiceDetails(service: TripService): string[] {
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <h1 style="font-size: 24px; color: #0f766e; margin: 0;">
-          ${profile?.agency_name || '🧳 Carteira Digital'}
-        </h1>
+      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
+        <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
+          ${profile?.agency_name || "Carteira Digital"}
+        </p>
       </div>
     `;
   }
-  
   return `
-    <div style="text-align: center; margin-bottom: 32px;">
-      <img 
-        src="${profile.agency_logo_url}" 
-        alt="${profile.agency_name || 'Logo'}"
-        style="max-height: 80px; max-width: 200px; object-fit: contain; margin: 0 auto;"
-      />
+    <div style="text-align:center;padding:4px 0 2px;background:#ffffff;">
+      <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
+        style="max-height:180px;max-width:520px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
   `;
 }
 
 function generateAgentSignature(profile: AgentProfile | null): string {
-  if (!profile) {
-    return `
-      <div style="text-align: center; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-        <p style="font-size: 12px; color: #64748b;">
-          Agentes de Sonhos • Sua viagem começa aqui
-        </p>
-      </div>
-    `;
-  }
-
+  if (!profile) return "";
   const avatarHtml = profile.avatar_url
-    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 12px;" />`
-    : `<div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; margin-right: 12px;">${profile.name.charAt(0).toUpperCase()}</div>`;
-
+    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:4px solid rgba(15,118,110,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.08);display:inline-block;" />`
+    : `<div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#0f766e,#14b8a6);display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:26px;box-shadow:0 8px 20px rgba(0,0,0,0.08);">${profile.name.charAt(0).toUpperCase()}</div>`;
+  const whatsappNumber = profile.phone?.replace(/\D/g, "") || "";
+  const whatsappLink = whatsappNumber
+    ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
+    : "";
   return `
-    <div style="padding-top: 24px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
-      ${avatarHtml}
-      <div style="text-align: left;">
-        <p style="font-weight: 600; font-size: 14px; color: #1e293b; margin: 0;">${profile.name}</p>
-        ${profile.phone ? `<p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">📱 ${profile.phone}</p>` : ''}
-        ${profile.agency_name ? `<p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">${profile.agency_name}</p>` : ''}
+    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
+      </div>
+      <div style="padding:14px 18px;text-align:center;">
+        ${avatarHtml}
+        <p style="font-size:17px;font-weight:800;color:#1e293b;margin:8px 0 1px;">${profile.name}</p>
+        ${profile.agency_name ? `<p style="font-size:12px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
+        ${profile.city || profile.state ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
+        ${
+          whatsappLink
+            ? `<div style="margin-top:10px;">
+                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
+                  💬 Falar no WhatsApp
+                </a>
+              </div>`
+            : ""
+        }
       </div>
     </div>
   `;
@@ -409,61 +428,61 @@ export async function generateTripPDF(
   const sortedServices = [...(trip.services || [])].sort(
     (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
   );
-  const grouped = sortedServices.reduce((acc, service) => {
-    const type = service.service_type;
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(service);
-    return acc;
-  }, {} as Record<string, TripService[]>);
-  const orderedTypes = Object.keys(grouped).sort((a, b) => {
-    const aMin = grouped[a][0]?.order_index ?? 0;
-    const bMin = grouped[b][0]?.order_index ?? 0;
-    return aMin - bMin;
-  });
 
-  const servicesHtml = orderedTypes.map((type) => {
-    const services = grouped[type];
-    const label = SERVICE_LABELS[type as TripServiceType] || "Serviço";
-    
-    const servicesItems = services.map((service) => {
-      const details = getServiceDetails(service);
+  // Cards de serviço alinhados visualmente ao QuotePDF (gradiente por categoria + emoji)
+  const servicesHtml = sortedServices.map((service) => {
+    const type = service.service_type as TripServiceType;
+    const label = SERVICE_LABELS[type] || "Serviço";
+    const emoji = SERVICE_EMOJI[type] || "📋";
+    const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
+    const details = getServiceDetails(service);
+    const summary = details[0] || "";
+    const restDetails = details.slice(1);
 
-      // Build clickable attachment links
-      let attachmentsHtml = '';
-      if (service.attachments?.length > 0) {
-        attachmentsHtml = service.attachments.map((att: any) => {
-          const signedUrl = permanentUrlCache[att.url];
-          if (signedUrl) {
-            return `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; color: #0f766e; font-size: 12px; text-decoration: underline; margin-right: 12px;">📎 ${att.name} ↗</a>`;
-          }
-          return `<span style="color: #64748b; font-size: 12px;">📎 ${att.name}</span>`;
-        }).join(' ');
-      } else if (service.voucher_url) {
-        const signedUrl = permanentUrlCache[service.voucher_url];
-        const name = service.voucher_name || 'Documento anexo';
+    let attachmentsHtml = '';
+    if (service.attachments?.length > 0) {
+      attachmentsHtml = service.attachments.map((att: any) => {
+        const signedUrl = permanentUrlCache[att.url];
         if (signedUrl) {
-          attachmentsHtml = `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; color: #0f766e; font-size: 12px; text-decoration: underline;">📎 ${name} ↗</a>`;
-        } else {
-          attachmentsHtml = `<span style="color: #64748b; font-size: 12px;">📎 ${name}</span>`;
+          return `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:#0f766e;font-size:12px;text-decoration:underline;margin-right:12px;">📎 ${att.name} ↗</a>`;
         }
+        return `<span style="color:#64748b;font-size:12px;">📎 ${att.name}</span>`;
+      }).join(' ');
+    } else if (service.voucher_url) {
+      const signedUrl = permanentUrlCache[service.voucher_url];
+      const name = service.voucher_name || 'Documento anexo';
+      if (signedUrl) {
+        attachmentsHtml = `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:#0f766e;font-size:12px;text-decoration:underline;">📎 ${name} ↗</a>`;
+      } else {
+        attachmentsHtml = `<span style="color:#64748b;font-size:12px;">📎 ${name}</span>`;
       }
-      
-      return `
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; background: white;">
-          <div style="margin-bottom: 4px;">
-            ${details.map((d) => `<p style="margin: 2px 0; font-size: 13px; color: #475569;">${d}</p>`).join("")}
-          </div>
-          ${attachmentsHtml ? `<div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #f1f5f9;">${attachmentsHtml}</div>` : ''}
-        </div>
-      `;
-    }).join("");
-    
+    }
+
+    const detailsHtml = restDetails.length > 0
+      ? `<div class="pdf-block pdf-details" style="word-wrap:break-word;overflow-wrap:break-word;">
+          ${restDetails.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+        </div>`
+      : "";
+
+    const attachmentsBlock = attachmentsHtml
+      ? `<div class="pdf-block" style="margin-top:8px;padding-top:6px;border-top:1px solid #f1f5f9;">${attachmentsHtml}</div>`
+      : "";
+
     return `
-      <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 14px; font-weight: 600; color: #0f766e; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-          ${label}
-        </h3>
-        ${servicesItems}
+      <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:8px 14px;color:${grad.fg};">
+          <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
+            <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
+            <div style="min-width:0;">
+              <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
+              ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
+            </div>
+          </div>
+        </div>
+        <div style="padding:12px 16px;">
+          ${detailsHtml}
+          ${attachmentsBlock}
+        </div>
       </div>
     `;
   }).join("");
@@ -475,79 +494,108 @@ export async function generateTripPDF(
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Carteira Digital - ${trip.client_name}</title>
+      <title>Carteira Digital — ${trip.client_name}</title>
       <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-          color: #1e293b;
-          line-height: 1.5;
-          background: #f8fafc;
-        }
-        a { color: #0f766e; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:#f8fafc; }
+        img { max-width:100%; height:auto; }
+        a { color:#0f766e; }
         @media print {
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
-          a { color: #0f766e !important; text-decoration: underline !important; }
+          @page { size: A4; margin: 14mm 10mm 10mm 10mm; }
+          @page :first { margin-top: 8mm; }
+          html, body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: #fff !important;
+            line-height: 1.42 !important;
+          }
+          a { color:#0f766e !important; text-decoration:underline !important; }
+
+          .pdf-hero { padding-top: 0 !important; padding-bottom: 6px !important; }
+          .pdf-hero h1 { font-size: 26px !important; line-height: 1.05 !important; margin-bottom: 2px !important; }
+          .pdf-hero p { margin-top: 2px !important; }
+
+          .overview-card { padding: 10px 14px !important; margin-bottom: 12px !important; }
+
+          .service-card { margin-bottom: 7px !important; }
+          .service-card > div:last-child { padding: 9px 14px !important; }
+          .service-title { padding: 6px 12px !important; }
+          .pdf-details p { margin: 1px 0 !important; line-height: 1.38 !important; }
+
+          .agent-signature { margin-top: 10px !important; }
+          .agent-signature > div:last-child { padding: 10px 16px !important; }
+
+          .pdf-block,
+          .pdf-header,
+          .agent-signature,
+          .overview-card,
+          img { break-inside: avoid; page-break-inside: avoid; }
+
+          .agent-signature { break-before: avoid; page-break-before: avoid; }
+
+          .pdf-title, .section-title, .service-title {
+            break-after: avoid; page-break-after: avoid;
+          }
+          .pdf-card, .pdf-details, .service-card {
+            break-inside: auto; page-break-inside: auto;
+          }
+          h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+          p { orphans: 3; widows: 3; }
         }
       </style>
     </head>
     <body>
-      <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
-        <!-- Agency Logo/Header -->
+      <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
         ${generateAgencyHeader(profile || null)}
 
-        <!-- Header -->
-        <div style="text-align: center; margin-bottom: 40px;">
-          <h1 style="font-size: 32px; color: #0f766e; margin-bottom: 8px;">
-            🧳 Carteira Digital
-          </h1>
-          <p style="color: #64748b; font-size: 14px;">
-            Organizador de Viagem
-          </p>
-        </div>
+        <div style="padding:6px 32px 0;">
+          <!-- Hero -->
+          <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
+            <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
+              🧳 Carteira Digital
+            </div>
+            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${trip.destination}</h1>
+            <p style="font-size:14px;color:#64748b;margin-top:4px;">
+              Preparado especialmente para <strong style="color:#1e293b;">${trip.client_name}</strong>
+            </p>
+          </div>
 
-        <!-- Client Info -->
-        <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
-          <h2 style="font-size: 24px; margin-bottom: 16px; color: #0f766e;">
-            ${trip.client_name}
-          </h2>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+          <!-- Overview -->
+          <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
             <div>
-              <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Destino</span>
-              <p style="font-weight: 600; font-size: 16px;">${trip.destination}</p>
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
+              <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.destination}</p>
             </div>
-            <div>
-              <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Período</span>
-              <p style="font-weight: 600; font-size: 16px;">
-                ${formatDate(trip.start_date)} - ${formatDate(trip.end_date)}
-              </p>
+            <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 Período</p>
+              <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatDate(trip.start_date)} — ${formatDate(trip.end_date)}</p>
+              <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} dias</p>
             </div>
-            <div>
-              <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Duração</span>
-              <p style="font-weight: 600; font-size: 16px;">${days} dias</p>
+            <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👤 Cliente</p>
+              <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.client_name}</p>
             </div>
           </div>
-        </div>
 
-        <!-- Services -->
-        <h3 style="font-size: 20px; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
-          Serviços da Viagem
-        </h3>
-        
-        ${servicesHtml || '<p style="text-align: center; color: #64748b; padding: 24px;">Nenhum serviço adicionado</p>'}
+          <!-- Services -->
+          <div style="margin-bottom:18px;">
+            <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+              <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+              <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Serviços da Viagem</h3>
+              <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+            </div>
+            ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
+          </div>
 
-        <!-- Itinerary -->
-        ${itineraryHtml}
+          <!-- Itinerary -->
+          ${itineraryHtml}
 
-        <!-- Footer -->
-        <div style="margin-top: 40px;">
-          <p style="text-align: center; font-size: 12px; color: #64748b; margin-bottom: 16px;">
-            Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
-          </p>
-          
           <!-- Agent Signature -->
           ${generateAgentSignature(profile || null)}
 
+          <p style="text-align:center;font-size:10px;color:#94a3b8;margin-top:14px;">
+            Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+          </p>
         </div>
       </div>
     </body>
