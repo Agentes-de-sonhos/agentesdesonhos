@@ -377,7 +377,7 @@ export function AdminUserManager() {
 
       let matchesStat = true;
       if (statFilter === "admins") matchesStat = user.role === "admin";
-      else if (statFilter !== "all") matchesStat = user.plan === statFilter;
+      else if (statFilter !== "all") matchesStat = user.role !== "admin" && user.plan === statFilter;
 
       return matchesSearch && matchesStat;
     });
@@ -386,11 +386,11 @@ export function AdminUserManager() {
   const stats = {
     total: users.length,
     admins: users.filter((u) => u.role === "admin").length,
-    start: users.filter((u) => u.plan === "start").length,
-    profissional: users.filter((u) => u.plan === "profissional").length,
-    premium: users.filter((u) => u.plan === "premium").length,
-    fundador: users.filter((u) => u.plan === "fundador").length,
-    fornecedor_parceiro: users.filter((u) => u.plan === "fornecedor_parceiro").length,
+    start: users.filter((u) => u.role !== "admin" && u.plan === "start").length,
+    profissional: users.filter((u) => u.role !== "admin" && u.plan === "profissional").length,
+    premium: users.filter((u) => u.role !== "admin" && u.plan === "premium").length,
+    fundador: users.filter((u) => u.role !== "admin" && u.plan === "fundador").length,
+    fornecedor_parceiro: users.filter((u) => u.role !== "admin" && u.plan === "fornecedor_parceiro").length,
   };
 
   const statCards: { key: string; label: string; value: number }[] = [
