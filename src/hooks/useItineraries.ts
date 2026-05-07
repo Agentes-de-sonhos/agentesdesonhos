@@ -123,10 +123,13 @@ export function useItineraries() {
   const generateWithAI = async (formData: ItineraryFormData) => {
     const response = await supabase.functions.invoke("generate-itinerary", {
       body: {
+        origin: formData.origin,
         destination: formData.destination,
         startDate: format(formData.startDate, "yyyy-MM-dd"),
         endDate: format(formData.endDate, "yyyy-MM-dd"),
         travelersCount: formData.travelersCount,
+        adultsCount: formData.adultsCount,
+        childrenCount: formData.childrenCount,
         tripType: formData.tripType,
         budgetLevel: formData.budgetLevel,
         interests: formData.interests || [],
