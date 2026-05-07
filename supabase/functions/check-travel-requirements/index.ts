@@ -46,11 +46,12 @@ serve(async (req) => {
 
     const body = await req.json();
     const { passenger_data, trip_data } = body;
-    if (!passenger_data || !trip_data) {
-      return new Response(JSON.stringify({ error: "Dados do passageiro e da viagem são obrigatórios." }), {
+    if (!trip_data) {
+      return new Response(JSON.stringify({ error: "Dados da viagem são obrigatórios." }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const hasPassenger = !!passenger_data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -59,7 +60,8 @@ serve(async (req) => {
       });
     }
 
-    const userPrompt = `Avalie a elegibilidade de embarque desta viagem internacional cruzando todos os dados.
+    const userPrompt = hasPassenger
+      ? `Avalie a elegibilidade de embarque desta viagem internacional cruzando todos os dados.
 
 DADOS DO PASSAGEIRO:
 ${JSON.stringify(passenger_data, null, 2)}
@@ -67,7 +69,13 @@ ${JSON.stringify(passenger_data, null, 2)}
 DADOS DA VIAGEM:
 ${JSON.stringify(trip_data, null, 2)}
 
-Gere uma análise estruturada em blocos: documentação obrigatória, vistos e autorizações, saúde e vacinas, alertas inteligentes (cruzando dados), links oficiais (URLs reais e verificáveis) e observações. Defina o status geral.`;
+Gere uma análise estruturada em blocos: documentação obrigatória, vistos e autorizações, saúde e vacinas, alertas inteligentes (cruzando dados), links oficiais (URLs reais e verificáveis) e observações. Defina o status geral.`
+      : `Gere os REQUISITOS GERAIS DE VIAGEM para o destino abaixo, SEM dados do passageiro. Considere o cenário padrão: passageiro brasileiro, adulto, viajando com passaporte brasileiro válido. NÃO invente dados pessoais. Sinalize claramente nas observações que a análise é genérica e que para validação completa de elegibilidade é necessário informar os dados do passageiro.
+
+DADOS DA VIAGEM:
+${JSON.stringify(trip_data, null, 2)}
+
+Gere uma análise estruturada em blocos: documentação obrigatória, vistos e autorizações (assumindo nacionalidade brasileira), saúde e vacinas, alertas gerais do destino, links oficiais (URLs reais e verificáveis) e observações. Use confidence "medio" no máximo, pois faltam dados do passageiro. Defina o status geral como "attention" para reforçar a necessidade de validação individual.`;
 
     const model = "google/gemini-2.5-pro";
 
@@ -213,7 +221,7 @@ Gere uma análise estruturada em blocos: documentação obrigatória, vistos e a
       .from("travel_requirements_consultations")
       .insert({
         user_id: userData.user.id,
-        passenger_data,
+        passenger_data: passenger_data ?? {},
         trip_data,
         result,
         confidence_score: confidenceScore,
