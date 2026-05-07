@@ -505,79 +505,108 @@ export async function generateTripPDF(
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Carteira Digital - ${trip.client_name}</title>
+      <title>Carteira Digital — ${trip.client_name}</title>
       <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-          color: #1e293b;
-          line-height: 1.5;
-          background: #f8fafc;
-        }
-        a { color: #0f766e; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:#f8fafc; }
+        img { max-width:100%; height:auto; }
+        a { color:#0f766e; }
         @media print {
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
-          a { color: #0f766e !important; text-decoration: underline !important; }
+          @page { size: A4; margin: 14mm 10mm 10mm 10mm; }
+          @page :first { margin-top: 8mm; }
+          html, body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: #fff !important;
+            line-height: 1.42 !important;
+          }
+          a { color:#0f766e !important; text-decoration:underline !important; }
+
+          .pdf-hero { padding-top: 0 !important; padding-bottom: 6px !important; }
+          .pdf-hero h1 { font-size: 26px !important; line-height: 1.05 !important; margin-bottom: 2px !important; }
+          .pdf-hero p { margin-top: 2px !important; }
+
+          .overview-card { padding: 10px 14px !important; margin-bottom: 12px !important; }
+
+          .service-card { margin-bottom: 7px !important; }
+          .service-card > div:last-child { padding: 9px 14px !important; }
+          .service-title { padding: 6px 12px !important; }
+          .pdf-details p { margin: 1px 0 !important; line-height: 1.38 !important; }
+
+          .agent-signature { margin-top: 10px !important; }
+          .agent-signature > div:last-child { padding: 10px 16px !important; }
+
+          .pdf-block,
+          .pdf-header,
+          .agent-signature,
+          .overview-card,
+          img { break-inside: avoid; page-break-inside: avoid; }
+
+          .agent-signature { break-before: avoid; page-break-before: avoid; }
+
+          .pdf-title, .section-title, .service-title {
+            break-after: avoid; page-break-after: avoid;
+          }
+          .pdf-card, .pdf-details, .service-card {
+            break-inside: auto; page-break-inside: auto;
+          }
+          h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+          p { orphans: 3; widows: 3; }
         }
       </style>
     </head>
     <body>
-      <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
-        <!-- Agency Logo/Header -->
+      <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
         ${generateAgencyHeader(profile || null)}
 
-        <!-- Header -->
-        <div style="text-align: center; margin-bottom: 40px;">
-          <h1 style="font-size: 32px; color: #0f766e; margin-bottom: 8px;">
-            🧳 Carteira Digital
-          </h1>
-          <p style="color: #64748b; font-size: 14px;">
-            Organizador de Viagem
-          </p>
-        </div>
+        <div style="padding:6px 32px 0;">
+          <!-- Hero -->
+          <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
+            <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
+              🧳 Carteira Digital
+            </div>
+            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${trip.destination}</h1>
+            <p style="font-size:14px;color:#64748b;margin-top:4px;">
+              Preparado especialmente para <strong style="color:#1e293b;">${trip.client_name}</strong>
+            </p>
+          </div>
 
-        <!-- Client Info -->
-        <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
-          <h2 style="font-size: 24px; margin-bottom: 16px; color: #0f766e;">
-            ${trip.client_name}
-          </h2>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+          <!-- Overview -->
+          <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
             <div>
-              <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Destino</span>
-              <p style="font-weight: 600; font-size: 16px;">${trip.destination}</p>
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
+              <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.destination}</p>
             </div>
-            <div>
-              <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Período</span>
-              <p style="font-weight: 600; font-size: 16px;">
-                ${formatDate(trip.start_date)} - ${formatDate(trip.end_date)}
-              </p>
+            <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 Período</p>
+              <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatDate(trip.start_date)} — ${formatDate(trip.end_date)}</p>
+              <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} dias</p>
             </div>
-            <div>
-              <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Duração</span>
-              <p style="font-weight: 600; font-size: 16px;">${days} dias</p>
+            <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👤 Cliente</p>
+              <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.client_name}</p>
             </div>
           </div>
-        </div>
 
-        <!-- Services -->
-        <h3 style="font-size: 20px; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
-          Serviços da Viagem
-        </h3>
-        
-        ${servicesHtml || '<p style="text-align: center; color: #64748b; padding: 24px;">Nenhum serviço adicionado</p>'}
+          <!-- Services -->
+          <div style="margin-bottom:18px;">
+            <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+              <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+              <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Serviços da Viagem</h3>
+              <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+            </div>
+            ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
+          </div>
 
-        <!-- Itinerary -->
-        ${itineraryHtml}
+          <!-- Itinerary -->
+          ${itineraryHtml}
 
-        <!-- Footer -->
-        <div style="margin-top: 40px;">
-          <p style="text-align: center; font-size: 12px; color: #64748b; margin-bottom: 16px;">
-            Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
-          </p>
-          
           <!-- Agent Signature -->
           ${generateAgentSignature(profile || null)}
 
+          <p style="text-align:center;font-size:10px;color:#94a3b8;margin-top:14px;">
+            Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+          </p>
         </div>
       </div>
     </body>
