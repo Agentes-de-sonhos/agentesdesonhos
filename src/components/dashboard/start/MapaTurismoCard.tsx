@@ -42,7 +42,7 @@ const CATEGORIES_DATA: CategoryDef[] = [
 
 export function MapaTurismoCard() {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <Card className="border-0 shadow-card">
