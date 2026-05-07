@@ -30,8 +30,9 @@ import {
   TripProfile,
   TravelInterest,
   TravelPace,
-  FlightInfo,
-  FlightPeriod,
+  JourneyInfo,
+  JourneyPeriod,
+  JOURNEY_PERIOD_LABELS,
   ExtraDestination,
   DestinationKind,
   TransportMode,
@@ -75,10 +76,9 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [showPace, setShowPace] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
   const [clientError, setClientError] = useState("");
-  const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ period: 'manha' });
-  const [returnFlight, setReturnFlight] = useState<FlightInfo>({ period: 'tarde' });
-  const [outboundEnabled, setOutboundEnabled] = useState(false);
-  const [returnEnabled, setReturnEnabled] = useState(false);
+  const [journeyEnabled, setJourneyEnabled] = useState(false);
+  const [arrivalInfo, setArrivalInfo] = useState<JourneyInfo>({ transport: 'aviao', period: 'manha' });
+  const [departureInfo, setDepartureInfo] = useState<JourneyInfo>({ transport: 'aviao', period: 'tarde' });
   const [multiEnabled, setMultiEnabled] = useState(false);
   const [extraDestinations, setExtraDestinations] = useState<ExtraDestination[]>([]);
 
@@ -138,8 +138,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
         exclusiveOrPopular: (values.exclusiveOrPopular as "exclusive" | "popular" | "mix") || "mix",
         mobilityLimitations: values.mobilityLimitations || undefined,
       },
-      outboundFlight: outboundEnabled ? outboundFlight : undefined,
-      returnFlight: returnEnabled ? returnFlight : undefined,
+      arrivalInfo: journeyEnabled ? arrivalInfo : undefined,
+      departureInfo: journeyEnabled ? departureInfo : undefined,
       extraDestinations: multiEnabled && extraDestinations.length > 0 ? extraDestinations : undefined,
     });
   };
