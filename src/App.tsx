@@ -37,6 +37,7 @@ const CruisesPage = lazy(() => import("./pages/CruisesPage"));
 const CruiseDetailPage = lazy(() => import("./pages/CruiseDetailPage"));
 const Noticias = lazy(() => import("./pages/Noticias"));
 const Perfil = lazy(() => import("./pages/Perfil"));
+const MinhaConta = lazy(() => import("./pages/MinhaConta"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Materiais = lazy(() => import("./pages/Materiais"));
