@@ -126,9 +126,10 @@ const guiasSection: MenuSection = {
   borderColor: "border-emerald-600",
   items: [
     { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass, requiredFeature: "travel_advisor" },
-    { key: "requisitos_viagem", title: "Central de Requisitos", url: "/requisitos-viagem", icon: Shield, requiredFeature: "travel_requirements", isPremium: true },
     { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "benefits" },
+    { key: "requisitos_viagem", title: "Central de Requisitos", url: "/requisitos-viagem", icon: Shield, requiredFeature: "travel_requirements", isPremium: true },
+    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, requiredFeature: "hotel_raio_x" },
+    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass, requiredFeature: "travel_advisor" },
     { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
@@ -146,7 +147,6 @@ const recursosVendasSection: MenuSection = {
   items: [
     { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane, requiredFeature: "flight_blocks" },
     { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, requiredFeature: "hotel_raio_x" },
   ],
 };
 
