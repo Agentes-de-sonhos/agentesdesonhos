@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import {
   Select,
@@ -69,8 +68,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [showPace, setShowPace] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
   const [clientError, setClientError] = useState("");
-  const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ mode: 'period', period: 'manha', hasConnection: false });
-  const [returnFlight, setReturnFlight] = useState<FlightInfo>({ mode: 'period', period: 'tarde', hasConnection: false });
+  const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ period: 'manha' });
+  const [returnFlight, setReturnFlight] = useState<FlightInfo>({ period: 'tarde' });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
