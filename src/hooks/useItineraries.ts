@@ -137,6 +137,7 @@ export function useItineraries() {
         additionalPreferences: formData.additionalPreferences || {},
         outboundFlight: formData.outboundFlight ? { period: formData.outboundFlight.period } : undefined,
         returnFlight: formData.returnFlight ? { period: formData.returnFlight.period } : undefined,
+        extraDestinations: formData.extraDestinations,
       },
     });
 
