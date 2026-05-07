@@ -109,10 +109,10 @@ function normalizeLegs(init: any): { outbound: z.infer<typeof flightLegSchema>[]
 const flightSchema = z.object({
   option_label: z.string().optional(),
   service_description: z.string().optional(),
-  origin_city: z.string().min(2, "Cidade de origem é obrigatória"),
-  destination_city: z.string().min(2, "Cidade de destino é obrigatória"),
-  airline: z.string().min(2, "Companhia aérea é obrigatória"),
-  departure_date: z.date({ required_error: "Data de ida é obrigatória" }),
+  origin_city: z.string().optional(),
+  destination_city: z.string().optional(),
+  airline: z.string().optional(),
+  departure_date: z.date().optional().nullable(),
   return_date: z.date().optional().nullable(),
   is_one_way: z.boolean(),
   includes_baggage: z.boolean(),
@@ -447,12 +447,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 const hotelSchema = z.object({
   option_label: z.string().optional(),
   service_description: z.string().optional(),
-  hotel_name: z.string().min(2, "Nome do hotel é obrigatório"),
-  city: z.string().min(2, "Cidade é obrigatória"),
-  check_in: z.date({ required_error: "Check-in é obrigatório" }),
-  check_out: z.date({ required_error: "Check-out é obrigatório" }),
-  room_type: z.string().min(1, "Tipo de quarto é obrigatório"),
-  meal_plan: z.string().min(1, "Regime de alimentação é obrigatório"),
+  hotel_name: z.string().optional(),
+  city: z.string().optional(),
+  check_in: z.date().optional().nullable(),
+  check_out: z.date().optional().nullable(),
+  room_type: z.string().optional(),
+  meal_plan: z.string().optional(),
   price: z.number().min(0),
   adult_price: z.number().min(0).optional(),
   child_price: z.number().min(0).optional(),
@@ -678,14 +678,14 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
 /* ━━━━━━━━━━━━━━━━━━━ CAR RENTAL FORM ━━━━━━━━━━━━━━━━━━━ */
 const carRentalSchema = z.object({
   rental_company: z.string().optional(),
-  pickup_location: z.string().min(2, "Local de retirada é obrigatório"),
-  dropoff_location: z.string().min(2, "Local de devolução é obrigatório"),
-  pickup_date: z.date({ required_error: "Data de retirada é obrigatória" }),
+  pickup_location: z.string().optional(),
+  dropoff_location: z.string().optional(),
+  pickup_date: z.date().optional().nullable(),
   pickup_time: z.string().optional(),
-  dropoff_date: z.date({ required_error: "Data de devolução é obrigatória" }),
+  dropoff_date: z.date().optional().nullable(),
   dropoff_time: z.string().optional(),
-  car_type: z.string().min(1, "Tipo de carro é obrigatório"),
-  days: z.number().min(1, "Mínimo 1 diária"),
+  car_type: z.string().optional(),
+  days: z.number().optional(),
   price: z.number().min(0),
   notes: z.string().optional(),
 }).refine((data) => data.dropoff_date >= data.pickup_date, {
@@ -903,8 +903,8 @@ const transferSchema = z.object({
   company_name: z.string().optional(),
   transfer_mode: z.enum(["arrival", "departure", "round_trip"]),
   service_category: z.enum(["regular", "private"]).optional(),
-  location: z.string().min(2, "Local é obrigatório"),
-  arrival_date: z.date({ required_error: "Data de chegada é obrigatória" }),
+  location: z.string().optional(),
+  arrival_date: z.date().optional().nullable(),
   departure_date: z.date().optional(),
   price: z.number().min(0),
   description: z.string().optional(),
@@ -1088,10 +1088,10 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 
 /* ━━━━━━━━━━━━━━━━━━━ ATTRACTION FORM ━━━━━━━━━━━━━━━━━━━ */
 const attractionSchema = z.object({
-  product_name: z.string().min(2, "Nome do produto é obrigatório"),
+  product_name: z.string().optional(),
   ticket_type: z.string().optional(),
   service_description: z.string().optional(),
-  date: z.date({ required_error: "Data é obrigatória" }),
+  date: z.date().optional().nullable(),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
   notes: z.string().optional(),
@@ -1245,10 +1245,10 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
 
 /* ━━━━━━━━━━━━━━━━━━━ INSURANCE FORM ━━━━━━━━━━━━━━━━━━━ */
 const insuranceSchema = z.object({
-  provider: z.string().min(2, "Seguradora é obrigatória"),
-  start_date: z.date({ required_error: "Data início é obrigatória" }),
-  end_date: z.date({ required_error: "Data fim é obrigatória" }),
-  coverage: z.string().min(2, "Cobertura é obrigatória"),
+  provider: z.string().optional(),
+  start_date: z.date().optional().nullable(),
+  end_date: z.date().optional().nullable(),
+  coverage: z.string().optional(),
   price: z.number().min(0),
   is_unit_price: z.boolean(),
   notes: z.string().optional(),
@@ -1350,11 +1350,11 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
 
 /* ━━━━━━━━━━━━━━━━━━━ CRUISE FORM ━━━━━━━━━━━━━━━━━━━ */
 const cruiseSchema = z.object({
-  ship_name: z.string().min(2, "Nome do navio é obrigatório"),
-  route: z.string().min(2, "Rota é obrigatória"),
-  start_date: z.date({ required_error: "Data início é obrigatória" }),
-  end_date: z.date({ required_error: "Data fim é obrigatória" }),
-  cabin_type: z.string().min(1, "Tipo de cabine é obrigatório"),
+  ship_name: z.string().optional(),
+  route: z.string().optional(),
+  start_date: z.date().optional().nullable(),
+  end_date: z.date().optional().nullable(),
+  cabin_type: z.string().optional(),
   price: z.number().min(0),
   notes: z.string().optional(),
 });
@@ -1437,7 +1437,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
 const otherSchema = z.object({
   custom_title: z.string().max(80, "Máximo 80 caracteres").optional(),
   company_name: z.string().optional(),
-  description: z.string().min(5, "Descrição é obrigatória"),
+  description: z.string().optional(),
   price: z.number().min(0),
 });
 
@@ -1512,9 +1512,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
 
 /* ━━━━━━━━━━━━━━━━━━━ CIRCUIT FORM ━━━━━━━━━━━━━━━━━━━ */
 const circuitSchema = z.object({
-  circuit_name: z.string().min(2, "Nome do circuito é obrigatório"),
+  circuit_name: z.string().optional(),
   duration: z.string().optional(),
-  itinerary: z.string().min(5, "Roteiro day by day é obrigatório"),
+  itinerary: z.string().optional(),
   notes: z.string().optional(),
   price: z.number().min(0),
 });

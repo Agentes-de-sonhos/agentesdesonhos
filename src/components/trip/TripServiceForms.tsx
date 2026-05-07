@@ -101,9 +101,9 @@ function MultiFileUpload({ files, setFiles, label = "Documentos / Vouchers" }: M
 
 // Flight Form - Professional multi-segment
 const flightSchema = z.object({
-  main_airline: z.string().min(2, "Companhia aérea principal é obrigatória"),
-  origin_city: z.string().min(2, "Cidade de origem é obrigatória"),
-  destination_city: z.string().min(2, "Cidade de destino é obrigatória"),
+  main_airline: z.string().optional(),
+  origin_city: z.string().optional(),
+  destination_city: z.string().optional(),
   trip_type: z.enum(["ida", "ida_volta", "multi_trechos"]),
   locator_code: z.string().optional(),
   flight_status: z.enum(["confirmado", "emitido", "pendente"]),
@@ -591,12 +591,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
 
 // Hotel Form - Professional
 const hotelSchema = z.object({
-  hotel_name: z.string().min(2, "Nome do hotel é obrigatório"),
+  hotel_name: z.string().optional(),
   hotel_category: z.string().optional(),
-  city: z.string().min(2, "Cidade é obrigatória"),
+  city: z.string().optional(),
   country: z.string().optional(),
-  check_in: z.date({ required_error: "Check-in é obrigatório" }),
-  check_out: z.date({ required_error: "Check-out é obrigatório" }),
+  check_in: z.date().optional().nullable(),
+  check_out: z.date().optional().nullable(),
   room_type: z.string().optional(),
   reservation_status: z.string().optional(),
   reservation_code: z.string().optional(),
@@ -1280,10 +1280,10 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
 
 // Car Rental Form - Professional
 const carRentalSchema = z.object({
-  rental_company: z.string().min(2, "Locadora é obrigatória"),
+  rental_company: z.string().optional(),
   reservation_code: z.string().optional(),
   reservation_status: z.enum(["confirmada", "emitida", "a_retirar"]),
-  pickup_location: z.string().min(2, "Local de retirada é obrigatório"),
+  pickup_location: z.string().optional(),
   pickup_address: z.string().optional(),
   pickup_city: z.string().optional(),
   pickup_country: z.string().optional(),
@@ -1293,7 +1293,7 @@ const carRentalSchema = z.object({
   pickup_instructions: z.string().optional(),
   pickup_phone: z.string().optional(),
   pickup_maps_url: z.string().optional(),
-  dropoff_location: z.string().min(2, "Local de devolução é obrigatório"),
+  dropoff_location: z.string().optional(),
   dropoff_address: z.string().optional(),
   dropoff_city: z.string().optional(),
   dropoff_country: z.string().optional(),
@@ -1301,7 +1301,7 @@ const carRentalSchema = z.object({
   dropoff_time: z.string().optional(),
   dropoff_instructions: z.string().optional(),
   dropoff_late_policy: z.string().optional(),
-  car_type: z.string().min(1, "Categoria é obrigatória"),
+  car_type: z.string().optional(),
   car_model: z.string().optional(),
   transmission: z.string().optional(),
   fuel_type: z.string().optional(),
@@ -1735,10 +1735,10 @@ const transferSchema = z.object({
   transfer_mode: z.string().optional(),
   transfer_status: z.string().optional(),
   city: z.string().optional(),
-  date: z.date({ required_error: "Data é obrigatória" }),
+  date: z.date().optional().nullable(),
   time: z.string().optional(),
-  origin_location: z.string().min(2, "Origem é obrigatória"),
-  destination_location: z.string().min(2, "Destino é obrigatório"),
+  origin_location: z.string().optional(),
+  destination_location: z.string().optional(),
   company_name: z.string().optional(),
   reservation_code: z.string().optional(),
   // Arrival
@@ -2254,13 +2254,13 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
 
 // Attraction Form - Professional module
 const attractionSchema = z.object({
-  name: z.string().min(2, "Nome da atração é obrigatório"),
+  name: z.string().optional(),
   attraction_type: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),
-  date: z.date({ required_error: "Data é obrigatória" }),
+  date: z.date().optional().nullable(),
   status: z.string().optional(),
-  quantity: z.number().min(1, "Mínimo 1 ingresso"),
+  quantity: z.number().optional(),
   entry_time: z.string().optional(),
   usage_window: z.string().optional(),
   duration: z.string().optional(),
@@ -2786,13 +2786,13 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
 
 // Insurance Form - Premium
 const insuranceSchema = z.object({
-  provider: z.string().min(2, "Seguradora é obrigatória"),
+  provider: z.string().optional(),
   plan_name: z.string().optional(),
   policy_number: z.string().optional(),
   destination_covered: z.string().optional(),
   coverage_type: z.string().optional(),
-  start_date: z.date({ required_error: "Data início é obrigatória" }),
-  end_date: z.date({ required_error: "Data fim é obrigatória" }),
+  start_date: z.date().optional().nullable(),
+  end_date: z.date().optional().nullable(),
   status: z.string().optional(),
   medical_assistance: z.string().optional(),
   hospital_expenses: z.string().optional(),
@@ -3280,13 +3280,13 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
 
 // Cruise Form
 const cruiseSchema = z.object({
-  cruise_company: z.string().min(2, "Companhia marítima é obrigatória"),
-  ship_name: z.string().min(2, "Nome do navio é obrigatório"),
-  route: z.string().min(2, "Rota é obrigatória"),
-  embarkation_port: z.string().min(2, "Porto de embarque é obrigatório"),
+  cruise_company: z.string().optional(),
+  ship_name: z.string().optional(),
+  route: z.string().optional(),
+  embarkation_port: z.string().optional(),
   disembarkation_port: z.string().optional(),
-  start_date: z.date({ required_error: "Data embarque é obrigatória" }),
-  end_date: z.date({ required_error: "Data desembarque é obrigatória" }),
+  start_date: z.date().optional().nullable(),
+  end_date: z.date().optional().nullable(),
   booking_number: z.string().optional(),
   cabin_type: z.string().optional(),
   cabin_number: z.string().optional(),
@@ -3853,7 +3853,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
 
 // Other Form - Concierge Digital
 const otherSchema = z.object({
-  service_name: z.string().min(2, "Nome do serviço é obrigatório"),
+  service_name: z.string().optional(),
   other_service_type: z.string().optional(),
   custom_type_name: z.string().optional(),
   city: z.string().optional(),
@@ -4394,11 +4394,11 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
 
 // Train Form
 const trainSchema = z.object({
-  origin_city: z.string().min(2, "Cidade de origem é obrigatória"),
+  origin_city: z.string().optional(),
   origin_station: z.string().optional(),
-  destination_city: z.string().min(2, "Cidade de destino é obrigatória"),
+  destination_city: z.string().optional(),
   destination_station: z.string().optional(),
-  travel_date: z.date({ required_error: "Data da viagem é obrigatória" }),
+  travel_date: z.date().optional().nullable(),
   departure_time: z.string().optional(),
   arrival_time: z.string().optional(),
   train_company: z.string().optional(),
