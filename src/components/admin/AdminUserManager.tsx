@@ -365,6 +365,8 @@ export function AdminUserManager() {
     },
   });
 
+  const [statFilter, setStatFilter] = useState<string>("all");
+
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchesSearch =
@@ -373,20 +375,33 @@ export function AdminUserManager() {
         user.agency_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.city?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesRole = roleFilter === "all" || user.role === roleFilter;
-      const matchesPlan = planFilter === "all" || user.plan === planFilter;
-      const matchesPayment = paymentFilter === "all" || (paymentFilter === "sim" ? user.monthly_paid : !user.monthly_paid);
+      let matchesStat = true;
+      if (statFilter === "admins") matchesStat = user.role === "admin";
+      else if (statFilter !== "all") matchesStat = user.plan === statFilter;
 
-      return matchesSearch && matchesRole && matchesPlan && matchesPayment;
+      return matchesSearch && matchesStat;
     });
-  }, [users, searchTerm, roleFilter, planFilter, paymentFilter]);
+  }, [users, searchTerm, statFilter]);
 
   const stats = {
     total: users.length,
     admins: users.filter((u) => u.role === "admin").length,
-    essencial: users.filter((u) => u.plan === "essencial").length,
+    start: users.filter((u) => u.plan === "start").length,
     profissional: users.filter((u) => u.plan === "profissional").length,
+    premium: users.filter((u) => u.plan === "premium").length,
+    fundador: users.filter((u) => u.plan === "fundador").length,
+    fornecedor_parceiro: users.filter((u) => u.plan === "fornecedor_parceiro").length,
   };
+
+  const statCards: { key: string; label: string; value: number }[] = [
+    { key: "all", label: "Total", value: stats.total },
+    { key: "admins", label: "Admins", value: stats.admins },
+    { key: "start", label: "Start", value: stats.start },
+    { key: "profissional", label: "Profissional", value: stats.profissional },
+    { key: "premium", label: "Premium", value: stats.premium },
+    { key: "fundador", label: "Fundador", value: stats.fundador },
+    { key: "fornecedor_parceiro", label: "Fornecedor Parceiro", value: stats.fornecedor_parceiro },
+  ];
 
   const planColors: Record<string, string> = {
     educa_pass: "bg-blue-500",
@@ -447,28 +462,28 @@ export function AdminUserManager() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
-          <div className="text-center p-3 bg-muted rounded-lg">
-            <p className="text-2xl font-bold">{stats.total}</p>
-            <p className="text-xs text-muted-foreground">Total</p>
-          </div>
-          <div className="text-center p-3 bg-muted rounded-lg">
-            <p className="text-2xl font-bold">{stats.admins}</p>
-            <p className="text-xs text-muted-foreground">Admins</p>
-          </div>
-          <div className="text-center p-3 bg-muted/70 rounded-lg">
-            <p className="text-2xl font-bold">{stats.essencial}</p>
-            <p className="text-xs text-muted-foreground">Essencial</p>
-          </div>
-          <div className="text-center p-3 bg-primary/10 rounded-lg">
-            <p className="text-2xl font-bold">{stats.profissional}</p>
-            <p className="text-xs text-muted-foreground">Plano Fundador</p>
-          </div>
+        {/* Stats — clicáveis para filtrar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mt-4">
+          {statCards.map((s) => {
+            const active = statFilter === s.key;
+            return (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setStatFilter(s.key)}
+                className={`text-center p-3 rounded-lg transition-colors ${
+                  active ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/70"
+                }`}
+              >
+                <p className="text-2xl font-bold">{s.value}</p>
+                <p className={`text-xs ${active ? "opacity-90" : "text-muted-foreground"}`}>{s.label}</p>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+        {/* Search */}
+        <div className="mt-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -478,36 +493,6 @@ export function AdminUserManager() {
               className="pl-9"
             />
           </div>
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="Permissão" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="agente">Agente</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={planFilter} onValueChange={setPlanFilter}>
-            <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="Plano" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="essencial">Essencial</SelectItem>
-              <SelectItem value="profissional">Plano Fundador</SelectItem>
-            </SelectContent>
-           </Select>
-          <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-            <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="Pagamento" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="sim">Pago</SelectItem>
-              <SelectItem value="nao">Não pago</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </CardHeader>
 
