@@ -44,10 +44,13 @@ export interface AdditionalPreferences {
 export interface ItineraryFormData {
   clientId?: string;
   clientName?: string;
+  origin?: string;
   destination: string;
   startDate: Date;
   endDate: Date;
   travelersCount: number;
+  adultsCount?: number;
+  childrenCount?: number;
   tripType: TripProfile;
   budgetLevel: 'economico' | 'conforto' | 'luxo';
   interests: TravelInterest[];

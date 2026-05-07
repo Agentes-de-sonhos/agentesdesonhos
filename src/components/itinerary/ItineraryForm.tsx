@@ -40,10 +40,12 @@ import {
 import type { DateRange } from "react-day-picker";
 
 const formSchema = z.object({
+  origin: z.string().optional(),
   destination: z.string().min(2, "Destino é obrigatório"),
   startDate: z.date({ required_error: "Data de início é obrigatória" }),
   endDate: z.date({ required_error: "Data de fim é obrigatória" }),
-  travelersCount: z.number().min(1, "Mínimo 1 viajante"),
+  adultsCount: z.number().min(1, "Mínimo 1 adulto"),
+  childrenCount: z.number().min(0).default(0),
   tripType: z.string(),
   budgetLevel: z.enum(["economico", "conforto", "luxo"]),
   interests: z.array(z.string()).default([]),
@@ -74,8 +76,10 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      origin: "",
       destination: "",
-      travelersCount: 2,
+      adultsCount: 2,
+      childrenCount: 0,
       tripType: "casal",
       budgetLevel: "conforto",
       interests: [],
@@ -103,13 +107,18 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
       return;
     }
     setClientError("");
+    const adults = values.adultsCount || 1;
+    const children = values.childrenCount || 0;
     onSubmit({
       clientId: selectedClient.id,
       clientName: selectedClient.name,
+      origin: values.origin || undefined,
       destination: values.destination,
       startDate: values.startDate,
       endDate: values.endDate,
-      travelersCount: values.travelersCount,
+      travelersCount: adults + children,
+      adultsCount: adults,
+      childrenCount: children,
       tripType: values.tripType as TripProfile,
       budgetLevel: values.budgetLevel,
       interests: selectedInterests,
@@ -128,15 +137,28 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       <div className="space-y-4">
-        {/* Cliente + Destino */}
+        {/* Linha 1: Cliente */}
+        <div className="space-y-2">
+          <Label>Cliente *</Label>
+          <ClientSelector
+            value={selectedClient}
+            onChange={(c) => { setSelectedClient(c); setClientError(""); }}
+            required
+            error={clientError}
+          />
+        </div>
+
+        {/* Linha 2: Origem + Destino */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Cliente *</Label>
-            <ClientSelector
-              value={selectedClient}
-              onChange={(c) => { setSelectedClient(c); setClientError(""); }}
-              required
-              error={clientError}
+            <Label htmlFor="origin">Cidade de origem</Label>
+            <PlacesAutocomplete
+              value={form.watch("origin") || ""}
+              onChange={(val) => form.setValue("origin", val)}
+              onPlaceSelect={(pred) => form.setValue("origin", pred.name)}
+              placeType="city"
+              placeholder="Ex: São Paulo, Brasil"
+              fetchDetailsOnSelect={false}
             />
           </div>
 
@@ -222,16 +244,29 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="travelersCount">Número de Viajantes</Label>
-            <div className="relative">
-              <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="travelersCount"
-                type="number"
-                min={1}
-                className="pl-10"
-                {...form.register("travelersCount", { valueAsNumber: true })}
-              />
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Viajantes
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Adultos"
+                  {...form.register("adultsCount", { valueAsNumber: true })}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">Adultos</p>
+              </div>
+              <div>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="Crianças"
+                  {...form.register("childrenCount", { valueAsNumber: true })}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">Crianças</p>
+              </div>
             </div>
           </div>
         </div>

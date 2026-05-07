@@ -21,7 +21,7 @@ const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "fami
 const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
 const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
-const ALLOWED_BODY_KEYS = ["destination", "startDate", "endDate", "travelersCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight"];
+const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight"];
 const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations", "serviceContext"];
 const ALLOWED_FLIGHT_KEYS = ["period"];
 const ALLOWED_FLIGHT_PERIODS = ["manha", "tarde", "noite"];
@@ -177,6 +177,14 @@ serve(async (req) => {
     if (!destCheck.valid) return validationError(destCheck.error, corsHeaders);
     const destination = destCheck.value;
 
+    // Validate origin (optional)
+    let origin: string | undefined;
+    if (body.origin !== undefined && body.origin !== null && body.origin !== "") {
+      const oCheck = validateString(body.origin, "Origem", 1, 200);
+      if (!oCheck.valid) return validationError(oCheck.error, corsHeaders);
+      origin = oCheck.value;
+    }
+
     // Validate dates
     if (typeof body.startDate !== "string" || typeof body.endDate !== "string") {
       return validationError("Datas de início e fim são obrigatórias.", corsHeaders);
@@ -201,6 +209,20 @@ serve(async (req) => {
     const tcCheck = validateNumber(body.travelersCount, "Número de viajantes", 1, 50);
     if (!tcCheck.valid) return validationError(tcCheck.error, corsHeaders);
     const travelersCount = tcCheck.value;
+
+    // Validate adults/children (optional)
+    let adultsCount: number | undefined;
+    let childrenCount: number | undefined;
+    if (body.adultsCount !== undefined) {
+      const aCheck = validateNumber(body.adultsCount, "Adultos", 1, 50);
+      if (!aCheck.valid) return validationError(aCheck.error, corsHeaders);
+      adultsCount = aCheck.value;
+    }
+    if (body.childrenCount !== undefined) {
+      const cCheck = validateNumber(body.childrenCount, "Crianças", 0, 50);
+      if (!cCheck.valid) return validationError(cCheck.error, corsHeaders);
+      childrenCount = cCheck.value;
+    }
 
     // Validate tripType
     const ttCheck = validateEnum(body.tripType, "Tipo de viagem", ALLOWED_TRIP_TYPES);
@@ -357,10 +379,15 @@ REGRAS FUNDAMENTAIS:
 
 ${profileRules}`;
 
-    const userPrompt = `Crie um roteiro completo para:
+    const travelersDesc = (adultsCount !== undefined || childrenCount !== undefined)
+      ? `${adultsCount ?? travelersCount} adulto(s)${childrenCount ? ` e ${childrenCount} criança(s)` : ""}`
+      : `${travelersCount} pessoa(s)`;
+    const originLine = origin ? `\n- Cidade de origem: ${origin}` : "";
+
+    const userPrompt = `Crie um roteiro completo para:${originLine}
 - Destino: ${destination}
 - Período: ${days} dias (${startDate} a ${endDate})
-- Viajantes: ${travelersCount} pessoa(s)
+- Viajantes: ${travelersDesc}
 - Tipo de viagem: ${tripTypeLabels[tripType] || tripType}
 - Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}${flightsText}
 
