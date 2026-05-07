@@ -346,12 +346,14 @@ export function CommunityQACard() {
               <MessageCircle className="h-5 w-5 text-[hsl(var(--section-community))]" />
               Perguntas da Comunidade
               {unreadCount > 0 && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[hsl(var(--section-community))]/10 border border-[hsl(var(--section-community))]/30 text-[11px] font-medium text-[hsl(var(--section-community))]">
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold text-white whitespace-nowrap shadow-[0_4px_14px_-2px_rgba(168,85,247,0.55)] ring-1 ring-white/20 bg-[linear-gradient(110deg,#7c3aed_0%,#d946ef_55%,#ec4899_100%)] bg-[length:200%_100%] animate-[qa-shimmer_4s_ease-in-out_infinite,qa-pulse_2.4s_ease-in-out_infinite] transition-transform duration-200 hover:scale-[1.04] hover:shadow-[0_6px_20px_-2px_rgba(236,72,153,0.65)] cursor-default"
+                >
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--section-community))] opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--section-community))]" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" />
                   </span>
-                  Ajude a comunidade • {unreadCount} {unreadCount === 1 ? "nova pergunta" : "novas perguntas"}
+                  {unreadCount} {unreadCount === 1 ? "nova pergunta" : "novas perguntas"}
                 </span>
               )}
             </h2>
