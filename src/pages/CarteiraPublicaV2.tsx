@@ -1,13 +1,20 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
-import { Loader2, Lock, Eye, EyeOff, ShieldAlert, MessageCircle, AlertTriangle } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, ShieldAlert, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Trip, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { BrandText } from "@/components/ui/brand-text";
+
+const WhatsAppIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+  </svg>
+);
 
 const ViagemPublica = lazy(() => import("@/pages/ViagemPublica"));
 
@@ -64,18 +71,18 @@ function PasswordGate({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-5">
+      <div className="w-full max-w-md space-y-5">
         {branding?.agency_logo_url && (
           <div className="flex justify-center">
             <img
               src={branding.agency_logo_url}
               alt={branding.agency_name || "Agência"}
-              className="max-h-24 w-auto object-contain"
+              className="h-24 sm:h-28 w-auto object-contain"
             />
           </div>
         )}
 
-        <Card className="shadow-xl border-0">
+        <Card className="w-full">
           <CardContent className="pt-8 pb-6 px-6 text-center space-y-6">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mx-auto">
               <Lock className="h-8 w-8 text-primary" />
@@ -123,39 +130,38 @@ function PasswordGate({
           </CardContent>
         </Card>
 
-        {(branding?.name || branding?.agency_name || whatsappUrl) && (
-          <Card className="shadow-md border-0">
-            <CardContent className="py-4 px-5 flex items-center gap-3">
-              {branding?.avatar_url ? (
-                <img
-                  src={branding.avatar_url}
-                  alt={branding.name || ""}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-muted" />
-              )}
-              <div className="flex-1 min-w-0 text-left">
-                {branding?.name && (
-                  <p className="text-sm font-semibold truncate">{branding.name}</p>
+        {branding && (
+          <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">
+                Precisa de ajuda?
+              </p>
+            </div>
+            <div className="p-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                {branding.avatar_url ? (
+                  <img src={branding.avatar_url} alt={branding.name || ""} className="h-20 w-20 rounded-full object-cover border-4 border-primary/10 shadow-md ring-2 ring-white" />
+                ) : (
+                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-md ring-2 ring-white">
+                    {branding.name?.charAt(0).toUpperCase() || '?'}
+                  </div>
                 )}
-                {branding?.agency_name && (
-                  <p className="text-xs text-muted-foreground truncate">{branding.agency_name}</p>
+                <div className="space-y-0.5">
+                  {branding.name && <p className="text-base font-bold text-foreground">{branding.name}</p>}
+                  {branding.agency_name && (
+                    <BrandText as="p" className="text-sm text-muted-foreground font-medium">{branding.agency_name}</BrandText>
+                  )}
+                </div>
+                {whatsappUrl && (
+                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-7 py-3 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
+                    <WhatsAppIcon className="h-5 w-5" />
+                    Falar no WhatsApp
+                  </a>
                 )}
               </div>
-              {whatsappUrl && (
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-full px-3 py-2 transition-colors"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  WhatsApp
-                </a>
-              )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
       </div>
     </div>
