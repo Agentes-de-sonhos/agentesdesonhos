@@ -1691,31 +1691,45 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           );
         })()}
 
-        {/* Agent Footer */}
-        <div className="mt-8 pt-6 border-t">
-          {agentProfile ? (
-            <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-border/40 shadow-sm">
-              <CardContent className="py-5">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-14 w-14 border-2 border-primary/20">
-                    <AvatarImage src={agentProfile.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+        {/* ─── Agent Signature (mesmo padrão do Orçamento) ─── */}
+        {agentProfile && (() => {
+          const whatsappNumber = agentProfile.phone?.replace(/\D/g, "") || "";
+          const whatsappUrl = whatsappNumber
+            ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
+            : "";
+          return (
+            <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">Seu consultor de viagens</p>
+              </div>
+              <div className="p-6 sm:p-8">
+                <div className="flex flex-col items-center text-center space-y-5">
+                  {agentProfile.avatar_url ? (
+                    <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
+                  ) : (
+                    <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg ring-2 ring-white">
                       {agentProfile.name?.charAt(0).toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="text-left">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Seu agente de viagens</p>
-                    <p className="font-bold text-base">{agentProfile.name}</p>
-                    {agentProfile.phone && <p className="text-sm text-muted-foreground">📱 {agentProfile.phone}</p>}
-                    {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground">{agentProfile.agency_name}</BrandText>}
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <p className="text-xl font-bold text-foreground">{agentProfile.name}</p>
+                    {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
+                    {(agentProfile.city || agentProfile.state) && (
+                      <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
+                    )}
                   </div>
+                  {whatsappUrl && (
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
+                      <WhatsAppIcon className="h-5 w-5" />
+                      Falar no WhatsApp
+                    </a>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <p className="text-center text-sm text-muted-foreground">Agentes de Sonhos • Sua viagem começa aqui</p>
-          )}
-        </div>
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="mt-6 pb-4 text-center">
           <p className="text-xs text-muted-foreground/60">
