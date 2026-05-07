@@ -440,49 +440,60 @@ export async function generateTripPDF(
     return aMin - bMin;
   });
 
-  const servicesHtml = orderedTypes.map((type) => {
-    const services = grouped[type];
-    const label = SERVICE_LABELS[type as TripServiceType] || "Serviço";
-    
-    const servicesItems = services.map((service) => {
-      const details = getServiceDetails(service);
+  // Cards de serviço alinhados visualmente ao QuotePDF (gradiente por categoria + emoji)
+  const servicesHtml = sortedServices.map((service) => {
+    const type = service.service_type as TripServiceType;
+    const label = SERVICE_LABELS[type] || "Serviço";
+    const emoji = SERVICE_EMOJI[type] || "📋";
+    const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
+    const details = getServiceDetails(service);
+    const summary = details[0] || "";
+    const restDetails = details.slice(1);
 
-      // Build clickable attachment links
-      let attachmentsHtml = '';
-      if (service.attachments?.length > 0) {
-        attachmentsHtml = service.attachments.map((att: any) => {
-          const signedUrl = permanentUrlCache[att.url];
-          if (signedUrl) {
-            return `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; color: #0f766e; font-size: 12px; text-decoration: underline; margin-right: 12px;">📎 ${att.name} ↗</a>`;
-          }
-          return `<span style="color: #64748b; font-size: 12px;">📎 ${att.name}</span>`;
-        }).join(' ');
-      } else if (service.voucher_url) {
-        const signedUrl = permanentUrlCache[service.voucher_url];
-        const name = service.voucher_name || 'Documento anexo';
+    let attachmentsHtml = '';
+    if (service.attachments?.length > 0) {
+      attachmentsHtml = service.attachments.map((att: any) => {
+        const signedUrl = permanentUrlCache[att.url];
         if (signedUrl) {
-          attachmentsHtml = `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; color: #0f766e; font-size: 12px; text-decoration: underline;">📎 ${name} ↗</a>`;
-        } else {
-          attachmentsHtml = `<span style="color: #64748b; font-size: 12px;">📎 ${name}</span>`;
+          return `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:#0f766e;font-size:12px;text-decoration:underline;margin-right:12px;">📎 ${att.name} ↗</a>`;
         }
+        return `<span style="color:#64748b;font-size:12px;">📎 ${att.name}</span>`;
+      }).join(' ');
+    } else if (service.voucher_url) {
+      const signedUrl = permanentUrlCache[service.voucher_url];
+      const name = service.voucher_name || 'Documento anexo';
+      if (signedUrl) {
+        attachmentsHtml = `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:#0f766e;font-size:12px;text-decoration:underline;">📎 ${name} ↗</a>`;
+      } else {
+        attachmentsHtml = `<span style="color:#64748b;font-size:12px;">📎 ${name}</span>`;
       }
-      
-      return `
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; background: white;">
-          <div style="margin-bottom: 4px;">
-            ${details.map((d) => `<p style="margin: 2px 0; font-size: 13px; color: #475569;">${d}</p>`).join("")}
-          </div>
-          ${attachmentsHtml ? `<div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #f1f5f9;">${attachmentsHtml}</div>` : ''}
-        </div>
-      `;
-    }).join("");
-    
+    }
+
+    const detailsHtml = restDetails.length > 0
+      ? `<div class="pdf-block pdf-details" style="word-wrap:break-word;overflow-wrap:break-word;">
+          ${restDetails.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+        </div>`
+      : "";
+
+    const attachmentsBlock = attachmentsHtml
+      ? `<div class="pdf-block" style="margin-top:8px;padding-top:6px;border-top:1px solid #f1f5f9;">${attachmentsHtml}</div>`
+      : "";
+
     return `
-      <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 14px; font-weight: 600; color: #0f766e; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-          ${label}
-        </h3>
-        ${servicesItems}
+      <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:8px 14px;color:${grad.fg};">
+          <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
+            <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
+            <div style="min-width:0;">
+              <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
+              ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
+            </div>
+          </div>
+        </div>
+        <div style="padding:12px 16px;">
+          ${detailsHtml}
+          ${attachmentsBlock}
+        </div>
       </div>
     `;
   }).join("");
