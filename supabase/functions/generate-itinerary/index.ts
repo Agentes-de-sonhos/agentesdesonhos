@@ -327,6 +327,39 @@ serve(async (req) => {
       ? `\n\nINFORMAÇÕES DE VOO (use OBRIGATORIAMENTE):\n${flightLines.join("\n")}\n\nREGRAS DE AJUSTE LOGÍSTICO (siga rigorosamente):\n${ruleLines.join("\n")}`
       : "";
 
+    // --- MULTI-DESTINATIONS ---
+    type ExtraDest = { city: string; kind: string; nights: number; transportFromPrevious: string; notes?: string };
+    const extraDestinations: ExtraDest[] = [];
+    if (Array.isArray(body.extraDestinations)) {
+      for (const raw of body.extraDestinations.slice(0, 8)) {
+        if (!raw || typeof raw !== "object") continue;
+        const r = raw as Record<string, unknown>;
+        const city = typeof r.city === "string" ? sanitizeText(r.city).slice(0, 200) : "";
+        if (!city) continue;
+        const kind = typeof r.kind === "string" && ALLOWED_DEST_KIND.includes(r.kind) ? r.kind : "secundario";
+        const transport = typeof r.transportFromPrevious === "string" && ALLOWED_TRANSPORT.includes(r.transportFromPrevious)
+          ? r.transportFromPrevious : "aviao";
+        const nights = typeof r.nights === "number" && r.nights >= 0 && r.nights <= 30 ? Math.floor(r.nights) : 0;
+        const notes = typeof r.notes === "string" ? sanitizeText(r.notes).slice(0, 500) : undefined;
+        extraDestinations.push({ city, kind, nights, transportFromPrevious: transport, notes });
+      }
+    }
+
+    let multiDestText = "";
+    if (extraDestinations.length > 0) {
+      const lines = [
+        `1. ${destination} — destino principal / cidade base`,
+      ];
+      extraDestinations.forEach((d, i) => {
+        const transp = TRANSPORT_LABELS[d.transportFromPrevious] || d.transportFromPrevious;
+        const kindLbl = DEST_KIND_LABELS[d.kind] || d.kind;
+        const nightsTxt = d.nights > 0 ? `, ${d.nights} noite(s)` : "";
+        const notesTxt = d.notes ? ` — Obs: ${d.notes}` : "";
+        lines.push(`${i + 2}. ${d.city} — ${kindLbl}${nightsTxt} (deslocamento desde o destino anterior: ${transp})${notesTxt}`);
+      });
+      multiDestText = `\n\nROTEIRO MULTI-DESTINOS — siga RIGOROSAMENTE a ordem e a logística:\n${lines.join("\n")}\n\nREGRAS PARA MÚLTIPLOS DESTINOS:\n- Distribua os dias do roteiro respeitando as noites informadas em cada destino.\n- No dia de deslocamento entre cidades, programe atividades LEVES (não sugira passeios pesados).\n- Bate-volta: NÃO troca a hospedagem; o viajante volta a dormir na cidade base.\n- Extensão: trate como nova etapa, com hospedagem própria no novo destino.\n- Conexão/pernoite curto: programe apenas algo leve ou descanso.\n- NUNCA sugira atividades em duas cidades distantes no mesmo dia/horário.\n- Considere o tempo de deslocamento informado (avião, carro, trem etc.) ao montar o dia da troca de cidade.\n- Indique no título da atividade do dia de transição algo como "Deslocamento <cidade A> → <cidade B>".`;
+    }
+
     // --- BUILD AI REQUEST ---
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
