@@ -347,17 +347,21 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
         </div>
 
-        {/* Voos de ida e volta */}
+        {/* Voos de ida e volta (opcionais, em blocos colapsáveis) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FlightField
+          <CollapsibleFlight
             label="Voo de ida"
             helper="Usado pela IA para ajustar o Dia 1 (chegada no destino)"
+            enabled={outboundEnabled}
+            onToggle={setOutboundEnabled}
             value={outboundFlight}
             onChange={setOutboundFlight}
           />
-          <FlightField
+          <CollapsibleFlight
             label="Voo de volta"
             helper="Usado pela IA para ajustar o último dia (saída do destino)"
+            enabled={returnEnabled}
+            onToggle={setReturnEnabled}
             value={returnFlight}
             onChange={setReturnFlight}
           />
