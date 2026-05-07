@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plane, Search, MapPin, ArrowRight, Loader2, Users, Calendar as CalendarIcon } from "lucide-react";
+import { Plane, Search, ArrowRight, Loader2, Users, Calendar as CalendarIcon, PlaneTakeoff, PlaneLanding } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -12,6 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 import { supabase } from "@/integrations/supabase/client";
+import { AirportInput } from "@/components/bloqueios/BlockSearchForm";
 
 export function BloqueiosAereosStartCard() {
   const navigate = useNavigate();
@@ -123,24 +124,22 @@ export function BloqueiosAereosStartCard() {
 
           {/* Search controls */}
           <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:flex xl:flex-1 xl:min-w-0 xl:items-center">
-            <div className="relative xl:flex-1 xl:min-w-0">
-              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              <Input
-                placeholder="Origem (ex: GRU)"
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                className="h-11 pl-10"
-              />
-            </div>
-            <div className="relative xl:flex-1 xl:min-w-0">
-              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              <Input
-                placeholder="Destino (ex: MCO)"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="h-11 pl-10"
-              />
-            </div>
+            <AirportInput
+              value={origin}
+              onChange={setOrigin}
+              placeholder="Origem (ex: São Paulo, GRU)"
+              icon={PlaneTakeoff}
+              className="xl:flex-1 xl:min-w-0"
+              inputClassName="h-11"
+            />
+            <AirportInput
+              value={destination}
+              onChange={setDestination}
+              placeholder="Destino (ex: Salvador, SSA)"
+              icon={PlaneLanding}
+              className="xl:flex-1 xl:min-w-0"
+              inputClassName="h-11"
+            />
             <Popover>
               <PopoverTrigger asChild>
                 <Button
