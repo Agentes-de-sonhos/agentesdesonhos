@@ -40,9 +40,14 @@ const CATEGORIES_DATA: CategoryDef[] = [
   { title: "Guias", icon: Users, category: "Guias", color: "bg-teal-100 text-teal-700", iconColor: "text-teal-500" },
 ];
 
-export function MapaTurismoCard() {
+interface MapaTurismoCardProps {
+  alwaysExpanded?: boolean;
+}
+
+export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps = {}) {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const isCollapsed = alwaysExpanded ? false : collapsed;
 
   return (
     <Card className="border-0 shadow-card">
@@ -55,16 +60,18 @@ export function MapaTurismoCard() {
             </h2>
             <div className="mt-2 h-1 w-full rounded-full bg-primary" />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform flex-shrink-0"
-            onClick={() => setCollapsed((v) => !v)}
-            aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
-            aria-expanded={!collapsed}
-          >
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
-          </Button>
+          {!alwaysExpanded && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform flex-shrink-0"
+              onClick={() => setCollapsed((v) => !v)}
+              aria-label={isCollapsed ? "Expandir seção" : "Recolher seção"}
+              aria-expanded={!isCollapsed}
+            >
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isCollapsed ? "" : "rotate-180"}`} />
+            </Button>
+          )}
         </div>
 
         <div className="rounded-xl bg-primary/5 border border-primary/15 px-3 py-2 space-y-0.5 w-full">
@@ -74,7 +81,7 @@ export function MapaTurismoCard() {
           </p>
         </div>
 
-        {!collapsed && (
+        {!isCollapsed && (
         <div
           className="grid gap-3 w-full"
           style={{

@@ -144,8 +144,8 @@ export default function StartDashboard() {
           </div>
         </div>
 
-        {/* 1. Mapa do Turismo */}
-        <MapaTurismoCard />
+        {/* 1. Mapa do Turismo (sempre expandido no Dashboard Start) */}
+        <MapaTurismoCard alwaysExpanded />
 
         {/* 2. Radar do Turismo + Minha Agenda */}
         <Suspense
