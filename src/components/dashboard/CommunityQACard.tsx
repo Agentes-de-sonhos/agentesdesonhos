@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -56,6 +56,26 @@ export function CommunityQACard() {
   const [replyContent, setReplyContent] = useState("");
   const [replyLink, setReplyLink] = useState("");
   const [showReplyLink, setShowReplyLink] = useState(false);
+
+  // Track last viewed timestamp for unread badge (per user, persisted)
+  const lastViewedKey = user ? `qa_last_viewed_${user.id}` : null;
+  const [lastViewedAt, setLastViewedAt] = useState<string | null>(() => {
+    if (typeof window === "undefined" || !user) return null;
+    return localStorage.getItem(`qa_last_viewed_${user.id}`);
+  });
+
+  const markAsViewed = () => {
+    if (!lastViewedKey) return;
+    const now = new Date().toISOString();
+    localStorage.setItem(lastViewedKey, now);
+    setLastViewedAt(now);
+  };
+
+  // When user expands the card, mark as viewed
+  useEffect(() => {
+    if (!collapsed) markAsViewed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collapsed]);
 
   // Fetch latest questions with author info
   const { data: questions = [], isLoading } = useQuery({
@@ -308,14 +328,32 @@ export function CommunityQACard() {
 
   const expandedQuestion = questions.find((q: any) => q.id === expandedQuestionId);
 
+  // Count unread questions (created after last view, excluding own questions)
+  const unreadCount = useMemo(() => {
+    if (!user) return 0;
+    const threshold = lastViewedAt ? new Date(lastViewedAt).getTime() : 0;
+    return questions.filter(
+      (q: any) => q.user_id !== user.id && new Date(q.created_at).getTime() > threshold
+    ).length;
+  }, [questions, lastViewedAt, user]);
+
   return (
     <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/20 via-[hsl(var(--section-community))]/10 to-[hsl(var(--section-community))]/[0.03]">
       <CardContent className="pt-5 pb-4 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="w-fit">
-            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
               <MessageCircle className="h-5 w-5 text-[hsl(var(--section-community))]" />
               Perguntas da Comunidade
+              {unreadCount > 0 && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[hsl(var(--section-community))]/10 border border-[hsl(var(--section-community))]/30 text-[11px] font-medium text-[hsl(var(--section-community))]">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--section-community))] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--section-community))]" />
+                  </span>
+                  Ajude a comunidade • {unreadCount} {unreadCount === 1 ? "nova pergunta" : "novas perguntas"}
+                </span>
+              )}
             </h2>
             <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
           </div>
@@ -323,7 +361,12 @@ export function CommunityQACard() {
             variant="ghost"
             size="icon"
             className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform"
-            onClick={() => setCollapsed((v) => !v)}
+            onClick={() => {
+              setCollapsed((v) => {
+                if (v) markAsViewed();
+                return !v;
+              });
+            }}
             aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
             aria-expanded={!collapsed}
           >
