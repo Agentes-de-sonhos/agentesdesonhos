@@ -291,6 +291,7 @@ export interface ItineraryActivityForPDF {
   location: string | null;
   notes: string | null;
   order_index: number;
+  maps_url?: string | null;
 }
 
 function generateItinerarySection(activities: ItineraryActivityForPDF[]): string {
@@ -323,6 +324,7 @@ function generateItinerarySection(activities: ItineraryActivityForPDF[]): string
           ${act.start_time ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">⏰ ${act.start_time}</p>` : ''}
           ${act.location ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">📍 ${act.location}</p>` : ''}
           ${act.notes ? `<p style="font-size: 11px; color: #64748b; font-style: italic; margin: 2px 0 0 0;">${act.notes}</p>` : ''}
+          ${act.maps_url ? `<p style="font-size: 11px; margin: 2px 0 0 0;"><a href="${act.maps_url.startsWith('http') ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}" style="color: #0f766e; text-decoration: underline;">🗺️ Ver no Google Maps</a></p>` : ''}
         </div>
       `).join("");
 
