@@ -428,17 +428,6 @@ export async function generateTripPDF(
   const sortedServices = [...(trip.services || [])].sort(
     (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
   );
-  const grouped = sortedServices.reduce((acc, service) => {
-    const type = service.service_type;
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(service);
-    return acc;
-  }, {} as Record<string, TripService[]>);
-  const orderedTypes = Object.keys(grouped).sort((a, b) => {
-    const aMin = grouped[a][0]?.order_index ?? 0;
-    const bMin = grouped[b][0]?.order_index ?? 0;
-    return aMin - bMin;
-  });
 
   // Cards de serviço alinhados visualmente ao QuotePDF (gradiente por categoria + emoji)
   const servicesHtml = sortedServices.map((service) => {
