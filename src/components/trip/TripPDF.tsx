@@ -252,47 +252,49 @@ function getServiceDetails(service: TripService): string[] {
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
-      <div style="text-align: center; margin-bottom: 24px;">
-        <h1 style="font-size: 24px; color: #0f766e; margin: 0;">
-          ${profile?.agency_name || '🧳 Carteira Digital'}
-        </h1>
+      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
+        <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
+          ${profile?.agency_name || "Carteira Digital"}
+        </p>
       </div>
     `;
   }
-  
   return `
-    <div style="text-align: center; margin-bottom: 32px;">
-      <img 
-        src="${profile.agency_logo_url}" 
-        alt="${profile.agency_name || 'Logo'}"
-        style="max-height: 80px; max-width: 200px; object-fit: contain; margin: 0 auto;"
-      />
+    <div style="text-align:center;padding:4px 0 2px;background:#ffffff;">
+      <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
+        style="max-height:180px;max-width:520px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
   `;
 }
 
 function generateAgentSignature(profile: AgentProfile | null): string {
-  if (!profile) {
-    return `
-      <div style="text-align: center; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-        <p style="font-size: 12px; color: #64748b;">
-          Agentes de Sonhos • Sua viagem começa aqui
-        </p>
-      </div>
-    `;
-  }
-
+  if (!profile) return "";
   const avatarHtml = profile.avatar_url
-    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 12px;" />`
-    : `<div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #14b8a6); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; margin-right: 12px;">${profile.name.charAt(0).toUpperCase()}</div>`;
-
+    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:4px solid rgba(15,118,110,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.08);display:inline-block;" />`
+    : `<div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#0f766e,#14b8a6);display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:26px;box-shadow:0 8px 20px rgba(0,0,0,0.08);">${profile.name.charAt(0).toUpperCase()}</div>`;
+  const whatsappNumber = profile.phone?.replace(/\D/g, "") || "";
+  const whatsappLink = whatsappNumber
+    ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
+    : "";
   return `
-    <div style="padding-top: 24px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
-      ${avatarHtml}
-      <div style="text-align: left;">
-        <p style="font-weight: 600; font-size: 14px; color: #1e293b; margin: 0;">${profile.name}</p>
-        ${profile.phone ? `<p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">📱 ${profile.phone}</p>` : ''}
-        ${profile.agency_name ? `<p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">${profile.agency_name}</p>` : ''}
+    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
+      </div>
+      <div style="padding:14px 18px;text-align:center;">
+        ${avatarHtml}
+        <p style="font-size:17px;font-weight:800;color:#1e293b;margin:8px 0 1px;">${profile.name}</p>
+        ${profile.agency_name ? `<p style="font-size:12px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
+        ${profile.city || profile.state ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
+        ${
+          whatsappLink
+            ? `<div style="margin-top:10px;">
+                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
+                  💬 Falar no WhatsApp
+                </a>
+              </div>`
+            : ""
+        }
       </div>
     </div>
   `;
