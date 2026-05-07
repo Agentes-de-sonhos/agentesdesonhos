@@ -1649,6 +1649,16 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                                       {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
                                       {act.location && <p className="text-xs text-muted-foreground">📍 {act.location}</p>}
                                       {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
+                                      {act.maps_url && (
+                                        <a
+                                          href={act.maps_url.startsWith("http") ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                                        >
+                                          🗺️ Ver no Google Maps
+                                        </a>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
