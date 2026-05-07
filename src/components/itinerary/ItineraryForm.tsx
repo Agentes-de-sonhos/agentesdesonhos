@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Users, MapPin, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarIcon, Users, MapPin, Sparkles, ChevronDown, ChevronUp, Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,11 @@ import {
   TravelPace,
   FlightInfo,
   FlightPeriod,
+  ExtraDestination,
+  DestinationKind,
+  TransportMode,
+  DESTINATION_KIND_LABELS,
+  TRANSPORT_MODE_LABELS,
   TRIP_PROFILE_LABELS,
   TRAVEL_INTEREST_LABELS,
   TRAVEL_INTEREST_ICONS,
@@ -72,6 +77,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [clientError, setClientError] = useState("");
   const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ period: 'manha' });
   const [returnFlight, setReturnFlight] = useState<FlightInfo>({ period: 'tarde' });
+  const [multiEnabled, setMultiEnabled] = useState(false);
+  const [extraDestinations, setExtraDestinations] = useState<ExtraDestination[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -131,6 +138,7 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
       },
       outboundFlight,
       returnFlight,
+      extraDestinations: multiEnabled && extraDestinations.length > 0 ? extraDestinations : undefined,
     });
   };
 
@@ -163,7 +171,7 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="destination">Destino</Label>
+            <Label htmlFor="destination">Destino principal</Label>
             <PlacesAutocomplete
               value={form.watch("destination") || ""}
               onChange={(val) => form.setValue("destination", val)}
@@ -178,6 +186,72 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
               </p>
             )}
           </div>
+        </div>
+
+        {/* Multi-destinos toggle + builder */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={multiEnabled}
+              onChange={(e) => setMultiEnabled(e.target.checked)}
+            />
+            <span>Esta viagem possui múltiplos destinos</span>
+          </label>
+
+          {multiEnabled && (
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">
+                  O destino principal acima é o ponto de partida. Adicione abaixo os demais destinos na ordem que serão visitados.
+                </p>
+              </div>
+
+              {extraDestinations.length === 0 && (
+                <p className="text-xs text-muted-foreground italic">Nenhum destino adicional ainda.</p>
+              )}
+
+              {extraDestinations.map((dest, idx) => (
+                <DestinationRow
+                  key={idx}
+                  index={idx}
+                  total={extraDestinations.length}
+                  value={dest}
+                  onChange={(next) =>
+                    setExtraDestinations((prev) => prev.map((d, i) => (i === idx ? next : d)))
+                  }
+                  onRemove={() =>
+                    setExtraDestinations((prev) => prev.filter((_, i) => i !== idx))
+                  }
+                  onMove={(dir) =>
+                    setExtraDestinations((prev) => {
+                      const arr = [...prev];
+                      const target = idx + dir;
+                      if (target < 0 || target >= arr.length) return prev;
+                      [arr[idx], arr[target]] = [arr[target], arr[idx]];
+                      return arr;
+                    })
+                  }
+                />
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setExtraDestinations((prev) => [
+                    ...prev,
+                    { city: "", kind: "secundario", nights: 2, transportFromPrevious: "aviao", notes: "" },
+                  ])
+                }
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Adicionar destino
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Período + Número de Viajantes */}
@@ -505,6 +579,97 @@ function FlightField({ label, helper, value, onChange }: FlightFieldProps) {
         </SelectContent>
       </Select>
       {helper && <p className="text-[11px] text-muted-foreground">{helper}</p>}
+    </div>
+  );
+}
+
+interface DestinationRowProps {
+  index: number;
+  total: number;
+  value: ExtraDestination;
+  onChange: (v: ExtraDestination) => void;
+  onRemove: () => void;
+  onMove: (dir: -1 | 1) => void;
+}
+
+function DestinationRow({ index, total, value, onChange, onRemove, onMove }: DestinationRowProps) {
+  return (
+    <div className="rounded-md border border-border p-3 space-y-2 bg-muted/30">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-muted-foreground">Destino {index + 2}</span>
+        <div className="flex items-center gap-1">
+          <Button type="button" variant="ghost" size="icon" className="h-7 w-7" disabled={index === 0} onClick={() => onMove(-1)}>
+            <ArrowUp className="h-3.5 w-3.5" />
+          </Button>
+          <Button type="button" variant="ghost" size="icon" className="h-7 w-7" disabled={index === total - 1} onClick={() => onMove(1)}>
+            <ArrowDown className="h-3.5 w-3.5" />
+          </Button>
+          <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onRemove}>
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div>
+          <Label className="text-xs">Cidade / destino</Label>
+          <PlacesAutocomplete
+            value={value.city}
+            onChange={(v) => onChange({ ...value, city: v })}
+            onPlaceSelect={(pred) => onChange({ ...value, city: pred.name })}
+            placeType="city"
+            placeholder="Ex: Miami, EUA"
+            fetchDetailsOnSelect={false}
+          />
+        </div>
+        <div>
+          <Label className="text-xs">Tipo de destino</Label>
+          <Select value={value.kind} onValueChange={(v) => onChange({ ...value, kind: v as DestinationKind })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(Object.entries(DESTINATION_KIND_LABELS) as [DestinationKind, string][]).map(([k, l]) => (
+                <SelectItem key={k} value={k}>{l}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label className="text-xs">Noites neste destino</Label>
+          <Input
+            type="number"
+            min={0}
+            value={value.nights ?? 0}
+            onChange={(e) => onChange({ ...value, nights: Number(e.target.value) || 0 })}
+          />
+        </div>
+        <div>
+          <Label className="text-xs">Deslocamento até aqui</Label>
+          <Select
+            value={value.transportFromPrevious || "aviao"}
+            onValueChange={(v) => onChange({ ...value, transportFromPrevious: v as TransportMode })}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(Object.entries(TRANSPORT_MODE_LABELS) as [TransportMode, string][]).map(([k, l]) => (
+                <SelectItem key={k} value={k}>{l}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-xs">Observações (opcional)</Label>
+        <Textarea
+          rows={2}
+          placeholder="Ex: hospedagem na cidade base, retornar no fim do dia, etc."
+          value={value.notes || ""}
+          onChange={(e) => onChange({ ...value, notes: e.target.value })}
+        />
+      </div>
     </div>
   );
 }

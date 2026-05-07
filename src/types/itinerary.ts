@@ -33,6 +33,48 @@ export interface FlightInfo {
   period: FlightPeriod;
 }
 
+export type DestinationKind =
+  | 'principal'
+  | 'secundario'
+  | 'bate_volta'
+  | 'conexao'
+  | 'extensao';
+
+export type TransportMode =
+  | 'aviao'
+  | 'carro'
+  | 'trem'
+  | 'onibus'
+  | 'transfer'
+  | 'cruzeiro'
+  | 'outro';
+
+export interface ExtraDestination {
+  city: string;
+  kind: DestinationKind;
+  nights?: number;
+  transportFromPrevious?: TransportMode;
+  notes?: string;
+}
+
+export const DESTINATION_KIND_LABELS: Record<DestinationKind, string> = {
+  principal: 'Destino principal / cidade base',
+  secundario: 'Destino secundário',
+  bate_volta: 'Bate-volta (sem pernoite)',
+  conexao: 'Conexão / pernoite curto',
+  extensao: 'Extensão da viagem',
+};
+
+export const TRANSPORT_MODE_LABELS: Record<TransportMode, string> = {
+  aviao: 'Avião',
+  carro: 'Carro',
+  trem: 'Trem',
+  onibus: 'Ônibus',
+  transfer: 'Transfer privativo',
+  cruzeiro: 'Cruzeiro',
+  outro: 'Outro',
+};
+
 export interface AdditionalPreferences {
   dietaryRestrictions?: string;
   localOrTouristy?: 'local' | 'touristy' | 'mix';
@@ -58,6 +100,7 @@ export interface ItineraryFormData {
   additionalPreferences: AdditionalPreferences;
   outboundFlight?: FlightInfo;
   returnFlight?: FlightInfo;
+  extraDestinations?: ExtraDestination[];
 }
 
 export interface Activity {
