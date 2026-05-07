@@ -14,7 +14,7 @@ export function useTravelRequirements() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ConsultationResponse | null>(null);
 
-  const consult = async (passenger_data: PassengerData, trip_data: TripData) => {
+  const consult = async (passenger_data: PassengerData | null, trip_data: TripData) => {
     setLoading(true);
     try {
       const { data: resp, error } = await supabase.functions.invoke("check-travel-requirements", {
