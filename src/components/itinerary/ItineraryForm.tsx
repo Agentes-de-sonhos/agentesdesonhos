@@ -445,3 +445,68 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
     </form>
   );
 }
+
+interface FlightFieldProps {
+  label: string;
+  helper?: string;
+  value: FlightInfo;
+  onChange: (v: FlightInfo) => void;
+}
+
+function FlightField({ label, helper, value, onChange }: FlightFieldProps) {
+  const isExact = value.mode === 'exact';
+  return (
+    <div className="space-y-2 rounded-lg border border-border p-3">
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-sm font-medium">{label}</Label>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>{isExact ? 'Horário exato' : 'Período'}</span>
+          <Switch
+            checked={isExact}
+            onCheckedChange={(checked) =>
+              onChange(
+                checked
+                  ? { mode: 'exact', time: value.time || '', hasConnection: value.hasConnection }
+                  : { mode: 'period', period: value.period || 'manha', hasConnection: value.hasConnection }
+              )
+            }
+          />
+        </div>
+      </div>
+
+      {isExact ? (
+        <Input
+          type="time"
+          value={value.time || ''}
+          onChange={(e) => onChange({ ...value, time: e.target.value })}
+        />
+      ) : (
+        <Select
+          value={value.period || 'manha'}
+          onValueChange={(v) => onChange({ ...value, period: v as FlightPeriod })}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="manha">Manhã</SelectItem>
+            <SelectItem value="tarde">Tarde</SelectItem>
+            <SelectItem value="noite">Noite</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+
+      <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+        <input
+          type="checkbox"
+          className="h-3.5 w-3.5"
+          checked={!!value.hasConnection}
+          onChange={(e) => onChange({ ...value, hasConnection: e.target.checked })}
+        />
+        Voo com conexão (mais tempo de deslocamento)
+      </label>
+
+      {helper && <p className="text-[11px] text-muted-foreground">{helper}</p>}
+    </div>
+  );
+}
