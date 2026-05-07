@@ -237,6 +237,22 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
         </div>
 
+        {/* Voos de ida e volta */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FlightField
+            label="Voo de ida"
+            helper="Usado pela IA para ajustar o Dia 1 (chegada no destino)"
+            value={outboundFlight}
+            onChange={setOutboundFlight}
+          />
+          <FlightField
+            label="Voo de volta"
+            helper="Usado pela IA para ajustar o último dia (saída do destino)"
+            value={returnFlight}
+            onChange={setReturnFlight}
+          />
+        </div>
+
         {/* Perfil + Orçamento */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
