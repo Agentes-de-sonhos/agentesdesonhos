@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Shield, UserCheck, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
@@ -47,8 +46,6 @@ import { AdminTravelMeetManager } from "@/components/admin/AdminTravelMeetManage
 import { AdminPendingApprovalsManager } from "@/components/admin/AdminPendingApprovalsManager";
 import { AdminTourGuidesManager } from "@/components/admin/AdminTourGuidesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 const TAB_LABELS: Record<string, string> = {
   users: "Usuários",
@@ -202,25 +199,6 @@ export default function Admin() {
     setSearchParams({ tab });
   };
 
-  const { data: userStats } = useQuery({
-    queryKey: ["admin-user-stats"],
-    queryFn: async () => {
-      const { data: profiles } = await supabase.from("profiles").select("user_id");
-      const { data: roles } = await supabase.from("user_roles").select("role");
-      const { data: subscriptions } = await supabase.from("subscriptions").select("plan");
-      const total = profiles?.length || 0;
-      const admins = roles?.filter((r) => r.role === "admin").length || 0;
-      const fundadores = subscriptions?.filter((s) => s.plan === "profissional").length || 0;
-      return { total, admins, premium: fundadores };
-    },
-  });
-
-  const stats = [
-    { title: "Total de Usuários", value: userStats?.total || 0, icon: Users, color: "text-primary" },
-    { title: "Administradores", value: userStats?.admins || 0, icon: Shield, color: "text-accent" },
-    { title: "Plano Fundador", value: userStats?.premium || 0, icon: UserCheck, color: "text-green-500" },
-  ];
-
   return (
     <DashboardLayout>
       <div className="flex gap-6 min-h-[calc(100vh-8rem)]">
@@ -243,25 +221,6 @@ export default function Admin() {
               <Mail className="h-4 w-4" />
               CRM / Emails
             </Button>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {stats.map((stat) => (
-              <Card key={stat.title} className="border-0 shadow-sm">
-                <CardContent className="pt-4 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{stat.title}</p>
-                      <p className="text-2xl font-bold mt-0.5">{stat.value}</p>
-                    </div>
-                    <div className={`p-2.5 rounded-xl bg-muted ${stat.color}`}>
-                      <stat.icon className="h-5 w-5" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </div>
 
           {/* Tab content */}
