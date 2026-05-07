@@ -291,6 +291,7 @@ export interface ItineraryActivityForPDF {
   location: string | null;
   notes: string | null;
   order_index: number;
+  maps_url?: string | null;
 }
 
 function generateItinerarySection(activities: ItineraryActivityForPDF[]): string {
