@@ -177,6 +177,14 @@ serve(async (req) => {
     if (!destCheck.valid) return validationError(destCheck.error, corsHeaders);
     const destination = destCheck.value;
 
+    // Validate origin (optional)
+    let origin: string | undefined;
+    if (body.origin !== undefined && body.origin !== null && body.origin !== "") {
+      const oCheck = validateString(body.origin, "Origem", 1, 200);
+      if (!oCheck.valid) return validationError(oCheck.error, corsHeaders);
+      origin = oCheck.value;
+    }
+
     // Validate dates
     if (typeof body.startDate !== "string" || typeof body.endDate !== "string") {
       return validationError("Datas de início e fim são obrigatórias.", corsHeaders);
@@ -201,6 +209,20 @@ serve(async (req) => {
     const tcCheck = validateNumber(body.travelersCount, "Número de viajantes", 1, 50);
     if (!tcCheck.valid) return validationError(tcCheck.error, corsHeaders);
     const travelersCount = tcCheck.value;
+
+    // Validate adults/children (optional)
+    let adultsCount: number | undefined;
+    let childrenCount: number | undefined;
+    if (body.adultsCount !== undefined) {
+      const aCheck = validateNumber(body.adultsCount, "Adultos", 1, 50);
+      if (!aCheck.valid) return validationError(aCheck.error, corsHeaders);
+      adultsCount = aCheck.value;
+    }
+    if (body.childrenCount !== undefined) {
+      const cCheck = validateNumber(body.childrenCount, "Crianças", 0, 50);
+      if (!cCheck.valid) return validationError(cCheck.error, corsHeaders);
+      childrenCount = cCheck.value;
+    }
 
     // Validate tripType
     const ttCheck = validateEnum(body.tripType, "Tipo de viagem", ALLOWED_TRIP_TYPES);
