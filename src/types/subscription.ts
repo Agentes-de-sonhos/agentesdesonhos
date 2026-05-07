@@ -45,7 +45,8 @@ export type Feature =
   | 'lamina_customizer'
   | 'lead_capture'
   | 'travel_advisor'
-  | 'hotel_raio_x';
+  | 'hotel_raio_x'
+  | 'travel_requirements';
 
 const ALL_FEATURES: Feature[] = [
   'news', 'tourism_map', 'materials', 'agenda', 'crm_basic',
@@ -56,6 +57,7 @@ const ALL_FEATURES: Feature[] = [
   'premium_group', 'fam_tours', 'community', 'content_creator',
   'benefits', 'notepad', 'showcase', 'lamina_customizer',
   'lead_capture', 'travel_advisor', 'hotel_raio_x',
+  'travel_requirements',
 ];
 
 const START_FEATURES: Feature[] = [
@@ -151,6 +153,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   lead_capture: 'Captação de Leads',
   travel_advisor: 'Travel Advisor',
   hotel_raio_x: 'Raio-X do Hotel',
+  travel_requirements: 'Central de Requisitos de Viagem',
 };
 
 export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
@@ -182,6 +185,7 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   lead_capture: 'profissional',
   travel_advisor: 'profissional',
   hotel_raio_x: 'profissional',
+  travel_requirements: 'premium',
   ai_unlimited: 'premium',
   premium_group: 'premium',
   fam_tours: 'premium',

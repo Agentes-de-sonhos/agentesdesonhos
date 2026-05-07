@@ -8194,6 +8194,48 @@ export type Database = {
         }
         Relationships: []
       }
+      travel_requirements_consultations: {
+        Row: {
+          client_id: string | null
+          confidence_score: number | null
+          consulted_at: string
+          created_at: string
+          id: string
+          model_used: string | null
+          passenger_data: Json
+          result: Json | null
+          trip_data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          confidence_score?: number | null
+          consulted_at?: string
+          created_at?: string
+          id?: string
+          model_used?: string | null
+          passenger_data?: Json
+          result?: Json | null
+          trip_data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          confidence_score?: number | null
+          consulted_at?: string
+          created_at?: string
+          id?: string
+          model_used?: string | null
+          passenger_data?: Json
+          result?: Json | null
+          trip_data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       traveler_documents: {
         Row: {
           arquivo_url: string
