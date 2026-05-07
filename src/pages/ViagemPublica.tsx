@@ -1301,6 +1301,22 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [loading, setLoading] = useState(false);
   const [usedPassword, setUsedPassword] = useState(preLoadedPassword || "");
   const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
+  const [gateAttempts, setGateAttempts] = useState(0);
+  const [gateLocked, setGateLocked] = useState(false);
+  const [gateBranding, setGateBranding] = useState<AgentProfile | null>(null);
+
+  // Load public branding (logo, agency, agent) for the password gate
+  useEffect(() => {
+    if (authenticated || !token) return;
+    (async () => {
+      try {
+        const { data } = await supabase.rpc('get_trip_public_branding', { p_token: token });
+        const result = data as any;
+        if (result?.agent_profile) setGateBranding(result.agent_profile);
+        if (result?.is_locked) setGateLocked(true);
+      } catch {}
+    })();
+  }, [token, authenticated]);
 
   // Fetch itinerary activities when trip is loaded
   useEffect(() => {
@@ -1357,7 +1373,24 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       setAuthenticated(true);
       setUsedPassword(password);
     } catch (err: any) {
-      setError(err.message || "Senha incorreta");
+      const msg: string = err?.message || "Senha incorreta";
+      const isLockMsg = /bloqueado/i.test(msg);
+      if (isLockMsg) {
+        setGateLocked(true);
+        setError(msg);
+      } else {
+        const next = gateAttempts + 1;
+        setGateAttempts(next);
+        const remaining = Math.max(0, 3 - next);
+        if (remaining === 2) {
+          setError("Senha incorreta. Você tem mais 2 tentativas.");
+        } else if (remaining === 1) {
+          setError("Senha incorreta. Você tem mais 1 tentativa antes do bloqueio.");
+        } else {
+          setGateLocked(true);
+          setError("Acesso bloqueado por segurança. Entre em contato com a agência responsável.");
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -1377,35 +1410,95 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   }
 
   if (!authenticated) {
+    const brand = gateBranding;
+    const whatsappNumber = brand?.phone?.replace(/\D/g, "") || "";
+    const whatsappUrl = whatsappNumber
+      ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${encodeURIComponent("Olá! Preciso de ajuda para acessar minha Carteira de Viagem.")}`
+      : "";
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/5 flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm">
-          <CardContent className="pt-8 pb-6 px-6 text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mx-auto">
-              <Lock className="h-8 w-8 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold mb-1">Carteira de Viagem</h1>
-              <p className="text-sm text-muted-foreground">
-                Digite a senha fornecida pela sua agência
-              </p>
-            </div>
-            <form onSubmit={(e) => { e.preventDefault(); handleUnlock((e.target as any).password.value); }} className="space-y-4">
-              <Input
-                name="password"
-                type="password"
-                placeholder="Senha de acesso"
-                className="text-center text-lg tracking-widest"
-                autoFocus
+        <div className="w-full max-w-md space-y-5">
+          {/* Logo da agência (mesmo padrão dos links públicos) */}
+          {brand?.agency_logo_url && (
+            <div className="flex justify-center">
+              <img
+                src={brand.agency_logo_url}
+                alt={brand.agency_name || "Agência"}
+                className="h-24 sm:h-28 w-auto object-contain"
               />
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-                Acessar Carteira
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </div>
+          )}
+
+          {/* Bloco de senha */}
+          <Card className="w-full">
+            <CardContent className="pt-8 pb-6 px-6 text-center space-y-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mx-auto">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold mb-1">Carteira de Viagem</h1>
+                <p className="text-sm text-muted-foreground">
+                  {gateLocked
+                    ? "Acesso bloqueado por segurança."
+                    : "Digite a senha fornecida pela sua agência"}
+                </p>
+              </div>
+              {gateLocked ? (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                  Por segurança, este acesso foi bloqueado após 3 tentativas. Entre em contato com sua agência para liberar novamente.
+                </div>
+              ) : (
+                <form onSubmit={(e) => { e.preventDefault(); handleUnlock((e.target as any).password.value); }} className="space-y-4">
+                  <Input
+                    name="password"
+                    type="password"
+                    placeholder="Senha de acesso"
+                    className="text-center text-lg tracking-widest"
+                    autoFocus
+                  />
+                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
+                    Acessar Carteira
+                  </Button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Assinatura da agência (mesmo padrão do rodapé) */}
+          {brand && (
+            <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">
+                  Precisa de ajuda?
+                </p>
+              </div>
+              <div className="p-6">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  {brand.avatar_url ? (
+                    <img src={brand.avatar_url} alt={brand.name} className="h-20 w-20 rounded-full object-cover border-4 border-primary/10 shadow-md ring-2 ring-white" />
+                  ) : (
+                    <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-md ring-2 ring-white">
+                      {brand.name?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                  )}
+                  <div className="space-y-0.5">
+                    <p className="text-base font-bold text-foreground">{brand.name}</p>
+                    {brand.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{brand.agency_name}</BrandText>}
+                  </div>
+                  {whatsappUrl && (
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-7 py-3 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
+                      <WhatsAppIcon className="h-5 w-5" />
+                      Falar no WhatsApp
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }

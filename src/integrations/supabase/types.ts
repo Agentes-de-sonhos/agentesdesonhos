@@ -9214,6 +9214,7 @@ export type Database = {
         Args: { p_agency_slug: string; p_code: string }
         Returns: Json
       }
+      get_trip_public_branding: { Args: { p_token: string }; Returns: Json }
       get_user_analytics: {
         Args: { _end_date?: string; _start_date?: string }
         Returns: {
