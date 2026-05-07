@@ -89,7 +89,7 @@ interface UserWithDetails {
   state: string | null;
   created_at: string;
   role: "admin" | "agente";
-  plan: "essencial" | "profissional";
+  plan: SubscriptionPlan;
   is_active: boolean;
   monthly_paid: boolean;
 }
@@ -151,7 +151,7 @@ export function AdminUserManager() {
           state: profile.state,
           created_at: profile.created_at,
           role: (userRole as "admin" | "agente") || "agente",
-          plan: (userSub?.plan as "essencial" | "profissional") || "essencial",
+          plan: (userSub?.plan as SubscriptionPlan) || "start",
           is_active: userSub?.is_active ?? true,
           monthly_paid: paymentMap[profile.user_id] ?? false,
         } as UserWithDetails;
