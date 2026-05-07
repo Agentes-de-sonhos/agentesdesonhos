@@ -30,8 +30,9 @@ import {
   TripProfile,
   TravelInterest,
   TravelPace,
-  FlightInfo,
-  FlightPeriod,
+  JourneyInfo,
+  JourneyPeriod,
+  JOURNEY_PERIOD_LABELS,
   ExtraDestination,
   DestinationKind,
   TransportMode,
@@ -75,10 +76,9 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [showPace, setShowPace] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
   const [clientError, setClientError] = useState("");
-  const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ period: 'manha' });
-  const [returnFlight, setReturnFlight] = useState<FlightInfo>({ period: 'tarde' });
-  const [outboundEnabled, setOutboundEnabled] = useState(false);
-  const [returnEnabled, setReturnEnabled] = useState(false);
+  const [journeyEnabled, setJourneyEnabled] = useState(false);
+  const [arrivalInfo, setArrivalInfo] = useState<JourneyInfo>({ transport: 'aviao', period: 'manha' });
+  const [departureInfo, setDepartureInfo] = useState<JourneyInfo>({ transport: 'aviao', period: 'tarde' });
   const [multiEnabled, setMultiEnabled] = useState(false);
   const [extraDestinations, setExtraDestinations] = useState<ExtraDestination[]>([]);
 
@@ -138,8 +138,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
         exclusiveOrPopular: (values.exclusiveOrPopular as "exclusive" | "popular" | "mix") || "mix",
         mobilityLimitations: values.mobilityLimitations || undefined,
       },
-      outboundFlight: outboundEnabled ? outboundFlight : undefined,
-      returnFlight: returnEnabled ? returnFlight : undefined,
+      arrivalInfo: journeyEnabled ? arrivalInfo : undefined,
+      departureInfo: journeyEnabled ? departureInfo : undefined,
       extraDestinations: multiEnabled && extraDestinations.length > 0 ? extraDestinations : undefined,
     });
   };
@@ -347,24 +347,37 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
         </div>
 
-        {/* Voos de ida e volta (opcionais, em blocos colapsáveis) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CollapsibleFlight
-            label="Voo de ida"
-            helper="Usado pela IA para ajustar o Dia 1 (chegada no destino)"
-            enabled={outboundEnabled}
-            onToggle={setOutboundEnabled}
-            value={outboundFlight}
-            onChange={setOutboundFlight}
-          />
-          <CollapsibleFlight
-            label="Voo de volta"
-            helper="Usado pela IA para ajustar o último dia (saída do destino)"
-            enabled={returnEnabled}
-            onToggle={setReturnEnabled}
-            value={returnFlight}
-            onChange={setReturnFlight}
-          />
+        {/* Chegada e Retorno (opcional, mesmo padrão de múltiplos destinos) */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={journeyEnabled}
+              onChange={(e) => setJourneyEnabled(e.target.checked)}
+            />
+            <span>Esta viagem possui informações de chegada e retorno</span>
+          </label>
+
+          {journeyEnabled && (
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Informe como o viajante chega e sai do destino. A IA usa esses dados para ajustar o Dia 1, o último dia e o ritmo do roteiro.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <JourneyBlock
+                  title="Chegada ao destino"
+                  value={arrivalInfo}
+                  onChange={setArrivalInfo}
+                />
+                <JourneyBlock
+                  title="Retorno / saída do destino"
+                  value={departureInfo}
+                  onChange={setDepartureInfo}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Perfil + Orçamento */}
@@ -560,86 +573,46 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   );
 }
 
-interface FlightFieldProps {
-  label: string;
-  helper?: string;
-  value: FlightInfo;
-  onChange: (v: FlightInfo) => void;
+interface JourneyBlockProps {
+  title: string;
+  value: JourneyInfo;
+  onChange: (v: JourneyInfo) => void;
 }
 
-function FlightField({ label, helper, value, onChange }: FlightFieldProps) {
-  return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium">{label}</Label>
-      <Select
-        value={value.period}
-        onValueChange={(v) => onChange({ period: v as FlightPeriod })}
-      >
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="manha">Manhã</SelectItem>
-          <SelectItem value="tarde">Tarde</SelectItem>
-          <SelectItem value="noite">Noite</SelectItem>
-        </SelectContent>
-      </Select>
-      {helper && <p className="text-[11px] text-muted-foreground">{helper}</p>}
-    </div>
-  );
-}
-
-interface CollapsibleFlightProps {
-  label: string;
-  helper?: string;
-  enabled: boolean;
-  onToggle: (v: boolean) => void;
-  value: FlightInfo;
-  onChange: (v: FlightInfo) => void;
-}
-
-function CollapsibleFlight({ label, helper, enabled, onToggle, value, onChange }: CollapsibleFlightProps) {
-  if (!enabled) {
-    return (
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full justify-start h-auto py-3"
-        onClick={() => onToggle(true)}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        <span className="text-sm">Adicionar {label.toLowerCase()} (opcional)</span>
-      </Button>
-    );
-  }
+function JourneyBlock({ title, value, onChange }: JourneyBlockProps) {
   return (
     <div className="rounded-md border border-border p-3 space-y-2 bg-muted/30">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-sm font-medium">{label}</Label>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-destructive"
-          onClick={() => onToggle(false)}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+      <Label className="text-sm font-medium">{title}</Label>
+      <div className="space-y-2">
+        <div>
+          <Label className="text-xs">Meio de transporte</Label>
+          <Select
+            value={value.transport}
+            onValueChange={(v) => onChange({ ...value, transport: v as TransportMode })}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(Object.entries(TRANSPORT_MODE_LABELS) as [TransportMode, string][]).map(([v, l]) => (
+                <SelectItem key={v} value={v}>{l}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Período</Label>
+          <Select
+            value={value.period}
+            onValueChange={(v) => onChange({ ...value, period: v as JourneyPeriod })}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(Object.entries(JOURNEY_PERIOD_LABELS) as [JourneyPeriod, string][]).map(([v, l]) => (
+                <SelectItem key={v} value={v}>{l}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      <Select
-        value={value.period}
-        onValueChange={(v) => onChange({ period: v as FlightPeriod })}
-      >
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="manha">Manhã</SelectItem>
-          <SelectItem value="tarde">Tarde</SelectItem>
-          <SelectItem value="noite">Noite</SelectItem>
-        </SelectContent>
-      </Select>
-      {helper && <p className="text-[11px] text-muted-foreground">{helper}</p>}
     </div>
   );
 }
