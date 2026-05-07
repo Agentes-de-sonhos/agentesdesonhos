@@ -59,7 +59,7 @@ export function GuidesReferencesCard() {
         </div>
 
         {!collapsed && (
-          <div className="grid gap-3 w-full grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
+          <div className="flex flex-wrap gap-3 w-full">
             {ITEMS.map((item) => {
               const Icon = item.icon;
               return (
@@ -68,7 +68,7 @@ export function GuidesReferencesCard() {
                   onClick={() => navigate(item.url)}
                   aria-label={`Acessar ${item.title}`}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-3 rounded-2xl w-full aspect-square p-4 text-sm font-semibold transition-all duration-200 border border-transparent",
+                    "flex flex-col items-center justify-center gap-3 rounded-2xl w-[140px] sm:w-[150px] aspect-square p-4 text-sm font-semibold transition-all duration-200 border border-transparent",
                     "bg-amber-100 text-amber-700",
                     "hover:scale-[1.02] hover:shadow-md hover:border-border/50"
                   )}
