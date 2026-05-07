@@ -17,7 +17,7 @@ export function MateriaisRecentesCard() {
     const recent = materials.filter(
       (m) => new Date(m.published_at).getTime() >= sevenDaysAgo.getTime()
     );
-    return groupIntoGalleries(recent).slice(0, 3);
+    return groupIntoGalleries(recent).slice(0, 4);
   }, [materials, groupIntoGalleries]);
 
   return (
@@ -51,7 +51,7 @@ export function MateriaisRecentesCard() {
             Nenhum material novo nos últimos 7 dias.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 justify-items-center">
             {recentGalleries.map((gallery) => (
               <SocialPostCard key={gallery.id} gallery={gallery} />
             ))}
