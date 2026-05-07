@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import {
   Select,
@@ -30,6 +31,8 @@ import {
   TripProfile,
   TravelInterest,
   TravelPace,
+  FlightInfo,
+  FlightPeriod,
   TRIP_PROFILE_LABELS,
   TRAVEL_INTEREST_LABELS,
   TRAVEL_INTEREST_ICONS,
@@ -66,6 +69,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [showPace, setShowPace] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
   const [clientError, setClientError] = useState("");
+  const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ mode: 'period', period: 'manha', hasConnection: false });
+  const [returnFlight, setReturnFlight] = useState<FlightInfo>({ mode: 'period', period: 'tarde', hasConnection: false });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -116,6 +121,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
         exclusiveOrPopular: (values.exclusiveOrPopular as "exclusive" | "popular" | "mix") || "mix",
         mobilityLimitations: values.mobilityLimitations || undefined,
       },
+      outboundFlight,
+      returnFlight,
     });
   };
 
