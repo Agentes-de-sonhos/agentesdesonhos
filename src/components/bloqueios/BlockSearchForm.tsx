@@ -26,18 +26,22 @@ interface BlockSearchFormProps {
 
 type Suggestion = { code: string; city: string; name: string };
 
-function AirportInput({
+export function AirportInput({
   value,
   onChange,
   placeholder,
   icon: Icon,
   iconColor,
+  className,
+  inputClassName,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   icon: typeof MapPin;
   iconColor?: string;
+  className?: string;
+  inputClassName?: string;
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -131,7 +135,7 @@ function AirportInput({
   };
 
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
       <Icon className={cn("absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2", iconColor || "text-[hsl(var(--section-flights))]")} />
       <Input
         ref={inputRef}
@@ -147,7 +151,7 @@ function AirportInput({
           }
           if (suggestions.length > 0) setShowSuggestions(true);
         }}
-        className="pl-10 pr-8"
+        className={cn("pl-10 pr-8", inputClassName)}
       />
       {displayValue && (
         <button
