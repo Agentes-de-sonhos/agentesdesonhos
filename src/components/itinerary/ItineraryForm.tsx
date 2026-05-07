@@ -137,15 +137,28 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       <div className="space-y-4">
-        {/* Cliente + Destino */}
+        {/* Linha 1: Cliente */}
+        <div className="space-y-2">
+          <Label>Cliente *</Label>
+          <ClientSelector
+            value={selectedClient}
+            onChange={(c) => { setSelectedClient(c); setClientError(""); }}
+            required
+            error={clientError}
+          />
+        </div>
+
+        {/* Linha 2: Origem + Destino */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Cliente *</Label>
-            <ClientSelector
-              value={selectedClient}
-              onChange={(c) => { setSelectedClient(c); setClientError(""); }}
-              required
-              error={clientError}
+            <Label htmlFor="origin">Cidade de origem</Label>
+            <PlacesAutocomplete
+              value={form.watch("origin") || ""}
+              onChange={(val) => form.setValue("origin", val)}
+              onPlaceSelect={(pred) => form.setValue("origin", pred.name)}
+              placeType="city"
+              placeholder="Ex: São Paulo, Brasil"
+              fetchDetailsOnSelect={false}
             />
           </div>
 
