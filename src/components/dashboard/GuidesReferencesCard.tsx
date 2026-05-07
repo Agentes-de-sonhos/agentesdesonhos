@@ -53,8 +53,8 @@ export function GuidesReferencesCard() {
 
         <div className="rounded-xl bg-amber-600/5 border border-amber-600/15 px-3 py-2 space-y-0.5 w-full">
           <p className="text-sm font-semibold text-foreground leading-tight">📚 Consulte com confiança</p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Acesse benefícios exclusivos, requisitos de viagem atualizados e análises estratégicas de hotéis.
+          <p className="text-xs text-muted-foreground leading-relaxed truncate">
+            Benefícios, requisitos de viagem e análises de hotéis.
           </p>
         </div>
 
