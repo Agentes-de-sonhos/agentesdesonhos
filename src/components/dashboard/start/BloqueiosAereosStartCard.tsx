@@ -87,50 +87,58 @@ export function BloqueiosAereosStartCard() {
           </Button>
         </div>
 
-        {/* Stats + Search — single row on desktop */}
-        <div className="flex flex-col xl:flex-row xl:items-stretch gap-3">
+        {/* Stats + Search — aligned single row on desktop */}
+        <div className="flex flex-col xl:flex-row xl:items-center gap-3">
+          {/* Stats */}
           <div className="grid grid-cols-2 gap-3 xl:flex xl:shrink-0">
-            <div className="rounded-xl border border-border bg-muted/30 px-3 py-2 flex items-center gap-2 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
-                <Users className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 leading-tight">
-                <div className="text-[10px] text-muted-foreground">Lugares disponíveis</div>
-                <div className="font-display text-lg font-bold text-foreground">
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : totalSeats.toLocaleString("pt-BR")}
+            {[
+              { icon: Users, label: "Lugares disponíveis", value: totalSeats },
+              { icon: Plane, label: "Bloqueios ativos", value: totalBlocks },
+            ].map(({ icon: Icon, label, value }) => (
+              <div
+                key={label}
+                className="h-11 rounded-lg border border-border bg-muted/30 px-3 flex items-center gap-2.5 min-w-0"
+              >
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
+                  <Icon className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0 flex flex-col leading-none">
+                  <span className="text-[10px] font-medium text-muted-foreground truncate">
+                    {label}
+                  </span>
+                  <span className="font-display text-base font-bold text-foreground tabular-nums mt-0.5">
+                    {isLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                    ) : (
+                      value.toLocaleString("pt-BR")
+                    )}
+                  </span>
                 </div>
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-muted/30 px-3 py-2 flex items-center gap-2 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
-                <Plane className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 leading-tight">
-                <div className="text-[10px] text-muted-foreground">Bloqueios ativos</div>
-                <div className="font-display text-lg font-bold text-foreground">
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : totalBlocks.toLocaleString("pt-BR")}
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:flex xl:flex-1 xl:min-w-0">
+          {/* Divider on desktop */}
+          <div className="hidden xl:block h-8 w-px bg-border shrink-0" />
+
+          {/* Search controls */}
+          <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:flex xl:flex-1 xl:min-w-0 xl:items-center">
             <div className="relative xl:flex-1 xl:min-w-0">
-              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 placeholder="Origem (ex: GRU)"
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
-                className="pl-10"
+                className="h-11 pl-10"
               />
             </div>
             <div className="relative xl:flex-1 xl:min-w-0">
-              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 placeholder="Destino (ex: MCO)"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
-                className="pl-10"
+                className="h-11 pl-10"
               />
             </div>
             <Popover>
@@ -138,7 +146,7 @@ export function BloqueiosAereosStartCard() {
                 <Button
                   variant="outline"
                   className={cn(
-                    "justify-start text-left font-normal sm:col-span-2 xl:col-span-1 xl:flex-1 xl:min-w-0",
+                    "h-11 px-3 justify-start text-left font-normal sm:col-span-2 xl:col-span-1 xl:flex-1 xl:min-w-0",
                     !range?.from && "text-muted-foreground"
                   )}
                 >
@@ -170,7 +178,10 @@ export function BloqueiosAereosStartCard() {
                 />
               </PopoverContent>
             </Popover>
-            <Button onClick={handleSearch} className="sm:col-span-2 xl:col-span-1 xl:shrink-0">
+            <Button
+              onClick={handleSearch}
+              className="h-11 px-5 sm:col-span-2 xl:col-span-1 xl:shrink-0"
+            >
               <Search className="h-4 w-4 mr-2" />
               Buscar
             </Button>
