@@ -21,7 +21,7 @@ const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "fami
 const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
 const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
-const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight", "extraDestinations"];
+const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight", "arrivalInfo", "departureInfo", "extraDestinations"];
 const ALLOWED_DEST_KIND = ["principal", "secundario", "bate_volta", "conexao", "extensao"];
 const ALLOWED_TRANSPORT = ["aviao", "carro", "trem", "onibus", "transfer", "cruzeiro", "outro"];
 const DEST_KIND_LABELS: Record<string, string> = {
@@ -38,6 +38,8 @@ const TRANSPORT_LABELS: Record<string, string> = {
 const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations", "serviceContext"];
 const ALLOWED_FLIGHT_KEYS = ["period"];
 const ALLOWED_FLIGHT_PERIODS = ["manha", "tarde", "noite"];
+const ALLOWED_JOURNEY_KEYS = ["transport", "period"];
+const ALLOWED_JOURNEY_PERIODS = ["madrugada", "manha", "tarde", "noite"];
 
 const tripTypeLabels: Record<string, string> = {
   casal: "viagem de casal",
@@ -301,30 +303,65 @@ serve(async (req) => {
       }
       return undefined;
     }
-    const outboundFlight = validateFlightPeriod(body.outboundFlight);
-    const returnFlight = validateFlightPeriod(body.returnFlight);
+    function validateJourney(raw: unknown): { transport: string; period: string } | undefined {
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+      const j = whitelistKeys<Record<string, unknown>>(raw, ALLOWED_JOURNEY_KEYS);
+      const transport = typeof j.transport === "string" && ALLOWED_TRANSPORT.includes(j.transport) ? j.transport : undefined;
+      const period = typeof j.period === "string" && ALLOWED_JOURNEY_PERIODS.includes(j.period) ? j.period : undefined;
+      if (!transport || !period) return undefined;
+      return { transport, period };
+    }
+    // Backward-compat: accept old outbound/returnFlight if present
+    const legacyOutbound = validateFlightPeriod(body.outboundFlight);
+    const legacyReturn = validateFlightPeriod(body.returnFlight);
+    const arrivalInfo = validateJourney(body.arrivalInfo)
+      ?? (legacyOutbound ? { transport: "aviao", period: legacyOutbound } : undefined);
+    const departureInfo = validateJourney(body.departureInfo)
+      ?? (legacyReturn ? { transport: "aviao", period: legacyReturn } : undefined);
 
-    const periodLabel: Record<string, string> = { manha: "manhã", tarde: "tarde", noite: "noite" };
-    const flightLines: string[] = [];
-    if (outboundFlight) flightLines.push(`- Voo de IDA: período da ${periodLabel[outboundFlight]}`);
-    if (returnFlight) flightLines.push(`- Voo de VOLTA: período da ${periodLabel[returnFlight]}`);
-
-    const outboundRules: Record<string, string> = {
-      manha: "Voo de ida pela manhã: o viajante chegará ao destino ao longo do dia. Programe o Dia 1 preferencialmente apenas no período da NOITE (jantar/atividade leve).",
-      tarde: "Voo de ida à tarde: chegada mais tardia. O Dia 1 deve iniciar APENAS à noite com algo leve, ou ficar sem atividades relevantes.",
-      noite: "Voo de ida à noite: chegada tardia. NÃO programe atividades no Dia 1 (apenas check-in/descanso).",
+    const journeyPeriodLabel: Record<string, string> = {
+      madrugada: "madrugada", manha: "manhã", tarde: "tarde", noite: "noite",
     };
-    const returnRules: Record<string, string> = {
-      manha: "Voo de volta pela manhã: encerre a programação no DIA ANTERIOR à noite. NÃO adicione atividades relevantes no último dia (apenas check-out).",
-      tarde: "Voo de volta à tarde: permita APENAS atividades leves pela manhã no último dia.",
-      noite: "Voo de volta à noite: programação parcial durante o dia no último dia, evitando atividades longas próximas ao embarque.",
-    };
-    const ruleLines: string[] = [];
-    if (outboundFlight) ruleLines.push("- " + outboundRules[outboundFlight]);
-    if (returnFlight) ruleLines.push("- " + returnRules[returnFlight]);
 
-    const flightsText = flightLines.length > 0
-      ? `\n\nINFORMAÇÕES DE VOO (use OBRIGATORIAMENTE):\n${flightLines.join("\n")}\n\nREGRAS DE AJUSTE LOGÍSTICO (siga rigorosamente):\n${ruleLines.join("\n")}`
+    const arrivalRules: Record<string, string> = {
+      madrugada: "Chegada na MADRUGADA: o viajante chega muito cedo. Permita programação leve durante o Dia 1, mas reserve a manhã para descanso/check-in.",
+      manha: "Chegada pela MANHÃ: inicie a programação preferencialmente na TARDE ou NOITE do Dia 1 (manhã reservada para deslocamento e check-in).",
+      tarde: "Chegada à TARDE: o Dia 1 deve ter APENAS atividades leves à noite (jantar local) ou ficar livre.",
+      noite: "Chegada à NOITE: NÃO programe atividades relevantes no Dia 1 (apenas check-in e descanso).",
+    };
+    const departureRules: Record<string, string> = {
+      madrugada: "Saída na MADRUGADA: encerre a programação no DIA ANTERIOR. NÃO adicione atividades no último dia (apenas check-out e deslocamento).",
+      manha: "Saída pela MANHÃ: NÃO programe atividades relevantes no último dia (apenas check-out).",
+      tarde: "Saída à TARDE: permita APENAS atividades leves pela manhã no último dia.",
+      noite: "Saída à NOITE: programação parcial durante o dia no último dia, evitando atividades longas próximas ao embarque.",
+    };
+    const transportNotes: Record<string, string> = {
+      aviao: "Avião: considere deslocamento aeroportuário, check-in e tempo de embarque (chegar 2-3h antes em voos internacionais, 1-2h em domésticos).",
+      carro: "Carro: viagem flexível, permita paradas e horários mais livres. O viajante pode ajustar deslocamentos com facilidade.",
+      onibus: "Ônibus: deslocamentos longos e mais cansativos. No dia da chegada/saída, programe atividades mais leves.",
+      trem: "Trem: estações geralmente centrais, deslocamentos urbanos rápidos. Tempo de embarque curto.",
+      transfer: "Transfer privativo: deslocamento confortável e direto. Boa flexibilidade de horários.",
+      cruzeiro: "Cruzeiro: considere embarque/desembarque portuário (check-in pode levar 2-4h, desembarque costuma ser pela manhã).",
+      outro: "Meio de transporte alternativo: trate com flexibilidade e bom senso logístico.",
+    };
+
+    const journeyLines: string[] = [];
+    const journeyRules: string[] = [];
+    if (arrivalInfo) {
+      journeyLines.push(`- CHEGADA ao destino: ${TRANSPORT_LABELS[arrivalInfo.transport]} no período da ${journeyPeriodLabel[arrivalInfo.period]}`);
+      journeyRules.push("- " + arrivalRules[arrivalInfo.period]);
+      journeyRules.push("- " + transportNotes[arrivalInfo.transport]);
+    }
+    if (departureInfo) {
+      journeyLines.push(`- SAÍDA / RETORNO do destino: ${TRANSPORT_LABELS[departureInfo.transport]} no período da ${journeyPeriodLabel[departureInfo.period]}`);
+      journeyRules.push("- " + departureRules[departureInfo.period]);
+      if (departureInfo.transport !== arrivalInfo?.transport) {
+        journeyRules.push("- " + transportNotes[departureInfo.transport]);
+      }
+    }
+
+    const flightsText = journeyLines.length > 0
+      ? `\n\nINFORMAÇÕES DE CHEGADA E RETORNO (use OBRIGATORIAMENTE):\n${journeyLines.join("\n")}\n\nREGRAS DE AJUSTE LOGÍSTICO (siga rigorosamente):\n${journeyRules.join("\n")}`
       : "";
 
     // --- MULTI-DESTINATIONS ---
