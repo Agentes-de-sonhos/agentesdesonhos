@@ -116,8 +116,6 @@ export function RoteiroIACard() {
           </div>
         </div>
 
-        {!collapsed && (
-        <>
         <p className="text-sm text-muted-foreground">
           Preencha os dados da viagem e gere um roteiro personalizado em segundos.
           {dailyLimit !== null && (
@@ -127,31 +125,33 @@ export function RoteiroIACard() {
           )}
         </p>
 
-        {!canCreateItinerary && dailyLimit !== null ? (
-          <div className="rounded-lg border border-dashed border-violet-300 bg-violet-50/50 p-6 text-center space-y-3">
-            <Lock className="h-8 w-8 mx-auto text-violet-600" />
-            <div>
-              <h3 className="font-semibold text-foreground">
-                Você atingiu o limite diário ({dailyLimit}/{dailyLimit})
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Faça upgrade para o plano Profissional ou Premium para gerar roteiros sem limites.
-              </p>
-            </div>
-            <Button
-              onClick={() => navigate("/planos")}
-              className="bg-violet-600 hover:bg-violet-700 text-white"
-            >
-              Ver planos
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <div className="rounded-lg border border-border bg-card p-4">
-            <ItineraryForm onSubmit={handleCreateItinerary} isLoading={isGenerating} />
-          </div>
-        )}
-        </>
+        {!collapsed && (
+          <>
+            {!canCreateItinerary && dailyLimit !== null ? (
+              <div className="rounded-lg border border-dashed border-violet-300 bg-violet-50/50 p-6 text-center space-y-3">
+                <Lock className="h-8 w-8 mx-auto text-violet-600" />
+                <div>
+                  <h3 className="font-semibold text-foreground">
+                    Você atingiu o limite diário ({dailyLimit}/{dailyLimit})
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Faça upgrade para o plano Profissional ou Premium para gerar roteiros sem limites.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => navigate("/planos")}
+                  className="bg-violet-600 hover:bg-violet-700 text-white"
+                >
+                  Ver planos
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-border bg-card p-4">
+                <ItineraryForm onSubmit={handleCreateItinerary} isLoading={isGenerating} />
+              </div>
+            )}
+          </>
         )}
 
         <AIGeneratingOverlay visible={isGenerating} />
