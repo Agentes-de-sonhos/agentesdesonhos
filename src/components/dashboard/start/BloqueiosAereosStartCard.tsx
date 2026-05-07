@@ -4,13 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plane, Search, MapPin, ArrowRight, Loader2, Users } from "lucide-react";
+import { Plane, Search, MapPin, ArrowRight, Loader2, Users, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function BloqueiosAereosStartCard() {
   const navigate = useNavigate();
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["air-blocks-start-summary"],
@@ -47,6 +49,8 @@ export function BloqueiosAereosStartCard() {
     const params = new URLSearchParams();
     if (origin) params.set("origin", origin);
     if (destination) params.set("destination", destination);
+    if (dateFrom) params.set("dateFrom", dateFrom);
+    if (dateTo) params.set("dateTo", dateTo);
     const qs = params.toString();
     navigate(`/bloqueios-aereos${qs ? `?${qs}` : ""}`);
   };
@@ -115,29 +119,54 @@ export function BloqueiosAereosStartCard() {
         </div>
 
         {/* Search */}
-        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Origem (ex: GRU)"
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
-              className="pl-10"
-            />
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Origem (ex: GRU)"
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Destino (ex: MCO)"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Destino (ex: MCO)"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              className="pl-10"
-            />
+          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Input
+                type="date"
+                aria-label="Data inicial"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Input
+                type="date"
+                aria-label="Data final"
+                value={dateTo}
+                min={dateFrom || undefined}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button onClick={handleSearch} className="w-full sm:w-auto">
+              <Search className="h-4 w-4 mr-2" />
+              Buscar
+            </Button>
           </div>
-          <Button onClick={handleSearch} className="w-full sm:w-auto">
-            <Search className="h-4 w-4 mr-2" />
-            Buscar
-          </Button>
         </div>
       </CardContent>
     </Card>
