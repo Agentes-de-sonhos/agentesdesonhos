@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Users, MapPin, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarIcon, Users, MapPin, Sparkles, ChevronDown, ChevronUp, Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,11 @@ import {
   TravelPace,
   FlightInfo,
   FlightPeriod,
+  ExtraDestination,
+  DestinationKind,
+  TransportMode,
+  DESTINATION_KIND_LABELS,
+  TRANSPORT_MODE_LABELS,
   TRIP_PROFILE_LABELS,
   TRAVEL_INTEREST_LABELS,
   TRAVEL_INTEREST_ICONS,
@@ -72,6 +77,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [clientError, setClientError] = useState("");
   const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ period: 'manha' });
   const [returnFlight, setReturnFlight] = useState<FlightInfo>({ period: 'tarde' });
+  const [multiEnabled, setMultiEnabled] = useState(false);
+  const [extraDestinations, setExtraDestinations] = useState<ExtraDestination[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -131,6 +138,7 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
       },
       outboundFlight,
       returnFlight,
+      extraDestinations: multiEnabled && extraDestinations.length > 0 ? extraDestinations : undefined,
     });
   };
 
