@@ -21,8 +21,10 @@ const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "fami
 const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
 const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
-const ALLOWED_BODY_KEYS = ["destination", "startDate", "endDate", "travelersCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences"];
+const ALLOWED_BODY_KEYS = ["destination", "startDate", "endDate", "travelersCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight"];
 const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations", "serviceContext"];
+const ALLOWED_FLIGHT_KEYS = ["mode", "time", "period", "hasConnection"];
+const ALLOWED_FLIGHT_PERIODS = ["manha", "tarde", "noite"];
 
 const tripTypeLabels: Record<string, string> = {
   casal: "viagem de casal",
