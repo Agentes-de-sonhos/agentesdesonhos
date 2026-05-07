@@ -27,6 +27,15 @@ export type TravelInterest =
 
 export type TravelPace = 'leve' | 'moderado' | 'intenso';
 
+export type FlightPeriod = 'manha' | 'tarde' | 'noite';
+
+export interface FlightInfo {
+  mode: 'exact' | 'period';
+  time?: string; // HH:mm quando mode = 'exact'
+  period?: FlightPeriod; // quando mode = 'period'
+  hasConnection?: boolean;
+}
+
 export interface AdditionalPreferences {
   dietaryRestrictions?: string;
   localOrTouristy?: 'local' | 'touristy' | 'mix';
@@ -47,6 +56,8 @@ export interface ItineraryFormData {
   interests: TravelInterest[];
   travelPace: TravelPace;
   additionalPreferences: AdditionalPreferences;
+  outboundFlight?: FlightInfo;
+  returnFlight?: FlightInfo;
 }
 
 export interface Activity {
