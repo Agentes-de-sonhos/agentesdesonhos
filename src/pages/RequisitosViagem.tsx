@@ -3,7 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, ArrowLeft, ArrowRight, Loader2, Search } from "lucide-react";
+import { ShieldCheck, ArrowLeft, ArrowRight, Loader2, Search, SkipForward } from "lucide-react";
 import { PassengerStep } from "@/components/travel-requirements/PassengerStep";
 import { TripStep } from "@/components/travel-requirements/TripStep";
 import { RequirementsResult } from "@/components/travel-requirements/RequirementsResult";
@@ -41,6 +41,7 @@ function Inner() {
   const [step, setStep] = useState<1 | 2>(1);
   const [passenger, setPassenger] = useState<PassengerData>(initialPassenger);
   const [trip, setTrip] = useState<TripData>(initialTrip);
+  const [skipPassenger, setSkipPassenger] = useState(false);
   const { consult, loading, data, reset } = useTravelRequirements();
 
   const validatePassenger = () => {
@@ -58,8 +59,14 @@ function Inner() {
   };
 
   const handleNext = () => {
+    setSkipPassenger(false);
     const err = validatePassenger();
     if (err) { toast.error(err); return; }
+    setStep(2);
+  };
+
+  const handleSkip = () => {
+    setSkipPassenger(true);
     setStep(2);
   };
 
@@ -67,7 +74,7 @@ function Inner() {
     const err = validateTrip();
     if (err) { toast.error(err); return; }
     try {
-      await consult(passenger, trip);
+      await consult(skipPassenger ? null : passenger, trip);
     } catch { /* toast já exibido */ }
   };
 
@@ -76,6 +83,7 @@ function Inner() {
     setStep(1);
     setPassenger(initialPassenger);
     setTrip(initialTrip);
+    setSkipPassenger(false);
   };
 
   if (data?.result) {
@@ -90,7 +98,7 @@ function Inner() {
           />
           <RequirementsResult
             result={data.result}
-            passengerName={passenger.full_name}
+            passengerName={skipPassenger ? "Requisitos gerais do destino" : passenger.full_name}
             destination={`${trip.destination_city}, ${trip.destination_country}`}
             onReset={handleReset}
           />
@@ -117,14 +125,28 @@ function Inner() {
         </div>
 
         {step === 1 ? (
-          <PassengerStep data={passenger} onChange={setPassenger} />
+          <>
+            <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold text-foreground">Ainda não tem os dados do passageiro?</p>
+                <p className="text-xs text-muted-foreground">
+                  Pule esta etapa e veja os principais requisitos gerais para o destino (sem cruzar nacionalidade ou passaporte).
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleSkip} className="gap-2 self-start sm:self-auto whitespace-nowrap">
+                <SkipForward className="h-4 w-4" />
+                Pular passageiro
+              </Button>
+            </div>
+            <PassengerStep data={passenger} onChange={setPassenger} />
+          </>
         ) : (
           <TripStep data={trip} onChange={setTrip} />
         )}
 
         <div className="flex justify-between gap-3">
           {step === 2 ? (
-            <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
+            <Button variant="outline" onClick={() => { setSkipPassenger(false); setStep(1); }} className="gap-2">
               <ArrowLeft className="h-4 w-4" /> Voltar
             </Button>
           ) : <span />}
