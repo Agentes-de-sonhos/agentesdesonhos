@@ -347,24 +347,37 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
         </div>
 
-        {/* Voos de ida e volta (opcionais, em blocos colapsáveis) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CollapsibleFlight
-            label="Voo de ida"
-            helper="Usado pela IA para ajustar o Dia 1 (chegada no destino)"
-            enabled={outboundEnabled}
-            onToggle={setOutboundEnabled}
-            value={outboundFlight}
-            onChange={setOutboundFlight}
-          />
-          <CollapsibleFlight
-            label="Voo de volta"
-            helper="Usado pela IA para ajustar o último dia (saída do destino)"
-            enabled={returnEnabled}
-            onToggle={setReturnEnabled}
-            value={returnFlight}
-            onChange={setReturnFlight}
-          />
+        {/* Chegada e Retorno (opcional, mesmo padrão de múltiplos destinos) */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={journeyEnabled}
+              onChange={(e) => setJourneyEnabled(e.target.checked)}
+            />
+            <span>Esta viagem possui informações de chegada e retorno</span>
+          </label>
+
+          {journeyEnabled && (
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Informe como o viajante chega e sai do destino. A IA usa esses dados para ajustar o Dia 1, o último dia e o ritmo do roteiro.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <JourneyBlock
+                  title="Chegada ao destino"
+                  value={arrivalInfo}
+                  onChange={setArrivalInfo}
+                />
+                <JourneyBlock
+                  title="Retorno / saída do destino"
+                  value={departureInfo}
+                  onChange={setDepartureInfo}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Perfil + Orçamento */}
