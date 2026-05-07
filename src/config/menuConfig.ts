@@ -28,15 +28,15 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
   ],
   guias: [
     { key: "mapa_turismo", label: "Mapa do Turismo" },
-    { key: "travel_advisor", label: "Travel Advisor" },
-    { key: "requisitos_viagem", label: "Central de Requisitos" },
     { key: "beneficios", label: "Benefícios e Descontos" },
+    { key: "requisitos_viagem", label: "Central de Requisitos" },
+    { key: "hotel_raio_x", label: "Raio-X do Hotel" },
+    { key: "travel_advisor", label: "Travel Advisor" },
     { key: "agenda", label: "Minha Agenda" },
   ],
   recursos_vendas: [
     { key: "bloqueios_aereos", label: "Bloqueios Aéreos" },
     { key: "materiais", label: "Materiais de Divulgação" },
-    { key: "hotel_raio_x", label: "Raio-X do Hotel" },
   ],
   criar: [
     { key: "carteira_digital", label: "Carteira Digital" },
