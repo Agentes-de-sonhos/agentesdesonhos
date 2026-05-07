@@ -145,10 +145,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, [plan, isPromotor, isAdmin, hasExplicitAccess]);
 
   const canUseAI = useCallback((): boolean => {
+    if (isAdmin || isPromotor) return true;
     if (plan === "start" || plan === "educa_pass" || plan === "cartao_digital" || plan === "essencial") return false;
     if (plan === "premium" || plan === "profissional" || plan === "fundador") return true;
     return aiUsageCount < aiLimit;
-  }, [plan, aiUsageCount, aiLimit]);
+  }, [plan, aiUsageCount, aiLimit, isAdmin, isPromotor]);
 
   const incrementAIUsage = useCallback(async (): Promise<boolean> => {
     if (!subscription || !canUseAI()) return false;
