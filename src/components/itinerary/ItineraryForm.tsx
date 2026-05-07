@@ -190,72 +190,6 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
         </div>
 
-        {/* Multi-destinos toggle + builder */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
-            <input
-              type="checkbox"
-              className="h-4 w-4"
-              checked={multiEnabled}
-              onChange={(e) => setMultiEnabled(e.target.checked)}
-            />
-            <span>Esta viagem possui múltiplos destinos</span>
-          </label>
-
-          {multiEnabled && (
-            <div className="rounded-lg border border-border p-4 space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
-                  O destino principal acima é o ponto de partida. Adicione abaixo os demais destinos na ordem que serão visitados.
-                </p>
-              </div>
-
-              {extraDestinations.length === 0 && (
-                <p className="text-xs text-muted-foreground italic">Nenhum destino adicional ainda.</p>
-              )}
-
-              {extraDestinations.map((dest, idx) => (
-                <DestinationRow
-                  key={idx}
-                  index={idx}
-                  total={extraDestinations.length}
-                  value={dest}
-                  onChange={(next) =>
-                    setExtraDestinations((prev) => prev.map((d, i) => (i === idx ? next : d)))
-                  }
-                  onRemove={() =>
-                    setExtraDestinations((prev) => prev.filter((_, i) => i !== idx))
-                  }
-                  onMove={(dir) =>
-                    setExtraDestinations((prev) => {
-                      const arr = [...prev];
-                      const target = idx + dir;
-                      if (target < 0 || target >= arr.length) return prev;
-                      [arr[idx], arr[target]] = [arr[target], arr[idx]];
-                      return arr;
-                    })
-                  }
-                />
-              ))}
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setExtraDestinations((prev) => [
-                    ...prev,
-                    { city: "", kind: "secundario", nights: 2, transportFromPrevious: "aviao", notes: "" },
-                  ])
-                }
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Adicionar destino
-              </Button>
-            </div>
-          )}
-        </div>
-
         {/* Período + Número de Viajantes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -376,6 +310,72 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
                   onChange={setDepartureInfo}
                 />
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Multi-destinos toggle + builder */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={multiEnabled}
+              onChange={(e) => setMultiEnabled(e.target.checked)}
+            />
+            <span>Esta viagem possui múltiplos destinos</span>
+          </label>
+
+          {multiEnabled && (
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">
+                  O destino principal acima é o ponto de partida. Adicione abaixo os demais destinos na ordem que serão visitados.
+                </p>
+              </div>
+
+              {extraDestinations.length === 0 && (
+                <p className="text-xs text-muted-foreground italic">Nenhum destino adicional ainda.</p>
+              )}
+
+              {extraDestinations.map((dest, idx) => (
+                <DestinationRow
+                  key={idx}
+                  index={idx}
+                  total={extraDestinations.length}
+                  value={dest}
+                  onChange={(next) =>
+                    setExtraDestinations((prev) => prev.map((d, i) => (i === idx ? next : d)))
+                  }
+                  onRemove={() =>
+                    setExtraDestinations((prev) => prev.filter((_, i) => i !== idx))
+                  }
+                  onMove={(dir) =>
+                    setExtraDestinations((prev) => {
+                      const arr = [...prev];
+                      const target = idx + dir;
+                      if (target < 0 || target >= arr.length) return prev;
+                      [arr[idx], arr[target]] = [arr[target], arr[idx]];
+                      return arr;
+                    })
+                  }
+                />
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setExtraDestinations((prev) => [
+                    ...prev,
+                    { city: "", kind: "secundario", nights: 2, transportFromPrevious: "aviao", notes: "" },
+                  ])
+                }
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Adicionar destino
+              </Button>
             </div>
           )}
         </div>
