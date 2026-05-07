@@ -11,6 +11,7 @@ import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -425,10 +426,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
               )}
               {photoSlot}
               <FormField control={form.control} name="service_description" render={({ field }) => (
-                <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><TextareaWithTemplate placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="notes" render={({ field }) => (
-                <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
               )} />
             </div>
           )}
@@ -637,7 +638,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         {/* 5. Description */}
         {showOptionLabel && (
           <FormField control={form.control} name="service_description" render={({ field }) => (
-            <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Descrição (opcional)</FormLabel><FormControl><TextareaWithTemplate placeholder="Detalhes, diferenciais..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         )}
 
@@ -663,7 +664,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         )}
 
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -886,7 +887,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
         )} />
         {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -1067,7 +1068,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
         <FormField control={form.control} name="description" render={({ field }) => (
           <FormItem>
             <FormLabel>Descrição</FormLabel>
-            <FormControl><Textarea placeholder="Detalhes adicionais do transfer..." className="min-h-[80px]" {...field} /></FormControl>
+            <FormControl><TextareaWithTemplate placeholder="Detalhes adicionais do transfer..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -1180,7 +1181,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         )} />
 
         <FormField control={form.control} name="service_description" render={({ field }) => (
-          <FormItem><FormLabel>Descrição <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Descrição <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><TextareaWithTemplate placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -1229,7 +1230,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         )}
 
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Textarea placeholder="Observações sobre o ingresso..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><TextareaWithTemplate placeholder="Observações sobre o ingresso..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
         {renderPaymentSlot(paymentSlot, totalAmount)}
@@ -1336,7 +1337,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
         )} />
         {renderPaymentSlot(paymentSlot, totalAmount)}
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -1421,7 +1422,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
         )} />
         {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações</FormLabel><FormControl><Textarea placeholder="Observações adicionais..." {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -1494,7 +1495,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
           </FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="description" render={({ field }) => (
-          <FormItem><FormLabel>Descrição do Serviço</FormLabel><FormControl><Textarea placeholder="Descreva o serviço..." rows={3} {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Descrição do Serviço</FormLabel><FormControl><TextareaWithTemplate placeholder="Descreva o serviço..." rows={3} onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
@@ -1561,11 +1562,11 @@ function CircuitForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }
           <FormItem>
             <FormLabel>Roteiro Day by Day</FormLabel>
             <FormControl>
-              <Textarea
+              <TextareaWithTemplate
                 placeholder={"Dia 1 — Chegada em Roma\nDia 2 — City tour pelo Coliseu e Fórum Romano\nDia 3 — Vaticano e Castel Sant'Angelo\n..."}
                 rows={12}
                 className="font-mono text-sm leading-relaxed"
-                {...field}
+                onValueChange={field.onChange} {...field}
               />
             </FormControl>
             <p className="text-xs text-muted-foreground">Dica: separe cada dia em uma linha (Dia 1, Dia 2…). Quebras de linha são preservadas no orçamento e PDF.</p>
@@ -1574,7 +1575,7 @@ function CircuitForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }
         )} />
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel><FormControl>
-            <Textarea placeholder="Inclusões, exclusões, hotéis previstos, etc." rows={3} {...field} />
+            <TextareaWithTemplate placeholder="Inclusões, exclusões, hotéis previstos, etc." rows={3} onValueChange={field.onChange} {...field} />
           </FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="price" render={({ field }) => (
