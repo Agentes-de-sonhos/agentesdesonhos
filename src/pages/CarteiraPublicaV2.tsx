@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
-import { Loader2, Lock, Eye, EyeOff, ShieldAlert } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, ShieldAlert, MessageCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,19 @@ async function verifyByPublicCode(agencySlug: string, code: string, password: st
   };
 }
 
-function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: string) => void; loading: boolean; error: string }) {
+function PasswordGate({
+  onUnlock,
+  loading,
+  error,
+  branding,
+  attemptsLeft,
+}: {
+  onUnlock: (password: string) => void;
+  loading: boolean;
+  error: string;
+  branding: AgentProfile | null;
+  attemptsLeft: number | null;
+}) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -43,20 +55,38 @@ function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: strin
     onUnlock(password);
   };
 
+  const phoneDigits = (branding?.phone || "").replace(/\D/g, "");
+  const whatsappUrl = phoneDigits
+    ? `https://wa.me/${phoneDigits.startsWith("55") ? phoneDigits : `55${phoneDigits}`}?text=${encodeURIComponent(
+        "Olá! Preciso de ajuda para acessar minha Carteira de Viagem."
+      )}`
+    : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/5 flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm shadow-xl border-0">
-        <CardContent className="pt-8 pb-6 px-6 text-center space-y-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mx-auto">
-            <Lock className="h-8 w-8 text-primary" />
+      <div className="w-full max-w-sm space-y-5">
+        {branding?.agency_logo_url && (
+          <div className="flex justify-center">
+            <img
+              src={branding.agency_logo_url}
+              alt={branding.agency_name || "Agência"}
+              className="max-h-24 w-auto object-contain"
+            />
           </div>
-          <div>
-            <h1 className="text-xl font-bold mb-1">Carteira de Viagem</h1>
-            <p className="text-sm text-muted-foreground">
-              Digite a senha fornecida pela sua agência
-            </p>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        )}
+
+        <Card className="shadow-xl border-0">
+          <CardContent className="pt-8 pb-6 px-6 text-center space-y-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mx-auto">
+              <Lock className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold mb-1">Carteira de Viagem</h1>
+              <p className="text-sm text-muted-foreground">
+                Digite a senha fornecida pela sua agência
+              </p>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -75,13 +105,59 @@ function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: strin
               </button>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
+            {attemptsLeft !== null && attemptsLeft > 0 && (
+              <div className="flex items-center justify-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md py-2 px-3">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>
+                  {attemptsLeft === 1
+                    ? "Atenção: você tem mais 1 tentativa antes do bloqueio."
+                    : `Você tem mais ${attemptsLeft} tentativas antes do bloqueio.`}
+                </span>
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Acessar Carteira
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+          </CardContent>
+        </Card>
+
+        {(branding?.name || branding?.agency_name || whatsappUrl) && (
+          <Card className="shadow-md border-0">
+            <CardContent className="py-4 px-5 flex items-center gap-3">
+              {branding?.avatar_url ? (
+                <img
+                  src={branding.avatar_url}
+                  alt={branding.name || ""}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-muted" />
+              )}
+              <div className="flex-1 min-w-0 text-left">
+                {branding?.name && (
+                  <p className="text-sm font-semibold truncate">{branding.name}</p>
+                )}
+                {branding?.agency_name && (
+                  <p className="text-xs text-muted-foreground truncate">{branding.agency_name}</p>
+                )}
+              </div>
+              {whatsappUrl && (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-full px-3 py-2 transition-colors"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp
+                </a>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
@@ -94,8 +170,11 @@ export default function CarteiraPublicaV2() {
   const [needsPassword, setNeedsPassword] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [usedPassword, setUsedPassword] = useState("");
+  const [branding, setBranding] = useState<AgentProfile | null>(null);
+  const [attemptsUsed, setAttemptsUsed] = useState(0);
 
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
+  const MAX_ATTEMPTS = 3;
 
   useEffect(() => {
     setOgMeta({
@@ -103,6 +182,13 @@ export default function CarteiraPublicaV2() {
       description: "Acesse seus vouchers, ingressos e documentos de forma simples e segura.",
     });
     if (!agencySlug || !accessCode) return;
+    // Load agency branding for password gate (no password required)
+    supabase
+      .rpc('get_trip_by_public_code', { p_agency_slug: agencySlug, p_code: accessCode })
+      .then(({ data }) => {
+        const result = data as any;
+        if (result?.agent_profile) setBranding(result.agent_profile as AgentProfile);
+      });
     verifyByPublicCode(agencySlug, accessCode, "")
       .then((result) => {
         setTripData(result);
@@ -135,6 +221,7 @@ export default function CarteiraPublicaV2() {
         setIsLocked(true);
         setNeedsPassword(false);
       } else {
+        setAttemptsUsed((n) => n + 1);
         setError(err.message || "Erro ao acessar carteira");
       }
     } finally {
@@ -179,7 +266,16 @@ export default function CarteiraPublicaV2() {
   }
 
   if (needsPassword && !tripData) {
-    return <PasswordGate onUnlock={handleUnlock} loading={loading} error={error} />;
+    const attemptsLeft = Math.max(0, MAX_ATTEMPTS - attemptsUsed);
+    return (
+      <PasswordGate
+        onUnlock={handleUnlock}
+        loading={loading}
+        error={error}
+        branding={branding}
+        attemptsLeft={attemptsUsed > 0 ? attemptsLeft : null}
+      />
+    );
   }
 
   if (error && !tripData) {
