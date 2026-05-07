@@ -379,10 +379,15 @@ REGRAS FUNDAMENTAIS:
 
 ${profileRules}`;
 
-    const userPrompt = `Crie um roteiro completo para:
+    const travelersDesc = (adultsCount !== undefined || childrenCount !== undefined)
+      ? `${adultsCount ?? travelersCount} adulto(s)${childrenCount ? ` e ${childrenCount} criança(s)` : ""}`
+      : `${travelersCount} pessoa(s)`;
+    const originLine = origin ? `\n- Cidade de origem: ${origin}` : "";
+
+    const userPrompt = `Crie um roteiro completo para:${originLine}
 - Destino: ${destination}
 - Período: ${days} dias (${startDate} a ${endDate})
-- Viajantes: ${travelersCount} pessoa(s)
+- Viajantes: ${travelersDesc}
 - Tipo de viagem: ${tripTypeLabels[tripType] || tripType}
 - Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}${flightsText}
 
