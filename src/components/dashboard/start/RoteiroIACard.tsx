@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Wand2, Lock, Sparkles, ArrowRight, Loader2 } from "lucide-react";
+import { Wand2, Lock, Sparkles, ArrowRight, Loader2, ChevronDown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 export function RoteiroIACard() {
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   const {
     canUse: canCreateItinerary,
@@ -79,8 +80,9 @@ export function RoteiroIACard() {
             <div className="mt-2 h-1 w-full rounded-full bg-violet-600" />
           </div>
 
-          {!limitLoading && dailyLimit !== null && (
-            <Badge
+          <div className="flex items-center gap-2">
+            {!limitLoading && dailyLimit !== null && (
+              <Badge
               variant="outline"
               className={
                 canCreateItinerary
@@ -99,10 +101,23 @@ export function RoteiroIACard() {
                   Limite atingido ({dailyLimit}/{dailyLimit})
                 </>
               )}
-            </Badge>
-          )}
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform flex-shrink-0"
+              onClick={() => setCollapsed((v) => !v)}
+              aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
+              aria-expanded={!collapsed}
+            >
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
+            </Button>
+          </div>
         </div>
 
+        {!collapsed && (
+        <>
         <p className="text-sm text-muted-foreground">
           Preencha os dados da viagem e gere um roteiro personalizado em segundos.
           {dailyLimit !== null && (
@@ -135,6 +150,8 @@ export function RoteiroIACard() {
           <div className="rounded-lg border border-border bg-card p-4">
             <ItineraryForm onSubmit={handleCreateItinerary} isLoading={isGenerating} />
           </div>
+        )}
+        </>
         )}
 
         <AIGeneratingOverlay visible={isGenerating} />
