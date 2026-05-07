@@ -77,6 +77,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [clientError, setClientError] = useState("");
   const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ period: 'manha' });
   const [returnFlight, setReturnFlight] = useState<FlightInfo>({ period: 'tarde' });
+  const [outboundEnabled, setOutboundEnabled] = useState(false);
+  const [returnEnabled, setReturnEnabled] = useState(false);
   const [multiEnabled, setMultiEnabled] = useState(false);
   const [extraDestinations, setExtraDestinations] = useState<ExtraDestination[]>([]);
 
@@ -136,8 +138,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
         exclusiveOrPopular: (values.exclusiveOrPopular as "exclusive" | "popular" | "mix") || "mix",
         mobilityLimitations: values.mobilityLimitations || undefined,
       },
-      outboundFlight,
-      returnFlight,
+      outboundFlight: outboundEnabled ? outboundFlight : undefined,
+      returnFlight: returnEnabled ? returnFlight : undefined,
       extraDestinations: multiEnabled && extraDestinations.length > 0 ? extraDestinations : undefined,
     });
   };
