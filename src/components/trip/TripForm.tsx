@@ -183,13 +183,27 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
                     mode="range"
                     selected={field.value as DateRange}
                     onSelect={(range) => {
-                      if (range?.from && range?.to && range.from.getTime() !== range.to.getTime()) {
+                      if (!range?.from) {
+                        field.onChange(undefined);
+                        return;
+                      }
+                      const current = field.value as DateRange | undefined;
+                      // Same-day click: if user clicks the same start date again, treat as 1-day trip
+                      if (
+                        current?.from &&
+                        !current?.to &&
+                        range.from.getTime() === current.from.getTime() &&
+                        (!range.to || range.to.getTime() === range.from.getTime())
+                      ) {
+                        field.onChange({ from: range.from, to: range.from });
+                        setCalendarOpen(false);
+                        return;
+                      }
+                      if (range.to) {
                         field.onChange({ from: range.from, to: range.to });
                         setCalendarOpen(false);
-                      } else if (range?.from) {
-                        field.onChange({ from: range.from, to: undefined });
                       } else {
-                        field.onChange(undefined);
+                        field.onChange({ from: range.from, to: undefined });
                       }
                     }}
                     numberOfMonths={2}
