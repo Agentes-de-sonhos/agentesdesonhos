@@ -1454,28 +1454,37 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>
-    <div className="min-h-screen bg-gradient-to-b from-background via-muted/5 to-primary/5">
-      {/* Agency Header */}
-      <header className="border-b bg-background/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="container max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {agentProfile?.agency_logo_url ? (
-              <img src={agentProfile.agency_logo_url} alt={agentProfile.agency_name || ''} translate="no" className="h-10 max-w-32 object-contain notranslate" />
-            ) : agentProfile?.agency_name ? (
-              <BrandText className="font-bold text-primary">{agentProfile.agency_name}</BrandText>
-            ) : (
-              <span className="font-bold text-primary flex items-center gap-2">
-                <Wallet className="h-5 w-5" /> Carteira de Viagem
-              </span>
-            )}
-          </div>
-          <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
-            <FileText className="mr-2 h-4 w-4" /> PDF
-          </Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
+      <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+        <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-center">
+          {agentProfile?.agency_logo_url ? (
+            <img
+              src={agentProfile.agency_logo_url}
+              alt={agentProfile.agency_name || "Agência"}
+              translate="no"
+              className="h-32 sm:h-40 max-w-[400px] object-contain notranslate"
+            />
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Briefcase className="h-7 w-7 text-primary" />
+              </div>
+              <BrandText as="span" className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                {agentProfile?.agency_name || "Carteira Digital"}
+              </BrandText>
+            </div>
+          )}
         </div>
       </header>
 
       <div className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
+        {/* PDF action */}
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
+            <FileText className="mr-2 h-4 w-4" /> Baixar PDF
+          </Button>
+        </div>
         {/* Trip Overview Card */}
         <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
           <CardContent className="pt-5 pb-5 relative">
