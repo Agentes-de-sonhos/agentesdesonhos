@@ -589,6 +589,61 @@ function FlightField({ label, helper, value, onChange }: FlightFieldProps) {
   );
 }
 
+interface CollapsibleFlightProps {
+  label: string;
+  helper?: string;
+  enabled: boolean;
+  onToggle: (v: boolean) => void;
+  value: FlightInfo;
+  onChange: (v: FlightInfo) => void;
+}
+
+function CollapsibleFlight({ label, helper, enabled, onToggle, value, onChange }: CollapsibleFlightProps) {
+  if (!enabled) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full justify-start h-auto py-3"
+        onClick={() => onToggle(true)}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        <span className="text-sm">Adicionar {label.toLowerCase()} (opcional)</span>
+      </Button>
+    );
+  }
+  return (
+    <div className="rounded-md border border-border p-3 space-y-2 bg-muted/30">
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-sm font-medium">{label}</Label>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-destructive"
+          onClick={() => onToggle(false)}
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+      <Select
+        value={value.period}
+        onValueChange={(v) => onChange({ period: v as FlightPeriod })}
+      >
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="manha">Manhã</SelectItem>
+          <SelectItem value="tarde">Tarde</SelectItem>
+          <SelectItem value="noite">Noite</SelectItem>
+        </SelectContent>
+      </Select>
+      {helper && <p className="text-[11px] text-muted-foreground">{helper}</p>}
+    </div>
+  );
+}
+
 interface DestinationRowProps {
   index: number;
   total: number;
