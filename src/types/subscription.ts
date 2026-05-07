@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'start' | 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium' | 'fundador';
+export type SubscriptionPlan = 'start' | 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium' | 'fundador' | 'fornecedor_parceiro';
 
 export interface Subscription {
   id: string;
@@ -88,6 +88,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   profissional: PROFISSIONAL_FEATURES,
   premium: ALL_FEATURES,
   fundador: ALL_FEATURES,
+  fornecedor_parceiro: [],
 };
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
@@ -98,6 +99,7 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   profissional: 'Plano Profissional',
   premium: 'Plano Premium',
   fundador: 'Plano Fundador',
+  fornecedor_parceiro: 'Fornecedor Parceiro',
 };
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
@@ -108,6 +110,7 @@ export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   profissional: 'Tudo que você precisa para operar sua agência com eficiência',
   premium: 'Para agentes que querem escalar resultados e se conectar com o mercado',
   fundador: 'Acesso vitalício completo — plano exclusivo dos primeiros membros',
+  fornecedor_parceiro: 'Plano destinado a fornecedores parceiros — acesso restrito ao próprio perfil de empresa',
 };
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
@@ -118,6 +121,7 @@ export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   profissional: 1000,
   premium: 999999,
   fundador: 1000,
+  fornecedor_parceiro: 0,
 };
 
 export const FEATURE_LABELS: Record<Feature, string> = {

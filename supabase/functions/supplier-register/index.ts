@@ -67,6 +67,12 @@ Deno.serve(async (req) => {
       agency_name: company_name.trim(),
     });
 
+    // 3b. Set plan to fornecedor_parceiro (trigger creates default plan, so update it)
+    await adminClient
+      .from("subscriptions")
+      .update({ plan: "fornecedor_parceiro", is_active: true })
+      .eq("user_id", userId);
+
     // 4. Create tour_operators record linked to user
     const { data: operator, error: opError } = await adminClient
       .from("tour_operators")
