@@ -4,15 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plane, Search, MapPin, ArrowRight, Loader2, Users, Calendar } from "lucide-react";
+import { Plane, Search, MapPin, ArrowRight, Loader2, Users, Calendar as CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 import { supabase } from "@/integrations/supabase/client";
 
 export function BloqueiosAereosStartCard() {
   const navigate = useNavigate();
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [range, setRange] = useState<DateRange | undefined>();
 
   const { data, isLoading } = useQuery({
     queryKey: ["air-blocks-start-summary"],
@@ -49,8 +54,10 @@ export function BloqueiosAereosStartCard() {
     const params = new URLSearchParams();
     if (origin) params.set("origin", origin);
     if (destination) params.set("destination", destination);
-    if (dateFrom) params.set("dateFrom", dateFrom);
-    if (dateTo) params.set("dateTo", dateTo);
+    const toIso = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    if (range?.from) params.set("dateFrom", toIso(range.from));
+    if (range?.to) params.set("dateTo", toIso(range.to));
     const qs = params.toString();
     navigate(`/bloqueios-aereos${qs ? `?${qs}` : ""}`);
   };
@@ -80,48 +87,35 @@ export function BloqueiosAereosStartCard() {
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
-              <Users className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">
-                Total de lugares disponíveis
+        {/* Stats + Search — single row on desktop */}
+        <div className="flex flex-col xl:flex-row xl:items-stretch gap-3">
+          <div className="grid grid-cols-2 gap-3 xl:flex xl:shrink-0">
+            <div className="rounded-xl border border-border bg-muted/30 px-3 py-2 flex items-center gap-2 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
+                <Users className="h-4 w-4" />
               </div>
-              <div className="font-display text-2xl font-bold text-foreground">
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                ) : (
-                  totalSeats.toLocaleString("pt-BR")
-                )}
+              <div className="min-w-0 leading-tight">
+                <div className="text-[10px] text-muted-foreground">Lugares disponíveis</div>
+                <div className="font-display text-lg font-bold text-foreground">
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : totalSeats.toLocaleString("pt-BR")}
+                </div>
               </div>
             </div>
-          </div>
-          <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
-              <Plane className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">
-                Bloqueios ativos
+            <div className="rounded-xl border border-border bg-muted/30 px-3 py-2 flex items-center gap-2 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--section-flights))]/10 text-[hsl(var(--section-flights))]">
+                <Plane className="h-4 w-4" />
               </div>
-              <div className="font-display text-2xl font-bold text-foreground">
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                ) : (
-                  totalBlocks.toLocaleString("pt-BR")
-                )}
+              <div className="min-w-0 leading-tight">
+                <div className="text-[10px] text-muted-foreground">Bloqueios ativos</div>
+                <div className="font-display text-lg font-bold text-foreground">
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : totalBlocks.toLocaleString("pt-BR")}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Search */}
-        <div className="space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="relative">
+          <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:flex xl:flex-1 xl:min-w-0">
+            <div className="relative xl:flex-1 xl:min-w-0">
               <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Origem (ex: GRU)"
@@ -130,7 +124,7 @@ export function BloqueiosAereosStartCard() {
                 className="pl-10"
               />
             </div>
-            <div className="relative">
+            <div className="relative xl:flex-1 xl:min-w-0">
               <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Destino (ex: MCO)"
@@ -139,30 +133,44 @@ export function BloqueiosAereosStartCard() {
                 className="pl-10"
               />
             </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              <Input
-                type="date"
-                aria-label="Data inicial"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              <Input
-                type="date"
-                aria-label="Data final"
-                value={dateTo}
-                min={dateFrom || undefined}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button onClick={handleSearch} className="w-full sm:w-auto">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal sm:col-span-2 xl:col-span-1 xl:flex-1 xl:min-w-0",
+                    !range?.from && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                  <span className="truncate">
+                    {range?.from ? (
+                      range.to ? (
+                        <>
+                          {format(range.from, "dd/MM/yy", { locale: ptBR })} – {format(range.to, "dd/MM/yy", { locale: ptBR })}
+                        </>
+                      ) : (
+                        format(range.from, "dd/MM/yy", { locale: ptBR })
+                      )
+                    ) : (
+                      "Período"
+                    )}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  selected={range}
+                  onSelect={setRange}
+                  numberOfMonths={2}
+                  initialFocus
+                  locale={ptBR}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <Button onClick={handleSearch} className="sm:col-span-2 xl:col-span-1 xl:shrink-0">
               <Search className="h-4 w-4 mr-2" />
               Buscar
             </Button>
