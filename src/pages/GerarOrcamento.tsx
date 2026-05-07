@@ -785,17 +785,6 @@ export default function GerarOrcamento() {
                   )}
                 </button>
                 <div className="flex items-center gap-2">
-                  {!selectedServiceType && (
-                    <Button
-                      size="sm"
-                      className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
-                      onClick={(e) => { e.stopPropagation(); setShowAIImport(true); }}
-                    >
-                      <Sparkles className="mr-1 h-3 w-3 shrink-0" />
-                      <span className="hidden sm:inline truncate">Importar com IA</span>
-                      <span className="sm:hidden truncate">IA</span>
-                    </Button>
-                  )}
                   <button
                     type="button"
                     onClick={() => toggleSection("services")}
@@ -873,6 +862,14 @@ export default function GerarOrcamento() {
                           ) : null}
                         </Button>
                       ))}
+                      <Button
+                        size="sm"
+                        className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
+                        onClick={() => setShowAIImport(true)}
+                      >
+                        <Sparkles className="mr-1 h-3 w-3 shrink-0" />
+                        <span className="truncate">Importar com IA</span>
+                      </Button>
                     </div>
                     <ServiceList
                       services={quote.services || []}
