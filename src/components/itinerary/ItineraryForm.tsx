@@ -244,16 +244,29 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="travelersCount">Número de Viajantes</Label>
-            <div className="relative">
-              <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="travelersCount"
-                type="number"
-                min={1}
-                className="pl-10"
-                {...form.register("travelersCount", { valueAsNumber: true })}
-              />
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Viajantes
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Adultos"
+                  {...form.register("adultsCount", { valueAsNumber: true })}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">Adultos</p>
+              </div>
+              <div>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="Crianças"
+                  {...form.register("childrenCount", { valueAsNumber: true })}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">Crianças</p>
+              </div>
             </div>
           </div>
         </div>
