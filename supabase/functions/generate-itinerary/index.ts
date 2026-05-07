@@ -435,7 +435,7 @@ ${profileRules}`;
 - Período: ${days} dias (${startDate} a ${endDate})
 - Viajantes: ${travelersDesc}
 - Tipo de viagem: ${tripTypeLabels[tripType] || tripType}
-- Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}${flightsText}
+- Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}${flightsText}${multiDestText}
 
 Datas dos dias: ${datesInfo.join(', ')}
 
