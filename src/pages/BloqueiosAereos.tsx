@@ -203,12 +203,20 @@ export default function BloqueiosAereos() {
     const airline = searchParams.get("airline");
     const operator = searchParams.get("operator");
     const seasonKey = searchParams.get("season");
+    const dateFromParam = searchParams.get("dateFrom");
+    const dateToParam = searchParams.get("dateTo");
 
     let didApply = false;
     if (origin) { setOriginTerm(origin); didApply = true; }
     if (destination) { setDestinationTerm(destination); didApply = true; }
     if (airline) { setSelectedAirline(airline); didApply = true; }
     if (operator) { setSelectedOperator(operator); didApply = true; }
+    const parseLocal = (s: string) => {
+      const [y, m, d] = s.split("-").map(Number);
+      return new Date(y, (m || 1) - 1, d || 1);
+    };
+    if (dateFromParam) { setDateFrom(parseLocal(dateFromParam)); didApply = true; }
+    if (dateToParam) { setDateTo(parseLocal(dateToParam)); didApply = true; }
     if (seasonKey) {
       const s = STRATEGIC_SEASONS.find((x) => x.key === seasonKey);
       if (s) { setActiveSeason(s); didApply = true; }
