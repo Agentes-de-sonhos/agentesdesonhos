@@ -21,7 +21,20 @@ const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "fami
 const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
 const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
-const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight"];
+const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight", "extraDestinations"];
+const ALLOWED_DEST_KIND = ["principal", "secundario", "bate_volta", "conexao", "extensao"];
+const ALLOWED_TRANSPORT = ["aviao", "carro", "trem", "onibus", "transfer", "cruzeiro", "outro"];
+const DEST_KIND_LABELS: Record<string, string> = {
+  principal: "destino principal / cidade base",
+  secundario: "destino secundário",
+  bate_volta: "bate-volta (sem pernoite — manter hospedagem na cidade base)",
+  conexao: "conexão / pernoite curto",
+  extensao: "extensão da viagem",
+};
+const TRANSPORT_LABELS: Record<string, string> = {
+  aviao: "avião", carro: "carro", trem: "trem", onibus: "ônibus",
+  transfer: "transfer privativo", cruzeiro: "cruzeiro", outro: "outro",
+};
 const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations", "serviceContext"];
 const ALLOWED_FLIGHT_KEYS = ["period"];
 const ALLOWED_FLIGHT_PERIODS = ["manha", "tarde", "noite"];
