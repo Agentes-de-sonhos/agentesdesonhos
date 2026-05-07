@@ -33,6 +33,20 @@ export interface FlightInfo {
   period: FlightPeriod;
 }
 
+export type JourneyPeriod = 'madrugada' | 'manha' | 'tarde' | 'noite';
+
+export interface JourneyInfo {
+  transport: TransportMode;
+  period: JourneyPeriod;
+}
+
+export const JOURNEY_PERIOD_LABELS: Record<JourneyPeriod, string> = {
+  madrugada: 'Madrugada',
+  manha: 'Manhã',
+  tarde: 'Tarde',
+  noite: 'Noite',
+};
+
 export type DestinationKind =
   | 'principal'
   | 'secundario'
@@ -100,6 +114,8 @@ export interface ItineraryFormData {
   additionalPreferences: AdditionalPreferences;
   outboundFlight?: FlightInfo;
   returnFlight?: FlightInfo;
+  arrivalInfo?: JourneyInfo;
+  departureInfo?: JourneyInfo;
   extraDestinations?: ExtraDestination[];
 }
 
