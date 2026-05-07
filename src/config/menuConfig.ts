@@ -29,6 +29,7 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
   guias: [
     { key: "mapa_turismo", label: "Mapa do Turismo" },
     { key: "travel_advisor", label: "Travel Advisor" },
+    { key: "requisitos_viagem", label: "Central de Requisitos" },
     { key: "beneficios", label: "Benefícios e Descontos" },
     { key: "agenda", label: "Minha Agenda" },
   ],
