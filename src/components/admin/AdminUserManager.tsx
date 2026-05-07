@@ -72,9 +72,6 @@ const ROLE_OPTIONS: { value: "admin" | "agente" | "promotor" | "fornecedor"; lab
 
 const PLAN_OPTIONS: { value: SubscriptionPlan; label: string }[] = [
   { value: "start", label: PLAN_LABELS.start },
-  { value: "educa_pass", label: PLAN_LABELS.educa_pass },
-  { value: "cartao_digital", label: PLAN_LABELS.cartao_digital },
-  { value: "essencial", label: PLAN_LABELS.essencial },
   { value: "profissional", label: PLAN_LABELS.profissional },
   { value: "premium", label: PLAN_LABELS.premium },
   { value: "fundador", label: PLAN_LABELS.fundador },
@@ -714,11 +711,9 @@ export function AdminUserManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="start">Start (Gratuito)</SelectItem>
-                    <SelectItem value="educa_pass">Educa Travel Pass</SelectItem>
-                    <SelectItem value="cartao_digital">Cartão Digital Pass</SelectItem>
-                    <SelectItem value="essencial">Essencial</SelectItem>
-                    <SelectItem value="profissional">Plano Fundador</SelectItem>
+                    {PLAN_OPTIONS.map((p) => (
+                      <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
