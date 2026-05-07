@@ -40,10 +40,12 @@ import {
 import type { DateRange } from "react-day-picker";
 
 const formSchema = z.object({
+  origin: z.string().optional(),
   destination: z.string().min(2, "Destino é obrigatório"),
   startDate: z.date({ required_error: "Data de início é obrigatória" }),
   endDate: z.date({ required_error: "Data de fim é obrigatória" }),
-  travelersCount: z.number().min(1, "Mínimo 1 viajante"),
+  adultsCount: z.number().min(1, "Mínimo 1 adulto"),
+  childrenCount: z.number().min(0).default(0),
   tripType: z.string(),
   budgetLevel: z.enum(["economico", "conforto", "luxo"]),
   interests: z.array(z.string()).default([]),
@@ -74,8 +76,10 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      origin: "",
       destination: "",
-      travelersCount: 2,
+      adultsCount: 2,
+      childrenCount: 0,
       tripType: "casal",
       budgetLevel: "conforto",
       interests: [],
@@ -103,13 +107,18 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
       return;
     }
     setClientError("");
+    const adults = values.adultsCount || 1;
+    const children = values.childrenCount || 0;
     onSubmit({
       clientId: selectedClient.id,
       clientName: selectedClient.name,
+      origin: values.origin || undefined,
       destination: values.destination,
       startDate: values.startDate,
       endDate: values.endDate,
-      travelersCount: values.travelersCount,
+      travelersCount: adults + children,
+      adultsCount: adults,
+      childrenCount: children,
       tripType: values.tripType as TripProfile,
       budgetLevel: values.budgetLevel,
       interests: selectedInterests,
