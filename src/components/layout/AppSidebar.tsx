@@ -248,6 +248,7 @@ const planoStartSection: MenuSection = {
 };
 
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: CreditCard };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
 
@@ -680,6 +681,19 @@ export function AppSidebar() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
+                  <Link
+                    to="/minha-conta"
+                    className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                  >
+                    <CreditCard className="h-4 w-4" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
+                  <p className="text-sm font-medium">Minha Conta</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -710,6 +724,13 @@ export function AppSidebar() {
                 >
                   <User className="h-3.5 w-3.5" />
                   Perfil
+                </Link>
+                <Link
+                  to="/minha-conta"
+                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  Minha Conta
                 </Link>
                 <Button
                   variant="ghost"
