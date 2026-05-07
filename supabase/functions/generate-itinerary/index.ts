@@ -23,7 +23,7 @@ const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religio
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
 const ALLOWED_BODY_KEYS = ["destination", "startDate", "endDate", "travelersCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight"];
 const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations", "serviceContext"];
-const ALLOWED_FLIGHT_KEYS = ["mode", "time", "period", "hasConnection"];
+const ALLOWED_FLIGHT_KEYS = ["period"];
 const ALLOWED_FLIGHT_PERIODS = ["manha", "tarde", "noite"];
 
 const tripTypeLabels: Record<string, string> = {
@@ -257,53 +257,39 @@ serve(async (req) => {
       prefs.serviceContext = scCheck.value;
     }
 
-    // Validate flight info (optional)
-    function validateFlight(raw: unknown, label: string): { valid: true; value: any } | { valid: false; error: string } {
-      if (raw === undefined || raw === null) return { valid: true, value: undefined };
-      if (typeof raw !== "object" || Array.isArray(raw)) return { valid: false, error: `${label} inválido.` };
+    // Validate flight info (optional, period only)
+    function validateFlightPeriod(raw: unknown): string | undefined {
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
       const f = whitelistKeys<Record<string, unknown>>(raw, ALLOWED_FLIGHT_KEYS);
-      const mode = f.mode === "exact" || f.mode === "period" ? f.mode : null;
-      if (!mode) return { valid: true, value: undefined };
-      const out: any = { mode, hasConnection: !!f.hasConnection };
-      if (mode === "exact") {
-        if (typeof f.time !== "string" || !/^\d{2}:\d{2}$/.test(f.time)) {
-          return { valid: true, value: undefined };
-        }
-        out.time = f.time;
-      } else {
-        if (typeof f.period !== "string" || !ALLOWED_FLIGHT_PERIODS.includes(f.period)) {
-          return { valid: true, value: undefined };
-        }
-        out.period = f.period;
+      if (typeof f.period === "string" && ALLOWED_FLIGHT_PERIODS.includes(f.period)) {
+        return f.period;
       }
-      return { valid: true, value: out };
+      return undefined;
     }
-    const outboundCheck = validateFlight(body.outboundFlight, "Voo de ida");
-    const returnCheck = validateFlight(body.returnFlight, "Voo de volta");
-    const outboundFlight = outboundCheck.valid ? outboundCheck.value : undefined;
-    const returnFlight = returnCheck.valid ? returnCheck.value : undefined;
+    const outboundFlight = validateFlightPeriod(body.outboundFlight);
+    const returnFlight = validateFlightPeriod(body.returnFlight);
 
-    function describeFlight(f: any, kind: 'ida' | 'volta'): string | null {
-      if (!f) return null;
-      const conn = f.hasConnection ? " (com conexão — considerar maior tempo de deslocamento)" : " (voo direto)";
-      if (f.mode === "exact") {
-        return `Voo de ${kind}: horário ${f.time}${conn}`;
-      }
-      const periodTxt: Record<string, string> = {
-        manha: "manhã (estimar por volta de 09:00)",
-        tarde: "tarde (estimar por volta de 15:00)",
-        noite: "noite (estimar por volta de 21:00)",
-      };
-      return `Voo de ${kind}: período da ${periodTxt[f.period] || f.period}${conn}`;
-    }
-
+    const periodLabel: Record<string, string> = { manha: "manhã", tarde: "tarde", noite: "noite" };
     const flightLines: string[] = [];
-    const outDesc = describeFlight(outboundFlight, "ida");
-    const retDesc = describeFlight(returnFlight, "volta");
-    if (outDesc) flightLines.push("- " + outDesc);
-    if (retDesc) flightLines.push("- " + retDesc);
+    if (outboundFlight) flightLines.push(`- Voo de IDA: período da ${periodLabel[outboundFlight]}`);
+    if (returnFlight) flightLines.push(`- Voo de VOLTA: período da ${periodLabel[returnFlight]}`);
+
+    const outboundRules: Record<string, string> = {
+      manha: "Voo de ida pela manhã: o viajante chegará ao destino ao longo do dia. Programe o Dia 1 preferencialmente apenas no período da NOITE (jantar/atividade leve).",
+      tarde: "Voo de ida à tarde: chegada mais tardia. O Dia 1 deve iniciar APENAS à noite com algo leve, ou ficar sem atividades relevantes.",
+      noite: "Voo de ida à noite: chegada tardia. NÃO programe atividades no Dia 1 (apenas check-in/descanso).",
+    };
+    const returnRules: Record<string, string> = {
+      manha: "Voo de volta pela manhã: encerre a programação no DIA ANTERIOR à noite. NÃO adicione atividades relevantes no último dia (apenas check-out).",
+      tarde: "Voo de volta à tarde: permita APENAS atividades leves pela manhã no último dia.",
+      noite: "Voo de volta à noite: programação parcial durante o dia no último dia, evitando atividades longas próximas ao embarque.",
+    };
+    const ruleLines: string[] = [];
+    if (outboundFlight) ruleLines.push("- " + outboundRules[outboundFlight]);
+    if (returnFlight) ruleLines.push("- " + returnRules[returnFlight]);
+
     const flightsText = flightLines.length > 0
-      ? `\n\nINFORMAÇÕES DE VOO (use OBRIGATORIAMENTE — não invente horários):\n${flightLines.join("\n")}\n\nREGRAS DE AJUSTE LOGÍSTICO:\n- Se o voo de ida chega à noite, o Dia 1 deve ter apenas check-in / jantar leve / descanso. Não sugira passeios pesados.\n- Se o voo de ida chega pela manhã, o Dia 1 pode ter atividades leves à tarde e à noite (considerar cansaço da viagem).\n- Se o voo de ida chega à tarde, comece o roteiro à noite com algo leve.\n- Se o voo de volta é de manhã, o último dia deve ter apenas check-out / deslocamento ao aeroporto.\n- Se o voo de volta é à tarde, sugira no máximo 1 atividade pela manhã e check-out.\n- Se o voo de volta é à noite, é possível aproveitar manhã e início da tarde com atividades leves antes do deslocamento.\n- Em voos com conexão, considere ainda mais tempo de deslocamento e cansaço.`
+      ? `\n\nINFORMAÇÕES DE VOO (use OBRIGATORIAMENTE):\n${flightLines.join("\n")}\n\nREGRAS DE AJUSTE LOGÍSTICO (siga rigorosamente):\n${ruleLines.join("\n")}`
       : "";
 
     // --- BUILD AI REQUEST ---

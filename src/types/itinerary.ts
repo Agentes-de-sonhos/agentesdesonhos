@@ -30,10 +30,7 @@ export type TravelPace = 'leve' | 'moderado' | 'intenso';
 export type FlightPeriod = 'manha' | 'tarde' | 'noite';
 
 export interface FlightInfo {
-  mode: 'exact' | 'period';
-  time?: string; // HH:mm quando mode = 'exact'
-  period?: FlightPeriod; // quando mode = 'period'
-  hasConnection?: boolean;
+  period: FlightPeriod;
 }
 
 export interface AdditionalPreferences {
