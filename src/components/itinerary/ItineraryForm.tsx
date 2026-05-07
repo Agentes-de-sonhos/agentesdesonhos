@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import {
   Select,
@@ -30,6 +31,8 @@ import {
   TripProfile,
   TravelInterest,
   TravelPace,
+  FlightInfo,
+  FlightPeriod,
   TRIP_PROFILE_LABELS,
   TRAVEL_INTEREST_LABELS,
   TRAVEL_INTEREST_ICONS,
@@ -66,6 +69,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [showPace, setShowPace] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
   const [clientError, setClientError] = useState("");
+  const [outboundFlight, setOutboundFlight] = useState<FlightInfo>({ mode: 'period', period: 'manha', hasConnection: false });
+  const [returnFlight, setReturnFlight] = useState<FlightInfo>({ mode: 'period', period: 'tarde', hasConnection: false });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -116,6 +121,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
         exclusiveOrPopular: (values.exclusiveOrPopular as "exclusive" | "popular" | "mix") || "mix",
         mobilityLimitations: values.mobilityLimitations || undefined,
       },
+      outboundFlight,
+      returnFlight,
     });
   };
 
@@ -228,6 +235,22 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
               />
             </div>
           </div>
+        </div>
+
+        {/* Voos de ida e volta */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FlightField
+            label="Voo de ida"
+            helper="Usado pela IA para ajustar o Dia 1 (chegada no destino)"
+            value={outboundFlight}
+            onChange={setOutboundFlight}
+          />
+          <FlightField
+            label="Voo de volta"
+            helper="Usado pela IA para ajustar o último dia (saída do destino)"
+            value={returnFlight}
+            onChange={setReturnFlight}
+          />
         </div>
 
         {/* Perfil + Orçamento */}
@@ -420,5 +443,70 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
         )}
       </Button>
     </form>
+  );
+}
+
+interface FlightFieldProps {
+  label: string;
+  helper?: string;
+  value: FlightInfo;
+  onChange: (v: FlightInfo) => void;
+}
+
+function FlightField({ label, helper, value, onChange }: FlightFieldProps) {
+  const isExact = value.mode === 'exact';
+  return (
+    <div className="space-y-2 rounded-lg border border-border p-3">
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-sm font-medium">{label}</Label>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>{isExact ? 'Horário exato' : 'Período'}</span>
+          <Switch
+            checked={isExact}
+            onCheckedChange={(checked) =>
+              onChange(
+                checked
+                  ? { mode: 'exact', time: value.time || '', hasConnection: value.hasConnection }
+                  : { mode: 'period', period: value.period || 'manha', hasConnection: value.hasConnection }
+              )
+            }
+          />
+        </div>
+      </div>
+
+      {isExact ? (
+        <Input
+          type="time"
+          value={value.time || ''}
+          onChange={(e) => onChange({ ...value, time: e.target.value })}
+        />
+      ) : (
+        <Select
+          value={value.period || 'manha'}
+          onValueChange={(v) => onChange({ ...value, period: v as FlightPeriod })}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="manha">Manhã</SelectItem>
+            <SelectItem value="tarde">Tarde</SelectItem>
+            <SelectItem value="noite">Noite</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+
+      <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+        <input
+          type="checkbox"
+          className="h-3.5 w-3.5"
+          checked={!!value.hasConnection}
+          onChange={(e) => onChange({ ...value, hasConnection: e.target.checked })}
+        />
+        Voo com conexão (mais tempo de deslocamento)
+      </label>
+
+      {helper && <p className="text-[11px] text-muted-foreground">{helper}</p>}
+    </div>
   );
 }

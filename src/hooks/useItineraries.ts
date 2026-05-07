@@ -132,6 +132,8 @@ export function useItineraries() {
         interests: formData.interests || [],
         travelPace: formData.travelPace || "moderado",
         additionalPreferences: formData.additionalPreferences || {},
+        outboundFlight: formData.outboundFlight,
+        returnFlight: formData.returnFlight,
       },
     });
 

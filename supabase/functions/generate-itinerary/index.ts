@@ -21,8 +21,10 @@ const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "fami
 const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
 const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
-const ALLOWED_BODY_KEYS = ["destination", "startDate", "endDate", "travelersCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences"];
+const ALLOWED_BODY_KEYS = ["destination", "startDate", "endDate", "travelersCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight"];
 const ALLOWED_PREF_KEYS = ["dietaryRestrictions", "localOrTouristy", "exclusiveOrPopular", "mobilityLimitations", "serviceContext"];
+const ALLOWED_FLIGHT_KEYS = ["mode", "time", "period", "hasConnection"];
+const ALLOWED_FLIGHT_PERIODS = ["manha", "tarde", "noite"];
 
 const tripTypeLabels: Record<string, string> = {
   casal: "viagem de casal",
@@ -255,6 +257,55 @@ serve(async (req) => {
       prefs.serviceContext = scCheck.value;
     }
 
+    // Validate flight info (optional)
+    function validateFlight(raw: unknown, label: string): { valid: true; value: any } | { valid: false; error: string } {
+      if (raw === undefined || raw === null) return { valid: true, value: undefined };
+      if (typeof raw !== "object" || Array.isArray(raw)) return { valid: false, error: `${label} inválido.` };
+      const f = whitelistKeys<Record<string, unknown>>(raw, ALLOWED_FLIGHT_KEYS);
+      const mode = f.mode === "exact" || f.mode === "period" ? f.mode : null;
+      if (!mode) return { valid: true, value: undefined };
+      const out: any = { mode, hasConnection: !!f.hasConnection };
+      if (mode === "exact") {
+        if (typeof f.time !== "string" || !/^\d{2}:\d{2}$/.test(f.time)) {
+          return { valid: true, value: undefined };
+        }
+        out.time = f.time;
+      } else {
+        if (typeof f.period !== "string" || !ALLOWED_FLIGHT_PERIODS.includes(f.period)) {
+          return { valid: true, value: undefined };
+        }
+        out.period = f.period;
+      }
+      return { valid: true, value: out };
+    }
+    const outboundCheck = validateFlight(body.outboundFlight, "Voo de ida");
+    const returnCheck = validateFlight(body.returnFlight, "Voo de volta");
+    const outboundFlight = outboundCheck.valid ? outboundCheck.value : undefined;
+    const returnFlight = returnCheck.valid ? returnCheck.value : undefined;
+
+    function describeFlight(f: any, kind: 'ida' | 'volta'): string | null {
+      if (!f) return null;
+      const conn = f.hasConnection ? " (com conexão — considerar maior tempo de deslocamento)" : " (voo direto)";
+      if (f.mode === "exact") {
+        return `Voo de ${kind}: horário ${f.time}${conn}`;
+      }
+      const periodTxt: Record<string, string> = {
+        manha: "manhã (estimar por volta de 09:00)",
+        tarde: "tarde (estimar por volta de 15:00)",
+        noite: "noite (estimar por volta de 21:00)",
+      };
+      return `Voo de ${kind}: período da ${periodTxt[f.period] || f.period}${conn}`;
+    }
+
+    const flightLines: string[] = [];
+    const outDesc = describeFlight(outboundFlight, "ida");
+    const retDesc = describeFlight(returnFlight, "volta");
+    if (outDesc) flightLines.push("- " + outDesc);
+    if (retDesc) flightLines.push("- " + retDesc);
+    const flightsText = flightLines.length > 0
+      ? `\n\nINFORMAÇÕES DE VOO (use OBRIGATORIAMENTE — não invente horários):\n${flightLines.join("\n")}\n\nREGRAS DE AJUSTE LOGÍSTICO:\n- Se o voo de ida chega à noite, o Dia 1 deve ter apenas check-in / jantar leve / descanso. Não sugira passeios pesados.\n- Se o voo de ida chega pela manhã, o Dia 1 pode ter atividades leves à tarde e à noite (considerar cansaço da viagem).\n- Se o voo de ida chega à tarde, comece o roteiro à noite com algo leve.\n- Se o voo de volta é de manhã, o último dia deve ter apenas check-out / deslocamento ao aeroporto.\n- Se o voo de volta é à tarde, sugira no máximo 1 atividade pela manhã e check-out.\n- Se o voo de volta é à noite, é possível aproveitar manhã e início da tarde com atividades leves antes do deslocamento.\n- Em voos com conexão, considere ainda mais tempo de deslocamento e cansaço.`
+      : "";
+
     // --- BUILD AI REQUEST ---
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -325,7 +376,7 @@ ${profileRules}`;
 - Período: ${days} dias (${startDate} a ${endDate})
 - Viajantes: ${travelersCount} pessoa(s)
 - Tipo de viagem: ${tripTypeLabels[tripType] || tripType}
-- Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}
+- Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}${flightsText}
 
 Datas dos dias: ${datesInfo.join(', ')}
 
