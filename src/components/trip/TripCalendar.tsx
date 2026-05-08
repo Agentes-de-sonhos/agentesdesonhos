@@ -47,6 +47,60 @@ interface TripCalendarProps {
 
 const WEEKDAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
+function LocalClock({ timezone, destinationLabel }: { timezone: string; destinationLabel?: string }) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  let timeStr = "";
+  let dateStr = "";
+  let tzShort = "";
+  try {
+    timeStr = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(now);
+    dateStr = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: timezone,
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+    }).format(now);
+    const parts = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: timezone,
+      timeZoneName: "short",
+    }).formatToParts(now);
+    tzShort = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+  } catch {
+    return null;
+  }
+  const cityLabel = destinationLabel?.split(",")[0]?.trim();
+  return (
+    <div className="flex items-center justify-between gap-3 px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/10">
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center text-primary shrink-0">
+          <Clock className="h-3.5 w-3.5" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-[9px] uppercase tracking-[0.2em] text-primary/70 font-semibold leading-none">
+            Hora local{cityLabel ? ` · ${cityLabel}` : ""}
+          </div>
+          <div className="text-[10px] text-muted-foreground capitalize truncate leading-tight mt-0.5">
+            {dateStr}{tzShort ? ` · ${tzShort}` : ""}
+          </div>
+        </div>
+      </div>
+      <div className="text-base font-bold tabular-nums text-foreground tracking-tight">
+        {timeStr}
+      </div>
+    </div>
+  );
+}
+
 function weatherIconFor(code: number) {
   // Open-Meteo WMO weather codes
   if (code === 0) return Sun;
