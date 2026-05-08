@@ -520,7 +520,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
                         ? "border-primary/40 shadow-md shadow-primary/10 ring-1 ring-primary/20"
                         : "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 cursor-pointer"
                     )}
-                    onClick={() => unlocked && !quizPassed && setSelectedTraining(training)}
+                    onClick={() => unlocked && setSelectedTraining(training)}
                   >
                     <CardContent className="py-4">
                       <div className="flex items-start gap-4">
@@ -582,9 +582,19 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
                         {/* Actions */}
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {quizPassed ? (
-                            <Button variant="ghost" size="sm" className="text-success gap-1 text-xs pointer-events-none">
-                              <CheckCircle2 className="h-4 w-4" /> Aprovado
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5 rounded-lg text-success border-success/30 hover:bg-success/10"
+                                onClick={(e) => { e.stopPropagation(); setSelectedTraining(training); }}
+                              >
+                                <Play className="h-3.5 w-3.5" /> Rever aula
+                              </Button>
+                              <Badge variant="outline" className="text-success border-success/30 gap-1">
+                                <CheckCircle2 className="h-3 w-3" /> Aprovado
+                              </Badge>
+                            </div>
                           ) : unlocked ? (
                             <div className="flex items-center gap-2">
                               <Button size="sm" className="gap-1.5 rounded-lg" onClick={(e) => { e.stopPropagation(); setSelectedTraining(training); }}>
