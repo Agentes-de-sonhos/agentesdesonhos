@@ -85,12 +85,20 @@ export function useTripWeather(
       try {
         // City may have country/state; take first comma-separated chunk.
         const cityQuery = destination.split(",")[0].trim();
-        const geoRes = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityQuery)}&count=1&language=pt&format=json`
-        );
-        const geo = await geoRes.json();
-        const place = geo?.results?.[0];
-        if (!place) return;
+        let place: any = null;
+        for (const lang of ["pt", "en"]) {
+          try {
+            const r = await fetch(
+              `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityQuery)}&count=1&language=${lang}&format=json`
+            );
+            const j = await r.json();
+            if (j?.results?.[0]) { place = j.results[0]; break; }
+          } catch { /* try next */ }
+        }
+        if (!place) {
+          console.warn("[useTripWeather] geocoding failed for", cityQuery);
+          return;
+        }
         const tz: string | undefined = place.timezone;
         if (!cancelled && tz) setTimezone(tz);
 
