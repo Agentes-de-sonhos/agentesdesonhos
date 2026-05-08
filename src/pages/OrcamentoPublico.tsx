@@ -206,6 +206,28 @@ function CollapsibleServiceCard({
   const colorClass = SERVICE_COLORS[type] || SERVICE_COLORS.other;
   const summary = getServiceSummary(service);
 
+  // Parse a detail string into structured key/value chips.
+  // - "Ida: X | Volta: Y" -> [{label:"Ida",value:"X"},{label:"Volta",value:"Y"}]
+  // - "Check-in: 12/01/2025" -> [{label:"Check-in",value:"12/01/2025"}]
+  // - "Notas longas..." -> [{value:"Notas longas..."}]
+  const parseDetail = (line: string): Array<{ label?: string; value: string }> => {
+    if (!line) return [];
+    // Multi-line text → render as a single free-form block (notes, itineraries)
+    if (line.includes("\n")) return [{ value: line }];
+    const parts = line.split(" | ").map(p => p.trim()).filter(Boolean);
+    const out: Array<{ label?: string; value: string }> = [];
+    for (const p of parts) {
+      const m = p.match(/^([^:]{1,40}):\s*(.+)$/);
+      if (m) out.push({ label: m[1].trim(), value: m[2].trim() });
+      else out.push({ value: p });
+    }
+    return out;
+  };
+
+  const detailItems = details.flatMap(parseDetail);
+  const chipItems = detailItems.filter(d => d.label);
+  const freeItems = detailItems.filter(d => !d.label);
+
   return (
     <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
       {/* Clickable header */}
@@ -245,7 +267,7 @@ function CollapsibleServiceCard({
         className={`overflow-hidden transition-all duration-300 ease-in-out`}
         style={{ maxHeight: isOpen ? "2000px" : "0px", opacity: isOpen ? 1 : 0 }}
       >
-        <div className="px-5 py-4 space-y-3">
+        <div className="px-5 py-5 space-y-4">
           {isOpen && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
@@ -256,22 +278,47 @@ function CollapsibleServiceCard({
             const name = getServiceName(service);
             // Para "other" sem company_name, evita exibir título genérico duplicado
             if (service.service_type === "other" && !((service.service_data as any)?.company_name)) return null;
-            return <p className="text-base font-semibold text-foreground">{name}</p>;
+            return <p className="text-base font-semibold text-foreground tracking-tight">{name}</p>;
           })()}
-          {isOpen && details.map((d, i) => (
-            <p key={i} className="text-sm text-muted-foreground leading-relaxed">
-              <FormattedText>{d}</FormattedText>
-            </p>
-          ))}
+          {isOpen && chipItems.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {chipItems.map((d, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg bg-muted/40 border border-border/40 px-3 py-2"
+                >
+                  <div className="text-[11px] font-bold uppercase tracking-wide text-foreground/70">
+                    {d.label}
+                  </div>
+                  <div className="text-sm font-medium text-foreground mt-0.5 break-words">
+                    <FormattedText>{d.value}</FormattedText>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {isOpen && freeItems.length > 0 && (
+            <div className="space-y-2">
+              {freeItems.map((d, i) => (
+                <p key={i} className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  <FormattedText>{d.value}</FormattedText>
+                </p>
+              ))}
+            </div>
+          )}
           {isOpen && service.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              <FormattedText>{service.description}</FormattedText>
-            </p>
+            <div className="rounded-lg border-l-2 border-primary/40 bg-muted/30 px-4 py-3">
+              <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                <FormattedText>{service.description}</FormattedText>
+              </p>
+            </div>
           )}
           {isOpen && service.service_type === "attraction" && (service.service_data as any)?.notes && (
-            <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 mt-2 italic">
-              <FormattedText>{(service.service_data as any).notes}</FormattedText>
-            </p>
+            <div className="rounded-lg border-l-2 border-primary/40 bg-muted/30 px-4 py-3">
+              <p className="text-sm text-foreground/80 leading-relaxed italic whitespace-pre-wrap">
+                <FormattedText>{(service.service_data as any).notes}</FormattedText>
+              </p>
+            </div>
           )}
           {/* Per-service payment display */}
           {isOpen && showPaymentPerService && (() => {
@@ -280,9 +327,12 @@ function CollapsibleServiceCard({
             const display = getServicePaymentDisplay(service.amount, payConfig);
             if (!display) return null;
             return (
-              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30">
-                <CreditCard className="h-4 w-4 text-primary/70" />
-                <span className="text-sm font-medium text-primary">{display}</span>
+              <div className="mt-2 rounded-lg bg-primary/5 border border-primary/20 px-4 py-3 flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-primary" />
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-bold uppercase tracking-wide text-primary/80">Parcelamento</span>
+                  <span className="text-sm font-semibold text-primary">{display}</span>
+                </div>
               </div>
             );
           })()}
