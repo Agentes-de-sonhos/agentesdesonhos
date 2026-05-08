@@ -8593,6 +8593,7 @@ export type Database = {
           slug: string | null
           start_date: string
           status: string
+          trip_title: string | null
           updated_at: string
           user_id: string
         }
@@ -8613,6 +8614,7 @@ export type Database = {
           slug?: string | null
           start_date: string
           status?: string
+          trip_title?: string | null
           updated_at?: string
           user_id: string
         }
@@ -8633,6 +8635,7 @@ export type Database = {
           slug?: string | null
           start_date?: string
           status?: string
+          trip_title?: string | null
           updated_at?: string
           user_id?: string
         }
