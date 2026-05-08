@@ -307,7 +307,7 @@ function ServiceSection({
   const colors = SERVICE_COLORS[type];
 
   return (
-    <div ref={sectionRef} data-service-type={type} style={{ scrollMarginTop: '70px' }}>
+    <div ref={sectionRef} data-service-type={type} style={{ scrollMarginTop: '110px' }}>
       <div className={cn(
         "rounded-xl overflow-hidden border shadow-sm bg-card transition-all duration-200",
         isOpen ? cn(colors.activeBorder, colors.activeGlow, "shadow-md") : cn(colors.border, "hover:shadow-md")
@@ -1694,18 +1694,14 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Serviços da viagem</h2>
             <div className="space-y-3">
               {availableTabs.map((type) => (
-                <div
+                <ServiceSection
                   key={type}
-                  ref={(el) => { sectionRefs.current[type] = el; }}
-                  style={{ scrollMarginTop: '110px' }}
-                >
-                  <ServiceSection
-                    type={type}
-                    services={grouped[type]}
-                    isOpen={openSection === `service-${type}`}
-                    onToggle={() => toggleSection(`service-${type}`)}
-                  />
-                </div>
+                  type={type}
+                  services={grouped[type]}
+                  isOpen={openSection === `service-${type}`}
+                  onToggle={() => toggleSection(`service-${type}`)}
+                  sectionRef={(el) => { sectionRefs.current[type] = el; }}
+                />
               ))}
             </div>
           </div>
