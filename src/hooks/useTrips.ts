@@ -79,6 +79,10 @@ export function useTrips() {
         updateData.client_name = updates.client_name;
         historyEntries.push({ field_changed: "Nome do cliente", old_value: current?.client_name, new_value: updates.client_name });
       }
+      if ((updates as any).trip_title !== undefined && (updates as any).trip_title !== (current as any)?.trip_title) {
+        updateData.trip_title = (updates as any).trip_title;
+        historyEntries.push({ field_changed: "Título da viagem", old_value: (current as any)?.trip_title ?? null, new_value: (updates as any).trip_title ?? null });
+      }
       if ((updates as any).client_id !== undefined && (updates as any).client_id !== current?.client_id) {
         updateData.client_id = (updates as any).client_id;
       }
