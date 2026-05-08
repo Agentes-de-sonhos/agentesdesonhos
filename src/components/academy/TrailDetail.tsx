@@ -60,6 +60,8 @@ import { usePlaybook } from "@/hooks/usePlaybook";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { SocialPostCard } from "@/components/materials/SocialPostCard";
+import { MaterialCard } from "@/components/materials/MaterialCard";
+import { MaterialPreviewModal } from "@/components/materials/MaterialPreviewModal";
 import { useMaterials } from "@/hooks/useMaterials";
 import {
   Target,
@@ -93,6 +95,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [showCertificate, setShowCertificate] = useState(false);
   const [showNameConfirm, setShowNameConfirm] = useState(false);
   const [userName, setUserName] = useState<string>("Agente de Viagens");
+  const [previewMaterial, setPreviewMaterial] = useState<any | null>(null);
 
   const { destinations: allPlaybookDestinations } = usePlaybook();
   const linkedSlug = trail.playbook_destination_id
@@ -141,6 +144,14 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   }, [linkedMaterials, exclusiveMaterials]);
 
   const linkedGalleries = groupIntoGalleries(allTrailMaterialsCombined);
+  // Sort all linked materials individually so each appears as its own card
+  const linkedMaterialsSorted = useMemo(() => {
+    return [...allTrailMaterialsCombined].sort((a, b) => {
+      const da = new Date(a.published_at || 0).getTime();
+      const db = new Date(b.published_at || 0).getTime();
+      return db - da;
+    });
+  }, [allTrailMaterialsCombined]);
 
   const certificate = certificates.find((c) => c.trail_id === trail.id);
   const certificateAvailable = (trail as any).certificate_available !== false;
