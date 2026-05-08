@@ -13,21 +13,22 @@ const FORECAST_HORIZON_DAYS = 16;
 interface CacheShape {
   savedAt: number;
   data: Record<string, DayWeather>;
+  timezone?: string;
 }
 
-function readCache(key: string): Record<string, DayWeather> | null {
+function readCache(key: string): { data: Record<string, DayWeather>; timezone?: string } | null {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const parsed: CacheShape = JSON.parse(raw);
     if (Date.now() - parsed.savedAt > CACHE_TTL_MS) return null;
-    return parsed.data;
+    return { data: parsed.data, timezone: parsed.timezone };
   } catch { return null; }
 }
 
-function writeCache(key: string, data: Record<string, DayWeather>) {
+function writeCache(key: string, data: Record<string, DayWeather>, timezone?: string) {
   try {
-    localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data }));
+    localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data, timezone }));
   } catch { /* ignore */ }
 }
 
@@ -42,6 +43,7 @@ export function useTripWeather(
   endDate: Date
 ) {
   const [data, setData] = useState<Record<string, DayWeather>>({});
+  const [timezone, setTimezone] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!destination) return;
@@ -50,8 +52,8 @@ export function useTripWeather(
     today.setHours(0, 0, 0, 0);
     const start = new Date(Math.max(startDate.getTime(), today.getTime()));
     const daysAhead = differenceInDays(start, today);
-    if (daysAhead > FORECAST_HORIZON_DAYS) return;
-    if (endDate.getTime() < today.getTime()) return;
+    const tripPast = endDate.getTime() < today.getTime();
+    const tooFar = daysAhead > FORECAST_HORIZON_DAYS;
 
     const effectiveEnd = new Date(
       Math.min(
@@ -59,14 +61,20 @@ export function useTripWeather(
         today.getTime() + FORECAST_HORIZON_DAYS * 86400000
       )
     );
-    if (effectiveEnd.getTime() < start.getTime()) return;
+    const skipWeather = tripPast || tooFar || effectiveEnd.getTime() < start.getTime();
 
     const startStr = format(start, "yyyy-MM-dd");
     const endStr = format(effectiveEnd, "yyyy-MM-dd");
     const cacheKey = `wx:${destination}:${startStr}:${endStr}`;
 
     const cached = readCache(cacheKey);
-    if (cached) { setData(cached); return; }
+    if (cached) {
+      setData(cached.data);
+      if (cached.timezone) setTimezone(cached.timezone);
+      if (skipWeather) return;
+      // Even with cached weather we have timezone; nothing else to fetch.
+      return;
+    }
 
     let cancelled = false;
     (async () => {
@@ -79,6 +87,13 @@ export function useTripWeather(
         const geo = await geoRes.json();
         const place = geo?.results?.[0];
         if (!place) return;
+        const tz: string | undefined = place.timezone;
+        if (!cancelled && tz) setTimezone(tz);
+
+        if (skipWeather) {
+          if (!cancelled) writeCache(cacheKey, {}, tz);
+          return;
+        }
 
         const wxRes = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&start_date=${startStr}&end_date=${endStr}`
@@ -94,7 +109,7 @@ export function useTripWeather(
         });
         if (!cancelled) {
           setData(out);
-          writeCache(cacheKey, out);
+          writeCache(cacheKey, out, tz);
         }
       } catch { /* silent */ }
     })();
@@ -102,5 +117,5 @@ export function useTripWeather(
     return () => { cancelled = true; };
   }, [destination, startDate.getTime(), endDate.getTime()]);
 
-  return data;
+  return { weatherByDate: data, timezone };
 }
