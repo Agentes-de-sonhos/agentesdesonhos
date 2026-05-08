@@ -1552,8 +1552,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-6 relative flex items-center justify-center">
-          <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
+        <div className="max-w-3xl mx-auto px-4 py-2 sm:py-3 relative flex items-center justify-center">
+          <div className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-4">
             <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
               <FileText className="mr-2 h-4 w-4" /> Baixar PDF
             </Button>
@@ -1563,14 +1563,14 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               src={agentProfile.agency_logo_url}
               alt={agentProfile.agency_name || "Agência"}
               translate="no"
-              className="h-32 sm:h-40 max-w-[400px] object-contain notranslate"
+              className="h-14 sm:h-20 max-w-[260px] object-contain notranslate"
             />
           ) : (
             <div className="flex items-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Briefcase className="h-7 w-7 text-primary" />
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Briefcase className="h-5 w-5 text-primary" />
               </div>
-              <BrandText as="span" className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+              <BrandText as="span" className="text-base sm:text-lg font-bold text-foreground tracking-tight">
                 {agentProfile?.agency_name || "Carteira Digital"}
               </BrandText>
             </div>
@@ -1694,14 +1694,18 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Serviços da viagem</h2>
             <div className="space-y-3">
               {availableTabs.map((type) => (
-                <ServiceSection
+                <div
                   key={type}
-                  type={type}
-                  services={grouped[type]}
-                  isOpen={openSection === `service-${type}`}
-                  onToggle={() => toggleSection(`service-${type}`)}
-                  sectionRef={(el) => { sectionRefs.current[type] = el; }}
-                />
+                  ref={(el) => { sectionRefs.current[type] = el; }}
+                  style={{ scrollMarginTop: '110px' }}
+                >
+                  <ServiceSection
+                    type={type}
+                    services={grouped[type]}
+                    isOpen={openSection === `service-${type}`}
+                    onToggle={() => toggleSection(`service-${type}`)}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -1727,7 +1731,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           const sortedDates = Object.keys(grouped_days).sort();
 
           return (
-            <div ref={itineraryRef} style={{ scrollMarginTop: '70px' }}>
+            <div ref={itineraryRef} style={{ scrollMarginTop: '110px' }}>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Roteiro dia a dia</h2>
               <div className="space-y-3">
                 {sortedDates.map((dateStr, idx) => {
