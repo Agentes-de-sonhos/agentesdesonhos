@@ -50,18 +50,19 @@ export function useTripWeather(
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const start = new Date(Math.max(startDate.getTime(), today.getTime()));
-    const daysAhead = differenceInDays(start, today);
-    const tripPast = endDate.getTime() < today.getTime();
-    const tooFar = daysAhead > FORECAST_HORIZON_DAYS;
+    // Always include today (so the local clock can show today's temp), even if
+    // the trip starts in the future or already ended.
+    const start = new Date(Math.min(startDate.getTime(), today.getTime()));
+    const tripStartAhead = differenceInDays(startDate, today);
+    const tooFar = tripStartAhead > FORECAST_HORIZON_DAYS;
 
     const effectiveEnd = new Date(
       Math.min(
-        endDate.getTime(),
+        Math.max(endDate.getTime(), today.getTime()),
         today.getTime() + FORECAST_HORIZON_DAYS * 86400000
       )
     );
-    const skipWeather = tripPast || tooFar || effectiveEnd.getTime() < start.getTime();
+    const skipWeather = tooFar || effectiveEnd.getTime() < start.getTime();
 
     const startStr = format(start, "yyyy-MM-dd");
     const endStr = format(effectiveEnd, "yyyy-MM-dd");

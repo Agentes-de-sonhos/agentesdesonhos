@@ -47,7 +47,15 @@ interface TripCalendarProps {
 
 const WEEKDAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
-function LocalClock({ timezone, destinationLabel }: { timezone: string; destinationLabel?: string }) {
+function LocalClock({
+  timezone,
+  destinationLabel,
+  weatherByDate,
+}: {
+  timezone: string;
+  destinationLabel?: string;
+  weatherByDate?: Record<string, DayWeather>;
+}) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -56,6 +64,7 @@ function LocalClock({ timezone, destinationLabel }: { timezone: string; destinat
   let timeStr = "";
   let dateStr = "";
   let tzShort = "";
+  let todayKey = "";
   try {
     timeStr = new Intl.DateTimeFormat("pt-BR", {
       timeZone: timezone,
@@ -75,10 +84,21 @@ function LocalClock({ timezone, destinationLabel }: { timezone: string; destinat
       timeZoneName: "short",
     }).formatToParts(now);
     tzShort = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+    const dParts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(now);
+    const y = dParts.find((p) => p.type === "year")?.value;
+    const m = dParts.find((p) => p.type === "month")?.value;
+    const d = dParts.find((p) => p.type === "day")?.value;
+    if (y && m && d) todayKey = `${y}-${m}-${d}`;
   } catch {
     return null;
   }
   const cityLabel = destinationLabel?.split(",")[0]?.trim();
+  const wxToday = weatherByDate?.[todayKey];
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/10">
       <div className="flex items-center gap-2 min-w-0">
@@ -94,6 +114,17 @@ function LocalClock({ timezone, destinationLabel }: { timezone: string; destinat
           </div>
         </div>
       </div>
+      {wxToday && (() => {
+        const WxIcon = weatherIconFor(wxToday.code);
+        return (
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/70 border border-primary/10 shrink-0">
+            <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
+            <span className="text-[11px] font-semibold tabular-nums text-foreground leading-none">
+              {wxToday.tmin}° / {wxToday.tmax}°C
+            </span>
+          </div>
+        );
+      })()}
       <div className="text-base font-bold tabular-nums text-foreground tracking-tight">
         {timeStr}
       </div>
@@ -138,7 +169,7 @@ export function TripCalendar({
   return (
     <div className="rounded-2xl border border-primary/15 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden">
       {timezone && (
-        <LocalClock timezone={timezone} destinationLabel={destinationLabel} />
+        <LocalClock timezone={timezone} destinationLabel={destinationLabel} weatherByDate={weatherByDate} />
       )}
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/10">
