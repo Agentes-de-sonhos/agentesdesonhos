@@ -13,9 +13,21 @@ import {
   subMonths,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Sun,
+  CloudSun,
+  Cloud,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  CloudFog,
+  CloudDrizzle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import type { DayWeather } from "@/hooks/useTripWeather";
 
 interface TripCalendarProps {
   startDate: Date;
@@ -24,15 +36,31 @@ interface TripCalendarProps {
   itineraryDates?: Set<string>;
   /** Called when user clicks a date that has an itinerary entry */
   onDayClick?: (dateStr: string) => void;
+  /** Map of "yyyy-MM-dd" -> weather data from Open-Meteo */
+  weatherByDate?: Record<string, DayWeather>;
 }
 
 const WEEKDAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+function weatherIconFor(code: number) {
+  // Open-Meteo WMO weather codes
+  if (code === 0) return Sun;
+  if (code === 1 || code === 2) return CloudSun;
+  if (code === 3) return Cloud;
+  if (code === 45 || code === 48) return CloudFog;
+  if (code >= 51 && code <= 57) return CloudDrizzle;
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return CloudRain;
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return CloudSnow;
+  if (code >= 95) return CloudLightning;
+  return Cloud;
+}
 
 export function TripCalendar({
   startDate,
   endDate,
   itineraryDates,
   onDayClick,
+  weatherByDate,
 }: TripCalendarProps) {
   const [cursor, setCursor] = useState<Date>(startOfMonth(startDate));
 
@@ -103,6 +131,8 @@ export function TripCalendar({
           const isToday = isSameDay(day, today);
           const hasItinerary = itineraryDates?.has(dateStr);
           const clickable = inTrip && hasItinerary;
+          const wx = inTrip ? weatherByDate?.[dateStr] : undefined;
+          const WxIcon = wx ? weatherIconFor(wx.code) : null;
 
           return (
             <button
@@ -121,14 +151,27 @@ export function TripCalendar({
                 !clickable && "cursor-default"
               )}
               title={
-                clickable
+                wx
+                  ? `${format(day, "dd/MM")} • ${wx.tmin}°/${wx.tmax}°C${
+                      clickable ? " — clique para ver o roteiro" : ""
+                    }`
+                  : clickable
                   ? `Ver roteiro de ${format(day, "dd/MM")}`
                   : inTrip
                   ? format(day, "dd/MM")
                   : undefined
               }
             >
-              {format(day, "d")}
+              <span className={cn(WxIcon && "leading-none")}>{format(day, "d")}</span>
+              {WxIcon && (
+                <WxIcon
+                  className={cn(
+                    "absolute top-0.5 right-0.5 h-2.5 w-2.5",
+                    isStart || isEnd ? "text-white/90" : "text-primary/70"
+                  )}
+                  strokeWidth={2.5}
+                />
+              )}
               {hasItinerary && inTrip && (
                 <span
                   className={cn(
@@ -153,6 +196,11 @@ export function TripCalendar({
         <span className="flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Roteiro
         </span>
+        {weatherByDate && Object.keys(weatherByDate).length > 0 && (
+          <span className="flex items-center gap-1.5">
+            <Sun className="h-2.5 w-2.5 text-primary/70" /> Clima
+          </span>
+        )}
       </div>
     </div>
   );

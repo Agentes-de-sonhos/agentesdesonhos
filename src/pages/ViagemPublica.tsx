@@ -20,9 +20,29 @@ import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
 import { TripCalendar } from "@/components/trip/TripCalendar";
+import { useTripWeather } from "@/hooks/useTripWeather";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+
+function TripCalendarWithWeather(props: {
+  destination: string;
+  startDate: Date;
+  endDate: Date;
+  itineraryDates?: Set<string>;
+  onDayClick?: (dateStr: string) => void;
+}) {
+  const weatherByDate = useTripWeather(props.destination, props.startDate, props.endDate);
+  return (
+    <TripCalendar
+      startDate={props.startDate}
+      endDate={props.endDate}
+      itineraryDates={props.itineraryDates}
+      onDayClick={props.onDayClick}
+      weatherByDate={weatherByDate}
+    />
+  );
+}
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
@@ -1681,7 +1701,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 {navGrid}
               </div>
               <div className="md:w-[320px] md:justify-self-end w-full">
-                <TripCalendar
+                <TripCalendarWithWeather
+                  destination={tripData.destination}
                   startDate={startDate}
                   endDate={endDate}
                   itineraryDates={itineraryDates}
