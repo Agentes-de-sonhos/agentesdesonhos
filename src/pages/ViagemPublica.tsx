@@ -1579,28 +1579,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       </header>
 
       <div className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
-        {/* Trip Overview Card */}
-        <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
-          <CardContent className="pt-5 pb-5 relative">
-            <h1 className="text-xl sm:text-2xl font-bold mb-3">{(tripData as any).trip_title || tripData.client_name}</h1>
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-primary" />
-                <span className="font-medium">{tripData.destination}</span>
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 text-primary" />
-                <span>{format(startDate, "dd/MM", { locale: ptBR })} - {format(endDate, "dd/MM/yyyy", { locale: ptBR })}</span>
-              </span>
-              <span className="flex items-center gap-1.5">
-                <FileText className="h-4 w-4 text-primary" />
-                <span>{days} dias</span>
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Calendar with trip period */}
+        {/* Trip Overview + Calendar (side-by-side on desktop) */}
         {(() => {
           const itineraryDates = new Set<string>(itineraryActivities.map((a: any) => a.day_date));
           const handleCalendarDayClick = (dateStr: string) => {
@@ -1616,12 +1595,35 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             }, 120);
           };
           return (
-            <TripCalendar
-              startDate={startDate}
-              endDate={endDate}
-              itineraryDates={itineraryDates}
-              onDayClick={handleCalendarDayClick}
-            />
+            <div className="grid gap-4 md:grid-cols-[1fr_320px] items-stretch">
+              <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden flex flex-col">
+                <CardContent className="pt-5 pb-5 relative flex-1 flex flex-col justify-center">
+                  <h1 className="text-xl sm:text-2xl font-bold mb-3">{(tripData as any).trip_title || tripData.client_name}</h1>
+                  <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{tripData.destination}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span>{format(startDate, "dd/MM", { locale: ptBR })} - {format(endDate, "dd/MM/yyyy", { locale: ptBR })}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span>{days} dias</span>
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+              <div className="md:w-[320px] md:justify-self-end w-full">
+                <TripCalendar
+                  startDate={startDate}
+                  endDate={endDate}
+                  itineraryDates={itineraryDates}
+                  onDayClick={handleCalendarDayClick}
+                />
+              </div>
+            </div>
           );
         })()}
 
