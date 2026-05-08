@@ -60,6 +60,8 @@ import { usePlaybook } from "@/hooks/usePlaybook";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { SocialPostCard } from "@/components/materials/SocialPostCard";
+import { MaterialCard } from "@/components/materials/MaterialCard";
+import { MaterialPreviewModal } from "@/components/materials/MaterialPreviewModal";
 import { useMaterials } from "@/hooks/useMaterials";
 import {
   Target,
@@ -93,6 +95,7 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   const [showCertificate, setShowCertificate] = useState(false);
   const [showNameConfirm, setShowNameConfirm] = useState(false);
   const [userName, setUserName] = useState<string>("Agente de Viagens");
+  const [previewMaterial, setPreviewMaterial] = useState<any | null>(null);
 
   const { destinations: allPlaybookDestinations } = usePlaybook();
   const linkedSlug = trail.playbook_destination_id
@@ -141,6 +144,14 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
   }, [linkedMaterials, exclusiveMaterials]);
 
   const linkedGalleries = groupIntoGalleries(allTrailMaterialsCombined);
+  // Sort all linked materials individually so each appears as its own card
+  const linkedMaterialsSorted = useMemo(() => {
+    return [...allTrailMaterialsCombined].sort((a, b) => {
+      const da = new Date(a.published_at || 0).getTime();
+      const db = new Date(b.published_at || 0).getTime();
+      return db - da;
+    });
+  }, [allTrailMaterialsCombined]);
 
   const certificate = certificates.find((c) => c.trail_id === trail.id);
   const certificateAvailable = (trail as any).certificate_available !== false;
@@ -712,22 +723,26 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
             description={"Nesta aba você encontra materiais prontos para divulgação do destino, como lâminas, carrosséis, reels, artes para redes sociais e WhatsApp.\nTambém há links editáveis no Canva para personalização das lâminas de pacotes, permitindo que os agentes adaptem os conteúdos conforme sua estratégia de vendas."}
           />
 
-          {linkedGalleries.length > 0 && (
+          {linkedMaterialsSorted.length > 0 && (
             <div className="space-y-4 mb-8">
               <div className="flex items-center gap-2 mb-2">
                 <FolderOpen className="h-5 w-5 text-primary" />
                 <h3 className="text-base font-semibold">Posts de Divulgação</h3>
                 <p className="text-sm text-muted-foreground">— Baixe e compartilhe nas redes sociais</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
-                {linkedGalleries.map((gallery) => (
-                  <SocialPostCard key={gallery.id} gallery={gallery} />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {linkedMaterialsSorted.map((m) => (
+                  <MaterialCard
+                    key={m.id}
+                    material={m}
+                    onPreview={() => setPreviewMaterial(m)}
+                  />
                 ))}
               </div>
             </div>
           )}
 
-          {complementaryMaterials.length === 0 && linkedGalleries.length === 0 ? (
+          {complementaryMaterials.length === 0 && linkedMaterialsSorted.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="p-5 rounded-2xl bg-muted mb-5">
                 <FolderOpen className="h-12 w-12 text-muted-foreground/40" />
@@ -820,6 +835,13 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           await generateCertificate.mutateAsync({ trailId: trail.id, agentName: name });
           setShowNameConfirm(false);
         }}
+      />
+
+      {/* Material Preview Modal */}
+      <MaterialPreviewModal
+        material={previewMaterial}
+        isOpen={!!previewMaterial}
+        onClose={() => setPreviewMaterial(null)}
       />
     </div>
   );
