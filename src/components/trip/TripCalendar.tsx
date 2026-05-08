@@ -101,6 +101,7 @@ function LocalClock({
   const wxToday = weatherByDate?.[todayKey];
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/10">
+      {/* Left: local clock */}
       <div className="flex items-center gap-2 min-w-0">
         <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center text-primary shrink-0">
           <Clock className="h-3.5 w-3.5" />
@@ -114,6 +115,11 @@ function LocalClock({
           </div>
         </div>
       </div>
+      {/* Center: digital time */}
+      <div className="text-base font-bold tabular-nums text-foreground tracking-tight">
+        {timeStr}
+      </div>
+      {/* Right: temperature */}
       {wxToday && (() => {
         const WxIcon = weatherIconFor(wxToday.code);
         return (
@@ -125,9 +131,6 @@ function LocalClock({
           </div>
         );
       })()}
-      <div className="text-base font-bold tabular-nums text-foreground tracking-tight">
-        {timeStr}
-      </div>
     </div>
   );
 }
