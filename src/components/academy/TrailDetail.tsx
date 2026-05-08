@@ -836,6 +836,13 @@ export function TrailDetail({ trail, onBack }: TrailDetailProps) {
           setShowNameConfirm(false);
         }}
       />
+
+      {/* Material Preview Modal */}
+      <MaterialPreviewModal
+        material={previewMaterial}
+        isOpen={!!previewMaterial}
+        onClose={() => setPreviewMaterial(null)}
+      />
     </div>
   );
 }
