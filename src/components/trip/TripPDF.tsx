@@ -1136,9 +1136,7 @@ export async function generateTripPDF(
     const label = SERVICE_LABELS[type] || "Serviço";
     const emoji = SERVICE_EMOJI[type] || "📋";
     const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
-    const details = getServiceDetails(service);
-    const summary = details[0] || "";
-    const restDetails = details.slice(1);
+    const bodyHtml = renderServiceBody(service);
 
     let attachmentsHtml = '';
     if (service.attachments?.length > 0) {
@@ -1159,12 +1157,6 @@ export async function generateTripPDF(
       }
     }
 
-    const detailsHtml = restDetails.length > 0
-      ? `<div class="pdf-block pdf-details" style="word-wrap:break-word;overflow-wrap:break-word;">
-          ${restDetails.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
-        </div>`
-      : "";
-
     const attachmentsBlock = attachmentsHtml
       ? `<div class="pdf-block" style="margin-top:8px;padding-top:6px;border-top:1px solid #f1f5f9;">${attachmentsHtml}</div>`
       : "";
@@ -1176,12 +1168,11 @@ export async function generateTripPDF(
             <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
             <div style="min-width:0;">
               <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
-              ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
             </div>
           </div>
         </div>
         <div style="padding:12px 16px;">
-          ${detailsHtml}
+          ${bodyHtml}
           ${attachmentsBlock}
         </div>
       </div>
