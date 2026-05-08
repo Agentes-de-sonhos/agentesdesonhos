@@ -1555,7 +1555,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         <div className="max-w-3xl mx-auto px-4 py-6 relative flex items-center justify-center">
           <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
             <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
-              <FileText className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Baixar PDF</span><span className="sm:hidden">PDF</span>
+              <FileText className="mr-2 h-4 w-4" /> Baixar PDF
             </Button>
           </div>
           {agentProfile?.agency_logo_url ? (
