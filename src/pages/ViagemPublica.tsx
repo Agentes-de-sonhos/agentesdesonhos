@@ -1552,7 +1552,12 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-center">
+        <div className="max-w-3xl mx-auto px-4 py-6 relative flex items-center justify-center">
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
+            <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
+              <FileText className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Baixar PDF</span><span className="sm:hidden">PDF</span>
+            </Button>
+          </div>
           {agentProfile?.agency_logo_url ? (
             <img
               src={agentProfile.agency_logo_url}
@@ -1574,12 +1579,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       </header>
 
       <div className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
-        {/* PDF action */}
-        <div className="flex justify-end">
-          <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
-            <FileText className="mr-2 h-4 w-4" /> Baixar PDF
-          </Button>
-        </div>
         {/* Trip Overview Card */}
         <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
           <CardContent className="pt-5 pb-5 relative">
