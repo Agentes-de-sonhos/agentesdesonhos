@@ -19,6 +19,7 @@ import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
+import { TripCalendar } from "@/components/trip/TripCalendar";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
@@ -1296,6 +1297,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preLoadedAgent ?? preAuth?.agentProfile ?? null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const itineraryRef = useRef<HTMLDivElement | null>(null);
+  const dayRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -1599,6 +1601,31 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           </CardContent>
         </Card>
 
+        {/* Calendar with trip period */}
+        {(() => {
+          const itineraryDates = new Set<string>(itineraryActivities.map((a: any) => a.day_date));
+          const handleCalendarDayClick = (dateStr: string) => {
+            setOpenSection('itinerary');
+            setOpenDay(dateStr);
+            setTimeout(() => {
+              const el = dayRefs.current[dateStr];
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 120);
+          };
+          return (
+            <TripCalendar
+              startDate={startDate}
+              endDate={endDate}
+              itineraryDates={itineraryDates}
+              onDayClick={handleCalendarDayClick}
+            />
+          );
+        })()}
+
         {/* Service Navigation Grid — always visible, replaces horizontal scroll */}
         {(availableTabs.length > 0 || itineraryActivities.length > 0) && (
           <div>
@@ -1712,7 +1739,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   const isDayOpen = openDay === dateStr;
 
                   return (
-                    <div key={dateStr} className={cn(
+                    <div key={dateStr} ref={(el) => { dayRefs.current[dateStr] = el; }} style={{ scrollMarginTop: '80px' }} className={cn(
                       "rounded-xl overflow-hidden border shadow-sm bg-card transition-all duration-200",
                       isDayOpen ? cn(SERVICE_COLORS.itinerary.activeBorder, SERVICE_COLORS.itinerary.activeGlow, "shadow-md") : cn(SERVICE_COLORS.itinerary.border, "hover:shadow-md")
                     )}>
