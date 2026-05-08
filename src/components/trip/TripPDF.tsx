@@ -249,6 +249,707 @@ function getServiceDetails(service: TripService): string[] {
   return details;
 }
 
+// ========================================================================
+// Structured body renderer — mirrors the section layout from ViagemPublica
+// (the public wallet link), so the PDF and the public page look the same.
+// ========================================================================
+
+const TXT = "color:#475569;font-size:11px;line-height:1.4;margin:1px 0;";
+const TXT_FG = "color:#1e293b;font-size:11px;line-height:1.4;margin:1px 0;";
+const TXT_ITALIC = "color:#475569;font-size:11px;line-height:1.4;margin:1px 0;font-style:italic;";
+const SECTION_TITLE = "font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:#0f766e;margin:0 0 5px;";
+
+function escapeHtml(s: any): string {
+  if (s == null) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+type Row = string | null | false | undefined;
+function rowsToHtml(rows: Row[]): string {
+  return rows.filter(Boolean).join("");
+}
+function p(label: string | null, value: any, opts: { mono?: boolean; italic?: boolean; fg?: boolean } = {}): string {
+  if (value == null || value === "") return "";
+  const style = opts.italic ? TXT_ITALIC : opts.fg ? TXT_FG : TXT;
+  const mono = opts.mono ? "font-family:'Courier New',monospace;font-weight:600;color:#1e293b;" : "";
+  const inner = label
+    ? `${escapeHtml(label)}: <span style="${mono}">${escapeHtml(value)}</span>`
+    : `<span style="${mono}">${escapeHtml(value)}</span>`;
+  return `<p style="${style}">${inner}</p>`;
+}
+
+function miniCard(title: string, rows: Row[], variant: "muted" | "primary" | "amber" | "destructive" | "tips" = "muted"): string {
+  const body = rowsToHtml(rows);
+  if (!body) return "";
+  let bg = "background:#f1f5f9;";
+  let titleColor = "color:#0f766e;";
+  let border = "";
+  if (variant === "primary") { bg = "background:rgba(15,118,110,0.06);"; border = "border:1px solid rgba(15,118,110,0.18);"; }
+  if (variant === "amber") { bg = "background:#fffbeb;"; border = "border:1px solid #fde68a;"; titleColor = "color:#b45309;"; }
+  if (variant === "destructive") { bg = "background:rgba(220,38,38,0.05);"; border = "border:1px solid rgba(220,38,38,0.2);"; titleColor = "color:#b91c1c;"; }
+  if (variant === "tips") { bg = "background:linear-gradient(90deg,rgba(15,118,110,0.10),rgba(15,118,110,0.04));"; border = "border:1px solid rgba(15,118,110,0.18);"; }
+  return `<div class="pdf-block" style="margin-top:6px;padding:8px 11px;border-radius:8px;${bg}${border}">
+    <p style="${SECTION_TITLE}${titleColor}">${escapeHtml(title)}</p>
+    ${body}
+  </div>`;
+}
+
+function badgeRow(items: string[]): string {
+  if (!items.length) return "";
+  return `<p style="margin:2px 0 0;font-size:10px;">${items.map(t => `<span style="display:inline-block;background:rgba(15,118,110,0.10);color:#0f766e;padding:2px 7px;border-radius:9999px;margin-right:4px;font-weight:600;">${escapeHtml(t)}</span>`).join("")}</p>`;
+}
+
+function pillTitle(parts: { label?: string; value: string; muted?: boolean }[]): string {
+  return parts.map(p => `<span style="${p.muted ? "color:#64748b;" : "color:#1e293b;"}">${p.label ? `<strong>${escapeHtml(p.label)}:</strong> ` : ""}${escapeHtml(p.value)}</span>`).join(' &nbsp;·&nbsp; ');
+}
+
+/** Header summary block: title + dates row, mirroring the public card top */
+function renderServiceHeadline(opts: { title?: string; dates?: string; lines?: string[] }): string {
+  const { title, dates, lines = [] } = opts;
+  const titleHtml = title ? `<p style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 2px;line-height:1.3;">${escapeHtml(title)}</p>` : "";
+  const datesHtml = dates ? `<p style="font-size:11px;color:#64748b;margin:0 0 4px;">📅 ${escapeHtml(dates)}</p>` : "";
+  const linesHtml = lines.filter(Boolean).map(l => `<p style="${TXT}">${escapeHtml(l)}</p>`).join("");
+  if (!titleHtml && !datesHtml && !linesHtml) return "";
+  return `<div class="pdf-block" style="margin-bottom:4px;">${titleHtml}${datesHtml}${linesHtml}</div>`;
+}
+
+function fmtDate(d: any): string { return d ? formatDate(String(d)) : ""; }
+
+function renderFlightBody(service: TripService): string {
+  const data = service.service_data as any;
+  const tripTypeMap: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
+  const statusMap: Record<string, string> = { confirmado: '✅ Confirmado', emitido: '📄 Emitido', pendente: '⏳ Pendente' };
+  const airline = data.main_airline || data.airline || '';
+  const firstDate = data.segments?.[0]?.flight_date || data.departure_date || '';
+  const lastDate = data.segments?.[data.segments?.length - 1]?.flight_date || data.return_date || '';
+  const datesStr = firstDate ? `${fmtDate(firstDate)}${lastDate && lastDate !== firstDate ? ` - ${fmtDate(lastDate)}` : ''}` : "";
+
+  const head = renderServiceHeadline({
+    title: `${data.origin_city || ''} → ${data.destination_city || ''}`,
+    dates: datesStr,
+    lines: [
+      airline ? `Companhia: ${airline}` : "",
+      data.trip_type ? `Tipo: ${tripTypeMap[data.trip_type] || data.trip_type}` : "",
+      data.locator_code ? `Localizador: ${data.locator_code}` : "",
+      data.flight_status ? `Status: ${statusMap[data.flight_status] || data.flight_status}` : "",
+    ],
+  });
+
+  // Segments timeline
+  let segmentsHtml = "";
+  if (data.segments?.length > 0) {
+    const segCards = data.segments.map((seg: any, i: number) => {
+      const segType = seg.segment_type === 'ida' ? 'Ida' : seg.segment_type === 'conexao' ? 'Conexão' : 'Volta';
+      let conn = "";
+      if (i > 0 && data.segments[i - 1]) {
+        const prev = data.segments[i - 1];
+        if (prev.flight_date === seg.flight_date && prev.arrival_time && seg.departure_time) {
+          const [ph, pm] = prev.arrival_time.split(':').map(Number);
+          const [sh, sm] = seg.departure_time.split(':').map(Number);
+          const diff = (sh * 60 + sm) - (ph * 60 + pm);
+          if (diff > 0) {
+            const h = Math.floor(diff / 60); const m = diff % 60;
+            conn = `<p style="font-size:10px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:3px 8px;border-radius:6px;margin:4px 0;font-weight:600;">✈️ Conexão em ${escapeHtml(seg.origin_city || seg.origin_airport || '')} — ${h}h${m > 0 ? String(m).padStart(2, '0') : ''}</p>`;
+          }
+        }
+      }
+      return `${conn}<div style="border-left:2px solid rgba(15,118,110,0.4);padding:3px 0 3px 9px;margin:2px 0;">
+        <p style="margin:0 0 2px;font-size:10px;">
+          <span style="background:rgba(15,118,110,0.12);color:#0f766e;padding:1px 6px;border-radius:4px;font-weight:700;">${escapeHtml(segType)}</span>
+          ${seg.airline ? `<span style="color:#64748b;margin-left:6px;">${escapeHtml(seg.airline)}</span>` : ''}
+          ${seg.flight_number ? `<span style="color:#64748b;font-family:'Courier New',monospace;margin-left:6px;">${escapeHtml(seg.flight_number)}</span>` : ''}
+        </p>
+        <p style="margin:1px 0;font-size:12px;font-weight:600;color:#1e293b;">${escapeHtml(seg.origin_airport || seg.origin_city || '')} → ${escapeHtml(seg.destination_airport || seg.destination_city || '')}</p>
+        <p style="margin:1px 0;font-size:10px;color:#64748b;">
+          ${seg.flight_date ? escapeHtml(fmtDate(seg.flight_date)) : ''}${seg.departure_time ? ` • ${escapeHtml(seg.departure_time)}` : ''}${seg.arrival_time ? ` → ${escapeHtml(seg.arrival_time)}` : ''}${seg.terminal ? ` • Terminal ${escapeHtml(seg.terminal)}` : ''}${seg.gate ? ` • Portão ${escapeHtml(seg.gate)}` : ''}
+        </p>
+      </div>`;
+    }).join("");
+    segmentsHtml = `<div class="pdf-block" style="margin-top:6px;padding:8px 11px;background:#f1f5f9;border-radius:8px;">
+      <p style="${SECTION_TITLE}">🛫 Trechos</p>${segCards}</div>`;
+  }
+
+  const passengersHtml = data.passengers?.length > 0
+    ? miniCard("👤 Passageiros", data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)} (${p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})${p.seat ? ` • Assento ${escapeHtml(p.seat)}` : ''}</p>`))
+    : "";
+
+  const baggageHtml = (data.carry_on || data.checked_baggage)
+    ? miniCard("🧳 Bagagem", [
+        p("Mão", data.carry_on),
+        p("Despachada", data.checked_baggage),
+        p("Extra", data.extra_baggage),
+        data.baggage_rules ? `<p style="${TXT_ITALIC}">${escapeHtml(data.baggage_rules)}</p>` : "",
+      ])
+    : "";
+
+  const boardingHtml = (data.recommended_arrival || data.required_documents || data.boarding_notes)
+    ? miniCard("⚠️ Orientações de Embarque", [
+        p("Antecedência", data.recommended_arrival),
+        p("Terminal", data.boarding_terminal),
+        p("Documentos", data.required_documents),
+        p("Imigração", data.immigration_rules),
+        data.boarding_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>` : "",
+      ])
+    : "";
+
+  const checkinHtml = data.checkin_url
+    ? `<div class="pdf-block" style="margin-top:6px;"><a href="${escapeHtml(data.checkin_url)}" style="display:inline-block;background:#0f766e;color:#fff;padding:7px 14px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;">✅ Fazer Check-in Online</a>${data.checkin_open_date ? `<p style="${TXT}">Abertura: ${escapeHtml(data.checkin_open_date)}</p>` : ''}</div>`
+    : "";
+
+  return head + segmentsHtml + passengersHtml + baggageHtml + boardingHtml + checkinHtml;
+}
+
+function renderHotelBody(service: TripService): string {
+  const data = service.service_data as any;
+  const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: 'Boutique', resort: 'Resort', pousada: 'Pousada' };
+  const roomMap: Record<string, string> = { standard: 'Standard', superior: 'Superior', deluxe: 'Deluxe', suite: 'Suíte', suite_junior: 'Suíte Júnior', presidencial: 'Presidencial', apartamento: 'Apartamento', villa: 'Villa', bangalo: 'Bangalô' };
+  const mealMap: Record<string, string> = { somente_hospedagem: 'Somente Hospedagem', cafe_manha: 'Café da Manhã', meia_pensao: 'Meia Pensão', pensao_completa: 'Pensão Completa', all_inclusive: 'All Inclusive' };
+  const bedMap: Record<string, string> = { king: 'King', queen: 'Queen', twin: 'Twin (2 Solteiro)', single: 'Solteiro', double: 'Casal', triple: 'Triplo' };
+  const statusMap: Record<string, string> = { confirmada: '✅ Confirmada', emitida: '📄 Emitida', pre_reserva: '⏳ Pré-reserva' };
+
+  let nights: number | null = null;
+  try { const [sy,sm,sd] = data.check_in.split('-').map(Number); const [ey,em,ed] = data.check_out.split('-').map(Number); nights = Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / 86400000); } catch {}
+
+  const head = renderServiceHeadline({
+    title: `${data.hotel_name}${data.hotel_category ? ` ${catMap[data.hotel_category] || data.hotel_category}` : ''}`,
+    dates: `${fmtDate(data.check_in)} - ${fmtDate(data.check_out)}${nights ? ` (${nights} noites)` : ''}`,
+    lines: [
+      `${data.city || ''}${data.country ? `, ${data.country}` : ''}`,
+      data.reservation_status ? `Status: ${statusMap[data.reservation_status] || data.reservation_status}` : "",
+      data.reservation_code ? `Reserva: ${data.reservation_code}` : "",
+      data.room_type ? `Acomodação: ${roomMap[data.room_type] || data.room_type}` : "",
+      data.meal_plan ? `Regime: ${mealMap[data.meal_plan] || data.meal_plan}` : "",
+    ],
+  });
+
+  const checkin = miniCard("📅 Check-in", [
+    p("Horário", data.checkin_time),
+    data.early_checkin ? p("Early check-in", data.early_checkin === 'sim' ? '✅ Incluso' : data.early_checkin === 'mediante_taxa' ? '💰 Mediante taxa' : data.early_checkin === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível') : "",
+    p("Titular", data.checkin_holder),
+    data.checkin_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.checkin_instructions)}</p>` : "",
+    p("Chegada tardia", data.late_arrival_policy),
+  ]);
+
+  const checkout = miniCard("🧳 Check-out", [
+    p("Horário", data.checkout_time),
+    data.late_checkout ? p("Late check-out", data.late_checkout === 'sim' ? '✅ Incluso' : data.late_checkout === 'mediante_taxa' ? `💰 Mediante taxa${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível') : "",
+    data.checkout_procedure ? p("Procedimento", data.checkout_procedure === 'recepcao' ? 'Recepção' : data.checkout_procedure === 'express' ? 'Express' : 'Online') : "",
+    data.checkout_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.checkout_instructions)}</p>` : "",
+  ]);
+
+  const room = miniCard("🛏️ Acomodação", [
+    data.bed_type ? p("Cama", bedMap[data.bed_type] || data.bed_type) : "",
+    p("Hóspedes", data.guest_count),
+    p("Vista", data.room_view),
+    p("Amenities", data.amenities),
+  ]);
+
+  const food = miniCard("🍽️ Alimentação", [
+    p("Café da manhã", data.breakfast_hours),
+    p("Restaurantes", data.restaurants_included),
+    data.food_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.food_notes)}</p>` : "",
+    p("All Inclusive", data.all_inclusive_rules),
+  ]);
+
+  const includedBadges: string[] = [];
+  if (data.breakfast_included === 'sim') includedBadges.push('☕ Café');
+  if (data.wifi_included === 'sim') includedBadges.push('📶 Wi-Fi');
+  if (data.taxes_included === 'sim') includedBadges.push('✅ Taxas');
+  if (data.parking_included === 'sim') includedBadges.push('🅿️ Estacionamento');
+  if (data.transfer_included === 'sim') includedBadges.push('🚐 Transfer');
+  const included = (includedBadges.length || data.resort_fee || data.other_inclusions)
+    ? miniCard("💰 Inclusos na Reserva", [
+        badgeRow(includedBadges),
+        p("Resort Fee", data.resort_fee),
+        data.other_inclusions ? `<p style="${TXT}">${escapeHtml(data.other_inclusions)}</p>` : "",
+      ])
+    : "";
+
+  const policies = miniCard("🧾 Políticas", [
+    p("Cancelamento", data.cancellation_policy),
+    p("Crianças", data.children_policy),
+    p("Pets", data.pet_policy),
+    data.mandatory_fees ? `<p style="${TXT_FG}font-weight:600;">⚠️ Taxas no destino: ${escapeHtml(data.mandatory_fees)}</p>` : "",
+    data.hotel_deposit ? p("Caução", `${data.hotel_deposit}${data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}`) : "",
+  ]);
+
+  const guests = data.guests?.length > 0
+    ? miniCard("👨‍👩‍👧 Hóspedes", data.guests.map((g: any) => `<p style="${TXT}">${escapeHtml(g.name)}${g.age ? ` (${g.age})` : ''}${g.notes ? ` • ${escapeHtml(g.notes)}` : ''}</p>`))
+    : "";
+
+  const location = miniCard("📍 Localização e Contato", [
+    data.address ? `<p style="${TXT}">${escapeHtml(data.address)}</p>` : "",
+    data.hotel_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.hotel_phone)}</p>` : "",
+    data.hotel_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.hotel_email)}</p>` : "",
+    data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">🗺️ Ver no mapa</a></p>` : "",
+    data.hotel_website ? `<p style="${TXT}"><a href="${escapeHtml(data.hotel_website)}" style="color:#0f766e;text-decoration:underline;">🌐 Site oficial</a></p>` : "",
+  ]);
+
+  const notes = (data.special_requests || data.agency_notes || data.notes)
+    ? miniCard("📝 Observações", [
+        p("Solicitações", data.special_requests),
+        data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>` : "",
+        data.notes && !data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.notes)}</p>` : "",
+      ])
+    : "";
+
+  return head + checkin + checkout + room + food + included + policies + guests + location + notes;
+}
+
+function renderCarRentalBody(service: TripService): string {
+  const data = service.service_data as any;
+  const head = renderServiceHeadline({
+    title: `${data.car_type ? escapeHtml(data.car_type) : ''}${data.car_model ? ` • ${escapeHtml(data.car_model)}` : ''}`,
+    dates: data.pickup_date && data.dropoff_date ? `${fmtDate(data.pickup_date)} - ${fmtDate(data.dropoff_date)}` : "",
+    lines: [
+      data.rental_company ? `Locadora: ${data.rental_company}` : "",
+      data.reservation_code ? `Reserva: ${data.reservation_code}` : "",
+    ],
+  });
+
+  const pickup = miniCard("📍 Retirada", [
+    data.pickup_address ? `<p style="${TXT}">${escapeHtml(data.pickup_address)}</p>` : "",
+    data.pickup_city ? `<p style="${TXT}">${escapeHtml(data.pickup_city)}${data.pickup_country ? `, ${escapeHtml(data.pickup_country)}` : ''}</p>` : "",
+    data.pickup_date ? `<p style="${TXT}">📅 ${escapeHtml(fmtDate(data.pickup_date))}${data.pickup_time ? ` às ${escapeHtml(data.pickup_time)}` : ''}</p>` : "",
+    p("Terminal", data.pickup_terminal),
+    data.pickup_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.pickup_phone)}</p>` : "",
+    data.pickup_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.pickup_instructions)}</p>` : "",
+  ]);
+
+  const dropoff = miniCard("🔁 Devolução", [
+    data.dropoff_address ? `<p style="${TXT}">${escapeHtml(data.dropoff_address)}</p>` : "",
+    data.dropoff_city ? `<p style="${TXT}">${escapeHtml(data.dropoff_city)}${data.dropoff_country ? `, ${escapeHtml(data.dropoff_country)}` : ''}</p>` : "",
+    data.dropoff_date ? `<p style="${TXT}">📅 ${escapeHtml(fmtDate(data.dropoff_date))}${data.dropoff_time ? ` às ${escapeHtml(data.dropoff_time)}` : ''}</p>` : "",
+    data.dropoff_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.dropoff_instructions)}</p>` : "",
+    data.dropoff_late_policy ? `<p style="${TXT}">⏰ ${escapeHtml(data.dropoff_late_policy)}</p>` : "",
+  ]);
+
+  const vehicle = miniCard("🚘 Veículo", [
+    p("Modelo", data.car_model),
+    data.transmission ? p("Transmissão", data.transmission === 'automatico' ? 'Automático' : 'Manual') : "",
+    p("Combustível", data.fuel_type),
+    badgeRow([
+      data.doors ? `🚪 ${data.doors} portas` : "",
+      data.passenger_capacity ? `👤 ${data.passenger_capacity} passageiros` : "",
+      data.luggage_capacity ? `🧳 ${data.luggage_capacity}` : "",
+    ].filter(Boolean) as string[]),
+    p("Placa", data.plate),
+  ]);
+
+  const insurance = miniCard("🛡️ Seguros", [
+    p("Básico", data.basic_insurance),
+    p("Total (CDW/LDW)", data.full_insurance),
+    p("Terceiros", data.third_party_protection),
+    p("Roubo", data.theft_protection),
+    p("Danos", data.damage_protection),
+    data.deductible ? `<p style="${TXT_FG}font-weight:600;">Franquia: ${escapeHtml(data.deductible)}</p>` : "",
+    data.insurance_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.insurance_notes)}</p>` : "",
+  ]);
+
+  const deposit = data.deposit_amount
+    ? miniCard("💳 Caução e Pagamento", [
+        p("Caução", data.deposit_amount),
+        p("Forma", data.deposit_method),
+        data.card_in_driver_name ? `<p style="${TXT_FG}font-weight:600;">⚠️ Cartão no nome do condutor: ${escapeHtml(data.card_in_driver_name)}</p>` : "",
+        p("Pagamento", data.payment_status),
+      ], "amber")
+    : "";
+
+  const drivers = data.drivers?.length > 0
+    ? miniCard("👤 Condutores", data.drivers.map((d: any, i: number) => `<p style="${TXT}">${i === 0 ? '🔑 ' : '👤 '}${escapeHtml(d.name)}${d.document ? ` • ${escapeHtml(d.document)}` : ''}</p>`))
+    : "";
+
+  const fuel = data.fuel_policy
+    ? miniCard("⛽ Combustível", [
+        p("Política", data.fuel_policy === 'cheio_cheio' ? 'Cheio-Cheio' : data.fuel_policy === 'cheio_vazio' ? 'Cheio-Vazio' : data.fuel_policy),
+        p("Penalidade", data.fuel_penalty),
+        data.fuel_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.fuel_notes)}</p>` : "",
+      ])
+    : "";
+
+  const orient = miniCard("⚠️ Orientações", [
+    p("Documentos", data.required_documents),
+    p("Idade mínima", data.minimum_age),
+    p("PID", data.international_permit),
+    data.traffic_rules ? `<p style="${TXT_ITALIC}">${escapeHtml(data.traffic_rules)}</p>` : "",
+    data.emergency_contact ? `<p style="${TXT}">📞 Emergência: ${escapeHtml(data.emergency_contact)}</p>` : "",
+  ]);
+
+  return head + pickup + dropoff + vehicle + insurance + deposit + drivers + fuel + orient;
+}
+
+function renderTransferBody(service: TripService): string {
+  const data = service.service_data as any;
+  const typeMap: Record<string, string> = { arrival: 'Transfer IN', departure: 'Transfer OUT', inter_hotel: 'Inter-hotel' };
+  const route = data.origin_location && data.destination_location
+    ? `${data.origin_location} → ${data.destination_location}`
+    : data.location || '';
+  const head = renderServiceHeadline({
+    title: `${typeMap[data.transfer_type] || data.transfer_type || 'Transfer'} — ${route}`,
+    dates: data.date ? `${fmtDate(data.date)}${data.time ? ` às ${data.time}` : ''}` : "",
+    lines: [
+      data.company_name ? `Empresa: ${data.company_name}` : "",
+      data.reservation_code ? `Reserva: ${data.reservation_code}` : "",
+      data.city ? `Cidade: ${data.city}` : "",
+    ],
+  });
+
+  const arrival = data.transfer_type === 'arrival' && (data.flight_number || data.arrival_airport || data.meeting_instructions)
+    ? miniCard("✈️ Detalhes da Chegada", [
+        p("Voo", data.flight_number),
+        p("Chegada prevista", data.arrival_time),
+        data.arrival_airport ? p("Aeroporto", `${data.arrival_airport}${data.arrival_terminal ? ` • Terminal ${data.arrival_terminal}` : ''}`) : "",
+        p("Espera do motorista", data.driver_wait_time),
+        data.reception_type ? p("Recepção", data.reception_type === 'placa' ? 'Com placa / nome' : data.reception_type === 'balcao' ? 'Balcão da empresa' : 'Ponto fixo') : "",
+        data.meeting_instructions ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">📍 Onde encontrar o motorista:</p><p style="${TXT_FG}">${escapeHtml(data.meeting_instructions)}</p></div>` : "",
+      ])
+    : "";
+
+  const departure = data.transfer_type === 'departure' && (data.hotel_departure_time || data.departure_airport || data.departure_alert)
+    ? miniCard("🧳 Detalhes da Saída", [
+        p("Saída do hotel", data.hotel_departure_time),
+        p("Horário do voo", data.departure_flight_time),
+        p("Aeroporto", data.departure_airport),
+        p("Saída recomendada", data.recommended_departure),
+        data.boarding_point ? p("Embarque", data.boarding_point === 'lobby' ? 'Lobby / Recepção' : data.boarding_point === 'entrada' ? 'Entrada Principal' : data.boarding_point === 'estacionamento' ? 'Estacionamento' : data.boarding_point) : "",
+        data.departure_alert ? `<p style="margin-top:4px;font-size:11px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:6px 9px;border-radius:6px;font-weight:600;">⚠️ ${escapeHtml(data.departure_alert)}</p>` : "",
+      ])
+    : "";
+
+  const driver = (data.driver_name || data.driver_phone)
+    ? miniCard("👤 Motorista", [
+        p("Nome", data.driver_name),
+        p("Idioma", data.driver_language),
+        p("Placa", data.vehicle_plate),
+        data.driver_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.driver_phone)}</p>` : "",
+      ])
+    : "";
+
+  const vehicle = (data.vehicle_type || data.vehicle_capacity)
+    ? miniCard("🚗 Veículo", [
+        data.vehicle_type ? p("Tipo", data.vehicle_type === 'sedan' ? 'Sedan' : data.vehicle_type === 'suv' ? 'SUV' : data.vehicle_type === 'van' ? 'Van' : data.vehicle_type === 'minibus' ? 'Micro-ônibus' : data.vehicle_type === 'onibus' ? 'Ônibus' : data.vehicle_type) : "",
+        badgeRow([
+          data.vehicle_capacity ? `👤 ${data.vehicle_capacity} passageiros` : "",
+          data.luggage_capacity ? `🧳 ${data.luggage_capacity}` : "",
+          data.air_conditioning === 'sim' ? '❄️ Ar-condicionado' : "",
+        ].filter(Boolean) as string[]),
+        data.vehicle_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.vehicle_notes)}</p>` : "",
+      ])
+    : "";
+
+  const passengers = data.passengers?.length > 0
+    ? miniCard("👨‍👩‍👧 Passageiros", data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)} (${p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})${p.needs_child_seat === 'sim' ? ' 🪑 Cadeirinha' : ''}</p>`))
+    : "";
+
+  const locations = (data.pickup_address || data.destination_address)
+    ? miniCard("📍 Locais", [
+        p("Embarque", data.pickup_address),
+        p("Destino", data.destination_address),
+        data.location_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.location_notes)}</p>` : "",
+      ])
+    : "";
+
+  const orient = (data.required_documents || data.emergency_contact || data.plan_b || data.agency_notes)
+    ? miniCard("⚠️ Orientações", [
+        p("Documentos", data.required_documents),
+        data.emergency_contact ? `<p style="${TXT}">📞 Emergência: ${escapeHtml(data.emergency_contact)}</p>` : "",
+        data.agency_contact ? `<p style="${TXT}">📱 Agência: ${escapeHtml(data.agency_contact)}</p>` : "",
+        data.plan_b ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">🔄 Plano B:</p><p style="${TXT_FG}">${escapeHtml(data.plan_b)}</p></div>` : "",
+        data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>` : "",
+      ])
+    : "";
+
+  return head + arrival + departure + driver + vehicle + passengers + locations + orient;
+}
+
+function renderAttractionBody(service: TripService): string {
+  const data = service.service_data as any;
+  const head = renderServiceHeadline({
+    title: data.name,
+    dates: data.date ? fmtDate(data.date) : "",
+    lines: [
+      data.attraction_type ? `Tipo: ${data.attraction_type}` : "",
+      data.city ? `${data.city}${data.country ? `, ${data.country}` : ''}` : "",
+      `Quantidade: ${data.quantity || 1}x`,
+    ],
+  });
+
+  const codes = (data.ticket_code || data.confirmation_code || data.order_number)
+    ? miniCard("📱 Códigos do Ingresso", [
+        data.ticket_code ? `<p style="font-family:'Courier New',monospace;font-weight:700;color:#1e293b;font-size:13px;margin:1px 0;">🎟️ ${escapeHtml(data.ticket_code)}</p>` : "",
+        p("Confirmação", data.confirmation_code),
+        p("Pedido", data.order_number),
+      ])
+    : "";
+
+  const usage = (data.entry_time || data.usage_window || data.duration || data.access_type)
+    ? miniCard("📅 Detalhes de Uso", [
+        p("Horário de entrada", data.entry_time),
+        p("Janela de uso", data.usage_window),
+        p("Duração", data.duration),
+        data.access_type ? p("Acesso", data.access_type === '1_dia' ? '1 Dia' : data.access_type === 'multi_day' ? 'Multi-Day' : data.access_type === 'open_date' ? 'Data Aberta' : 'Horário Marcado') : "",
+        data.requires_reservation ? p("Reserva", data.requires_reservation === 'sim' ? '✅ Necessária' : data.requires_reservation === 'recomendado' ? '📌 Recomendada' : '❌ Não necessária') : "",
+      ])
+    : "";
+
+  const instructions = data.usage_instructions
+    ? miniCard("📋 Instruções Importantes", [`<p style="${TXT_FG}">${escapeHtml(data.usage_instructions)}</p>`], "primary")
+    : "";
+
+  const passengers = data.passengers?.length > 0
+    ? miniCard("👨‍👩‍👧 Ingressos por Pessoa", data.passengers.map((p: any) => `<p style="${TXT}">🎟️ ${escapeHtml(p.name)} (${p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})${p.document ? ` • ${escapeHtml(p.document)}` : ''}</p>`))
+    : "";
+
+  const location = (data.address || data.venue_name)
+    ? miniCard("📍 Localização", [
+        data.venue_name ? `<p style="${TXT_FG}font-weight:600;">${escapeHtml(data.venue_name)}</p>` : "",
+        data.address ? `<p style="${TXT}">${escapeHtml(data.address)}</p>` : "",
+        p("Entrada", data.entry_point),
+        data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">🗺️ Ver no mapa</a></p>` : "",
+      ])
+    : "";
+
+  const rules = (data.attraction_rules || data.cancellation_policy || data.prohibited_items || data.dress_code || data.required_documents)
+    ? miniCard("📌 Regras e Políticas", [
+        p("Cancelamento", data.cancellation_policy),
+        p("Alteração", data.change_policy),
+        data.attraction_rules ? `<p style="${TXT}">${escapeHtml(data.attraction_rules)}</p>` : "",
+        data.prohibited_items ? `<p style="${TXT}">🚫 Proibido: ${escapeHtml(data.prohibited_items)}</p>` : "",
+        data.dress_code ? `<p style="${TXT}">👔 Dress code: ${escapeHtml(data.dress_code)}</p>` : "",
+        data.required_documents ? `<p style="${TXT}">📄 Documentos: ${escapeHtml(data.required_documents)}</p>` : "",
+      ])
+    : "";
+
+  const tips = data.agency_tips
+    ? miniCard("🧠 Dicas do seu Agente de Viagem", [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    : "";
+
+  const contacts = (data.attraction_contact || data.operator_contact || data.agency_contact || data.emergency_contact)
+    ? miniCard("📞 Contatos", [
+        p("Atração", data.attraction_contact),
+        p("Operadora", data.operator_contact),
+        p("Agência", data.agency_contact),
+        data.emergency_contact ? `<p style="${TXT}">🆘 Emergência: ${escapeHtml(data.emergency_contact)}</p>` : "",
+      ])
+    : "";
+
+  const notes = data.agency_notes
+    ? miniCard("📝 Observações", [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    : "";
+
+  return head + codes + usage + instructions + passengers + location + rules + tips + contacts + notes;
+}
+
+function renderInsuranceBody(service: TripService): string {
+  const data = service.service_data as any;
+  let days: number | null = null;
+  try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); days = Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / 86400000); } catch {}
+
+  const head = renderServiceHeadline({
+    title: data.provider,
+    dates: `${fmtDate(data.start_date)} - ${fmtDate(data.end_date)}${days ? ` (${days} dias)` : ''}`,
+    lines: [
+      data.plan_name ? `Plano: ${data.plan_name}` : "",
+      data.policy_number ? `Apólice: ${data.policy_number}` : "",
+      data.destination_covered ? `Destino: ${data.destination_covered}` : "",
+      data.coverage_type ? `Tipo: ${data.coverage_type}` : "",
+    ],
+  });
+
+  const emergency = (data.emergency_phone || data.emergency_whatsapp || data.emergency_email)
+    ? miniCard("🆘 Contatos de Emergência", [
+        data.emergency_phone ? `<p style="${TXT_FG}font-weight:600;">📞 ${escapeHtml(data.emergency_phone)}</p>` : "",
+        data.emergency_whatsapp ? `<p style="${TXT}">💬 WhatsApp: ${escapeHtml(data.emergency_whatsapp)}</p>` : "",
+        data.emergency_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.emergency_email)}</p>` : "",
+        data.emergency_24h === 'sim' ? `<p style="${TXT}color:#0f766e;font-weight:600;">✅ Atendimento 24 horas</p>` : "",
+        p("Idiomas", data.emergency_languages),
+        data.insurer_website ? `<p style="${TXT}"><a href="${escapeHtml(data.insurer_website)}" style="color:#0f766e;text-decoration:underline;">🌐 Site da Seguradora</a></p>` : "",
+      ], "destructive")
+    : "";
+
+  const coverages = (data.medical_assistance || data.hospital_expenses || data.lost_baggage || data.trip_cancellation)
+    ? miniCard("🏥 Coberturas", [
+        data.medical_assistance ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Assistência Médica</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.medical_assistance)}</span></p>` : "",
+        data.hospital_expenses ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Despesas Hospitalares</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.hospital_expenses)}</span></p>` : "",
+        data.lost_baggage ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Bagagem Extraviada</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.lost_baggage)}</span></p>` : "",
+        data.trip_cancellation ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Cancelamento</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.trip_cancellation)}</span></p>` : "",
+        data.trip_interruption ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Interrupção</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.trip_interruption)}</span></p>` : "",
+        data.dental_assistance ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Odontológica</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.dental_assistance)}</span></p>` : "",
+        data.medical_repatriation ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Repatriação</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.medical_repatriation)}</span></p>` : "",
+        data.covid_coverage ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>COVID</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.covid_coverage)}</span></p>` : "",
+      ])
+    : "";
+
+  const procedure = (data.how_to_activate || data.hospital_procedure || data.reimbursement_info)
+    ? miniCard("🆘 O que Fazer em Emergência", [
+        data.how_to_activate ? `<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.how_to_activate)}</p>` : "",
+        p("📄 Documentos", data.required_documents_claim),
+        data.hospital_procedure ? `<p style="${TXT}">🏥 ${escapeHtml(data.hospital_procedure)}</p>` : "",
+        data.reimbursement_info ? `<p style="${TXT}">💰 Reembolso: ${escapeHtml(data.reimbursement_info)}</p>` : "",
+      ], "primary")
+    : "";
+
+  const insured = data.insured_persons?.length > 0
+    ? miniCard("👨‍👩‍👧 Segurados", data.insured_persons.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}${p.coverage_type ? ` (${p.coverage_type === 'individual' ? 'Individual' : 'Familiar'})` : ''}${p.birth_date ? ` • ${escapeHtml(p.birth_date)}` : ''}</p>`))
+    : "";
+
+  const tips = data.agency_tips
+    ? miniCard("🧠 Orientações do seu Agente", [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    : "";
+
+  const notes = data.agency_notes
+    ? miniCard("📝 Observações", [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    : "";
+
+  return head + emergency + coverages + procedure + insured + tips + notes;
+}
+
+function renderCruiseBody(service: TripService): string {
+  const data = service.service_data as any;
+  const head = renderServiceHeadline({
+    title: data.ship_name,
+    dates: `${fmtDate(data.start_date)} - ${fmtDate(data.end_date)}`,
+    lines: [
+      data.cruise_company ? `Companhia: ${data.cruise_company}` : "",
+      `Roteiro: ${data.route || ''}`,
+      data.embarkation_port ? `Embarque: ${data.embarkation_port}` : "",
+      data.disembarkation_port ? `Desembarque: ${data.disembarkation_port}` : "",
+      data.cabin_type ? `Cabine: ${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}` : "",
+      data.deck ? `Deck: ${data.deck}` : "",
+    ],
+  });
+
+  const itinerary = data.itinerary?.length > 0
+    ? miniCard("🗺 Roteiro", data.itinerary.map((stop: any) => `<p style="${TXT}border-left:2px solid rgba(15,118,110,0.25);padding-left:6px;"><strong>${escapeHtml(stop.date ? `${stop.date} – ` : '')}${escapeHtml(stop.port || '')}</strong>${stop.stop_type === 'navegacao' ? ' (Navegação)' : ''}${stop.arrival_time ? ` ${escapeHtml(stop.arrival_time)}` : ''}${stop.departure_time ? ` – ${escapeHtml(stop.departure_time)}` : ''}</p>`))
+    : "";
+
+  const boarding = (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes)
+    ? miniCard("⚠️ Orientações de Embarque", [
+        p("Terminal", data.boarding_terminal),
+        p("Chegada", data.recommended_arrival),
+        p("Documentos", data.required_documents),
+        p("Bagagem", data.baggage_policy),
+        p("Dress Code", data.dress_code),
+        data.boarding_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>` : "",
+      ])
+    : "";
+
+  const passengers = data.passengers?.length > 0
+    ? miniCard("👤 Passageiros", data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}</p>`))
+    : "";
+
+  return head + itinerary + boarding + passengers;
+}
+
+function renderTrainBody(service: TripService): string {
+  const data = service.service_data as any;
+  const time = data.departure_time && data.arrival_time ? `${data.departure_time} → ${data.arrival_time}` : '';
+  const head = renderServiceHeadline({
+    title: `🚆 ${data.origin_city || ''} → ${data.destination_city || ''}`,
+    dates: data.travel_date ? `${fmtDate(data.travel_date)}${time ? ` • ${time}` : ''}` : "",
+    lines: [
+      data.train_company ? `${data.train_company}${data.train_number ? ` • Trem ${data.train_number}` : ''}` : "",
+      data.travel_class ? `Classe: ${data.travel_class}` : "",
+      (data.coach || data.seat) ? `${data.coach ? `Vagão ${data.coach}` : ''}${data.seat ? ` • Assento ${data.seat}` : ''}` : "",
+      data.origin_station ? `Embarque: ${data.origin_station}` : "",
+      data.destination_station ? `Desembarque: ${data.destination_station}` : "",
+    ],
+  });
+  const passengers = data.passengers?.length > 0
+    ? miniCard("👤 Passageiros", data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}</p>`))
+    : "";
+  const notes = data.boarding_notes
+    ? miniCard("📋 Orientações", [`<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>`])
+    : "";
+  return head + passengers + notes;
+}
+
+function renderOtherBody(service: TripService): string {
+  const data = service.service_data as any;
+  const otherTypeMap: Record<string, string> = { restaurante: '🍽️ Restaurante', guia_turistico: '🧭 Guia Turístico', chip_internet: '📶 Chip/Internet', experiencia: '✨ Experiência', evento: '📅 Evento', spa_wellness: '🧘 Spa/Bem-estar', servico_vip: '👑 Serviço VIP', concierge: '🛎️ Concierge', personalizado: '⭐ Personalizado' };
+  const head = renderServiceHeadline({
+    title: data.service_name || (data.other_service_type ? (otherTypeMap[data.other_service_type] || data.other_service_type) : 'Serviço'),
+    dates: data.date ? `${fmtDate(data.date)}${data.time ? ` às ${data.time}` : ''}` : "",
+    lines: [
+      data.other_service_type ? `Tipo: ${otherTypeMap[data.other_service_type] || data.custom_type_name || data.other_service_type}` : "",
+      data.city ? `Local: ${data.city}${data.country ? `, ${data.country}` : ''}` : "",
+      data.duration ? `Duração: ${data.duration}` : "",
+      data.reservation_code ? `Reserva: ${data.reservation_code}` : "",
+    ],
+  });
+
+  const location = (data.location_name || data.address || data.maps_url)
+    ? miniCard("📍 Localização", [
+        data.location_name ? `<p style="${TXT_FG}font-weight:600;">${escapeHtml(data.location_name)}</p>` : "",
+        data.address ? `<p style="${TXT}">${escapeHtml(data.address)}</p>` : "",
+        p("Ponto de encontro", data.meeting_point),
+        data.how_to_arrive ? `<p style="${TXT_ITALIC}">${escapeHtml(data.how_to_arrive)}</p>` : "",
+        data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">🗺️ Abrir no mapa</a></p>` : "",
+      ])
+    : "";
+
+  const contact = (data.contact_name || data.contact_phone || data.contact_whatsapp)
+    ? miniCard("👤 Contato", [
+        data.contact_name ? `<p style="${TXT}">${escapeHtml(data.contact_name)}${data.contact_company ? ` — ${escapeHtml(data.contact_company)}` : ''}</p>` : "",
+        p("🌐", data.contact_language),
+        data.contact_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.contact_phone)}</p>` : "",
+        data.contact_whatsapp ? `<p style="${TXT}">💬 WhatsApp: ${escapeHtml(data.contact_whatsapp)}</p>` : "",
+        data.contact_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.contact_email)}</p>` : "",
+      ])
+    : "";
+
+  const chip = data.other_service_type === 'chip_internet' && (data.chip_operator || data.chip_activation_instructions)
+    ? miniCard("📶 Chip / Internet", [
+        p("Operadora", data.chip_operator),
+        data.chip_type ? p("Tipo", data.chip_type === 'esim' ? 'eSIM (digital)' : 'Chip Físico') : "",
+        data.chip_activation_instructions ? `<p style="${TXT_FG}font-weight:600;margin-top:4px;">📲 Instruções de Ativação:</p><p style="${TXT}white-space:pre-line;">${escapeHtml(data.chip_activation_instructions)}</p>` : "",
+        data.chip_activation_url ? `<p style="${TXT}"><a href="${escapeHtml(data.chip_activation_url)}" style="color:#0f766e;text-decoration:underline;">📲 Link de Ativação</a></p>` : "",
+        p("Suporte", data.chip_support),
+      ], "primary")
+    : "";
+
+  const guide = data.other_service_type === 'guia_turistico' && (data.guide_name || data.guide_meeting_point)
+    ? miniCard("🧭 Guia Turístico", [
+        p("Guia", data.guide_name),
+        p("Idioma", data.guide_language),
+        p("Horário", data.guide_tour_time),
+        p("Duração", data.guide_tour_duration),
+        data.guide_meeting_point ? `<p style="${TXT}">📍 Encontro: ${escapeHtml(data.guide_meeting_point)}</p>` : "",
+      ])
+    : "";
+
+  const tips = data.agency_tips
+    ? miniCard("🧠 Orientações do seu Agente", [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    : "";
+
+  const description = data.description
+    ? miniCard("📝 Descrição", [`<p style="${TXT}white-space:pre-line;">${escapeHtml(data.description)}</p>`])
+    : "";
+
+  const notes = data.agency_notes
+    ? miniCard("📝 Observações", [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    : "";
+
+  return head + location + contact + chip + guide + tips + description + notes;
+}
+
+function renderServiceBody(service: TripService): string {
+  switch (service.service_type) {
+    case "flight": return renderFlightBody(service);
+    case "hotel": return renderHotelBody(service);
+    case "car_rental": return renderCarRentalBody(service);
+    case "transfer": return renderTransferBody(service);
+    case "attraction": return renderAttractionBody(service);
+    case "insurance": return renderInsuranceBody(service);
+    case "cruise": return renderCruiseBody(service);
+    case "train": return renderTrainBody(service);
+    case "other": return renderOtherBody(service);
+    default:
+      // Fallback to legacy flat list if any future type is unmapped
+      return getServiceDetails(service).map(d => `<p style="${TXT}">${escapeHtml(d)}</p>`).join("");
+  }
+}
+
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
@@ -435,9 +1136,7 @@ export async function generateTripPDF(
     const label = SERVICE_LABELS[type] || "Serviço";
     const emoji = SERVICE_EMOJI[type] || "📋";
     const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
-    const details = getServiceDetails(service);
-    const summary = details[0] || "";
-    const restDetails = details.slice(1);
+    const bodyHtml = renderServiceBody(service);
 
     let attachmentsHtml = '';
     if (service.attachments?.length > 0) {
@@ -458,12 +1157,6 @@ export async function generateTripPDF(
       }
     }
 
-    const detailsHtml = restDetails.length > 0
-      ? `<div class="pdf-block pdf-details" style="word-wrap:break-word;overflow-wrap:break-word;">
-          ${restDetails.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
-        </div>`
-      : "";
-
     const attachmentsBlock = attachmentsHtml
       ? `<div class="pdf-block" style="margin-top:8px;padding-top:6px;border-top:1px solid #f1f5f9;">${attachmentsHtml}</div>`
       : "";
@@ -475,12 +1168,11 @@ export async function generateTripPDF(
             <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
             <div style="min-width:0;">
               <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
-              ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
             </div>
           </div>
         </div>
         <div style="padding:12px 16px;">
-          ${detailsHtml}
+          ${bodyHtml}
           ${attachmentsBlock}
         </div>
       </div>
