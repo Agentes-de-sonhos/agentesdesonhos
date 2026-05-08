@@ -100,33 +100,41 @@ function LocalClock({
   const cityLabel = destinationLabel?.split(",")[0]?.trim();
   const wxToday = weatherByDate?.[todayKey];
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/10">
+    <div className="grid grid-cols-3 items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/10">
       {/* Left: clock */}
-      <div className="flex items-center gap-2 min-w-0">
-        <div className="text-base font-bold tabular-nums text-foreground tracking-tight">
+      <div className="flex flex-col min-w-0 justify-self-start">
+        <div className="text-base font-bold tabular-nums text-foreground tracking-tight leading-none">
           {timeStr}
         </div>
-        <div className="min-w-0">
-          <div className="text-[9px] uppercase tracking-[0.2em] text-primary/70 font-semibold leading-none">
-            Hora local{cityLabel ? ` · ${cityLabel}` : ""}
-          </div>
-          <div className="text-[10px] text-muted-foreground capitalize truncate leading-tight mt-0.5">
-            {dateStr}{tzShort ? ` · ${tzShort}` : ""}
-          </div>
+        <div className="text-[9px] uppercase tracking-[0.18em] text-primary/70 font-semibold leading-none mt-1 truncate">
+          Hora local{cityLabel ? ` · ${cityLabel}` : ""}
         </div>
       </div>
-      {/* Right: temperature */}
-      {wxToday && (() => {
-        const WxIcon = weatherIconFor(wxToday.code);
-        return (
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/70 border border-primary/10 shrink-0">
-            <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
-            <span className="text-[11px] font-semibold tabular-nums text-foreground leading-none">
-              {wxToday.tmin}° / {wxToday.tmax}°C
-            </span>
+      {/* Center: date */}
+      <div className="flex flex-col items-center min-w-0">
+        <div className="text-[11px] sm:text-xs font-semibold text-foreground capitalize truncate leading-none">
+          {dateStr}
+        </div>
+        {tzShort && (
+          <div className="text-[9px] uppercase tracking-[0.18em] text-primary/70 font-semibold leading-none mt-1">
+            {tzShort}
           </div>
-        );
-      })()}
+        )}
+      </div>
+      {/* Right: temperature */}
+      <div className="justify-self-end">
+        {wxToday && (() => {
+          const WxIcon = weatherIconFor(wxToday.code);
+          return (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/70 border border-primary/10 shrink-0">
+              <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
+              <span className="text-[11px] font-semibold tabular-nums text-foreground leading-none">
+                {wxToday.tmin}° / {wxToday.tmax}°C
+              </span>
+            </div>
+          );
+        })()}
+      </div>
     </div>
   );
 }
