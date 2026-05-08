@@ -1186,7 +1186,7 @@ export async function generateTripPDF(
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Carteira Digital — ${trip.client_name}</title>
+      <title>Carteira Digital — ${(trip as any).trip_title || trip.client_name}</title>
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:#f8fafc; }
@@ -1246,9 +1246,9 @@ export async function generateTripPDF(
             <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
               🧳 Carteira Digital
             </div>
-            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${trip.destination}</h1>
+            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(trip as any).trip_title || trip.destination}</h1>
             <p style="font-size:14px;color:#64748b;margin-top:4px;">
-              Preparado especialmente para <strong style="color:#1e293b;">${trip.client_name}</strong>
+              ${(trip as any).trip_title ? `<span>${trip.destination} • </span>` : ''}Preparado especialmente para <strong style="color:#1e293b;">${trip.client_name}</strong>
             </p>
           </div>
 
