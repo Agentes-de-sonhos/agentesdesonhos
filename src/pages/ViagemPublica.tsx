@@ -20,6 +20,7 @@ import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
 import { TripCalendar } from "@/components/trip/TripCalendar";
+import { useTripWeather } from "@/hooks/useTripWeather";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
@@ -1686,6 +1687,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   endDate={endDate}
                   itineraryDates={itineraryDates}
                   onDayClick={handleCalendarDayClick}
+                  weatherByDate={weatherByDate}
                 />
               </div>
             </div>
