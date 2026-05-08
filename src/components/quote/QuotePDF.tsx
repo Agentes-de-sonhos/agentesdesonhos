@@ -263,23 +263,79 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
             const display = getServicePaymentDisplay(service.amount, payConfig);
             if (display) {
               paymentHtml = `
-                <div class="pdf-block pdf-payment" style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
-                  <p style="font-size:13px;font-weight:600;color:#0f766e;">💳 ${display}</p>
+                <div class="pdf-block pdf-payment" style="margin-top:10px;background:rgba(15,118,110,0.05);border:1px solid rgba(15,118,110,0.20);border-radius:10px;padding:10px 12px;">
+                  <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#0f766e;margin:0 0 2px;">💳 Parcelamento</p>
+                  <p style="font-size:13px;font-weight:600;color:#0f766e;margin:0;">${display}</p>
                 </div>
               `;
             }
           }
         }
 
-        const detailsHtml = details.length > 0 ? `
-          <div class="pdf-block pdf-details" style="word-wrap:break-word;overflow-wrap:break-word;">
-            ${details.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+        // Parse "Label: value | Label: value" into mini-boxes (chips); leave
+        // multi-line / free-form text as plain blocks. Mirrors the public link.
+        type Chip = { key: string; value: string };
+        const chipItems: Chip[] = [];
+        const freeItems: string[] = [];
+        const labelRe = /^([^:\n]{1,40}):\s*([\s\S]+)$/;
+        details.forEach((d) => {
+          if (!d) return;
+          const isMultiline = /\n/.test(d);
+          if (isMultiline) { freeItems.push(d); return; }
+          // Split top-level by " | " separator
+          const parts = d.split(/\s\|\s/).map((p) => p.trim()).filter(Boolean);
+          let allChips = true;
+          const localChips: Chip[] = [];
+          for (const p of parts) {
+            const m = p.match(labelRe);
+            if (m) {
+              localChips.push({ key: m[1].trim(), value: m[2].trim() });
+            } else {
+              allChips = false;
+              break;
+            }
+          }
+          if (allChips && localChips.length > 0) {
+            chipItems.push(...localChips);
+          } else {
+            freeItems.push(d);
+          }
+        });
+
+        const renderChipValue = (v: string) =>
+          v.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+        const chipsHtml = chipItems.length > 0 ? `
+          <table class="pdf-block pdf-details" style="width:100%;border-collapse:separate;border-spacing:6px 6px;table-layout:fixed;margin:0 -6px;">
+            ${(() => {
+              const rows: string[] = [];
+              for (let i = 0; i < chipItems.length; i += 2) {
+                const cells = chipItems.slice(i, i + 2).map((c) => `
+                  <td style="width:50%;vertical-align:top;background:rgba(241,245,249,0.6);border:1px solid rgba(226,232,240,0.7);border-radius:8px;padding:6px 10px;">
+                    <p style="margin:0 0 2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;line-height:1.2;">${c.key}</p>
+                    <p style="margin:0;font-size:12px;color:#1e293b;line-height:1.4;word-break:break-word;">${renderChipValue(c.value)}</p>
+                  </td>
+                `).join("");
+                const padCount = 2 - chipItems.slice(i, i + 2).length;
+                const pad = padCount > 0 ? '<td style="width:50%;"></td>'.repeat(padCount) : "";
+                rows.push(`<tr>${cells}${pad}</tr>`);
+              }
+              return rows.join("");
+            })()}
+          </table>
+        ` : "";
+
+        const freeHtml = freeItems.length > 0 ? `
+          <div class="pdf-block pdf-details" style="margin-top:${chipItems.length > 0 ? 6 : 0}px;word-wrap:break-word;overflow-wrap:break-word;">
+            ${freeItems.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
           </div>
         ` : "";
 
+        const detailsHtml = `${chipsHtml}${freeHtml}`;
+
         const descHtml = descText ? `
-          <div class="pdf-block pdf-desc" style="margin-top:4px;word-wrap:break-word;overflow-wrap:break-word;">
-            <p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${descText}</p>
+          <div class="pdf-block pdf-desc" style="margin-top:8px;background:rgba(241,245,249,0.5);border-left:3px solid rgba(15,118,110,0.4);border-radius:6px;padding:8px 12px;word-wrap:break-word;overflow-wrap:break-word;">
+            <p style="margin:0;font-size:12px;color:#475569;line-height:1.5;white-space:pre-wrap;word-break:break-word;">${descText}</p>
           </div>
         ` : "";
 
