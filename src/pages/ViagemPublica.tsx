@@ -1594,27 +1594,92 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               }
             }, 120);
           };
+          const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Navegação rápida</h2>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {availableTabs.map((type) => {
+                  const Icon = SERVICE_ICONS[type];
+                  const colors = SERVICE_COLORS[type];
+                  const isActive = openSection === `service-${type}`;
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        setOpenSection(`service-${type}`);
+                        setTimeout(() => {
+                          sectionRefs.current[type]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      }}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
+                        isActive ? cn(colors.activeBorder, colors.activeGlow, "shadow-md") : cn(colors.border, "hover:shadow-md"),
+                        colors.hoverBg
+                      )}
+                    >
+                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", colors.bg)}>
+                        <Icon className={cn("h-5 w-5", colors.icon)} />
+                      </div>
+                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">{SERVICE_LABELS[type]}</span>
+                      <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", colors.badge)}>{grouped[type].length}</span>
+                    </button>
+                  );
+                })}
+                {itineraryActivities.length > 0 && (() => {
+                  const itColors = SERVICE_COLORS.itinerary;
+                  const isActive = openSection === 'itinerary';
+                  return (
+                    <button
+                      onClick={() => {
+                        setOpenSection('itinerary');
+                        setTimeout(() => {
+                          itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      }}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
+                        isActive ? cn(itColors.activeBorder, itColors.activeGlow, "shadow-md") : cn(itColors.border, "hover:shadow-md"),
+                        itColors.hoverBg
+                      )}
+                    >
+                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", itColors.bg)}>
+                        <CalendarDays className={cn("h-5 w-5", itColors.icon)} />
+                      </div>
+                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">Roteiro</span>
+                      <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", itColors.badge)}>
+                        {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
+                      </span>
+                    </button>
+                  );
+                })()}
+              </div>
+            </div>
+          ) : null;
+
           return (
-            <div className="grid gap-4 md:grid-cols-[1fr_320px] items-stretch">
-              <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden flex flex-col">
-                <CardContent className="pt-5 pb-5 relative flex-1 flex flex-col justify-center">
-                  <h1 className="text-xl sm:text-2xl font-bold mb-3">{(tripData as any).trip_title || tripData.client_name}</h1>
-                  <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      <span className="font-medium">{tripData.destination}</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      <span>{format(startDate, "dd/MM", { locale: ptBR })} - {format(endDate, "dd/MM/yyyy", { locale: ptBR })}</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <FileText className="h-4 w-4 text-primary" />
-                      <span>{days} dias</span>
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
+              <div className="space-y-4 min-w-0">
+                <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
+                  <CardContent className="pt-5 pb-5 relative">
+                    <h1 className="text-xl sm:text-2xl font-bold mb-3">{(tripData as any).trip_title || tripData.client_name}</h1>
+                    <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span className="font-medium">{tripData.destination}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span>{format(startDate, "dd/MM", { locale: ptBR })} - {format(endDate, "dd/MM/yyyy", { locale: ptBR })}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span>{days} dias</span>
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+                {navGrid}
+              </div>
               <div className="md:w-[320px] md:justify-self-end w-full">
                 <TripCalendar
                   startDate={startDate}
@@ -1626,69 +1691,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             </div>
           );
         })()}
-
-        {/* Service Navigation Grid — always visible, replaces horizontal scroll */}
-        {(availableTabs.length > 0 || itineraryActivities.length > 0) && (
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Navegação rápida</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-              {availableTabs.map((type) => {
-                const Icon = SERVICE_ICONS[type];
-                const colors = SERVICE_COLORS[type];
-                const isActive = openSection === `service-${type}`;
-                return (
-                  <button
-                    key={type}
-                    onClick={() => {
-                      setOpenSection(`service-${type}`);
-                      setTimeout(() => {
-                        sectionRefs.current[type]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }, 100);
-                    }}
-                    className={cn(
-                      "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
-                      isActive ? cn(colors.activeBorder, colors.activeGlow, "shadow-md") : cn(colors.border, "hover:shadow-md"),
-                      colors.hoverBg
-                    )}
-                  >
-                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", colors.bg)}>
-                      <Icon className={cn("h-5 w-5", colors.icon)} />
-                    </div>
-                    <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">{SERVICE_LABELS[type]}</span>
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", colors.badge)}>{grouped[type].length}</span>
-                  </button>
-                );
-              })}
-              {itineraryActivities.length > 0 && (() => {
-                const itColors = SERVICE_COLORS.itinerary;
-                const isActive = openSection === 'itinerary';
-                return (
-                  <button
-                    onClick={() => {
-                      setOpenSection('itinerary');
-                      setTimeout(() => {
-                        itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }, 100);
-                    }}
-                    className={cn(
-                      "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
-                      isActive ? cn(itColors.activeBorder, itColors.activeGlow, "shadow-md") : cn(itColors.border, "hover:shadow-md"),
-                      itColors.hoverBg
-                    )}
-                  >
-                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", itColors.bg)}>
-                      <CalendarDays className={cn("h-5 w-5", itColors.icon)} />
-                    </div>
-                    <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">Roteiro</span>
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", itColors.badge)}>
-                      {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
-                    </span>
-                  </button>
-                );
-              })()}
-            </div>
-          </div>
-        )}
 
         {/* Services Section */}
         {services.length > 0 && (
