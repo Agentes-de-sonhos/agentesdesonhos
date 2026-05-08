@@ -1296,6 +1296,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preLoadedAgent ?? preAuth?.agentProfile ?? null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const itineraryRef = useRef<HTMLDivElement | null>(null);
+  const dayRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const isMobile = useIsMobile();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
