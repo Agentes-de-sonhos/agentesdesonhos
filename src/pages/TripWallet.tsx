@@ -117,8 +117,8 @@ function TripWalletContent() {
   const saveEditField = async () => {
     if (!id || !editingField) return;
     const val = fieldDraft.trim();
-    if (editingField !== "status" && !val) return;
-    await updateTrip({ id, [editingField]: val } as any);
+    if (editingField !== "status" && editingField !== "trip_title" && !val) return;
+    await updateTrip({ id, [editingField]: editingField === "trip_title" ? (val || null) : val } as any);
     setEditingField(null);
     setFieldDraft("");
   };
