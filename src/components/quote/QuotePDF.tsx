@@ -87,8 +87,8 @@ function getServiceDetails(service: QuoteService): string[] {
         if (ob.leg_date) parts.push(formatDate(ob.leg_date));
         if (ob.flight_number) parts.push(`Voo ${ob.flight_number}`);
         if (ob.airport_origin && ob.airport_destination) parts.push(`${ob.airport_origin} → ${ob.airport_destination}`);
-        if (ob.departure_time) parts.push(`Saída ${ob.departure_time}`);
-        if (ob.arrival_time) parts.push(`Chegada ${ob.arrival_time}`);
+        if (ob.departure_time) parts.push(`Saída: ${ob.departure_time}`);
+        if (ob.arrival_time) parts.push(`Chegada: ${ob.arrival_time}`);
         const label = outLegs.length > 1 ? `✈ Ida (trecho ${i + 1})` : `✈ Ida`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
@@ -97,8 +97,8 @@ function getServiceDetails(service: QuoteService): string[] {
         if (rt.leg_date) parts.push(formatDate(rt.leg_date));
         if (rt.flight_number) parts.push(`Voo ${rt.flight_number}`);
         if (rt.airport_origin && rt.airport_destination) parts.push(`${rt.airport_origin} → ${rt.airport_destination}`);
-        if (rt.departure_time) parts.push(`Saída ${rt.departure_time}`);
-        if (rt.arrival_time) parts.push(`Chegada ${rt.arrival_time}`);
+        if (rt.departure_time) parts.push(`Saída: ${rt.departure_time}`);
+        if (rt.arrival_time) parts.push(`Chegada: ${rt.arrival_time}`);
         const label = retLegs.length > 1 ? `✈ Volta (trecho ${i + 1})` : `✈ Volta`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
@@ -313,7 +313,7 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
                 const cells = chipItems.slice(i, i + 2).map((c) => `
                   <td style="width:50%;vertical-align:top;background:rgba(241,245,249,0.6);border:1px solid rgba(226,232,240,0.7);border-radius:8px;padding:6px 10px;">
                     <p style="margin:0 0 2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;line-height:1.2;">${c.key}</p>
-                    <p style="margin:0;font-size:12px;color:#1e293b;line-height:1.4;word-break:break-word;">${renderChipValue(c.value)}</p>
+                    <p style="margin:0;font-size:12px;color:#1e293b;line-height:1.4;word-break:break-word;${/^\d{1,2}:\d{2}$/.test(c.value) ? 'white-space:nowrap;' : ''}">${renderChipValue(c.value)}</p>
                   </td>
                 `).join("");
                 const padCount = 2 - chipItems.slice(i, i + 2).length;
