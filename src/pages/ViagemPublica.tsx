@@ -32,7 +32,7 @@ function TripCalendarWithWeather(props: {
   itineraryDates?: Set<string>;
   onDayClick?: (dateStr: string) => void;
 }) {
-  const weatherByDate = useTripWeather(props.destination, props.startDate, props.endDate);
+  const { weatherByDate, timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
   return (
     <TripCalendar
       startDate={props.startDate}
@@ -40,6 +40,8 @@ function TripCalendarWithWeather(props: {
       itineraryDates={props.itineraryDates}
       onDayClick={props.onDayClick}
       weatherByDate={weatherByDate}
+      timezone={timezone}
+      destinationLabel={props.destination}
     />
   );
 }
