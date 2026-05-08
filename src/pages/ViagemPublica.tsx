@@ -1512,7 +1512,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const startDate = parseLocal(tripData.start_date);
   const endDate = parseLocal(tripData.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  const weatherByDate = useTripWeather(tripData.destination, startDate, endDate);
   // Sort by user-defined order_index (with creation-date fallback for legacy records)
   const services = [...(tripData.services || [])].sort(
     (a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0)
