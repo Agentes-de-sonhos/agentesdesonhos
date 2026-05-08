@@ -1583,7 +1583,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         {/* Trip Overview Card */}
         <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
           <CardContent className="pt-5 pb-5 relative">
-            <h1 className="text-xl sm:text-2xl font-bold mb-3">{tripData.client_name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold mb-3">{(tripData as any).trip_title || tripData.client_name}</h1>
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
               <span className="flex items-center gap-1.5">
                 <MapPin className="h-4 w-4 text-primary" />

@@ -101,7 +101,7 @@ function TripWalletContent() {
   };
 
   // Inline edit state for the Resumo block
-  const [editingField, setEditingField] = useState<null | "client_name" | "destination" | "start_date" | "end_date" | "status">(null);
+  const [editingField, setEditingField] = useState<null | "client_name" | "trip_title" | "destination" | "start_date" | "end_date" | "status">(null);
   const [fieldDraft, setFieldDraft] = useState<string>("");
 
   const startEditField = (field: typeof editingField, currentValue: string) => {
@@ -117,8 +117,8 @@ function TripWalletContent() {
   const saveEditField = async () => {
     if (!id || !editingField) return;
     const val = fieldDraft.trim();
-    if (editingField !== "status" && !val) return;
-    await updateTrip({ id, [editingField]: val } as any);
+    if (editingField !== "status" && editingField !== "trip_title" && !val) return;
+    await updateTrip({ id, [editingField]: editingField === "trip_title" ? (val || null) : val } as any);
     setEditingField(null);
     setFieldDraft("");
   };
@@ -688,6 +688,41 @@ function TripWalletContent() {
                     <>
                       <span className="font-medium">{trip.client_name}</span>
                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("client_name", trip.client_name)} title="Editar cliente">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                {/* Título da viagem (opcional) */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-muted-foreground">Título:</span>
+                  {editingField === "trip_title" ? (
+                    <>
+                      <Input
+                        value={fieldDraft}
+                        onChange={(e) => setFieldDraft(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
+                        className="h-7 text-sm flex-1 min-w-[200px]"
+                        placeholder="Título da viagem (opcional)"
+                        autoFocus
+                      />
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        className="font-medium cursor-pointer hover:underline"
+                        onClick={() => startEditField("trip_title", (trip as any).trip_title || "")}
+                      >
+                        {(trip as any).trip_title || <span className="text-muted-foreground italic font-normal">Adicionar título</span>}
+                      </span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("trip_title", (trip as any).trip_title || "")} title="Editar título">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                     </>
