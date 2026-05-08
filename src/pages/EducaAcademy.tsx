@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -46,6 +47,7 @@ export default function EducaAcademy() {
   const { isAdmin } = useUserRole();
   const { hasFeature, plan } = useSubscription();
   const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
+  const location = useLocation();
   const [selectedCertificate, setSelectedCertificate] = useState<{
     certificate: UserCertificate;
     trail: LearningTrail;
@@ -56,6 +58,15 @@ export default function EducaAcademy() {
   // Start plan users only have access to the 3 most recent trails
   const isStartPlan = plan === "start";
   const visibleTrails = isStartPlan ? trailsWithProgress.slice(0, 3) : trailsWithProgress;
+
+  // Auto-open a trail when navigated with state.trailId (from dashboards)
+  useEffect(() => {
+    const trailId = (location.state as { trailId?: string } | null)?.trailId;
+    if (trailId && trailsWithProgress.length > 0 && !selectedTrail) {
+      const found = trailsWithProgress.find((t) => t.id === trailId);
+      if (found) setSelectedTrail(found);
+    }
+  }, [location.state, trailsWithProgress, selectedTrail]);
 
   const totalProgress = visibleTrails.length > 0
     ? Math.round(visibleTrails.reduce((sum, t) => sum + t.progressPercent, 0) / visibleTrails.length)

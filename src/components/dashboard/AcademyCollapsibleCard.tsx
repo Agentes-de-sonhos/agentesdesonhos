@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ import {
   Globe,
 } from "lucide-react";
 import { useAcademy } from "@/hooks/useAcademy";
-import { TrailDetail } from "@/components/academy/TrailDetail";
 import type { TrailWithProgress } from "@/types/academy";
 
 interface AcademyCollapsibleCardProps {
@@ -143,9 +141,12 @@ function HorizontalTrailCard({
 export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
   const navigate = useNavigate();
   const { trailsWithProgress, isLoading } = useAcademy();
-  const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
 
   const visibleTrails = limit ? trailsWithProgress.slice(0, limit) : trailsWithProgress;
+
+  const openTrail = (trail: TrailWithProgress) => {
+    navigate("/educa-academy", { state: { trailId: trail.id } });
+  };
 
   return (
     <>
@@ -174,7 +175,7 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                   <HorizontalTrailCard
                     key={trail.id}
                     trail={trail}
-                    onSelect={setSelectedTrail}
+                    onSelect={openTrail}
                   />
                 ))}
               </div>
@@ -194,10 +195,6 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
           </div>
         </CardContent>
       </Card>
-
-      {selectedTrail && (
-        <TrailDetail trail={selectedTrail} onBack={() => setSelectedTrail(null)} />
-      )}
     </>
   );
 }
