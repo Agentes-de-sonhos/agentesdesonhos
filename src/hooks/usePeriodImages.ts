@@ -44,7 +44,9 @@ export function usePeriodImages(tripId: string | undefined) {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-zA-Z0-9_-]/g, "_");
-    const path = `itinerary-periods/${tripId}/${Date.now()}_${sanitizedName}.${ext}`;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Usuário não autenticado");
+    const path = `${user.id}/itinerary-periods/${tripId}/${Date.now()}_${sanitizedName}.${ext}`;
     const { error } = await supabase.storage.from("vouchers").upload(path, file);
     if (error) throw error;
     return path; // Store path only, signed URLs generated on demand
