@@ -47,14 +47,17 @@ interface TripCalendarProps {
 
 const WEEKDAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
-function LocalClock({
+export function LocalClock({
   timezone,
   destinationLabel,
   weatherByDate,
+  standalone = false,
 }: {
   timezone: string;
   destinationLabel?: string;
   weatherByDate?: Record<string, DayWeather>;
+  /** When true, renders with its own rounded card; otherwise as a header strip. */
+  standalone?: boolean;
 }) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -100,7 +103,14 @@ function LocalClock({
   const cityLabel = destinationLabel?.split(",")[0]?.trim();
   const wxToday = weatherByDate?.[todayKey];
   return (
-    <div className="grid grid-cols-3 items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/10">
+    <div
+      className={cn(
+        "grid grid-cols-3 items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5",
+        standalone
+          ? "rounded-2xl border border-primary/15 shadow-sm"
+          : "border-b border-primary/10"
+      )}
+    >
       {/* Left: clock */}
       <div className="flex flex-col min-w-0 justify-self-start">
         <div className="text-base font-bold tabular-nums text-foreground tracking-tight leading-none">
@@ -175,9 +185,6 @@ export function TripCalendar({
 
   return (
     <div className="rounded-2xl border border-primary/15 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden">
-      {timezone && (
-        <LocalClock timezone={timezone} destinationLabel={destinationLabel} weatherByDate={weatherByDate} />
-      )}
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/10">
         <Button

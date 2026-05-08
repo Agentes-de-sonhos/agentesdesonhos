@@ -19,7 +19,7 @@ import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
-import { TripCalendar } from "@/components/trip/TripCalendar";
+import { TripCalendar, LocalClock } from "@/components/trip/TripCalendar";
 import { useTripWeather } from "@/hooks/useTripWeather";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
@@ -42,6 +42,23 @@ function TripCalendarWithWeather(props: {
       weatherByDate={weatherByDate}
       timezone={timezone}
       destinationLabel={props.destination}
+    />
+  );
+}
+
+function TripLocalClockBar(props: {
+  destination: string;
+  startDate: Date;
+  endDate: Date;
+}) {
+  const { weatherByDate, timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
+  if (!timezone) return null;
+  return (
+    <LocalClock
+      timezone={timezone}
+      destinationLabel={props.destination}
+      weatherByDate={weatherByDate}
+      standalone
     />
   );
 }
@@ -1681,6 +1698,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
               <div className="space-y-4 min-w-0">
+                <TripLocalClockBar
+                  destination={tripData.destination}
+                  startDate={startDate}
+                  endDate={endDate}
+                />
                 <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
                   <CardContent className="pt-5 pb-5 relative">
                     <h1 className="text-xl sm:text-2xl font-bold mb-3">{(tripData as any).trip_title || tripData.client_name}</h1>
