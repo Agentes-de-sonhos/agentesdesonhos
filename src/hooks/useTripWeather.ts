@@ -68,12 +68,16 @@ export function useTripWeather(
     const cacheKey = `wx:${destination}:${startStr}:${endStr}`;
 
     const cached = readCache(cacheKey);
-    if (cached) {
+    if (cached && cached.timezone) {
       setData(cached.data);
-      if (cached.timezone) setTimezone(cached.timezone);
+      setTimezone(cached.timezone);
       if (skipWeather) return;
       // Even with cached weather we have timezone; nothing else to fetch.
       return;
+    }
+    if (cached) {
+      // Old cache without timezone — keep weather but still fetch geo for tz.
+      setData(cached.data);
     }
 
     let cancelled = false;
