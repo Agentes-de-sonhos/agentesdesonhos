@@ -7,6 +7,7 @@ export interface Trip {
   id: string;
   user_id: string;
   client_name: string;
+  trip_title?: string | null;
   destination: string;
   start_date: string;
   end_date: string;
