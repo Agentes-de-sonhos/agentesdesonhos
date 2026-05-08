@@ -1601,6 +1601,31 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           </CardContent>
         </Card>
 
+        {/* Calendar with trip period */}
+        {(() => {
+          const itineraryDates = new Set<string>(itineraryActivities.map((a: any) => a.day_date));
+          const handleCalendarDayClick = (dateStr: string) => {
+            setOpenSection('itinerary');
+            setOpenDay(dateStr);
+            setTimeout(() => {
+              const el = dayRefs.current[dateStr];
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 120);
+          };
+          return (
+            <TripCalendar
+              startDate={startDate}
+              endDate={endDate}
+              itineraryDates={itineraryDates}
+              onDayClick={handleCalendarDayClick}
+            />
+          );
+        })()}
+
         {/* Service Navigation Grid — always visible, replaces horizontal scroll */}
         {(availableTabs.length > 0 || itineraryActivities.length > 0) && (
           <div>
