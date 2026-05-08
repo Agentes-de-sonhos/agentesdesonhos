@@ -185,9 +185,6 @@ export function TripCalendar({
 
   return (
     <div className="rounded-2xl border border-primary/15 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden">
-      {timezone && (
-        <LocalClock timezone={timezone} destinationLabel={destinationLabel} weatherByDate={weatherByDate} />
-      )}
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/10">
         <Button
