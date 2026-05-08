@@ -21,8 +21,6 @@ import {
 import { GraduationCap, ArrowRight, Gift, Sparkles } from "lucide-react";
 import { useAcademy } from "@/hooks/useAcademy";
 import { TrailCard } from "@/components/academy/TrailCard";
-import { TrailDetail } from "@/components/academy/TrailDetail";
-import { useState } from "react";
 import type { TrailWithProgress } from "@/types/academy";
 
 import { MapaTurismoCard } from "@/components/dashboard/start/MapaTurismoCard";
@@ -46,7 +44,6 @@ export default function StartDashboard() {
   const { signOut, user } = useAuth();
   const { registerDailyLogin } = useGamification();
   const { trailsWithProgress, isLoading: academyLoading } = useAcademy();
-  const [selectedTrail, setSelectedTrail] = useState<TrailWithProgress | null>(null);
 
   React.useEffect(() => {
     registerDailyLogin();
@@ -84,13 +81,9 @@ export default function StartDashboard() {
   // Start users only see the 3 most recent trails
   const visibleTrails = trailsWithProgress.slice(0, 3);
 
-  if (selectedTrail) {
-    return (
-      <DashboardLayout>
-        <TrailDetail trail={selectedTrail} onBack={() => setSelectedTrail(null)} />
-      </DashboardLayout>
-    );
-  }
+  const handleSelectTrail = (trail: TrailWithProgress) => {
+    navigate("/educa-academy", { state: { trailId: trail.id } });
+  };
 
   return (
     <DashboardLayout>
@@ -198,7 +191,7 @@ export default function StartDashboard() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {visibleTrails.map((trail) => (
-                  <TrailCard key={trail.id} trail={trail} onSelect={setSelectedTrail} />
+                  <TrailCard key={trail.id} trail={trail} onSelect={handleSelectTrail} />
                 ))}
               </div>
             )}
