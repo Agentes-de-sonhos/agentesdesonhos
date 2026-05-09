@@ -1396,18 +1396,40 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     fetchItinerary();
   }, [tripData?.id]);
 
-  const scrollToSection = useCallback((type: TripServiceType | "itinerary") => {
-    if (type === "itinerary") {
-      itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
-    const el = sectionRefs.current[type];
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      const trigger = el.querySelector('[data-state="closed"]');
-      if (trigger) (trigger as HTMLElement).click();
-    }
+  // Robust scroll to a target element: waits for layout/animations to settle
+  // and compensates for the sticky header so the section title is fully visible.
+  // Works consistently across iOS Safari, Chrome Android and Samsung Internet.
+  const scrollToElement = useCallback((el: HTMLElement | null | undefined) => {
+    if (!el) return;
+    const getHeaderOffset = () => {
+      const header = document.querySelector('header.sticky') as HTMLElement | null;
+      const h = header?.getBoundingClientRect().height ?? 0;
+      return h + 12; // small breathing space
+    };
+    const doScroll = () => {
+      const offset = getHeaderOffset();
+      const rect = el.getBoundingClientRect();
+      const target = Math.max(0, rect.top + window.pageYOffset - offset);
+      try {
+        window.scrollTo({ top: target, behavior: 'smooth' });
+      } catch {
+        window.scrollTo(0, target);
+      }
+    };
+    // Double rAF + extra delay so Radix accordion has expanded before measuring.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        doScroll();
+        // Re-correct after the open animation finishes (in case content height changed)
+        setTimeout(doScroll, 320);
+      });
+    });
   }, []);
+
+  const scrollToSection = useCallback((type: TripServiceType | "itinerary") => {
+    const el = type === "itinerary" ? itineraryRef.current : sectionRefs.current[type];
+    scrollToElement(el);
+  }, [scrollToElement]);
 
   // Also try without password for trips that have no password set
   useEffect(() => {
