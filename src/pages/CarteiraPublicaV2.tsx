@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { setOgMeta } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
-import { Loader2, Lock, Eye, EyeOff, ShieldAlert, AlertTriangle } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, Plane, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Trip, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { BrandText } from "@/components/ui/brand-text";
+import { parseLocalDate } from "@/lib/dateParsing";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
@@ -46,15 +47,32 @@ function PasswordGate({
   error,
   branding,
   attemptsLeft,
+  tripStartDate,
 }: {
   onUnlock: (password: string) => void;
   loading: boolean;
   error: string;
   branding: AgentProfile | null;
   attemptsLeft: number | null;
+  tripStartDate: string | null;
 }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+
+  const countdown = (() => {
+    if (!tripStartDate) return null;
+    try {
+      const start = parseLocalDate(tripStartDate);
+      start.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diff = Math.round((start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      return diff;
+    } catch {
+      return null;
+    }
+  })();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +97,35 @@ function PasswordGate({
               alt={branding.agency_name || "Agência"}
               className="h-24 sm:h-28 w-auto object-contain"
             />
+          </div>
+        )}
+
+        {countdown !== null && (
+          <div className="text-center">
+            {countdown > 1 && (
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+                <Plane className="h-4 w-4" />
+                Faltam {countdown} dias para a sua viagem
+              </div>
+            )}
+            {countdown === 1 && (
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+                <Plane className="h-4 w-4" />
+                Falta 1 dia para a sua viagem
+              </div>
+            )}
+            {countdown === 0 && (
+              <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/70 px-4 py-2 text-sm font-bold text-primary-foreground shadow-md">
+                <Sparkles className="h-4 w-4" />
+                Hoje é o grande dia! Boa viagem 🌍✈️
+              </div>
+            )}
+            {countdown < 0 && countdown >= -30 && (
+              <div className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-medium text-muted-foreground">
+                <Sparkles className="h-4 w-4" />
+                Esperamos que esteja aproveitando muito! ✨
+              </div>
+            )}
           </div>
         )}
 
@@ -132,12 +179,23 @@ function PasswordGate({
 
         {branding && (
           <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">
-                Precisa de ajuda?
+            <button
+              type="button"
+              onClick={() => setHelpOpen((v) => !v)}
+              className="w-full bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3 flex items-center justify-center gap-2 hover:from-muted/70 hover:to-muted/30 transition-colors"
+              aria-expanded={helpOpen}
+            >
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Precisa de ajuda? Fale com o seu consultor de viagens
               </p>
-            </div>
-            <div className="p-6">
+              {helpOpen ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+            {helpOpen && (
+            <div className="p-6 border-t border-border/40">
               <div className="flex flex-col items-center text-center space-y-4">
                 {branding.avatar_url ? (
                   <img src={branding.avatar_url} alt={branding.name || ""} className="h-20 w-20 rounded-full object-cover border-4 border-primary/10 shadow-md ring-2 ring-white" />
@@ -161,6 +219,7 @@ function PasswordGate({
                 )}
               </div>
             </div>
+            )}
           </div>
         )}
       </div>
@@ -180,7 +239,8 @@ export default function CarteiraPublicaV2() {
   const [attemptsUsed, setAttemptsUsed] = useState(0);
 
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
-  const MAX_ATTEMPTS = 3;
+  const MAX_ATTEMPTS = 5;
+  const [tripStartDate, setTripStartDate] = useState<string | null>(null);
 
   useEffect(() => {
     setOgMeta({
@@ -194,6 +254,7 @@ export default function CarteiraPublicaV2() {
       .then(({ data }) => {
         const result = data as any;
         if (result?.agent_profile) setBranding(result.agent_profile as AgentProfile);
+        if (result?.trip?.start_date) setTripStartDate(result.trip.start_date as string);
       });
     verifyByPublicCode(agencySlug, accessCode, "")
       .then((result) => {
@@ -280,6 +341,7 @@ export default function CarteiraPublicaV2() {
         error={error}
         branding={branding}
         attemptsLeft={attemptsUsed > 0 ? attemptsLeft : null}
+        tripStartDate={tripStartDate}
       />
     );
   }
