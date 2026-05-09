@@ -235,23 +235,16 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const tripTypeLabels: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
   const segmentTypeLabels: Record<string, string> = { ida: 'Ida', conexao: 'Conexão', volta: 'Volta' };
 
-  const handleFlightImport = (importData: any) => {
-    // Fill main form fields
-    if (importData.airline) form.setValue("main_airline", importData.airline);
-    if (importData.origin_city) form.setValue("origin_city", importData.origin_city);
-    if (importData.destination_city) form.setValue("destination_city", importData.destination_city);
-
-    // Fill first segment
-    const updatedSegments = [...segments];
-    const seg = updatedSegments[0] || emptySegment();
-    if (importData.airline) seg.airline = importData.airline;
-    if (importData.flight_number) seg.flight_number = importData.flight_number;
-    if (importData.origin_airport) seg.origin_airport = importData.origin_airport;
-    if (importData.origin_city) seg.origin_city = importData.origin_city;
-    if (importData.destination_airport) seg.destination_airport = importData.destination_airport;
-    if (importData.destination_city) seg.destination_city = importData.destination_city;
-    if (importData.departure_time) {
-      const t = importData.departure_time;
+  const mapImportToSegment = (data: any, base?: FlightSegmentInput): FlightSegmentInput => {
+    const seg: FlightSegmentInput = base ? { ...base } : emptySegment();
+    if (data.airline) seg.airline = data.airline;
+    if (data.flight_number) seg.flight_number = data.flight_number;
+    if (data.origin_airport) seg.origin_airport = data.origin_airport;
+    if (data.origin_city) seg.origin_city = data.origin_city;
+    if (data.destination_airport) seg.destination_airport = data.destination_airport;
+    if (data.destination_city) seg.destination_city = data.destination_city;
+    if (data.departure_time) {
+      const t = data.departure_time;
       seg.departure_time = t.includes("T")
         ? new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
         : t;
@@ -259,14 +252,67 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         seg.flight_date = t.split("T")[0];
       }
     }
-    if (importData.arrival_time) {
-      const t = importData.arrival_time;
+    if (data.arrival_time) {
+      const t = data.arrival_time;
       seg.arrival_time = t.includes("T")
         ? new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
         : t;
     }
-    updatedSegments[0] = seg;
-    setSegments(updatedSegments);
+    return seg;
+  };
+
+  const isSegmentFilled = (s: FlightSegmentInput) =>
+    !!(s.flight_number || s.origin_airport || s.destination_airport);
+
+  const handleFlightImport = (importData: any) => {
+    // Normalize incoming data into an array of segments
+    const incoming: any[] = Array.isArray(importData?.segments) && importData.segments.length > 0
+      ? importData.segments
+      : [importData];
+
+    setSegments((prev) => {
+      const current = [...prev];
+      const firstFilled = current.length > 0 && isSegmentFilled(current[0]);
+
+      if (!firstFilled) {
+        // Initial import: replace all segments with the imported ones
+        const mapped = incoming.map((s) => mapImportToSegment(s));
+        // Mark types: ida / conexao / volta when multiple
+        if (mapped.length > 1) {
+          mapped.forEach((m, idx) => {
+            m.segment_type = idx === 0 ? 'ida' : idx === mapped.length - 1 ? 'volta' : 'conexao';
+          });
+        }
+        return mapped;
+      }
+
+      // Subsequent import: append imported segments to existing ones
+      const appended = incoming.map((s) => {
+        const next = mapImportToSegment(s);
+        next.segment_type = 'volta';
+        return next;
+      });
+      const combined = [...current, ...appended];
+      // Re-label: first = ida, last = volta, middle = conexao
+      combined.forEach((m, idx) => {
+        m.segment_type = idx === 0 ? 'ida' : idx === combined.length - 1 ? 'volta' : 'conexao';
+      });
+      return combined;
+    });
+
+    // Update main fields from first/last segment of incoming data
+    const firstIn = incoming[0];
+    const lastIn = incoming[incoming.length - 1];
+    if (firstIn?.airline) form.setValue("main_airline", firstIn.airline);
+    // Only set origin/destination cities on initial import (avoid overwriting on second pull)
+    const firstFilledNow = segments.length > 0 && isSegmentFilled(segments[0]);
+    if (!firstFilledNow) {
+      if (firstIn?.origin_city) form.setValue("origin_city", firstIn.origin_city);
+      if (lastIn?.destination_city) form.setValue("destination_city", lastIn.destination_city);
+    } else {
+      // Second import → update destination to the new last segment's destination (typical return flight)
+      if (lastIn?.destination_city) form.setValue("destination_city", lastIn.destination_city);
+    }
   };
 
   return (
