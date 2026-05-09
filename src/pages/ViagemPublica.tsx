@@ -967,14 +967,22 @@ function PublicServiceCard({ service }: { service: TripService }) {
         )}
 
         {/* Attraction - Ticket Codes */}
-        {isAttraction && (data.ticket_code || data.confirmation_code || data.order_number) && (
-          <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
-            <p className="text-xs font-semibold text-primary uppercase tracking-wide">📱 Códigos do Ingresso</p>
-            {data.ticket_code && <p className="text-sm font-mono font-semibold text-foreground">🎟️ {data.ticket_code}</p>}
-            {data.confirmation_code && <p className="text-xs text-muted-foreground">Confirmação: {data.confirmation_code}</p>}
-            {data.order_number && <p className="text-xs text-muted-foreground">Pedido: {data.order_number}</p>}
-          </div>
-        )}
+        {isAttraction && (data.ticket_code || data.confirmation_code || data.order_number) && (() => {
+          const list = [
+            ...((data.ticket_code || "").toString().split(/\r?\n/).map((s: string) => s.trim()).filter(Boolean)),
+            ...((data.confirmation_code ? [String(data.confirmation_code).trim()] : [])),
+            ...((data.order_number ? [String(data.order_number).trim()] : [])),
+          ].filter(Boolean);
+          if (list.length === 0) return null;
+          return (
+            <div className="mt-3 p-3 bg-muted/50 rounded-lg space-y-1">
+              <p className="text-xs font-semibold text-primary uppercase tracking-wide">📱 Códigos do Ingresso</p>
+              {list.map((code, i) => (
+                <p key={i} className="text-sm font-mono font-semibold text-foreground">🎟️ {code}</p>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Attraction - Usage details */}
         {isAttraction && (data.entry_time || data.usage_window || data.duration || data.access_type) && (
