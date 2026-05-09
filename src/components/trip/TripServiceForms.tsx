@@ -1,5 +1,6 @@
 import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
 import { useState } from "react";
+import { useEffect } from "react";
 import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
 import { CollapsibleFormSection } from "@/components/trip/CollapsibleFormSection";
 import { PassengerNameInput } from "@/components/trip/PassengerNameInput";
@@ -2302,6 +2303,20 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const [newPax, setNewPax] = useState<AttractionPassengerInput>({ name: '', ticket_type: 'adulto', document: '', notes: '' });
   const [isEditingPax, setIsEditingPax] = useState(false);
 
+  // Multi-codes: preserve back-compat. Seed from existing ticket_code (newline / " / " separated)
+  // and merge legacy confirmation_code / order_number as separate entries.
+  const seedCodes = (() => {
+    const raw: string[] = [];
+    const tc = (defaultValues?.ticket_code || "").toString();
+    if (tc) tc.split(/\r?\n|\s\/\s/).forEach((c: string) => { const t = c.trim(); if (t) raw.push(t); });
+    const cc = (defaultValues?.confirmation_code || "").toString().trim();
+    if (cc && !raw.includes(cc)) raw.push(cc);
+    const on = (defaultValues?.order_number || "").toString().trim();
+    if (on && !raw.includes(on)) raw.push(on);
+    return raw.length ? raw : [""];
+  })();
+  const [codes, setCodes] = useState<string[]>(seedCodes);
+
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
     defaultValues: {
@@ -2340,6 +2355,16 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
     },
   });
 
+  // Sync codes count with quantity (auto-grow only; preserve existing values)
+  const quantityWatch = form.watch("quantity");
+  useEffect(() => {
+    const q = Math.max(1, Number(quantityWatch) || 1);
+    setCodes((prev) => {
+      if (prev.length >= q) return prev;
+      return [...prev, ...Array(q - prev.length).fill("")];
+    });
+  }, [quantityWatch]);
+
   const addPassenger = () => {
     if (!newPax.name.trim()) return;
     setPassengers([...passengers, { ...newPax }]);
@@ -2348,6 +2373,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   };
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
+    const cleanCodes = codes.map((c) => c.trim()).filter(Boolean);
     onSubmit(
       {
         name: values.name,
@@ -2363,9 +2389,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         access_type: values.access_type || "",
         requires_reservation: values.requires_reservation || "",
         usage_instructions: values.usage_instructions || "",
-        ticket_code: values.ticket_code || "",
-        confirmation_code: values.confirmation_code || "",
-        order_number: values.order_number || "",
+        ticket_code: cleanCodes.join("\n"),
+        confirmation_code: "",
+        order_number: "",
         address: values.address || "",
         venue_name: values.venue_name || "",
         maps_url: values.maps_url || "",
