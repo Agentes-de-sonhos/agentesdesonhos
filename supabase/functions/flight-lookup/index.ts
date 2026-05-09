@@ -252,20 +252,28 @@ async function fetchFromFlightAwareSchedules(
 ): Promise<FlightResult | null> {
   try {
     // /schedules expects date_start/date_end as YYYY-MM-DD (inclusive start, exclusive end).
-    // Expand window by ±1 day to absorb timezone differences; we'll filter below.
+    // It does NOT accept `ident` — must split into airline (letters) + flight_number (digits).
+    const match = flightNumber.match(/^([A-Z]{2,3})\s*(\d{1,4})$/i);
+    if (!match) {
+      console.error(`/schedules: cannot parse flight number "${flightNumber}"`);
+      return null;
+    }
+    const airline = match[1].toUpperCase();
+    const flightNum = match[2];
+
+    // Use a 1-day window per the API (max 2 days). End is exclusive.
     const selected = new Date(`${flightDate}T00:00:00Z`);
-    const startDate = new Date(selected.getTime() - 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10);
-    const endDate = new Date(selected.getTime() + 2 * 24 * 60 * 60 * 1000)
+    const startDate = flightDate;
+    const endDate = new Date(selected.getTime() + 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 10);
 
-    const apiUrl = `https://aeroapi.flightaware.com/aeroapi/schedules/${startDate}/${endDate}?ident=${encodeURIComponent(flightNumber)}`;
+    const apiUrl = `https://aeroapi.flightaware.com/aeroapi/schedules/${startDate}/${endDate}?airline=${encodeURIComponent(airline)}&flight_number=${encodeURIComponent(flightNum)}`;
     const response = await fetch(apiUrl, { headers: { 'x-apikey': apiKey } });
 
     if (!response.ok) {
-      console.error(`FlightAware /schedules error: ${response.status}`);
+      const errText = await response.text().catch(() => '');
+      console.error(`FlightAware /schedules error: ${response.status} ${errText}`);
       return null;
     }
 
@@ -273,38 +281,52 @@ async function fetchFromFlightAwareSchedules(
     const scheduled = data.scheduled || [];
     if (scheduled.length === 0) return null;
 
-    // Sort by scheduled departure UTC
-    const sorted = scheduled
-      .filter((f: any) => f.scheduled_out)
-      .sort((a: any, b: any) =>
-        String(a.scheduled_out).localeCompare(String(b.scheduled_out))
-      );
+    // Prefer the actual operating flight (not codeshares). When `actual_ident` is null,
+    // the row IS the operating flight under the requested airline/number.
+    const operating = scheduled.filter(
+      (f: any) => f.scheduled_out && !f.actual_ident
+    );
+    const pool = operating.length > 0 ? operating : scheduled.filter((f: any) => f.scheduled_out);
+    if (pool.length === 0) return null;
 
-    if (sorted.length === 0) return null;
-
-    // Filter to flights departing on the user-selected date in origin timezone.
-    const matching = sorted.filter((f: any) => {
-      const dep = f.scheduled_out;
-      if (!dep) return false;
-      // /schedules sometimes lacks origin.timezone; fall back to UTC.
-      const tz = f.origin?.timezone;
-      return formatDateInTimezone(dep, tz) === flightDate;
+    // Deduplicate by ident + scheduled_out (codeshares can repeat the same physical flight)
+    const seen = new Set<string>();
+    const unique = pool.filter((f: any) => {
+      const key = `${f.ident_icao || f.ident}_${f.scheduled_out}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
 
-    const candidates = matching.length > 0 ? matching : [];
-    if (candidates.length === 0) return null;
+    // Filter by user-selected date (origin local time when tz available, else UTC).
+    const matching = unique.filter((f: any) => {
+      const tz = f.origin?.timezone;
+      return formatDateInTimezone(f.scheduled_out, tz) === flightDate;
+    });
+    const candidates = matching.length > 0 ? matching : unique;
 
-    const segments: FlightSegment[] = candidates.map((f: any) => ({
-      airline: f.operator || f.operator_iata || '',
-      flight_number: f.ident_iata || f.ident || flightNumber,
-      origin_airport: f.origin?.code_iata || f.origin?.code || '',
-      origin_city: f.origin?.city || '',
-      destination_airport: f.destination?.code_iata || f.destination?.code || '',
-      destination_city: f.destination?.city || '',
-      departure_time: f.scheduled_out || '',
-      arrival_time: f.scheduled_in || '',
-      flight_status: 'scheduled',
-    }));
+    candidates.sort((a: any, b: any) =>
+      String(a.scheduled_out).localeCompare(String(b.scheduled_out))
+    );
+
+    const segments: FlightSegment[] = candidates.map((f: any) => {
+      // /schedules has flat fields: origin (ICAO string), origin_iata, destination, etc.
+      const originIata = typeof f.origin === 'object' ? (f.origin?.code_iata || f.origin?.code) : f.origin_iata;
+      const destIata = typeof f.destination === 'object' ? (f.destination?.code_iata || f.destination?.code) : f.destination_iata;
+      const originIcao = typeof f.origin === 'string' ? f.origin : (f.origin?.code_icao || f.origin_icao);
+      const destIcao = typeof f.destination === 'string' ? f.destination : (f.destination?.code_icao || f.destination_icao);
+      return {
+        airline: f.operator_iata || f.operator || airline,
+        flight_number: f.ident_iata || f.actual_ident_iata || f.ident || flightNumber,
+        origin_airport: originIata || originIcao || '',
+        origin_city: f.origin?.city || '',
+        destination_airport: destIata || destIcao || '',
+        destination_city: f.destination?.city || '',
+        departure_time: f.scheduled_out || '',
+        arrival_time: f.scheduled_in || '',
+        flight_status: 'scheduled',
+      };
+    });
 
     const first = segments[0];
     return { segments, ...first };
