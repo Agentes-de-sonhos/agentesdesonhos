@@ -1598,7 +1598,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-3 sm:py-3 relative flex items-center justify-start sm:justify-center">
+        <div className="max-w-3xl mx-auto px-4 py-3 sm:py-3 relative flex items-center justify-start">
           <div className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-4">
             <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
               <FileText className="mr-2 h-4 w-4" /> Baixar PDF
