@@ -113,13 +113,8 @@ export function LocalClock({
     >
       {/* Top row: clock + temperature */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-col min-w-0">
-          <div className="text-base font-bold tabular-nums text-foreground tracking-tight leading-none">
-            {timeStr}
-          </div>
-          <div className="text-[9px] uppercase tracking-[0.18em] text-primary/70 font-semibold leading-none mt-1 truncate">
-            Hora local{cityLabel ? ` · ${cityLabel}` : ""}
-          </div>
+        <div className="text-base font-bold tabular-nums text-foreground tracking-tight leading-none">
+          {timeStr}
         </div>
         {wxToday && (() => {
           const WxIcon = weatherIconFor(wxToday.code);
@@ -132,17 +127,6 @@ export function LocalClock({
             </div>
           );
         })()}
-      </div>
-      {/* Bottom row: date */}
-      <div className="flex items-center justify-center gap-1.5 pt-1 border-t border-primary/10">
-        <div className="text-[11px] sm:text-xs font-semibold text-foreground capitalize truncate leading-none">
-          {dateStr}
-        </div>
-        {tzShort && (
-          <div className="text-[9px] uppercase tracking-[0.18em] text-primary/70 font-semibold leading-none">
-            · {tzShort}
-          </div>
-        )}
       </div>
     </div>
   );
