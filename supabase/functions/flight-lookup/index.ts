@@ -67,7 +67,12 @@ Deno.serve(async (req) => {
       result = await fetchFromFlightAware(flightNumber, flightDate, flightAwareKey);
     }
 
-    // 3. Fallback to AviationStack
+    // 3. Fallback to FlightAware /schedules (covers up to ~330 days ahead)
+    if (!result && flightAwareKey && flightDate) {
+      result = await fetchFromFlightAwareSchedules(flightNumber, flightDate, flightAwareKey);
+    }
+
+    // 4. Fallback to AviationStack
     if (!result && aviationStackKey) {
       result = await fetchFromAviationStack(flightNumber, flightDate, aviationStackKey);
     }
@@ -237,6 +242,77 @@ function mapFlightAwareStatus(status: string | undefined): string {
 }
 
 // ─── AviationStack fallback ───
+
+// ─── FlightAware /schedules (future flights up to ~330 days) ───
+
+async function fetchFromFlightAwareSchedules(
+  flightNumber: string,
+  flightDate: string,
+  apiKey: string
+): Promise<FlightResult | null> {
+  try {
+    // /schedules expects date_start/date_end as YYYY-MM-DD (inclusive start, exclusive end).
+    // Expand window by ±1 day to absorb timezone differences; we'll filter below.
+    const selected = new Date(`${flightDate}T00:00:00Z`);
+    const startDate = new Date(selected.getTime() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    const endDate = new Date(selected.getTime() + 2 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+
+    const apiUrl = `https://aeroapi.flightaware.com/aeroapi/schedules/${startDate}/${endDate}?ident=${encodeURIComponent(flightNumber)}`;
+    const response = await fetch(apiUrl, { headers: { 'x-apikey': apiKey } });
+
+    if (!response.ok) {
+      console.error(`FlightAware /schedules error: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    const scheduled = data.scheduled || [];
+    if (scheduled.length === 0) return null;
+
+    // Sort by scheduled departure UTC
+    const sorted = scheduled
+      .filter((f: any) => f.scheduled_out)
+      .sort((a: any, b: any) =>
+        String(a.scheduled_out).localeCompare(String(b.scheduled_out))
+      );
+
+    if (sorted.length === 0) return null;
+
+    // Filter to flights departing on the user-selected date in origin timezone.
+    const matching = sorted.filter((f: any) => {
+      const dep = f.scheduled_out;
+      if (!dep) return false;
+      // /schedules sometimes lacks origin.timezone; fall back to UTC.
+      const tz = f.origin?.timezone;
+      return formatDateInTimezone(dep, tz) === flightDate;
+    });
+
+    const candidates = matching.length > 0 ? matching : [];
+    if (candidates.length === 0) return null;
+
+    const segments: FlightSegment[] = candidates.map((f: any) => ({
+      airline: f.operator || f.operator_iata || '',
+      flight_number: f.ident_iata || f.ident || flightNumber,
+      origin_airport: f.origin?.code_iata || f.origin?.code || '',
+      origin_city: f.origin?.city || '',
+      destination_airport: f.destination?.code_iata || f.destination?.code || '',
+      destination_city: f.destination?.city || '',
+      departure_time: f.scheduled_out || '',
+      arrival_time: f.scheduled_in || '',
+      flight_status: 'scheduled',
+    }));
+
+    const first = segments[0];
+    return { segments, ...first };
+  } catch (err) {
+    console.error('FlightAware /schedules fetch error:', err);
+    return null;
+  }
+}
 
 async function fetchFromAviationStack(flightNumber: string, flightDate: string, apiKey: string): Promise<FlightResult | null> {
   try {
