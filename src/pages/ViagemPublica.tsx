@@ -1396,18 +1396,40 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     fetchItinerary();
   }, [tripData?.id]);
 
-  const scrollToSection = useCallback((type: TripServiceType | "itinerary") => {
-    if (type === "itinerary") {
-      itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
-    const el = sectionRefs.current[type];
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      const trigger = el.querySelector('[data-state="closed"]');
-      if (trigger) (trigger as HTMLElement).click();
-    }
+  // Robust scroll to a target element: waits for layout/animations to settle
+  // and compensates for the sticky header so the section title is fully visible.
+  // Works consistently across iOS Safari, Chrome Android and Samsung Internet.
+  const scrollToElement = useCallback((el: HTMLElement | null | undefined) => {
+    if (!el) return;
+    const getHeaderOffset = () => {
+      const header = document.querySelector('header.sticky') as HTMLElement | null;
+      const h = header?.getBoundingClientRect().height ?? 0;
+      return h + 12; // small breathing space
+    };
+    const doScroll = () => {
+      const offset = getHeaderOffset();
+      const rect = el.getBoundingClientRect();
+      const target = Math.max(0, rect.top + window.pageYOffset - offset);
+      try {
+        window.scrollTo({ top: target, behavior: 'smooth' });
+      } catch {
+        window.scrollTo(0, target);
+      }
+    };
+    // Double rAF + extra delay so Radix accordion has expanded before measuring.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        doScroll();
+        // Re-correct after the open animation finishes (in case content height changed)
+        setTimeout(doScroll, 320);
+      });
+    });
   }, []);
+
+  const scrollToSection = useCallback((type: TripServiceType | "itinerary") => {
+    const el = type === "itinerary" ? itineraryRef.current : sectionRefs.current[type];
+    scrollToElement(el);
+  }, [scrollToElement]);
 
   // Also try without password for trips that have no password set
   useEffect(() => {
@@ -1654,12 +1676,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             setOpenSection('itinerary');
             setOpenDay(dateStr);
             setTimeout(() => {
-              const el = dayRefs.current[dateStr];
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              } else {
-                itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
+              const el = dayRefs.current[dateStr] || itineraryRef.current;
+              scrollToElement(el);
             }, 120);
           };
           const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
@@ -1675,9 +1693,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       key={type}
                       onClick={() => {
                         setOpenSection(`service-${type}`);
-                        setTimeout(() => {
-                          sectionRefs.current[type]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 100);
+                        setTimeout(() => scrollToElement(sectionRefs.current[type]), 80);
                       }}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
@@ -1700,9 +1716,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     <button
                       onClick={() => {
                         setOpenSection('itinerary');
-                        setTimeout(() => {
-                          itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 100);
+                        setTimeout(() => scrollToElement(itineraryRef.current), 80);
                       }}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
