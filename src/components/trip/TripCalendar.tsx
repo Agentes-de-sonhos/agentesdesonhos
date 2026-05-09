@@ -61,7 +61,7 @@ export function LocalClock({
 }) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
+    const id = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(id);
   }, []);
   let timeStr = "";
@@ -73,7 +73,6 @@ export function LocalClock({
       timeZone: timezone,
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
       hour12: false,
     }).format(now);
     dateStr = new Intl.DateTimeFormat("pt-BR", {
@@ -113,8 +112,13 @@ export function LocalClock({
     >
       {/* Top row: clock + temperature */}
       <div className="flex items-center justify-between gap-2">
-        <div className="text-base font-bold tabular-nums text-foreground tracking-tight leading-none">
-          {timeStr}
+        <div className="flex items-baseline gap-2 min-w-0">
+          <div className="text-base font-bold tabular-nums text-foreground tracking-tight leading-none">
+            {timeStr}
+          </div>
+          <div className="text-[9px] uppercase tracking-[0.18em] text-primary/70 font-semibold leading-none truncate">
+            Hora local{cityLabel ? ` · ${cityLabel}` : ""}
+          </div>
         </div>
         {wxToday && (() => {
           const WxIcon = weatherIconFor(wxToday.code);
