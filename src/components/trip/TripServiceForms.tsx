@@ -2581,28 +2581,46 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
 
         <CollapsibleFormSection title="📱 Códigos do Ingresso">
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <FormField control={form.control} name="ticket_code" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código do Ingresso</FormLabel>
-              <FormControl><Input placeholder="ABC-123-XYZ" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="confirmation_code" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código de Confirmação</FormLabel>
-              <FormControl><Input placeholder="CONF-456" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="order_number" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nº do Pedido</FormLabel>
-              <FormControl><Input placeholder="#789012" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
+        <p className="text-xs text-muted-foreground">
+          Adicione um código por ingresso (código de confirmação ou nº do pedido). Os campos crescem automaticamente conforme a quantidade de ingressos.
+        </p>
+        <div className="space-y-2">
+          {codes.map((code, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <div className="flex-1 space-y-1">
+                {idx === 0 && (
+                  <label className="text-sm font-medium">Código / Confirmação / Nº do Pedido</label>
+                )}
+                <Input
+                  placeholder={`Código ${idx + 1}`}
+                  value={code}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setCodes((prev) => prev.map((c, i) => (i === idx ? v : c)));
+                  }}
+                />
+              </div>
+              {codes.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={idx === 0 ? "mt-6" : ""}
+                  onClick={() => setCodes((prev) => prev.filter((_, i) => i !== idx))}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setCodes((prev) => [...prev, ""])}
+          >
+            <Plus className="mr-1 h-4 w-4" /> Adicionar código
+          </Button>
         </div>
 
         </CollapsibleFormSection>
