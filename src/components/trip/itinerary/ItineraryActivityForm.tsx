@@ -7,6 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Camera, X, Loader2, Link2, Paperclip, MapPin } from "lucide-react";
 import type { TripService, TripServiceType } from "@/types/trip";
 import type { ItineraryActivity } from "@/hooks/useItineraryActivities";
+import { useResolvedVoucherUrl } from "@/lib/itineraryAssetUrl";
+
+function ExistingPhoto({ path }: { path: string }) {
+  const url = useResolvedVoucherUrl(path);
+  if (!url) return <div className="w-16 h-16 rounded border bg-muted animate-pulse" />;
+  return <img src={url} alt="" className="w-16 h-16 rounded object-cover border" />;
+}
 
 const SERVICE_ICONS: Record<TripServiceType, string> = {
   flight: "✈️", hotel: "🏨", car_rental: "🚗", transfer: "🚐",
@@ -163,7 +170,7 @@ export function ItineraryActivityForm({ tripServices, onSubmit, onCancel, isLoad
         <Label className="text-xs flex items-center gap-1"><Camera className="h-3 w-3" /> Fotos</Label>
         <div className="flex flex-wrap gap-2 mt-1">
           {existingPhotos.map((url, i) => (
-            <img key={i} src={url} alt="" className="w-16 h-16 rounded object-cover border" />
+            <ExistingPhoto key={i} path={url} />
           ))}
           {selectedFiles.map((f, i) => (
             <div key={i} className="relative w-16 h-16">
