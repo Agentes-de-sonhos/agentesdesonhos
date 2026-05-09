@@ -3,12 +3,10 @@ import App from "./App.tsx";
 import "./index.css";
 
 // =============================================================================
-// PWA / Carteira Digital offline
+// Instalação / Carteira Digital
 // =============================================================================
-// Habilita instalação como app + cache offline APENAS no domínio público da
-// carteira digital do cliente final. Em todos os outros contextos (app dos
-// agentes, preview do editor, iframe, lovableproject.com) o Service Worker
-// e o manifest NÃO são ativados — evitando cache "preso" no editor.
+// Habilita apenas o manifest no domínio público da carteira digital.
+// Não registramos Service Worker para evitar o WebAPK bloqueado pelo Android.
 // =============================================================================
 (() => {
   if (typeof window === "undefined") return;
@@ -33,24 +31,18 @@ import "./index.css";
     host.includes("lovableproject-dev.com") ||
     host.includes("lovable.app");
 
-  // Limpa qualquer SW residual em contextos onde ele NÃO deveria existir.
-  if (!isWalletPublicHost || isInIframe || isPreviewHost) {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.getRegistrations?.().then((regs) => {
-        regs.forEach((r) => r.unregister());
-      }).catch(() => {});
-    }
+  // Limpa qualquer SW residual, inclusive o que foi publicado antes.
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations?.().then((regs) => {
+      regs.forEach((r) => r.unregister());
+    }).catch(() => {});
   }
 
-  // Apenas no domínio da carteira digital pública: injeta manifest + meta tags
-  // de instalação e registra o Service Worker (gerado pelo vite-plugin-pwa).
+  // Apenas no domínio da carteira digital pública: injeta manifest + meta tags.
   if (!isWalletPublicHost || isInIframe || isPreviewHost) return;
 
   const head = document.head;
 
-  // Usamos um MANIFEST ESTÁTICO real (http) — manifests data:/blob: fazem o
-  // Chrome gerar WebAPK com targetSdk antigo, o que dispara o aviso de
-  // "App de risco bloqueado" do Google Play Protect na instalação.
   // Para abrir a carteira correta após o launch, gravamos o caminho atual
   // no localStorage e redirecionamos a partir do start_url ("/").
   const path = window.location.pathname || "/";
@@ -102,14 +94,6 @@ import "./index.css";
     head.appendChild(m);
   });
 
-  // Registro do Service Worker em produção (gerado pelo vite-plugin-pwa).
-  if ("serviceWorker" in navigator && import.meta.env.PROD) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .catch(() => {});
-    });
-  }
 })();
 
 createRoot(document.getElementById("root")!).render(<App />);
