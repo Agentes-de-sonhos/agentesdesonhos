@@ -1813,7 +1813,22 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                             </p>
                           </div>
                         </div>
-                        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isDayOpen && "rotate-180")} />
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const wx = itineraryWeather?.[dateStr];
+                            if (!wx) return null;
+                            const WxIcon = weatherIconFor(wx.code);
+                            return (
+                              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/5 border border-primary/10">
+                                <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
+                                <span className="text-[11px] font-semibold tabular-nums text-foreground leading-none">
+                                  {wx.tmin}° / {wx.tmax}°C
+                                </span>
+                              </div>
+                            );
+                          })()}
+                          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isDayOpen && "rotate-180")} />
+                        </div>
                       </button>
                       <div
                         className={cn(
