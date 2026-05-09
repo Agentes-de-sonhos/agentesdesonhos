@@ -674,12 +674,15 @@ function renderAttractionBody(service: TripService): string {
     ],
   });
 
-  const codes = (data.ticket_code || data.confirmation_code || data.order_number)
-    ? miniCard("📱 Códigos do Ingresso", [
-        data.ticket_code ? `<p style="font-family:'Courier New',monospace;font-weight:700;color:#1e293b;font-size:13px;margin:1px 0;">🎟️ ${escapeHtml(data.ticket_code)}</p>` : "",
-        p("Confirmação", data.confirmation_code),
-        p("Pedido", data.order_number),
-      ])
+  const codeList = [
+    ...((data.ticket_code || "").toString().split(/\r?\n/).map((s: string) => s.trim()).filter(Boolean)),
+    ...(data.confirmation_code ? [String(data.confirmation_code).trim()] : []),
+    ...(data.order_number ? [String(data.order_number).trim()] : []),
+  ].filter(Boolean);
+  const codes = codeList.length
+    ? miniCard("📱 Códigos do Ingresso", codeList.map((c) =>
+        `<p style="font-family:'Courier New',monospace;font-weight:700;color:#1e293b;font-size:13px;margin:1px 0;">🎟️ ${escapeHtml(c)}</p>`
+      ))
     : "";
 
   const usage = (data.entry_time || data.usage_window || data.duration || data.access_type)

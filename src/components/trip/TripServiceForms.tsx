@@ -1,5 +1,6 @@
 import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
 import { useState } from "react";
+import { useEffect } from "react";
 import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
 import { CollapsibleFormSection } from "@/components/trip/CollapsibleFormSection";
 import { PassengerNameInput } from "@/components/trip/PassengerNameInput";
@@ -2302,6 +2303,20 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const [newPax, setNewPax] = useState<AttractionPassengerInput>({ name: '', ticket_type: 'adulto', document: '', notes: '' });
   const [isEditingPax, setIsEditingPax] = useState(false);
 
+  // Multi-codes: preserve back-compat. Seed from existing ticket_code (newline / " / " separated)
+  // and merge legacy confirmation_code / order_number as separate entries.
+  const seedCodes = (() => {
+    const raw: string[] = [];
+    const tc = (defaultValues?.ticket_code || "").toString();
+    if (tc) tc.split(/\r?\n|\s\/\s/).forEach((c: string) => { const t = c.trim(); if (t) raw.push(t); });
+    const cc = (defaultValues?.confirmation_code || "").toString().trim();
+    if (cc && !raw.includes(cc)) raw.push(cc);
+    const on = (defaultValues?.order_number || "").toString().trim();
+    if (on && !raw.includes(on)) raw.push(on);
+    return raw.length ? raw : [""];
+  })();
+  const [codes, setCodes] = useState<string[]>(seedCodes);
+
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
     defaultValues: {
@@ -2340,6 +2355,16 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
     },
   });
 
+  // Sync codes count with quantity (auto-grow only; preserve existing values)
+  const quantityWatch = form.watch("quantity");
+  useEffect(() => {
+    const q = Math.max(1, Number(quantityWatch) || 1);
+    setCodes((prev) => {
+      if (prev.length >= q) return prev;
+      return [...prev, ...Array(q - prev.length).fill("")];
+    });
+  }, [quantityWatch]);
+
   const addPassenger = () => {
     if (!newPax.name.trim()) return;
     setPassengers([...passengers, { ...newPax }]);
@@ -2348,6 +2373,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   };
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
+    const cleanCodes = codes.map((c) => c.trim()).filter(Boolean);
     onSubmit(
       {
         name: values.name,
@@ -2363,9 +2389,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         access_type: values.access_type || "",
         requires_reservation: values.requires_reservation || "",
         usage_instructions: values.usage_instructions || "",
-        ticket_code: values.ticket_code || "",
-        confirmation_code: values.confirmation_code || "",
-        order_number: values.order_number || "",
+        ticket_code: cleanCodes.join("\n"),
+        confirmation_code: "",
+        order_number: "",
         address: values.address || "",
         venue_name: values.venue_name || "",
         maps_url: values.maps_url || "",
@@ -2555,28 +2581,46 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
 
         <CollapsibleFormSection title="📱 Códigos do Ingresso">
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <FormField control={form.control} name="ticket_code" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código do Ingresso</FormLabel>
-              <FormControl><Input placeholder="ABC-123-XYZ" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="confirmation_code" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código de Confirmação</FormLabel>
-              <FormControl><Input placeholder="CONF-456" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="order_number" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nº do Pedido</FormLabel>
-              <FormControl><Input placeholder="#789012" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
+        <p className="text-xs text-muted-foreground">
+          Adicione um código por ingresso (código de confirmação ou nº do pedido). Os campos crescem automaticamente conforme a quantidade de ingressos.
+        </p>
+        <div className="space-y-2">
+          {codes.map((code, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <div className="flex-1 space-y-1">
+                {idx === 0 && (
+                  <label className="text-sm font-medium">Código / Confirmação / Nº do Pedido</label>
+                )}
+                <Input
+                  placeholder={`Código ${idx + 1}`}
+                  value={code}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setCodes((prev) => prev.map((c, i) => (i === idx ? v : c)));
+                  }}
+                />
+              </div>
+              {codes.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={idx === 0 ? "mt-6" : ""}
+                  onClick={() => setCodes((prev) => prev.filter((_, i) => i !== idx))}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setCodes((prev) => [...prev, ""])}
+          >
+            <Plus className="mr-1 h-4 w-4" /> Adicionar código
+          </Button>
         </div>
 
         </CollapsibleFormSection>
