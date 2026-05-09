@@ -272,7 +272,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* FlightAutoImport hidden per user request */}
+        <FlightAutoImport onImport={handleFlightImport} />
 
         <CollapsibleFormSection title="✈️ Informações Principais">
         {imageSlot}
