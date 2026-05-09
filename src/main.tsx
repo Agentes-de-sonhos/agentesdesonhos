@@ -48,54 +48,44 @@ import "./index.css";
 
   const head = document.head;
 
-  // Monta um manifest DINÂMICO por carteira: o start_url/scope/id apontam
-  // para o caminho atual (ex.: /minha-agencia/ABC123), de modo que ao
-  // instalar o site como app, o atalho abra exatamente a carteira digital
-  // daquele cliente — e não a raiz do domínio.
+  // Usamos um MANIFEST ESTÁTICO real (http) — manifests data:/blob: fazem o
+  // Chrome gerar WebAPK com targetSdk antigo, o que dispara o aviso de
+  // "App de risco bloqueado" do Google Play Protect na instalação.
+  // Para abrir a carteira correta após o launch, gravamos o caminho atual
+  // no localStorage e redirecionamos a partir do start_url ("/").
   const path = window.location.pathname || "/";
-  // Considera como "carteira específica" qualquer caminho /:slug/:code.
   const isSpecificWallet = /^\/[^/]+\/[^/]+\/?$/.test(path);
-  // Garante que start_url termine sem barra final duplicada e seja absoluto
-  // (Android/Chrome às vezes ignora caminhos relativos ao instalar via blob:).
-  const origin = window.location.origin;
   const cleanPath = path.replace(/\/+$/, "") || "/";
-  const startUrl = isSpecificWallet ? `${origin}${cleanPath}` : `${origin}/`;
-  // O scope precisa cobrir o start_url. Usamos o diretório pai (/:slug/) para
-  // permitir navegação dentro da carteira sem sair do app instalado.
-  const scopePath = isSpecificWallet
-    ? cleanPath.substring(0, cleanPath.lastIndexOf("/") + 1)
-    : "/";
-  const scope = `${origin}${scopePath}`;
-  // short_name: usa o código da carteira quando disponível.
-  const codeFromPath = isSpecificWallet ? path.split("/").filter(Boolean)[1] : "";
-  const shortName = codeFromPath ? `Carteira ${codeFromPath}` : "Carteira";
 
-  const dynamicManifest = {
-    name: "Carteira Digital",
-    short_name: shortName.slice(0, 30),
-    description:
-      "Sua carteira digital de viagem — acesse documentos, roteiro e contatos da sua viagem.",
-    id: startUrl,
-    start_url: startUrl,
-    scope,
-    display: "standalone",
-    orientation: "portrait",
-    background_color: "#ffffff",
-    theme_color: "#0f766e",
-    icons: [
-      { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-      { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-    ],
-  };
-  // Usa data: URL — mais confiável que blob: em Chrome Android para PWA install.
-  const manifestJson = JSON.stringify(dynamicManifest);
-  const manifestUrl =
-    "data:application/manifest+json;charset=utf-8," +
-    encodeURIComponent(manifestJson);
+  // Salva a última carteira visitada para abrir após instalar como app.
+  if (isSpecificWallet) {
+    try {
+      localStorage.setItem("wallet:last-path", cleanPath);
+    } catch {}
+  }
+
+  // Se abriu via PWA (start_url=/?source=pwa) ou via raiz em modo standalone,
+  // redireciona para a última carteira salva.
+  const isStandalone =
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    // iOS
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+  const url = new URL(window.location.href);
+  const launchedFromPwa = url.searchParams.get("source") === "pwa";
+  if ((launchedFromPwa || (isStandalone && path === "/"))) {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem("wallet:last-path");
+    } catch {}
+    if (saved && saved !== "/" && saved !== path) {
+      window.location.replace(saved);
+      return;
+    }
+  }
 
   const manifest = document.createElement("link");
   manifest.rel = "manifest";
-  manifest.href = manifestUrl;
+  manifest.href = "/wallet-manifest.json";
   head.appendChild(manifest);
 
   const metas: Array<[string, string, "name" | "property"]> = [
