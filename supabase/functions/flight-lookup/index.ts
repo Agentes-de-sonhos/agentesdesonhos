@@ -74,7 +74,9 @@ Deno.serve(async (req) => {
 
     if (!result) {
       return new Response(JSON.stringify({
-        error: 'Não foi possível encontrar os dados deste voo. Preencha manualmente.',
+        error: flightDate
+          ? 'Não encontramos um voo com partida nesta data. Verifique se a data informada corresponde à data de saída do voo.'
+          : 'Não foi possível encontrar os dados deste voo. Preencha manualmente.',
       }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -250,7 +252,21 @@ async function fetchFromAviationStack(flightNumber: string, flightDate: string, 
 
     if (!response.ok || data.error || !data.data || data.data.length === 0) return null;
 
-    const flight = data.data[0];
+    // Filter to flights whose DEPARTURE date matches the requested date in
+    // the origin airport's local timezone, to avoid picking a same-numbered
+    // flight that departed the previous day.
+    let candidates = data.data;
+    if (flightDate) {
+      candidates = data.data.filter((f: any) => {
+        const dep = f.departure?.scheduled || f.departure?.estimated;
+        if (!dep) return false;
+        const tz = f.departure?.timezone;
+        return formatDateInTimezone(dep, tz) === flightDate;
+      });
+      if (candidates.length === 0) return null;
+    }
+
+    const flight = candidates[0];
     const segment: FlightSegment = {
       airline: flight.airline?.name || '',
       flight_number: flight.flight?.iata || flightNumber,
