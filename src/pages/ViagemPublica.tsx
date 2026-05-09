@@ -1761,7 +1761,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   itineraryDates={itineraryDates}
                   onDayClick={handleCalendarDayClick}
                 />
-                <TripConverters destination={tripData.destination} />
+                <TripConvertersWrapper
+                  destination={tripData.destination}
+                  startDate={startDate}
+                  endDate={endDate}
+                />
               </div>
             </div>
           );
