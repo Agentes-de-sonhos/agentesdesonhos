@@ -38,6 +38,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { TripServiceType } from "@/types/trip";
+import { resolveAirlineDisplay } from "@/lib/airlines";
+import { getAirportsMap } from "@/lib/airports";
 
 interface TripServiceFormProps {
   serviceType: TripServiceType;
