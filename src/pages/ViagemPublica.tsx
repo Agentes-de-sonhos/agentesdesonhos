@@ -47,6 +47,19 @@ function TripCalendarWithWeather(props: {
   );
 }
 
+const BRAZIL_TIMEZONES = new Set([
+  "America/Sao_Paulo","America/Bahia","America/Fortaleza","America/Recife",
+  "America/Belem","America/Manaus","America/Cuiaba","America/Campo_Grande",
+  "America/Porto_Velho","America/Rio_Branco","America/Boa_Vista","America/Eirunepe",
+  "America/Maceio","America/Araguaina","America/Santarem","America/Noronha",
+]);
+function isInternationalDestination(destination: string, timezone?: string | null): boolean {
+  if (timezone) return !BRAZIL_TIMEZONES.has(timezone);
+  const d = (destination || "").toLowerCase();
+  if (/\bbrasil\b|\bbrazil\b/.test(d)) return false;
+  return false; // unknown -> treat as domestic until timezone resolves
+}
+
 function TripLocalClockBar(props: {
   destination: string;
   startDate: Date;
@@ -54,6 +67,7 @@ function TripLocalClockBar(props: {
 }) {
   const { weatherByDate, timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
   if (!timezone) return null;
+  if (!isInternationalDestination(props.destination, timezone)) return null;
   return (
     <LocalClock
       timezone={timezone}
@@ -62,6 +76,13 @@ function TripLocalClockBar(props: {
       standalone
     />
   );
+}
+
+function TripConvertersWrapper(props: { destination: string; startDate: Date; endDate: Date; }) {
+  const { timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
+  if (!timezone) return null;
+  if (!isInternationalDestination(props.destination, timezone)) return null;
+  return <TripConverters destination={props.destination} />;
 }
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
