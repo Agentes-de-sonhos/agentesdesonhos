@@ -32,11 +32,21 @@ import "./index.css";
     host.includes("lovableproject-dev.com") ||
     host.includes("lovable.app");
 
-  // Limpa qualquer SW residual, inclusive o que foi publicado antes.
+  // No domínio da carteira pública (produção): registra o Service Worker
+  // para suporte offline. Em qualquer outro contexto (preview/iframe/app),
+  // garante que NENHUM Service Worker fique registrado.
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations?.().then((regs) => {
-      regs.forEach((r) => r.unregister());
-    }).catch(() => {});
+    if (isWalletPublicHost && !isInIframe && !isPreviewHost) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js", { scope: "/" })
+          .catch(() => {});
+      });
+    } else {
+      navigator.serviceWorker.getRegistrations?.().then((regs) => {
+        regs.forEach((r) => r.unregister());
+      }).catch(() => {});
+    }
   }
 
   // Apenas no domínio da carteira digital pública: mantém a rota da carteira.
