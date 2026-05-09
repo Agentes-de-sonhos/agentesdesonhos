@@ -55,8 +55,17 @@ import "./index.css";
   const path = window.location.pathname || "/";
   // Considera como "carteira específica" qualquer caminho /:slug/:code.
   const isSpecificWallet = /^\/[^/]+\/[^/]+\/?$/.test(path);
-  const startUrl = isSpecificWallet ? path : "/";
-  const scope = isSpecificWallet ? path : "/";
+  // Garante que start_url termine sem barra final duplicada e seja absoluto
+  // (Android/Chrome às vezes ignora caminhos relativos ao instalar via blob:).
+  const origin = window.location.origin;
+  const cleanPath = path.replace(/\/+$/, "") || "/";
+  const startUrl = isSpecificWallet ? `${origin}${cleanPath}` : `${origin}/`;
+  // O scope precisa cobrir o start_url. Usamos o diretório pai (/:slug/) para
+  // permitir navegação dentro da carteira sem sair do app instalado.
+  const scopePath = isSpecificWallet
+    ? cleanPath.substring(0, cleanPath.lastIndexOf("/") + 1)
+    : "/";
+  const scope = `${origin}${scopePath}`;
   // short_name: usa o código da carteira quando disponível.
   const codeFromPath = isSpecificWallet ? path.split("/").filter(Boolean)[1] : "";
   const shortName = codeFromPath ? `Carteira ${codeFromPath}` : "Carteira";
@@ -78,10 +87,11 @@ import "./index.css";
       { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
     ],
   };
-  const manifestBlob = new Blob([JSON.stringify(dynamicManifest)], {
-    type: "application/manifest+json",
-  });
-  const manifestUrl = URL.createObjectURL(manifestBlob);
+  // Usa data: URL — mais confiável que blob: em Chrome Android para PWA install.
+  const manifestJson = JSON.stringify(dynamicManifest);
+  const manifestUrl =
+    "data:application/manifest+json;charset=utf-8," +
+    encodeURIComponent(manifestJson);
 
   const manifest = document.createElement("link");
   manifest.rel = "manifest";
