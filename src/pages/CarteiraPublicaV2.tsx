@@ -23,6 +23,27 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 const ViagemPublica = lazy(() => import("@/pages/ViagemPublica"));
 
 const REMEMBER_KEY_PREFIX = "wallet-remember-pwd:";
+const OFFLINE_CACHE_PREFIX = "wallet-offline-cache:";
+
+type CachedTripData = { trip: Trip; agentProfile: AgentProfile | null };
+
+const getOfflineCache = (code: string): CachedTripData | null => {
+  try {
+    const raw = localStorage.getItem(OFFLINE_CACHE_PREFIX + code);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.trip) return null;
+    return parsed as CachedTripData;
+  } catch {
+    return null;
+  }
+};
+const setOfflineCache = (code: string, data: CachedTripData) => {
+  try {
+    localStorage.setItem(OFFLINE_CACHE_PREFIX + code, JSON.stringify(data));
+  } catch {}
+};
+
 const getRememberedPassword = (code: string): string | null => {
   try { return localStorage.getItem(REMEMBER_KEY_PREFIX + code); } catch { return null; }
 };
@@ -292,6 +313,7 @@ export default function CarteiraPublicaV2() {
         const result = await tryPassword("");
         setTripData(result);
         setNeedsPassword(false);
+        setOfflineCache(accessCode, result);
       } catch (err: any) {
         const msg = err?.message;
         if (msg === LOCKED_MSG) {
@@ -304,6 +326,7 @@ export default function CarteiraPublicaV2() {
               setTripData(result);
               setUsedPassword(remembered);
               setNeedsPassword(false);
+              setOfflineCache(accessCode, result);
               setLoading(false);
               return;
             } catch (err2: any) {
@@ -321,7 +344,14 @@ export default function CarteiraPublicaV2() {
           }
           setNeedsPassword(true);
         } else {
-          setError(msg || "Erro ao acessar carteira");
+          // Erro de rede / servidor: tenta servir cópia offline.
+          const cached = getOfflineCache(accessCode);
+          if (cached) {
+            setTripData(cached);
+            setNeedsPassword(false);
+          } else {
+            setError(msg || "Erro ao acessar carteira");
+          }
         }
       }
       setLoading(false);
@@ -424,6 +454,7 @@ export default function CarteiraPublicaV2() {
       setTripData(result);
       setUsedPassword(password);
       setNeedsPassword(false);
+      setOfflineCache(accessCode, result);
       if (remember) {
         setRememberedPassword(accessCode, password);
       } else {
