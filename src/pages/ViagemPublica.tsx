@@ -19,7 +19,7 @@ import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
-import { TripCalendar, LocalClock } from "@/components/trip/TripCalendar";
+import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
 import { useTripWeather } from "@/hooks/useTripWeather";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
@@ -1586,6 +1586,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     setOpenDay(prev => prev === key ? null : key);
   }, []);
 
+  // Weather forecast per day for the itinerary header (cached via useTripWeather)
+  const { weatherByDate: itineraryWeather } = useTripWeather(
+    tripData.destination,
+    startDate,
+    endDate,
+  );
+
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
@@ -1806,7 +1813,22 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                             </p>
                           </div>
                         </div>
-                        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isDayOpen && "rotate-180")} />
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const wx = itineraryWeather?.[dateStr];
+                            if (!wx) return null;
+                            const WxIcon = weatherIconFor(wx.code);
+                            return (
+                              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/5 border border-primary/10">
+                                <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
+                                <span className="text-[11px] font-semibold tabular-nums text-foreground leading-none">
+                                  {wx.tmin}° / {wx.tmax}°C
+                                </span>
+                              </div>
+                            );
+                          })()}
+                          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isDayOpen && "rotate-180")} />
+                        </div>
                       </button>
                       <div
                         className={cn(

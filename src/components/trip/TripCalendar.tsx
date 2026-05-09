@@ -149,7 +149,7 @@ export function LocalClock({
   );
 }
 
-function weatherIconFor(code: number) {
+export function weatherIconFor(code: number) {
   // Open-Meteo WMO weather codes
   if (code === 0) return Sun;
   if (code === 1 || code === 2) return CloudSun;
