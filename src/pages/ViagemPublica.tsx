@@ -1906,6 +1906,34 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                                           🗺️ Ver no Google Maps
                                         </a>
                                       )}
+                                      {Array.isArray(act.photo_urls) && act.photo_urls.length > 0 && (
+                                        <div className="flex gap-1.5 flex-wrap mt-2">
+                                          {act.photo_urls.map((p: string, pi: number) => {
+                                            const u = buildVoucherProxyUrl(p, tripData.share_token);
+                                            if (!u) return null;
+                                            return (
+                                              <a key={pi} href={u} target="_blank" rel="noopener noreferrer">
+                                                <img src={u} alt="" loading="lazy" className="w-16 h-16 rounded object-cover border hover:opacity-80 transition-opacity" />
+                                              </a>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                      {Array.isArray(act.document_urls) && act.document_urls.length > 0 && (
+                                        <div className="flex flex-col gap-1 mt-2">
+                                          {act.document_urls.map((p: string, di: number) => {
+                                            const u = buildVoucherProxyUrl(p, tripData.share_token);
+                                            if (!u) return null;
+                                            const name = decodeURIComponent((p.split("/").pop() || "documento").replace(/^\d+_/, ""));
+                                            return (
+                                              <a key={di} href={u} target="_blank" rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                                                📎 {name}
+                                              </a>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
