@@ -282,6 +282,7 @@ export default function CarteiraPublicaV2() {
         if (result?.trip?.start_date) setTripStartDate(result.trip.start_date as string);
       });
     // Try remembered password first (if any), fallback to empty probe
+    // Try remembered password first (if any), fallback to empty probe
     const remembered = getRememberedPassword(accessCode);
     const tryPassword = async (pwd: string) => verifyByPublicCode(agencySlug, accessCode, pwd);
 
