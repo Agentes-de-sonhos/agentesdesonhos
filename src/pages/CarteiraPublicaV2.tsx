@@ -12,6 +12,7 @@ import type { Trip, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { BrandText } from "@/components/ui/brand-text";
 import { parseLocalDate } from "@/lib/dateParsing";
+import { InstallWalletButton } from "@/components/wallet/InstallWalletButton";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
@@ -370,9 +371,47 @@ export default function CarteiraPublicaV2() {
     document.head.appendChild(appCapable);
     created.push(appCapable);
 
+    // Manifest dinâmico só na carteira: habilita o prompt nativo "Instalar app"
+    // do Android com nome/logo da agência e start_url apontando para a carteira.
+    let manifestUrl: string | null = null;
+    try {
+      const startUrl = window.location.pathname + "?source=pwa";
+      const manifest = {
+        name: agencyName,
+        short_name: agencyName.length > 12 ? agencyName.slice(0, 12) : agencyName,
+        id: window.location.pathname,
+        start_url: startUrl,
+        scope: window.location.pathname,
+        display: "standalone",
+        orientation: "portrait",
+        background_color: "#ffffff",
+        theme_color: "#0f766e",
+        icons: logo
+          ? [
+              { src: logo, sizes: "192x192", type: "image/png", purpose: "any" },
+              { src: logo, sizes: "512x512", type: "image/png", purpose: "any" },
+            ]
+          : [
+              { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+              { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+            ],
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+      manifestUrl = URL.createObjectURL(blob);
+      const manifestLink = document.createElement("link");
+      manifestLink.setAttribute("rel", "manifest");
+      manifestLink.setAttribute("href", manifestUrl);
+      manifestLink.setAttribute("data-wallet-icon", "1");
+      document.head.appendChild(manifestLink);
+      created.push(manifestLink);
+    } catch {}
+
     return () => {
       document.title = previousTitle;
       created.forEach((el) => el.parentNode?.removeChild(el));
+      if (manifestUrl) {
+        try { URL.revokeObjectURL(manifestUrl); } catch {}
+      }
     };
   }, [branding]);
 
@@ -478,6 +517,7 @@ export default function CarteiraPublicaV2() {
         preLoadedAgent={tripData.agentProfile}
         preLoadedPassword={usedPassword}
       />
+      <InstallWalletButton agencyName={branding?.agency_name || branding?.name || undefined} />
     </Suspense>
   );
 }
