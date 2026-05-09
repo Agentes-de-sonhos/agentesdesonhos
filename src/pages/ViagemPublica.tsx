@@ -1888,10 +1888,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
             : "";
           return (
-            <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">Seu consultor de viagens</p>
-              </div>
+            <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
+              <summary className="list-none cursor-pointer bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3 flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center flex-1">Precisa de ajuda? Fale com o seu consultor de viagens</p>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+              </summary>
               <div className="p-6 sm:p-8">
                 <div className="flex flex-col items-center text-center space-y-5">
                   {agentProfile.avatar_url ? (
@@ -1917,7 +1918,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   )}
                 </div>
               </div>
-            </div>
+            </details>
           );
         })()}
 
