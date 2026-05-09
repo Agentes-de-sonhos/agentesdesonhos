@@ -1703,14 +1703,15 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           ) : null;
 
           return (
-            <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
-              <div className="space-y-4 min-w-0">
-                <TripLocalClockBar
-                  destination={tripData.destination}
-                  startDate={startDate}
-                  endDate={endDate}
-                />
-                <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
+            <div className="space-y-4">
+              <TripLocalClockBar
+                destination={tripData.destination}
+                startDate={startDate}
+                endDate={endDate}
+              />
+              <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
+                <div className="space-y-4 min-w-0">
+                  <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
                   <CardContent className="pt-5 pb-5 relative">
                     <h1 className="text-xl sm:text-2xl font-bold mb-3">{(tripData as any).trip_title || tripData.client_name}</h1>
                     <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
@@ -1728,17 +1729,18 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       </span>
                     </div>
                   </CardContent>
-                </Card>
-                {navGrid}
-              </div>
-              <div className="md:w-[320px] md:justify-self-end w-full">
-                <TripCalendarWithWeather
-                  destination={tripData.destination}
-                  startDate={startDate}
-                  endDate={endDate}
-                  itineraryDates={itineraryDates}
-                  onDayClick={handleCalendarDayClick}
-                />
+                  </Card>
+                  {navGrid}
+                </div>
+                <div className="md:w-[320px] md:justify-self-end w-full">
+                  <TripCalendarWithWeather
+                    destination={tripData.destination}
+                    startDate={startDate}
+                    endDate={endDate}
+                    itineraryDates={itineraryDates}
+                    onDayClick={handleCalendarDayClick}
+                  />
+                </div>
               </div>
             </div>
           );
