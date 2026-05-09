@@ -23,6 +23,7 @@ import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/Trip
 import { TripConverters } from "@/components/trip/TripConverters";
 import { useTripWeather } from "@/hooks/useTripWeather";
 import { verifyTripAccess } from "@/hooks/useTrips";
+import { buildVoucherProxyUrl } from "@/lib/itineraryAssetUrl";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 
