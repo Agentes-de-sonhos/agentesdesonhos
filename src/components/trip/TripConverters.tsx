@@ -71,8 +71,7 @@ function inferCurrency(destination: string): string {
 }
 
 function CurrencyConverterDialog({ destination, open, onOpenChange }: { destination: string; open: boolean; onOpenChange: (v: boolean) => void; }) {
-  const defaultCur = useMemo(() => inferCurrency(destination), [destination]);
-  const [target, setTarget] = useState(defaultCur);
+  const [target, setTarget] = useState("USD");
   const [amount, setAmount] = useState("100");
   const [direction, setDirection] = useState<"BRL_TO" | "TO_BRL">("BRL_TO");
 
