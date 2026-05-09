@@ -77,9 +77,9 @@ export function LocalClock({
     }).format(now);
     dateStr = new Intl.DateTimeFormat("pt-BR", {
       timeZone: timezone,
-      weekday: "short",
       day: "2-digit",
-      month: "short",
+      month: "2-digit",
+      year: "2-digit",
     }).format(now);
     const parts = new Intl.DateTimeFormat("pt-BR", {
       timeZone: timezone,
@@ -119,6 +119,9 @@ export function LocalClock({
           <div className="text-[9px] uppercase tracking-[0.18em] text-primary/70 font-semibold leading-none truncate">
             Hora local{cityLabel ? ` · ${cityLabel}` : ""}
           </div>
+        </div>
+        <div className="text-sm font-bold tabular-nums text-foreground leading-none shrink-0">
+          {dateStr}
         </div>
         {wxToday && (() => {
           const WxIcon = weatherIconFor(wxToday.code);
