@@ -327,6 +327,55 @@ export default function CarteiraPublicaV2() {
     })();
   }, [agencySlug, accessCode]);
 
+  // Personaliza nome e ícone para "Adicionar à tela inicial" usar o
+  // nome e logotipo da agência. Sem manifest, Android/iOS criam um atalho
+  // baseado no <title> e nos <link rel="apple-touch-icon"> / icon.
+  useEffect(() => {
+    if (!branding) return;
+    const agencyName = branding.agency_name || branding.name || "Carteira Digital";
+    const logo = branding.agency_logo_url || branding.avatar_url || null;
+
+    // Atualiza título da aba — usado por Android como nome do atalho.
+    const previousTitle = document.title;
+    document.title = agencyName;
+
+    // Tags adicionadas dinamicamente — removemos ao desmontar.
+    const created: HTMLElement[] = [];
+
+    if (logo) {
+      // apple-touch-icon (iOS) e icon (Android shortcut sem manifest).
+      const rels = ["apple-touch-icon", "icon", "shortcut icon"];
+      rels.forEach((rel) => {
+        const link = document.createElement("link");
+        link.setAttribute("rel", rel);
+        link.setAttribute("href", logo);
+        link.setAttribute("data-wallet-icon", "1");
+        document.head.appendChild(link);
+        created.push(link);
+      });
+    }
+
+    // Nome curto para iOS Home Screen.
+    const appleTitle = document.createElement("meta");
+    appleTitle.setAttribute("name", "apple-mobile-web-app-title");
+    appleTitle.setAttribute("content", agencyName);
+    appleTitle.setAttribute("data-wallet-icon", "1");
+    document.head.appendChild(appleTitle);
+    created.push(appleTitle);
+
+    const appCapable = document.createElement("meta");
+    appCapable.setAttribute("name", "apple-mobile-web-app-capable");
+    appCapable.setAttribute("content", "yes");
+    appCapable.setAttribute("data-wallet-icon", "1");
+    document.head.appendChild(appCapable);
+    created.push(appCapable);
+
+    return () => {
+      document.title = previousTitle;
+      created.forEach((el) => el.parentNode?.removeChild(el));
+    };
+  }, [branding]);
+
   const handleUnlock = async (password: string, remember: boolean) => {
     if (!agencySlug || !accessCode) return;
     setLoading(true);
