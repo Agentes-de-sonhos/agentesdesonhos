@@ -5,8 +5,9 @@ import "./index.css";
 // =============================================================================
 // Instalação / Carteira Digital
 // =============================================================================
-// Habilita apenas o manifest no domínio público da carteira digital.
-// Não registramos Service Worker para evitar o WebAPK bloqueado pelo Android.
+// Mantém a carteira livre de PWA/WebAPK para evitar bloqueio do Android.
+// Sem manifest e sem Service Worker, o "Adicionar à tela inicial" vira atalho
+// da página atual, preservando a URL exata da carteira do cliente.
 // =============================================================================
 (() => {
   if (typeof window === "undefined") return;
@@ -38,7 +39,7 @@ import "./index.css";
     }).catch(() => {});
   }
 
-  // Apenas no domínio da carteira digital pública: injeta manifest + meta tags.
+  // Apenas no domínio da carteira digital pública: mantém a rota da carteira.
   if (!isWalletPublicHost || isInIframe || isPreviewHost) return;
 
   const head = document.head;
@@ -75,14 +76,8 @@ import "./index.css";
     }
   }
 
-  const manifest = document.createElement("link");
-  manifest.rel = "manifest";
-  manifest.href = "/wallet-manifest.json";
-  head.appendChild(manifest);
-
   const metas: Array<[string, string, "name" | "property"]> = [
     ["theme-color", "#0f766e", "name"],
-    ["mobile-web-app-capable", "yes", "name"],
     ["apple-mobile-web-app-capable", "yes", "name"],
     ["apple-mobile-web-app-status-bar-style", "default", "name"],
     ["apple-mobile-web-app-title", "Carteira Digital", "name"],
