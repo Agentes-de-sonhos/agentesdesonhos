@@ -74,7 +74,9 @@ Deno.serve(async (req) => {
 
     if (!result) {
       return new Response(JSON.stringify({
-        error: 'Não foi possível encontrar os dados deste voo. Preencha manualmente.',
+        error: flightDate
+          ? 'Não encontramos um voo com partida nesta data. Verifique se a data informada corresponde à data de saída do voo.'
+          : 'Não foi possível encontrar os dados deste voo. Preencha manualmente.',
       }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -126,9 +128,13 @@ async function fetchFromFlightAware(flightNumber: string, flightDate: string, ap
     // Build ident with optional date filter
     let apiUrl = `https://aeroapi.flightaware.com/aeroapi/flights/${flightNumber}`;
     if (flightDate) {
-      // AeroAPI expects start/end as ISO timestamps
-      const start = `${flightDate}T00:00:00Z`;
-      const end = `${flightDate}T23:59:59Z`;
+      // AeroAPI expects start/end as ISO timestamps. Expand the window by ±1 day
+      // to account for timezone differences between UTC and the origin airport's
+      // local time — we will filter to the user-selected departure date below
+      // using the origin airport's timezone.
+      const selected = new Date(`${flightDate}T00:00:00Z`);
+      const start = new Date(selected.getTime() - 24 * 60 * 60 * 1000).toISOString();
+      const end = new Date(selected.getTime() + 48 * 60 * 60 * 1000).toISOString();
       apiUrl += `?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`;
     }
 
@@ -157,7 +163,26 @@ async function fetchFromFlightAware(flightNumber: string, flightDate: string, ap
 
     if (sorted.length === 0) return null;
 
-    const segments: FlightSegment[] = sorted.map((f: any) => ({
+    // CRITICAL: when a date is provided we must select the flight whose
+    // DEPARTURE (scheduled_out) falls on the user's selected date in the
+    // origin airport's local timezone — not a flight from the day before
+    // that merely arrived on this date.
+    let candidates = sorted;
+    if (flightDate) {
+      const matching = sorted.filter((f: any) => {
+        const dep = f.scheduled_out || f.estimated_out || f.actual_out || f.scheduled_off;
+        if (!dep) return false;
+        const tz = f.origin?.timezone;
+        const localDate = formatDateInTimezone(dep, tz);
+        return localDate === flightDate;
+      });
+      if (matching.length === 0) {
+        return null; // signal "no flight departing on selected date"
+      }
+      candidates = matching;
+    }
+
+    const segments: FlightSegment[] = candidates.map((f: any) => ({
       airline: f.operator || f.operator_iata || '',
       flight_number: f.ident_iata || f.ident || flightNumber,
       origin_airport: f.origin?.code_iata || f.origin?.code || '',
@@ -178,6 +203,24 @@ async function fetchFromFlightAware(flightNumber: string, flightDate: string, ap
   } catch (err) {
     console.error('FlightAware fetch error:', err);
     return null;
+  }
+}
+
+// Returns YYYY-MM-DD for the given ISO timestamp in the supplied IANA timezone.
+// Falls back to UTC date if timezone is missing/invalid.
+function formatDateInTimezone(isoTimestamp: string, timeZone: string | undefined): string {
+  try {
+    const d = new Date(isoTimestamp);
+    if (isNaN(d.getTime())) return '';
+    const fmt = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timeZone || 'UTC',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    return fmt.format(d); // en-CA gives YYYY-MM-DD
+  } catch {
+    return isoTimestamp.slice(0, 10);
   }
 }
 
@@ -209,7 +252,21 @@ async function fetchFromAviationStack(flightNumber: string, flightDate: string, 
 
     if (!response.ok || data.error || !data.data || data.data.length === 0) return null;
 
-    const flight = data.data[0];
+    // Filter to flights whose DEPARTURE date matches the requested date in
+    // the origin airport's local timezone, to avoid picking a same-numbered
+    // flight that departed the previous day.
+    let candidates = data.data;
+    if (flightDate) {
+      candidates = data.data.filter((f: any) => {
+        const dep = f.departure?.scheduled || f.departure?.estimated;
+        if (!dep) return false;
+        const tz = f.departure?.timezone;
+        return formatDateInTimezone(dep, tz) === flightDate;
+      });
+      if (candidates.length === 0) return null;
+    }
+
+    const flight = candidates[0];
     const segment: FlightSegment = {
       airline: flight.airline?.name || '',
       flight_number: flight.flight?.iata || flightNumber,
