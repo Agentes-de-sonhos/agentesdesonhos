@@ -1012,9 +1012,14 @@ export interface ItineraryActivityForPDF {
   notes: string | null;
   order_index: number;
   maps_url?: string | null;
+  photo_urls?: string[];
+  document_urls?: string[];
 }
 
-function generateItinerarySection(activities: ItineraryActivityForPDF[]): string {
+function generateItinerarySection(
+  activities: ItineraryActivityForPDF[],
+  resolveUrl: (path: string) => string | null
+): string {
   if (!activities || activities.length === 0) return "";
 
   const PERIOD_LABELS: Record<string, string> = { morning: "☀️ Manhã", afternoon: "🌅 Tarde", evening: "🌙 Noite" };
@@ -1045,6 +1050,20 @@ function generateItinerarySection(activities: ItineraryActivityForPDF[]): string
           ${act.location ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">📍 ${act.location}</p>` : ''}
           ${act.notes ? `<p style="font-size: 11px; color: #64748b; font-style: italic; margin: 2px 0 0 0;">${act.notes}</p>` : ''}
           ${act.maps_url ? `<p style="font-size: 11px; margin: 2px 0 0 0;"><a href="${act.maps_url.startsWith('http') ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}" style="color: #0f766e; text-decoration: underline;">🗺️ Ver no Google Maps</a></p>` : ''}
+          ${(() => {
+            const photos = (act.photo_urls || [])
+              .map(p => resolveUrl(p))
+              .filter((u): u is string => !!u);
+            if (!photos.length) return '';
+            return `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">${photos.map(u => `<img src="${u}" style="width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;" />`).join('')}</div>`;
+          })()}
+          ${(() => {
+            const docs = (act.document_urls || [])
+              .map(p => ({ url: resolveUrl(p), name: decodeURIComponent((p.split('/').pop() || 'documento').replace(/^\d+_/, '')) }))
+              .filter(d => !!d.url);
+            if (!docs.length) return '';
+            return `<div style="margin-top:6px;">${docs.map(d => `<a href="${d.url}" style="display:inline-block;font-size:11px;color:#0f766e;text-decoration:underline;margin-right:8px;">📎 ${d.name}</a>`).join('')}</div>`;
+          })()}
         </div>
       `).join("");
 
@@ -1179,7 +1198,15 @@ export async function generateTripPDF(
     `;
   }).join("");
 
-  const itineraryHtml = generateItinerarySection(itineraryActivities || []);
+  const resolveItineraryUrl = (p: string): string | null => {
+    if (!p) return null;
+    if (/^https?:\/\//i.test(p)) return p;
+    if (!supabaseUrl || !shareToken) return null;
+    const cleanPath = extractVoucherPath(p);
+    if (!cleanPath) return null;
+    return `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(cleanPath)}`;
+  };
+  const itineraryHtml = generateItinerarySection(itineraryActivities || [], resolveItineraryUrl);
 
   const html = `
     <!DOCTYPE html>

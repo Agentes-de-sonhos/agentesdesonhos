@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import type { ItineraryActivity } from "@/hooks/useItineraryActivities";
 import type { TripService, TripServiceType } from "@/types/trip";
+import { useResolvedVoucherUrl } from "@/lib/itineraryAssetUrl";
 
 const SERVICE_ICONS: Record<TripServiceType, string> = {
   flight: "✈️", hotel: "🏨", car_rental: "🚗", transfer: "🚐",
@@ -41,6 +42,42 @@ function getDocFileName(url: string) {
 
 function isImageUrl(url: string) {
   return /\.(jpg|jpeg|png|webp)$/i.test(url);
+}
+
+function ResolvedPhoto({ path }: { path: string }) {
+  const url = useResolvedVoucherUrl(path);
+  if (!url) {
+    return <div className="w-12 h-12 rounded border bg-muted animate-pulse" />;
+  }
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      <img src={url} alt="" className="w-12 h-12 rounded object-cover border hover:opacity-80 transition-opacity" />
+    </a>
+  );
+}
+
+function ResolvedDocRow({ path }: { path: string }) {
+  const url = useResolvedVoucherUrl(path);
+  const fileName = getDocFileName(path);
+  const isImg = isImageUrl(path);
+  return (
+    <div className="flex items-center gap-2 text-xs bg-muted/30 rounded px-2 py-1.5 border border-border/50">
+      {isImg ? <ImageIcon className="h-3.5 w-3.5 text-primary shrink-0" /> : <FileText className="h-3.5 w-3.5 text-primary shrink-0" />}
+      <span className="truncate flex-1">{fileName}</span>
+      {url ? (
+        <>
+          <a href={url} target="_blank" rel="noopener noreferrer" title="Visualizar" className="text-primary hover:text-primary/80">
+            <ExternalLink className="h-3 w-3" />
+          </a>
+          <a href={url} download title="Download" className="text-primary hover:text-primary/80">
+            <Download className="h-3 w-3" />
+          </a>
+        </>
+      ) : (
+        <span className="text-muted-foreground text-[10px]">carregando…</span>
+      )}
+    </div>
+  );
 }
 
 function getMapsLink(mapsUrl: string): string {
@@ -126,9 +163,7 @@ export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelet
             {activity.photo_urls && activity.photo_urls.length > 0 && (
               <div className="flex gap-1.5 flex-wrap">
                 {activity.photo_urls.map((url, i) => (
-                  <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                    <img src={url} alt="" className="w-12 h-12 rounded object-cover border hover:opacity-80 transition-opacity" />
-                  </a>
+                  <ResolvedPhoto key={i} path={url} />
                 ))}
               </div>
             )}
@@ -140,22 +175,9 @@ export function ItineraryActivityCard({ activity, linkedService, onEdit, onDelet
                   <Paperclip className="h-3 w-3" /> Documentos
                 </p>
                 <div className="flex flex-col gap-1">
-                  {activity.document_urls.map((url, i) => {
-                    const fileName = getDocFileName(url);
-                    const isImg = isImageUrl(url);
-                    return (
-                      <div key={i} className="flex items-center gap-2 text-xs bg-muted/30 rounded px-2 py-1.5 border border-border/50">
-                        {isImg ? <ImageIcon className="h-3.5 w-3.5 text-primary shrink-0" /> : <FileText className="h-3.5 w-3.5 text-primary shrink-0" />}
-                        <span className="truncate flex-1">{fileName}</span>
-                        <a href={url} target="_blank" rel="noopener noreferrer" title="Visualizar" className="text-primary hover:text-primary/80">
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                        <a href={url} download title="Download" className="text-primary hover:text-primary/80">
-                          <Download className="h-3 w-3" />
-                        </a>
-                      </div>
-                    );
-                  })}
+                  {activity.document_urls.map((url, i) => (
+                    <ResolvedDocRow key={i} path={url} />
+                  ))}
                 </div>
               </div>
             )}
