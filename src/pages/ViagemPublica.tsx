@@ -1586,6 +1586,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     setOpenDay(prev => prev === key ? null : key);
   }, []);
 
+  // Weather forecast per day for the itinerary header (cached via useTripWeather)
+  const { weatherByDate: itineraryWeather } = useTripWeather(
+    tripData.destination,
+    startDate,
+    endDate,
+  );
+
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
