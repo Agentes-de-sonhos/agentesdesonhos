@@ -182,12 +182,13 @@ function PasswordGate({
             <button
               type="button"
               onClick={() => setHelpOpen((v) => !v)}
-              className="w-full bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3 flex items-center justify-center gap-2 hover:from-muted/70 hover:to-muted/30 transition-colors"
+              className="w-full bg-gradient-to-r from-slate-300 via-slate-100 to-white px-6 py-3 flex items-center justify-center gap-2 hover:from-slate-400/80 hover:via-slate-200 hover:to-white transition-colors"
               aria-expanded={helpOpen}
             >
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Precisa de ajuda? Fale com o seu consultor de viagens
-              </p>
+              <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center leading-tight">
+                <p>Precisa de ajuda?</p>
+                <p>Fale com o seu consultor de viagens</p>
+              </div>
               {helpOpen ? (
                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
               ) : (
