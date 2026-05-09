@@ -21,6 +21,17 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 
 const ViagemPublica = lazy(() => import("@/pages/ViagemPublica"));
 
+const REMEMBER_KEY_PREFIX = "wallet-remember-pwd:";
+const getRememberedPassword = (code: string): string | null => {
+  try { return localStorage.getItem(REMEMBER_KEY_PREFIX + code); } catch { return null; }
+};
+const setRememberedPassword = (code: string, pwd: string) => {
+  try { localStorage.setItem(REMEMBER_KEY_PREFIX + code, pwd); } catch {}
+};
+const clearRememberedPassword = (code: string) => {
+  try { localStorage.removeItem(REMEMBER_KEY_PREFIX + code); } catch {}
+};
+
 async function verifyByPublicCode(agencySlug: string, code: string, password: string) {
   const { data, error } = await supabase.rpc('verify_trip_by_public_code', {
     p_agency_slug: agencySlug,
@@ -51,7 +62,7 @@ function PasswordGate({
   attemptsLeft,
   tripStartDate,
 }: {
-  onUnlock: (password: string) => void;
+  onUnlock: (password: string, remember: boolean) => void;
   loading: boolean;
   error: string;
   branding: AgentProfile | null;
@@ -61,6 +72,7 @@ function PasswordGate({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [remember, setRemember] = useState(true);
 
   const countdown = (() => {
     if (!tripStartDate) return null;
@@ -79,7 +91,7 @@ function PasswordGate({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!password.trim()) return;
-    onUnlock(password);
+    onUnlock(password, remember);
   };
 
   const phoneDigits = (branding?.phone || "").replace(/\D/g, "");
@@ -161,6 +173,16 @@ function PasswordGate({
               </button>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
+            <div className="flex items-center justify-center gap-2">
+              <Checkbox
+                id="remember-device"
+                checked={remember}
+                onCheckedChange={(v) => setRemember(v === true)}
+              />
+              <Label htmlFor="remember-device" className="text-sm text-muted-foreground cursor-pointer select-none">
+                Lembrar deste dispositivo
+              </Label>
+            </div>
             {attemptsLeft !== null && attemptsLeft > 0 && (
               <div className="flex items-center justify-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md py-2 px-3">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
