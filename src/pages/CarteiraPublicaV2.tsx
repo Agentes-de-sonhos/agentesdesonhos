@@ -281,25 +281,53 @@ export default function CarteiraPublicaV2() {
         if (result?.agent_profile) setBranding(result.agent_profile as AgentProfile);
         if (result?.trip?.start_date) setTripStartDate(result.trip.start_date as string);
       });
-    verifyByPublicCode(agencySlug, accessCode, "")
-      .then((result) => {
+    // Try remembered password first (if any), fallback to empty probe
+    const remembered = getRememberedPassword(accessCode);
+    const tryPassword = async (pwd: string) => verifyByPublicCode(agencySlug, accessCode, pwd);
+
+    (async () => {
+      try {
+        // First attempt: no password (works if wallet has no password)
+        const result = await tryPassword("");
         setTripData(result);
         setNeedsPassword(false);
-        setLoading(false);
-      })
-      .catch((err) => {
-        if (err.message === "Senha incorreta" || err.message === "Senha inválida") {
-          setNeedsPassword(true);
-        } else if (err.message === LOCKED_MSG) {
+      } catch (err: any) {
+        const msg = err?.message;
+        if (msg === LOCKED_MSG) {
           setIsLocked(true);
+        } else if (msg === "Senha incorreta" || msg === "Senha inválida") {
+          // If we have a remembered password, try it silently
+          if (remembered) {
+            try {
+              const result = await tryPassword(remembered);
+              setTripData(result);
+              setUsedPassword(remembered);
+              setNeedsPassword(false);
+              setLoading(false);
+              return;
+            } catch (err2: any) {
+              const msg2 = err2?.message;
+              if (msg2 === LOCKED_MSG) {
+                setIsLocked(true);
+              } else {
+                // Saved password no longer valid: clear it and ask again
+                clearRememberedPassword(accessCode);
+                setNeedsPassword(true);
+              }
+              setLoading(false);
+              return;
+            }
+          }
+          setNeedsPassword(true);
         } else {
-          setError(err.message);
+          setError(msg || "Erro ao acessar carteira");
         }
-        setLoading(false);
-      });
+      }
+      setLoading(false);
+    })();
   }, [agencySlug, accessCode]);
 
-  const handleUnlock = async (password: string) => {
+  const handleUnlock = async (password: string, remember: boolean) => {
     if (!agencySlug || !accessCode) return;
     setLoading(true);
     setError("");
@@ -308,6 +336,11 @@ export default function CarteiraPublicaV2() {
       setTripData(result);
       setUsedPassword(password);
       setNeedsPassword(false);
+      if (remember) {
+        setRememberedPassword(accessCode, password);
+      } else {
+        clearRememberedPassword(accessCode);
+      }
     } catch (err: any) {
       if (err.message === LOCKED_MSG) {
         setIsLocked(true);
