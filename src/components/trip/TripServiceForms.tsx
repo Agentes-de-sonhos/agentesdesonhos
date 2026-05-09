@@ -266,7 +266,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const isSegmentFilled = (s: FlightSegmentInput) =>
     !!(s.flight_number || s.origin_airport || s.destination_airport);
 
-  const handleFlightImport = (importData: any) => {
+  const handleFlightImport = async (importData: any) => {
     // Normalize incoming data into an array of segments
     const incoming: any[] = Array.isArray(importData?.segments) && importData.segments.length > 0
       ? importData.segments
@@ -274,9 +274,11 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
 
     // Enrich: replace airline IATA/ICAO codes with full commercial name and
     // fill missing origin/destination cities from airports.csv when possible.
-    getAirportsMap().then((airports) => {
-      const enrich = (s: any) => {
-        if (s.airline) s.airline = resolveAirlineDisplay(s.airline);
+    let airports: Map<string, { name: string; city: string; country: string }> | null = null;
+    try { airports = await getAirportsMap(); } catch { /* best-effort */ }
+    incoming.forEach((s) => {
+      if (s.airline) s.airline = resolveAirlineDisplay(s.airline);
+      if (airports) {
         if (!s.origin_city && s.origin_airport) {
           const ap = airports.get(String(s.origin_airport).toUpperCase());
           if (ap?.city) s.origin_city = ap.city;
@@ -285,12 +287,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           const ap = airports.get(String(s.destination_airport).toUpperCase());
           if (ap?.city) s.destination_city = ap.city;
         }
-      };
-      incoming.forEach(enrich);
-    }).catch(() => {/* best-effort enrichment */});
-    // Synchronous best-effort: airline name doesn't need airports.csv
-    incoming.forEach((s) => {
-      if (s.airline) s.airline = resolveAirlineDisplay(s.airline);
+      }
     });
 
     setSegments((prev) => {
