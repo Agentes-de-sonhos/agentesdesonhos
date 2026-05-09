@@ -1676,12 +1676,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             setOpenSection('itinerary');
             setOpenDay(dateStr);
             setTimeout(() => {
-              const el = dayRefs.current[dateStr];
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              } else {
-                itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
+              const el = dayRefs.current[dateStr] || itineraryRef.current;
+              scrollToElement(el);
             }, 120);
           };
           const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
@@ -1697,9 +1693,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       key={type}
                       onClick={() => {
                         setOpenSection(`service-${type}`);
-                        setTimeout(() => {
-                          sectionRefs.current[type]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 100);
+                        setTimeout(() => scrollToElement(sectionRefs.current[type]), 80);
                       }}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
@@ -1722,9 +1716,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     <button
                       onClick={() => {
                         setOpenSection('itinerary');
-                        setTimeout(() => {
-                          itineraryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 100);
+                        setTimeout(() => scrollToElement(itineraryRef.current), 80);
                       }}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
