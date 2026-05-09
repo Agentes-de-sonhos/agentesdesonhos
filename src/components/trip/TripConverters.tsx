@@ -71,9 +71,9 @@ function inferCurrency(destination: string): string {
 }
 
 function CurrencyConverterDialog({ destination, open, onOpenChange }: { destination: string; open: boolean; onOpenChange: (v: boolean) => void; }) {
-  const [target, setTarget] = useState("USD");
+  const [target, setTarget] = useState(() => inferCurrency(destination || ""));
   const [amount, setAmount] = useState("100");
-  const [direction, setDirection] = useState<"BRL_TO" | "TO_BRL">("BRL_TO");
+  const [direction, setDirection] = useState<"BRL_TO" | "TO_BRL">("TO_BRL");
 
   const { data: rate, isLoading, isError } = useQuery({
     queryKey: ["fx", target],
