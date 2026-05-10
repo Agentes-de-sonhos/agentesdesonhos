@@ -102,6 +102,7 @@ const CadastroGuia = lazy(() => import("./pages/CadastroGuia"));
 const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 const SupplierProfileEdit = lazy(() => import("./pages/SupplierProfileEdit"));
 const RequisitosViagem = lazy(() => import("./pages/RequisitosViagem"));
+const Blog = lazy(() => import("./pages/Blog"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -152,6 +153,7 @@ const App = () => (
               }
             />
             <Route path="/planos" element={<Planos />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/desconto30off" element={<Desconto30Off />} />
             <Route path="/cadastro-fornecedor" element={<CadastroFornecedor />} />
             <Route path="/cadastro-guia" element={<CadastroGuia />} />
