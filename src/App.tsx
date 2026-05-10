@@ -153,6 +153,7 @@ const App = () => (
               }
             />
             <Route path="/planos" element={<Planos />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/desconto30off" element={<Desconto30Off />} />
             <Route path="/cadastro-fornecedor" element={<CadastroFornecedor />} />
             <Route path="/cadastro-guia" element={<CadastroGuia />} />
