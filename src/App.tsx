@@ -102,6 +102,7 @@ const CadastroGuia = lazy(() => import("./pages/CadastroGuia"));
 const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 const SupplierProfileEdit = lazy(() => import("./pages/SupplierProfileEdit"));
 const RequisitosViagem = lazy(() => import("./pages/RequisitosViagem"));
+const Blog = lazy(() => import("./pages/Blog"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
