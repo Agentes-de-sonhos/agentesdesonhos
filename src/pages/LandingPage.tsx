@@ -73,6 +73,7 @@ const sectionLinks = [
   { label: "Funcionalidades", id: "funcionalidades" },
   { label: "Benefícios", id: "beneficios" },
   { label: "Diferenciais", id: "diferenciais" },
+  { label: "Blog", href: "https://www.agentesdesonhos.com.br/blog" },
   { label: "FAQ", id: "faq" },
 ];
 
@@ -317,15 +318,25 @@ export default function LandingPage() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {sectionLinks.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => scrollToSection(s.id)}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
-              >
-                {s.label}
-              </button>
-            ))}
+            {sectionLinks.map((s) =>
+              s.href ? (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
+                >
+                  {s.label}
+                </a>
+              ) : (
+                <button
+                  key={s.id}
+                  onClick={() => scrollToSection(s.id!)}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
+                >
+                  {s.label}
+                </button>
+              )
+            )}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -358,15 +369,25 @@ export default function LandingPage() {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border/40 bg-card py-4 px-6 space-y-2">
-            {sectionLinks.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => scrollToSection(s.id)}
-                className="block w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
-              >
-                {s.label}
-              </button>
-            ))}
+            {sectionLinks.map((s) =>
+              s.href ? (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  className="block w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
+                >
+                  {s.label}
+                </a>
+              ) : (
+                <button
+                  key={s.id}
+                  onClick={() => scrollToSection(s.id!)}
+                  className="block w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
+                >
+                  {s.label}
+                </button>
+              )
+            )}
             <div className="flex gap-2 pt-2 border-t border-border/40">
               <Button variant="outline" size="sm" onClick={goLogin} className="flex-1 rounded-xl">
                 Entrar
