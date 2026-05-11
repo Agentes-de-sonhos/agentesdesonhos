@@ -73,6 +73,7 @@ const sectionLinks = [
   { label: "Funcionalidades", id: "funcionalidades" },
   { label: "Benefícios", id: "beneficios" },
   { label: "Diferenciais", id: "diferenciais" },
+  { label: "Blog", href: "https://www.agentesdesonhos.com.br/blog" },
   { label: "FAQ", id: "faq" },
 ];
 
