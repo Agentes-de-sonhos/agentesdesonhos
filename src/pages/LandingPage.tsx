@@ -676,6 +676,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Blog ───────────────────────────────────────────────── */}
+      <BlogSection />
+
       {/* ── FAQ ────────────────────────────────────────────────── */}
       <section id="faq" className="py-[100px] md:py-[120px] scroll-mt-20" style={{ backgroundColor: "hsl(210 20% 97%)" }}>
         <div className={cn(sectionContainer, "max-w-2xl space-y-12")}>
