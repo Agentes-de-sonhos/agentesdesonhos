@@ -318,15 +318,25 @@ export default function LandingPage() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {sectionLinks.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => scrollToSection(s.id)}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
-              >
-                {s.label}
-              </button>
-            ))}
+            {sectionLinks.map((s) =>
+              s.href ? (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
+                >
+                  {s.label}
+                </a>
+              ) : (
+                <button
+                  key={s.id}
+                  onClick={() => scrollToSection(s.id!)}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
+                >
+                  {s.label}
+                </button>
+              )
+            )}
           </nav>
 
           <div className="flex items-center gap-3">
