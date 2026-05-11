@@ -268,6 +268,54 @@ const faqs = [
 const sectionContainer = "max-w-[1100px] mx-auto px-6";
 
 /* ------------------------------------------------------------------ */
+/*  Blog Section (Soro embed)                                          */
+/* ------------------------------------------------------------------ */
+const SORO_SCRIPT_SRC = "https://app.trysoro.com/api/embed/18bb9f90-e619-4a42-b7df-c1dce0cc053a";
+
+function BlogSection() {
+  useEffect(() => {
+    const existing = document.querySelector(`script[src="${SORO_SCRIPT_SRC}"]`);
+    if (!existing) {
+      const script = document.createElement("script");
+      script.src = SORO_SCRIPT_SRC;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  return (
+    <section id="blog" className="py-[100px] md:py-[120px] scroll-mt-20 bg-card">
+      <div className={cn(sectionContainer, "space-y-12")}>
+        <Reveal>
+          <div className="text-center space-y-3">
+            <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold tracking-[-0.02em]">
+              Direto do nosso blog
+            </h2>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-[1.7]">
+              Conteúdo, novidades e insights para profissionais do mercado de turismo.
+            </p>
+          </div>
+        </Reveal>
+        <Reveal delay={120}>
+          <div id="soro-blog" className="min-h-[300px]" />
+        </Reveal>
+        <Reveal delay={200}>
+          <div className="text-center">
+            <a
+              href="https://www.agentesdesonhos.com.br/blog"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+            >
+              Ver todos os posts
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -675,6 +723,9 @@ export default function LandingPage() {
           </Reveal>
         </div>
       </section>
+
+      {/* ── Blog ───────────────────────────────────────────────── */}
+      <BlogSection />
 
       {/* ── FAQ ────────────────────────────────────────────────── */}
       <section id="faq" className="py-[100px] md:py-[120px] scroll-mt-20" style={{ backgroundColor: "hsl(210 20% 97%)" }}>
