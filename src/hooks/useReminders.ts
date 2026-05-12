@@ -107,7 +107,8 @@ export function useReminders() {
   const remindersWithDays = reminders.map((reminder) => {
     const today = new Date();
     const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const dateStr = reminder.trip?.start_date || "";
+    const isReturn = reminder.days_before === -1;
+    const dateStr = (isReturn ? reminder.trip?.end_date : reminder.trip?.start_date) || "";
     const [y, m, d] = dateStr.split("-").map(Number);
     const tripDate = new Date(y, m - 1, d);
     const diffTime = tripDate.getTime() - todayLocal.getTime();

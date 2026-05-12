@@ -53,7 +53,16 @@ export function TripRemindersCard() {
 
   const getReminderLabel = (daysRemaining: number, isReturn: boolean) => {
     if (isReturn) {
-      return <Badge className="bg-accent text-accent-foreground">🏠 Retorno hoje</Badge>;
+      if (daysRemaining === 0) {
+        return <Badge className="bg-accent text-accent-foreground">🏠 Retorno hoje</Badge>;
+      }
+      if (daysRemaining === 1) {
+        return <Badge className="bg-accent text-accent-foreground">🏠 Retorno amanhã</Badge>;
+      }
+      if (daysRemaining > 1) {
+        return <Badge className="bg-accent text-accent-foreground">🏠 Retorno em {daysRemaining} dias</Badge>;
+      }
+      return <Badge className="bg-accent text-accent-foreground">🏠 Retornou há {Math.abs(daysRemaining)} dia{Math.abs(daysRemaining) !== 1 ? "s" : ""}</Badge>;
     }
     if (daysRemaining === 0) {
       return <Badge variant="destructive" className="animate-pulse">✈️ Viaja hoje!</Badge>;
