@@ -407,16 +407,37 @@ export function DestinationIntroEditor({
           className="hidden"
           onChange={(e) => e.target.files && handleUploadImages(e.target.files)}
         />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-          className="gap-2"
-        >
-          {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-          Adicionar imagem
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="gap-2"
+          >
+            {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+            Adicionar imagem
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={openGooglePicker}
+            disabled={isResolvingPlace}
+            className="gap-2"
+          >
+            {isResolvingPlace ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+            {googlePlaceId ? "Fechar fotos do Google" : "Buscar fotos no Google"}
+          </Button>
+        </div>
+
+        {googlePlaceId && (
+          <GoogleHotelPhotos
+            placeId={googlePlaceId}
+            onPhotosSelected={handleAddGooglePhotos}
+            existingUrls={images}
+            autoShow
+          />
+        )}
 
         {/* Text */}
         <Textarea
