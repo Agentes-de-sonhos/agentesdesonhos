@@ -191,6 +191,38 @@ export function DestinationIntroEditor({
     setIsUploading(false);
   };
 
+  const handleAddGooglePhotos = async (urls: string[]) => {
+    const newOnes = urls.filter((u) => !images.includes(u));
+    if (newOnes.length === 0) return;
+    const updated = [...images, ...newOnes];
+    setImages(updated);
+    await saveToDb({ destination_intro_images: updated });
+  };
+
+  const openGooglePicker = async () => {
+    if (googlePlaceId) {
+      setGooglePlaceId(null); // toggle off
+      return;
+    }
+    setIsResolvingPlace(true);
+    try {
+      const firstCity = destination.split(",")[0]?.trim() || destination;
+      const { data } = await supabase.functions.invoke("places-autocomplete", {
+        body: { input: firstCity, place_type: "city" },
+      });
+      const pid = data?.predictions?.[0]?.place_id;
+      if (pid) {
+        setGooglePlaceId(pid);
+      } else {
+        toast({ title: "Não encontramos esse destino no Google", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Erro ao buscar destino", variant: "destructive" });
+    } finally {
+      setIsResolvingPlace(false);
+    }
+  };
+
   if (!enabled && !embedded) {
     return (
       <Card>
