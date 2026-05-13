@@ -1,86 +1,74 @@
-## Central de Requisitos de Viagem — Plano de Implementação
+# Integração Telegram → Galeria de Materiais
 
-Nova funcionalidade premium que valida elegibilidade de embarque do passageiro (documentação, vistos, vacinas, regras migratórias) usando IA + fontes oficiais.
+## Visão geral
+Você (admin) cria UM bot do Telegram via @BotFather e adiciona ele em canais/grupos de fornecedores parceiros. Toda vez que um fornecedor postar uma imagem ou PDF, o bot captura automaticamente, salva o arquivo na pasta do fornecedor correto, preserva a legenda e disponibiliza o material na **Galeria de Materiais** para todos os agentes.
 
-### 1. Banco de dados (1 migration)
+## Como vai funcionar (visão do agente)
+1. Fornecedor posta foto/PDF (com ou sem legenda) no canal do Telegram
+2. Bot recebe automaticamente em segundos
+3. Material aparece na Galeria de Materiais agrupado por **pasta do fornecedor**
+4. Card mostra a legenda original (quando houver) com botões:
+   - **Copiar legenda**
+   - **Baixar lâmina** (individual)
+   - **Baixar todas** do mesmo post/lote (zip)
 
-Tabela `travel_requirements_consultations`:
-- `user_id`, `client_id` (opcional, link futuro com CRM)
-- `passenger_data` (jsonb): nacionalidade, residência, nome, nascimento, menor, desacompanhado, passaporte (nº/validade/emissor), vistos
-- `trip_data` (jsonb): destino, conexões[], datas, cia aérea, tipo de viagem
-- `result` (jsonb): status geral + 6 blocos estruturados
-- `confidence_score`, `consulted_at`, `model_used`
-- RLS: dono vê/edita/apaga só os próprios
+## O que vou construir
 
-### 2. Edge Function: `check-travel-requirements`
+### 1. Tabela de mapeamento (admin)
+Nova tabela `telegram_supplier_channels`:
+- `chat_id` (id do canal/grupo Telegram)
+- `supplier_id` (FK → tour_operators)
+- `category_default` (categoria padrão para os materiais recebidos)
+- `is_active`
 
-- Recebe `passenger_data` + `trip_data`
-- Chama Lovable AI (`google/gemini-2.5-pro` para precisão) com **tool calling** estruturado
-- Schema do tool retorna JSON com:
-  - `overall_status`: `apt` | `attention` | `not_apt`
-  - `confidence`: 0–1
-  - `documentation`: passaporte/RG/CNH, validade mínima, páginas em branco, comprovantes
-  - `visas`: tipo (Visto/ETA/eTA/ESTA), prazo, custo, antecedência, link oficial
-  - `health`: vacinas, certificados, seguro mínimo
-  - `alerts[]`: `severity` + `message` (gerados a partir do cruzamento dos dados)
-  - `official_sources[]`: nome, url, última atualização aproximada
-  - `observations[]`
-- Prompt do sistema instrui IA a NUNCA inventar; quando incerto, marcar `confidence` baixo e exibir aviso
-- Salva resultado em `travel_requirements_consultations`
-- Sanitiza erros em PT-BR
+### 2. Tela admin: "Canais Telegram"
+Em **Admin → Materiais**, nova aba para:
+- Ver instruções de como adicionar o bot ao canal/grupo
+- Listar canais conectados
+- Vincular cada `chat_id` ao fornecedor correspondente
+- Ativar/desativar canais
 
-### 3. Frontend
+### 3. Edge Function `telegram-webhook`
+- Recebe updates do Telegram (com validação de secret token)
+- Para cada foto/documento: baixa via `getFile` → salva no bucket `materials` na pasta `telegram/{supplier_slug}/{batch_id}/`
+- Cria registro em `materials` com:
+  - `supplier_id` (do mapeamento)
+  - `caption` (legenda do Telegram, se houver)
+  - `batch_id` (para agrupar várias fotos do mesmo post — Telegram envia como `media_group_id`)
+  - `material_type`: `imagem` ou `pdf`
+  - `category` da configuração do canal
+  - `title`: primeira linha da legenda ou "Material — {fornecedor} — {data}"
+- Idempotência por `update_id` (Telegram pode reenviar)
 
-**Página nova:** `src/pages/RequisitosViagem.tsx` (rota `/requisitos-viagem`)
+### 4. UI: Galeria por fornecedor
+Na página **Materiais**, garantir agrupamento visual por fornecedor (pasta) com:
+- Card de lote (`batch_id`) mostrando até 4 thumbnails
+- Legenda completa com botão "Copiar"
+- "Baixar lâmina" individual (signed URL)
+- "Baixar todas" (gera .zip no cliente com JSZip)
 
-**Componentes:** `src/components/travel-requirements/`
-- `PassengerStep.tsx` — Etapa 1 (dados do passageiro)
-- `TripStep.tsx` — Etapa 2 (viagem + conexões dinâmicas)
-- `ConnectionItem.tsx` — bloco recolhível por conexão (mesmo padrão do gerador de roteiros)
-- `RequirementsResult.tsx` — dashboard de resposta:
-  - Header com status colorido (verde/amarelo/vermelho) + score de confiança
-  - 6 blocos colapsáveis (Documentação, Vistos, Saúde, Alertas, Links Oficiais, Observações)
-  - Disclaimer fixo no rodapé
-- `GeneratePdfButton.tsx` — gera PDF premium com jsPDF + html2canvas (padrão já usado no projeto)
+## Detalhes técnicos
 
-**Hook:** `src/hooks/useTravelRequirements.ts` — invoca edge function, gerencia loading/erro, salva histórico
+**Conector necessário**: Telegram (via `standard_connectors`) — você adiciona o token do bot uma única vez, sem precisar colar em código.
 
-### 4. Menu e navegação
+**Bucket de armazenamento**: usaremos o bucket `materials` (já existente, público) com pasta `telegram/{supplier_slug}/`.
 
-- Adicionar item "Central de Requisitos" em `src/config/menuConfig.ts` com ícone `ShieldCheck`
-- Registrar rota em `src/App.tsx` (lazy load)
-- Gate por plano: **Premium** via `<FeatureGate>` (alinha com posicionamento "premium" do pedido)
+**Agrupamento de posts**: o Telegram envia múltiplas fotos do mesmo post como mensagens separadas com o mesmo `media_group_id` — usado como `batch_id`.
 
-### 5. PDF
+**Tipos de arquivo aceitos**: `photo`, `document` (PDF/imagens). Vídeos serão ignorados nesta versão.
 
-- Reuso do padrão `generateBusinessCardPdf` (html2canvas scale 2x + jsPDF)
-- Template com identidade do agente (logo via `useAgentProfile`), todos os blocos, alertas destacados, links clicáveis (`doc.link`), data/hora da consulta, disclaimer
+**Segurança**: webhook validado por secret token derivado da API key do conector, conforme padrão Lovable.
 
-### 6. Preparação para integrações futuras
+## Passo a passo após eu construir
+1. Você conecta o **Telegram** no Lovable (botão que aparecerá no chat)
+2. Cria um bot no @BotFather e cola o token na conexão
+3. Eu registro o webhook automaticamente
+4. Você adiciona o bot como **administrador** no canal/grupo do fornecedor (necessário para receber mensagens em canais)
+5. No painel admin, descobre o `chat_id` (mostro automaticamente assim que chegar a primeira mensagem) e vincula ao fornecedor
 
-- `client_id` nullable na tabela permite linkar com CRM depois
-- Hook exporta `consultRequirements(payload)` reutilizável → futuramente chamado de Roteiros/Orçamentos/Carteira com prompt "Deseja verificar os requisitos?"
-- Resultado em jsonb permite expor via Carteira pública futuramente
+## Fora do escopo desta versão
+- Análise automática com IA (você optou por apenas armazenar)
+- Captura de vídeos
+- Notificação push para agentes quando chega material novo
 
-### Detalhes técnicos
-
-```text
-Fluxo:
-[Form Wizard 2 etapas] → [Edge Function] → [Lovable AI Tool Call]
-        ↓                      ↓                    ↓
-  Validação Zod         Salva consulta         JSON estruturado
-                              ↓
-                      [Dashboard Result] → [PDF Premium]
-```
-
-**Stack:** React + Tailwind tokens semânticos, framer-motion para entrada dos blocos, lucide-react ícones (ShieldCheck, AlertTriangle, FileCheck, Syringe, ExternalLink), shadcn `Collapsible` + `Badge` + `Alert`.
-
-**Modelo IA:** `google/gemini-2.5-pro` (precisão > velocidade para regras migratórias). Tool calling força saída estruturada — sem texto corrido.
-
-**Sem APIs externas pagas neste primeiro release** — Timatic/IATA fica no roadmap. A IA é organizadora; sempre exibe links oficiais e disclaimer.
-
-### O que NÃO entra agora (roadmap)
-- Monitoramento automático de mudanças, cache cross-user, tradução PT/EN/ES, integrações WhatsApp/e-mail, score de risco avançado, painel de países mais consultados, integração Timatic.
-- Auto-sugestão dentro de Roteiros/Orçamentos/Carteira (deixa hook pronto, plugamos depois).
-
-Confirma para eu implementar?
+Quer que eu siga com essa estrutura?
