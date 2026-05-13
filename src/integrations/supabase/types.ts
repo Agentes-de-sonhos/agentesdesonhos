@@ -7575,6 +7575,89 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_pending_chats: {
+        Row: {
+          chat_id: number
+          chat_title: string | null
+          chat_type: string | null
+          first_seen_at: string
+          last_seen_at: string
+          message_count: number
+        }
+        Insert: {
+          chat_id: number
+          chat_title?: string | null
+          chat_type?: string | null
+          first_seen_at?: string
+          last_seen_at?: string
+          message_count?: number
+        }
+        Update: {
+          chat_id?: number
+          chat_title?: string | null
+          chat_type?: string | null
+          first_seen_at?: string
+          last_seen_at?: string
+          message_count?: number
+        }
+        Relationships: []
+      }
+      telegram_processed_updates: {
+        Row: {
+          processed_at: string
+          update_id: number
+        }
+        Insert: {
+          processed_at?: string
+          update_id: number
+        }
+        Update: {
+          processed_at?: string
+          update_id?: number
+        }
+        Relationships: []
+      }
+      telegram_supplier_channels: {
+        Row: {
+          category_default: string
+          chat_id: number
+          chat_title: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          category_default?: string
+          chat_id: number
+          chat_title?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          category_default?: string
+          chat_id?: number
+          chat_title?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_supplier_channels_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_messages: {
         Row: {
           attachment_urls: string[] | null
