@@ -1810,7 +1810,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
-  const [hotelPlaceId, setHotelPlaceId] = useState<string | null>(null);
+  const [placeId, setPlaceId] = useState<string | null>(null);
   const [transferCompanyName, setTransferCompanyName] = useState(
     initialData?.service_data?.company_name || ""
   );
@@ -1827,14 +1827,14 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
       imageUrls={serviceImageUrls}
       onImageUrlsChange={setServiceImageUrls}
       isUploading={isImgUploading}
-      placeId={isHotel ? hotelPlaceId : undefined}
+      placeId={placeId}
       hotelMode={isHotel}
     />
   );
   const formProps = {
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions,
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement,
-    ...(serviceType === 'hotel' ? { onPlaceIdChange: setHotelPlaceId } : {}),
+    ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
   };
 
   let formElement: React.ReactNode = null;
