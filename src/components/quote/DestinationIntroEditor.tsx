@@ -312,6 +312,16 @@ export function DestinationIntroEditor({
               <Button
                 variant="outline"
                 size="sm"
+                onClick={openGooglePicker}
+                disabled={isResolvingPlace}
+                className="gap-2"
+              >
+                {isResolvingPlace ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+                {googlePlaceId ? "Fechar fotos do Google" : "Buscar fotos no Google"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleGenerate}
                 disabled={isGenerating || isFetchingPhotos}
                 className="gap-2"
@@ -324,6 +334,15 @@ export function DestinationIntroEditor({
                 {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
               </Button>
             </div>
+
+            {googlePlaceId && (
+              <GoogleHotelPhotos
+                placeId={googlePlaceId}
+                onPhotosSelected={handleAddGooglePhotos}
+                existingUrls={images}
+                autoShow
+              />
+            )}
 
             <Textarea
               value={text}
