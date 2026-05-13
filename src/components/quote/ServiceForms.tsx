@@ -1443,7 +1443,7 @@ const otherSchema = z.object({
   price: z.number().min(0),
 });
 
-function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
@@ -1490,7 +1490,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
           <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl>
             <PlacesAutocomplete
               value={field.value || ""}
-              onChange={field.onChange}
+              onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+              onPlaceSelect={(p) => onPlaceIdChange?.(p.place_id)}
               placeType="general"
               placeholder="Nome da empresa..."
             />
