@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
     const supplierSlug = slugify(supplierName);
 
     const caption = (msg.caption || "").trim();
-    const mediaGroupId = msg.media_group_id ? String(msg.media_group_id) : `tg-${chatId}-${msg.message_id}`;
+    const mediaGroupId = msg.media_group_id ? String(msg.media_group_id) : `tg-${sourceChatId}-${msg.message_id}`;
     const batchId = `tg-${mediaGroupId}`;
 
     const dateStr = new Date().toISOString().slice(0, 10);
