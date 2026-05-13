@@ -693,7 +693,7 @@ const carRentalSchema = z.object({
   path: ["dropoff_date"],
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const [pickupOpen, setPickupOpen] = useState(false);
   const [dropoffOpen, setDropoffOpen] = useState(false);
@@ -759,7 +759,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
           <FormItem><FormLabel>Nome da Locadora</FormLabel><FormControl>
             <PlacesAutocomplete
               value={field.value || ""}
-              onChange={field.onChange}
+              onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+              onPlaceSelect={(p) => onPlaceIdChange?.(p.place_id)}
               placeType="car_rental"
               placeholder="Ex: Localiza, Hertz, Movida..."
             />
