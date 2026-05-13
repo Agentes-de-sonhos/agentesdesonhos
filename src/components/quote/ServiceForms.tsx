@@ -693,7 +693,7 @@ const carRentalSchema = z.object({
   path: ["dropoff_date"],
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const [pickupOpen, setPickupOpen] = useState(false);
   const [dropoffOpen, setDropoffOpen] = useState(false);
@@ -759,7 +759,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
           <FormItem><FormLabel>Nome da Locadora</FormLabel><FormControl>
             <PlacesAutocomplete
               value={field.value || ""}
-              onChange={field.onChange}
+              onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+              onPlaceSelect={(p) => onPlaceIdChange?.(p.place_id)}
               placeType="car_rental"
               placeholder="Ex: Localiza, Hertz, Movida..."
             />
@@ -1097,7 +1098,7 @@ const attractionSchema = z.object({
   notes: z.string().optional(),
 });
 
-function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
 
@@ -1158,7 +1159,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
             <FormItem><FormLabel>Nome do Produto</FormLabel><FormControl>
               <PlacesAutocomplete
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                onPlaceSelect={(p) => onPlaceIdChange?.(p.place_id)}
                 placeType="attraction"
                 placeholder="Universal Orlando, Disney..."
               />
@@ -1441,7 +1443,7 @@ const otherSchema = z.object({
   price: z.number().min(0),
 });
 
-function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
@@ -1488,7 +1490,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot }: 
           <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl>
             <PlacesAutocomplete
               value={field.value || ""}
-              onChange={field.onChange}
+              onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+              onPlaceSelect={(p) => onPlaceIdChange?.(p.place_id)}
               placeType="general"
               placeholder="Nome da empresa..."
             />
@@ -1807,7 +1810,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
-  const [hotelPlaceId, setHotelPlaceId] = useState<string | null>(null);
+  const [placeId, setPlaceId] = useState<string | null>(null);
   const [transferCompanyName, setTransferCompanyName] = useState(
     initialData?.service_data?.company_name || ""
   );
@@ -1824,14 +1827,14 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
       imageUrls={serviceImageUrls}
       onImageUrlsChange={setServiceImageUrls}
       isUploading={isImgUploading}
-      placeId={isHotel ? hotelPlaceId : undefined}
+      placeId={placeId}
       hotelMode={isHotel}
     />
   );
   const formProps = {
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions,
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement,
-    ...(serviceType === 'hotel' ? { onPlaceIdChange: setHotelPlaceId } : {}),
+    ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
   };
 
   let formElement: React.ReactNode = null;
