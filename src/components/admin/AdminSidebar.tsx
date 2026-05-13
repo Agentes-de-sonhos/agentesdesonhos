@@ -36,6 +36,7 @@ import {
   Eye,
   Globe,
   CheckCircle2,
+  Send,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -64,6 +65,7 @@ const menuGroups: AdminMenuGroup[] = [
     title: "Conteúdo",
     items: [
       { id: "materials", label: "Materiais", icon: FileText },
+      { id: "telegram", label: "Telegram", icon: Send },
       { id: "vitrine", label: "Vitrine", icon: Store },
       { id: "mentorships", label: "Cursos", icon: GraduationCap },
       { id: "academy", label: "Academy", icon: GraduationCap },
