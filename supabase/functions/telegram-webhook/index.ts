@@ -89,28 +89,44 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ ok: true, dup: true }), { headers: corsHeaders });
     }
 
-    const chatId = msg?.chat?.id;
-    const chatTitle = msg?.chat?.title || msg?.chat?.username || `Chat ${chatId}`;
-    const chatType = msg?.chat?.type;
-    if (!chatId) return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+    const hubChatId = msg?.chat?.id;
+    if (!hubChatId) return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
 
-    // Procura mapeamento canal -> fornecedor
+    // Detecta origem real (mensagens encaminhadas — Opção 2)
+    // forward_origin (Bot API >= 7) ou forward_from_chat (legado)
+    const fOrigin = msg?.forward_origin;
+    const fFromChat = msg?.forward_from_chat;
+    const fFromUser = msg?.forward_from || fOrigin?.sender_user;
+    const originChat = fOrigin?.chat || fOrigin?.sender_chat || fFromChat || null;
+
+    const sourceChatId = originChat?.id ?? hubChatId;
+    const sourceTitle =
+      originChat?.title ||
+      originChat?.username ||
+      fOrigin?.sender_user_name ||
+      (fFromUser ? `${fFromUser.first_name || ""} ${fFromUser.last_name || ""}`.trim() || fFromUser.username : null) ||
+      msg?.chat?.title ||
+      msg?.chat?.username ||
+      `Chat ${sourceChatId}`;
+    const sourceType = originChat?.type || msg?.chat?.type;
+
+    // Procura mapeamento (origem real OU hub)
     const { data: mapping } = await supabase
       .from("telegram_supplier_channels")
-      .select("supplier_id, category_default, is_active")
-      .eq("chat_id", chatId)
+      .select("supplier_id, category_default, is_active, chat_id")
+      .eq("chat_id", sourceChatId)
       .maybeSingle();
 
     if (!mapping || !mapping.is_active) {
-      // Registra como pendente para o admin vincular
+      // Registra como pendente — usando a origem real quando for forward
       await supabase.from("telegram_pending_chats").upsert({
-        chat_id: chatId,
-        chat_title: chatTitle,
-        chat_type: chatType,
+        chat_id: sourceChatId,
+        chat_title: sourceTitle,
+        chat_type: sourceType,
         last_seen_at: new Date().toISOString(),
         message_count: 1,
       }, { onConflict: "chat_id" });
-      return new Response(JSON.stringify({ ok: true, pending: true }), { headers: corsHeaders });
+      return new Response(JSON.stringify({ ok: true, pending: true, forwarded: !!originChat }), { headers: corsHeaders });
     }
 
     // Identifica arquivos
