@@ -76,6 +76,18 @@ export function AdminTelegramManager() {
     },
   });
 
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ["telegram-suppliers-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tour_operators")
+        .select("id, name, logo_url, category")
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const callSetup = async (action: "register" | "info" | "delete" | "me") => {
     setSetupLoading(true);
     try {
@@ -213,6 +225,7 @@ export function AdminTelegramManager() {
                 <PendingChatRow
                   key={p.chat_id}
                   chat={p}
+                  suppliers={suppliers}
                   onLink={(supplier_id, category_default) =>
                     linkPending.mutate({
                       chat_id: p.chat_id,
@@ -295,14 +308,14 @@ export function AdminTelegramManager() {
 }
 
 function PendingChatRow({
-  chat, onLink, onDismiss,
+  chat, suppliers, onLink, onDismiss,
 }: {
   chat: PendingChat;
+  suppliers: any[];
   onLink: (supplier_id: string, category_default: string) => void;
   onDismiss: () => void;
 }) {
   const [supplierId, setSupplierId] = useState("");
-  const [supplierName, setSupplierName] = useState("");
   const [category, setCategory] = useState("Promocional");
 
   return (
@@ -315,9 +328,9 @@ function PendingChatRow({
       </div>
       <div className="w-full md:w-64">
         <SupplierCombobox
+          suppliers={suppliers}
           value={supplierId}
-          supplierName={supplierName}
-          onChange={(id, name) => { setSupplierId(id); setSupplierName(name); }}
+          onChange={(id) => setSupplierId(id)}
         />
       </div>
       <Select value={category} onValueChange={setCategory}>
