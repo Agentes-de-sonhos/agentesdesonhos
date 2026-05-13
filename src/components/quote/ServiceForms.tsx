@@ -1097,7 +1097,7 @@ const attractionSchema = z.object({
   notes: z.string().optional(),
 });
 
-function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
 
@@ -1158,7 +1158,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
             <FormItem><FormLabel>Nome do Produto</FormLabel><FormControl>
               <PlacesAutocomplete
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                onPlaceSelect={(p) => onPlaceIdChange?.(p.place_id)}
                 placeType="attraction"
                 placeholder="Universal Orlando, Disney..."
               />
