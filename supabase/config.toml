@@ -74,3 +74,9 @@ verify_jwt = false
 
 [functions.extract-business-card]
 verify_jwt = false
+
+[functions.telegram-webhook]
+verify_jwt = false
+
+[functions.telegram-setup]
+verify_jwt = true
