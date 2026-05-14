@@ -1152,58 +1152,57 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           const methodLabel = (quote as any).payment_method_label as string | null;
           const total = totalForBar;
 
-          let mainDisplay: React.ReactNode;
-          let subtitleDisplay: React.ReactNode = null;
+          // Total is always the protagonist; parcel/condition is a refined secondary line.
+          const headlineTotal = mode === "full_payment" && discountPct > 0
+            ? total * (1 - discountPct / 100)
+            : total;
 
+          const mainDisplay = (
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">
+                {formatCurrency(headlineTotal)}
+              </span>
+              {mode === "full_payment" && discountPct > 0 && (
+                <span className="text-sm text-muted-foreground line-through">{formatCurrency(total)}</span>
+              )}
+            </div>
+          );
+
+          let subtitleDisplay: React.ReactNode = null;
           if (mode === "installments") {
             const installmentValue = total / (installments || 1);
-            mainDisplay = (
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-base sm:text-lg font-medium text-foreground/60">Em até {installments}x de</span>
-                <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">{formatCurrency(installmentValue)}</span>
-              </div>
-            );
             subtitleDisplay = (
-              <p className="text-sm text-muted-foreground">
-                Investimento total: <span className="font-semibold text-foreground/80">{formatCurrency(total)}</span>{methodLabel ? ` • ${methodLabel}` : ""} • parcelamento sem juros
+              <p className="text-sm sm:text-base font-medium text-foreground/70">
+                A partir de <span className="font-semibold text-foreground">{formatCurrency(installmentValue)}</span>/mês
+                <span className="block text-xs text-muted-foreground mt-1">
+                  Em até {installments}x sem juros{methodLabel ? ` • ${methodLabel}` : ""}
+                </span>
               </p>
             );
           } else if (mode === "installments_with_entry") {
             const entryValue = total * (entryPct / 100);
             const remainder = total - entryValue;
             const installmentValue = remainder / (installments || 1);
-            mainDisplay = (
-              <div className="space-y-2 flex flex-col items-center">
-                <p className="text-base sm:text-lg font-medium text-foreground/60">
-                  Entrada de <span className="font-bold text-foreground">{formatCurrency(entryValue)}</span>
-                </p>
-                <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-                  + {installments}x {formatCurrency(installmentValue)}
-                </p>
-              </div>
-            );
             subtitleDisplay = (
-              <p className="text-sm text-muted-foreground">
-                Investimento total: <span className="font-semibold text-foreground/80">{formatCurrency(total)}</span>{methodLabel ? ` • ${methodLabel}` : ""}
+              <p className="text-sm sm:text-base font-medium text-foreground/70">
+                Entrada de <span className="font-semibold text-foreground">{formatCurrency(entryValue)}</span> + {installments}x de <span className="font-semibold text-foreground">{formatCurrency(installmentValue)}</span>
+                {methodLabel && (
+                  <span className="block text-xs text-muted-foreground mt-1">{methodLabel}</span>
+                )}
+              </p>
+            );
+          } else if (discountPct > 0) {
+            subtitleDisplay = (
+              <p className="text-sm font-medium text-primary">
+                Condição especial: {discountPct}% de desconto{methodLabel ? ` • ${methodLabel}` : ""}
               </p>
             );
           } else {
-            const discountedTotal = total * (1 - discountPct / 100);
-            mainDisplay = (
-              <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">{formatCurrency(discountedTotal)}</span>
+            subtitleDisplay = (
+              <p className="text-sm text-muted-foreground">
+                Parcelamento disponível{methodLabel ? ` • ${methodLabel}` : ""}
+              </p>
             );
-            if (discountPct > 0) {
-              subtitleDisplay = (
-                <div className="space-y-0.5">
-                  <p className="text-sm text-muted-foreground line-through">{formatCurrency(total)}</p>
-                  <p className="text-sm font-semibold text-primary">
-                    Condição especial: {discountPct}% de desconto{methodLabel ? ` via ${methodLabel}` : ""}
-                  </p>
-                </div>
-              );
-            } else {
-              subtitleDisplay = methodLabel ? <p className="text-sm text-muted-foreground">{methodLabel}</p> : null;
-            }
           }
 
           return (
@@ -1332,10 +1331,19 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       {whatsappUrl && (
         <div className="fixed bottom-0 inset-x-0 z-30 sm:hidden border-t border-border/40 bg-white/95 backdrop-blur-lg shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)]">
           <div className="flex items-center gap-3 px-4 py-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">A partir de</p>
-              <p className="text-base font-extrabold text-foreground truncate">{formatCurrency(totalForBar)}</p>
-            </div>
+            {(quote as any).show_investment_section !== false ? (
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Investimento total</p>
+                <p className="text-base font-extrabold text-foreground truncate">{formatCurrency(totalForBar)}</p>
+              </div>
+            ) : (
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-primary/80">Condições flexíveis</p>
+                <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
+                  Parcele cada serviço na melhor condição
+                </p>
+              </div>
+            )}
             <a
               href={whatsappUrl}
               target="_blank"
@@ -1345,7 +1353,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
                 <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm animate-shimmer-slide" />
               </span>
-              <WhatsAppIcon className="relative h-4 w-4" /> <span className="relative">Conversar</span>
+              <WhatsAppIcon className="relative h-4 w-4" /> <span className="relative">Quero reservar</span>
             </a>
           </div>
         </div>
