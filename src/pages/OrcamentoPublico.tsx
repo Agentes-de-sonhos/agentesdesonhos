@@ -5,7 +5,7 @@ import { usePublicQuote } from "@/hooks/useQuotes";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -228,6 +228,8 @@ function CollapsibleServiceCard({
   const chipItems = detailItems.filter(d => d.label);
   const freeItems = detailItems.filter(d => !d.label);
 
+  const hasCustomLayout = ["flight", "hotel", "car_rental", "transfer", "attraction", "insurance", "cruise"].includes(type);
+
   return (
     <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
       {/* Clickable header */}
@@ -278,9 +280,14 @@ function CollapsibleServiceCard({
             const name = getServiceName(service);
             // Para "other" sem company_name, evita exibir título genérico duplicado
             if (service.service_type === "other" && !((service.service_data as any)?.company_name)) return null;
+            // Para tipos com layout próprio, o nome já vem destacado dentro do corpo
+            if (hasCustomLayout) return null;
             return <p className="text-base font-semibold text-foreground tracking-tight">{name}</p>;
           })()}
-          {isOpen && chipItems.length > 0 && (
+          {isOpen && hasCustomLayout && (
+            <ServiceBody service={service} />
+          )}
+          {isOpen && !hasCustomLayout && chipItems.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {chipItems.map((d, i) => (
                 <div
@@ -299,7 +306,7 @@ function CollapsibleServiceCard({
               ))}
             </div>
           )}
-          {isOpen && freeItems.length > 0 && (
+          {isOpen && !hasCustomLayout && freeItems.length > 0 && (
             <div className="space-y-2">
               {freeItems.map((d, i) => (
                 <p key={i} className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
