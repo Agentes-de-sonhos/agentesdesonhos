@@ -5,7 +5,7 @@ import { usePublicQuote } from "@/hooks/useQuotes";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -196,6 +196,363 @@ function getServiceDetails(service: QuoteService): string[] {
   return details;
 }
 
+// ===================== Premium service body renderers =====================
+
+function parseTimeMin(t?: string): number | null {
+  if (!t) return null;
+  const m = t.match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return null;
+  return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+}
+
+function formatLayover(prevArr?: string, nextDep?: string): string | null {
+  const a = parseTimeMin(prevArr);
+  const b = parseTimeMin(nextDep);
+  if (a == null || b == null) return null;
+  let diff = b - a;
+  if (diff < 0) diff += 24 * 60; // overnight layover
+  if (diff <= 0 || diff > 18 * 60) return null;
+  const h = Math.floor(diff / 60);
+  const m = diff % 60;
+  return h > 0 ? `${h}h${m > 0 ? ` ${m}min` : ""}` : `${m}min`;
+}
+
+function formatLegDate(s?: string): string {
+  if (!s) return "";
+  try {
+    return format(parseLocalDate(s), "dd MMM yyyy", { locale: ptBR }).toUpperCase();
+  } catch {
+    return s;
+  }
+}
+
+function FlightLegRow({ leg }: { leg: any }) {
+  const dep = leg.departure_time || "—";
+  const arr = leg.arrival_time || "—";
+  return (
+    <div className="flex items-center gap-3 py-1.5">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 text-foreground">
+          <span className="text-base font-semibold tabular-nums tracking-tight">{dep}</span>
+          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span className="text-base font-semibold tabular-nums tracking-tight">{arr}</span>
+        </div>
+        <div className="mt-0.5 text-xs text-muted-foreground tracking-wide">
+          <span className="font-medium text-foreground/80">{leg.airport_origin || "—"}</span>
+          <span className="mx-1.5 opacity-50">→</span>
+          <span className="font-medium text-foreground/80">{leg.airport_destination || "—"}</span>
+          {leg.flight_number && <span className="ml-2 opacity-70">• Voo {leg.flight_number}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FlightDirectionGroup({ title, icon, legs, fallbackDate }: { title: string; icon: React.ReactNode; legs: any[]; fallbackDate?: string }) {
+  if (!legs.length) return null;
+  // Group legs by date for clean separation when overnight or multi-day
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-foreground/60">
+        <span className="text-primary">{icon}</span>
+        <span>{title}</span>
+      </div>
+      <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 divide-y divide-border/30">
+        {legs.map((leg, i) => {
+          const date = leg.leg_date || (i === 0 ? fallbackDate : undefined);
+          const layover = i > 0 ? formatLayover(legs[i - 1].arrival_time, leg.departure_time) : null;
+          return (
+            <div key={i} className="py-1">
+              {layover && (
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground my-1.5">
+                  <Clock className="h-3 w-3" />
+                  <span>Conexão • {layover}</span>
+                </div>
+              )}
+              {date && i === 0 && (
+                <div className="text-[11px] font-semibold tracking-wider text-foreground/50 mb-1">{formatLegDate(date)}</div>
+              )}
+              {date && i > 0 && legs[i - 1].leg_date && legs[i - 1].leg_date !== leg.leg_date && (
+                <div className="text-[11px] font-semibold tracking-wider text-foreground/50 mb-1 mt-1">{formatLegDate(date)}</div>
+              )}
+              <FlightLegRow leg={leg} />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function InclusionBadge({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <div className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${ok ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "bg-amber-500/10 text-amber-700 dark:text-amber-400"}`}>
+      {ok ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+      {label}
+    </div>
+  );
+}
+
+function FlightBody({ data }: { data: any }) {
+  const outLegs: any[] = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
+  const retLegs: any[] = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
+  return (
+    <div className="space-y-4">
+      {/* Header: airline + route */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-base font-semibold text-foreground tracking-tight truncate">{data.airline || "Companhia aérea"}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            <span className="font-medium text-foreground/80">{data.origin_city}</span>
+            <span className="mx-1.5 opacity-50">→</span>
+            <span className="font-medium text-foreground/80">{data.destination_city}</span>
+          </div>
+        </div>
+      </div>
+
+      <FlightDirectionGroup title="Ida" icon={<PlaneTakeoff className="h-3.5 w-3.5" />} legs={outLegs} fallbackDate={data.departure_date} />
+      {!data.is_one_way && retLegs.length > 0 && (
+        <FlightDirectionGroup title="Volta" icon={<PlaneLanding className="h-3.5 w-3.5" />} legs={retLegs} fallbackDate={data.return_date} />
+      )}
+
+      {/* Inclusions */}
+      <div className="flex flex-wrap gap-1.5 pt-1">
+        <InclusionBadge ok={!!data.includes_baggage} label={data.includes_baggage ? "Bagagem incluída" : "Sem bagagem despachada"} />
+        <InclusionBadge ok={!!data.includes_boarding_fee} label={data.includes_boarding_fee ? "Taxa de embarque incluída" : "Taxa de embarque não incluída"} />
+      </div>
+
+      {data.notes && (
+        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+          <FormattedText>{data.notes}</FormattedText>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function StayRow({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub?: string }) {
+  return (
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-foreground/60">
+        {icon}{label}
+      </div>
+      <div className="mt-1 text-base font-semibold text-foreground tabular-nums">{value}</div>
+      {sub && <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>}
+    </div>
+  );
+}
+
+function nightsBetween(a?: string, b?: string): number | null {
+  if (!a || !b) return null;
+  try {
+    const ms = parseLocalDate(b).getTime() - parseLocalDate(a).getTime();
+    const n = Math.round(ms / (1000 * 60 * 60 * 24));
+    return n > 0 ? n : null;
+  } catch { return null; }
+}
+
+function HotelBody({ data }: { data: any }) {
+  const nights = nightsBetween(data.check_in, data.check_out);
+  return (
+    <div className="space-y-4">
+      <div className="min-w-0">
+        <div className="text-base font-semibold text-foreground tracking-tight">{data.hotel_name}</div>
+        {data.city && (
+          <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+            <MapPin className="h-3 w-3" />{data.city}
+          </div>
+        )}
+      </div>
+      <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 flex items-center gap-4">
+        <StayRow icon={<PlaneLanding className="h-3 w-3 mr-1" />} label="Check-in" value={formatDateShort(data.check_in)} />
+        <div className="flex flex-col items-center text-muted-foreground">
+          <ArrowRight className="h-4 w-4" />
+          {nights && <span className="text-[10px] font-semibold mt-0.5">{nights} {nights === 1 ? "noite" : "noites"}</span>}
+        </div>
+        <StayRow icon={<PlaneTakeoff className="h-3 w-3 mr-1" />} label="Check-out" value={formatDateShort(data.check_out)} />
+      </div>
+      <div className="flex flex-wrap gap-3 text-sm">
+        {data.room_type && (
+          <div className="flex items-center gap-1.5 text-foreground/80">
+            <BedDouble className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-medium">{formatLabel(data.room_type)}</span>
+          </div>
+        )}
+        {data.meal_plan && (
+          <div className="flex items-center gap-1.5 text-foreground/80">
+            <UtensilsCrossed className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-medium">{formatLabel(data.meal_plan)}</span>
+          </div>
+        )}
+      </div>
+      {data.notes && (
+        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+          <FormattedText>{data.notes}</FormattedText>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function CarBody({ data }: { data: any }) {
+  return (
+    <div className="space-y-4">
+      <div className="min-w-0">
+        <div className="text-base font-semibold text-foreground tracking-tight">{data.car_type}</div>
+        {data.rental_company && <div className="text-xs text-muted-foreground mt-0.5">{data.rental_company}</div>}
+      </div>
+      <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 space-y-3">
+        <div className="flex items-start gap-3">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60 w-20 shrink-0 pt-0.5">Retirada</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium text-foreground break-words">{data.pickup_location}</div>
+            {(data.pickup_date || data.pickup_time) && (
+              <div className="text-xs text-muted-foreground mt-0.5 tabular-nums">
+                {data.pickup_date && formatDateShort(data.pickup_date)}{data.pickup_time ? ` • ${data.pickup_time}` : ""}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60 w-20 shrink-0 pt-0.5">Devolução</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium text-foreground break-words">{data.dropoff_location}</div>
+            {(data.dropoff_date || data.dropoff_time) && (
+              <div className="text-xs text-muted-foreground mt-0.5 tabular-nums">
+                {data.dropoff_date && formatDateShort(data.dropoff_date)}{data.dropoff_time ? ` • ${data.dropoff_time}` : ""}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {data.days && (
+        <div className="text-xs text-muted-foreground">{data.days} {data.days === 1 ? "diária" : "diárias"}</div>
+      )}
+      {data.notes && (
+        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+          <FormattedText>{data.notes}</FormattedText>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function TransferBody({ data }: { data: any }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
+          {data.transfer_type === "arrival" ? "Chegada" : "Saída"}
+        </span>
+        {data.service_category && (
+          <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
+            {data.service_category === "private" ? "Privativo" : "Regular"}
+          </span>
+        )}
+      </div>
+      <div className="text-base font-semibold text-foreground tracking-tight">{data.location}</div>
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
+        <Calendar className="h-3.5 w-3.5" />{formatDateShort(data.date)}
+      </div>
+      {data.notes && (
+        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+          <FormattedText>{data.notes}</FormattedText>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function AttractionBody({ data }: { data: any }) {
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="text-base font-semibold text-foreground tracking-tight">{data.product_name || data.name}</div>
+        {data.ticket_type && <div className="text-xs text-muted-foreground mt-0.5">{data.ticket_type}</div>}
+      </div>
+      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1 tabular-nums"><Calendar className="h-3.5 w-3.5" />{formatDateShort(data.date)}</span>
+        <span className="inline-flex items-center gap-1"><Ticket className="h-3.5 w-3.5" />Qtd: {data.quantity || 1}</span>
+      </div>
+      {(data.adult_price > 0 || data.child_price > 0) && (
+        <div className="flex flex-wrap gap-2">
+          {data.adult_price > 0 && (
+            <span className="text-[11px] rounded-full bg-muted px-2.5 py-0.5 text-foreground/80">Adulto {getCurrencySymbol(quoteCurrency)} {Number(data.adult_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+          )}
+          {data.child_price > 0 && (
+            <span className="text-[11px] rounded-full bg-muted px-2.5 py-0.5 text-foreground/80">Criança {getCurrencySymbol(quoteCurrency)} {Number(data.child_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PeriodBody({ title, sub, data }: { title: string; sub?: string; data: any }) {
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="text-base font-semibold text-foreground tracking-tight">{title}</div>
+        {sub && <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>}
+      </div>
+      <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 flex items-center gap-4 tabular-nums">
+        <div className="flex-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60">Início</div>
+          <div className="text-sm font-semibold text-foreground mt-0.5">{formatDateShort(data.start_date)}</div>
+        </div>
+        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+        <div className="flex-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60">Fim</div>
+          <div className="text-sm font-semibold text-foreground mt-0.5">{formatDateShort(data.end_date)}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InsuranceBody({ data }: { data: any }) {
+  return (
+    <div className="space-y-3">
+      <PeriodBody title={data.provider} sub={data.coverage ? `Cobertura: ${data.coverage}` : undefined} data={data} />
+      {data.notes && (
+        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+          <FormattedText>{data.notes}</FormattedText>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function CruiseBody({ data }: { data: any }) {
+  return (
+    <div className="space-y-3">
+      <PeriodBody title={data.ship_name} sub={data.route} data={data} />
+      {data.cabin_type && (
+        <div className="text-sm text-foreground/80"><span className="text-muted-foreground">Cabine:</span> <span className="font-medium">{data.cabin_type}</span></div>
+      )}
+      {data.notes && (
+        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+          <FormattedText>{data.notes}</FormattedText>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ServiceBody({ service }: { service: QuoteService }) {
+  const data = service.service_data as any;
+  switch (service.service_type) {
+    case "flight": return <FlightBody data={data} />;
+    case "hotel": return <HotelBody data={data} />;
+    case "car_rental": return <CarBody data={data} />;
+    case "transfer": return <TransferBody data={data} />;
+    case "attraction": return <AttractionBody data={data} />;
+    case "insurance": return <InsuranceBody data={data} />;
+    case "cruise": return <CruiseBody data={data} />;
+    default: return null;
+  }
+}
+
 function CollapsibleServiceCard({
   service, showPrice, isOpen, onToggle, showPaymentPerService = false,
 }: {
@@ -227,6 +584,8 @@ function CollapsibleServiceCard({
   const detailItems = details.flatMap(parseDetail);
   const chipItems = detailItems.filter(d => d.label);
   const freeItems = detailItems.filter(d => !d.label);
+
+  const hasCustomLayout = ["flight", "hotel", "car_rental", "transfer", "attraction", "insurance", "cruise"].includes(type);
 
   return (
     <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
@@ -267,7 +626,7 @@ function CollapsibleServiceCard({
         className={`overflow-hidden transition-all duration-300 ease-in-out`}
         style={{ maxHeight: isOpen ? "2000px" : "0px", opacity: isOpen ? 1 : 0 }}
       >
-        <div className="px-5 py-5 space-y-4">
+        <div className="px-5 py-4 space-y-4">
           {isOpen && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
@@ -278,9 +637,14 @@ function CollapsibleServiceCard({
             const name = getServiceName(service);
             // Para "other" sem company_name, evita exibir título genérico duplicado
             if (service.service_type === "other" && !((service.service_data as any)?.company_name)) return null;
+            // Para tipos com layout próprio, o nome já vem destacado dentro do corpo
+            if (hasCustomLayout) return null;
             return <p className="text-base font-semibold text-foreground tracking-tight">{name}</p>;
           })()}
-          {isOpen && chipItems.length > 0 && (
+          {isOpen && hasCustomLayout && (
+            <ServiceBody service={service} />
+          )}
+          {isOpen && !hasCustomLayout && chipItems.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {chipItems.map((d, i) => (
                 <div
@@ -299,7 +663,7 @@ function CollapsibleServiceCard({
               ))}
             </div>
           )}
-          {isOpen && freeItems.length > 0 && (
+          {isOpen && !hasCustomLayout && freeItems.length > 0 && (
             <div className="space-y-2">
               {freeItems.map((d, i) => (
                 <p key={i} className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
