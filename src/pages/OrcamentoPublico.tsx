@@ -1229,7 +1229,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         })()}
 
         {/* ─── Commercial CTA block (Scenario B: no total) ─── */}
-        {(quote as any).show_investment_section === false && (
+        {(quote as any).show_investment_section === false && !useServicePayment && (
           <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
             <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
@@ -1386,9 +1386,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               );
             })() : (
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">Condições flexíveis</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+                  {useServicePayment ? "Parcelamento por serviço" : "Condições flexíveis"}
+                </p>
                 <p className="text-[15px] font-bold text-foreground leading-tight truncate">
-                  Parcele cada serviço do seu jeito
+                  {useServicePayment ? "Veja a condição em cada serviço" : "Parcele cada serviço do seu jeito"}
                 </p>
               </div>
             )}
