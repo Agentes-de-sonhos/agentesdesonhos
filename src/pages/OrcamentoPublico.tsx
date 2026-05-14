@@ -1329,18 +1329,46 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
       {/* ─── Sticky mobile conversion bar ─── */}
       {whatsappUrl && (
-        <div className="fixed bottom-0 inset-x-0 z-30 sm:hidden border-t border-border/40 bg-white/95 backdrop-blur-lg shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)]">
-          <div className="flex items-center gap-3 px-4 py-3">
-            {(quote as any).show_investment_section !== false ? (
+        <div className="fixed bottom-0 inset-x-0 z-30 sm:hidden border-t border-border/30 bg-white/95 backdrop-blur-xl shadow-[0_-10px_32px_-14px_rgba(0,0,0,0.18)]">
+          <div className="flex items-center gap-3 px-4 py-3 max-w-4xl mx-auto">
+            {(quote as any).show_investment_section !== false ? (() => {
+              const mode = (quote as any).payment_display_mode || "full_payment";
+              const installments = (quote as any).installments_count || 10;
+              const entryPct = (quote as any).entry_percentage || 0;
+              const discountPct = (quote as any).full_payment_discount_percent || 0;
+              const total = totalForBar;
+
+              // When discount applies, show discounted total as "from" baseline
+              const baseTotal = mode === "full_payment" && discountPct > 0
+                ? total * (1 - discountPct / 100)
+                : total;
+
+              const installmentValue = baseTotal / (installments || 1);
+
+              return (
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    {mode === "installments_with_entry" ? "Condição de pagamento" : "A partir de"}
+                  </p>
+                  <p className="text-[19px] font-extrabold text-foreground tracking-tight leading-none mt-0.5">
+                    {formatCurrency(installmentValue)}<span className="text-[13px] font-semibold text-muted-foreground">/mês</span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                    {mode === "installments_with_entry"
+                      ? `Entrada de ${formatCurrency(total * (entryPct / 100))} + ${installments}x sem juros`
+                      : mode === "installments"
+                        ? `Em até ${installments}x sem juros`
+                        : discountPct > 0
+                          ? `Condição especial à vista`
+                          : `Parcelamento disponível`}
+                  </p>
+                </div>
+              );
+            })() : (
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Investimento total</p>
-                <p className="text-base font-extrabold text-foreground truncate">{formatCurrency(totalForBar)}</p>
-              </div>
-            ) : (
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-primary/80">Condições flexíveis</p>
-                <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
-                  Parcele cada serviço na melhor condição
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">Condições flexíveis</p>
+                <p className="text-[15px] font-bold text-foreground leading-tight truncate">
+                  Parcele cada serviço do seu jeito
                 </p>
               </div>
             )}
@@ -1348,7 +1376,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[#25D366] text-white px-5 py-3 font-semibold text-sm shadow-[0_8px_24px_-6px_rgba(37,211,102,0.55)] active:scale-95 transition-transform"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[#25D366] text-white px-5 py-3 font-semibold text-sm shadow-[0_8px_24px_-6px_rgba(37,211,102,0.55)] active:scale-95 transition-transform shrink-0"
             >
               <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
                 <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm animate-shimmer-slide" />
