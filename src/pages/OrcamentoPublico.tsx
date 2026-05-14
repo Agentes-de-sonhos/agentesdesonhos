@@ -961,19 +961,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       {/* ─── Slim Premium Header ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
-          {agentProfile?.agency_logo_url ? (
-            <img
-              src={agentProfile.agency_logo_url}
-              alt={agentProfile.agency_name || "Agência"}
-              translate="no"
-              className="h-10 sm:h-12 max-w-[180px] object-contain"
-            />
-          ) : (
-            <BrandText as="span" className="text-base sm:text-lg font-semibold tracking-tight">
-              {agentProfile?.agency_name || "Proposta de Viagem"}
-            </BrandText>
-          )}
-          <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <BrandText as="span" className="text-sm sm:text-base font-semibold tracking-tight text-foreground/85">
+            {agentProfile?.agency_name || "Proposta de Viagem"}
+          </BrandText>
+          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 text-primary" /> Proposta exclusiva
           </span>
         </div>
