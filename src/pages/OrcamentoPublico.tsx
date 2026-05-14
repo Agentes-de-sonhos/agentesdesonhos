@@ -961,12 +961,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       {/* ─── Slim Premium Header ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
-          <BrandText as="span" className="text-sm sm:text-base font-semibold tracking-tight text-foreground/85">
-            {agentProfile?.agency_name || "Proposta de Viagem"}
-          </BrandText>
           <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> Proposta exclusiva
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Proposta de Viagem
           </span>
+          <BrandText as="span" className="text-sm sm:text-base font-semibold tracking-tight text-foreground/85 truncate max-w-[55%] text-right">
+            {agentProfile?.agency_name || "Proposta exclusiva"}
+          </BrandText>
         </div>
       </header>
 
@@ -1024,25 +1024,6 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
           </div>
 
-          {/* Floating premium agency badge */}
-          {(agentProfile?.agency_logo_url || agentProfile?.agency_name) && (
-            <div className="absolute left-1/2 -bottom-10 sm:-bottom-12 -translate-x-1/2 z-20">
-              <div className="rounded-full bg-white shadow-[0_18px_50px_-12px_rgba(0,0,0,0.35)] ring-1 ring-black/5 p-3 sm:p-4 flex items-center justify-center h-20 w-20 sm:h-24 sm:w-24">
-                {agentProfile?.agency_logo_url ? (
-                  <img
-                    src={agentProfile.agency_logo_url}
-                    alt={agentProfile.agency_name || "Agência"}
-                    translate="no"
-                    className="max-h-full max-w-full object-contain"
-                  />
-                ) : (
-                  <BrandText as="span" className="text-xs font-bold tracking-tight text-foreground text-center leading-tight">
-                    {agentProfile?.agency_name}
-                  </BrandText>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
@@ -1117,31 +1098,6 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
           </section>
         )}
-
-        {/* ─── Diferenciais da agência ─── */}
-        <section className="rounded-3xl border border-border/40 bg-gradient-to-br from-muted/30 to-white p-7 sm:p-10 animate-fade-up">
-          <div className="text-center space-y-1 mb-7">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Por que viajar com a gente</p>
-            <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Sua viagem em boas mãos</h3>
-          </div>
-          <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
-            {[
-              { icon: <Compass className="h-4 w-4" />, t: "Curadoria personalizada", d: "Cada detalhe pensado para o seu perfil." },
-              { icon: <HeartHandshake className="h-4 w-4" />, t: "Atendimento humanizado", d: "Pessoas de verdade, do começo ao fim." },
-              { icon: <Headphones className="h-4 w-4" />, t: "Suporte durante a viagem", d: "Estamos com você se algo precisar." },
-              { icon: <Award className="h-4 w-4" />, t: "Especialistas no destino", d: "Conhecimento real de quem já foi lá." },
-              { icon: <ShieldCheck className="h-4 w-4" />, t: "Segurança e proteção", d: "Reservas confirmadas e fornecedores confiáveis." },
-            ].map((b, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">{b.icon}</span>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{b.t}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{b.d}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
 
         {/* ─── Investment Highlight (after experience for premium narrative) ─── */}
         {(quote as any).show_investment_section !== false && (() => {
