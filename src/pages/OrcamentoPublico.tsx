@@ -626,7 +626,7 @@ function CollapsibleServiceCard({
         className={`overflow-hidden transition-all duration-300 ease-in-out`}
         style={{ maxHeight: isOpen ? "2000px" : "0px", opacity: isOpen ? 1 : 0 }}
       >
-        <div className="px-5 py-5 space-y-4">
+        <div className="px-5 py-4 space-y-4">
           {isOpen && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
