@@ -1110,7 +1110,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </section>
         )}
 
-        {/* ─── Investment Highlight (after experience for premium narrative) ─── */}
+        {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
         {(quote as any).show_investment_section !== false && (() => {
           const mode = (quote as any).payment_display_mode || "full_payment";
           const installments = (quote as any).installments_count || 10;
@@ -1119,56 +1119,93 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           const methodLabel = (quote as any).payment_method_label as string | null;
           const total = totalForBar;
 
-          // Total is always the protagonist; parcel/condition is a refined secondary line.
           const headlineTotal = mode === "full_payment" && discountPct > 0
             ? total * (1 - discountPct / 100)
             : total;
 
-          const mainDisplay = (
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">
-                {formatCurrency(headlineTotal)}
-              </span>
-              {mode === "full_payment" && discountPct > 0 && (
-                <span className="text-sm text-muted-foreground line-through">{formatCurrency(total)}</span>
-              )}
-            </div>
-          );
+          let primaryDisplay: React.ReactNode = null;
+          let secondaryDisplay: React.ReactNode = null;
 
-          let subtitleDisplay: React.ReactNode = null;
           if (mode === "installments") {
             const installmentValue = total / (installments || 1);
-            subtitleDisplay = (
-              <p className="text-sm sm:text-base font-medium text-foreground/70">
-                A partir de <span className="font-semibold text-foreground">{formatCurrency(installmentValue)}</span>/mês
-                <span className="block text-xs text-muted-foreground mt-1">
-                  Em até {installments}x sem juros{methodLabel ? ` • ${methodLabel}` : ""}
+            primaryDisplay = (
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                  A partir de
                 </span>
-              </p>
+                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                  {installments}x de {formatCurrency(installmentValue)}
+                </span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  sem juros{methodLabel ? ` • ${methodLabel}` : ""}
+                </span>
+              </div>
+            );
+            secondaryDisplay = (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Valor à vista:</span>
+                <span className="font-medium text-foreground/80">{formatCurrency(headlineTotal)}</span>
+                {discountPct > 0 && (
+                  <span className="line-through text-muted-foreground/60">{formatCurrency(total)}</span>
+                )}
+              </div>
             );
           } else if (mode === "installments_with_entry") {
             const entryValue = total * (entryPct / 100);
             const remainder = total - entryValue;
             const installmentValue = remainder / (installments || 1);
-            subtitleDisplay = (
-              <p className="text-sm sm:text-base font-medium text-foreground/70">
-                Entrada de <span className="font-semibold text-foreground">{formatCurrency(entryValue)}</span> + {installments}x de <span className="font-semibold text-foreground">{formatCurrency(installmentValue)}</span>
+            primaryDisplay = (
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                  Condição especial
+                </span>
+                <span className="text-[2.2rem] sm:text-[3rem] font-extrabold tracking-tight text-foreground leading-none text-center">
+                  Entrada de {formatCurrency(entryValue)} + {installments}x de {formatCurrency(installmentValue)}
+                </span>
                 {methodLabel && (
-                  <span className="block text-xs text-muted-foreground mt-1">{methodLabel}</span>
+                  <span className="text-xs text-muted-foreground mt-1">{methodLabel}</span>
                 )}
-              </p>
+              </div>
+            );
+            secondaryDisplay = (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Valor total:</span>
+                <span className="font-medium text-foreground/80">{formatCurrency(total)}</span>
+              </div>
             );
           } else if (discountPct > 0) {
-            subtitleDisplay = (
+            primaryDisplay = (
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-primary/80">
+                  Condição especial à vista
+                </span>
+                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                  {formatCurrency(headlineTotal)}
+                </span>
+                <span className="text-sm text-muted-foreground line-through mt-1">{formatCurrency(total)}</span>
+              </div>
+            );
+            secondaryDisplay = (
               <p className="text-sm font-medium text-primary">
-                Condição especial: {discountPct}% de desconto{methodLabel ? ` • ${methodLabel}` : ""}
+                {discountPct}% de desconto aplicado{methodLabel ? ` • ${methodLabel}` : ""}
               </p>
             );
           } else {
-            subtitleDisplay = (
-              <p className="text-sm text-muted-foreground">
-                Parcelamento disponível{methodLabel ? ` • ${methodLabel}` : ""}
-              </p>
+            primaryDisplay = (
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                  Investimento
+                </span>
+                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                  {formatCurrency(headlineTotal)}
+                </span>
+                {methodLabel && (
+                  <span className="text-xs text-muted-foreground mt-1">{methodLabel}</span>
+                )}
+              </div>
+            );
+            secondaryDisplay = (
+              <p className="text-sm text-muted-foreground">Parcelamento disponível</p>
             );
           }
 
@@ -1176,32 +1213,13 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.28)] animate-fade-up">
               <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
               <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-              <div className="relative text-center space-y-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
-                  {showDetailedPrices ? "Investimento total" : "Valor do pacote"}
-                </p>
-                {mainDisplay}
-                {subtitleDisplay}
+              <div className="relative text-center space-y-4 sm:space-y-5">
+                {primaryDisplay}
+                {secondaryDisplay}
                 {quote.services && quote.services.length > 0 && (
                   <p className="text-xs text-muted-foreground">
                     {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
                   </p>
-                )}
-                {whatsappUrl && (
-                  <div className="pt-5 flex justify-center">
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-4 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.02] w-full sm:w-auto"
-                    >
-                      <span className="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-full">
-                        <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent blur-sm animate-shimmer-slide" />
-                      </span>
-                      <WhatsAppIcon className="relative h-4 w-4" />
-                      <span className="relative">Quero reservar essa viagem</span>
-                    </a>
-                  </div>
                 )}
               </div>
             </section>
