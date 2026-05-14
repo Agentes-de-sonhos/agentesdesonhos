@@ -686,24 +686,26 @@ function CollapsibleServiceCard({
               </p>
             </div>
           )}
-          {/* Per-service payment display */}
-          {isOpen && showPaymentPerService && (() => {
-            const payConfig = extractServicePaymentConfig(service);
-            if (!payConfig.is_custom_payment) return null;
-            const display = getServicePaymentDisplay(service.amount, payConfig);
-            if (!display) return null;
-            return (
-              <div className="mt-2 rounded-lg bg-primary/5 border border-primary/20 px-4 py-3 flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-primary" />
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-bold uppercase tracking-wide text-primary/80">Parcelamento</span>
-                  <span className="text-sm font-semibold text-primary">{display}</span>
-                </div>
-              </div>
-            );
-          })()}
         </div>
       </div>
+      {/* Per-service payment footer — always visible (open or collapsed) */}
+      {showPaymentPerService && (() => {
+        const payConfig = extractServicePaymentConfig(service);
+        if (!payConfig.is_custom_payment) return null;
+        const display = getServicePaymentDisplay(service.amount, payConfig);
+        if (!display) return null;
+        return (
+          <div className="border-t border-primary/15 bg-gradient-to-r from-primary/[0.06] via-primary/[0.04] to-transparent px-5 py-3 flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+              <CreditCard className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/70">Parcelamento</span>
+              <span className="text-sm font-bold text-primary truncate">{display}</span>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -1227,7 +1229,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         })()}
 
         {/* ─── Commercial CTA block (Scenario B: no total) ─── */}
-        {(quote as any).show_investment_section === false && (
+        {(quote as any).show_investment_section === false && !useServicePayment && (
           <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
             <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
@@ -1384,9 +1386,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               );
             })() : (
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">Condições flexíveis</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+                  {useServicePayment ? "Parcelamento por serviço" : "Condições flexíveis"}
+                </p>
                 <p className="text-[15px] font-bold text-foreground leading-tight truncate">
-                  Parcele cada serviço do seu jeito
+                  {useServicePayment ? "Veja a condição em cada serviço" : "Parcele cada serviço do seu jeito"}
                 </p>
               </div>
             )}
