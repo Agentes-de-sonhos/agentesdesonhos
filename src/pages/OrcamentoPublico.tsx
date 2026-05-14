@@ -987,9 +987,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
 
-          {/* floating agency logo badge */}
+          {/* floating agency logo badge — premium circular signature */}
           {agentProfile?.agency_logo_url && (
-            <div className="absolute top-5 sm:top-7 left-1/2 -translate-x-1/2 z-10 h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-white p-2 sm:p-2.5 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.5)] ring-1 ring-black/5">
+            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-32 w-32 sm:h-40 sm:w-40 rounded-full bg-white p-3 sm:p-4 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
               <img
                 src={agentProfile.agency_logo_url}
                 alt={agentProfile.agency_name || "Agência"}
