@@ -5,7 +5,7 @@ import { usePublicQuote } from "@/hooks/useQuotes";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -467,10 +467,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
 
-  // Initialize all services as open on first load
+  // Premium UX: services start collapsed (resumo first, detalhes on demand)
   useEffect(() => {
     if (!servicesInitialized.current && quote?.services?.length) {
-      setOpenServiceIndices(new Set(quote.services.map((_, i) => i)));
+      setOpenServiceIndices(new Set());
       servicesInitialized.current = true;
     }
   }, [quote?.services]);
@@ -553,107 +553,293 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     });
   };
 
+  // ── Smart trip summary derived from services
+  const introImages: string[] = (quote as any).destination_intro_images || [];
+  const introText: string | null = (quote as any).destination_intro_text || null;
+  const heroImage = introImages[0] || quote.services?.find(s => s.image_url)?.image_url || quote.services?.find(s => (s as any).image_urls?.length)?.image_urls?.[0] || null;
+  const tripTitle = (quote as any).trip_title as string | undefined;
+
+  const totalForBar = quote.services && quote.services.length > 0
+    ? quote.services.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
+    : quote.total_amount;
+
+  // Smart highlights inferred from services
+  const svcTypes = new Set((quote.services || []).map(s => s.service_type));
+  const hotelSvc = (quote.services || []).find(s => s.service_type === "hotel") as any;
+  const flightSvc = (quote.services || []).find(s => s.service_type === "flight") as any;
+  const highlights: { icon: React.ReactNode; text: string }[] = [];
+  if (hotelSvc?.service_data) {
+    const meal = (hotelSvc.service_data.meal_plan || "").toLowerCase();
+    const isAI = meal.includes("all") || meal.includes("inclu");
+    highlights.push({ icon: <Hotel className="h-4 w-4" />, text: `${hotelSvc.service_data.hotel_name || "Hospedagem selecionada"}${isAI ? " • All Inclusive" : ""}` });
+  }
+  if (flightSvc?.service_data) {
+    highlights.push({ icon: <Plane className="h-4 w-4" />, text: `Voos${flightSvc.service_data.origin_city ? ` saindo de ${flightSvc.service_data.origin_city}` : ""}` });
+  }
+  if (svcTypes.has("car_rental")) highlights.push({ icon: <Car className="h-4 w-4" />, text: "Carro à disposição" });
+  if (svcTypes.has("transfer")) highlights.push({ icon: <ArrowRightLeft className="h-4 w-4" />, text: "Transfers privativos inclusos" });
+  if (svcTypes.has("attraction")) highlights.push({ icon: <Ticket className="h-4 w-4" />, text: "Experiências e passeios selecionados" });
+  if (svcTypes.has("insurance")) highlights.push({ icon: <Shield className="h-4 w-4" />, text: "Seguro viagem incluso" });
+  if (svcTypes.has("cruise")) highlights.push({ icon: <Ship className="h-4 w-4" />, text: "Cruzeiro reservado" });
+  if (highlights.length === 0) highlights.push({ icon: <Sparkles className="h-4 w-4" />, text: "Roteiro personalizado pela sua agência" });
+
+  // Timeline nodes
+  const timelineNodes: { icon: React.ReactNode; label: string }[] = [];
+  if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <MapPin className="h-4 w-4" />, label: flightSvc.service_data.origin_city });
+  if (flightSvc?.service_data?.destination_city || quote.destination) timelineNodes.push({ icon: <Plane className="h-4 w-4" />, label: flightSvc?.service_data?.destination_city || quote.destination });
+  if (hotelSvc) timelineNodes.push({ icon: <Hotel className="h-4 w-4" />, label: `${days - 1 > 0 ? days - 1 : days} noites` });
+  if (svcTypes.has("car_rental")) timelineNodes.push({ icon: <Car className="h-4 w-4" />, label: "Locação" });
+  if (svcTypes.has("attraction")) timelineNodes.push({ icon: <Ticket className="h-4 w-4" />, label: "Experiências" });
+  if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <Plane className="h-4 w-4 rotate-180" />, label: "Retorno" });
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* ─── Premium Agency Header with large logo ─── */}
-      <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-center">
+    <div className="min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0">
+      {/* ─── Slim Premium Header ─── */}
+      <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
           {agentProfile?.agency_logo_url ? (
             <img
               src={agentProfile.agency_logo_url}
-               alt={agentProfile.agency_name || "Agência"}
-               translate="no"
-              className="h-32 sm:h-40 max-w-[400px] object-contain"
+              alt={agentProfile.agency_name || "Agência"}
+              translate="no"
+              className="h-10 sm:h-12 max-w-[180px] object-contain"
             />
           ) : (
-            <div className="flex items-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Briefcase className="h-7 w-7 text-primary" />
-              </div>
-              <BrandText as="span" className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-                {agentProfile?.agency_name || "Proposta de Viagem"}
-              </BrandText>
-            </div>
+            <BrandText as="span" className="text-base sm:text-lg font-semibold tracking-tight">
+              {agentProfile?.agency_name || "Proposta de Viagem"}
+            </BrandText>
           )}
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Proposta exclusiva
+          </span>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
-        {/* ─── Hero Section ─── */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
-            <MapPin className="h-3.5 w-3.5" />
-            Proposta de Viagem
-          </div>
-          {(quote as any).trip_title ? (
-            <>
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
-                {(quote as any).trip_title}
-              </h1>
-              <p className="text-xl sm:text-2xl font-semibold text-muted-foreground">
-                {quote.destination}
-              </p>
-            </>
+      {/* ─── HERO PREMIUM ─── */}
+      <section className="relative w-full overflow-hidden">
+        <div className="relative h-[62vh] min-h-[440px] sm:h-[68vh] sm:min-h-[520px] w-full">
+          {heroImage ? (
+            <img
+              src={heroImage}
+              alt={quote.destination}
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="eager"
+            />
           ) : (
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
-              {quote.destination}
-            </h1>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
           )}
-          <p className="text-lg text-muted-foreground">
-            Preparado especialmente para{" "}
-            <span className="font-semibold text-foreground">{quote.client_name}</span>
-          </p>
-        </div>
+          {/* cinematic gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.45),transparent_60%)]" />
 
-        {/* ─── Trip Overview ─── */}
-        <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Destino</span>
+          <div className="relative h-full max-w-4xl mx-auto px-5 sm:px-8 flex flex-col justify-end pb-10 sm:pb-14 text-white">
+            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]">
+              <MapPin className="h-3 w-3" /> {quote.destination}
+            </span>
+            <h1 className="mt-4 text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight max-w-3xl drop-shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+              {tripTitle || quote.destination}
+            </h1>
+            <p className="mt-3 text-base sm:text-xl font-light text-white/90 max-w-2xl">
+              {tripTitle
+                ? `Uma experiência preparada com cuidado para ${quote.client_name}.`
+                : `${days} ${days === 1 ? "dia" : "dias"} para viver ${quote.destination} de um jeito único — feito para ${quote.client_name}.`}
+            </p>
+
+            {/* meta chips */}
+            <div className="mt-6 flex flex-wrap gap-2 sm:gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
+                <Calendar className="h-4 w-4 opacity-80" />
+                {formatDateShort(quote.start_date)} – {formatDateShort(quote.end_date)}
               </div>
-              <p className="text-sm font-bold text-foreground">{quote.destination}</p>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Período</span>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
+                <Sparkles className="h-4 w-4 opacity-80" />
+                {days} {days === 1 ? "dia" : "dias"}
               </div>
-              <p className="text-sm font-bold text-foreground">
-                {formatDateShort(quote.start_date)} — {formatDateShort(quote.end_date)}
-              </p>
-              <p className="text-xs text-muted-foreground">{days} dias</p>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Viajantes</span>
-              </div>
-              <p className="text-sm font-bold text-foreground">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
+                <Users className="h-4 w-4 opacity-80" />
                 {quote.adults_count} adulto{quote.adults_count > 1 ? "s" : ""}
                 {quote.children_count > 0 && ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}`}
-              </p>
+              </div>
+              {flightSvc?.service_data?.origin_city && (
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
+                  <Plane className="h-4 w-4 opacity-80" />
+                  Saindo de {flightSvc.service_data.origin_city}
+                </div>
+              )}
             </div>
           </div>
         </div>
+      </section>
 
-        {/* ─── Destination Intro ─── */}
-        {(quote as any).show_destination_intro !== false && (
+      <main className="max-w-4xl mx-auto px-5 sm:px-8 py-10 sm:py-14 space-y-12 sm:space-y-16">
+        {/* ─── Smart Trip Highlights ─── */}
+        <section className="-mt-20 sm:-mt-24 relative z-10">
+          <div className="rounded-3xl bg-white shadow-[0_20px_60px_-20px_rgba(0,0,0,0.18)] border border-border/40 p-6 sm:p-8">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80 mb-4">O que está incluso</p>
+            <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
+              {highlights.map((h, i) => (
+                <li key={i} className="flex items-start gap-3 text-[15px] text-foreground/90 leading-snug">
+                  <span className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                    {h.icon}
+                  </span>
+                  <span className="font-medium">{h.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* ─── Timeline visual ─── */}
+        {timelineNodes.length >= 2 && (
+          <section>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground text-center mb-5">Sua jornada</p>
+            <div className="flex items-center justify-center flex-wrap gap-y-3">
+              {timelineNodes.map((n, i) => (
+                <div key={i} className="flex items-center">
+                  <div className="flex flex-col items-center gap-1.5 min-w-[78px] sm:min-w-[110px]">
+                    <div className="h-11 w-11 rounded-full bg-white border border-border shadow-sm flex items-center justify-center text-primary">
+                      {n.icon}
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-medium text-foreground/80 text-center leading-tight">{n.label}</span>
+                  </div>
+                  {i < timelineNodes.length - 1 && (
+                    <div className="h-px w-6 sm:w-10 bg-gradient-to-r from-border via-foreground/20 to-border mx-1" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── Destination Intro (text + extra images carousel) ─── */}
+        {(quote as any).show_destination_intro !== false && (introText || introImages.length > 1) && (
           <DestinationIntroPublic
-            text={(quote as any).destination_intro_text || null}
-            images={(quote as any).destination_intro_images || []}
+            text={introText}
+            images={introImages.slice(1)}
             destination={quote.destination}
           />
         )}
 
-        {/* ─── Collapsible Services (accordion — one open at a time) ─── */}
+        {/* ─── Investment Highlight (moved up for conversion) ─── */}
+        {(quote as any).show_investment_section !== false && (() => {
+          const mode = (quote as any).payment_display_mode || "full_payment";
+          const installments = (quote as any).installments_count || 10;
+          const entryPct = (quote as any).entry_percentage || 0;
+          const discountPct = (quote as any).full_payment_discount_percent || 0;
+          const methodLabel = (quote as any).payment_method_label as string | null;
+          const total = totalForBar;
+
+          let mainDisplay: React.ReactNode;
+          let subtitleDisplay: React.ReactNode = null;
+
+          if (mode === "installments") {
+            const installmentValue = total / (installments || 1);
+            mainDisplay = (
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-base sm:text-lg font-medium text-foreground/60">{installments}x de</span>
+                <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">{formatCurrency(installmentValue)}</span>
+              </div>
+            );
+            subtitleDisplay = (
+              <p className="text-sm text-muted-foreground">
+                Total: <span className="font-semibold text-foreground/80">{formatCurrency(total)}</span>{methodLabel ? ` • ${methodLabel}` : ""} • sem juros
+              </p>
+            );
+          } else if (mode === "installments_with_entry") {
+            const entryValue = total * (entryPct / 100);
+            const remainder = total - entryValue;
+            const installmentValue = remainder / (installments || 1);
+            mainDisplay = (
+              <div className="space-y-2 flex flex-col items-center">
+                <p className="text-base sm:text-lg font-medium text-foreground/60">
+                  Entrada de <span className="font-bold text-foreground">{formatCurrency(entryValue)}</span>
+                </p>
+                <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+                  + {installments}x {formatCurrency(installmentValue)}
+                </p>
+              </div>
+            );
+            subtitleDisplay = (
+              <p className="text-sm text-muted-foreground">
+                Total: <span className="font-semibold text-foreground/80">{formatCurrency(total)}</span>{methodLabel ? ` • ${methodLabel}` : ""}
+              </p>
+            );
+          } else {
+            const discountedTotal = total * (1 - discountPct / 100);
+            mainDisplay = (
+              <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">{formatCurrency(discountedTotal)}</span>
+            );
+            if (discountPct > 0) {
+              subtitleDisplay = (
+                <div className="space-y-0.5">
+                  <p className="text-sm text-muted-foreground line-through">{formatCurrency(total)}</p>
+                  <p className="text-sm font-semibold text-primary">
+                    {discountPct}% de desconto{methodLabel ? ` via ${methodLabel}` : ""}
+                  </p>
+                </div>
+              );
+            } else {
+              subtitleDisplay = methodLabel ? <p className="text-sm text-muted-foreground">{methodLabel}</p> : null;
+            }
+          }
+
+          return (
+            <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.25)]">
+              <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+              <div className="relative text-center space-y-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
+                  {showDetailedPrices ? "Investimento total" : "Valor do pacote"}
+                </p>
+                {mainDisplay}
+                {subtitleDisplay}
+                {quote.services && quote.services.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
+                  </p>
+                )}
+                {whatsappUrl && (
+                  <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-8 py-3.5 font-semibold text-sm shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] w-full sm:w-auto"
+                    >
+                      Quero reservar
+                    </a>
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-semibold text-sm shadow-lg transition-all hover:scale-[1.02] w-full sm:w-auto"
+                    >
+                      <WhatsAppIcon className="h-4 w-4" /> Falar com especialista
+                    </a>
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* ─── Payment terms ─── */}
+        {(quote as any).show_investment_section !== false && paymentTerms && (
+          <div className="rounded-2xl border border-border/40 bg-card p-6 sm:p-8">
+            <div className="flex items-center gap-2 mb-3">
+              <CreditCard className="h-4 w-4 text-primary" />
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Condições de pagamento</h3>
+            </div>
+            <p className="text-sm text-foreground/85 leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></p>
+          </div>
+        )}
+
+        {/* ─── Services Section (collapsed by default) ─── */}
         {quote.services && quote.services.length > 0 && (
           <section className="space-y-5">
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-border/60" />
-              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Serviços Incluídos</h2>
-              <div className="h-px flex-1 bg-border/60" />
+            <div className="text-center space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Sua experiência</p>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Serviços incluídos</h2>
+              <p className="text-sm text-muted-foreground">Toque em cada item para ver os detalhes completos.</p>
             </div>
             <div className="space-y-3">
               {quote.services.map((service, index) => (
@@ -670,107 +856,30 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </section>
         )}
 
-        {/* ─── Investment Highlight ─── */}
-        {(() => {
-          const mode = (quote as any).payment_display_mode || "full_payment";
-          const installments = (quote as any).installments_count || 10;
-          const entryPct = (quote as any).entry_percentage || 0;
-          const discountPct = (quote as any).full_payment_discount_percent || 0;
-          const methodLabel = (quote as any).payment_method_label as string | null;
-          const total = quote.services && quote.services.length > 0
-            ? quote.services.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
-            : quote.total_amount;
-
-          let mainDisplay: React.ReactNode;
-          let subtitleDisplay: React.ReactNode = null;
-
-          if (mode === "installments") {
-            const installmentValue = total / (installments || 1);
-            mainDisplay = (
-              <>
-                <span className="text-xl sm:text-2xl font-bold opacity-90">{installments}x de</span>
-                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">{formatCurrency(installmentValue)}</span>
-              </>
-            );
-            subtitleDisplay = (
-              <p className="text-sm opacity-70">
-                Total: {formatCurrency(total)}{methodLabel ? ` • ${methodLabel}` : ""} • sem juros
-              </p>
-            );
-          } else if (mode === "installments_with_entry") {
-            const entryValue = total * (entryPct / 100);
-            const remainder = total - entryValue;
-            const installmentValue = remainder / (installments || 1);
-            mainDisplay = (
-              <div className="space-y-1">
-                <p className="text-lg sm:text-xl font-bold opacity-90">
-                  Entrada de <span className="text-primary-foreground">{formatCurrency(entryValue)}</span>
-                </p>
-                <p className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                  + {installments}x de {formatCurrency(installmentValue)}
-                </p>
-              </div>
-            );
-            subtitleDisplay = (
-              <p className="text-sm opacity-70">
-                Total: {formatCurrency(total)}{methodLabel ? ` • ${methodLabel}` : ""}
-              </p>
-            );
-          } else {
-            // full_payment
-            const discountedTotal = total * (1 - discountPct / 100);
-            mainDisplay = (
-              <>
-                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">{formatCurrency(discountedTotal)}</span>
-              </>
-            );
-            if (discountPct > 0) {
-              subtitleDisplay = (
-                <div className="space-y-1">
-                  <p className="text-sm opacity-70 line-through">{formatCurrency(total)}</p>
-                  <p className="text-sm font-semibold opacity-90">
-                    🎉 {discountPct}% de desconto{methodLabel ? ` via ${methodLabel}` : ""}
-                  </p>
-                </div>
-              );
-            } else {
-              subtitleDisplay = methodLabel ? <p className="text-sm opacity-70">{methodLabel}</p> : null;
-            }
-          }
-
-          if ((quote as any).show_investment_section === false) return null;
-
-          return (
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/90 to-primary/70 text-primary-foreground p-6 sm:p-8 text-center shadow-md">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_50%)]" />
-              <div className="relative space-y-2">
-                <p className="text-xs font-medium opacity-70 uppercase tracking-widest">
-                  {showDetailedPrices ? "Investimento Total" : "Valor do Pacote"}
-                </p>
-                <div className="flex flex-col items-center gap-1">
-                  {mainDisplay}
-                </div>
-                {subtitleDisplay}
-                {quote.services && quote.services.length > 0 && (
-                  <p className="text-xs opacity-50 pt-1">
-                    {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
-                  </p>
-                )}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* ─── Payment Notes ─── */}
-        {(quote as any).show_investment_section !== false && paymentTerms && (
-          <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
-            <div className="flex items-center gap-2 mb-3">
-              <CreditCard className="h-5 w-5 text-primary" />
-              <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Condições de Pagamento</h3>
-            </div>
-            <p className="text-sm text-foreground leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></p>
+        {/* ─── Diferenciais da agência ─── */}
+        <section className="rounded-3xl border border-border/40 bg-gradient-to-br from-muted/30 to-white p-7 sm:p-10">
+          <div className="text-center space-y-1 mb-7">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Por que viajar com a gente</p>
+            <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Sua viagem em boas mãos</h3>
           </div>
-        )}
+          <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+            {[
+              { icon: <Compass className="h-4 w-4" />, t: "Curadoria personalizada", d: "Cada detalhe pensado para o seu perfil." },
+              { icon: <HeartHandshake className="h-4 w-4" />, t: "Atendimento humanizado", d: "Pessoas de verdade, do começo ao fim." },
+              { icon: <Headphones className="h-4 w-4" />, t: "Suporte durante a viagem", d: "Estamos com você se algo precisar." },
+              { icon: <Award className="h-4 w-4" />, t: "Especialistas no destino", d: "Conhecimento real de quem já foi lá." },
+              { icon: <ShieldCheck className="h-4 w-4" />, t: "Segurança e proteção", d: "Reservas confirmadas e fornecedores confiáveis." },
+            ].map((b, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">{b.icon}</span>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{b.t}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{b.d}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* ─── Validity ─── */}
         <div className="text-center space-y-1">
@@ -789,16 +898,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           )}
         </div>
 
-        {/* ─── Agent Signature: photo, name, agency, WhatsApp ─── */}
-        {/* ─── Documentos compartilhados com o cliente ─── */}
+        {/* ─── Documentos ─── */}
         <PublicQuoteDocuments quoteId={quote.id} />
 
+        {/* ─── Agent Signature ─── */}
         {agentProfile && (
-          <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">Seu consultor de viagens</p>
+          <div className="rounded-3xl border border-border/40 bg-white shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-muted/60 to-muted/20 px-6 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground text-center">Seu consultor de viagens</p>
             </div>
-            <div className="p-6 sm:p-8">
+            <div className="p-6 sm:p-10">
               <div className="flex flex-col items-center text-center space-y-5">
                 {agentProfile.avatar_url ? (
                   <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
@@ -827,13 +936,23 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         )}
       </main>
 
-      {/* ─── Mobile floating WhatsApp ─── */}
+      {/* ─── Sticky mobile conversion bar ─── */}
       {whatsappUrl && (
-        <div className="fixed bottom-6 right-6 sm:hidden z-20">
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl hover:scale-110 transition-transform">
-            <WhatsAppIcon className="h-7 w-7" />
-          </a>
+        <div className="fixed bottom-0 inset-x-0 z-30 sm:hidden border-t border-border/40 bg-white/95 backdrop-blur-lg shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)]">
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">A partir de</p>
+              <p className="text-base font-extrabold text-foreground truncate">{formatCurrency(totalForBar)}</p>
+            </div>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-[#25D366] text-white px-5 py-3 font-semibold text-sm shadow-lg active:scale-95 transition-transform"
+            >
+              <WhatsAppIcon className="h-4 w-4" /> Conversar
+            </a>
+          </div>
         </div>
       )}
     </div>
