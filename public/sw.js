@@ -4,7 +4,7 @@
 // - Stale-while-revalidate para assets estáticos
 // Os dados da carteira (trip JSON) ficam em localStorage do CarteiraPublicaV2.
 
-const CACHE = "wallet-shell-v2";
+const CACHE = "wallet-shell-v3";
 const SHELL_URLS = ["/", "/index.html"];
 
 self.addEventListener("install", (event) => {
