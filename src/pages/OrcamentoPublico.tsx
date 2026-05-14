@@ -1331,10 +1331,19 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       {whatsappUrl && (
         <div className="fixed bottom-0 inset-x-0 z-30 sm:hidden border-t border-border/40 bg-white/95 backdrop-blur-lg shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)]">
           <div className="flex items-center gap-3 px-4 py-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">A partir de</p>
-              <p className="text-base font-extrabold text-foreground truncate">{formatCurrency(totalForBar)}</p>
-            </div>
+            {(quote as any).show_investment_section !== false ? (
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Investimento total</p>
+                <p className="text-base font-extrabold text-foreground truncate">{formatCurrency(totalForBar)}</p>
+              </div>
+            ) : (
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-primary/80">Condições flexíveis</p>
+                <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
+                  Parcele cada serviço na melhor condição
+                </p>
+              </div>
+            )}
             <a
               href={whatsappUrl}
               target="_blank"
@@ -1344,7 +1353,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
                 <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm animate-shimmer-slide" />
               </span>
-              <WhatsAppIcon className="relative h-4 w-4" /> <span className="relative">Conversar</span>
+              <WhatsAppIcon className="relative h-4 w-4" /> <span className="relative">Quero reservar</span>
             </a>
           </div>
         </div>
