@@ -961,19 +961,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       {/* ─── Slim Premium Header ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
-          {agentProfile?.agency_logo_url ? (
-            <img
-              src={agentProfile.agency_logo_url}
-              alt={agentProfile.agency_name || "Agência"}
-              translate="no"
-              className="h-10 sm:h-12 max-w-[180px] object-contain"
-            />
-          ) : (
-            <BrandText as="span" className="text-base sm:text-lg font-semibold tracking-tight">
-              {agentProfile?.agency_name || "Proposta de Viagem"}
-            </BrandText>
-          )}
-          <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <BrandText as="span" className="text-sm sm:text-base font-semibold tracking-tight text-foreground/85">
+            {agentProfile?.agency_name || "Proposta de Viagem"}
+          </BrandText>
+          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 text-primary" /> Proposta exclusiva
           </span>
         </div>
@@ -981,36 +972,36 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
       {/* ─── HERO PREMIUM ─── */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative h-[62vh] min-h-[440px] sm:h-[68vh] sm:min-h-[520px] w-full">
+        <div className="relative h-[55vh] min-h-[420px] sm:h-[60vh] sm:min-h-[520px] w-full">
           {heroImage ? (
             <img
               src={heroImage}
               alt={quote.destination}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
               loading="eager"
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
           )}
           {/* cinematic gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.45),transparent_60%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
 
-          <div className="relative h-full max-w-4xl mx-auto px-5 sm:px-8 flex flex-col justify-end pb-10 sm:pb-14 text-white">
-            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]">
+          <div className="relative h-full max-w-4xl mx-auto px-5 sm:px-8 flex flex-col justify-end pb-20 sm:pb-24 text-white animate-fade-up">
+            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
               <MapPin className="h-3 w-3" /> {quote.destination}
             </span>
-            <h1 className="mt-4 text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight max-w-3xl drop-shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <h1 className="mt-4 text-[2.6rem] sm:text-7xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
               {tripTitle || quote.destination}
             </h1>
-            <p className="mt-3 text-base sm:text-xl font-light text-white/90 max-w-2xl">
+            <p className="mt-4 text-base sm:text-xl font-light text-white/90 max-w-2xl leading-relaxed">
               {tripTitle
                 ? `Uma experiência preparada com cuidado para ${quote.client_name}.`
                 : `${days} ${days === 1 ? "dia" : "dias"} para viver ${quote.destination} de um jeito único — feito para ${quote.client_name}.`}
             </p>
 
             {/* meta chips */}
-            <div className="mt-6 flex flex-wrap gap-2 sm:gap-3">
+            <div className="mt-7 flex flex-wrap gap-2 sm:gap-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
                 <Calendar className="h-4 w-4 opacity-80" />
                 {formatDateShort(quote.start_date)} – {formatDateShort(quote.end_date)}
@@ -1032,13 +1023,33 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               )}
             </div>
           </div>
+
+          {/* Floating premium agency badge */}
+          {(agentProfile?.agency_logo_url || agentProfile?.agency_name) && (
+            <div className="absolute left-1/2 -bottom-10 sm:-bottom-12 -translate-x-1/2 z-20">
+              <div className="rounded-full bg-white shadow-[0_18px_50px_-12px_rgba(0,0,0,0.35)] ring-1 ring-black/5 p-3 sm:p-4 flex items-center justify-center h-20 w-20 sm:h-24 sm:w-24">
+                {agentProfile?.agency_logo_url ? (
+                  <img
+                    src={agentProfile.agency_logo_url}
+                    alt={agentProfile.agency_name || "Agência"}
+                    translate="no"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <BrandText as="span" className="text-xs font-bold tracking-tight text-foreground text-center leading-tight">
+                    {agentProfile?.agency_name}
+                  </BrandText>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-5 sm:px-8 py-10 sm:py-14 space-y-12 sm:space-y-16">
+      <main className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-10 sm:pb-14 space-y-14 sm:space-y-20">
         {/* ─── Smart Trip Highlights ─── */}
-        <section className="-mt-20 sm:-mt-24 relative z-10">
-          <div className="rounded-3xl bg-white shadow-[0_20px_60px_-20px_rgba(0,0,0,0.18)] border border-border/40 p-6 sm:p-8">
+        <section className="-mt-32 sm:-mt-40 relative z-10 animate-fade-up">
+          <div className="rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] border border-border/40 p-7 sm:p-9 transition-shadow duration-500 hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.3)]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80 mb-4">O que está incluso</p>
             <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
               {highlights.map((h, i) => (
@@ -1084,122 +1095,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           />
         )}
 
-        {/* ─── Investment Highlight (moved up for conversion) ─── */}
-        {(quote as any).show_investment_section !== false && (() => {
-          const mode = (quote as any).payment_display_mode || "full_payment";
-          const installments = (quote as any).installments_count || 10;
-          const entryPct = (quote as any).entry_percentage || 0;
-          const discountPct = (quote as any).full_payment_discount_percent || 0;
-          const methodLabel = (quote as any).payment_method_label as string | null;
-          const total = totalForBar;
-
-          let mainDisplay: React.ReactNode;
-          let subtitleDisplay: React.ReactNode = null;
-
-          if (mode === "installments") {
-            const installmentValue = total / (installments || 1);
-            mainDisplay = (
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-base sm:text-lg font-medium text-foreground/60">{installments}x de</span>
-                <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">{formatCurrency(installmentValue)}</span>
-              </div>
-            );
-            subtitleDisplay = (
-              <p className="text-sm text-muted-foreground">
-                Total: <span className="font-semibold text-foreground/80">{formatCurrency(total)}</span>{methodLabel ? ` • ${methodLabel}` : ""} • sem juros
-              </p>
-            );
-          } else if (mode === "installments_with_entry") {
-            const entryValue = total * (entryPct / 100);
-            const remainder = total - entryValue;
-            const installmentValue = remainder / (installments || 1);
-            mainDisplay = (
-              <div className="space-y-2 flex flex-col items-center">
-                <p className="text-base sm:text-lg font-medium text-foreground/60">
-                  Entrada de <span className="font-bold text-foreground">{formatCurrency(entryValue)}</span>
-                </p>
-                <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-                  + {installments}x {formatCurrency(installmentValue)}
-                </p>
-              </div>
-            );
-            subtitleDisplay = (
-              <p className="text-sm text-muted-foreground">
-                Total: <span className="font-semibold text-foreground/80">{formatCurrency(total)}</span>{methodLabel ? ` • ${methodLabel}` : ""}
-              </p>
-            );
-          } else {
-            const discountedTotal = total * (1 - discountPct / 100);
-            mainDisplay = (
-              <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">{formatCurrency(discountedTotal)}</span>
-            );
-            if (discountPct > 0) {
-              subtitleDisplay = (
-                <div className="space-y-0.5">
-                  <p className="text-sm text-muted-foreground line-through">{formatCurrency(total)}</p>
-                  <p className="text-sm font-semibold text-primary">
-                    {discountPct}% de desconto{methodLabel ? ` via ${methodLabel}` : ""}
-                  </p>
-                </div>
-              );
-            } else {
-              subtitleDisplay = methodLabel ? <p className="text-sm text-muted-foreground">{methodLabel}</p> : null;
-            }
-          }
-
-          return (
-            <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.25)]">
-              <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-              <div className="relative text-center space-y-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
-                  {showDetailedPrices ? "Investimento total" : "Valor do pacote"}
-                </p>
-                {mainDisplay}
-                {subtitleDisplay}
-                {quote.services && quote.services.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
-                  </p>
-                )}
-                {whatsappUrl && (
-                  <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-8 py-3.5 font-semibold text-sm shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] w-full sm:w-auto"
-                    >
-                      Quero reservar
-                    </a>
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-semibold text-sm shadow-lg transition-all hover:scale-[1.02] w-full sm:w-auto"
-                    >
-                      <WhatsAppIcon className="h-4 w-4" /> Falar com especialista
-                    </a>
-                  </div>
-                )}
-              </div>
-            </section>
-          );
-        })()}
-
-        {/* ─── Payment terms ─── */}
-        {(quote as any).show_investment_section !== false && paymentTerms && (
-          <div className="rounded-2xl border border-border/40 bg-card p-6 sm:p-8">
-            <div className="flex items-center gap-2 mb-3">
-              <CreditCard className="h-4 w-4 text-primary" />
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Condições de pagamento</h3>
-            </div>
-            <p className="text-sm text-foreground/85 leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></p>
-          </div>
-        )}
-
         {/* ─── Services Section (collapsed by default) ─── */}
         {quote.services && quote.services.length > 0 && (
-          <section className="space-y-5">
+          <section className="space-y-5 animate-fade-up">
             <div className="text-center space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Sua experiência</p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Serviços incluídos</h2>
@@ -1221,7 +1119,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         )}
 
         {/* ─── Diferenciais da agência ─── */}
-        <section className="rounded-3xl border border-border/40 bg-gradient-to-br from-muted/30 to-white p-7 sm:p-10">
+        <section className="rounded-3xl border border-border/40 bg-gradient-to-br from-muted/30 to-white p-7 sm:p-10 animate-fade-up">
           <div className="text-center space-y-1 mb-7">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Por que viajar com a gente</p>
             <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Sua viagem em boas mãos</h3>
@@ -1245,6 +1143,116 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </ul>
         </section>
 
+        {/* ─── Investment Highlight (after experience for premium narrative) ─── */}
+        {(quote as any).show_investment_section !== false && (() => {
+          const mode = (quote as any).payment_display_mode || "full_payment";
+          const installments = (quote as any).installments_count || 10;
+          const entryPct = (quote as any).entry_percentage || 0;
+          const discountPct = (quote as any).full_payment_discount_percent || 0;
+          const methodLabel = (quote as any).payment_method_label as string | null;
+          const total = totalForBar;
+
+          let mainDisplay: React.ReactNode;
+          let subtitleDisplay: React.ReactNode = null;
+
+          if (mode === "installments") {
+            const installmentValue = total / (installments || 1);
+            mainDisplay = (
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-base sm:text-lg font-medium text-foreground/60">Em até {installments}x de</span>
+                <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">{formatCurrency(installmentValue)}</span>
+              </div>
+            );
+            subtitleDisplay = (
+              <p className="text-sm text-muted-foreground">
+                Investimento total: <span className="font-semibold text-foreground/80">{formatCurrency(total)}</span>{methodLabel ? ` • ${methodLabel}` : ""} • parcelamento sem juros
+              </p>
+            );
+          } else if (mode === "installments_with_entry") {
+            const entryValue = total * (entryPct / 100);
+            const remainder = total - entryValue;
+            const installmentValue = remainder / (installments || 1);
+            mainDisplay = (
+              <div className="space-y-2 flex flex-col items-center">
+                <p className="text-base sm:text-lg font-medium text-foreground/60">
+                  Entrada de <span className="font-bold text-foreground">{formatCurrency(entryValue)}</span>
+                </p>
+                <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+                  + {installments}x {formatCurrency(installmentValue)}
+                </p>
+              </div>
+            );
+            subtitleDisplay = (
+              <p className="text-sm text-muted-foreground">
+                Investimento total: <span className="font-semibold text-foreground/80">{formatCurrency(total)}</span>{methodLabel ? ` • ${methodLabel}` : ""}
+              </p>
+            );
+          } else {
+            const discountedTotal = total * (1 - discountPct / 100);
+            mainDisplay = (
+              <span className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">{formatCurrency(discountedTotal)}</span>
+            );
+            if (discountPct > 0) {
+              subtitleDisplay = (
+                <div className="space-y-0.5">
+                  <p className="text-sm text-muted-foreground line-through">{formatCurrency(total)}</p>
+                  <p className="text-sm font-semibold text-primary">
+                    Condição especial: {discountPct}% de desconto{methodLabel ? ` via ${methodLabel}` : ""}
+                  </p>
+                </div>
+              );
+            } else {
+              subtitleDisplay = methodLabel ? <p className="text-sm text-muted-foreground">{methodLabel}</p> : null;
+            }
+          }
+
+          return (
+            <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.28)] animate-fade-up">
+              <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+              <div className="relative text-center space-y-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
+                  {showDetailedPrices ? "Investimento total" : "Valor do pacote"}
+                </p>
+                {mainDisplay}
+                {subtitleDisplay}
+                {quote.services && quote.services.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
+                  </p>
+                )}
+                {whatsappUrl && (
+                  <div className="pt-5 flex justify-center">
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-4 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.02] w-full sm:w-auto"
+                    >
+                      <span className="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-full">
+                        <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent blur-sm animate-shimmer-slide" />
+                      </span>
+                      <WhatsAppIcon className="relative h-4 w-4" />
+                      <span className="relative">Quero reservar essa viagem</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* ─── Payment terms ─── */}
+        {(quote as any).show_investment_section !== false && paymentTerms && (
+          <div className="rounded-2xl border border-border/40 bg-card p-6 sm:p-8 animate-fade-up">
+            <div className="flex items-center gap-2 mb-3">
+              <CreditCard className="h-4 w-4 text-primary" />
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Condições de pagamento</h3>
+            </div>
+            <p className="text-sm text-foreground/85 leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></p>
+          </div>
+        )}
+
         {/* ─── Validity ─── */}
         <div className="text-center space-y-1">
           {validUntil && (
@@ -1267,36 +1275,56 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
         {/* ─── Agent Signature ─── */}
         {agentProfile && (
-          <div className="rounded-3xl border border-border/40 bg-white shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-muted/60 to-muted/20 px-6 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground text-center">Seu consultor de viagens</p>
-            </div>
-            <div className="p-6 sm:p-10">
-              <div className="flex flex-col items-center text-center space-y-5">
-                {agentProfile.avatar_url ? (
-                  <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
-                ) : (
-                  <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg ring-2 ring-white">
-                    {agentProfile.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="space-y-1">
-                  <p className="text-xl font-bold text-foreground">{agentProfile.name}</p>
-                  {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
+          <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
+            <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+            <div className="relative p-8 sm:p-12">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-7">
+                Sua consultora de viagens
+              </p>
+              <div className="flex flex-col items-center text-center gap-5">
+                <div className="relative">
+                  <span className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-md" aria-hidden />
+                  {agentProfile.avatar_url ? (
+                    <img
+                      src={agentProfile.avatar_url}
+                      alt={agentProfile.name}
+                      className="relative h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]"
+                    />
+                  ) : (
+                    <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold ring-4 ring-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]">
+                      {agentProfile.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1.5 max-w-md">
+                  <p className="text-2xl font-bold tracking-tight text-foreground">{agentProfile.name}</p>
+                  {agentProfile.agency_name && (
+                    <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>
+                  )}
                   {(agentProfile.city || agentProfile.state) && (
                     <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
                   )}
+                  <p className="pt-3 text-[15px] text-foreground/75 leading-relaxed italic">
+                    “Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem.”
+                  </p>
                 </div>
                 {whatsappUrl && (
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                    <WhatsAppIcon className="h-5 w-5" />
-                    Falar no WhatsApp
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative mt-1 inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-3.5 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.03]"
+                  >
+                    <span className="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-full">
+                      <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent blur-sm animate-shimmer-slide" />
+                    </span>
+                    <WhatsAppIcon className="relative h-5 w-5" />
+                    <span className="relative">Conversar no WhatsApp</span>
                   </a>
                 )}
               </div>
             </div>
-          </div>
+          </section>
         )}
       </main>
 
@@ -1312,9 +1340,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-[#25D366] text-white px-5 py-3 font-semibold text-sm shadow-lg active:scale-95 transition-transform"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[#25D366] text-white px-5 py-3 font-semibold text-sm shadow-[0_8px_24px_-6px_rgba(37,211,102,0.55)] active:scale-95 transition-transform"
             >
-              <WhatsAppIcon className="h-4 w-4" /> Conversar
+              <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+                <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm animate-shimmer-slide" />
+              </span>
+              <WhatsAppIcon className="relative h-4 w-4" /> <span className="relative">Conversar</span>
             </a>
           </div>
         </div>
