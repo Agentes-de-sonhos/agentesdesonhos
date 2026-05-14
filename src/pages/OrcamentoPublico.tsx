@@ -981,36 +981,36 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
       {/* ─── HERO PREMIUM ─── */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative h-[62vh] min-h-[440px] sm:h-[68vh] sm:min-h-[520px] w-full">
+        <div className="relative h-[55vh] min-h-[420px] sm:h-[60vh] sm:min-h-[520px] w-full">
           {heroImage ? (
             <img
               src={heroImage}
               alt={quote.destination}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
               loading="eager"
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
           )}
           {/* cinematic gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.45),transparent_60%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
 
-          <div className="relative h-full max-w-4xl mx-auto px-5 sm:px-8 flex flex-col justify-end pb-10 sm:pb-14 text-white">
-            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]">
+          <div className="relative h-full max-w-4xl mx-auto px-5 sm:px-8 flex flex-col justify-end pb-20 sm:pb-24 text-white animate-fade-up">
+            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
               <MapPin className="h-3 w-3" /> {quote.destination}
             </span>
-            <h1 className="mt-4 text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight max-w-3xl drop-shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <h1 className="mt-4 text-[2.6rem] sm:text-7xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
               {tripTitle || quote.destination}
             </h1>
-            <p className="mt-3 text-base sm:text-xl font-light text-white/90 max-w-2xl">
+            <p className="mt-4 text-base sm:text-xl font-light text-white/90 max-w-2xl leading-relaxed">
               {tripTitle
                 ? `Uma experiência preparada com cuidado para ${quote.client_name}.`
                 : `${days} ${days === 1 ? "dia" : "dias"} para viver ${quote.destination} de um jeito único — feito para ${quote.client_name}.`}
             </p>
 
             {/* meta chips */}
-            <div className="mt-6 flex flex-wrap gap-2 sm:gap-3">
+            <div className="mt-7 flex flex-wrap gap-2 sm:gap-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
                 <Calendar className="h-4 w-4 opacity-80" />
                 {formatDateShort(quote.start_date)} – {formatDateShort(quote.end_date)}
@@ -1032,13 +1032,33 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               )}
             </div>
           </div>
+
+          {/* Floating premium agency badge */}
+          {(agentProfile?.agency_logo_url || agentProfile?.agency_name) && (
+            <div className="absolute left-1/2 -bottom-10 sm:-bottom-12 -translate-x-1/2 z-20">
+              <div className="rounded-full bg-white shadow-[0_18px_50px_-12px_rgba(0,0,0,0.35)] ring-1 ring-black/5 p-3 sm:p-4 flex items-center justify-center h-20 w-20 sm:h-24 sm:w-24">
+                {agentProfile?.agency_logo_url ? (
+                  <img
+                    src={agentProfile.agency_logo_url}
+                    alt={agentProfile.agency_name || "Agência"}
+                    translate="no"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <BrandText as="span" className="text-xs font-bold tracking-tight text-foreground text-center leading-tight">
+                    {agentProfile?.agency_name}
+                  </BrandText>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-5 sm:px-8 py-10 sm:py-14 space-y-12 sm:space-y-16">
+      <main className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-10 sm:pb-14 space-y-14 sm:space-y-20">
         {/* ─── Smart Trip Highlights ─── */}
-        <section className="-mt-20 sm:-mt-24 relative z-10">
-          <div className="rounded-3xl bg-white shadow-[0_20px_60px_-20px_rgba(0,0,0,0.18)] border border-border/40 p-6 sm:p-8">
+        <section className="-mt-32 sm:-mt-40 relative z-10 animate-fade-up">
+          <div className="rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] border border-border/40 p-7 sm:p-9 transition-shadow duration-500 hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.3)]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80 mb-4">O que está incluso</p>
             <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
               {highlights.map((h, i) => (
