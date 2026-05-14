@@ -972,7 +972,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
       {/* ─── HERO PREMIUM ─── */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative h-[55vh] min-h-[420px] sm:h-[60vh] sm:min-h-[520px] w-full">
+        <div className="relative min-h-[520px] sm:min-h-[600px] w-full">
           {heroImage ? (
             <img
               src={heroImage}
@@ -998,7 +998,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
           )}
 
-          <div className="relative h-full max-w-4xl mx-auto px-5 sm:px-8 flex flex-col justify-end pb-20 sm:pb-24 text-white animate-fade-up">
+          <div className="relative max-w-4xl mx-auto px-5 sm:px-8 pt-44 sm:pt-56 pb-20 sm:pb-24 flex flex-col text-white animate-fade-up">
             <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
               <MapPin className="h-3 w-3" /> {quote.destination}
             </span>
