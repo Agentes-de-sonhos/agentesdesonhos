@@ -987,6 +987,17 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
 
+          {/* floating agency logo badge */}
+          {agentProfile?.agency_logo_url && (
+            <div className="absolute top-5 sm:top-7 left-1/2 -translate-x-1/2 z-10 h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-white p-2 sm:p-2.5 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.5)] ring-1 ring-black/5">
+              <img
+                src={agentProfile.agency_logo_url}
+                alt={agentProfile.agency_name || "Agência"}
+                className="h-full w-full object-contain"
+              />
+            </div>
+          )}
+
           <div className="relative h-full max-w-4xl mx-auto px-5 sm:px-8 flex flex-col justify-end pb-20 sm:pb-24 text-white animate-fade-up">
             <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
               <MapPin className="h-3 w-3" /> {quote.destination}
