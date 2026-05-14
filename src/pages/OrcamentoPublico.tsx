@@ -467,10 +467,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
 
-  // Initialize all services as open on first load
+  // Premium UX: services start collapsed (resumo first, detalhes on demand)
   useEffect(() => {
     if (!servicesInitialized.current && quote?.services?.length) {
-      setOpenServiceIndices(new Set(quote.services.map((_, i) => i)));
+      setOpenServiceIndices(new Set());
       servicesInitialized.current = true;
     }
   }, [quote?.services]);
