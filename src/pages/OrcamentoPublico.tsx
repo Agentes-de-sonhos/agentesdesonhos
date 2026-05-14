@@ -1284,36 +1284,56 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
         {/* ─── Agent Signature ─── */}
         {agentProfile && (
-          <div className="rounded-3xl border border-border/40 bg-white shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-muted/60 to-muted/20 px-6 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground text-center">Seu consultor de viagens</p>
-            </div>
-            <div className="p-6 sm:p-10">
-              <div className="flex flex-col items-center text-center space-y-5">
-                {agentProfile.avatar_url ? (
-                  <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
-                ) : (
-                  <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg ring-2 ring-white">
-                    {agentProfile.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="space-y-1">
-                  <p className="text-xl font-bold text-foreground">{agentProfile.name}</p>
-                  {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
+          <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
+            <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+            <div className="relative p-8 sm:p-12">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-7">
+                Sua consultora de viagens
+              </p>
+              <div className="flex flex-col items-center text-center gap-5">
+                <div className="relative">
+                  <span className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-md" aria-hidden />
+                  {agentProfile.avatar_url ? (
+                    <img
+                      src={agentProfile.avatar_url}
+                      alt={agentProfile.name}
+                      className="relative h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]"
+                    />
+                  ) : (
+                    <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold ring-4 ring-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]">
+                      {agentProfile.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1.5 max-w-md">
+                  <p className="text-2xl font-bold tracking-tight text-foreground">{agentProfile.name}</p>
+                  {agentProfile.agency_name && (
+                    <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>
+                  )}
                   {(agentProfile.city || agentProfile.state) && (
                     <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
                   )}
+                  <p className="pt-3 text-[15px] text-foreground/75 leading-relaxed italic">
+                    “Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem.”
+                  </p>
                 </div>
                 {whatsappUrl && (
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                    <WhatsAppIcon className="h-5 w-5" />
-                    Falar no WhatsApp
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative mt-1 inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-3.5 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.03]"
+                  >
+                    <span className="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-full">
+                      <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent blur-sm animate-shimmer-slide" />
+                    </span>
+                    <WhatsAppIcon className="relative h-5 w-5" />
+                    <span className="relative">Conversar no WhatsApp</span>
                   </a>
                 )}
               </div>
             </div>
-          </div>
+          </section>
         )}
       </main>
 
@@ -1329,9 +1349,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-[#25D366] text-white px-5 py-3 font-semibold text-sm shadow-lg active:scale-95 transition-transform"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[#25D366] text-white px-5 py-3 font-semibold text-sm shadow-[0_8px_24px_-6px_rgba(37,211,102,0.55)] active:scale-95 transition-transform"
             >
-              <WhatsAppIcon className="h-4 w-4" /> Conversar
+              <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+                <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm animate-shimmer-slide" />
+              </span>
+              <WhatsAppIcon className="relative h-4 w-4" /> <span className="relative">Conversar</span>
             </a>
           </div>
         </div>
