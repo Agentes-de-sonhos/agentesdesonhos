@@ -60,10 +60,29 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Fornecedor users can only access /meu-perfil-empresa
+  // Fornecedor users have a dedicated ecosystem (dashboard, profile, materials, community,
+  // trade agenda, news, academy, tourism map, personal profile). Other internal agent
+  // areas (CRM, financeiro, orçamentos, roteiros etc.) remain blocked.
   if (isFornecedor) {
-    if (location.pathname !== "/meu-perfil-empresa") {
-      return <Navigate to="/meu-perfil-empresa" replace />;
+    const supplierAllowed = [
+      "/dashboard-fornecedor",
+      "/meu-perfil-empresa",
+      "/materiais",
+      "/comunidade",
+      "/agenda-trade",
+      "/agenda",
+      "/noticias",
+      "/educa-academy",
+      "/mapa-turismo",
+      "/perfil",
+      "/minha-conta",
+      "/suporte",
+    ];
+    const isAllowed = supplierAllowed.some(
+      (p) => location.pathname === p || location.pathname.startsWith(p + "/")
+    );
+    if (!isAllowed) {
+      return <Navigate to="/dashboard-fornecedor" replace />;
     }
   }
 
