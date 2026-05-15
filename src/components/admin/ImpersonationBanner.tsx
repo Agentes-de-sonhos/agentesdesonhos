@@ -14,6 +14,7 @@ export interface ImpersonationData {
   targetUserId: string;
   adminId: string;
   startedAt: string;
+  impersonationLogId?: string | null;
 }
 
 export function getImpersonationData(): ImpersonationData | null {
@@ -72,11 +73,8 @@ export function ImpersonationBanner() {
     setExiting(true);
 
     try {
-      // Log the end of impersonation — update ended_at
-      // We do this before restoring session because after restore we're admin again
-      // and RLS will allow the update
-
-      // Sign out of impersonated session
+      // Sign out of impersonated session (does NOT touch the admin's stored tokens
+      // — they live in localStorage under impersonation_data and are restored below).
       await supabase.auth.signOut();
 
       // Restore admin session
@@ -91,6 +89,15 @@ export function ImpersonationBanner() {
         clearImpersonationData();
         navigate("/auth");
         return;
+      }
+
+      // Close the support-session log (admin RLS now applies)
+      if (data.impersonationLogId) {
+        await (supabase as any)
+          .from("impersonation_logs")
+          .update({ ended_at: new Date().toISOString() })
+          .eq("id", data.impersonationLogId)
+          .is("ended_at", null);
       }
 
       clearImpersonationData();

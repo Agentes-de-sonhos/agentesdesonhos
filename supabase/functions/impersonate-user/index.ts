@@ -84,11 +84,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Log the impersonation
-    await adminClient.from("impersonation_logs").insert({
-      admin_id: callerUser.id,
-      target_user_id: targetUserId,
-    });
+    // Log the impersonation (support session)
+    const { data: logData } = await adminClient
+      .from("impersonation_logs")
+      .insert({
+        admin_id: callerUser.id,
+        target_user_id: targetUserId,
+      })
+      .select("id")
+      .single();
 
     // Get target user profile name for the banner
     const { data: profileData } = await adminClient
@@ -103,6 +107,7 @@ Deno.serve(async (req) => {
         email: targetUser.email,
         target_user_name: profileData?.name || targetUser.email,
         target_user_id: targetUserId,
+        impersonation_log_id: logData?.id ?? null,
       }),
       {
         status: 200,

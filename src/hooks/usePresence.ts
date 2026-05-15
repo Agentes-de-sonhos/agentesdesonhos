@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { isImpersonating } from "@/components/admin/ImpersonationBanner";
 
 export interface OnlineAgent {
   user_id: string;
@@ -19,7 +20,7 @@ export function usePresence() {
 
   // Load initial is_online state from DB
   useEffect(() => {
-    if (!user) return;
+    if (!user || isImpersonating()) return;
     (async () => {
       const { data } = await (supabase as any)
         .from("user_presence")
@@ -33,7 +34,9 @@ export function usePresence() {
 
   // Heartbeat - update presence every 60s
   useEffect(() => {
-    if (!user) return;
+    // Skip heartbeat during impersonation so we don't mark the impersonated
+    // user as online based on the admin's support session.
+    if (!user || isImpersonating()) return;
 
     const updatePresence = async () => {
       await (supabase as any)
@@ -53,7 +56,7 @@ export function usePresence() {
   }, [user, isOnline]);
 
   const toggleOnline = useCallback(async (value: boolean) => {
-    if (!user) return;
+    if (!user || isImpersonating()) return;
     setIsOnlineState(value);
     await (supabase as any)
       .from("user_presence")
