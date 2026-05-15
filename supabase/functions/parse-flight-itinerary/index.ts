@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userContent },
@@ -229,6 +229,25 @@ Deno.serve(async (req) => {
       tripType: parsed.tripType || null,
       confidence: parsed.confidence ?? null,
       missingFields: parsed.missingFields || [],
+    });
+
+    // Per-segment completeness log to debug AI extractions
+    parsed.segments.forEach((s: any, idx: number) => {
+      const missing: string[] = [];
+      if (!s.date) missing.push("date");
+      if (!s.departureTime) missing.push("departureTime");
+      if (!s.arrivalTime) missing.push("arrivalTime");
+      if (!s.flightNumber) missing.push("flightNumber");
+      if (!s.airline) missing.push("airline");
+      console.log(`[parse-flight-itinerary] segment ${idx + 1}`, {
+        route: `${s.originAirport || "?"} → ${s.destinationAirport || "?"}`,
+        date: s.date || null,
+        flight: s.flightNumber || null,
+        airline: s.airline || null,
+        dep: s.departureTime || null,
+        arr: s.arrivalTime || null,
+        missing,
+      });
     });
 
     return json(parsed, 200);
