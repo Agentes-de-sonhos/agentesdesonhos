@@ -13,6 +13,7 @@ import { SupplierProfileHeroCard } from "@/components/supplier-dashboard/Supplie
 import { SupplierAgendaCard } from "@/components/supplier-dashboard/SupplierAgendaCard";
 import { SupplierMaterialsCard } from "@/components/supplier-dashboard/SupplierMaterialsCard";
 import { SupplierMetricsStrip } from "@/components/supplier-dashboard/SupplierMetricsStrip";
+import { SupplierAcademyCard } from "@/components/supplier-dashboard/SupplierAcademyCard";
 import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
@@ -20,11 +21,8 @@ import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropd
 const CuratedNewsFeed = lazy(() =>
   import("@/components/dashboard/CuratedNewsFeed").then((m) => ({ default: m.CuratedNewsFeed }))
 );
-const AcademyCollapsibleCard = lazy(() =>
-  import("@/components/dashboard/AcademyCollapsibleCard").then((m) => ({ default: m.AcademyCollapsibleCard }))
-);
-const CommunityQACard = lazy(() =>
-  import("@/components/dashboard/CommunityQACard").then((m) => ({ default: m.CommunityQACard }))
+const CommunitySocialFeed = lazy(() =>
+  import("@/components/dashboard/CommunitySocialFeed").then((m) => ({ default: m.CommunitySocialFeed }))
 );
 const MapaTurismoCard = lazy(() =>
   import("@/components/dashboard/start/MapaTurismoCard").then((m) => ({ default: m.MapaTurismoCard }))
@@ -124,27 +122,31 @@ export default function DashboardFornecedor() {
         {/* 1. Hero do perfil */}
         <SupplierProfileHeroCard />
 
-        {/* 2. Radar + Academy */}
         <Suspense fallback={<div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>}>
-          <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch">
-            <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CuratedNewsFeed /></div>
-            <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AcademyCollapsibleCard /></div>
+          {/* 2. Mapa do Turismo (full width) */}
+          <section>
+            <div className="min-w-0"><MapaTurismoCard /></div>
           </section>
 
-          {/* 3. Comunidade Q&A + Mapa */}
+          {/* 3. Radar + Academy */}
+          <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch">
+            <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CuratedNewsFeed /></div>
+            <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><SupplierAcademyCard /></div>
+          </section>
+
+          {/* 4. Agenda do Trade + Materiais */}
           <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
-            <div className="min-w-0"><CommunityQACard /></div>
-            <div className="min-w-0"><MapaTurismoCard /></div>
+            <div className="min-w-0"><SupplierAgendaCard /></div>
+            <div className="min-w-0"><SupplierMaterialsCard /></div>
+          </section>
+
+          {/* 5. Comunidade (full width) */}
+          <section>
+            <div className="min-w-0"><CommunitySocialFeed /></div>
           </section>
         </Suspense>
 
-        {/* 4. Agenda do Trade + Materiais */}
-        <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
-          <div className="min-w-0"><SupplierAgendaCard /></div>
-          <div className="min-w-0"><SupplierMaterialsCard /></div>
-        </section>
-
-        {/* 5. Indicadores premium */}
+        {/* Indicadores premium */}
         <SupplierMetricsStrip />
       </div>
     </SupplierDashboardLayout>
