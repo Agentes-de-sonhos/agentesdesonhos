@@ -6,7 +6,7 @@ import { GlobalPopupModal } from "@/components/popup/GlobalPopupModal";
 import { MonthlyPopupModal } from "@/components/popup/MonthlyPopupModal";
 import { ChatFloatingButton } from "@/components/community-chat/ChatFloatingButton";
 import { SessionTimeoutModal } from "@/components/session/SessionTimeoutModal";
-import { isActiveImpersonatingUser } from "@/components/admin/ImpersonationBanner";
+import { isActiveImpersonatingUser } from "@/lib/impersonation";
 import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardLayoutProps {
