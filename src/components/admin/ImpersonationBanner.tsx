@@ -97,13 +97,14 @@ export function ImpersonationBanner() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, loading } = useAuth();
+  const currentUserId = user?.id;
 
   useEffect(() => {
     if (loading) return;
 
     const syncData = () => {
       const stored = getImpersonationData();
-      const isActiveSupportSession = !!stored && !!user && stored.targetUserId === user.id;
+      const isActiveSupportSession = !!stored && !!currentUserId && stored.targetUserId === currentUserId;
 
       if (!isActiveSupportSession) {
         setData(null);
@@ -121,10 +122,10 @@ export function ImpersonationBanner() {
       window.removeEventListener("storage", syncData);
       window.removeEventListener(IMPERSONATION_EVENT, syncData);
     };
-  }, [user?.id, loading]);
+  }, [currentUserId, loading]);
 
   useEffect(() => {
-    if (loading || !user) return;
+    if (loading || !currentUserId) return;
 
     const stored = getImpersonationData();
     if (!stored) return;
@@ -132,15 +133,15 @@ export function ImpersonationBanner() {
     const startedAt = new Date(stored.startedAt).getTime();
     const isTransitioningIntoSupport =
       Number.isFinite(startedAt) &&
-      stored.adminId === user.id &&
+      stored.adminId === currentUserId &&
       Date.now() - startedAt < IMPERSONATION_TRANSITION_MS;
 
-    if (stored.targetUserId !== user.id && !isTransitioningIntoSupport) {
+    if (stored.targetUserId !== currentUserId && !isTransitioningIntoSupport) {
       sessionStorage.removeItem(IMPERSONATION_KEY);
       setData(null);
       window.dispatchEvent(new Event(IMPERSONATION_EVENT));
     }
-  }, [user?.id, loading]);
+  }, [currentUserId, loading]);
 
   // Update elapsed time every second
   useEffect(() => {
