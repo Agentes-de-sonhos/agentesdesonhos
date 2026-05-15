@@ -64,7 +64,7 @@ type AuthView = "login" | "magic-link" | "magic-link-sent" | "forgot-password" |
 function BrandHeader() {
   return (
     <div className="flex flex-col items-center space-y-3">
-      <img src={logoAgentes} alt="Agentes de Sonhos" className="h-36 w-auto" />
+      <img src={logoAgentes} alt="Agentes de Sonhos" className="h-36 w-auto object-contain shrink-0" />
       <p className="mt-1 text-sm text-muted-foreground">
         Plataforma inteligente para agentes de viagem
       </p>
