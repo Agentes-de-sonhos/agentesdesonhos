@@ -59,7 +59,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
-import { setImpersonationData, type ImpersonationData } from "./ImpersonationBanner";
+import { clearImpersonationData, setImpersonationData, type ImpersonationData } from "@/lib/impersonation";
 import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
 import { PLAN_LABELS, type SubscriptionPlan } from "@/types/subscription";
 
@@ -350,7 +350,6 @@ export function AdminUserManager() {
 
       if (verifyError) {
         // Rollback
-        const { clearImpersonationData } = await import("./ImpersonationBanner");
         clearImpersonationData();
         throw new Error("Erro ao autenticar como usuário: " + verifyError.message);
       }
