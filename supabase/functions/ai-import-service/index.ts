@@ -249,6 +249,12 @@ REGRAS CRÍTICAS:
 - Se houver dúvida, deixe o campo vazio (string vazia).
 - Datas SEMPRE no formato YYYY-MM-DD. Horários no formato HH:MM (24h).
 - Códigos de aeroporto sempre em IATA (3 letras maiúsculas).
+- Identifique TODOS os trechos do itinerário (ida, conexões e volta) na ordem cronológica.
+- Para CADA trecho preencha TODOS estes campos quando visíveis no documento: flight_date, origin_airport, destination_airport, departure_time, arrival_time, flight_number e airline. Não retorne segmentos com esses campos vazios se a informação estiver na tabela/itinerário (mesmo que precise inferir o ano da data).
+- Número do voo: concatene código IATA da cia + número, sem espaços, em maiúsculas (ex: LA8070, LH202, IB782, AF459).
+- Companhia aérea do trecho (campo airline do segmento): use o nome comercial completo a partir do código (LA→LATAM, LH→Lufthansa, IB→Iberia, AF→Air France, AA→American Airlines, UA→United, BA→British Airways, KL→KLM, TP→TAP, AZ→ITA Airways, etc.). Em main_airline, se houver mais de uma cia, concatene separadas por " / " (ex: "LATAM / Lufthansa / Iberia").
+- trip_type: "ida" se só uma direção; "ida_volta" se origem == destino final; "multi_trechos" se mais de 2 trechos sem retorno simples.
+- Bagagem: detecte "0 pc"/"sem bagagem"/"no checked bag" → checked_baggage="Não inclui bagagem despachada"; "1 PC"/"23kg" → "Inclui bagagem despachada"; "carry on"/"bagagem de mão" → carry_on="Inclui bagagem de mão".
 - Para "suggested": preencha SOMENTE se tiver conhecimento confiável (ex: URL oficial de check-in da companhia identificada). Caso contrário, deixe vazio.
 - Em "confidence_notes" liste de forma curta o que ficou ambíguo ou não foi possível identificar.`,
   hotel: `Você é um assistente especialista em ler vouchers e confirmações de HOSPEDAGEM.
@@ -415,7 +421,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: serviceType === "flight" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userParts },
