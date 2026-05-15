@@ -22,7 +22,7 @@ import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip
 // Lazy load heavy dashboard cards to reduce initial bundle
 const CuratedNewsFeed = lazy(() => import("@/components/dashboard/CuratedNewsFeed").then(m => ({ default: m.CuratedNewsFeed })));
 const UpcomingAgendaEventsCard = lazy(() => import("@/components/dashboard/UpcomingAgendaEventsCard").then(m => ({ default: m.UpcomingAgendaEventsCard })));
-const CommunityQACard = lazy(() => import("@/components/dashboard/CommunityQACard").then(m => ({ default: m.CommunityQACard })));
+const CommunitySocialFeed = lazy(() => import("@/components/dashboard/CommunitySocialFeed").then(m => ({ default: m.CommunitySocialFeed })));
 const AgentToolsCard = lazy(() => import("@/components/dashboard/AgentToolsCard").then(m => ({ default: m.AgentToolsCard })));
 const DashboardBanner = lazy(() => import("@/components/dashboard/DashboardBanner").then(m => ({ default: m.DashboardBanner })));
 const TripRemindersCard = lazy(() => import("@/components/dashboard/TripRemindersCard").then(m => ({ default: m.TripRemindersCard })));
