@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useUserRole } from "./useUserRole";
 import {
   POINTS_CONFIG,
   TRACKABLE_SECTIONS,
@@ -44,6 +45,7 @@ function getStrategicKey() {
 
 export function useGamification() {
   const { user } = useAuth();
+  const { isFornecedor } = useUserRole();
   const queryClient = useQueryClient();
 
   const invalidate = useCallback(() => {
@@ -53,11 +55,11 @@ export function useGamification() {
   // ─── Award Points ──────────────────────────────────────
   const awardPoints = useCallback(
     async (points: number, action: string, referenceId?: string) => {
-      if (!user) return;
+      if (!user || isFornecedor) return;
       const success = await awardGamificationPoints(user.id, points, action, referenceId);
       if (success) invalidate();
     },
-    [user, invalidate]
+    [user, isFornecedor, invalidate]
   );
 
   // ─── Daily Login ───────────────────────────────────────
