@@ -8,6 +8,7 @@ import { Loader2, Search, FileText, CheckCircle2, Plane, ArrowRight, Upload, Ale
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { extractPdfText } from "@/lib/pdfText";
 
 interface FlightSegment {
   airline?: string;
@@ -234,7 +235,18 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
     setResult(null);
     try {
       const fileBase64 = await fileToBase64(uploadFile);
-      const raw = await callItineraryParser({ fileBase64, fileMimeType: uploadFile.type });
+      // For PDFs we also extract text client-side using pdf.js so the AI
+      // receives BOTH the binary document and a faithful text rendering of
+      // the tabular itinerary (improves recall of dates, prices, exchange).
+      let extractedText = "";
+      if (uploadFile.type === "application/pdf") {
+        extractedText = await extractPdfText(uploadFile);
+      }
+      const raw = await callItineraryParser({
+        fileBase64,
+        fileMimeType: uploadFile.type,
+        text: extractedText || undefined,
+      });
       const normalized = normalizeRich(raw);
       setResult(normalized);
       toast({
