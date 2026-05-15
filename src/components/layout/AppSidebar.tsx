@@ -263,6 +263,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
+  const { isFornecedor } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
