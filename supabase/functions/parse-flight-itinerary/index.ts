@@ -12,9 +12,14 @@ a estrutura COMPLETA da viagem usando a função "extract_flight_itinerary".
 
 Regras obrigatórias:
 - Identifique TODOS os trechos do itinerário (ida, conexões e volta), na ordem cronológica.
+- Para CADA trecho é OBRIGATÓRIO preencher TODOS estes campos: date, originAirport, destinationAirport,
+  departureTime, arrivalTime, flightNumber e airline. NUNCA retorne um segmento com esses campos vazios
+  se a informação estiver visível no documento (mesmo que precise inferir o ano da data ou o IATA da cidade).
 - Datas SEMPRE no formato YYYY-MM-DD. Se o ano não estiver explícito, use o ano vigente ou o próximo, conforme a coerência das datas.
 - Horários SEMPRE em HH:mm (24h).
-- Códigos de aeroporto SEMPRE em IATA de 3 letras MAIÚSCULAS (GRU, FRA, BER, MAD...). Se só houver nome de cidade, deduza o IATA principal.
+- Códigos de aeroporto SEMPRE em IATA de 3 letras MAIÚSCULAS (GRU, FRA, BER, MAD, LAS, CDG, JFK, LHR, MAD, LIS, EZE, SCL...). Se só houver nome de cidade, deduza o IATA principal.
+- Número do voo: concatene código IATA da cia + número, sem espaços, em maiúsculas (ex: LA8070, LH202, IB6824, AA904).
+- Companhia aérea do trecho: use o nome comercial completo a partir do código (LA→LATAM, LH→Lufthansa, IB→Iberia, AF→Air France, AA→American Airlines, UA→United, BA→British Airways, etc.).
 - Cidade de origem = cidade do PRIMEIRO trecho. Cidade de destino principal = primeira cidade INTERNACIONAL (ou a cidade de maior permanência se for doméstico).
 - Se houver múltiplas cidades intermediárias, liste em "additionalCities".
 - Se houver múltiplas companhias aéreas, concatene em "airlines" separadas por " / " (ex: "LATAM / Lufthansa / Iberia").
@@ -33,7 +38,8 @@ Regras obrigatórias:
 - "confidence": 0 a 1 (sua confiança na extração completa).
 - "missingFields": campos importantes que NÃO foi possível extrair.
 
-Nunca invente dados. Se um campo não estiver presente, deixe vazio/ausente.`;
+Nunca invente dados. Se um campo realmente não estiver presente no documento, deixe vazio e adicione em "missingFields".
+Mas se a informação ESTÁ no documento (ex: tabela com data, horários e número do voo por trecho), você DEVE extraí-la para todos os trechos.`;
 
 const TOOL_SCHEMA = {
   type: "function",
@@ -74,7 +80,7 @@ const TOOL_SCHEMA = {
               flightNumber: { type: "string" },
               airline: { type: "string" },
             },
-            required: ["originAirport", "destinationAirport"],
+            required: ["date", "originAirport", "destinationAirport", "departureTime", "arrivalTime", "flightNumber", "airline"],
             additionalProperties: false,
           },
         },
