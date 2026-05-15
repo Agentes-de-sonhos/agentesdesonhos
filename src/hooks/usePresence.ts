@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
-import { isSupportSessionForUser } from "@/components/admin/ImpersonationBanner";
+import { isSupportSessionForUser } from "@/lib/impersonation";
 
 export interface OnlineAgent {
   user_id: string;
