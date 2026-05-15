@@ -69,7 +69,7 @@ export function SupplierProfileHeroCard() {
   }[operator.approval_status as string] || { label: operator.approval_status, className: "" };
 
   const publicUrl = operator.public_slug
-    ? `${window.location.origin}/mapa-turismo/operadora/${operator.id}`
+    ? `https://vitrine.tur.br/${operator.public_slug}`
     : `${window.location.origin}/mapa-turismo/operadora/${operator.id}`;
 
   const handleCopy = async () => {
