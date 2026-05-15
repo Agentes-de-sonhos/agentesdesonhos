@@ -15,7 +15,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading, signOut } = useAuth();
   const { plan, loading: subLoading } = useSubscription();
-  const { role, loading: roleLoading, isFornecedor } = useUserRole();
+  const { role, loading: roleLoading, isFornecedor, isAdmin } = useUserRole();
   const location = useLocation();
   const checkInterval = useRef<ReturnType<typeof setInterval>>();
   useSessionTracker();
@@ -83,6 +83,19 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
     if (!isAllowed) {
       return <Navigate to="/dashboard-fornecedor" replace />;
+    }
+  }
+
+  // Non-supplier (and non-admin) users must not access supplier-exclusive areas.
+  // Admin keeps full access for support/impersonation purposes.
+  if (!isFornecedor && !isAdmin) {
+    const supplierOnly = ["/dashboard-fornecedor", "/meu-perfil-empresa"];
+    const isSupplierOnly = supplierOnly.some(
+      (p) => location.pathname === p || location.pathname.startsWith(p + "/")
+    );
+    if (isSupplierOnly) {
+      const redirectTo = plan === "start" ? "/dashboard-start" : "/dashboard";
+      return <Navigate to={redirectTo} replace />;
     }
   }
 
