@@ -9430,6 +9430,7 @@ export type Database = {
         Args: { p_lead_name: string; p_lead_phone: string; p_slug: string }
         Returns: Json
       }
+      supplier_slug_exists: { Args: { p_slug: string }; Returns: boolean }
       track_sales_landing_view: {
         Args: { p_session_hash: string; p_slug: string }
         Returns: undefined

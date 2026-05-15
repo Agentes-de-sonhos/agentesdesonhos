@@ -20,6 +20,7 @@ export default function SlugResolver() {
   const isVitrineDomain = VITRINE_DOMAINS.includes(hostname);
 
   const [supplierData, setSupplierData] = useState<any>(null);
+  const [supplierExists, setSupplierExists] = useState(false);
   const [checked, setChecked] = useState(false);
 
   // Try to resolve as a published supplier first.
@@ -31,13 +32,18 @@ export default function SlugResolver() {
     }
     (async () => {
       try {
-        const { data } = await supabase.rpc("get_published_supplier_by_slug" as any, {
-          p_slug: slug,
-        });
+        const [{ data }, { data: exists }] = await Promise.all([
+          supabase.rpc("get_published_supplier_by_slug" as any, { p_slug: slug }),
+          supabase.rpc("supplier_slug_exists" as any, { p_slug: slug }),
+        ]);
         if (cancelled) return;
         setSupplierData(data ?? null);
+        setSupplierExists(!!exists);
       } catch {
-        if (!cancelled) setSupplierData(null);
+        if (!cancelled) {
+          setSupplierData(null);
+          setSupplierExists(false);
+        }
       } finally {
         if (!cancelled) setChecked(true);
       }
@@ -55,6 +61,20 @@ export default function SlugResolver() {
       <Suspense fallback={<Loading />}>
         <SupplierPublic slug={slug} preloaded={supplierData} />
       </Suspense>
+    );
+  }
+
+  // Slug belongs to a supplier, but it's deactivated/unpublished.
+  if (supplierExists) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <div className="max-w-md space-y-3">
+          <h2 className="text-xl font-semibold text-foreground">Perfil indisponível</h2>
+          <p className="text-sm text-muted-foreground">
+            Este perfil de parceiro está temporariamente desativado e não pode ser visualizado no momento.
+          </p>
+        </div>
+      </div>
     );
   }
 
