@@ -163,7 +163,7 @@ export function ImpersonationBanner() {
 
     try {
       // Sign out of impersonated session (does NOT touch the admin's stored tokens
-      // — they live in localStorage under impersonation_data and are restored below).
+      // — they live in this tab's sessionStorage under impersonation_data and are restored below).
       await supabase.auth.signOut();
 
       // Restore admin session
