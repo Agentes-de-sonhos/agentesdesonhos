@@ -15,7 +15,11 @@ Regras obrigatórias:
 - Para CADA trecho é OBRIGATÓRIO preencher TODOS estes campos: date, originAirport, destinationAirport,
   departureTime, arrivalTime, flightNumber e airline. NUNCA retorne um segmento com esses campos vazios
   se a informação estiver visível no documento (mesmo que precise inferir o ano da data ou o IATA da cidade).
-- Datas SEMPRE no formato YYYY-MM-DD. Se o ano não estiver explícito, use o ano vigente ou o próximo, conforme a coerência das datas.
+- Datas SEMPRE no formato YYYY-MM-DD. Se aparecer só "25 Set", "25/09" ou "25 Sep", complete com o ano
+  visível em qualquer parte do documento (cabeçalho, tarifa, observações, "Valor em reais... do dia DD/MM/AAAA").
+  Se não houver ano explícito, use o ano coerente com a sequência cronológica dos trechos.
+- Cada trecho da tabela tem SUA PRÓPRIA data na coluna "Saída"/"Chegada". NUNCA repita a data do primeiro
+  trecho nos demais — leia linha por linha. Se "Chegada" é no dia seguinte ou +N (overnight), some os dias.
 - Horários SEMPRE em HH:mm (24h).
 - Códigos de aeroporto SEMPRE em IATA de 3 letras MAIÚSCULAS (GRU, FRA, BER, MAD, LAS, CDG, JFK, LHR, MAD, LIS, EZE, SCL...). Se só houver nome de cidade, deduza o IATA principal.
 - Número do voo: concatene código IATA da cia + número, sem espaços, em maiúsculas (ex: LA8070, LH202, IB6824, AA904).
@@ -32,14 +36,27 @@ Regras obrigatórias:
     "1 PC", "23kg", "1 peça despachada" → checkedBaggage=true.
     "carry on", "bagagem de mão", "8kg" → carryOn=true.
     Resuma detalhes em "baggageNotes".
-- Valores: extraia totalPrice (número), currency (BRL, USD, EUR...), exchangeRate quando houver, boardingTax (taxa de embarque) quando houver.
+- Valores (LEIA COM ATENÇÃO — costumam estar à direita da tabela ou no rodapé):
+    * "totalPrice": valor TOTAL final cobrado do cliente. Se houver "Total" e "Total R$", priorize o valor em
+      REAIS (R$) e use currency="BRL". Se não houver R$, use o total na moeda original.
+    * "currency": "BRL", "USD", "EUR" (3 letras ISO).
+    * "exchangeRate": número decimal. Procure frases como "USD 1,00 = R$ 4,9118", "câmbio do dia DD/MM/AAAA",
+      "1 USD = X BRL". Converta vírgula em ponto. Se aparecer "Tx Comb. USD 0,00" ignore — isso é taxa, não câmbio.
+    * "boardingTax": taxa de embarque / "Tx Emb" / "Tx Comb" quando explicitamente identificada.
+    * Sempre extraia números puros (sem "R$", sem milhar). Ex: "R$ 8.718,77" → 8718.77.
 - "fareNotes": observações tarifárias (não reembolsável, classe, regras de remarcação).
 - "autoSummary": resumo curto em pt-BR (1-3 frases) descrevendo a viagem.
 - "confidence": 0 a 1 (sua confiança na extração completa).
 - "missingFields": campos importantes que NÃO foi possível extrair.
 
 Nunca invente dados. Se um campo realmente não estiver presente no documento, deixe vazio e adicione em "missingFields".
-Mas se a informação ESTÁ no documento (ex: tabela com data, horários e número do voo por trecho), você DEVE extraí-la para todos os trechos.`;
+Mas se a informação ESTÁ no documento (ex: tabela com data, horários e número do voo por trecho), você DEVE extraí-la para todos os trechos.
+
+IMPORTANTE — fontes de informação no input:
+- Você pode receber simultaneamente (a) o PDF/imagem original e (b) o texto extraído do PDF (com layout
+  preservado em colunas). Use AMBAS as fontes: o texto é mais confiável para números e datas tabulares,
+  o PDF/imagem é mais confiável para logos de companhia, ícones de bagagem e estrutura visual.
+- NUNCA retorne menos trechos do que aparecem no documento. Conte as linhas da tabela "Trecho/Cia/Voo".`;
 
 const TOOL_SCHEMA = {
   type: "function",
@@ -137,7 +154,10 @@ Deno.serve(async (req) => {
 
     const userContent: any[] = [];
     if (text) {
-      userContent.push({ type: "text", text: `Texto do itinerário/voucher:\n\n${text}` });
+      userContent.push({
+        type: "text",
+        text: `Texto extraído do documento (layout aproximado preservado em colunas — use como fonte primária para datas, números de voo, horários, valores e câmbio):\n\n${text}`,
+      });
     }
     if (fileBase64) {
       const mime = fileMimeType || "application/pdf";
@@ -146,13 +166,13 @@ Deno.serve(async (req) => {
         // Gemini via OpenAI-compat aceita arquivo como image_url com data URL.
         userContent.push({
           type: "text",
-          text: "Analise o PDF anexo (voucher/cotação aérea) e extraia o itinerário completo.",
+          text: "Documento PDF original anexo (use para validar logos, ícones de bagagem e estrutura visual da tabela). Extraia o itinerário COMPLETO com TODOS os campos da função.",
         });
         userContent.push({ type: "image_url", image_url: { url: dataUrl } });
       } else {
         userContent.push({
           type: "text",
-          text: "Analise a imagem anexa (voucher/cotação aérea) e extraia o itinerário completo.",
+          text: "Imagem do voucher/cotação aérea anexa. Extraia o itinerário COMPLETO com TODOS os campos da função (datas por trecho, valor total, moeda, câmbio, taxas).",
         });
         userContent.push({ type: "image_url", image_url: { url: dataUrl } });
       }
@@ -172,6 +192,7 @@ Deno.serve(async (req) => {
         ],
         tools: [TOOL_SCHEMA],
         tool_choice: { type: "function", function: { name: "extract_flight_itinerary" } },
+        temperature: 0.1,
       }),
     });
 
