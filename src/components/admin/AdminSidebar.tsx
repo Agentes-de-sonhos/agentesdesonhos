@@ -92,6 +92,7 @@ const menuGroups: AdminMenuGroup[] = [
       { id: "hotels", label: "Hotéis", icon: Hotel },
       { id: "trade", label: "Trade", icon: TrendingUp },
       { id: "flight-blocks", label: "Bloqueios", icon: Plane },
+      { id: "trade-events", label: "Agenda Trade", icon: CalendarDays },
       { id: "benefits", label: "Benefícios", icon: Gift },
       { id: "travelmeet", label: "TravelMeet", icon: Globe },
     ],
