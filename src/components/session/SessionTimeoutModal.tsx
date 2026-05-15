@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
-import { isActiveImpersonatingUser } from "@/components/admin/ImpersonationBanner";
+import { isActiveImpersonatingUser } from "@/lib/impersonation";
 import {
   Dialog,
   DialogContent,
