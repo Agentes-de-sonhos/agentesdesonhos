@@ -46,6 +46,7 @@ import { AdminTravelMeetManager } from "@/components/admin/AdminTravelMeetManage
 import { AdminPendingApprovalsManager } from "@/components/admin/AdminPendingApprovalsManager";
 import { AdminTourGuidesManager } from "@/components/admin/AdminTourGuidesManager";
 import { AdminTelegramManager } from "@/components/admin/AdminTelegramManager";
+import { AdminTradeEventsManager } from "@/components/admin/AdminTradeEventsManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TAB_LABELS: Record<string, string> = {
@@ -82,6 +83,7 @@ const TAB_LABELS: Record<string, string> = {
   travelmeet: "TravelMeet",
   "tour-guides": "Guias de Turismo",
   telegram: "Telegram",
+  "trade-events": "Agenda do Trade",
 };
 
 function AdminContent({ tab }: { tab: string }) {
@@ -106,6 +108,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminMaterialsManager />;
     case "telegram":
       return <AdminTelegramManager />;
+    case "trade-events":
+      return <AdminTradeEventsManager />;
     case "flight-blocks":
       return (
         <div className="space-y-6">
