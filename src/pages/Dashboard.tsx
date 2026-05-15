@@ -199,7 +199,7 @@ export default function Dashboard() {
 
             {/* 3b. Perguntas da Comunidade & Mapa do Turismo */}
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-[3.5]">
-              <div className="min-w-0"><CommunityQACard /></div>
+              <div className="min-w-0"><CommunitySocialFeed /></div>
               <div className="min-w-0"><MapaTurismoCard /></div>
             </section>
 
