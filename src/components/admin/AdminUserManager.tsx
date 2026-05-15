@@ -328,7 +328,7 @@ export function AdminUserManager() {
       if (resp.error) throw new Error(resp.error.message || "Erro ao impersonar");
       if (resp.data?.error) throw new Error(resp.data.error);
 
-      const { token_hash, email, target_user_name, target_user_id } = resp.data;
+      const { token_hash, email, target_user_name, target_user_id, impersonation_log_id } = resp.data;
 
       // Store admin session before switching
       const impData: ImpersonationData = {
@@ -338,6 +338,7 @@ export function AdminUserManager() {
         targetUserId: target_user_id,
         adminId: sessionData.session.user.id,
         startedAt: new Date().toISOString(),
+        impersonationLogId: impersonation_log_id ?? null,
       };
       setImpersonationData(impData);
 
