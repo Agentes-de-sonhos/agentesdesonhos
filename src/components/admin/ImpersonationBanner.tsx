@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   IMPERSONATION_EVENT,
   IMPERSONATION_TRANSITION_MS,
+  type ImpersonationData,
   clearCurrentTabImpersonationData,
   clearImpersonationData,
   getImpersonationData,
