@@ -1,5 +1,6 @@
 const IMPERSONATION_KEY = "impersonation_data";
 const IMPERSONATION_CONTEXT_KEY = "impersonation_support_context";
+const CURRENT_SUPPORT_TAB_ID = crypto.randomUUID();
 
 export const IMPERSONATION_EVENT = "impersonation-data-changed";
 export const IMPERSONATION_TRANSITION_MS = 60_000;
@@ -11,6 +12,7 @@ export interface ImpersonationData {
   targetUserId: string;
   adminId: string;
   startedAt: string;
+  supportTabId?: string;
   impersonationLogId?: string | null;
 }
 
@@ -24,6 +26,11 @@ export function getImpersonationData(): ImpersonationData | null {
     if (!raw) return null;
 
     const data = JSON.parse(raw) as ImpersonationData;
+    if (data.supportTabId !== CURRENT_SUPPORT_TAB_ID) {
+      sessionStorage.removeItem(IMPERSONATION_KEY);
+      return null;
+    }
+
     const startedAt = new Date(data.startedAt).getTime();
     const isExpired = Number.isFinite(startedAt) && Date.now() - startedAt > 8 * 60 * 60 * 1000;
     return isExpired ? null : data;
@@ -33,7 +40,8 @@ export function getImpersonationData(): ImpersonationData | null {
 }
 
 export function setImpersonationData(data: ImpersonationData) {
-  sessionStorage.setItem(IMPERSONATION_KEY, JSON.stringify(data));
+  const scopedData = { ...data, supportTabId: CURRENT_SUPPORT_TAB_ID };
+  sessionStorage.setItem(IMPERSONATION_KEY, JSON.stringify(scopedData));
   localStorage.setItem(
     IMPERSONATION_CONTEXT_KEY,
     JSON.stringify({
