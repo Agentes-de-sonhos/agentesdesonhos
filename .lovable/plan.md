@@ -1,144 +1,127 @@
-# Dashboard Premium para Fornecedores/Parceiros
-
 ## Objetivo
-Criar uma experiência completa para usuários com role `fornecedor`, com a mesma sensação visual e estrutural do dashboard do agente — sem versão "simplificada". Hoje o fornecedor é redirecionado direto para `/meu-perfil-empresa` sem dashboard, sidebar ou comunidade.
 
-## Mudanças no roteamento e acesso
+Substituir o card atual `CommunityQACard` (perguntas/respostas) por um novo card `CommunitySocialFeed` — um feed social profissional onde qualquer membro autenticado publica livremente texto, imagem ou texto+imagem, com curtidas e comentários, sem aprovação prévia. Mesma identidade visual (lilás/roxo, cards arredondados).
 
-- Em `Auth.tsx` e `ProtectedRoute.tsx`: remover o redirect forçado de fornecedor para `/meu-perfil-empresa`. Fornecedor passa a ser redirecionado para `/dashboard-fornecedor`.
-- Liberar para a role `fornecedor` o acesso às rotas: `/dashboard-fornecedor`, `/meu-perfil-empresa`, `/materiais` (visualização/upload próprio), `/comunidade`, `/agenda-trade`, `/noticias` (Radar do Turismo), `/educa-academy`, `/mapa-turismo`, `/perfil` (perfil pessoal).
-- Bloquear demais áreas internas dos agentes (CRM, Financeiro, Orçamento, Roteiros, etc.) via `ProtectedRoute` com checagem de role.
+A área "Perguntas da Comunidade" no `Dashboard.tsx` e no `DashboardFornecedor.tsx` passa a renderizar o novo feed social. O sistema antigo de Q&A continua acessível em outras páginas (não removemos `qa_questions`); apenas a seção do dashboard muda.
 
-## Layout e navegação
+## 1. Banco de dados (nova migration)
 
-- Criar `SupplierDashboardLayout` (espelho do `DashboardLayout`) reutilizando `Footer`, `GlobalPopupModal`, `MonthlyPopupModal`, `SessionTimeoutModal`, `ChatFloatingButton` e `ImpersonationBanner`.
-- Criar `SupplierSidebar` (mesmo visual do `AppSidebar`) com itens:
-  1. Início (Dashboard)
-  2. Perfil do Parceiro
-  3. Materiais de Divulgação
-  4. Comunidade
-  5. Agenda do Trade
-  6. Radar do Turismo
-  7. EducaTravel Academy
-  8. Mapa do Turismo
-- Criar `SupplierBottomNavBar` para mobile com os 4-5 itens principais.
-- `DashboardLayout` existente passa a detectar role e renderizar `SupplierSidebar` quando `isFornecedor`, OU criar layout dedicado (preferência: layout dedicado para isolamento claro).
+Três tabelas novas em `public`:
 
-## Página `/dashboard-fornecedor`
+**`community_posts`**
+- `id uuid pk`, `user_id uuid not null`, `content text` (até 5000 chars), `image_url text` (opcional), `likes_count int default 0`, `comments_count int default 0`, `created_at`, `updated_at`
+- Constraint: `content` ou `image_url` obrigatórios
 
-Estrutura espelhando `Dashboard.tsx`:
+**`community_post_comments`**
+- `id`, `post_id uuid fk -> community_posts on delete cascade`, `user_id`, `content text not null` (até 2000 chars), `created_at`, `updated_at`
 
-1. **Header**: saudação dinâmica (Bom dia/tarde/noite + primeiro nome do usuário), frase institucional ("Gerencie sua presença comercial no ecossistema Agente de Sonhos."), `OnlineAgentsStrip`, `ExchangeRateCard`, `NotificationsDropdown`, botões Perfil + Sair. **Sem `GamificationPill`**.
+**`community_post_likes`**
+- `id`, `post_id uuid fk on delete cascade`, `user_id`, `created_at`
+- `unique(post_id, user_id)` — impede curtida duplicada
 
-2. **Bloco Perfil do Parceiro (full-width)** — novo componente `SupplierProfileHeroCard`:
-   - Logo + nome da empresa + categoria
-   - Status de aprovação (badge: pendente/aprovado/rejeitado)
-   - Barra de completude do perfil (% calculado por campos preenchidos do `tour_operators`)
-   - URL pública: `app.agentesdesonhos.com.br/operadora/{slug}` com botão copiar e abrir
-   - Toggle "Perfil público ativado" (nova coluna `is_public_visible` em `tour_operators`)
-   - 3 CTAs primários: Editar Perfil Comercial, Visualizar Perfil Público, Inserir Materiais
-   - Mini-indicadores premium: visualizações, materiais publicados, agentes alcançados, contatos recebidos (placeholder visual onde ainda não houver dado real).
+**Triggers**
+- `update_updated_at_column` em posts e comments
+- `update_community_post_likes_count` (AFTER INSERT/DELETE em likes → atualiza `likes_count`)
+- `update_community_post_comments_count` (AFTER INSERT/DELETE em comments → atualiza `comments_count`)
 
-3. **Linha 2 (2 cols)**: `CuratedNewsFeed` (Radar) + `AcademyCollapsibleCard` (Academy) — reutilizados sem mudança.
+**RLS**
+- Posts/comments/likes: SELECT liberado para qualquer usuário autenticado (`auth.uid() is not null`)
+- INSERT exige `auth.uid() = user_id`
+- UPDATE/DELETE: somente autor OU admin (`has_role(auth.uid(), 'admin')`)
 
-4. **Linha 3 (2 cols)**: `CommunityQACard` + `MapaTurismoCard` — reutilizados.
+**Storage**
+- Novo bucket público `community-feed` para imagens das publicações
+- Política: SELECT público; INSERT/UPDATE/DELETE somente em pastas `{auth.uid()}/...`
 
-5. **Linha 4 (2 cols)**: novo `SupplierAgendaCard` (próximos eventos do trade publicados pelo fornecedor + status) + novo `SupplierMaterialsCard` (resumo dos materiais publicados, com CTA upload).
+## 2. Novo componente `CommunitySocialFeed`
 
-6. **Linha 5 (full-width)**: `SupplierMetricsStrip` com 6 indicadores (placeholder onde necessário).
+Arquivo: `src/components/dashboard/CommunitySocialFeed.tsx`
 
-## Agenda do Trade (nova feature)
+Mantém o mesmo container visual do card atual (gradient lilás `--section-community`, header colapsável, mesmo padding) para parecer evolução natural.
 
-- Nova tabela `trade_events` com campos: titulo, descricao, data inicio/fim, local, link, tipo (treinamento/roadshow/live/famtour/etc), cover_url, status (pendente/aprovado/recusado), rejection_reason, supplier_user_id, operator_id.
-- RLS:
-  - Fornecedor: insert/select/update apenas dos próprios eventos.
-  - Admin: tudo.
-  - Agentes: select apenas eventos com `status = 'aprovado'`.
-- Página `/agenda-trade` para fornecedor: lista com filtros por status, botão "Novo evento", form modal de criação/edição, badge de status + motivo da recusa.
-- Painel admin: aba nova em `/admin` para aprovar/recusar eventos com motivo.
-- Integrar eventos aprovados no `UpcomingAgendaEventsCard` dos agentes (consulta `trade_events` aprovados + agenda existente).
+**Cabeçalho**
+- Ícone `Users` ou `MessageCircle`
+- Título: "Comunidade"
+- Subtítulo: "Compartilhe dúvidas, novidades, indicações, experiências e oportunidades com outros agentes de viagem."
+- Mantém o botão chevron de colapsar e o badge "X novas publicações" baseado em `localStorage` (mesma lógica de `lastViewedAt` do card atual)
 
-## Materiais de Divulgação para fornecedor
+**Caixa de criação (Composer)**
+- Card branco arredondado
+- Avatar do usuário logado à esquerda
+- `Textarea` autosize com placeholder: "O que você quer compartilhar com a comunidade?"
+- Linha de ações: botão "Adicionar foto" (ícone `ImageIcon`) que abre file picker; preview da imagem selecionada com botão remover
+- Botão "Publicar" em roxo, desabilitado se não houver texto nem imagem
+- Ao publicar:
+  1. Se houver imagem, upload para `community-feed/{user_id}/{timestamp}-{filename}` → pega `publicUrl`
+  2. Insert em `community_posts`
+  3. Limpa o composer; React Query invalida `["community-feed"]`; novo post aparece no topo
 
-- Reutilizar página `/materiais` em modo "meus materiais": filtrar por `tour_operator_id` do fornecedor.
-- Permitir upload (PDF/imagem/vídeo) vinculado ao próprio operador.
-- Admin continua moderando se já houver fluxo, ou publicação direta no espaço do fornecedor.
+**Lista de posts (ordenada por `created_at desc`)**
+- Paginação: 10 por página com botão "Carregar mais" (ou infinite scroll simples)
+- Cada post mostra:
+  - Avatar + nome do autor + role badge (Agente/Fornecedor/Admin via `user_roles`)
+  - Tempo relativo via `formatDistanceToNow(date, { locale: ptBR, addSuffix: true })`
+  - Texto (preserva quebras de linha com `whitespace-pre-wrap`)
+  - Imagem (se houver) com `object-cover` e `rounded-xl`
+  - Linha de ações: botão Curtir (filled quando o usuário curtiu), Comentar (toggle expand), Compartilhar (copia link do dashboard ou usa Web Share API se disponível)
+  - Contadores "X curtidas · Y comentários"
+  - Menu `...` para autor/admin com "Excluir publicação"
 
-## Comunidade e Perfil Pessoal
+**Seção de comentários (expansível)**
+- Lista de comentários do post (avatar, nome, tempo, texto)
+- Campo "Escreva um comentário..." com botão enviar
+- Comentários aparecem imediatamente via optimistic update + invalidate
+- Autor/admin pode excluir o próprio comentário
 
-- Fornecedor passa a aparecer normalmente em `OnlineAgentsStrip`, chat, posts, Q&A. Habilitar `usePresence` e `useSessionTracker` para a role.
-- Bloquear gamificação: em `useGamification`/`GamificationPill`/ranking/medalhas, checar `isFornecedor` e short-circuit (não registrar pontos, não exibir UI).
-- Perfil pessoal continua via `/perfil` (componente atual já serve).
-- Perfil comercial continua via `/meu-perfil-empresa`.
+**Estado vazio**
+- Ilustração leve + título "Seja o primeiro a movimentar a comunidade"
+- Texto: "Compartilhe uma dúvida, indicação, novidade ou experiência com outros profissionais de viagem."
+- Botão "Criar publicação" (foca o composer)
 
-## Mudanças no banco (migration)
+## 3. Hooks novos
 
-```sql
--- Toggle de visibilidade pública do perfil do parceiro
-ALTER TABLE tour_operators
-  ADD COLUMN IF NOT EXISTS is_public_visible boolean NOT NULL DEFAULT true;
+`src/hooks/useCommunityFeed.ts` (substitui parte do uso de `useQA` no dashboard):
+- `useFeedPosts(limit, offset)` — query lista
+- `useCreatePost()` — mutation com upload + insert
+- `useDeletePost()`
+- `usePostComments(postId)` — query
+- `useAddComment(postId)` — mutation
+- `useDeleteComment()`
+- `useToggleLike(postId)` — mutation com optimistic update; lê `community_post_likes` filtrado por `user_id` para saber se curtiu
 
--- Eventos da Agenda do Trade
-CREATE TYPE trade_event_status AS ENUM ('pendente','aprovado','recusado');
-CREATE TYPE trade_event_type AS ENUM ('treinamento','evento','roadshow','live','famtour','reuniao','capacitacao','encontro','outro');
+Roles dos autores: hook auxiliar `useUsersRoles(userIds[])` consultando `user_roles` em batch (single query `in('user_id', userIds)`), com cache de 10 min.
 
-CREATE TABLE trade_events (
-  id uuid PK default gen_random_uuid(),
-  supplier_user_id uuid NOT NULL,
-  operator_id uuid REFERENCES tour_operators(id) ON DELETE CASCADE,
-  title text NOT NULL,
-  description text,
-  event_type trade_event_type NOT NULL DEFAULT 'evento',
-  start_at timestamptz NOT NULL,
-  end_at timestamptz,
-  location text,
-  link text,
-  cover_url text,
-  status trade_event_status NOT NULL DEFAULT 'pendente',
-  rejection_reason text,
-  reviewed_by uuid,
-  reviewed_at timestamptz,
-  created_at, updated_at timestamptz
-);
+## 4. Substituições
 
--- RLS: fornecedor CRUD próprio, admin tudo, agentes SELECT aprovados
--- + trigger updated_at
+- `src/pages/Dashboard.tsx`: trocar import de `CommunityQACard` por `CommunitySocialFeed` no mesmo lugar.
+- `src/pages/DashboardFornecedor.tsx`: idem.
+- `CommunityQACard.tsx` permanece no projeto por enquanto (caso seja referenciado em outras telas), mas não será mais renderizado no dashboard. Se nenhuma outra página usar, removemos o arquivo.
 
--- Métricas placeholder: criar tabela supplier_profile_metrics (views, contacts, agents_reached) opcional ou apenas calcular on-the-fly
+## 5. Detalhes técnicos
+
+```text
+community_posts 1───* community_post_comments
+       │
+       └──* community_post_likes (unique post_id+user_id)
 ```
 
-Também atualizar policies de `tour_operators` para respeitar `is_public_visible` em leituras públicas (RPC `get_public_tour_guide` equivalente / leitura pública direta).
+- Imagens: máx 5 MB, tipos `image/jpeg|png|webp`; validação client-side antes do upload.
+- Texto: trim + limite 5000 chars no client e via check constraint no DB.
+- Real-time opcional (fora do escopo inicial): pode ser adicionado depois com `supabase.channel` em `community_posts`.
+- Acessibilidade: botões com `aria-label`, foco visível, alt text na imagem ("Imagem da publicação de {nome}").
+- Responsividade: composer e cards em `w-full`; imagens com `max-h-[480px] object-cover`; ações em `flex-wrap` no mobile.
 
-## Detalhes técnicos
+## 6. Permissões resumidas
 
-- Novos arquivos:
-  - `src/pages/DashboardFornecedor.tsx`
-  - `src/pages/AgendaTrade.tsx`
-  - `src/components/layout/SupplierDashboardLayout.tsx`
-  - `src/components/layout/SupplierSidebar.tsx`
-  - `src/components/layout/SupplierBottomNavBar.tsx`
-  - `src/components/supplier-dashboard/SupplierProfileHeroCard.tsx`
-  - `src/components/supplier-dashboard/SupplierAgendaCard.tsx`
-  - `src/components/supplier-dashboard/SupplierMaterialsCard.tsx`
-  - `src/components/supplier-dashboard/SupplierMetricsStrip.tsx`
-  - `src/components/admin/AdminTradeEventsManager.tsx`
-  - `src/hooks/useTradeEvents.ts`
-  - `src/hooks/useSupplierProfileMetrics.ts`
-- Mudanças em: `App.tsx` (rotas), `Auth.tsx` (redirect), `ProtectedRoute.tsx` (acesso por role), `useGamification` (bloquear fornecedor), `UpcomingAgendaEventsCard` (incluir trade_events aprovados), `Admin.tsx` (nova aba "Agenda do Trade").
-- Reuso direto: `CuratedNewsFeed`, `AcademyCollapsibleCard`, `CommunityQACard`, `MapaTurismoCard`, `OnlineAgentsStrip`, `ExchangeRateCard`, `NotificationsDropdown`, `Footer`, popups, `MediaManager` para materiais.
+- Qualquer usuário autenticado: ler feed, criar post, comentar, curtir
+- Autor: editar/excluir próprio post e próprios comentários
+- Admin (`has_role(auth.uid(),'admin')`): excluir qualquer post/comentário (moderação reativa, não preventiva)
+- Sem fluxo de aprovação. Posts aparecem imediatamente.
 
-## Permissões / Segurança
+## 7. Entregáveis
 
-- `ProtectedRoute` com prop `allowedRoles` aplicada nas novas rotas.
-- RLS estrita em `trade_events` (split por status para agentes).
-- `is_public_visible=false` esconde operador na listagem pública do Mapa do Turismo e bloqueia rota pública individual.
-- Sem alteração em rotas internas dos agentes.
-
-## Responsividade
-
-- Grid `lg:grid-cols-2` para desktop, single-column mobile.
-- Sidebar colapsável reaproveitando padrão do `AppSidebar`.
-- BottomNav só em mobile.
-
-## Entregável final
-Fornecedor faz login → cai em `/dashboard-fornecedor` com mesma densidade visual do agente, sidebar premium, blocos de Perfil/Radar/Academy/Comunidade/Agenda/Materiais/Métricas, sem gamificação, com Agenda do Trade integrada à agenda dos agentes após aprovação admin, e toggle de visibilidade pública no perfil comercial.
+1. Migration SQL (tabelas + RLS + triggers + bucket + storage policies)
+2. `src/hooks/useCommunityFeed.ts`
+3. `src/components/dashboard/CommunitySocialFeed.tsx` (composer + feed + comments + likes + estado vazio)
+4. Substituição no `Dashboard.tsx` e `DashboardFornecedor.tsx`
+5. Remoção opcional do `CommunityQACard.tsx` se ficar órfão
