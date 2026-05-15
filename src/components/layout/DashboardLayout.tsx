@@ -8,6 +8,8 @@ import { ChatFloatingButton } from "@/components/community-chat/ChatFloatingButt
 import { SessionTimeoutModal } from "@/components/session/SessionTimeoutModal";
 import { isActiveImpersonatingUser } from "@/lib/impersonation";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { SupplierDashboardLayout } from "./supplier/SupplierDashboardLayout";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -15,7 +17,13 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user } = useAuth();
+  const { isFornecedor, loading: roleLoading } = useUserRole();
   const impersonating = isActiveImpersonatingUser(user?.id);
+
+  // Suppliers always use the supplier-specific layout (sidebar, bottom nav, etc.)
+  if (!roleLoading && isFornecedor) {
+    return <SupplierDashboardLayout>{children}</SupplierDashboardLayout>;
+  }
   
   return (
     <div className={`min-h-screen bg-background flex flex-col overflow-x-hidden ${impersonating ? "pt-10" : ""}`}>
