@@ -1362,6 +1362,7 @@ export type Database = {
           created_at: string | null
           id: string
           post_id: string
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -1369,6 +1370,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           post_id: string
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -1376,6 +1378,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           post_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -1420,9 +1423,10 @@ export type Database = {
       community_posts: {
         Row: {
           comments_count: number | null
-          content: string
+          content: string | null
           created_at: string | null
           id: string
+          image_url: string | null
           is_pinned: boolean | null
           likes_count: number | null
           tags: string[] | null
@@ -1431,9 +1435,10 @@ export type Database = {
         }
         Insert: {
           comments_count?: number | null
-          content: string
+          content?: string | null
           created_at?: string | null
           id?: string
+          image_url?: string | null
           is_pinned?: boolean | null
           likes_count?: number | null
           tags?: string[] | null
@@ -1442,9 +1447,10 @@ export type Database = {
         }
         Update: {
           comments_count?: number | null
-          content?: string
+          content?: string | null
           created_at?: string | null
           id?: string
+          image_url?: string | null
           is_pinned?: boolean | null
           likes_count?: number | null
           tags?: string[] | null
