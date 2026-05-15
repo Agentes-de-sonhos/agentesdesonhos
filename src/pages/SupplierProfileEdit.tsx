@@ -12,7 +12,7 @@ import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
 import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
 import { ContactCards } from "@/components/operator/ContactCards";
 import { CompetitiveAdvantagesCard } from "@/components/operator/CompetitiveAdvantagesCard";
-import { RichTextWithLinks } from "@/components/operator/RichTextWithLinks";
+import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 import { BusinessHoursCard } from "@/components/operator/BusinessHoursCard";
 import { CertificationsCard } from "@/components/operator/CertificationsCard";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
@@ -267,7 +267,7 @@ function SupplierProfileContent({ operator, signOut, lang, onLangChange }: { ope
               onCancel={() => setEditShortDesc(operator.short_description || "")}
             >
               <OperatorInfoCard icon={FileText} title={tp(lang, "about")} iconColor="text-sky-600">
-                {operator.short_description ? <RichTextWithLinks text={operator.short_description} lineClamp={10} /> : placeholder}
+                {operator.short_description ? <RichContentDisplay content={operator.short_description} lineClamp={10} /> : placeholder}
               </OperatorInfoCard>
             </EditableSection>
 
@@ -291,7 +291,7 @@ function SupplierProfileContent({ operator, signOut, lang, onLangChange }: { ope
               onCancel={() => setEditHowToSell(operator.how_to_sell || "")}
             >
               <OperatorInfoCard icon={ShoppingCart} title={tp(lang, "how_to_sell")}>
-                {operator.how_to_sell ? <RichTextWithLinks text={operator.how_to_sell} /> : placeholder}
+                {operator.how_to_sell ? <RichContentDisplay content={operator.how_to_sell} /> : placeholder}
               </OperatorInfoCard>
             </EditableSection>
 
