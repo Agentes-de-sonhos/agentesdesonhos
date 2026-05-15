@@ -25,9 +25,10 @@ export interface CommunityMember {
 export interface CommunityPost {
   id: string;
   user_id: string;
-  content: string;
+  content: string | null;
   tags: string[];
   is_pinned: boolean;
+  image_url?: string | null;
   likes_count: number;
   comments_count: number;
   created_at: string;
