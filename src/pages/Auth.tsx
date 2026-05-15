@@ -128,7 +128,7 @@ export default function Auth() {
     }
 
     if (role === "fornecedor") {
-      navigate("/meu-perfil-empresa", { replace: true });
+      navigate("/dashboard-fornecedor", { replace: true });
       return;
     }
 
