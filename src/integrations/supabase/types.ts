@@ -7818,6 +7818,7 @@ export type Database = {
           id: string
           instagram: string | null
           is_active: boolean | null
+          is_public_visible: boolean
           is_published: boolean
           logo_url: string | null
           materials: Json | null
@@ -7848,6 +7849,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_active?: boolean | null
+          is_public_visible?: boolean
           is_published?: boolean
           logo_url?: string | null
           materials?: Json | null
@@ -7878,6 +7880,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_active?: boolean | null
+          is_public_visible?: boolean
           is_published?: boolean
           logo_url?: string | null
           materials?: Json | null
@@ -7893,6 +7896,74 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      trade_events: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          end_at: string | null
+          event_type: Database["public"]["Enums"]["trade_event_type"]
+          id: string
+          link: string | null
+          location: string | null
+          operator_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          start_at: string
+          status: Database["public"]["Enums"]["trade_event_status"]
+          supplier_user_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          end_at?: string | null
+          event_type?: Database["public"]["Enums"]["trade_event_type"]
+          id?: string
+          link?: string | null
+          location?: string | null
+          operator_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_at: string
+          status?: Database["public"]["Enums"]["trade_event_status"]
+          supplier_user_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          end_at?: string | null
+          event_type?: Database["public"]["Enums"]["trade_event_type"]
+          id?: string
+          link?: string | null
+          location?: string | null
+          operator_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_at?: string
+          status?: Database["public"]["Enums"]["trade_event_status"]
+          supplier_user_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_events_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_suppliers: {
         Row: {
@@ -9383,6 +9454,17 @@ export type Database = {
         | "fundador"
         | "start"
         | "fornecedor_parceiro"
+      trade_event_status: "pendente" | "aprovado" | "recusado"
+      trade_event_type:
+        | "treinamento"
+        | "evento"
+        | "roadshow"
+        | "live"
+        | "famtour"
+        | "reuniao"
+        | "capacitacao"
+        | "encontro"
+        | "outro"
       workshop_category:
         | "contabilidade"
         | "tributaria"
@@ -9526,6 +9608,18 @@ export const Constants = {
         "fundador",
         "start",
         "fornecedor_parceiro",
+      ],
+      trade_event_status: ["pendente", "aprovado", "recusado"],
+      trade_event_type: [
+        "treinamento",
+        "evento",
+        "roadshow",
+        "live",
+        "famtour",
+        "reuniao",
+        "capacitacao",
+        "encontro",
+        "outro",
       ],
       workshop_category: [
         "contabilidade",
