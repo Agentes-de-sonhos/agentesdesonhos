@@ -6,14 +6,16 @@ import { GlobalPopupModal } from "@/components/popup/GlobalPopupModal";
 import { MonthlyPopupModal } from "@/components/popup/MonthlyPopupModal";
 import { ChatFloatingButton } from "@/components/community-chat/ChatFloatingButton";
 import { SessionTimeoutModal } from "@/components/session/SessionTimeoutModal";
-import { isImpersonating } from "@/components/admin/ImpersonationBanner";
+import { isActiveImpersonatingUser } from "@/lib/impersonation";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const impersonating = isImpersonating();
+  const { user } = useAuth();
+  const impersonating = isActiveImpersonatingUser(user?.id);
   
   return (
     <div className={`min-h-screen bg-background flex flex-col overflow-x-hidden ${impersonating ? "pt-10" : ""}`}>

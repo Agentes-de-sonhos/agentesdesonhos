@@ -4,39 +4,25 @@ import { Shield, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  IMPERSONATION_EVENT,
+  IMPERSONATION_TRANSITION_MS,
+  type ImpersonationData,
+  clearCurrentTabImpersonationData,
+  clearImpersonationData,
+  getImpersonationData,
+} from "@/lib/impersonation";
 
-const IMPERSONATION_KEY = "impersonation_data";
-
-export interface ImpersonationData {
-  adminSessionAccess: string;
-  adminSessionRefresh: string;
-  targetUserName: string;
-  targetUserId: string;
-  adminId: string;
-  startedAt: string;
-  impersonationLogId?: string | null;
-}
-
-export function getImpersonationData(): ImpersonationData | null {
-  try {
-    const raw = localStorage.getItem(IMPERSONATION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-export function setImpersonationData(data: ImpersonationData) {
-  localStorage.setItem(IMPERSONATION_KEY, JSON.stringify(data));
-}
-
-export function clearImpersonationData() {
-  localStorage.removeItem(IMPERSONATION_KEY);
-}
-
-export function isImpersonating(): boolean {
-  return !!getImpersonationData();
-}
+type ImpersonationLogsClient = {
+  from: (table: "impersonation_logs") => {
+    update: (values: { ended_at: string }) => {
+      eq: (column: string, value: string) => {
+        is: (column: string, value: null) => Promise<unknown>;
+      };
+    };
+  };
+};
 
 export function ImpersonationBanner() {
   const [data, setData] = useState<ImpersonationData | null>(null);
@@ -44,14 +30,51 @@ export function ImpersonationBanner() {
   const [exiting, setExiting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading } = useAuth();
+  const currentUserId = user?.id;
 
   useEffect(() => {
-    setData(getImpersonationData());
+    if (loading) return;
 
-    const handler = () => setData(getImpersonationData());
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
+    const syncData = () => {
+      const stored = getImpersonationData();
+      const isActiveSupportSession = !!stored && !!currentUserId && stored.targetUserId === currentUserId;
+
+      if (!isActiveSupportSession) {
+        setData(null);
+        return;
+      }
+
+      setData(stored);
+    };
+
+    syncData();
+
+    window.addEventListener("storage", syncData);
+    window.addEventListener(IMPERSONATION_EVENT, syncData);
+    return () => {
+      window.removeEventListener("storage", syncData);
+      window.removeEventListener(IMPERSONATION_EVENT, syncData);
+    };
+  }, [currentUserId, loading]);
+
+  useEffect(() => {
+    if (loading || !currentUserId) return;
+
+    const stored = getImpersonationData();
+    if (!stored) return;
+
+    const startedAt = new Date(stored.startedAt).getTime();
+    const isTransitioningIntoSupport =
+      Number.isFinite(startedAt) &&
+      stored.adminId === currentUserId &&
+      Date.now() - startedAt < IMPERSONATION_TRANSITION_MS;
+
+    if (stored.targetUserId !== currentUserId && !isTransitioningIntoSupport) {
+      clearCurrentTabImpersonationData();
+      setData(null);
+    }
+  }, [currentUserId, loading]);
 
   // Update elapsed time every second
   useEffect(() => {
@@ -74,7 +97,7 @@ export function ImpersonationBanner() {
 
     try {
       // Sign out of impersonated session (does NOT touch the admin's stored tokens
-      // — they live in localStorage under impersonation_data and are restored below).
+      // — they live in this tab's sessionStorage under impersonation_data and are restored below).
       await supabase.auth.signOut();
 
       // Restore admin session
@@ -93,7 +116,7 @@ export function ImpersonationBanner() {
 
       // Close the support-session log (admin RLS now applies)
       if (data.impersonationLogId) {
-        await (supabase as any)
+        await (supabase as unknown as ImpersonationLogsClient)
           .from("impersonation_logs")
           .update({ ended_at: new Date().toISOString() })
           .eq("id", data.impersonationLogId)

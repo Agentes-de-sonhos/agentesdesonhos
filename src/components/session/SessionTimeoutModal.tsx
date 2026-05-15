@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
-import { isImpersonating } from "@/components/admin/ImpersonationBanner";
+import { isActiveImpersonatingUser } from "@/lib/impersonation";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ export function SessionTimeoutModal() {
   // Disable inactivity timeout during impersonation so the admin doesn't see
   // "Sessão encerrada por inatividade" while exiting support mode.
   const { showWarning, countdown, continueSession, requestLogout, timedOut } =
-    useSessionTimeout(!!user && !isImpersonating());
+    useSessionTimeout(!!user && !isActiveImpersonatingUser(user.id));
 
   const handleLogout = async () => {
     requestLogout();
