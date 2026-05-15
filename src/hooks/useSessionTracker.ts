@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { isImpersonating } from "@/components/admin/ImpersonationBanner";
 
 const HEARTBEAT_INTERVAL = 60_000; // 1 minute
 const INACTIVITY_TIMEOUT = 20 * 60 * 1000; // 20 minutes
@@ -27,7 +28,10 @@ export function useSessionTracker() {
   }, []);
 
   useEffect(() => {
-    if (!user) {
+    // Skip session tracking entirely during admin support/impersonation mode
+    // so the impersonated user's real activity logs and online status are
+    // not polluted by the admin's temporary session.
+    if (!user || isImpersonating()) {
       if (sessionIdRef.current) {
         void endSession(sessionIdRef.current);
         sessionIdRef.current = null;
