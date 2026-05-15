@@ -14,6 +14,16 @@ import {
   getImpersonationData,
 } from "@/lib/impersonation";
 
+type ImpersonationLogsClient = {
+  from: (table: "impersonation_logs") => {
+    update: (values: { ended_at: string }) => {
+      eq: (column: string, value: string) => {
+        is: (column: string, value: null) => Promise<unknown>;
+      };
+    };
+  };
+};
+
 export function ImpersonationBanner() {
   const [data, setData] = useState<ImpersonationData | null>(null);
   const [elapsed, setElapsed] = useState("");
@@ -106,7 +116,7 @@ export function ImpersonationBanner() {
 
       // Close the support-session log (admin RLS now applies)
       if (data.impersonationLogId) {
-        await (supabase as any)
+        await (supabase as unknown as ImpersonationLogsClient)
           .from("impersonation_logs")
           .update({ ended_at: new Date().toISOString() })
           .eq("id", data.impersonationLogId)
