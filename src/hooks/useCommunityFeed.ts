@@ -52,13 +52,22 @@ export function useCommunityFeed() {
   });
 
   const createPost = useMutation({
-    mutationFn: async ({ content, tags }: { content: string; tags: string[] }) => {
+    mutationFn: async ({
+      content,
+      tags = [],
+      imageUrl = null,
+    }: {
+      content: string;
+      tags?: string[];
+      imageUrl?: string | null;
+    }) => {
       if (!user?.id) throw new Error("Não autenticado");
       const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         content,
         tags,
-      });
+        image_url: imageUrl,
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
