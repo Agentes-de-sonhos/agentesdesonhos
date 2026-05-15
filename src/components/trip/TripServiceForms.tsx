@@ -245,6 +245,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     if (data.origin_city) seg.origin_city = data.origin_city;
     if (data.destination_airport) seg.destination_airport = data.destination_airport;
     if (data.destination_city) seg.destination_city = data.destination_city;
+    if (data.flight_date) seg.flight_date = data.flight_date;
     if (data.departure_time) {
       const t = data.departure_time;
       seg.departure_time = t.includes("T")
@@ -323,15 +324,68 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     // Update main fields from first/last segment of incoming data
     const firstIn = incoming[0];
     const lastIn = incoming[incoming.length - 1];
-    if (firstIn?.airline) form.setValue("main_airline", resolveAirlineDisplay(firstIn.airline));
+    // Prefer the AI-aggregated "airlines" string when available (e.g., "LATAM / Lufthansa / Iberia")
+    if (importData?.airlines) {
+      form.setValue("main_airline", importData.airlines);
+    } else if (firstIn?.airline) {
+      form.setValue("main_airline", resolveAirlineDisplay(firstIn.airline));
+    }
+
+    if (importData?.trip_type) {
+      form.setValue("trip_type", importData.trip_type);
+    }
+
     // Only set origin/destination cities on initial import (avoid overwriting on second pull)
     const firstFilledNow = segments.length > 0 && isSegmentFilled(segments[0]);
     if (!firstFilledNow) {
-      if (firstIn?.origin_city) form.setValue("origin_city", firstIn.origin_city);
-      if (lastIn?.destination_city) form.setValue("destination_city", lastIn.destination_city);
+      const oc = importData?.origin_city || firstIn?.origin_city;
+      const dc = importData?.destination_city || lastIn?.destination_city;
+      if (oc) form.setValue("origin_city", oc);
+      if (dc) form.setValue("destination_city", dc);
     } else {
       // Second import → update destination to the new last segment's destination (typical return flight)
-      if (lastIn?.destination_city) form.setValue("destination_city", lastIn.destination_city);
+      const dc = importData?.destination_city || lastIn?.destination_city;
+      if (dc) form.setValue("destination_city", dc);
+    }
+
+    // Baggage: derive friendly text from booleans + AI notes
+    if (importData?.checked_baggage !== undefined || importData?.carry_on !== undefined || importData?.baggage_notes) {
+      if (importData.checked_baggage === true) {
+        form.setValue("checked_baggage", "Inclui bagagem despachada");
+      } else if (importData.checked_baggage === false) {
+        form.setValue("checked_baggage", "Não inclui bagagem despachada");
+      }
+      if (importData.carry_on === true) {
+        form.setValue("carry_on", "Bagagem de mão inclusa");
+      } else if (importData.carry_on === false) {
+        form.setValue("carry_on", "Sem bagagem de mão");
+      }
+      if (importData.baggage_notes) {
+        form.setValue("baggage_notes", importData.baggage_notes);
+      }
+    }
+
+    // Boarding notes: combine auto summary + fare notes + price info
+    const summaryParts: string[] = [];
+    if (importData?.auto_summary) summaryParts.push(importData.auto_summary);
+    if (typeof importData?.total_price === "number") {
+      const cur = importData.currency || "";
+      summaryParts.push(`Valor total: ${cur} ${importData.total_price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+    }
+    if (typeof importData?.boarding_tax === "number") {
+      summaryParts.push(`Taxa de embarque: ${importData.boarding_tax.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+    }
+    if (typeof importData?.exchange_rate === "number") {
+      summaryParts.push(`Câmbio: ${importData.exchange_rate}`);
+    }
+    if (importData?.fare_notes) summaryParts.push(`Tarifa: ${importData.fare_notes}`);
+    if (importData?.additional_cities?.length) {
+      summaryParts.push(`Outras cidades: ${importData.additional_cities.join(", ")}`);
+    }
+    if (summaryParts.length > 0) {
+      const existing = form.getValues("boarding_notes") || "";
+      const next = summaryParts.join("\n");
+      form.setValue("boarding_notes", existing ? `${existing}\n${next}` : next);
     }
   };
 
