@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { isActiveImpersonatingUser } from "@/components/admin/ImpersonationBanner";
+import { isActiveImpersonatingUser } from "@/lib/impersonation";
 
 const HEARTBEAT_INTERVAL = 60_000; // 1 minute
 const INACTIVITY_TIMEOUT = 20 * 60 * 1000; // 20 minutes
