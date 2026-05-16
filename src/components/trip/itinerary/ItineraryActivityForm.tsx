@@ -4,10 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, X, Loader2, Link2, Paperclip, MapPin } from "lucide-react";
+import { Camera, X, Loader2, Link2, Paperclip, MapPin, Search, Sparkles } from "lucide-react";
 import type { TripService, TripServiceType } from "@/types/trip";
 import type { ItineraryActivity } from "@/hooks/useItineraryActivities";
 import { useResolvedVoucherUrl } from "@/lib/itineraryAssetUrl";
+import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
+import type { PlaceDetails, PlacePrediction } from "@/hooks/usePlacesAutocomplete";
 
 function ExistingPhoto({ path }: { path: string }) {
   const url = useResolvedVoucherUrl(path);
@@ -69,10 +71,69 @@ export function ItineraryActivityForm({ tripServices, onSubmit, onCancel, isLoad
   const [linkedServiceId, setLinkedServiceId] = useState<string | null>(defaultValues?.linked_service_id || null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedDocFiles, setSelectedDocFiles] = useState<File[]>([]);
-  const [existingPhotos] = useState<string[]>(defaultValues?.photo_urls || []);
+  const [existingPhotos, setExistingPhotos] = useState<string[]>(defaultValues?.photo_urls || []);
   const [existingDocs] = useState<string[]>(defaultValues?.document_urls || []);
+  const [placeQuery, setPlaceQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const docRef = useRef<HTMLInputElement>(null);
+
+  const buildDescription = (pred: PlacePrediction, d?: PlaceDetails): string => {
+    const raw = (d as any)?.raw_data || {};
+    const types: string[] = raw.types || pred.types || [];
+    const editorial: string | null = raw.editorial_summary || null;
+    if (editorial) return editorial;
+
+    const TYPE_LABELS: Record<string, string> = {
+      restaurant: "Restaurante",
+      cafe: "Café",
+      bar: "Bar",
+      bakery: "Padaria",
+      lodging: "Hospedagem",
+      tourist_attraction: "Atração turística",
+      museum: "Museu",
+      art_gallery: "Galeria de arte",
+      park: "Parque",
+      church: "Igreja",
+      shopping_mall: "Shopping",
+      store: "Loja",
+      night_club: "Casa noturna",
+      amusement_park: "Parque de diversões",
+      zoo: "Zoológico",
+      aquarium: "Aquário",
+      stadium: "Estádio",
+      spa: "Spa",
+    };
+    const friendly = types.map((t) => TYPE_LABELS[t]).filter(Boolean)[0] || "Ponto de interesse";
+    const parts: string[] = [`${friendly} em ${pred.secondary || d?.address || ""}`.trim()];
+    if (raw.rating) {
+      parts.push(`Avaliação ${raw.rating}/5${raw.user_ratings_total ? ` (${raw.user_ratings_total} avaliações)` : ""}.`);
+    }
+    return parts.filter(Boolean).join(". ").replace(/\.\.+/g, ".");
+  };
+
+  const priceLevelToText = (lvl: number | null | undefined): string => {
+    if (lvl == null) return "";
+    return ["Gratuito", "Econômico ($)", "Moderado ($$)", "Caro ($$$)", "Premium ($$$$)"][lvl] || "";
+  };
+
+  const handlePlaceSelect = (pred: PlacePrediction, details?: PlaceDetails) => {
+    // Only fill empty fields to avoid overwriting user edits
+    if (!title.trim()) setTitle(pred.name);
+    if (!location.trim()) setLocation(details?.address || pred.secondary || pred.name);
+    if (!description.trim()) setDescription(buildDescription(pred, details));
+    const raw: any = (details as any)?.raw_data || {};
+    if (!mapsUrl.trim()) {
+      setMapsUrl(raw.maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pred.name + " " + (pred.secondary || ""))}&query_place_id=${pred.place_id}`);
+    }
+    if (!notes.trim()) {
+      const price = priceLevelToText(raw.price_level);
+      if (price) setNotes(`Faixa de preço: ${price}`);
+    }
+    if (details?.photo_url && existingPhotos.length === 0) {
+      setExistingPhotos([details.photo_url]);
+    }
+    setPlaceQuery("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +166,24 @@ export function ItineraryActivityForm({ tripServices, onSubmit, onCancel, isLoad
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Google Places search */}
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-2.5 space-y-1.5">
+        <Label className="text-xs flex items-center gap-1.5 text-primary">
+          <Sparkles className="h-3.5 w-3.5" /> Buscar local no Google Places (opcional)
+        </Label>
+        <PlacesAutocomplete
+          value={placeQuery}
+          onChange={setPlaceQuery}
+          onPlaceSelect={handlePlaceSelect}
+          placeType="general"
+          placeholder="Ex: Jardim Japonês Buenos Aires, MASP, Cristo Redentor..."
+          className="h-9 bg-background"
+        />
+        <p className="text-[10px] text-muted-foreground">
+          Selecione um local para preencher automaticamente título, descrição, endereço e foto. Tudo permanece editável.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
         <div>
           <Label className="text-xs">Título *</Label>
@@ -170,7 +249,16 @@ export function ItineraryActivityForm({ tripServices, onSubmit, onCancel, isLoad
         <Label className="text-xs flex items-center gap-1"><Camera className="h-3 w-3" /> Fotos</Label>
         <div className="flex flex-wrap gap-2 mt-1">
           {existingPhotos.map((url, i) => (
-            <ExistingPhoto key={i} path={url} />
+            <div key={i} className="relative w-16 h-16">
+              <ExistingPhoto path={url} />
+              <button
+                type="button"
+                onClick={() => setExistingPhotos((prev) => prev.filter((_, j) => j !== i))}
+                className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
           ))}
           {selectedFiles.map((f, i) => (
             <div key={i} className="relative w-16 h-16">
