@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
       }
 
       // Fetch from Google
-      const fields = "name,formatted_address,photos,geometry,types,place_id";
+      const fields = "name,formatted_address,photos,geometry,types,place_id,price_level,rating,user_ratings_total,editorial_summary,url,website,international_phone_number";
       const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=${fields}&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR`;
       const resp = await fetch(detailsUrl);
       const data = await resp.json();
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
         `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`
       );
 
-      const placeData = {
+      const placeData: any = {
         place_id: r.place_id,
         name: r.name || "",
         address: r.formatted_address || "",
@@ -81,7 +81,16 @@ Deno.serve(async (req) => {
         place_type: (r.types || [])[0] || place_type || "establishment",
         latitude: r.geometry?.location?.lat || null,
         longitude: r.geometry?.location?.lng || null,
-        raw_data: { types: r.types },
+        raw_data: {
+          types: r.types,
+          price_level: r.price_level ?? null,
+          rating: r.rating ?? null,
+          user_ratings_total: r.user_ratings_total ?? null,
+          editorial_summary: r.editorial_summary?.overview ?? null,
+          maps_url: r.url ?? null,
+          website: r.website ?? null,
+          phone: r.international_phone_number ?? null,
+        },
       };
 
       // Save to cache
