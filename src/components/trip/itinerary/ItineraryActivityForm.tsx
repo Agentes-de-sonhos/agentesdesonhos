@@ -249,7 +249,16 @@ export function ItineraryActivityForm({ tripServices, onSubmit, onCancel, isLoad
         <Label className="text-xs flex items-center gap-1"><Camera className="h-3 w-3" /> Fotos</Label>
         <div className="flex flex-wrap gap-2 mt-1">
           {existingPhotos.map((url, i) => (
-            <ExistingPhoto key={i} path={url} />
+            <div key={i} className="relative w-16 h-16">
+              <ExistingPhoto path={url} />
+              <button
+                type="button"
+                onClick={() => setExistingPhotos((prev) => prev.filter((_, j) => j !== i))}
+                className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
           ))}
           {selectedFiles.map((f, i) => (
             <div key={i} className="relative w-16 h-16">
