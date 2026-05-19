@@ -261,6 +261,18 @@ const faqs = [
     q: "Já tenho um sistema de reservas. A plataforma substitui?",
     a: "Não. A Agentes de Sonhos complementa seu sistema atual, cuidando de tudo que ele não faz: capacitação, relacionamento com cliente, marketing, comunidade e ferramentas de IA.",
   },
+  {
+    q: "Existe fidelidade ou permanência mínima?",
+    a: "Não. A assinatura da Agentes de Sonhos não tem fidelidade. Você pode cancelar quando quiser.",
+  },
+  {
+    q: "A plataforma tem garantia?",
+    a: "Sim. Você pode testar por 30 dias. Se dentro desse período entender que a plataforma não faz sentido para você, basta solicitar o cancelamento e devolvemos o valor pago.",
+  },
+  {
+    q: "A promoção de 50% é por tempo limitado?",
+    a: "Sim. A condição promocional de 50% de desconto é válida por tempo limitado, até 31 de maio, conforme disponibilidade da campanha vigente.",
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -518,6 +530,32 @@ export default function LandingPage() {
               >
                 Já sou cliente
               </Button>
+            </div>
+            {/* Trust badges */}
+            <div
+              className="flex flex-col items-center gap-3 pt-2"
+              style={{
+                opacity: heroReady ? 1 : 0,
+                transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1) 0.45s",
+              }}
+            >
+              <p className="text-xs sm:text-[13px] text-muted-foreground font-medium">
+                Teste sem risco: 50% de desconto, sem fidelidade e com garantia de 30 dias.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-[11px] sm:text-xs font-medium text-muted-foreground">
+                  <Clock className="h-3 w-3 text-primary" />
+                  50% OFF por tempo limitado
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-[11px] sm:text-xs font-medium text-muted-foreground">
+                  <CheckCircle2 className="h-3 w-3 text-primary" />
+                  Cancele quando quiser
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-[11px] sm:text-xs font-medium text-muted-foreground">
+                  <ShieldCheck className="h-3 w-3 text-primary" />
+                  Garantia de 30 dias
+                </span>
+              </div>
             </div>
           </div>
         </div>
