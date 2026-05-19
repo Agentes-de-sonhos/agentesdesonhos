@@ -508,20 +508,14 @@ export default function LandingPage() {
                 transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s, transform 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s",
               }}
             >
-              <div className="flex flex-col items-center gap-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                  <Zap className="h-3 w-3" />
-                  50% de desconto nesta semana
-                </span>
-                <Button
+              <Button
                 size="lg"
                 className="gap-2 text-base px-8 py-[14px] rounded-xl font-semibold shadow-[0_10px_30px_hsl(var(--primary)/0.2)] hover:shadow-[0_14px_40px_hsl(var(--primary)/0.3)] hover:-translate-y-0.5 transition-all duration-250"
                 onClick={goSignup}
               >
                 Quero entrar na plataforma
                 <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
+              </Button>
               <Button
                 size="lg"
                 variant="outline"
