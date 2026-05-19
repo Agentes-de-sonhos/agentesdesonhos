@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
+import { PromoBar } from "@/components/landing/PromoBar";
 
 /* ------------------------------------------------------------------ */
 /*  Scroll-reveal wrapper                                              */
@@ -359,6 +360,8 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
+      {/* ── Faixa promocional ─────────────────────────────────── */}
+      <PromoBar onCtaClick={goSignup} />
       {/* ── Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-card/70 backdrop-blur-xl">
         <div className={cn(sectionContainer, "flex h-16 items-center justify-between")}>
@@ -394,14 +397,14 @@ export default function LandingPage() {
               onClick={goLogin}
               className="hidden sm:inline-flex rounded-xl font-semibold"
             >
-              Entrar
+              Já sou cliente
             </Button>
             <Button
               size="sm"
               onClick={goSignup}
               className="hidden sm:inline-flex rounded-xl font-semibold shadow-[0_4px_14px_hsl(var(--primary)/0.25)] hover:shadow-[0_6px_20px_hsl(var(--primary)/0.35)] hover:-translate-y-0.5 transition-all duration-250"
             >
-              Cadastrar
+              Quero entrar
             </Button>
             <Button
               variant="ghost"
@@ -438,10 +441,10 @@ export default function LandingPage() {
             )}
             <div className="flex gap-2 pt-2 border-t border-border/40">
               <Button variant="outline" size="sm" onClick={goLogin} className="flex-1 rounded-xl">
-                Entrar
+                Já sou cliente
               </Button>
               <Button size="sm" onClick={goSignup} className="flex-1 rounded-xl">
-                Cadastrar
+                Quero entrar
               </Button>
             </div>
           </div>
@@ -493,14 +496,20 @@ export default function LandingPage() {
                 transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s, transform 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s",
               }}
             >
-              <Button
+              <div className="flex flex-col items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                  <Zap className="h-3 w-3" />
+                  50% de desconto nesta semana
+                </span>
+                <Button
                 size="lg"
                 className="gap-2 text-base px-8 py-[14px] rounded-xl font-semibold shadow-[0_10px_30px_hsl(var(--primary)/0.2)] hover:shadow-[0_14px_40px_hsl(var(--primary)/0.3)] hover:-translate-y-0.5 transition-all duration-250"
                 onClick={goSignup}
               >
                 Quero entrar na plataforma
                 <ArrowRight className="h-4 w-4" />
-              </Button>
+                </Button>
+              </div>
               <Button
                 size="lg"
                 variant="outline"
