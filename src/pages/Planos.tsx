@@ -12,6 +12,7 @@ import {
   Crown,
   Star,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -294,6 +295,25 @@ export default function Planos() {
         <p className="text-xs text-center text-muted-foreground mt-8 max-w-lg mx-auto">
           Pagamento seguro via Stripe. Cancele quando quiser, sem fidelidade. Após o pagamento, você receberá um e-mail para concluir seu cadastro.
         </p>
+
+        {/* Bloco de confiança */}
+        <div className="max-w-3xl mx-auto mt-10">
+          <Card className="border-primary/20 bg-primary/[0.03] rounded-2xl">
+            <CardContent className="flex flex-col sm:flex-row items-start gap-4 p-6">
+              <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="font-semibold text-base tracking-tight">Assine com tranquilidade</h3>
+                <p className="text-sm text-muted-foreground leading-[1.65]">
+                  Aproveite 50% de desconto por tempo limitado. Teste a Agentes de Sonhos por 30 dias
+                  e, se a plataforma não fizer sentido para você, devolvemos o valor pago. Sem
+                  fidelidade: você pode cancelar quando quiser.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
