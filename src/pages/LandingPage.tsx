@@ -465,7 +465,7 @@ export default function LandingPage() {
 
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section
-        className="relative overflow-hidden min-h-[85vh] flex items-center"
+        className="relative overflow-hidden flex items-center"
         style={{
           background:
             "radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--primary) / 0.07), transparent 70%)",
@@ -475,7 +475,7 @@ export default function LandingPage() {
         <div className="absolute -top-32 -right-32 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
         <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
 
-        <div className={cn(sectionContainer, "py-24 md:py-32 lg:py-40 relative w-full")}>
+        <div className={cn(sectionContainer, "py-12 md:py-16 lg:py-20 relative w-full")}>
           <div className="max-w-3xl mx-auto text-center space-y-8">
             <h1
               className="text-4xl sm:text-5xl md:text-6xl lg:text-[3.75rem] font-bold tracking-[-0.02em] leading-[1.08]"
