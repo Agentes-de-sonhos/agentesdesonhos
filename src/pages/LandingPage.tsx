@@ -489,7 +489,7 @@ export default function LandingPage() {
               levam a profissão a sério.
             </p>
             <div
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+              className="flex flex-col sm:flex-row items-center sm:items-end justify-center gap-4 pt-4"
               style={{
                 opacity: heroReady ? 1 : 0,
                 transform: heroReady ? "translateY(0)" : "translateY(24px)",
