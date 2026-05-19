@@ -38,14 +38,18 @@ export function PromoBar({ onCtaClick }: PromoBarProps) {
         background: "linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(187 92% 42%) 100%)",
       }}
     >
-      <div className="mx-auto flex min-h-[26px] max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-0.5 px-4 py-1 text-center">
+      <div className="mx-auto flex min-h-[26px] max-w-7xl flex-wrap items-center justify-center gap-x-2 gap-y-0.5 px-4 py-1 text-center">
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="h-3 w-3" />
-          Aproveite 50% de desconto até 31 de maio
+          50% de desconto até 31 de maio
         </span>
-        <span className="text-primary-foreground/85 tabular-nums">
-          Faltam {remaining.days} {remaining.days === 1 ? "dia" : "dias"}, {remaining.hours}h e {remaining.minutes}min
+        <span className="text-primary-foreground/60 hidden sm:inline">|</span>
+        <span className="text-primary-foreground/90">Sem fidelidade</span>
+        <span className="text-primary-foreground/60 hidden sm:inline">|</span>
+        <span className="text-primary-foreground/90 tabular-nums">
+          Faltam {remaining.days} {remaining.days === 1 ? "dia" : "dias"}
         </span>
+        <span className="text-primary-foreground/60 hidden sm:inline">|</span>
         <button
           onClick={onCtaClick}
           className="underline underline-offset-2 hover:text-white/90 transition-colors font-semibold"
