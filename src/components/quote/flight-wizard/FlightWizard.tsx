@@ -454,12 +454,16 @@ export function FlightWizard({
             <div className="space-y-2">
               <Label>Descrição (opcional)</Label>
               <TextareaWithTemplate placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]"
-                value={data.description || ""} onValueChange={(v) => upd({ description: v })} onChange={() => {}} />
+                value={data.description || ""}
+                onValueChange={(v) => upd({ description: v })}
+                onChange={(e) => upd({ description: e.target.value })} />
             </div>
             <div className="space-y-2">
               <Label>Observações</Label>
               <TextareaWithTemplate placeholder="Observações adicionais..."
-                value={data.notes || ""} onValueChange={(v) => upd({ notes: v })} onChange={() => {}} />
+                value={data.notes || ""}
+                onValueChange={(v) => upd({ notes: v })}
+                onChange={(e) => upd({ notes: e.target.value })} />
             </div>
           </StepShell>
         );
