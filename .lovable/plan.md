@@ -1,127 +1,73 @@
-## Objetivo
+# Modo Assistido — Passagem Aérea
 
-Substituir o card atual `CommunityQACard` (perguntas/respostas) por um novo card `CommunitySocialFeed` — um feed social profissional onde qualquer membro autenticado publica livremente texto, imagem ou texto+imagem, com curtidas e comentários, sem aprovação prévia. Mesma identidade visual (lilás/roxo, cards arredondados).
+Objetivo: adicionar uma camada guiada (wizard de 8 etapas) ao cadastro de Passagem Aérea no Orçamento, reaproveitando 100% dos campos, validações e fluxo de salvamento existentes. **Nada do formulário manual atual é alterado, removido ou recriado**.
 
-A área "Perguntas da Comunidade" no `Dashboard.tsx` e no `DashboardFornecedor.tsx` passa a renderizar o novo feed social. O sistema antigo de Q&A continua acessível em outras páginas (não removemos `qa_questions`); apenas a seção do dashboard muda.
+## Visão geral
 
-## 1. Banco de dados (nova migration)
+Quando o usuário clica para adicionar um serviço do tipo Passagem Aérea, em vez de abrir direto o `FlightForm` atual, exibimos primeiro uma tela de **escolha de modo**:
 
-Três tabelas novas em `public`:
+- **Preencher com ajuda** (passo a passo)
+- **Preencher manualmente** (formulário completo atual — comportamento idêntico ao de hoje)
 
-**`community_posts`**
-- `id uuid pk`, `user_id uuid not null`, `content text` (até 5000 chars), `image_url text` (opcional), `likes_count int default 0`, `comments_count int default 0`, `created_at`, `updated_at`
-- Constraint: `content` ou `image_url` obrigatórios
+Se escolher manual → renderiza o `FlightForm` como já é hoje (zero mudança de comportamento).
+Se escolher assistido → renderiza um novo componente `FlightWizard` que produz **exatamente o mesmo payload** que o `FlightForm` ao salvar.
 
-**`community_post_comments`**
-- `id`, `post_id uuid fk -> community_posts on delete cascade`, `user_id`, `content text not null` (até 2000 chars), `created_at`, `updated_at`
+## Arquivos a criar
 
-**`community_post_likes`**
-- `id`, `post_id uuid fk on delete cascade`, `user_id`, `created_at`
-- `unique(post_id, user_id)` — impede curtida duplicada
+- `src/components/quote/flight-wizard/FlightWizard.tsx` — orquestra etapas, estado central, persistência de rascunho.
+- `src/components/quote/flight-wizard/types.ts` — tipo `WizardFlightDraft` (espelha `FlightData` + `option_label`, `description`, `notes`, `image_urls`, `payment_config`).
+- `src/components/quote/flight-wizard/steps/Step1Main.tsx` — companhia, origem, destino, tipo (ida e volta / só ida), datas, bagagem, taxa.
+- `src/components/quote/flight-wizard/steps/Step2Outbound.tsx` — trechos da ida (reutiliza `FlightLegFields` já existente).
+- `src/components/quote/flight-wizard/steps/Step3Return.tsx` — trechos da volta (oculto se "somente ida").
+- `src/components/quote/flight-wizard/steps/Step4Baggage.tsx` — reforço de bagagem/taxa (mesmos checkboxes).
+- `src/components/quote/flight-wizard/steps/Step5Prices.tsx` — valor adulto / valor criança.
+- `src/components/quote/flight-wizard/steps/Step6Payment.tsx` — primeiro pergunta "padrão vs personalizado"; se personalizado, reutiliza `ServicePaymentForm`.
+- `src/components/quote/flight-wizard/steps/Step7Presentation.tsx` — etiqueta (com sugestões clicáveis), fotos (reutiliza o mesmo `photoSlot` que o form manual recebe), descrição, observações.
+- `src/components/quote/flight-wizard/steps/Step8Review.tsx` — resumo + alertas amigáveis + ações.
+- `src/components/quote/flight-wizard/ModeChooser.tsx` — tela inicial com os 2 cards de escolha.
+- `src/components/quote/flight-wizard/useFlightDraft.ts` — wrapper de `useFormDraft` (chave `flight-wizard:{quoteId}:{serviceId|new}`).
+- `src/components/quote/flight-wizard/flightStatus.ts` — função pura `computeFlightStatus(data)` → `'draft' | 'incomplete' | 'ready'`.
 
-**Triggers**
-- `update_updated_at_column` em posts e comments
-- `update_community_post_likes_count` (AFTER INSERT/DELETE em likes → atualiza `likes_count`)
-- `update_community_post_comments_count` (AFTER INSERT/DELETE em comments → atualiza `comments_count`)
+## Arquivos a alterar (mínimo possível)
 
-**RLS**
-- Posts/comments/likes: SELECT liberado para qualquer usuário autenticado (`auth.uid() is not null`)
-- INSERT exige `auth.uid() = user_id`
-- UPDATE/DELETE: somente autor OU admin (`has_role(auth.uid(), 'admin')`)
+- `src/components/quote/ServiceForms.tsx` — no switch do `case "flight"` (linha ~1842), encapsular num componente `FlightFormOrWizard` que, **só para flight**, decide entre `ModeChooser → FlightWizard` ou `FlightForm`. O componente `FlightForm` em si **não é modificado**. Quando vier `initialData` (edição), pular o ModeChooser e abrir o `FlightForm` clássico — preserva o comportamento "depois de salvo, edição continua igual".
+- `src/types/quote.ts` — adicionar campo opcional `flight_status?: 'draft' | 'incomplete' | 'ready'` dentro de `FlightData` (campo opcional, não quebra dados existentes; salvo dentro de `service_data`).
 
-**Storage**
-- Novo bucket público `community-feed` para imagens das publicações
-- Política: SELECT público; INSERT/UPDATE/DELETE somente em pastas `{auth.uid()}/...`
+Nenhuma migration de banco. Nenhuma mudança em RLS, edge functions, OG, público.
 
-## 2. Novo componente `CommunitySocialFeed`
+## Comportamento do wizard
 
-Arquivo: `src/components/dashboard/CommunitySocialFeed.tsx`
+- Indicador de progresso "Etapa X de N" (N = 7 se "somente ida", 8 se ida e volta).
+- Botões: **Voltar**, **Pular por enquanto**, **Continuar**, **Salvar rascunho**, **Abrir edição completa** (em qualquer etapa, transfere o estado atual para o `FlightForm` manual já preenchido).
+- Toda etapa é opcional (nada bloqueia avançar).
+- Rascunho persistido em `localStorage` via `useFormDraft` (já existe em `usePersistedState.ts`).
+- Ao salvar: monta o mesmo objeto `FlightData` que o `FlightForm.handleSubmit` monta e chama o mesmo `onSubmit(data, amount, optionLabel, description, undefined, imageUrls)` — garante paridade absoluta com o fluxo manual.
 
-Mantém o mesmo container visual do card atual (gradient lilás `--section-community`, header colapsável, mesmo padding) para parecer evolução natural.
+## Status visual
 
-**Cabeçalho**
-- Ícone `Users` ou `MessageCircle`
-- Título: "Comunidade"
-- Subtítulo: "Compartilhe dúvidas, novidades, indicações, experiências e oportunidades com outros agentes de viagem."
-- Mantém o botão chevron de colapsar e o badge "X novas publicações" baseado em `localStorage` (mesma lógica de `lastViewedAt` do card atual)
+`computeFlightStatus` (puro, sem efeitos):
+- `ready` se: companhia + origem + destino + data ida + (data volta OU somente ida) + adult_price > 0.
+- `draft` se: salvo via "Salvar rascunho" (flag explícita).
+- `incomplete` caso contrário.
 
-**Caixa de criação (Composer)**
-- Card branco arredondado
-- Avatar do usuário logado à esquerda
-- `Textarea` autosize com placeholder: "O que você quer compartilhar com a comunidade?"
-- Linha de ações: botão "Adicionar foto" (ícone `ImageIcon`) que abre file picker; preview da imagem selecionada com botão remover
-- Botão "Publicar" em roxo, desabilitado se não houver texto nem imagem
-- Ao publicar:
-  1. Se houver imagem, upload para `community-feed/{user_id}/{timestamp}-{filename}` → pega `publicUrl`
-  2. Insert em `community_posts`
-  3. Limpa o composer; React Query invalida `["community-feed"]`; novo post aparece no topo
+Exibido como Badge no `ServiceCard` para serviços `flight`. Adicionar leitura de `service_data.flight_status` em `ServiceCard.tsx` apenas para flight (mudança visual mínima, 1 badge).
 
-**Lista de posts (ordenada por `created_at desc`)**
-- Paginação: 10 por página com botão "Carregar mais" (ou infinite scroll simples)
-- Cada post mostra:
-  - Avatar + nome do autor + role badge (Agente/Fornecedor/Admin via `user_roles`)
-  - Tempo relativo via `formatDistanceToNow(date, { locale: ptBR, addSuffix: true })`
-  - Texto (preserva quebras de linha com `whitespace-pre-wrap`)
-  - Imagem (se houver) com `object-cover` e `rounded-xl`
-  - Linha de ações: botão Curtir (filled quando o usuário curtiu), Comentar (toggle expand), Compartilhar (copia link do dashboard ou usa Web Share API se disponível)
-  - Contadores "X curtidas · Y comentários"
-  - Menu `...` para autor/admin com "Excluir publicação"
+## Preparação futura para IA/upload
 
-**Seção de comentários (expansível)**
-- Lista de comentários do post (avatar, nome, tempo, texto)
-- Campo "Escreva um comentário..." com botão enviar
-- Comentários aparecem imediatamente via optimistic update + invalidate
-- Autor/admin pode excluir o próprio comentário
+`FlightWizard` aceita prop opcional `prefill?: Partial<WizardFlightDraft>` que pré-popula o draft inicial. É só isso — nenhuma UI, OCR, upload ou IA agora. Quando vier a fase futura, o consumidor passa `prefill` e o wizard já valida etapa por etapa.
 
-**Estado vazio**
-- Ilustração leve + título "Seja o primeiro a movimentar a comunidade"
-- Texto: "Compartilhe uma dúvida, indicação, novidade ou experiência com outros profissionais de viagem."
-- Botão "Criar publicação" (foca o composer)
+## Detalhes técnicos
 
-## 3. Hooks novos
+- Reuso direto: `FlightLegFields`, `ServicePaymentForm`, `PlacesAutocomplete` (origem/destino), componente de upload de fotos (mesma prop `photoSlot` passada de fora).
+- O wizard mantém estado próprio em `useState` + sincroniza com `useFormDraft` (debounced). Não usa `react-hook-form` para simplicidade — toda validação é apenas visual ("alertas amigáveis"), nunca bloqueante.
+- Tela final faz o mesmo mapeamento de `outbound_legs`/`return_legs` (+ `outbound_detail`/`return_detail` para backward compat) que o `FlightForm` faz hoje.
+- Sugestões de etiqueta como chips clicáveis que apenas preenchem o input (usuário pode editar/limpar).
+- Edição de um serviço já salvo abre o `FlightForm` clássico (não o wizard), evitando qualquer regressão na edição.
 
-`src/hooks/useCommunityFeed.ts` (substitui parte do uso de `useQA` no dashboard):
-- `useFeedPosts(limit, offset)` — query lista
-- `useCreatePost()` — mutation com upload + insert
-- `useDeletePost()`
-- `usePostComments(postId)` — query
-- `useAddComment(postId)` — mutation
-- `useDeleteComment()`
-- `useToggleLike(postId)` — mutation com optimistic update; lê `community_post_likes` filtrado por `user_id` para saber se curtiu
+## Fora de escopo (não fazer)
 
-Roles dos autores: hook auxiliar `useUsersRoles(userIds[])` consultando `user_roles` em batch (single query `in('user_id', userIds)`), com cache de 10 min.
-
-## 4. Substituições
-
-- `src/pages/Dashboard.tsx`: trocar import de `CommunityQACard` por `CommunitySocialFeed` no mesmo lugar.
-- `src/pages/DashboardFornecedor.tsx`: idem.
-- `CommunityQACard.tsx` permanece no projeto por enquanto (caso seja referenciado em outras telas), mas não será mais renderizado no dashboard. Se nenhuma outra página usar, removemos o arquivo.
-
-## 5. Detalhes técnicos
-
-```text
-community_posts 1───* community_post_comments
-       │
-       └──* community_post_likes (unique post_id+user_id)
-```
-
-- Imagens: máx 5 MB, tipos `image/jpeg|png|webp`; validação client-side antes do upload.
-- Texto: trim + limite 5000 chars no client e via check constraint no DB.
-- Real-time opcional (fora do escopo inicial): pode ser adicionado depois com `supabase.channel` em `community_posts`.
-- Acessibilidade: botões com `aria-label`, foco visível, alt text na imagem ("Imagem da publicação de {nome}").
-- Responsividade: composer e cards em `w-full`; imagens com `max-h-[480px] object-cover`; ações em `flex-wrap` no mobile.
-
-## 6. Permissões resumidas
-
-- Qualquer usuário autenticado: ler feed, criar post, comentar, curtir
-- Autor: editar/excluir próprio post e próprios comentários
-- Admin (`has_role(auth.uid(),'admin')`): excluir qualquer post/comentário (moderação reativa, não preventiva)
-- Sem fluxo de aprovação. Posts aparecem imediatamente.
-
-## 7. Entregáveis
-
-1. Migration SQL (tabelas + RLS + triggers + bucket + storage policies)
-2. `src/hooks/useCommunityFeed.ts`
-3. `src/components/dashboard/CommunitySocialFeed.tsx` (composer + feed + comments + likes + estado vazio)
-4. Substituição no `Dashboard.tsx` e `DashboardFornecedor.tsx`
-5. Remoção opcional do `CommunityQACard.tsx` se ficar órfão
+- Não criar OCR, parser de PDF, integração IA, upload de e-mail.
+- Não alterar a página pública do orçamento.
+- Não alterar `QuoteService`/colunas do banco.
+- Não tocar nos demais tipos de serviço (hotel, transfer, etc.).
+- Não mudar fluxo de edição de serviço existente.
