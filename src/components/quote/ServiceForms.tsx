@@ -29,6 +29,7 @@ import type {
   ServiceType, FlightData, HotelData, CarRentalData, TransferData,
   AttractionData, InsuranceData, CruiseData, OtherServiceData,
 } from "@/types/quote";
+import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day). */
 function parseLocalDate(dateStr: string): Date {
@@ -1839,7 +1840,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
-    case "flight": formElement = <FlightForm {...formProps} />; break;
+    case "flight": formElement = <FlightEntry {...formProps} />; break;
     case "hotel": formElement = <HotelForm {...formProps} />; break;
     case "car_rental": formElement = <CarRentalForm {...formProps} />; break;
     case "transfer": formElement = <TransferForm {...formProps} />; break;
