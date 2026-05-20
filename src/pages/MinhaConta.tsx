@@ -38,7 +38,9 @@ export default function MinhaConta() {
   const openPortal = async (mode: "manage" | "cancel") => {
     try {
       setLoadingPortal(mode);
-      const { data, error } = await supabase.functions.invoke("customer-portal");
+      const { data, error } = await supabase.functions.invoke("customer-portal", {
+        body: { mode },
+      });
       if (error) throw error;
       if (!data?.url) throw new Error("Não foi possível abrir o portal de gerenciamento.");
       window.open(data.url, "_blank");
