@@ -35,7 +35,14 @@ export default function MinhaConta() {
 
   const isPaid = plan === "profissional" || plan === "premium" || plan === "fundador";
 
+  const STRIPE_PORTAL_URL = "https://billing.stripe.com/p/login/fZu8wP4Hw85gcTacdx9sk00";
+
   const openPortal = async (mode: "manage" | "cancel") => {
+    if (mode === "cancel") {
+      window.open(STRIPE_PORTAL_URL, "_blank");
+      setConfirmCancel(false);
+      return;
+    }
     try {
       setLoadingPortal(mode);
       const { data, error } = await supabase.functions.invoke("customer-portal", {
