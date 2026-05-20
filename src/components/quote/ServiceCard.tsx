@@ -11,6 +11,7 @@ import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { QuoteService, ServiceType } from "@/types/quote";
+import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, computeFlightStatus, type FlightStatus } from "./flight-wizard/flightStatus";
 
 const SERVICE_ICONS: Record<ServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
@@ -157,6 +158,15 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
                       {service.option_label}
                     </Badge>
                   )}
+                  {service.service_type === "flight" && (() => {
+                    const raw = (service.service_data as any)?.flight_status as FlightStatus | undefined;
+                    const status: FlightStatus = raw || computeFlightStatus(service.service_data);
+                    return (
+                      <Badge variant="outline" className={cn("text-[10px] py-0 h-5", FLIGHT_STATUS_CLASS[status])}>
+                        {FLIGHT_STATUS_LABEL[status]}
+                      </Badge>
+                    );
+                  })()}
                 </div>
                 <p className="font-medium break-words whitespace-pre-wrap">{getServiceDescription(service)}</p>
               </div>
