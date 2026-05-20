@@ -13,6 +13,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
+import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
+import { suggestAirlines } from "@/lib/airlines";
 import { cn } from "@/lib/utils";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { computeFlightStatus } from "./flightStatus";
