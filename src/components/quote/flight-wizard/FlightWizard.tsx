@@ -331,16 +331,6 @@ export function FlightWizard({
                 </div>
               )}
             </div>
-            <div className="flex flex-wrap gap-4 pt-1">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <Checkbox checked={!!data.includes_baggage} onCheckedChange={(c) => upd({ includes_baggage: !!c })} />
-                <span className="text-sm">Inclui bagagem</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <Checkbox checked={!!data.includes_boarding_fee} onCheckedChange={(c) => upd({ includes_boarding_fee: !!c })} />
-                <span className="text-sm">Inclui taxa de embarque</span>
-              </label>
-            </div>
           </StepShell>
         );
 
