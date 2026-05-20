@@ -318,16 +318,28 @@ export function FlightWizard({
             help="Comece pelas informações principais da passagem. Se ainda não souber algum dado, você pode pular e completar depois.">
             <div className="space-y-2">
               <Label>Companhia aérea</Label>
-              <Input placeholder="LATAM, GOL, Air France..." value={data.airline || ""} onChange={e => upd({ airline: e.target.value })} />
+              <AirlineInput value={data.airline || ""} onChange={(v) => upd({ airline: v })} />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Cidade de origem</Label>
-                <Input placeholder="São Paulo" value={data.origin_city || ""} onChange={e => upd({ origin_city: e.target.value })} />
+                <PlacesAutocomplete
+                  value={data.origin_city || ""}
+                  onChange={(v) => upd({ origin_city: v })}
+                  placeType="city"
+                  placeholder="São Paulo"
+                  fetchDetailsOnSelect={false}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Cidade de destino</Label>
-                <Input placeholder="Paris" value={data.destination_city || ""} onChange={e => upd({ destination_city: e.target.value })} />
+                <PlacesAutocomplete
+                  value={data.destination_city || ""}
+                  onChange={(v) => upd({ destination_city: v })}
+                  placeType="city"
+                  placeholder="Paris"
+                  fetchDetailsOnSelect={false}
+                />
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -354,7 +366,8 @@ export function FlightWizard({
                     <Calendar mode="single"
                       selected={parseLocal(data.departure_date)}
                       onSelect={(d) => upd({ departure_date: d ? format(d, "yyyy-MM-dd") : "" })}
-                      initialFocus className="pointer-events-auto" />
+                      initialFocus className="pointer-events-auto"
+                      locale={ptBR} />
                   </PopoverContent>
                 </Popover>
               </div>
@@ -372,7 +385,9 @@ export function FlightWizard({
                       <Calendar mode="single"
                         selected={parseLocal(data.return_date)}
                         onSelect={(d) => upd({ return_date: d ? format(d, "yyyy-MM-dd") : "" })}
-                        initialFocus className="pointer-events-auto" />
+                        initialFocus className="pointer-events-auto"
+                        locale={ptBR}
+                        defaultMonth={parseLocal(data.return_date) || parseLocal(data.departure_date)} />
                     </PopoverContent>
                   </Popover>
                 </div>
