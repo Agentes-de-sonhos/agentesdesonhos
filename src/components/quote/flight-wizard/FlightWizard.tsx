@@ -98,6 +98,51 @@ function fmtCurrency(v: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
 }
 
+/* ─── Airline autocomplete (livre, com sugestões) ─── */
+function AirlineInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const suggestions = useMemo(() => suggestAirlines(value || "", 8), [value]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const showList = open && focused && suggestions.length > 0 && !suggestions.some(s => s.toLowerCase() === (value || "").toLowerCase());
+
+  return (
+    <div ref={containerRef} className="relative">
+      <Input
+        placeholder="LATAM, GOL, Air France..."
+        value={value}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => { setFocused(true); setOpen(true); }}
+        onBlur={() => setFocused(false)}
+        autoComplete="off"
+      />
+      {showList && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md max-h-60 overflow-y-auto">
+          {suggestions.map((name) => (
+            <button
+              key={name}
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+              onMouseDown={(e) => { e.preventDefault(); onChange(name); setOpen(false); }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Step shell ─── */
 function StepShell({
   step, total, title, help, children,
