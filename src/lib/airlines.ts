@@ -139,3 +139,30 @@ export function resolveAirlineDisplay(code?: string | null): string {
   if (trimmed.length > 3 || /\s/.test(trimmed) || trimmed !== upper) return trimmed;
   return trimmed;
 }
+
+// Lista única de companhias aéreas (para autocomplete em formulários).
+export const AIRLINE_NAMES: string[] = Array.from(new Set(Object.values(AIRLINES))).sort((a, b) =>
+  a.localeCompare(b, "pt-BR")
+);
+
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+/** Sugestões de companhias aéreas a partir de um termo (matching por prefixo/contém, case/accent-insensitive). */
+export function suggestAirlines(query: string, limit = 8): string[] {
+  const q = normalize(query.trim());
+  if (!q) return [];
+  const starts: string[] = [];
+  const contains: string[] = [];
+  for (const name of AIRLINE_NAMES) {
+    const n = normalize(name);
+    if (n.startsWith(q)) starts.push(name);
+    else if (n.includes(q)) contains.push(name);
+    if (starts.length >= limit) break;
+  }
+  return [...starts, ...contains].slice(0, limit);
+}
