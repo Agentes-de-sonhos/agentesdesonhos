@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { suggestAirlines } from "@/lib/airlines";
+import { searchAirportsSync, type AirportSuggestion } from "@/lib/airports";
+import { useAirports } from "@/hooks/useAirports";
 import { cn } from "@/lib/utils";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { computeFlightStatus } from "./flightStatus";
@@ -143,6 +145,82 @@ function AirlineInput({ value, onChange }: { value: string; onChange: (v: string
   );
 }
 
+/* ─── Airport autocomplete (IATA, city or airport name) ─── */
+function AirportInput({
+  value, onChange, placeholder,
+}: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const { loaded } = useAirports();
+  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [query, setQuery] = useState<string>(value || "");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setQuery(value || ""); }, [value]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const suggestions: AirportSuggestion[] = useMemo(
+    () => loaded ? searchAirportsSync(query, 8) : [],
+    [query, loaded]
+  );
+
+  // Hide list if the query exactly matches a 3-letter IATA already selected.
+  const isExactIata = /^[A-Za-z]{3}$/.test(query.trim()) && suggestions.some(
+    s => s.iata.toLowerCase() === query.trim().toLowerCase() && s.iata === (value || "").toUpperCase()
+  );
+  const showList = open && focused && suggestions.length > 0 && !isExactIata;
+
+  return (
+    <div ref={containerRef} className="relative">
+      <Input
+        placeholder={placeholder}
+        value={query}
+        onChange={(e) => {
+          const v = e.target.value;
+          setQuery(v);
+          setOpen(true);
+          // Only propagate as IATA when user typed exactly a 3-letter code
+          if (/^[A-Za-z]{3}$/.test(v.trim())) onChange(v.trim().toUpperCase());
+          else if (v.trim() === "") onChange("");
+        }}
+        onFocus={() => { setFocused(true); setOpen(true); }}
+        onBlur={() => setFocused(false)}
+        autoComplete="off"
+      />
+      {showList && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md max-h-72 overflow-y-auto">
+          {suggestions.map((s) => (
+            <button
+              key={s.iata + s.name}
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground border-b border-border/40 last:border-b-0"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onChange(s.iata);
+                setQuery(s.iata);
+                setOpen(false);
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-semibold text-primary">{s.iata}</span>
+                <span className="text-muted-foreground">•</span>
+                <span className="font-medium">{s.city}</span>
+              </div>
+              <div className="text-xs text-muted-foreground truncate">{s.name}{s.country ? ` — ${s.country}` : ""}</div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Step shell ─── */
 function StepShell({
   step, total, title, help, children,
@@ -191,11 +269,23 @@ function LegEditor({
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de origem</label>
-              <Input placeholder="GRU" value={leg.airport_origin || ""} onChange={e => upd(idx, "airport_origin", e.target.value)} className="h-8 text-sm mt-1" />
+              <div className="mt-1">
+                <AirportInput
+                  placeholder="GRU, São Paulo, Guarulhos..."
+                  value={leg.airport_origin || ""}
+                  onChange={v => upd(idx, "airport_origin", v)}
+                />
+              </div>
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de destino</label>
-              <Input placeholder="CDG" value={leg.airport_destination || ""} onChange={e => upd(idx, "airport_destination", e.target.value)} className="h-8 text-sm mt-1" />
+              <div className="mt-1">
+                <AirportInput
+                  placeholder="CDG, Paris, Charles de Gaulle..."
+                  value={leg.airport_destination || ""}
+                  onChange={v => upd(idx, "airport_destination", v)}
+                />
+              </div>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">

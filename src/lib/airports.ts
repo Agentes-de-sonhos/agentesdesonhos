@@ -1,5 +1,14 @@
 let airportsMap: Map<string, { name: string; city: string; country: string }> | null = null;
 let loadingPromise: Promise<void> | null = null;
+let airportsList: Array<{ iata: string; name: string; city: string; country: string; _search: string }> | null = null;
+
+function normalize(s: string): string {
+  return (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
 
 async function loadAirports() {
   if (airportsMap) return;
@@ -11,6 +20,7 @@ async function loadAirports() {
     const res = await fetch("/data/airports.csv");
     const text = await res.text();
     const map = new Map<string, { name: string; city: string; country: string }>();
+    const list: Array<{ iata: string; name: string; city: string; country: string; _search: string }> = [];
     const lines = text.split("\n");
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -20,14 +30,18 @@ async function loadAirports() {
       if (parts.length < 5) continue;
       const iata = parts[4].trim().toUpperCase();
       if (iata.length === 3) {
-        map.set(iata, {
-          name: parts[1].trim(),
-          city: parts[2].trim(),
-          country: parts[3].trim(),
+        const name = parts[1].trim();
+        const city = parts[2].trim();
+        const country = parts[3].trim();
+        map.set(iata, { name, city, country });
+        list.push({
+          iata, name, city, country,
+          _search: normalize(`${iata} ${city} ${name} ${country}`),
         });
       }
     }
     airportsMap = map;
+    airportsList = list;
   })();
   await loadingPromise;
 }
@@ -50,4 +64,40 @@ export function formatAirportLabel(code: string): string {
 
 export function isAirportsLoaded(): boolean {
   return airportsMap !== null;
+}
+
+export interface AirportSuggestion {
+  iata: string;
+  name: string;
+  city: string;
+  country: string;
+}
+
+/** Search by IATA code, city, or airport name. Returns top `limit` results. */
+export function searchAirportsSync(query: string, limit = 8): AirportSuggestion[] {
+  if (!airportsList) return [];
+  const q = normalize(query);
+  if (q.length < 2) return [];
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const results: Array<{ a: AirportSuggestion; score: number }> = [];
+  for (const a of airportsList) {
+    if (!tokens.every(t => a._search.includes(t))) continue;
+    let score = 0;
+    if (a.iata.toLowerCase() === q) score += 1000;
+    else if (a.iata.toLowerCase().startsWith(q)) score += 500;
+    const cityN = normalize(a.city);
+    if (cityN === q) score += 400;
+    else if (cityN.startsWith(q)) score += 200;
+    const nameN = normalize(a.name);
+    if (nameN.startsWith(q)) score += 100;
+    // Prefer well-known airports (shorter list, no scoring data here): mild bonus by country
+    results.push({ a, score });
+  }
+  results.sort((x, y) => y.score - x.score);
+  return results.slice(0, limit).map(r => r.a);
+}
+
+export async function searchAirports(query: string, limit = 8): Promise<AirportSuggestion[]> {
+  await loadAirports();
+  return searchAirportsSync(query, limit);
 }
