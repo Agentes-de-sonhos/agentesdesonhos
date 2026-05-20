@@ -1807,6 +1807,60 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ MAIN ROUTER ━━━━━━━━━━━━━━━━━━━ */
+/* Flight entry: mode chooser → FlightWizard or classic FlightForm.
+   Editing existing services skips chooser and opens classic form (no regression). */
+function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
+  const isEditing = !!props.initialData;
+  const [mode, setMode] = useState<"chooser" | "wizard" | "manual">(isEditing ? "manual" : "chooser");
+  const [wizardPrefill, setWizardPrefill] = useState<WizardFlightDraft | undefined>(undefined);
+
+  if (mode === "chooser") {
+    return <FlightModeChooser onChoose={(m) => setMode(m === "wizard" ? "wizard" : "manual")} />;
+  }
+  if (mode === "wizard") {
+    // Stable draft key per session — falls back to "new" for unsaved services
+    const draftKey = `flight-wizard:${props.initialData ? "edit" : "new"}`;
+    return (
+      <FlightWizard
+        {...props}
+        draftKey={draftKey}
+        prefill={wizardPrefill}
+        onOpenFullForm={(draft) => {
+          // Map wizard draft → FlightForm initialData and switch to manual
+          const sd: any = {
+            airline: draft.airline,
+            origin_city: draft.origin_city,
+            destination_city: draft.destination_city,
+            departure_date: draft.departure_date || "",
+            return_date: draft.return_date || "",
+            is_one_way: draft.is_one_way,
+            includes_baggage: draft.includes_baggage,
+            includes_boarding_fee: draft.includes_boarding_fee,
+            adult_price: draft.adult_price || 0,
+            child_price: draft.child_price || 0,
+            notes: draft.notes || "",
+            outbound_legs: draft.outbound_legs,
+            return_legs: draft.return_legs,
+          };
+          // Inject into FlightForm via initialData by replacing props on next render
+          (props as any).__injectInitial = {
+            service_data: sd,
+            amount: (draft.adult_price || 0) + (draft.child_price || 0),
+            option_label: draft.option_label,
+            description: draft.description,
+          };
+          setWizardPrefill(draft);
+          setMode("manual");
+        }}
+      />
+    );
+  }
+  // manual
+  const injected = (props as any).__injectInitial;
+  const merged = injected ? { ...props, initialData: injected } : props;
+  return <FlightForm {...merged} />;
+}
+
 export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot }: ServiceFormProps) {
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
