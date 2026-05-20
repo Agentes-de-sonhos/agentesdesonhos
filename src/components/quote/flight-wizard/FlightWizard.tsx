@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -13,6 +13,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
+import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
+import { suggestAirlines } from "@/lib/airlines";
 import { cn } from "@/lib/utils";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { computeFlightStatus } from "./flightStatus";
@@ -94,6 +96,51 @@ function parseLocal(d?: string): Date | undefined {
 }
 function fmtCurrency(v: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
+}
+
+/* ─── Airline autocomplete (livre, com sugestões) ─── */
+function AirlineInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const suggestions = useMemo(() => suggestAirlines(value || "", 8), [value]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const showList = open && focused && suggestions.length > 0 && !suggestions.some(s => s.toLowerCase() === (value || "").toLowerCase());
+
+  return (
+    <div ref={containerRef} className="relative">
+      <Input
+        placeholder="LATAM, GOL, Air France..."
+        value={value}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => { setFocused(true); setOpen(true); }}
+        onBlur={() => setFocused(false)}
+        autoComplete="off"
+      />
+      {showList && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md max-h-60 overflow-y-auto">
+          {suggestions.map((name) => (
+            <button
+              key={name}
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+              onMouseDown={(e) => { e.preventDefault(); onChange(name); setOpen(false); }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ─── Step shell ─── */
@@ -271,16 +318,28 @@ export function FlightWizard({
             help="Comece pelas informações principais da passagem. Se ainda não souber algum dado, você pode pular e completar depois.">
             <div className="space-y-2">
               <Label>Companhia aérea</Label>
-              <Input placeholder="LATAM, GOL, Air France..." value={data.airline || ""} onChange={e => upd({ airline: e.target.value })} />
+              <AirlineInput value={data.airline || ""} onChange={(v) => upd({ airline: v })} />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Cidade de origem</Label>
-                <Input placeholder="São Paulo" value={data.origin_city || ""} onChange={e => upd({ origin_city: e.target.value })} />
+                <PlacesAutocomplete
+                  value={data.origin_city || ""}
+                  onChange={(v) => upd({ origin_city: v })}
+                  placeType="city"
+                  placeholder="São Paulo"
+                  fetchDetailsOnSelect={false}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Cidade de destino</Label>
-                <Input placeholder="Paris" value={data.destination_city || ""} onChange={e => upd({ destination_city: e.target.value })} />
+                <PlacesAutocomplete
+                  value={data.destination_city || ""}
+                  onChange={(v) => upd({ destination_city: v })}
+                  placeType="city"
+                  placeholder="Paris"
+                  fetchDetailsOnSelect={false}
+                />
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -307,7 +366,8 @@ export function FlightWizard({
                     <Calendar mode="single"
                       selected={parseLocal(data.departure_date)}
                       onSelect={(d) => upd({ departure_date: d ? format(d, "yyyy-MM-dd") : "" })}
-                      initialFocus className="pointer-events-auto" />
+                      initialFocus className="pointer-events-auto"
+                      locale={ptBR} />
                   </PopoverContent>
                 </Popover>
               </div>
@@ -325,7 +385,9 @@ export function FlightWizard({
                       <Calendar mode="single"
                         selected={parseLocal(data.return_date)}
                         onSelect={(d) => upd({ return_date: d ? format(d, "yyyy-MM-dd") : "" })}
-                        initialFocus className="pointer-events-auto" />
+                        initialFocus className="pointer-events-auto"
+                        locale={ptBR}
+                        defaultMonth={parseLocal(data.return_date) || parseLocal(data.departure_date)} />
                     </PopoverContent>
                   </Popover>
                 </div>
