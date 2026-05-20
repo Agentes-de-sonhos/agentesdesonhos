@@ -37,21 +37,73 @@ serve(async (req) => {
     if (!user?.email) throw new Error("Usuário sem e-mail vinculado.");
     log("user", { id: user.id, email: user.email });
 
+    let mode: "manage" | "cancel" = "manage";
+    if (req.method === "POST") {
+      try {
+        const body = await req.json();
+        if (body?.mode === "cancel") mode = "cancel";
+      } catch (_) {
+        // body opcional
+      }
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) {
+    // 1) Tenta pelo e-mail
+    let customerId: string | null = null;
+    const byEmail = await stripe.customers.list({ email: user.email, limit: 1 });
+    if (byEmail.data.length > 0) {
+      customerId = byEmail.data[0].id;
+    } else {
+      // 2) Fallback: busca por metadata.supabase_user_id (caso o e-mail no Stripe seja outro)
+      try {
+        const search = await stripe.customers.search({
+          query: `metadata['supabase_user_id']:'${user.id}'`,
+          limit: 1,
+        });
+        if (search.data.length > 0) customerId = search.data[0].id;
+      } catch (e) {
+        log("customer search fallback failed", String(e));
+      }
+    }
+
+    if (!customerId) {
       throw new Error(
-        "Nenhuma assinatura encontrada para este e-mail. Se você acredita que isso é um erro, fale com o suporte."
+        "Nenhuma assinatura encontrada para este e-mail. Verifique se você usou o mesmo e-mail no pagamento ou fale com o suporte."
       );
     }
-    const customerId = customers.data[0].id;
     log("customer", customerId);
 
     const origin = req.headers.get("origin") || "https://app.agentesdesonhos.com.br";
+
+    // Se for cancelamento, abrir direto o flow de cancelamento da assinatura ativa
+    let flowData: Stripe.BillingPortal.SessionCreateParams.FlowData | undefined;
+    if (mode === "cancel") {
+      const subs = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        limit: 1,
+      });
+      if (subs.data.length === 0) {
+        throw new Error(
+          "Não encontramos uma assinatura ativa para cancelar. Se você acredita que isso é um erro, fale com o suporte."
+        );
+      }
+      flowData = {
+        type: "subscription_cancel",
+        subscription_cancel: { subscription: subs.data[0].id },
+        after_completion: {
+          type: "redirect",
+          redirect: { return_url: `${origin}/minha-conta?canceled=1` },
+        },
+      };
+      log("cancel flow prepared", subs.data[0].id);
+    }
+
     const portal = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${origin}/minha-conta`,
+      ...(flowData ? { flow_data: flowData } : {}),
     });
     log("portal session", portal.id);
 
@@ -60,8 +112,14 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro inesperado.";
-    log("ERROR", message);
+    const raw = error instanceof Error ? error.message : String(error);
+    log("ERROR", raw);
+    // Mensagens específicas do Stripe (ex.: portal não configurado)
+    let message = raw;
+    if (/No configuration provided/i.test(raw) || /default configuration has not been created/i.test(raw)) {
+      message =
+        "O portal de assinaturas ainda não foi configurado no Stripe. Acesse o painel do Stripe e salve as configurações do Customer Portal para liberar o cancelamento.";
+    }
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
