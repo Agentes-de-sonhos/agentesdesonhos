@@ -1813,6 +1813,7 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
   const isEditing = !!props.initialData;
   const [mode, setMode] = useState<"chooser" | "wizard" | "manual">(isEditing ? "manual" : "chooser");
   const [wizardPrefill, setWizardPrefill] = useState<WizardFlightDraft | undefined>(undefined);
+  const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
 
   if (mode === "chooser") {
     return <FlightModeChooser onChoose={(m) => setMode(m === "wizard" ? "wizard" : "manual")} />;
@@ -1842,13 +1843,12 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
             outbound_legs: draft.outbound_legs,
             return_legs: draft.return_legs,
           };
-          // Inject into FlightForm via initialData by replacing props on next render
-          (props as any).__injectInitial = {
+          setInjectedInitial({
             service_data: sd,
             amount: (draft.adult_price || 0) + (draft.child_price || 0),
-            option_label: draft.option_label,
-            description: draft.description,
-          };
+            option_label: draft.option_label || null,
+            description: draft.description || null,
+          });
           setWizardPrefill(draft);
           setMode("manual");
         }}
@@ -1856,8 +1856,7 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
     );
   }
   // manual
-  const injected = (props as any).__injectInitial;
-  const merged = injected ? { ...props, initialData: injected } : props;
+  const merged = injectedInitial ? { ...props, initialData: injectedInitial } : props;
   return <FlightForm {...merged} />;
 }
 
