@@ -269,11 +269,23 @@ function LegEditor({
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de origem</label>
-              <Input placeholder="GRU" value={leg.airport_origin || ""} onChange={e => upd(idx, "airport_origin", e.target.value)} className="h-8 text-sm mt-1" />
+              <div className="mt-1">
+                <AirportInput
+                  placeholder="GRU, São Paulo, Guarulhos..."
+                  value={leg.airport_origin || ""}
+                  onChange={v => upd(idx, "airport_origin", v)}
+                />
+              </div>
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de destino</label>
-              <Input placeholder="CDG" value={leg.airport_destination || ""} onChange={e => upd(idx, "airport_destination", e.target.value)} className="h-8 text-sm mt-1" />
+              <div className="mt-1">
+                <AirportInput
+                  placeholder="CDG, Paris, Charles de Gaulle..."
+                  value={leg.airport_destination || ""}
+                  onChange={v => upd(idx, "airport_destination", v)}
+                />
+              </div>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
