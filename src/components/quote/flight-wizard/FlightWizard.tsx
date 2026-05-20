@@ -86,6 +86,12 @@ function fmt(d?: string) {
     return format(new Date(y, m - 1, day), "dd/MM/yyyy", { locale: ptBR });
   } catch { return d; }
 }
+function parseLocal(d?: string): Date | undefined {
+  if (!d) return undefined;
+  const [y, m, day] = d.split("-").map(Number);
+  if (!y || !m || !day) return undefined;
+  return new Date(y, m - 1, day);
+}
 function fmtCurrency(v: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
 }
@@ -299,7 +305,7 @@ export function FlightWizard({
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar mode="single"
-                      selected={data.departure_date ? new Date(...data.departure_date.split("-").map((v, i) => i === 1 ? Number(v) - 1 : Number(v)) as [number, number, number]) : undefined}
+                      selected={parseLocal(data.departure_date)}
                       onSelect={(d) => upd({ departure_date: d ? format(d, "yyyy-MM-dd") : "" })}
                       initialFocus className="pointer-events-auto" />
                   </PopoverContent>
@@ -317,7 +323,7 @@ export function FlightWizard({
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar mode="single"
-                        selected={data.return_date ? new Date(...data.return_date.split("-").map((v, i) => i === 1 ? Number(v) - 1 : Number(v)) as [number, number, number]) : undefined}
+                        selected={parseLocal(data.return_date)}
                         onSelect={(d) => upd({ return_date: d ? format(d, "yyyy-MM-dd") : "" })}
                         initialFocus className="pointer-events-auto" />
                     </PopoverContent>
