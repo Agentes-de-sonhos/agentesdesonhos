@@ -99,10 +99,59 @@ async function fileToBase64(file: File): Promise<string> {
 /** Convert HH:mm string safely */
 const cleanTime = (t?: string) => (t ? t.trim().slice(0, 5) : "");
 
+/** Portuguese / English short month names → 1-12 */
+const MONTH_MAP: Record<string, number> = {
+  jan: 1, fev: 2, mar: 3, abr: 4, mai: 5, jun: 6,
+  jul: 7, ago: 8, set: 9, sep: 9, out: 10, oct: 10, nov: 11, dez: 12, dec: 12,
+  feb: 2, apr: 4, may: 5, aug: 8,
+};
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** Normalize an AI-extracted date string into "YYYY-MM-DD".
+ *  Accepts: "YYYY-MM-DD", "DD/MM/YYYY", "DD/MM", "DD MMM", "DD-MMM-YYYY".
+ *  If year is missing, uses `yearHint` (or current year). */
+function normalizeFlightDate(raw: string | undefined, yearHint: number): string {
+  if (!raw || typeof raw !== "string") return "";
+  const s = raw.trim();
+  if (!s) return "";
+
+  // ISO YYYY-MM-DD
+  let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+
+  // DD/MM/YYYY or DD-MM-YYYY
+  m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/.exec(s);
+  if (m) {
+    let y = Number(m[3]);
+    if (y < 100) y += 2000;
+    return `${y}-${pad2(Number(m[2]))}-${pad2(Number(m[1]))}`;
+  }
+
+  // DD/MM (no year)
+  m = /^(\d{1,2})[\/\-.](\d{1,2})$/.exec(s);
+  if (m) return `${yearHint}-${pad2(Number(m[2]))}-${pad2(Number(m[1]))}`;
+
+  // DD MMM [YYYY]  (e.g. "25 Set", "25 Set 2026", "25-Set-2026")
+  m = /^(\d{1,2})[\s\-\/]+([A-Za-zçÇ]{3,})\.?(?:[\s\-\/]+(\d{2,4}))?$/.exec(s);
+  if (m) {
+    const day = Number(m[1]);
+    const monKey = m[2].toLowerCase().slice(0, 3).replace("ç", "c");
+    const mo = MONTH_MAP[monKey];
+    if (mo) {
+      let y = m[3] ? Number(m[3]) : yearHint;
+      if (y < 100) y += 2000;
+      return `${y}-${pad2(mo)}-${pad2(day)}`;
+    }
+  }
+
+  return "";
+}
+
 /** Map a single ParsedAirfareFlight → FlightLegDetail preserving ALL extracted fields */
-function voo2leg(v: ParsedAirfareFlight): FlightLegDetail {
+function voo2leg(v: ParsedAirfareFlight, yearHint: number): FlightLegDetail {
   return {
-    leg_date: v.data_saida || "",
+    leg_date: normalizeFlightDate(v.data_saida, yearHint) || v.data_saida || "",
     airport_origin: v.origem_codigo || "",
     airport_destination: v.destino_codigo || "",
     departure_time: cleanTime(v.hora_saida),
