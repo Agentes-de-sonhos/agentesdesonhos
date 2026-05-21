@@ -24,9 +24,6 @@ verify_jwt = false
 [functions.flight-lookup]
 verify_jwt = false
 
-[functions.parse-flight-text]
-verify_jwt = false
-
 [functions.flight-status]
 verify_jwt = false
 
@@ -73,6 +70,9 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.extract-business-card]
+verify_jwt = false
+
+[functions.import-airfare-document]
 verify_jwt = false
 
 [functions.telegram-webhook]
