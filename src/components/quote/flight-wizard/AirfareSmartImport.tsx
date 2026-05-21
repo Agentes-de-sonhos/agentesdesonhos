@@ -204,8 +204,28 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     }
   }
 
-  const outboundLegs: FlightLegDetail[] = voos.slice(0, outboundCount).map(voo2leg);
-  const returnLegs: FlightLegDetail[] = voos.slice(outboundCount).map(voo2leg);
+  // Infer year hint from resumo.data_ida (YYYY-MM-DD) or current year
+  const isoIda = /^(\d{4})-\d{2}-\d{2}$/.exec(p.resumo?.data_ida || "");
+  let yearHint = isoIda ? Number(isoIda[1]) : new Date().getFullYear();
+
+  // Walk voos chronologically; bump year when month goes backwards (Dec → Jan)
+  let lastMonth = 0;
+  const allLegs: FlightLegDetail[] = voos.map((v) => {
+    const leg = voo2leg(v, yearHint);
+    const m = /^\d{4}-(\d{2})-\d{2}$/.exec(leg.leg_date || "");
+    if (m) {
+      const mo = Number(m[1]);
+      if (lastMonth && mo < lastMonth) {
+        yearHint += 1;
+        // re-stamp this leg with the bumped year
+        leg.leg_date = `${yearHint}-${String(mo).padStart(2, "0")}-${leg.leg_date!.slice(8, 10)}`;
+      }
+      lastMonth = mo;
+    }
+    return leg;
+  });
+  const outboundLegs: FlightLegDetail[] = allLegs.slice(0, outboundCount);
+  const returnLegs: FlightLegDetail[] = allLegs.slice(outboundCount);
 
   const first = voos[0];
   const lastOut = voos[outboundCount - 1] || first;
@@ -263,8 +283,8 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     airline: airlines,
     origin_city: first.origem_nome || p.resumo?.origem_inicial || "",
     destination_city: lastOut.destino_nome || p.resumo?.destino_final || "",
-    departure_date: first.data_saida || p.resumo?.data_ida || "",
-    return_date: returnLegs.length ? (voos[outboundCount]?.data_saida || p.resumo?.data_retorno || "") : "",
+    departure_date: outboundLegs[0]?.leg_date || p.resumo?.data_ida || "",
+    return_date: returnLegs.length ? (returnLegs[0]?.leg_date || p.resumo?.data_retorno || "") : "",
     includes_baggage: anyChecked,
     includes_boarding_fee: false,
     adult_price: totalAdult,
