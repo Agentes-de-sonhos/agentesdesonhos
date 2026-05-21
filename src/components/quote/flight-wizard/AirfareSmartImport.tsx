@@ -99,6 +99,32 @@ async function fileToBase64(file: File): Promise<string> {
 /** Convert HH:mm string safely */
 const cleanTime = (t?: string) => (t ? t.trim().slice(0, 5) : "");
 
+/** Map a single ParsedAirfareFlight → FlightLegDetail preserving ALL extracted fields */
+function voo2leg(v: ParsedAirfareFlight): FlightLegDetail {
+  return {
+    leg_date: v.data_saida || "",
+    airport_origin: v.origem_codigo || "",
+    airport_destination: v.destino_codigo || "",
+    departure_time: cleanTime(v.hora_saida),
+    arrival_time: cleanTime(v.hora_chegada),
+    flight_number: v.numero_voo || "",
+    airline: v.companhia_aerea || "",
+    origin_city: v.origem_nome || "",
+    destination_city: v.destino_nome || "",
+    duration: v.duracao || "",
+    stops: typeof v.numero_escalas === "number" ? v.numero_escalas : undefined,
+    equipment: v.equipamento || "",
+    cabin: v.cabine || "",
+    fare_basis: v.base_tarifaria || "",
+    baggage_text: v.bagagem_texto || "",
+    baggage_carry_on: v.bagagem_mochila_bolsa ?? null,
+    baggage_hand: v.bagagem_mao ?? null,
+    baggage_checked: v.bagagem_despachada ?? null,
+    baggage_checked_count: v.quantidade_bagagem_despachada ?? null,
+    alert: v.alerta || "",
+  };
+}
+
 /** Map ParsedAirfare → FlightData (for prefilling the existing quote flight form) */
 export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData> & { __extras?: any } {
   const voos = p.voos || [];
@@ -129,22 +155,8 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     }
   }
 
-  const outboundLegs: FlightLegDetail[] = voos.slice(0, outboundCount).map((v) => ({
-    leg_date: v.data_saida || "",
-    airport_origin: v.origem_codigo || "",
-    airport_destination: v.destino_codigo || "",
-    departure_time: cleanTime(v.hora_saida),
-    arrival_time: cleanTime(v.hora_chegada),
-    flight_number: v.numero_voo || "",
-  }));
-  const returnLegs: FlightLegDetail[] = voos.slice(outboundCount).map((v) => ({
-    leg_date: v.data_saida || "",
-    airport_origin: v.origem_codigo || "",
-    airport_destination: v.destino_codigo || "",
-    departure_time: cleanTime(v.hora_saida),
-    arrival_time: cleanTime(v.hora_chegada),
-    flight_number: v.numero_voo || "",
-  }));
+  const outboundLegs: FlightLegDetail[] = voos.slice(0, outboundCount).map(voo2leg);
+  const returnLegs: FlightLegDetail[] = voos.slice(outboundCount).map(voo2leg);
 
   const first = voos[0];
   const lastOut = voos[outboundCount - 1] || first;
@@ -160,9 +172,13 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
 
   const totalAdult = typeof p.resumo?.valor_total_brl === "number"
     ? p.resumo.valor_total_brl
-    : typeof p.resumo?.valor_total_original === "number"
-      ? p.resumo.valor_total_original
-      : 0;
+    : typeof p.valores?.total_brl === "number"
+      ? p.valores.total_brl
+      : typeof p.resumo?.valor_total_original === "number"
+        ? p.resumo.valor_total_original
+        : typeof p.valores?.total_moeda_original === "number"
+          ? p.valores.total_moeda_original
+          : 0;
 
   // Notas: observações + alertas + base tarifária por voo + câmbio
   const noteLines: string[] = [];
@@ -207,6 +223,20 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     notes: noteLines.join("\n"),
     outbound_legs: outboundLegs,
     return_legs: returnLegs,
+    imported_summary: {
+      fare_type: p.resumo?.tipo_tarifa || p.valores?.tipo || "",
+      passengers: p.resumo?.quantidade_passageiros || "",
+      passenger_type: p.resumo?.tipo_passageiro || "",
+      currency: p.resumo?.moeda_original || "",
+      total_original: p.resumo?.valor_total_original ?? p.valores?.total_moeda_original ?? null,
+      total_brl: p.resumo?.valor_total_brl ?? p.valores?.total_brl ?? null,
+      exchange_rate: p.resumo?.cambio ?? null,
+      exchange_date: p.resumo?.data_cambio || "",
+      fuel_tax: p.valores?.taxa_combustivel || "",
+      observations: Array.isArray(p.observacoes) ? p.observacoes : [],
+      unidentified_fields: Array.isArray(p.campos_nao_identificados) ? p.campos_nao_identificados : [],
+      confidence: p.confianca_extracao?.geral ?? undefined,
+    },
   };
 }
 
