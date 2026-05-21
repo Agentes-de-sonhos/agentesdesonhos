@@ -41,6 +41,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { parsedAirfareToFlightData, type ParsedAirfare } from "@/components/quote/flight-wizard/AirfareSmartImport";
+import { extractPdfText } from "@/lib/pdfText";
 
 export type AIImportServiceType =
   | "flight"
@@ -177,6 +179,57 @@ export function AIImportServiceModal({
     setProgressMsg("Lendo documento com IA...");
 
     try {
+      // ─── Passagem aérea: usa o extrator TABULAR dedicado (import-airfare-document) ───
+      if (serviceType === "flight") {
+        const airfarePayload: Record<string, unknown> = {};
+        if (inputMode === "file" && file) {
+          const b64 = await fileToBase64(file);
+          airfarePayload.fileBase64 = b64;
+          airfarePayload.fileMimeType = file.type;
+          airfarePayload.fileName = file.name;
+          if (file.type === "application/pdf") {
+            try { airfarePayload.text = await extractPdfText(file); } catch { /* noop */ }
+          }
+        } else {
+          airfarePayload.text = text;
+        }
+
+        setProgressMsg("Extraindo voos, datas, bagagens e tarifas...");
+        const { data, error } = await supabase.functions.invoke("import-airfare-document", {
+          body: airfarePayload,
+        });
+
+        let body: any = data;
+        if (error) {
+          try {
+            const ctx = (error as any)?.context;
+            if (ctx && typeof ctx.json === "function") body = await ctx.json();
+          } catch { /* noop */ }
+        }
+
+        const parsed: ParsedAirfare | null =
+          (body?.success && (body?.data || body)) ||
+          (body?.partial_data && Object.keys(body.partial_data || {}).length > 0 ? body.partial_data : null);
+        const voos = Array.isArray(parsed?.voos) ? parsed!.voos : [];
+
+        if (!parsed || (voos.length === 0 && !parsed?.resumo?.trecho_geral)) {
+          const msg = body?.error_message || body?.error ||
+            "Não foi possível identificar voos no documento. Tente uma imagem mais nítida.";
+          toast({ title: "Não foi possível importar", description: msg, variant: "destructive" });
+          setStep("form");
+          return;
+        }
+
+        const flightData = parsedAirfareToFlightData(parsed) as Record<string, any>;
+        await onImport({ service_type: "flight", service_data: flightData });
+        toast({
+          title: `Passagem aérea importada — ${voos.length} voo(s)`,
+          description: "Abra o serviço para revisar os segmentos.",
+        });
+        handleClose(false);
+        return;
+      }
+
       const payload: Record<string, unknown> = { service_type: serviceType };
       if (inputMode === "file" && file) {
         const b64 = await fileToBase64(file);
