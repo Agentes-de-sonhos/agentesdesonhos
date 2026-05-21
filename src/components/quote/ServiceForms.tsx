@@ -325,10 +325,24 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     const hasOutbound = hasNonEmptyLegs(outboundLegs);
     const hasReturn = hasNonEmptyLegs(returnLegs);
 
+    // Fallback: derive top-level dates from leg dates when the date pickers are empty
+    // (e.g. AI import gave segments dates but the main "Data de ida/volta" wasn't picked).
+    const safeFormat = (d: Date | null | undefined) => {
+      if (!d) return "";
+      try { return format(d, "yyyy-MM-dd"); } catch { return ""; }
+    };
+    const firstLegDate = outboundLegs.find(l => l.leg_date)?.leg_date || "";
+    const firstReturnLegDate = returnLegs.find(l => l.leg_date)?.leg_date || "";
+    const departureDateStr = safeFormat(values.departure_date) || firstLegDate;
+    const returnDateStr = !isOneWay
+      ? (safeFormat(values.return_date) || firstReturnLegDate)
+      : "";
+
     const data: any = {
       origin_city: values.origin_city, destination_city: values.destination_city,
-      airline: values.airline, departure_date: format(values.departure_date, "yyyy-MM-dd"),
-      return_date: !isOneWay && values.return_date ? format(values.return_date, "yyyy-MM-dd") : "",
+      airline: values.airline,
+      departure_date: departureDateStr,
+      return_date: returnDateStr,
       includes_baggage: values.includes_baggage, includes_boarding_fee: values.includes_boarding_fee,
       adult_price: values.adult_price, child_price: values.child_price,
       is_unit_price: true, is_one_way: isOneWay,
