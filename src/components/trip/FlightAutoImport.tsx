@@ -48,7 +48,7 @@ interface FlightAutoImportProps {
   onImport: (data: FlightImportResult) => void;
 }
 
-const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_MIME = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp"];
 
 async function fileToBase64(file: File): Promise<string> {
@@ -250,7 +250,7 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
       return;
     }
     if (file.size > MAX_FILE_BYTES) {
-      toast({ title: "Arquivo muito grande", description: "Tamanho máximo: 5MB.", variant: "destructive" });
+      toast({ title: "Arquivo muito grande", description: "Tamanho máximo: 10MB.", variant: "destructive" });
       return;
     }
     setUploadFile(file);
@@ -353,7 +353,7 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
           <TabsContent value="upload" className="space-y-3 mt-3">
             <div>
               <label className="text-xs font-medium text-muted-foreground">
-                Anexe o voucher, e-ticket, cotação ou print da passagem (PDF, PNG, JPG • máx 5MB)
+                Anexe o voucher, e-ticket, cotação ou print da passagem (PDF, PNG, JPG • máx 10MB)
               </label>
               <Input
                 ref={fileInputRef}
