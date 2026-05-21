@@ -172,9 +172,13 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
 
   const totalAdult = typeof p.resumo?.valor_total_brl === "number"
     ? p.resumo.valor_total_brl
-    : typeof p.resumo?.valor_total_original === "number"
-      ? p.resumo.valor_total_original
-      : 0;
+    : typeof p.valores?.total_brl === "number"
+      ? p.valores.total_brl
+      : typeof p.resumo?.valor_total_original === "number"
+        ? p.resumo.valor_total_original
+        : typeof p.valores?.total_moeda_original === "number"
+          ? p.valores.total_moeda_original
+          : 0;
 
   // Notas: observações + alertas + base tarifária por voo + câmbio
   const noteLines: string[] = [];
@@ -219,6 +223,20 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     notes: noteLines.join("\n"),
     outbound_legs: outboundLegs,
     return_legs: returnLegs,
+    imported_summary: {
+      fare_type: p.resumo?.tipo_tarifa || p.valores?.tipo || "",
+      passengers: p.resumo?.quantidade_passageiros || "",
+      passenger_type: p.resumo?.tipo_passageiro || "",
+      currency: p.resumo?.moeda_original || "",
+      total_original: p.resumo?.valor_total_original ?? p.valores?.total_moeda_original ?? null,
+      total_brl: p.resumo?.valor_total_brl ?? p.valores?.total_brl ?? null,
+      exchange_rate: p.resumo?.cambio ?? null,
+      exchange_date: p.resumo?.data_cambio || "",
+      fuel_tax: p.valores?.taxa_combustivel || "",
+      observations: Array.isArray(p.observacoes) ? p.observacoes : [],
+      unidentified_fields: Array.isArray(p.campos_nao_identificados) ? p.campos_nao_identificados : [],
+      confidence: p.confianca_extracao?.geral ?? undefined,
+    },
   };
 }
 
