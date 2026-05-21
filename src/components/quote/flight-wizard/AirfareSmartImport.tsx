@@ -5,10 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Plane, CheckCircle2, AlertTriangle, ArrowRight, X, Trash2, Plus } from "lucide-react";
+import { Loader2, Upload, Plane, CheckCircle2, AlertTriangle, ArrowRight, X, Trash2, Plus, Bug } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { extractPdfText } from "@/lib/pdfText";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { FlightData, FlightLegDetail } from "@/types/quote";
 
 /** ─────────── Types matching the new edge function ─────────── */
@@ -217,11 +219,15 @@ interface Props {
 
 export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
   const { toast } = useToast();
+  const { isAdmin } = useUserRole();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
   const [parsed, setParsed] = useState<ParsedAirfare | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [showDebug, setShowDebug] = useState(false);
+  const [hardError, setHardError] = useState<string | null>(null);
 
   // Rotate progress messages while uploading
   useEffect(() => {
@@ -256,6 +262,8 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
     }
     setIsUploading(true);
     setParsed(null);
+    setDebugInfo(null);
+    setHardError(null);
     let storagePath: string | null = null;
 
     try {
@@ -298,31 +306,69 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
         },
       });
 
+      // Em caso de erro HTTP, tenta extrair o body estruturado de debug
+      let body: any = data;
       if (error) {
-        let msg = "Não foi possível identificar os dados do orçamento com precisão. Tente enviar uma imagem com melhor resolução ou preencha os campos manualmente.";
         try {
           const ctx = (error as any)?.context;
-          if (ctx && typeof ctx.json === "function") {
-            const body = await ctx.json();
-            if (body?.error) msg = body.error;
-          }
+          if (ctx && typeof ctx.json === "function") body = await ctx.json();
         } catch { /* noop */ }
-        throw new Error(msg);
-      }
-      if (data?.error) throw new Error(data.error);
-
-      const result = data as ParsedAirfare;
-      if (!Array.isArray(result.voos) || result.voos.length === 0) {
-        throw new Error("Nenhum voo foi identificado no documento. Tente uma imagem com melhor resolução.");
       }
 
+      // Captura debug info
+      setDebugInfo({
+        stage: body?.stage,
+        error_type: body?.error_type,
+        error_message: body?.error_message || body?.error,
+        raw_ai_response: body?.raw_ai_response,
+        partial_data: body?.partial_data,
+        confidence_score: body?.confidence_score,
+        success: body?.success,
+      });
+
+      // Extrai dados (ParsedAirfare) — tanto de success quanto de partial_data
+      const candidate: ParsedAirfare | null =
+        (body?.success && (body?.data || body)) ||
+        (body?.partial_data && Object.keys(body.partial_data || {}).length > 0 ? body.partial_data : null);
+
+      const voos = Array.isArray(candidate?.voos) ? candidate!.voos : [];
+      const resumo = candidate?.resumo || {};
+      const hasUseful =
+        voos.length > 0 ||
+        !!resumo?.trecho_geral ||
+        !!resumo?.origem_inicial ||
+        !!resumo?.destino_final;
+
+      if (!hasUseful) {
+        const msg = body?.error_message || body?.error ||
+          "Não foi possível identificar voos ou trechos no documento. Tente uma imagem mais nítida.";
+        setHardError(msg);
+        toast({ title: "Erro na importação", description: msg, variant: "destructive" });
+        return;
+      }
+
+      // Abre a tela de revisão mesmo com confiança baixa / dados parciais
+      const result: ParsedAirfare = {
+        resumo: candidate!.resumo || {},
+        voos,
+        valores: candidate!.valores || {},
+        observacoes: Array.isArray(candidate!.observacoes) ? candidate!.observacoes : [],
+        campos_nao_identificados: Array.isArray(candidate!.campos_nao_identificados) ? candidate!.campos_nao_identificados : [],
+        confianca_extracao: candidate!.confianca_extracao || {},
+      };
       setParsed(result);
 
       const conf = result.confianca_extracao?.geral ?? 0;
-      if (conf < 0.7) {
+      const confPct = Math.round(conf * 100);
+      if (conf < 0.5) {
         toast({
-          title: "Importação concluída",
-          description: "Alguns dados não foram identificados com segurança. Revise os campos destacados antes de continuar.",
+          title: "Dados parciais identificados",
+          description: `Confiança ${confPct}%. Revise os campos destacados antes de aplicar.`,
+        });
+      } else if (conf < 0.8) {
+        toast({
+          title: "Importação concluída com ressalvas",
+          description: `Confiança ${confPct}%. Confira os campos destacados.`,
         });
       } else {
         toast({
@@ -331,9 +377,11 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
         });
       }
     } catch (e: any) {
+      const msg = e?.message || "Não foi possível identificar os dados do orçamento com precisão.";
+      setHardError(msg);
       toast({
         title: "Erro na importação",
-        description: e?.message || "Não foi possível identificar os dados do orçamento com precisão.",
+        description: msg,
         variant: "destructive",
       });
     } finally {
@@ -344,19 +392,25 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
   /* ─────────── REVIEW SCREEN ─────────── */
   if (parsed) {
     return (
-      <ReviewScreen
-        data={parsed}
-        onChange={setParsed}
-        onCancel={() => {
-          setParsed(null);
-          setUploadFile(null);
-          if (fileInputRef.current) fileInputRef.current.value = "";
-        }}
-        onConfirm={() => {
-          const mapped = parsedAirfareToFlightData(parsed);
-          onConfirm(mapped, parsed);
-        }}
-      />
+      <>
+        <ReviewScreen
+          data={parsed}
+          onChange={setParsed}
+          onCancel={() => {
+            setParsed(null);
+            setUploadFile(null);
+            setDebugInfo(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+          }}
+          onConfirm={() => {
+            const mapped = parsedAirfareToFlightData(parsed);
+            onConfirm(mapped, parsed);
+          }}
+          isAdmin={isAdmin}
+          onShowDebug={debugInfo ? () => setShowDebug(true) : undefined}
+        />
+        <DebugDialog open={showDebug} onOpenChange={setShowDebug} info={debugInfo} />
+      </>
     );
   }
 
@@ -394,6 +448,26 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
               )}
             </div>
 
+            {hardError && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm space-y-2">
+                <div className="flex items-start gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>{hardError}</span>
+                </div>
+                {isAdmin && debugInfo && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDebug(true)}
+                    className="w-full"
+                  >
+                    <Bug className="h-3 w-3 mr-1" /> Ver detalhes técnicos da importação
+                  </Button>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
                 Voltar
@@ -419,8 +493,60 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
             </div>
           </div>
         )}
+        <DebugDialog open={showDebug} onOpenChange={setShowDebug} info={debugInfo} />
       </CardContent>
     </Card>
+  );
+}
+
+/* ──────────────────────── DEBUG DIALOG (admin only) ──────────────────────── */
+function DebugDialog({
+  open, onOpenChange, info,
+}: { open: boolean; onOpenChange: (v: boolean) => void; info: any }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Bug className="h-4 w-4" /> Detalhes técnicos da importação
+          </DialogTitle>
+        </DialogHeader>
+        {!info ? (
+          <p className="text-sm text-muted-foreground">Sem informações.</p>
+        ) : (
+          <div className="space-y-3 text-xs">
+            <DebugRow label="Etapa" value={info.stage || "—"} />
+            <DebugRow label="Tipo de erro" value={info.error_type || "—"} />
+            <DebugRow label="Mensagem" value={info.error_message || "—"} />
+            <DebugRow label="Confiança" value={info.confidence_score != null ? `${Math.round((info.confidence_score || 0) * 100)}%` : "—"} />
+            {info.raw_ai_response && (
+              <div>
+                <div className="font-medium mb-1">Resposta bruta da IA</div>
+                <pre className="rounded border bg-muted/30 p-2 max-h-48 overflow-auto whitespace-pre-wrap break-words">
+                  {String(info.raw_ai_response).slice(0, 4000)}
+                </pre>
+              </div>
+            )}
+            {info.partial_data && Object.keys(info.partial_data).length > 0 && (
+              <div>
+                <div className="font-medium mb-1">Dados parciais extraídos</div>
+                <pre className="rounded border bg-muted/30 p-2 max-h-48 overflow-auto whitespace-pre-wrap break-words">
+                  {JSON.stringify(info.partial_data, null, 2).slice(0, 4000)}
+                </pre>
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+function DebugRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex gap-2">
+      <span className="font-medium text-muted-foreground min-w-[110px]">{label}:</span>
+      <span className="break-all">{value}</span>
+    </div>
   );
 }
 
@@ -430,14 +556,19 @@ function ReviewScreen({
   onChange,
   onCancel,
   onConfirm,
+  isAdmin,
+  onShowDebug,
 }: {
   data: ParsedAirfare;
   onChange: (d: ParsedAirfare) => void;
   onCancel: () => void;
   onConfirm: () => void;
+  isAdmin?: boolean;
+  onShowDebug?: () => void;
 }) {
   const conf = data.confianca_extracao?.geral ?? 0;
-  const lowConf = conf > 0 && conf < 0.7;
+  const lowConf = conf > 0 && conf < 0.8;
+  const veryLowConf = conf > 0 && conf < 0.5;
 
   const updateResumo = (field: string, value: any) =>
     onChange({ ...data, resumo: { ...data.resumo, [field]: value } });
@@ -485,7 +616,11 @@ function ReviewScreen({
       {lowConf && (
         <div className="flex items-start gap-2 rounded-md border border-amber-300/60 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm text-amber-900 dark:text-amber-200">
           <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-          <span>Alguns dados não foram identificados com segurança. Revise os campos destacados antes de continuar.</span>
+          <span>
+            {veryLowConf
+              ? "Alguns dados foram identificados com baixa confiança. Revise os campos destacados antes de aplicar ao orçamento."
+              : "Alguns dados não foram identificados com segurança. Revise os campos destacados antes de continuar."}
+          </span>
         </div>
       )}
 
@@ -618,6 +753,11 @@ function ReviewScreen({
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
           Cancelar
         </Button>
+        {isAdmin && onShowDebug && (
+          <Button type="button" variant="outline" onClick={onShowDebug}>
+            <Bug className="h-3 w-3 mr-1" /> Detalhes técnicos
+          </Button>
+        )}
         <Button type="button" onClick={onConfirm} className="flex-1">
           <ArrowRight className="h-4 w-4 mr-1" /> Aplicar ao orçamento
         </Button>

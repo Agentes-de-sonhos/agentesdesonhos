@@ -10,6 +10,15 @@ const SYSTEM_PROMPT = `Você é um extrator estruturado de ORÇAMENTOS AÉREOS p
 Sua tarefa: ler vouchers, cotações GDS, e-tickets, prints e PDFs de orçamentos aéreos (em IMAGEM, texto ou ambos)
 e devolver os dados COMPLETOS da viagem aérea usando a função "extract_airfare_document".
 
+POSTURA DE EXTRAÇÃO (IMPORTANTE):
+- NUNCA desista da extração. Mesmo que alguns campos estejam ilegíveis, INCERTOS ou faltando,
+  EXTRAIA TUDO o que conseguir identificar — mesmo voos parciais. Preencha o que tiver certeza,
+  deixe vazio/null o que não tiver, e SEMPRE chame a função extract_airfare_document.
+- NÃO retorne erro. NÃO devolva texto explicando que o documento está ruim. SEMPRE retorne a função.
+- Se houver dúvida em um campo, mantenha-o vazio/null e adicione o nome desse campo em "campos_nao_identificados",
+  reduzindo a confiança correspondente — mas MANTENHA os demais campos identificados.
+- É preferível retornar 1 voo parcial com confiança baixa do que não retornar nada.
+
 REGRAS GERAIS:
 - Trate o documento como uma TABELA. Cada linha de voo é um voo separado. NÃO misture campos entre linhas/voos.
 - A coluna "Saída" pode conter DATA e HORA em linhas separadas — extraia ambos para cada voo.
@@ -137,10 +146,30 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const stages: string[] = [];
+  const log = (stage: string, payload?: any) => {
+    stages.push(stage);
+    if (payload !== undefined) {
+      try { console.log(`[stage:${stage}]`, typeof payload === "string" ? payload : JSON.stringify(payload).slice(0, 800)); }
+      catch { console.log(`[stage:${stage}]`); }
+    } else {
+      console.log(`[stage:${stage}]`);
+    }
+  };
+
+  let currentStage = "init";
+  let userId: string | null = null;
+  let quoteId: string | undefined;
+  let fileUrl: string | undefined;
+  let fileName: string | undefined;
+  let fileMimeType: string | undefined;
+  let rawAiText = "";
+
   try {
+    currentStage = "auth";
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return json({ error: "Não autorizado." }, 401);
+      return debugFail(currentStage, "unauthorized", "Não autorizado.", 401);
     }
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -149,36 +178,46 @@ Deno.serve(async (req) => {
     );
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      return json({ error: "Não autorizado." }, 401);
+      return debugFail(currentStage, "unauthorized", "Não autorizado.", 401);
     }
+    userId = user.id;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      return json({ error: "Configuração de IA indisponível." }, 500);
+      return debugFail("init", "missing_api_key", "Configuração de IA indisponível.", 500);
     }
 
+    currentStage = "upload_received";
     const body = await req.json().catch(() => ({}));
     const fileBase64: string | undefined = typeof body?.fileBase64 === "string" ? body.fileBase64 : undefined;
-    const fileMimeType: string | undefined = typeof body?.fileMimeType === "string" ? body.fileMimeType : undefined;
-    const fileName: string | undefined = typeof body?.fileName === "string" ? body.fileName : undefined;
-    const fileUrl: string | undefined = typeof body?.fileUrl === "string" ? body.fileUrl : undefined;
+    fileMimeType = typeof body?.fileMimeType === "string" ? body.fileMimeType : undefined;
+    fileName = typeof body?.fileName === "string" ? body.fileName : undefined;
+    fileUrl = typeof body?.fileUrl === "string" ? body.fileUrl : undefined;
     const text: string | undefined = typeof body?.text === "string" ? body.text : undefined;
-    const quoteId: string | undefined = typeof body?.quoteId === "string" ? body.quoteId : undefined;
+    quoteId = typeof body?.quoteId === "string" ? body.quoteId : undefined;
+
+    log("upload_received", {
+      fileName, fileMimeType,
+      fileBytes: fileBase64 ? Math.round(fileBase64.length * 0.75) : 0,
+      textChars: text?.length || 0,
+      hasStoragePath: !!fileUrl,
+    });
 
     if (!fileBase64 && !text) {
-      return json({ error: "Envie um arquivo (PDF/PNG/JPG) ou texto do orçamento aéreo." }, 400);
+      return debugFail(currentStage, "no_input", "Envie um arquivo (PDF/PNG/JPG) ou texto do orçamento aéreo.", 400);
     }
     if (text && text.length > 40000) {
-      return json({ error: "Texto muito longo (máx 40.000 caracteres)." }, 400);
+      return debugFail(currentStage, "text_too_long", "Texto muito longo (máx 40.000 caracteres).", 400);
     }
     if (fileBase64 && fileBase64.length > 14_000_000) {
-      return json({ error: "Arquivo muito grande (máx 10MB)." }, 400);
+      return debugFail(currentStage, "file_too_large", "Arquivo muito grande (máx 10MB).", 400);
     }
 
+    currentStage = "sent_to_ai";
     const userContent: any[] = [];
     userContent.push({
       type: "text",
-      text: "Extraia os dados COMPLETOS do orçamento aéreo abaixo, seguindo TODAS as regras do sistema e preenchendo a função extract_airfare_document. Cada linha de voo é um voo separado. Não misture dados entre voos.",
+      text: "Analise visualmente este documento de orçamento aéreo. Mesmo que alguns campos estejam incertos, EXTRAIA TUDO o que conseguir identificar. Não retorne erro nem texto explicativo: SEMPRE preencha a função extract_airfare_document. Identifique voos, datas, horários, companhias, aeroportos, bagagens, valores e observações. Se houver dúvida em algum campo, deixe-o vazio/null, adicione o nome em campos_nao_identificados e reduza a confiança correspondente — mas MANTENHA os demais campos identificados. Cada linha de voo é um voo separado. Não misture dados entre voos.",
     });
     if (text) {
       userContent.push({ type: "text", text: `TEXTO EXTRAÍDO DO DOCUMENTO:\n\n${text}` });
@@ -188,6 +227,8 @@ Deno.serve(async (req) => {
       const dataUrl = `data:${mime};base64,${fileBase64}`;
       userContent.push({ type: "image_url", image_url: { url: dataUrl } });
     }
+
+    log("sent_to_ai", { model: "google/gemini-2.5-pro", hasImage: !!fileBase64, hasText: !!text });
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -207,39 +248,59 @@ Deno.serve(async (req) => {
       }),
     });
 
+    currentStage = "ai_response_received";
+    log("ai_response_received", { status: aiResp.status });
+
     if (aiResp.status === 429) {
-      await logError(supabase, user.id, quoteId, fileUrl, fileName, fileMimeType, "rate_limited", "Rate limit");
-      return json({ error: "Muitas requisições. Aguarde alguns segundos e tente novamente." }, 429);
+      await logError(supabase, userId, quoteId, fileUrl, fileName, fileMimeType, "rate_limited", "Rate limit");
+      return debugFail(currentStage, "rate_limited", "Muitas requisições. Aguarde alguns segundos e tente novamente.", 429);
     }
     if (aiResp.status === 402) {
-      await logError(supabase, user.id, quoteId, fileUrl, fileName, fileMimeType, "credits_exhausted", "Sem créditos");
-      return json({ error: "Créditos de IA esgotados. Adicione saldo em Configurações > Workspace > Uso." }, 402);
+      await logError(supabase, userId, quoteId, fileUrl, fileName, fileMimeType, "credits_exhausted", "Sem créditos");
+      return debugFail(currentStage, "credits_exhausted", "Créditos de IA esgotados. Adicione saldo em Configurações > Workspace > Uso.", 402);
     }
     if (!aiResp.ok) {
       const t = await aiResp.text();
       console.error("AI gateway error:", aiResp.status, t.slice(0, 500));
-      await logError(supabase, user.id, quoteId, fileUrl, fileName, fileMimeType, "ai_error", `HTTP ${aiResp.status}`);
-      return json({ error: "Não foi possível identificar os dados do orçamento com precisão. Tente enviar uma imagem com melhor resolução ou preencha os campos manualmente." }, 500);
+      await logError(supabase, userId, quoteId, fileUrl, fileName, fileMimeType, "ai_error", `HTTP ${aiResp.status}`);
+      return debugFail(currentStage, "ai_error", `Falha na chamada à IA (HTTP ${aiResp.status}).`, 502, { raw_ai_response: t.slice(0, 2000) });
     }
 
     const aiJson = await aiResp.json();
-    const toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
-    const argsStr = toolCall?.function?.arguments;
-    if (!argsStr) {
-      console.error("No tool call returned:", JSON.stringify(aiJson).slice(0, 500));
-      await logError(supabase, user.id, quoteId, fileUrl, fileName, fileMimeType, "no_tool_call", "IA não estruturou");
-      return json({ error: "Não foi possível identificar os dados do orçamento com precisão. Tente enviar uma imagem com melhor resolução ou preencha os campos manualmente." }, 422);
+    const choice = aiJson?.choices?.[0];
+    const toolCall = choice?.message?.tool_calls?.[0];
+    const argsStr: string | undefined = toolCall?.function?.arguments;
+    const fallbackText: string | undefined = choice?.message?.content;
+    rawAiText = argsStr || fallbackText || JSON.stringify(aiJson).slice(0, 4000);
+
+    currentStage = "json_parse";
+    let parsed: any = null;
+    let parseError: string | null = null;
+    if (argsStr) {
+      try { parsed = JSON.parse(argsStr); }
+      catch (e) {
+        parseError = String(e);
+        try { parsed = extractJSON(argsStr); } catch (e2) { parseError = `${parseError} | fallback: ${e2}`; }
+      }
+    } else if (fallbackText) {
+      // IA não estruturou via tool — tenta extrair JSON do texto livre
+      try { parsed = extractJSON(fallbackText); }
+      catch (e) { parseError = String(e); }
     }
 
-    let parsed: any;
-    try {
-      parsed = JSON.parse(argsStr);
-    } catch (e) {
-      console.error("Tool args parse error:", e);
-      await logError(supabase, user.id, quoteId, fileUrl, fileName, fileMimeType, "parse_error", "JSON inválido");
-      return json({ error: "Resposta da IA inválida. Tente novamente." }, 500);
+    if (!parsed) {
+      console.error("[json_parse] failed", parseError, "raw:", rawAiText.slice(0, 500));
+      await logError(supabase, userId, quoteId, fileUrl, fileName, fileMimeType, "parse_error", parseError || "Sem tool_call e sem JSON extraível");
+      return debugFail(
+        currentStage,
+        "parse_error",
+        "A IA retornou uma resposta sem estrutura reconhecível. Tente novamente com uma imagem mais nítida.",
+        422,
+        { raw_ai_response: rawAiText },
+      );
     }
 
+    currentStage = "validation";
     // Normalização leve
     parsed.voos = Array.isArray(parsed.voos) ? parsed.voos : [];
     parsed.voos = parsed.voos
@@ -255,13 +316,24 @@ Deno.serve(async (req) => {
     parsed.observacoes = Array.isArray(parsed.observacoes) ? parsed.observacoes : [];
     parsed.campos_nao_identificados = Array.isArray(parsed.campos_nao_identificados) ? parsed.campos_nao_identificados : [];
     parsed.confianca_extracao = parsed.confianca_extracao || {};
+    parsed.resumo = parsed.resumo || {};
+    parsed.valores = parsed.valores || {};
 
     const confidence = Number(parsed.confianca_extracao?.geral) || 0;
+    const hasFlights = parsed.voos.length > 0;
+    const hasAnyUseful = hasFlights
+      || !!parsed.resumo?.trecho_geral
+      || !!parsed.resumo?.origem_inicial
+      || !!parsed.resumo?.destino_final
+      || typeof parsed.resumo?.valor_total_brl === "number"
+      || typeof parsed.resumo?.valor_total_original === "number";
+
+    log("validation", { voos: parsed.voos.length, confidence, hasAnyUseful });
 
     // Log de sucesso (best effort, não bloqueia retorno)
     try {
       await supabase.from("airfare_import_logs").insert({
-        user_id: user.id,
+        user_id: userId,
         quote_id: quoteId || null,
         file_url: fileUrl || null,
         file_name: fileName || null,
@@ -269,25 +341,88 @@ Deno.serve(async (req) => {
         raw_ai_response: aiJson,
         parsed_data: parsed,
         confidence_score: confidence,
-        status: "success",
+        status: hasFlights ? (confidence >= 0.5 ? "success" : "low_confidence") : (hasAnyUseful ? "partial" : "no_data"),
       });
     } catch (e) {
       console.error("Log insert failed (non-fatal):", e);
     }
 
+    // Nova regra: só erro definitivo quando NÃO há voos e NÃO há nada útil
+    if (!hasAnyUseful) {
+      return debugFail(
+        "low_confidence",
+        "no_useful_data",
+        "A IA não conseguiu identificar nenhum voo nem dado útil. Tente uma imagem com melhor resolução ou preencha manualmente.",
+        200,
+        { raw_ai_response: rawAiText, partial_data: parsed, confidence_score: confidence },
+      );
+    }
+
     console.log("[import-airfare-document]", {
-      user: user.id,
+      user: userId,
       voos: parsed.voos.length,
       confidence,
       missing: parsed.campos_nao_identificados.length,
+      stages,
     });
 
-    return json(parsed, 200);
+    // SEMPRE devolve parsed (mesmo confiança baixa) — frontend decide UI de revisão
+    return json({
+      success: true,
+      stage: "validation",
+      confidence_score: confidence,
+      data: parsed,
+      // mantém compat com client antigo (espalha campos no topo)
+      ...parsed,
+    }, 200);
   } catch (err) {
     console.error("import-airfare-document fatal:", err);
-    return json({ error: "Erro ao processar orçamento aéreo." }, 500);
+    return debugFail(currentStage, "fatal", String((err as any)?.message || err), 500, { raw_ai_response: rawAiText });
   }
 });
+
+/** Limpa e tenta extrair o primeiro bloco JSON válido de uma string com ruído. */
+function extractJSON(raw: string): any {
+  let cleaned = String(raw || "")
+    .replace(/^```json\s*/im, "")
+    .replace(/^```\s*/im, "")
+    .replace(/```\s*$/im, "")
+    .trim();
+
+  if (!cleaned.startsWith("{") && !cleaned.startsWith("[")) {
+    const objStart = cleaned.indexOf("{");
+    const arrStart = cleaned.indexOf("[");
+    const isArray = arrStart !== -1 && (objStart === -1 || arrStart < objStart);
+    const start = isArray ? arrStart : objStart;
+    const end = isArray ? cleaned.lastIndexOf("]") : cleaned.lastIndexOf("}");
+    if (start === -1 || end <= start) throw new Error("No JSON block found");
+    cleaned = cleaned.slice(start, end + 1);
+  }
+  return JSON.parse(cleaned);
+}
+
+function debugFail(
+  stage: string,
+  error_type: string,
+  error_message: string,
+  status: number,
+  extras?: { raw_ai_response?: string; partial_data?: any; confidence_score?: number | null },
+) {
+  return json(
+    {
+      success: false,
+      stage,
+      error_type,
+      error_message,
+      raw_ai_response: extras?.raw_ai_response || "",
+      partial_data: extras?.partial_data || {},
+      confidence_score: extras?.confidence_score ?? null,
+      // compat com client antigo
+      error: error_message,
+    },
+    status,
+  );
+}
 
 async function logError(
   supabase: any,
