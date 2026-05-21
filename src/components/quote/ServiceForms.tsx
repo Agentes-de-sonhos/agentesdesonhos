@@ -143,7 +143,7 @@ const flightSchema = z.object({
 });
 
 function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string }) {
-  const updateLeg = (idx: number, field: string, value: string) => {
+  const updateLeg = (idx: number, field: string, value: any) => {
     const updated = legs.map((l, i) => i === idx ? { ...l, [field]: value } : l);
     onChange(updated);
   };
@@ -194,6 +194,46 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
               <Input placeholder="LA8084" value={leg.flight_number || ""} onChange={e => updateLeg(idx, "flight_number", e.target.value)} className="h-8 text-sm mt-1" />
             </div>
           </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Companhia</label>
+              <Input placeholder="LATAM" value={leg.airline || ""} onChange={e => updateLeg(idx, "airline", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Duração</label>
+              <Input placeholder="11:25" value={leg.duration || ""} onChange={e => updateLeg(idx, "duration", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Paradas</label>
+              <Input type="number" min={0} placeholder="0" value={leg.stops ?? ""} onChange={e => updateLeg(idx, "stops", e.target.value === "" ? undefined : Number(e.target.value))} className="h-8 text-sm mt-1" />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Equipamento</label>
+              <Input placeholder="77W / 320" value={leg.equipment || ""} onChange={e => updateLeg(idx, "equipment", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Cabine</label>
+              <Input placeholder="Econômica / Executiva" value={leg.cabin || ""} onChange={e => updateLeg(idx, "cabin", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Base tarifária</label>
+              <Input placeholder="YBXOBR" value={leg.fare_basis || ""} onChange={e => updateLeg(idx, "fare_basis", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-1">
+            <div>
+              <label className="text-xs text-muted-foreground">Bagagem</label>
+              <Input placeholder="1 bagagem de mão + 1 despachada de 23kg" value={leg.baggage_text || ""} onChange={e => updateLeg(idx, "baggage_text", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+          </div>
+          {(leg.alert || leg.alert === "") && (
+            <div>
+              <label className="text-xs text-muted-foreground">Alerta / Observação do trecho</label>
+              <Input placeholder="Conexão longa, troca de aeroporto…" value={leg.alert || ""} onChange={e => updateLeg(idx, "alert", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+          )}
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={addLeg} className="text-xs">
