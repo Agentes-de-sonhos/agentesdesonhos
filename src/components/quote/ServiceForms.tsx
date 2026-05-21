@@ -262,6 +262,11 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       notes: values.notes || "",
     };
 
+    // Preserve structured AI import summary (currency, totals, exchange, observations, etc.)
+    if (init?.imported_summary) {
+      data.imported_summary = init.imported_summary;
+    }
+
     if (hasOutbound) {
       data.outbound_legs = outboundLegs;
       // backward compat: keep first leg as outbound_detail
