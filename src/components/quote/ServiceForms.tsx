@@ -32,10 +32,21 @@ import type {
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
 
-/** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day). */
-function parseLocalDate(dateStr: string): Date {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  return new Date(y, m - 1, d);
+/** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day).
+ * Returns undefined for empty/invalid input (e.g. "25 Set" from AI import
+ * when the year is not visible in the document) so downstream date-fns
+ * `format()` calls don't throw RangeError: Invalid time value. */
+function parseLocalDate(dateStr: string | null | undefined): Date | undefined {
+  if (!dateStr || typeof dateStr !== "string") return undefined;
+  const datePart = dateStr.length > 10 ? dateStr.slice(0, 10) : dateStr;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+  if (!m) return undefined;
+  const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+  const dt = new Date(y, mo - 1, d);
+  if (isNaN(dt.getTime()) || dt.getMonth() !== mo - 1 || dt.getDate() !== d) {
+    return undefined;
+  }
+  return dt;
 }
 
 interface ServiceFormProps {
