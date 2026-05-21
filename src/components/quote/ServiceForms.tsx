@@ -289,8 +289,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     const computedTotalAdults = values.adult_price * adultsCount;
     const computedTotalChildren = values.child_price * childrenCount;
 
-    const hasOutbound = showFlightDetails && hasNonEmptyLegs(outboundLegs);
-    const hasReturn = showFlightDetails && hasNonEmptyLegs(returnLegs);
+    // Always persist legs that have data, regardless of whether the panel is expanded.
+    // This guarantees imported segments survive save → reopen even if the user collapsed the section.
+    const hasOutbound = hasNonEmptyLegs(outboundLegs);
+    const hasReturn = hasNonEmptyLegs(returnLegs);
 
     const data: any = {
       origin_city: values.origin_city, destination_city: values.destination_city,
