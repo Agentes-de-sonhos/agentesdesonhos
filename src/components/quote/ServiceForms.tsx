@@ -85,7 +85,22 @@ const flightLegSchema = z.object({
   departure_time: z.string().optional(),
   arrival_time: z.string().optional(),
   flight_number: z.string().optional(),
-});
+  // Extended fields from AI import (passthrough — not rendered but preserved)
+  airline: z.string().optional(),
+  origin_city: z.string().optional(),
+  destination_city: z.string().optional(),
+  duration: z.string().optional(),
+  stops: z.number().optional(),
+  equipment: z.string().optional(),
+  cabin: z.string().optional(),
+  fare_basis: z.string().optional(),
+  baggage_text: z.string().optional(),
+  baggage_carry_on: z.boolean().nullable().optional(),
+  baggage_hand: z.boolean().nullable().optional(),
+  baggage_checked: z.boolean().nullable().optional(),
+  baggage_checked_count: z.number().nullable().optional(),
+  alert: z.string().optional(),
+}).passthrough();
 
 const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ leg_date: "", airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
 

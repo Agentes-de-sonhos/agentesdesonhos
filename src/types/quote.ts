@@ -52,6 +52,21 @@ export interface FlightLegDetail {
   departure_time?: string;
   arrival_time?: string;
   flight_number?: string;
+  /** Extended fields preserved from AI airfare import */
+  airline?: string;
+  origin_city?: string;
+  destination_city?: string;
+  duration?: string;          // "HH:mm"
+  stops?: number;
+  equipment?: string;
+  cabin?: string;
+  fare_basis?: string;
+  baggage_text?: string;
+  baggage_carry_on?: boolean | null;
+  baggage_hand?: boolean | null;
+  baggage_checked?: boolean | null;
+  baggage_checked_count?: number | null;
+  alert?: string;
 }
 
 export interface FlightData {
@@ -71,6 +86,21 @@ export interface FlightData {
   return_detail?: FlightLegDetail;
   outbound_legs?: FlightLegDetail[];
   return_legs?: FlightLegDetail[];
+  /** Structured summary preserved from AI airfare import (does not change form UI) */
+  imported_summary?: {
+    fare_type?: string;          // RT / OW / MT
+    passengers?: string;
+    passenger_type?: string;     // ADT / CHD / INF
+    currency?: string;           // USD / EUR / BRL
+    total_original?: number | null;
+    total_brl?: number | null;
+    exchange_rate?: number | null;
+    exchange_date?: string;
+    fuel_tax?: string;
+    observations?: string[];
+    unidentified_fields?: string[];
+    confidence?: number;
+  };
 }
 
 export interface HotelData {
