@@ -172,11 +172,12 @@ export default function GerarOrcamento() {
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
   const [openSections, setOpenSections] = useState<
-    Record<"services", boolean>
+    Record<"services" | "summary", boolean>
   >({
-    services: true,
+    services: false,
+    summary: false,
   });
-  const toggleSection = (key: "services") =>
+  const toggleSection = (key: "services" | "summary") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("destination");
@@ -769,47 +770,42 @@ export default function GerarOrcamento() {
 
         <div className="grid gap-4 sm:gap-6">
           <div className="space-y-4">
-            {/* NOVA ÁREA — Adicionar Serviços (grid visual estilo Mapa do Turismo) */}
+            {/* Adicionar Serviços */}
             <Card className="shadow-card">
               <CardContent className="pt-5 pb-5 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="w-fit">
-                    <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                      <Plus className="h-5 w-5 text-primary" />
-                      Adicionar Serviços
-                    </h2>
-                    <div className="mt-2 h-1 w-full rounded-full bg-primary" />
-                  </div>
-                </div>
-                <div className="rounded-xl bg-primary/5 border border-primary/15 px-3 py-2 space-y-0.5 w-full">
-                  <p className="text-sm font-semibold text-foreground leading-tight">✈️ Monte seu orçamento</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Selecione uma categoria para adicionar — o formulário abre em uma janela amigável, sem sair desta tela.
-                  </p>
+                <div className="w-fit">
+                  <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                    <Plus className="h-5 w-5 text-sky-500" />
+                    Adicionar Serviços
+                  </h2>
+                  <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
                 </div>
                 <ServiceCategoryGrid
                   countByType={serviceCountByType}
                   onSelect={(type) => { setEditingService(null); setSelectedServiceType(type); }}
-                  onOpenAIImport={() => setShowAIImport(true)}
                 />
               </CardContent>
             </Card>
 
             {/* Serviços adicionados (lista colapsável) */}
-            <Card>
+            <Card className="shadow-card">
               <button
                 type="button"
                 onClick={() => toggleSection("services")}
-                className="w-full flex items-center justify-between px-6 py-4 text-left"
+                className="w-full flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 text-left"
+                aria-expanded={openSections.services}
               >
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-base font-semibold">Serviços adicionados</span>
-                  {quote.services && quote.services.length > 0 && (
-                    <Badge variant="secondary" className="text-xs ml-1">{quote.services.length}</Badge>
-                  )}
+                <div className="w-fit">
+                  <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-emerald-500" />
+                    Serviços adicionados
+                    {quote.services && quote.services.length > 0 && (
+                      <Badge variant="secondary" className="text-xs ml-1">{quote.services.length}</Badge>
+                    )}
+                  </h2>
+                  <div className="mt-2 h-1 w-full rounded-full bg-emerald-500" />
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.services && "rotate-180")} />
+                <ChevronDown className={cn("h-5 w-5 mt-1 text-muted-foreground transition-transform duration-200 flex-shrink-0", openSections.services && "rotate-180")} />
               </button>
               {openSections.services && (
                 <CardContent className="pt-0">
@@ -828,31 +824,49 @@ export default function GerarOrcamento() {
               )}
             </Card>
 
-            {/* Configurações do Orçamento (abre wizard em modal) */}
+            {/* Configurações do Orçamento — clique em qualquer lugar abre o modal */}
             <Card className="shadow-card">
               <button
                 type="button"
                 onClick={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
-                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-muted/30 transition-colors rounded-lg"
+                className="w-full text-left px-5 sm:px-6 pt-5 pb-5 hover:bg-muted/30 transition-colors rounded-lg"
               >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                    <CreditCard className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold">Configurações do Orçamento</p>
-                    <p className="text-xs text-muted-foreground">
-                      Destino, investimento, validade e documentos — em etapas guiadas.
-                    </p>
-                  </div>
+                <div className="w-fit">
+                  <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-violet-500" />
+                    Configurações do Orçamento
+                  </h2>
+                  <div className="mt-2 h-1 w-full rounded-full bg-violet-500" />
                 </div>
-                <Button variant="outline" size="sm" tabIndex={-1} className="pointer-events-none">
-                  Abrir
-                </Button>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Destino, investimento, validade e documentos — em etapas guiadas.
+                </p>
               </button>
             </Card>
 
-            <QuoteSummary quote={quote} />
+            {/* Resumo do Orçamento */}
+            <Card className="shadow-card">
+              <button
+                type="button"
+                onClick={() => toggleSection("summary")}
+                className="w-full flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 text-left"
+                aria-expanded={openSections.summary}
+              >
+                <div className="w-fit">
+                  <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-amber-500" />
+                    Resumo do Orçamento
+                  </h2>
+                  <div className="mt-2 h-1 w-full rounded-full bg-amber-500" />
+                </div>
+                <ChevronDown className={cn("h-5 w-5 mt-1 text-muted-foreground transition-transform duration-200 flex-shrink-0", openSections.summary && "rotate-180")} />
+              </button>
+              {openSections.summary && (
+                <CardContent className="pt-0">
+                  <QuoteSummary quote={quote} />
+                </CardContent>
+              )}
+            </Card>
           </div>
         </div>
       </div>
