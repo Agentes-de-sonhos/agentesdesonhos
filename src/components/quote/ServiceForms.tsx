@@ -31,6 +31,7 @@ import type {
 } from "@/types/quote";
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
+import { useAirports } from "@/hooks/useAirports";
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day).
  * Returns undefined for empty/invalid input (e.g. "25 Set" from AI import
@@ -154,6 +155,15 @@ const flightSchema = z.object({
 });
 
 function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string }) {
+  const { getAirport } = useAirports();
+  const airportHint = (code?: string, fallbackCity?: string) => {
+    const c = (code || "").toUpperCase().trim();
+    if (c.length !== 3) return "";
+    const info = getAirport(c);
+    if (info) return `${c} • ${info.city} • ${info.name}`;
+    if (fallbackCity) return `${c} • ${fallbackCity}`;
+    return "";
+  };
   const updateLeg = (idx: number, field: string, value: any) => {
     const updated = legs.map((l, i) => i === idx ? { ...l, [field]: value } : l);
     onChange(updated);
@@ -185,10 +195,20 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de origem</label>
               <Input placeholder="GRU" value={leg.airport_origin || ""} onChange={e => updateLeg(idx, "airport_origin", e.target.value)} className="h-8 text-sm mt-1" />
+              {airportHint(leg.airport_origin, leg.origin_city) && (
+                <p className="text-[11px] text-muted-foreground mt-1 truncate" title={airportHint(leg.airport_origin, leg.origin_city)}>
+                  {airportHint(leg.airport_origin, leg.origin_city)}
+                </p>
+              )}
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de destino</label>
               <Input placeholder="CDG" value={leg.airport_destination || ""} onChange={e => updateLeg(idx, "airport_destination", e.target.value)} className="h-8 text-sm mt-1" />
+              {airportHint(leg.airport_destination, leg.destination_city) && (
+                <p className="text-[11px] text-muted-foreground mt-1 truncate" title={airportHint(leg.airport_destination, leg.destination_city)}>
+                  {airportHint(leg.airport_destination, leg.destination_city)}
+                </p>
+              )}
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
