@@ -99,6 +99,32 @@ async function fileToBase64(file: File): Promise<string> {
 /** Convert HH:mm string safely */
 const cleanTime = (t?: string) => (t ? t.trim().slice(0, 5) : "");
 
+/** Map a single ParsedAirfareFlight → FlightLegDetail preserving ALL extracted fields */
+function voo2leg(v: ParsedAirfareFlight): FlightLegDetail {
+  return {
+    leg_date: v.data_saida || "",
+    airport_origin: v.origem_codigo || "",
+    airport_destination: v.destino_codigo || "",
+    departure_time: cleanTime(v.hora_saida),
+    arrival_time: cleanTime(v.hora_chegada),
+    flight_number: v.numero_voo || "",
+    airline: v.companhia_aerea || "",
+    origin_city: v.origem_nome || "",
+    destination_city: v.destino_nome || "",
+    duration: v.duracao || "",
+    stops: typeof v.numero_escalas === "number" ? v.numero_escalas : undefined,
+    equipment: v.equipamento || "",
+    cabin: v.cabine || "",
+    fare_basis: v.base_tarifaria || "",
+    baggage_text: v.bagagem_texto || "",
+    baggage_carry_on: v.bagagem_mochila_bolsa ?? null,
+    baggage_hand: v.bagagem_mao ?? null,
+    baggage_checked: v.bagagem_despachada ?? null,
+    baggage_checked_count: v.quantidade_bagagem_despachada ?? null,
+    alert: v.alerta || "",
+  };
+}
+
 /** Map ParsedAirfare → FlightData (for prefilling the existing quote flight form) */
 export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData> & { __extras?: any } {
   const voos = p.voos || [];
