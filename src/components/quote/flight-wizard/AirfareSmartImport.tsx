@@ -155,22 +155,8 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     }
   }
 
-  const outboundLegs: FlightLegDetail[] = voos.slice(0, outboundCount).map((v) => ({
-    leg_date: v.data_saida || "",
-    airport_origin: v.origem_codigo || "",
-    airport_destination: v.destino_codigo || "",
-    departure_time: cleanTime(v.hora_saida),
-    arrival_time: cleanTime(v.hora_chegada),
-    flight_number: v.numero_voo || "",
-  }));
-  const returnLegs: FlightLegDetail[] = voos.slice(outboundCount).map((v) => ({
-    leg_date: v.data_saida || "",
-    airport_origin: v.origem_codigo || "",
-    airport_destination: v.destino_codigo || "",
-    departure_time: cleanTime(v.hora_saida),
-    arrival_time: cleanTime(v.hora_chegada),
-    flight_number: v.numero_voo || "",
-  }));
+  const outboundLegs: FlightLegDetail[] = voos.slice(0, outboundCount).map(voo2leg);
+  const returnLegs: FlightLegDetail[] = voos.slice(outboundCount).map(voo2leg);
 
   const first = voos[0];
   const lastOut = voos[outboundCount - 1] || first;
