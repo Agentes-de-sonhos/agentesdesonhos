@@ -30,6 +30,7 @@ import type {
   AttractionData, InsuranceData, CruiseData, OtherServiceData,
 } from "@/types/quote";
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
+import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day). */
 function parseLocalDate(dateStr: string): Date {
@@ -1811,12 +1812,28 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
    Editing existing services skips chooser and opens classic form (no regression). */
 function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
   const isEditing = !!props.initialData;
-  const [mode, setMode] = useState<"chooser" | "wizard" | "manual">(isEditing ? "manual" : "chooser");
+  const [mode, setMode] = useState<"chooser" | "wizard" | "manual" | "import">(isEditing ? "manual" : "chooser");
   const [wizardPrefill, setWizardPrefill] = useState<WizardFlightDraft | undefined>(undefined);
   const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
 
   if (mode === "chooser") {
-    return <FlightModeChooser onChoose={(m) => setMode(m === "wizard" ? "wizard" : "manual")} />;
+    return <FlightModeChooser onChoose={(m) => setMode(m)} />;
+  }
+  if (mode === "import") {
+    return (
+      <AirfareSmartImport
+        onCancel={() => setMode("chooser")}
+        onConfirm={(mapped) => {
+          setInjectedInitial({
+            service_data: mapped as any,
+            amount: (mapped.adult_price || 0) + (mapped.child_price || 0),
+            option_label: null,
+            description: null,
+          });
+          setMode("manual");
+        }}
+      />
+    );
   }
   if (mode === "wizard") {
     // Stable draft key per session — falls back to "new" for unsaved services
