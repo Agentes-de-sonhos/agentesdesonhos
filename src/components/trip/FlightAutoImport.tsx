@@ -125,10 +125,9 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
     }
   };
 
-  const callItineraryParser = async (payload: { text?: string; fileBase64?: string; fileMimeType?: string }) => {
-    const { data, error } = await supabase.functions.invoke("parse-flight-itinerary", { body: payload });
+  const callItineraryParser = async (payload: { text?: string; fileBase64?: string; fileMimeType?: string; fileName?: string }) => {
+    const { data, error } = await supabase.functions.invoke("import-airfare-document", { body: payload });
     if (error) {
-      // Surface the structured error from the function body if present
       let msg = "Não foi possível analisar a passagem. Tente novamente.";
       try {
         const ctx = (error as any)?.context;
@@ -143,48 +142,79 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
     return data as any;
   };
 
+  const joinDT = (date?: string, time?: string) => {
+    if (!date) return "";
+    const t = (time || "").trim().slice(0, 5);
+    return t ? `${date}T${t}:00` : date;
+  };
+
+  // Map new ParsedAirfare schema → legacy FlightImportResult shape consumed by TripServiceForms
   const normalizeRich = (raw: any): FlightImportResult => {
-    const segments: FlightSegment[] = Array.isArray(raw?.segments)
-      ? raw.segments.map((s: any) => ({
-          airline: s.airline || raw.airlines || "",
-          flight_number: s.flightNumber || "",
-          origin_airport: s.originAirport || "",
-          origin_city: s.originCity || "",
-          destination_airport: s.destinationAirport || "",
-          destination_city: s.destinationCity || "",
-          departure_time: s.departureTime || "",
-          arrival_time: s.arrivalTime || "",
-          flight_date: s.date || "",
-        }))
-      : [];
+    const voos: any[] = Array.isArray(raw?.voos) ? raw.voos : [];
+    const segments: FlightSegment[] = voos.map((v) => ({
+      airline: v.companhia_aerea || "",
+      flight_number: v.numero_voo || "",
+      origin_airport: v.origem_codigo || "",
+      origin_city: v.origem_nome || "",
+      destination_airport: v.destino_codigo || "",
+      destination_city: v.destino_nome || "",
+      departure_time: joinDT(v.data_saida, v.hora_saida),
+      arrival_time: joinDT(v.data_chegada, v.hora_chegada),
+      flight_date: v.data_saida || "",
+    }));
     const first = segments[0];
     const last = segments[segments.length - 1];
+
+    const resumo = raw?.resumo || {};
+    const airlinesSet = Array.from(new Set(voos.map((v) => v.companhia_aerea).filter(Boolean)));
+    const airlines = airlinesSet.join(" / ");
+
+    const tripType: FlightImportResult["trip_type"] | undefined =
+      resumo.tipo_tarifa === "RT" ? "ida_volta"
+      : resumo.tipo_tarifa === "OW" ? "ida"
+      : resumo.tipo_tarifa === "MT" ? "multi_trechos"
+      : segments.length > 1 ? "multi_trechos"
+      : "ida";
+
+    const checked = voos.some(
+      (v) => v.bagagem_despachada === true || (typeof v.quantidade_bagagem_despachada === "number" && v.quantidade_bagagem_despachada > 0),
+    );
+    const carryOn = voos.some((v) => v.bagagem_mao === true);
+    const baggageTexts = Array.from(new Set(voos.map((v) => v.bagagem_texto).filter(Boolean)));
+
+    const fareNotesParts: string[] = [];
+    if (Array.isArray(raw?.observacoes)) fareNotesParts.push(...raw.observacoes);
+
+    const autoSummary = resumo.trecho_geral || "";
+
     return {
-      // Top-level legacy fields (compat)
-      airline: raw.airlines || first?.airline || "",
+      // Legacy top-level
+      airline: airlines || first?.airline || "",
       flight_number: first?.flight_number,
       origin_airport: first?.origin_airport,
-      origin_city: raw.originCity || first?.origin_city,
+      origin_city: resumo.origem_inicial || first?.origin_city,
       destination_airport: last?.destination_airport,
-      destination_city: raw.destinationCity || last?.destination_city,
+      destination_city: resumo.destino_final || last?.destination_city,
       departure_time: first?.departure_time,
       arrival_time: last?.arrival_time,
       segments,
       // Rich
-      airlines: raw.airlines || "",
-      trip_type: raw.tripType,
-      additional_cities: raw.additionalCities || [],
-      checked_baggage: raw.checkedBaggage,
-      carry_on: raw.carryOn,
-      baggage_notes: raw.baggageNotes || "",
-      total_price: raw.totalPrice,
-      currency: raw.currency,
-      exchange_rate: raw.exchangeRate,
-      boarding_tax: raw.boardingTax,
-      fare_notes: raw.fareNotes || "",
-      auto_summary: raw.autoSummary || "",
-      confidence: raw.confidence,
-      missing_fields: raw.missingFields || [],
+      airlines,
+      trip_type: tripType,
+      additional_cities: [],
+      checked_baggage: checked,
+      carry_on: carryOn,
+      baggage_notes: baggageTexts.join(" • "),
+      total_price: typeof resumo.valor_total_brl === "number"
+        ? resumo.valor_total_brl
+        : (typeof resumo.valor_total_original === "number" ? resumo.valor_total_original : undefined),
+      currency: typeof resumo.valor_total_brl === "number" ? "BRL" : (resumo.moeda_original || ""),
+      exchange_rate: typeof resumo.cambio === "number" ? resumo.cambio : undefined,
+      boarding_tax: undefined,
+      fare_notes: fareNotesParts.join("\n"),
+      auto_summary: autoSummary,
+      confidence: typeof raw?.confianca_extracao?.geral === "number" ? raw.confianca_extracao.geral : undefined,
+      missing_fields: Array.isArray(raw?.campos_nao_identificados) ? raw.campos_nao_identificados : [],
     };
   };
 
@@ -245,6 +275,7 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
       const raw = await callItineraryParser({
         fileBase64,
         fileMimeType: uploadFile.type,
+        fileName: uploadFile.name,
         text: extractedText || undefined,
       });
       const normalized = normalizeRich(raw);
