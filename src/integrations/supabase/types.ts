@@ -479,6 +479,54 @@ export type Database = {
         }
         Relationships: []
       }
+      airfare_import_logs: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          error_message: string | null
+          file_mime: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          parsed_data: Json | null
+          quote_id: string | null
+          raw_ai_response: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          file_mime?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          parsed_data?: Json | null
+          quote_id?: string | null
+          raw_ai_response?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          file_mime?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          parsed_data?: Json | null
+          quote_id?: string | null
+          raw_ai_response?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       attractions: {
         Row: {
           address: string | null
