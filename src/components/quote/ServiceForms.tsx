@@ -228,12 +228,10 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
               <Input placeholder="1 bagagem de mão + 1 despachada de 23kg" value={leg.baggage_text || ""} onChange={e => updateLeg(idx, "baggage_text", e.target.value)} className="h-8 text-sm mt-1" />
             </div>
           </div>
-          {(leg.alert || leg.alert === "") && (
-            <div>
-              <label className="text-xs text-muted-foreground">Alerta / Observação do trecho</label>
-              <Input placeholder="Conexão longa, troca de aeroporto…" value={leg.alert || ""} onChange={e => updateLeg(idx, "alert", e.target.value)} className="h-8 text-sm mt-1" />
-            </div>
-          )}
+          <div>
+            <label className="text-xs text-muted-foreground">Alerta / Observação do trecho</label>
+            <Input placeholder="Conexão longa, troca de aeroporto…" value={leg.alert || ""} onChange={e => updateLeg(idx, "alert", e.target.value)} className="h-8 text-sm mt-1" />
+          </div>
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={addLeg} className="text-xs">
