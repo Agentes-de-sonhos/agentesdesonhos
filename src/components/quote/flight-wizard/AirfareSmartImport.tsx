@@ -321,6 +321,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
   const { isAdmin } = useUserRole();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [pastedText, setPastedText] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
   const [parsed, setParsed] = useState<ParsedAirfare | null>(null);
@@ -355,8 +356,13 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
   };
 
   const handleParse = async () => {
-    if (!uploadFile) {
-      toast({ title: "Selecione um arquivo", variant: "destructive" });
+    const hasText = pastedText.trim().length > 0;
+    if (!uploadFile && !hasText) {
+      toast({ title: "Envie um arquivo ou cole um texto", variant: "destructive" });
+      return;
+    }
+    if (hasText && pastedText.length > 40000) {
+      toast({ title: "Texto muito longo", description: "Máximo de 40.000 caracteres.", variant: "destructive" });
       return;
     }
     setIsUploading(true);
@@ -369,7 +375,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
       // 1) Upload do arquivo original para storage privado
       const { data: userRes } = await supabase.auth.getUser();
       const userId = userRes.user?.id;
-      if (userId) {
+      if (userId && uploadFile) {
         const ext = uploadFile.name.split(".").pop()?.toLowerCase() || "bin";
         storagePath = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const up = await supabase.storage.from("airfare-imports").upload(storagePath, uploadFile, {
@@ -383,11 +389,12 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
       }
 
       // 2) Base64 + texto auxiliar (PDF)
-      const fileBase64 = await fileToBase64(uploadFile);
-      let extractedText = "";
-      if (uploadFile.type === "application/pdf") {
+      const fileBase64 = uploadFile ? await fileToBase64(uploadFile) : undefined;
+      let extractedText = hasText ? pastedText.trim() : "";
+      if (uploadFile && uploadFile.type === "application/pdf") {
         try {
-          extractedText = await extractPdfText(uploadFile);
+          const pdfText = await extractPdfText(uploadFile);
+          extractedText = extractedText ? `${extractedText}\n\n${pdfText}` : pdfText;
         } catch (e) {
           console.warn("PDF text extraction failed:", e);
         }
@@ -397,8 +404,8 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
       const { data, error } = await supabase.functions.invoke("import-airfare-document", {
         body: {
           fileBase64,
-          fileMimeType: uploadFile.type,
-          fileName: uploadFile.name,
+          fileMimeType: uploadFile?.type,
+          fileName: uploadFile?.name,
           fileUrl: storagePath,
           text: extractedText || undefined,
           quoteId,
