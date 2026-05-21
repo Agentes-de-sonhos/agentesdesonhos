@@ -3,16 +3,16 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,20 +29,14 @@ import { Link } from "react-router-dom";
 
 export default function MinhaConta() {
   const { user } = useAuth();
-  const { plan, getPlanLabel, subscription } = useSubscription();
+  const { plan, getPlanLabel, subscription, refetch } = useSubscription();
   const [loadingPortal, setLoadingPortal] = useState<null | "manage" | "cancel">(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   const isPaid = plan === "profissional" || plan === "premium" || plan === "fundador";
 
-  const STRIPE_PORTAL_URL = "https://billing.stripe.com/p/login/fZu8wP4Hw85gcTacdx9sk00";
-
   const openPortal = async (mode: "manage" | "cancel") => {
-    if (mode === "cancel") {
-      window.open(STRIPE_PORTAL_URL, "_blank");
-      setConfirmCancel(false);
-      return;
-    }
     try {
       setLoadingPortal(mode);
       const { data, error } = await supabase.functions.invoke("customer-portal", {
@@ -56,7 +50,37 @@ export default function MinhaConta() {
       toast.error(msg);
     } finally {
       setLoadingPortal(null);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    try {
+      setLoadingPortal("cancel");
+      const { data, error } = await supabase.functions.invoke("cancel-subscription", {
+        body: { reason: cancelReason.trim() },
+      });
+      if (error) {
+        const msg = (error as any)?.context?.error || error.message;
+        throw new Error(msg || "Erro ao cancelar assinatura.");
+      }
+      if (!data?.success) {
+        throw new Error(data?.error || "Não foi possível cancelar a assinatura.");
+      }
+      const endDate = data.cancel_at
+        ? new Date(data.cancel_at * 1000).toLocaleDateString("pt-BR")
+        : null;
+      toast.success(
+        endDate
+          ? `Assinatura cancelada. Seu acesso permanece ativo até ${endDate}.`
+          : "Assinatura cancelada com sucesso."
+      );
       setConfirmCancel(false);
+      setCancelReason("");
+      await refetch();
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao cancelar assinatura.");
+    } finally {
+      setLoadingPortal(null);
     }
   };
 
@@ -170,38 +194,66 @@ export default function MinhaConta() {
         )}
       </div>
 
-      <AlertDialog open={confirmCancel} onOpenChange={setConfirmCancel}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancelar assinatura?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Você será direcionado para o portal seguro de cobrança, onde poderá confirmar o
-              cancelamento e informar o motivo. Seu acesso permanece ativo até o fim do período já
-              pago — sem novas cobranças.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={loadingPortal !== null}>Voltar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                openPortal("cancel");
-              }}
-              disabled={loadingPortal !== null}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+      <Dialog
+        open={confirmCancel}
+        onOpenChange={(open) => {
+          if (loadingPortal === "cancel") return;
+          setConfirmCancel(open);
+          if (!open) setCancelReason("");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar assinatura?</DialogTitle>
+            <DialogDescription>
+              Sentimos muito em ver você partir. Seu acesso permanece ativo até o fim do período já
+              pago — sem novas cobranças após o cancelamento.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 py-2">
+            <Label htmlFor="cancel-reason" className="text-sm">
+              Nos conte o motivo do cancelamento (opcional)
+            </Label>
+            <Textarea
+              id="cancel-reason"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Sua opinião nos ajuda a melhorar a plataforma. Se puder, compartilhe o que motivou sua decisão."
+              rows={4}
+              maxLength={1000}
+              disabled={loadingPortal === "cancel"}
+            />
+            <p className="text-xs text-muted-foreground">
+              {cancelReason.length}/1000 caracteres
+            </p>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmCancel(false)}
+              disabled={loadingPortal === "cancel"}
+            >
+              Manter assinatura
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelSubscription}
+              disabled={loadingPortal === "cancel"}
             >
               {loadingPortal === "cancel" ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Abrindo portal...
+                  Cancelando...
                 </>
               ) : (
-                "Continuar para o portal"
+                "Confirmar cancelamento"
               )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
