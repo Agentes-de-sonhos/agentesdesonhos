@@ -34,6 +34,9 @@ import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
+import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
+import { ServiceModal } from "@/components/quote/ServiceModal";
+import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -169,16 +172,14 @@ export default function GerarOrcamento() {
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
   const [openSections, setOpenSections] = useState<
-    Record<"services" | "destination" | "payment" | "validity" | "documents", boolean>
+    Record<"services", boolean>
   >({
-    services: false,
-    destination: false,
-    payment: false,
-    validity: false,
-    documents: false,
+    services: true,
   });
-  const toggleSection = (key: "services" | "destination" | "payment" | "validity" | "documents") =>
+  const toggleSection = (key: "services") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("destination");
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
   // Check for unsaved draft on mount (only on list screen)
@@ -768,193 +769,160 @@ export default function GerarOrcamento() {
 
         <div className="grid gap-4 sm:gap-6">
           <div className="space-y-4">
-            {/* Serviços - Collapsible */}
-            <Card>
-              <div className="flex items-center justify-between px-6 py-4">
-                <button
-                  type="button"
-                  onClick={() => toggleSection("services")}
-                  className="flex items-center gap-2 text-left flex-1"
-                >
-                  <Plus className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-base font-semibold">Adicionar Serviços</span>
-                  {quote.services && quote.services.length > 0 && (
-                    <span className="text-xs font-normal text-muted-foreground">
-                      ({quote.services.length})
-                    </span>
-                  )}
-                </button>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection("services")}
-                    className="p-1"
-                  >
-                    <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.services && "rotate-180")} />
-                  </button>
-                </div>
-              </div>
-              {openSections.services && (
-              <CardContent className="pt-0">
-                {selectedServiceType ? (
-                  <div className="space-y-4">
-                    <h3 className="font-medium">
-                      {editingService ? "Editando: " : ""}{SERVICE_TYPE_LABELS[selectedServiceType]}
-                      {!editingService && MULTI_OPTION_TYPES.includes(selectedServiceType) && serviceCountByType[selectedServiceType] ? (
-                        <span className="text-xs text-muted-foreground ml-2">
-                          (Opção {(serviceCountByType[selectedServiceType] || 0) + 1})
-                        </span>
-                      ) : null}
-                    </h3>
-                    {tripStartDate && tripEndDate && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5">
-                        <CalendarIcon className="h-3.5 w-3.5" />
-                        Período da viagem: {format(tripStartDate, "dd/MM", { locale: ptBR })} a {format(tripEndDate, "dd/MM/yyyy", { locale: ptBR })}
-                      </div>
-                    )}
-                    <ServiceForm
-                      key={editingService?.id || "new"}
-                      serviceType={selectedServiceType}
-                      onSubmit={handleAddService}
-                      onCancel={() => { setSelectedServiceType(null); setEditingService(null); setNewServicePaymentConfig({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }); }}
-                      isLoading={isAddingService}
-                      showOptionLabel={MULTI_OPTION_TYPES.includes(selectedServiceType)}
-                      tripStartDate={tripStartDate}
-                      tripEndDate={tripEndDate}
-                      adultsCount={quote.adults_count}
-                      childrenCount={quote.children_count}
-                      initialData={editingService ? {
-                        service_data: editingService.service_data,
-                        amount: editingService.amount,
-                        option_label: editingService.option_label,
-                        description: editingService.description,
-                        image_url: editingService.image_url,
-                        image_urls: editingService.image_urls || [],
-                      } : undefined}
-                      paymentSlot={editingService ? (
-                        (liveAmount: number) => (
-                          <ServicePaymentForm
-                            amount={liveAmount || editingService.amount}
-                            config={servicePaymentConfigs[editingService.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
-                            onChange={(config) => handleServicePaymentChange(editingService.id, config)}
-                          />
-                        )
-                      ) : (
-                        (liveAmount: number) => (
-                          <ServicePaymentForm
-                            amount={liveAmount}
-                            config={newServicePaymentConfig}
-                            onChange={setNewServicePaymentConfig}
-                          />
-                        )
-                      )}
-                    />
+            {/* NOVA ÁREA — Adicionar Serviços (grid visual estilo Mapa do Turismo) */}
+            <Card className="shadow-card">
+              <CardContent className="pt-5 pb-5 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="w-fit">
+                    <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                      <Plus className="h-5 w-5 text-primary" />
+                      Adicionar Serviços
+                    </h2>
+                    <div className="mt-2 h-1 w-full rounded-full bg-primary" />
                   </div>
-                ) : (
-                  <>
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
-                      {(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((type) => (
-                        <Button key={type} variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9" onClick={() => setSelectedServiceType(type)}>
-                          <Plus className="mr-1 h-3 w-3 shrink-0" />
-                          <span className="truncate">{SERVICE_TYPE_LABELS[type]}</span>
-                          {MULTI_OPTION_TYPES.includes(type) && serviceCountByType[type] ? (
-                            <span className="ml-1 text-xs text-muted-foreground">({serviceCountByType[type]})</span>
-                          ) : null}
-                        </Button>
-                      ))}
-                      <Button
-                        size="sm"
-                        className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
-                        onClick={() => setShowAIImport(true)}
-                      >
-                        <Sparkles className="mr-1 h-3 w-3 shrink-0" />
-                        <span className="truncate">Importar com IA</span>
-                      </Button>
-                    </div>
-                    <ServiceList
-                      services={quote.services || []}
-                      onDeleteService={deleteService}
-                      onEditService={handleEditService}
-                    />
-                  </>
-                )}
+                </div>
+                <div className="rounded-xl bg-primary/5 border border-primary/15 px-3 py-2 space-y-0.5 w-full">
+                  <p className="text-sm font-semibold text-foreground leading-tight">✈️ Monte seu orçamento</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Selecione uma categoria para adicionar — o formulário abre em uma janela amigável, sem sair desta tela.
+                  </p>
+                </div>
+                <ServiceCategoryGrid
+                  countByType={serviceCountByType}
+                  onSelect={(type) => { setEditingService(null); setSelectedServiceType(type); }}
+                  onOpenAIImport={() => setShowAIImport(true)}
+                />
               </CardContent>
-              )}
             </Card>
 
-            {/* Apresentação do Destino - Collapsible */}
+            {/* Serviços adicionados (lista colapsável) */}
             <Card>
               <button
                 type="button"
-                onClick={() => toggleSection("destination")}
+                onClick={() => toggleSection("services")}
                 className="w-full flex items-center justify-between px-6 py-4 text-left"
               >
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-base font-semibold">Apresentação do Destino</span>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-base font-semibold">Serviços adicionados</span>
+                  {quote.services && quote.services.length > 0 && (
+                    <Badge variant="secondary" className="text-xs ml-1">{quote.services.length}</Badge>
+                  )}
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.destination && "rotate-180")} />
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.services && "rotate-180")} />
               </button>
-              {openSections.destination && (
+              {openSections.services && (
                 <CardContent className="pt-0">
-                  <DestinationIntroEditor
-                    embedded
-                    quoteId={quote.id}
-                    destination={quote.destination}
-                    showIntro={(quote as any).show_destination_intro !== false}
-                    introText={(quote as any).destination_intro_text || null}
-                    introImages={(quote as any).destination_intro_images || []}
-                    onUpdate={() => {}}
-                  />
+                  {(!quote.services || quote.services.length === 0) ? (
+                    <p className="text-sm text-muted-foreground text-center py-6">
+                      Nenhum serviço adicionado ainda. Use a área acima para adicionar.
+                    </p>
+                  ) : (
+                    <ServiceList
+                      services={quote.services}
+                      onDeleteService={deleteService}
+                      onEditService={handleEditService}
+                    />
+                  )}
                 </CardContent>
               )}
             </Card>
 
-            {/* Apresentação do Investimento - Collapsible */}
-            <Card>
+            {/* Configurações do Orçamento (abre wizard em modal) */}
+            <Card className="shadow-card">
               <button
                 type="button"
-                onClick={() => toggleSection("payment")}
-                className="w-full flex items-center justify-between px-6 py-4 text-left"
+                onClick={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
+                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-muted/30 transition-colors rounded-lg"
               >
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-base font-semibold">Apresentação do Investimento</span>
-                </div>
                 <div className="flex items-center gap-3">
-                  <span
-                    role="switch"
-                    aria-checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex"
-                  >
-                    <Switch
-                      id="show-investment-header"
-                      checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
-                      onCheckedChange={async (checked) => {
-                        if (!quote) return;
-                        setShowInvestmentLocal(checked);
-                        if (!checked) {
-                          // Disabling investment → automatically show detailed prices per service
-                          setShowDetailedLocal(true);
-                          await supabase
-                            .from("quotes")
-                            .update({ show_investment_section: false, show_detailed_prices: true } as any)
-                            .eq("id", quote.id);
-                        } else {
-                          await supabase
-                            .from("quotes")
-                            .update({ show_investment_section: true } as any)
-                            .eq("id", quote.id);
-                        }
-                      }}
-                    />
-                  </span>
-                  <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.payment && "rotate-180")} />
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <CreditCard className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold">Configurações do Orçamento</p>
+                    <p className="text-xs text-muted-foreground">
+                      Destino, investimento, validade e documentos — em etapas guiadas.
+                    </p>
+                  </div>
                 </div>
+                <Button variant="outline" size="sm" tabIndex={-1} className="pointer-events-none">
+                  Abrir
+                </Button>
               </button>
-              {openSections.payment && (
-                <CardContent className="space-y-4 pt-0">
+            </Card>
+
+            <QuoteSummary quote={quote} />
+          </div>
+        </div>
+      </div>
+
+      {/* Modal de serviço (criação/edição) */}
+      <ServiceModal
+        open={!!selectedServiceType}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedServiceType(null);
+            setEditingService(null);
+            setNewServicePaymentConfig({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
+          }
+        }}
+        serviceType={selectedServiceType}
+        editingService={editingService}
+        serviceCountByType={serviceCountByType}
+        tripStartDate={tripStartDate}
+        tripEndDate={tripEndDate}
+        adultsCount={quote.adults_count}
+        childrenCount={quote.children_count}
+        isLoading={isAddingService}
+        onSubmit={handleAddService}
+        newServicePaymentConfig={newServicePaymentConfig}
+        setNewServicePaymentConfig={setNewServicePaymentConfig}
+        servicePaymentConfigs={servicePaymentConfigs}
+        onServicePaymentChange={handleServicePaymentChange}
+      />
+
+      {/* Wizard de configurações do orçamento */}
+      <QuoteSettingsModal
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        initialStep={settingsStep}
+        renderDestination={() => (
+          <DestinationIntroEditor
+            embedded
+            quoteId={quote.id}
+            destination={quote.destination}
+            showIntro={(quote as any).show_destination_intro !== false}
+            introText={(quote as any).destination_intro_text || null}
+            introImages={(quote as any).destination_intro_images || []}
+            onUpdate={() => {}}
+          />
+        )}
+        renderPayment={() => (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-xl border bg-muted/30 px-4 py-3">
+              <div>
+                <p className="text-sm font-semibold">Exibir Apresentação do Investimento</p>
+                <p className="text-xs text-muted-foreground">
+                  Quando desligado, somente os valores detalhados por serviço aparecem para o cliente.
+                </p>
+              </div>
+              <Switch
+                id="show-investment-modal"
+                checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
+                onCheckedChange={async (checked) => {
+                  if (!quote) return;
+                  setShowInvestmentLocal(checked);
+                  if (!checked) {
+                    setShowDetailedLocal(true);
+                    await supabase.from("quotes").update({ show_investment_section: false, show_detailed_prices: true } as any).eq("id", quote.id);
+                  } else {
+                    await supabase.from("quotes").update({ show_investment_section: true } as any).eq("id", quote.id);
+                  }
+                }}
+              />
+            </div>
+
                   {/* Tri-state display selector — centralizes financial display logic */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
@@ -1144,25 +1112,10 @@ export default function GerarOrcamento() {
                   <Button variant="outline" size="sm" onClick={() => handleSavePaymentConfig(true)}>
                     Salvar Configuração
                   </Button>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Validade e Termos - Collapsible */}
-            <Card>
-              <button
-                type="button"
-                onClick={() => toggleSection("validity")}
-                className="w-full flex items-center justify-between px-6 py-4 text-left"
-              >
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-base font-semibold">Validade e Termos</span>
-                </div>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", openSections.validity && "rotate-180")} />
-              </button>
-              {openSections.validity && (
-                <CardContent className="space-y-3 pt-0">
+          </div>
+        )}
+        renderValidity={() => (
+          <div className="space-y-3">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label className="text-sm">Válido até</Label>
@@ -1191,22 +1144,18 @@ export default function GerarOrcamento() {
                   <Button variant="outline" size="sm" onClick={() => handleSaveValidity(true)}>
                     Salvar
                   </Button>
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Documentos do Orçamento - Collapsible */}
-            <QuoteDocuments
-              quoteId={quote.id}
-              userId={quote.user_id}
-              isOpen={openSections.documents}
-              onToggle={() => toggleSection("documents")}
-            />
-
-            <QuoteSummary quote={quote} />
           </div>
-        </div>
-      </div>
+        )}
+        renderDocuments={() => (
+          <QuoteDocuments
+            quoteId={quote.id}
+            userId={quote.user_id}
+            isOpen={true}
+            onToggle={() => {}}
+          />
+        )}
+      />
+
       <AIImportServiceModal
         open={showAIImport}
         onOpenChange={setShowAIImport}
