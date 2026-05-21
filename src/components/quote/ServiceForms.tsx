@@ -405,6 +405,35 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )}
         </div>
 
+        {/* Resumo da importação inteligente (somente leitura) */}
+        {init?.imported_summary && (
+          <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 space-y-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Resumo da importação</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {init.imported_summary.fare_type && (<div><span className="text-muted-foreground">Tipo tarifa: </span>{init.imported_summary.fare_type}</div>)}
+              {init.imported_summary.passengers && (<div><span className="text-muted-foreground">Passageiros: </span>{init.imported_summary.passengers}</div>)}
+              {init.imported_summary.currency && (<div><span className="text-muted-foreground">Moeda: </span>{init.imported_summary.currency}</div>)}
+              {init.imported_summary.total_original != null && (<div><span className="text-muted-foreground">Total original: </span>{init.imported_summary.total_original}</div>)}
+              {init.imported_summary.total_brl != null && (<div><span className="text-muted-foreground">Total BRL: </span>R$ {init.imported_summary.total_brl}</div>)}
+              {init.imported_summary.exchange_rate != null && (<div><span className="text-muted-foreground">Câmbio: </span>{init.imported_summary.exchange_rate}{init.imported_summary.exchange_date ? ` (${init.imported_summary.exchange_date})` : ""}</div>)}
+              {init.imported_summary.fuel_tax && (<div><span className="text-muted-foreground">Taxa combustível: </span>{init.imported_summary.fuel_tax}</div>)}
+            </div>
+            {!!init.imported_summary.observations?.length && (
+              <div>
+                <p className="text-xs text-muted-foreground mt-2">Observações:</p>
+                <ul className="list-disc list-inside text-xs space-y-0.5">
+                  {init.imported_summary.observations.map((o: string, i: number) => (<li key={i}>{o}</li>))}
+                </ul>
+              </div>
+            )}
+            {!!init.imported_summary.unidentified_fields?.length && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                Campos não identificados: {init.imported_summary.unidentified_fields.join(", ")}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* BLOCO 5 — Apresentação do Serviço */}
         {/* BLOCO 5 — Financeiro (prioritário) */}
         <div className="border border-border/60 rounded-lg">
