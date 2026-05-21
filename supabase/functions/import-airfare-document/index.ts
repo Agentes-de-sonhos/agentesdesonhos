@@ -6,48 +6,72 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `Você é um extrator estruturado de ORÇAMENTOS AÉREOS para agências de viagens brasileiras.
-Sua tarefa: ler vouchers, cotações GDS, e-tickets, prints e PDFs de orçamentos aéreos (em IMAGEM, texto ou ambos)
-e devolver os dados COMPLETOS da viagem aérea usando a função "extract_airfare_document".
+const SYSTEM_PROMPT = `Você é um extrator TABULAR de ORÇAMENTOS AÉREOS (passagens) para agências de viagens brasileiras.
+Sua ÚNICA tarefa: ler vouchers, cotações GDS, e-tickets, prints e PDFs de ORÇAMENTOS AÉREOS (em IMAGEM, texto ou ambos)
+e devolver TODA a tabela de voos, LINHA POR LINHA, usando a função "extract_airfare_document".
 
-POSTURA DE EXTRAÇÃO (IMPORTANTE):
-- NUNCA desista da extração. Mesmo que alguns campos estejam ilegíveis, INCERTOS ou faltando,
-  EXTRAIA TUDO o que conseguir identificar — mesmo voos parciais. Preencha o que tiver certeza,
-  deixe vazio/null o que não tiver, e SEMPRE chame a função extract_airfare_document.
-- NÃO retorne erro. NÃO devolva texto explicando que o documento está ruim. SEMPRE retorne a função.
-- Se houver dúvida em um campo, mantenha-o vazio/null e adicione o nome desse campo em "campos_nao_identificados",
-  reduzindo a confiança correspondente — mas MANTENHA os demais campos identificados.
-- É preferível retornar 1 voo parcial com confiança baixa do que não retornar nada.
+REGRA #1 — NÃO RESUMA. EXTRAIA LINHA POR LINHA.
+- O documento contém uma TABELA com colunas como: Cia, Voo, Saída (data+hora), Chegada (data+hora), Duração, Origem, Destino, Esc., Equip., Cabine, Base, Bagagem, Tipo, Tx Comb., Total, Total R$.
+- CADA LINHA da tabela = UM voo separado no array "voos". NÃO agrupe voos. NÃO some campos. NÃO concatene companhias.
+- Se a tabela tem 4 linhas de voo, "voos" DEVE ter 4 itens. Se tem 6 linhas, "voos" DEVE ter 6 itens.
+- NUNCA devolva apenas o resumo. NUNCA devolva menos voos do que aparecem.
 
-REGRAS GERAIS:
-- Trate o documento como uma TABELA. Cada linha de voo é um voo separado. NÃO misture campos entre linhas/voos.
-- A coluna "Saída" pode conter DATA e HORA em linhas separadas — extraia ambos para cada voo.
-- A coluna "Chegada" pode conter DATA e HORA em linhas separadas — extraia ambos para cada voo.
-- Companhia aérea pode aparecer por LOGOTIPO ou TEXTO — identifique pelo nome comercial sempre que possível
-  (LA→LATAM, LH→Lufthansa, IB→IBERIA, AF→Air France, AA→American Airlines, BA→British Airways, AD→Azul, G3→GOL, JJ→LATAM).
-- O número do voo deve ser preservado exatamente como aparece (ex.: 8070, 202, 782, 1572).
-- Origem/Destino: separe SEMPRE em código IATA (3 letras MAIÚSCULAS) e nome da cidade.
-  Ex.: "GRU - SAO PAULO" → origem_codigo="GRU", origem_nome="SAO PAULO".
-- Base tarifária: preserve exatamente (ex.: S-SLESLU0E, W-SLESLU0E, M-MLEKD00E).
-- Equipamento: preserve exatamente (ex.: 773, 319, 321, 330).
-- Cabine: identifique e NORMALIZE quando óbvio (Econ./Y → "Econômica"; W → "Premium Economy"; J/C → "Executiva"; F → "Primeira").
-- Bagagem: interprete com atenção. Tente reconhecer: mochila/bolsa, bagagem de mão, bagagem despachada,
-  "0 pc" (= 0 peças despachadas), "1 PC"/"23kg" (= 1 peça despachada). Preencha booleanos e quantidade quando seguro.
-- Ícone de alerta SEM descrição visível → preencha alerta="Ícone de alerta exibido no documento, mas sem descrição visível."
-- Datas em DD/MM/AAAA ou YYYY-MM-DD; horas em HH:mm. Se o ano não estiver explícito, infira do cabeçalho/rodapé/contexto cronológico.
-- Valores brasileiros: vírgula = decimal, ponto = milhar. Extraia como número (ex.: "R$ 8.718,77" → 8718.77, "USD 1.775,07" → 1775.07).
-- Câmbio: capture quando aparecer "USD 1,00 = R$ 4,9118" → cambio=4.9118 e moeda_original="USD".
-- Data do câmbio: capture quando aparecer (ex.: "do dia 14/05/2026" → "2026-05-14").
-- Tipo de tarifa: identifique RT (ida e volta), OW (somente ida), MT (multi-trechos).
-- Resumo: trecho_geral em formato "SAO > BER - 25 Set - BER > MAD - 30 Set - MAD > SAO - 06 Out - 1 ADT" quando reconhecível.
-- Observações: capture TODAS as observações/regras tarifárias do rodapé, uma por item no array.
-- NÃO INVENTE. Se algum campo estiver ilegível/ausente, retorne string vazia ou null e inclua o nome do campo em "campos_nao_identificados".
+REGRA #2 — NÃO INVENTE ANO.
+- Se o ano da data NÃO estiver explícito no documento, NÃO assuma 2024, 2025 nem nenhum outro ano.
+- Preencha "data_saida" / "data_chegada" no formato curto exatamente como aparece (ex.: "25 Set", "06 Out", "26/09").
+- Apenas use "YYYY-MM-DD" quando o ano estiver claramente visível no documento.
+- Adicione "ano_pendente" em campos_nao_identificados se o ano não foi identificado.
+
+REGRA #3 — POSTURA DE EXTRAÇÃO.
+- NUNCA desista. Mesmo com campos ilegíveis, EXTRAIA TUDO o que conseguir. Deixe vazio/null o que não tiver certeza.
+- SEMPRE chame a função extract_airfare_document. NUNCA retorne texto explicando que o documento está ruim.
+- Liste em "campos_nao_identificados" o nome dos campos que ficaram em branco.
+
+CAMPOS POR VOO (cada linha da tabela):
+- ordem: número sequencial (1, 2, 3, 4...)
+- companhia_aerea: nome comercial pelo LOGO ou TEXTO (LA→LATAM, LH→Lufthansa, IB→IBERIA, AF→Air France, AA→American Airlines, BA→British Airways, AD→Azul, G3→GOL, JJ→LATAM, UA→United, DL→Delta, AC→Air Canada, KL→KLM, TP→TAP, AZ→ITA Airways).
+- numero_voo: preserve exatamente (ex.: "8070", "202", "782", "1572"). Não invente prefixos.
+- data_saida / data_chegada: formato curto "DD MMM" (ex.: "25 Set") quando ano ausente; OU "YYYY-MM-DD" quando ano visível.
+- hora_saida / hora_chegada: "HH:mm".
+- duracao: "HH:mm".
+- origem_codigo / destino_codigo: IATA 3 letras MAIÚSCULAS (ex.: "GRU", "FRA", "BER", "MAD").
+- origem_nome / destino_nome: nome da cidade exatamente como aparece (ex.: "SAO PAULO", "FRANKFURT", "BERLIN", "MADRID").
+- numero_escalas: número de escalas (0 se direto).
+- equipamento: preserve exatamente (ex.: "773", "319", "321", "330").
+- cabine: preserve como aparece (ex.: "Econ.", "Y", "W", "J", "C", "F").
+- base_tarifaria: preserve exatamente (ex.: "S-SLESLU0E", "W-SLESLU0E", "M-MLEKD00E").
+- bagagem_texto: o texto exato da célula bagagem (ex.: "LIG / 0 pc", "1PC 23kg", "---").
+- bagagem_mochila_bolsa / bagagem_mao / bagagem_despachada: true/false/null por voo.
+- quantidade_bagagem_despachada: número de peças despachadas, ou null.
+- alerta: se houver ícone de alerta SEM descrição → "Ícone de alerta exibido no documento, mas sem descrição visível."
+
+RESUMO (campos do orçamento, NÃO substituem os voos):
+- trecho_geral: ex.: "SAO > BER - 25 Set - BER > MAD - 30 Set - MAD > SAO - 06 Out - 1 ADT".
+- origem_inicial / destino_final: IATA de partida inicial e chegada final.
+- tipo_tarifa: "RT" (ida e volta), "OW" (somente ida), "MT" (multi-trechos).
+- quantidade_passageiros + tipo_passageiro (ADT / CHD / INF).
+- moeda_original (USD, EUR, BRL...).
+- valor_total_original e valor_total_brl: NÚMEROS (vírgula = decimal). "R$ 8.718,77" → 8718.77; "USD 1.775,07" → 1775.07.
+- cambio: número (ex.: "USD 1,00 = R$ 4,9118" → 4.9118).
+- data_cambio: "YYYY-MM-DD" (ex.: "do dia 14/05/2026" → "2026-05-14").
+
+VALORES (rodapé financeiro):
+- tipo: "RT" / "OW" / "MT".
+- taxa_combustivel: texto exato (ex.: "USD 0,00").
+- total_moeda_original / total_brl: números.
+
+OBSERVAÇÕES:
+- Capture TODAS as observações/regras tarifárias do rodapé. Uma por item no array "observacoes". Mantenha o texto literal.
+
+CONFIANÇA:
 - Calcule "confianca_extracao" (0 a 1) para: geral, voos, valores, bagagem, observacoes — refletindo sua certeza real.
+- Quanto mais voos extraídos com campos essenciais (companhia, número, data+hora saída, data+hora chegada, origem, destino), maior a confiança em "voos".
 
-IMPORTANTE — fontes de entrada:
-- Você pode receber (a) a IMAGEM/PDF original e/ou (b) texto extraído. Use AMBAS as fontes. A imagem é primária para
-  logos, ícones, estrutura de tabela; o texto é confiável para números, datas e câmbio.
-- NUNCA retorne menos voos do que aparecem no documento.`;
+FONTES DE ENTRADA:
+- Você pode receber a IMAGEM/PDF original e/ou texto extraído. Use AMBAS. A imagem é primária para logos, ícones e estrutura de tabela; o texto é confiável para números, datas e câmbio.
+
+IMPORTANTE FINAL:
+- NÃO RESUMA. NÃO INVENTE ANO. NÃO devolva apenas 1 voo se a tabela tem 4. NÃO concatene companhias no array. SEMPRE chame extract_airfare_document.`;
 
 const TOOL_SCHEMA = {
   type: "function",
@@ -244,7 +268,8 @@ Deno.serve(async (req) => {
         ],
         tools: [TOOL_SCHEMA],
         tool_choice: { type: "function", function: { name: "extract_airfare_document" } },
-        temperature: 0.1,
+        temperature: 0,
+        max_tokens: 8000,
       }),
     });
 
