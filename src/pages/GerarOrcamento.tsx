@@ -34,6 +34,9 @@ import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
+import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
+import { ServiceModal } from "@/components/quote/ServiceModal";
+import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -169,16 +172,14 @@ export default function GerarOrcamento() {
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
   const [openSections, setOpenSections] = useState<
-    Record<"services" | "destination" | "payment" | "validity" | "documents", boolean>
+    Record<"services", boolean>
   >({
-    services: false,
-    destination: false,
-    payment: false,
-    validity: false,
-    documents: false,
+    services: true,
   });
-  const toggleSection = (key: "services" | "destination" | "payment" | "validity" | "documents") =>
+  const toggleSection = (key: "services") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("destination");
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
   // Check for unsaved draft on mount (only on list screen)
