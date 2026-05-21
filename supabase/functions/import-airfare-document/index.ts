@@ -241,7 +241,13 @@ Deno.serve(async (req) => {
     const userContent: any[] = [];
     userContent.push({
       type: "text",
-      text: "Analise visualmente este documento de orçamento aéreo. Mesmo que alguns campos estejam incertos, EXTRAIA TUDO o que conseguir identificar. Não retorne erro nem texto explicativo: SEMPRE preencha a função extract_airfare_document. Identifique voos, datas, horários, companhias, aeroportos, bagagens, valores e observações. Se houver dúvida em algum campo, deixe-o vazio/null, adicione o nome em campos_nao_identificados e reduza a confiança correspondente — mas MANTENHA os demais campos identificados. Cada linha de voo é um voo separado. Não misture dados entre voos.",
+      text:
+        "Este é um ORÇAMENTO AÉREO em formato de TABELA. NÃO resuma. Extraia CADA LINHA da tabela de voos como UM segmento separado no array 'voos'. " +
+        "Se houver 4 linhas de voo, devolva 4 itens em 'voos'. Se houver 6, devolva 6. " +
+        "Para cada voo preencha: companhia (pelo logo/texto), número do voo, data e hora de saída, data e hora de chegada, origem (IATA + cidade), destino (IATA + cidade), duração, escalas, equipamento, cabine, base tarifária e bagagem. " +
+        "NÃO INVENTE ANO: se o ano não estiver visível, devolva data como 'DD MMM' (ex.: '25 Set') e adicione 'ano_pendente' em campos_nao_identificados. " +
+        "Capture também: tipo de tarifa (RT/OW/MT), passageiros, moeda, total na moeda original, total em R$, câmbio (USD 1,00 = R$ X), data do câmbio, taxa de combustível e TODAS as observações tarifárias do rodapé. " +
+        "SEMPRE chame extract_airfare_document — nunca retorne texto explicativo.",
     });
     if (text) {
       userContent.push({ type: "text", text: `TEXTO EXTRAÍDO DO DOCUMENTO:\n\n${text}` });
