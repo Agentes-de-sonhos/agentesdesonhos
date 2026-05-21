@@ -23,6 +23,9 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type {
@@ -1975,11 +1978,23 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
     // Stable draft key per session — falls back to "new" for unsaved services
     const draftKey = `flight-wizard:${props.initialData ? "edit" : "new"}`;
     return (
-      <FlightWizard
-        {...props}
-        draftKey={draftKey}
-        prefill={wizardPrefill}
-        onOpenFullForm={(draft) => {
+      <>
+        {/* Render chooser behind so user returns there on close */}
+        <FlightModeChooser onChoose={(m) => setMode(m)} />
+        <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
+          <DialogContent className="max-w-5xl w-[95vw] h-[92vh] sm:h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
+              <DialogTitle>Preencher passagem aérea passo a passo</DialogTitle>
+              <DialogDescription>
+                Vamos preencher a passagem aérea em etapas simples. Você pode pular o que ainda não souber e completar depois.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <FlightWizard
+                {...props}
+                draftKey={draftKey}
+                prefill={wizardPrefill}
+                onOpenFullForm={(draft) => {
           // Map wizard draft → FlightForm initialData and switch to manual
           const sd: any = {
             airline: draft.airline,
@@ -2004,8 +2019,12 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
           });
           setWizardPrefill(draft);
           setMode("manual");
-        }}
-      />
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
   // manual
