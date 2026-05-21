@@ -529,9 +529,9 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
           <h3 className="text-base font-semibold">Importação inteligente de orçamento aéreo</h3>
         </div>
         <p className="text-sm text-muted-foreground">
-          Envie um print, imagem ou PDF do orçamento aéreo. A IA lê a tabela completa
-          (trechos, voos, bagagens, tarifas, câmbio e observações) e abre uma tela de
-          revisão antes de aplicar no formulário.
+          Envie um PDF, imagem ou cole o texto do orçamento (e-mail, WhatsApp, GDS, itinerário).
+          A IA lê voos, datas, bagagens, tarifas e abre uma tela de revisão antes de aplicar
+          no formulário.
         </p>
 
         {!isUploading && (
@@ -550,6 +550,29 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
               {uploadFile && (
                 <p className="text-xs text-muted-foreground mt-1 truncate">
                   {uploadFile.name} • {(uploadFile.size / 1024).toFixed(0)} KB
+                </p>
+              )}
+            </div>
+
+            <div className="relative">
+              <div className="flex items-center gap-2 my-1">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">ou</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+              <Label className="text-xs font-medium text-muted-foreground">
+                Colar texto (e-mail, WhatsApp, GDS, itinerário)
+              </Label>
+              <Textarea
+                value={pastedText}
+                onChange={(e) => setPastedText(e.target.value)}
+                placeholder="Cole aqui o texto do orçamento, confirmação ou itinerário da passagem aérea..."
+                className="mt-1 min-h-[140px] font-mono text-xs"
+                maxLength={40000}
+              />
+              {pastedText.length > 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {pastedText.length.toLocaleString("pt-BR")} caracteres
                 </p>
               )}
             </div>
@@ -578,7 +601,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
               <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
                 Voltar
               </Button>
-              <Button type="button" onClick={handleParse} disabled={!uploadFile} className="flex-1">
+              <Button type="button" onClick={handleParse} disabled={!uploadFile && !pastedText.trim()} className="flex-1">
                 <Upload className="h-4 w-4 mr-2" /> Importar com IA
               </Button>
             </div>
