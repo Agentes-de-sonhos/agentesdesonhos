@@ -720,7 +720,7 @@ export function FlightWizard({
 
 /* ─── Mode chooser ─── */
 interface ModeChooserProps {
-  onChoose: (mode: "wizard" | "manual" | "import") => void;
+  onChoose: (mode: "wizard" | "import") => void;
 }
 export function FlightModeChooser({ onChoose }: ModeChooserProps) {
   return (
@@ -729,33 +729,24 @@ export function FlightModeChooser({ onChoose }: ModeChooserProps) {
         <h3 className="text-lg font-semibold">Como você quer preencher a passagem aérea?</h3>
         <p className="text-sm text-muted-foreground">Escolha o modo que for mais confortável agora. Você pode trocar a qualquer momento.</p>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <button type="button" onClick={() => onChoose("import")}
           className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm font-semibold text-primary">Importar com IA</span>
           </div>
-          <p className="font-semibold mb-1">Enviar PDF ou imagem</p>
-          <p className="text-sm text-muted-foreground">A IA lê o orçamento aéreo, extrai voos, bagagens, tarifas e abre tela de revisão.</p>
+          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
+          <p className="text-sm text-muted-foreground">A IA lê o orçamento aéreo, extrai voos, bagagens, tarifas e abre a tela de revisão.</p>
         </button>
         <button type="button" onClick={() => onChoose("wizard")}
           className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-muted-foreground" />
+            <Plane className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-semibold text-muted-foreground">Passo a passo</span>
           </div>
           <p className="font-semibold mb-1">Preencher com ajuda</p>
           <p className="text-sm text-muted-foreground">Responda passo a passo, pule o que ainda não souber e complete depois.</p>
-        </button>
-        <button type="button" onClick={() => onChoose("manual")}
-          className="text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <Plane className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-semibold text-muted-foreground">Modo avançado</span>
-          </div>
-          <p className="font-semibold mb-1">Preencher manualmente</p>
-          <p className="text-sm text-muted-foreground">Acesse todos os campos do formulário completo de uma só vez.</p>
         </button>
       </div>
     </div>

@@ -321,6 +321,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
   const { isAdmin } = useUserRole();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [pastedText, setPastedText] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
   const [parsed, setParsed] = useState<ParsedAirfare | null>(null);
@@ -355,8 +356,13 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
   };
 
   const handleParse = async () => {
-    if (!uploadFile) {
-      toast({ title: "Selecione um arquivo", variant: "destructive" });
+    const hasText = pastedText.trim().length > 0;
+    if (!uploadFile && !hasText) {
+      toast({ title: "Envie um arquivo ou cole um texto", variant: "destructive" });
+      return;
+    }
+    if (hasText && pastedText.length > 40000) {
+      toast({ title: "Texto muito longo", description: "Máximo de 40.000 caracteres.", variant: "destructive" });
       return;
     }
     setIsUploading(true);
@@ -369,7 +375,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
       // 1) Upload do arquivo original para storage privado
       const { data: userRes } = await supabase.auth.getUser();
       const userId = userRes.user?.id;
-      if (userId) {
+      if (userId && uploadFile) {
         const ext = uploadFile.name.split(".").pop()?.toLowerCase() || "bin";
         storagePath = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const up = await supabase.storage.from("airfare-imports").upload(storagePath, uploadFile, {
@@ -383,11 +389,12 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
       }
 
       // 2) Base64 + texto auxiliar (PDF)
-      const fileBase64 = await fileToBase64(uploadFile);
-      let extractedText = "";
-      if (uploadFile.type === "application/pdf") {
+      const fileBase64 = uploadFile ? await fileToBase64(uploadFile) : undefined;
+      let extractedText = hasText ? pastedText.trim() : "";
+      if (uploadFile && uploadFile.type === "application/pdf") {
         try {
-          extractedText = await extractPdfText(uploadFile);
+          const pdfText = await extractPdfText(uploadFile);
+          extractedText = extractedText ? `${extractedText}\n\n${pdfText}` : pdfText;
         } catch (e) {
           console.warn("PDF text extraction failed:", e);
         }
@@ -397,8 +404,8 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
       const { data, error } = await supabase.functions.invoke("import-airfare-document", {
         body: {
           fileBase64,
-          fileMimeType: uploadFile.type,
-          fileName: uploadFile.name,
+          fileMimeType: uploadFile?.type,
+          fileName: uploadFile?.name,
           fileUrl: storagePath,
           text: extractedText || undefined,
           quoteId,
@@ -522,9 +529,9 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
           <h3 className="text-base font-semibold">Importação inteligente de orçamento aéreo</h3>
         </div>
         <p className="text-sm text-muted-foreground">
-          Envie um print, imagem ou PDF do orçamento aéreo. A IA lê a tabela completa
-          (trechos, voos, bagagens, tarifas, câmbio e observações) e abre uma tela de
-          revisão antes de aplicar no formulário.
+          Envie um PDF, imagem ou cole o texto do orçamento (e-mail, WhatsApp, GDS, itinerário).
+          A IA lê voos, datas, bagagens, tarifas e abre uma tela de revisão antes de aplicar
+          no formulário.
         </p>
 
         {!isUploading && (
@@ -543,6 +550,29 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
               {uploadFile && (
                 <p className="text-xs text-muted-foreground mt-1 truncate">
                   {uploadFile.name} • {(uploadFile.size / 1024).toFixed(0)} KB
+                </p>
+              )}
+            </div>
+
+            <div className="relative">
+              <div className="flex items-center gap-2 my-1">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">ou</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+              <Label className="text-xs font-medium text-muted-foreground">
+                Colar texto (e-mail, WhatsApp, GDS, itinerário)
+              </Label>
+              <Textarea
+                value={pastedText}
+                onChange={(e) => setPastedText(e.target.value)}
+                placeholder="Cole aqui o texto do orçamento, confirmação ou itinerário da passagem aérea..."
+                className="mt-1 min-h-[140px] font-mono text-xs"
+                maxLength={40000}
+              />
+              {pastedText.length > 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {pastedText.length.toLocaleString("pt-BR")} caracteres
                 </p>
               )}
             </div>
@@ -571,7 +601,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
               <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
                 Voltar
               </Button>
-              <Button type="button" onClick={handleParse} disabled={!uploadFile} className="flex-1">
+              <Button type="button" onClick={handleParse} disabled={!uploadFile && !pastedText.trim()} className="flex-1">
                 <Upload className="h-4 w-4 mr-2" /> Importar com IA
               </Button>
             </div>

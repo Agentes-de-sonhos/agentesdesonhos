@@ -1960,18 +1960,34 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
   }
   if (mode === "import") {
     return (
-      <AirfareSmartImport
-        onCancel={() => setMode("chooser")}
-        onConfirm={(mapped) => {
-          setInjectedInitial({
-            service_data: mapped as any,
-            amount: (mapped.adult_price || 0) + (mapped.child_price || 0),
-            option_label: null,
-            description: null,
-          });
-          setMode("manual");
-        }}
-      />
+      <>
+        {/* Render chooser behind so user returns there on close */}
+        <FlightModeChooser onChoose={(m) => setMode(m)} />
+        <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] sm:max-h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
+              <DialogTitle>Importar passagem aérea com IA</DialogTitle>
+              <DialogDescription>
+                Envie um PDF, imagem ou cole o texto do orçamento. A IA extrai voos, bagagens e tarifas para você revisar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <AirfareSmartImport
+                onCancel={() => setMode("chooser")}
+                onConfirm={(mapped) => {
+                  setInjectedInitial({
+                    service_data: mapped as any,
+                    amount: (mapped.adult_price || 0) + (mapped.child_price || 0),
+                    option_label: null,
+                    description: null,
+                  });
+                  setMode("manual");
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
   if (mode === "wizard") {
