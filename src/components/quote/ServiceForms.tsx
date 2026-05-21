@@ -143,7 +143,7 @@ const flightSchema = z.object({
 });
 
 function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string }) {
-  const updateLeg = (idx: number, field: string, value: string) => {
+  const updateLeg = (idx: number, field: string, value: any) => {
     const updated = legs.map((l, i) => i === idx ? { ...l, [field]: value } : l);
     onChange(updated);
   };
@@ -194,6 +194,44 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
               <Input placeholder="LA8084" value={leg.flight_number || ""} onChange={e => updateLeg(idx, "flight_number", e.target.value)} className="h-8 text-sm mt-1" />
             </div>
           </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Companhia</label>
+              <Input placeholder="LATAM" value={leg.airline || ""} onChange={e => updateLeg(idx, "airline", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Duração</label>
+              <Input placeholder="11:25" value={leg.duration || ""} onChange={e => updateLeg(idx, "duration", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Paradas</label>
+              <Input type="number" min={0} placeholder="0" value={leg.stops ?? ""} onChange={e => updateLeg(idx, "stops", e.target.value === "" ? undefined : Number(e.target.value))} className="h-8 text-sm mt-1" />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Equipamento</label>
+              <Input placeholder="77W / 320" value={leg.equipment || ""} onChange={e => updateLeg(idx, "equipment", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Cabine</label>
+              <Input placeholder="Econômica / Executiva" value={leg.cabin || ""} onChange={e => updateLeg(idx, "cabin", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Base tarifária</label>
+              <Input placeholder="YBXOBR" value={leg.fare_basis || ""} onChange={e => updateLeg(idx, "fare_basis", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-1">
+            <div>
+              <label className="text-xs text-muted-foreground">Bagagem</label>
+              <Input placeholder="1 bagagem de mão + 1 despachada de 23kg" value={leg.baggage_text || ""} onChange={e => updateLeg(idx, "baggage_text", e.target.value)} className="h-8 text-sm mt-1" />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Alerta / Observação do trecho</label>
+            <Input placeholder="Conexão longa, troca de aeroporto…" value={leg.alert || ""} onChange={e => updateLeg(idx, "alert", e.target.value)} className="h-8 text-sm mt-1" />
+          </div>
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={addLeg} className="text-xs">
@@ -207,7 +245,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
-  const [showFlightDetails, setShowFlightDetails] = useState(false);
+  const hasImportedLegs =
+    (init?.outbound_legs?.length ?? 0) > 0 || (init?.return_legs?.length ?? 0) > 0;
+  const [showFlightDetails, setShowFlightDetails] = useState(hasImportedLegs);
   const [showPricing, setShowPricing] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
@@ -364,6 +404,35 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             </div>
           )}
         </div>
+
+        {/* Resumo da importação inteligente (somente leitura) */}
+        {init?.imported_summary && (
+          <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 space-y-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Resumo da importação</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {init.imported_summary.fare_type && (<div><span className="text-muted-foreground">Tipo tarifa: </span>{init.imported_summary.fare_type}</div>)}
+              {init.imported_summary.passengers && (<div><span className="text-muted-foreground">Passageiros: </span>{init.imported_summary.passengers}</div>)}
+              {init.imported_summary.currency && (<div><span className="text-muted-foreground">Moeda: </span>{init.imported_summary.currency}</div>)}
+              {init.imported_summary.total_original != null && (<div><span className="text-muted-foreground">Total original: </span>{init.imported_summary.total_original}</div>)}
+              {init.imported_summary.total_brl != null && (<div><span className="text-muted-foreground">Total BRL: </span>R$ {init.imported_summary.total_brl}</div>)}
+              {init.imported_summary.exchange_rate != null && (<div><span className="text-muted-foreground">Câmbio: </span>{init.imported_summary.exchange_rate}{init.imported_summary.exchange_date ? ` (${init.imported_summary.exchange_date})` : ""}</div>)}
+              {init.imported_summary.fuel_tax && (<div><span className="text-muted-foreground">Taxa combustível: </span>{init.imported_summary.fuel_tax}</div>)}
+            </div>
+            {!!init.imported_summary.observations?.length && (
+              <div>
+                <p className="text-xs text-muted-foreground mt-2">Observações:</p>
+                <ul className="list-disc list-inside text-xs space-y-0.5">
+                  {init.imported_summary.observations.map((o: string, i: number) => (<li key={i}>{o}</li>))}
+                </ul>
+              </div>
+            )}
+            {!!init.imported_summary.unidentified_fields?.length && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                Campos não identificados: {init.imported_summary.unidentified_fields.join(", ")}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* BLOCO 5 — Apresentação do Serviço */}
         {/* BLOCO 5 — Financeiro (prioritário) */}
