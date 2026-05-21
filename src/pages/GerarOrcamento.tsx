@@ -172,11 +172,12 @@ export default function GerarOrcamento() {
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
   const [openSections, setOpenSections] = useState<
-    Record<"services", boolean>
+    Record<"services" | "summary", boolean>
   >({
-    services: true,
+    services: false,
+    summary: false,
   });
-  const toggleSection = (key: "services") =>
+  const toggleSection = (key: "services" | "summary") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("destination");
