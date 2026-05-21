@@ -26,15 +26,17 @@ const CATEGORIES: CategoryDef[] = [
 interface Props {
   countByType?: Record<string, number>;
   onSelect: (type: ServiceType) => void;
-  onOpenAIImport: () => void;
+  onOpenAIImport?: () => void;
+  showAIImport?: boolean;
 }
 
-export function ServiceCategoryGrid({ countByType = {}, onSelect, onOpenAIImport }: Props) {
+export function ServiceCategoryGrid({ countByType = {}, onSelect, onOpenAIImport, showAIImport = false }: Props) {
   return (
     <div
       className="grid gap-3 w-full"
       style={{ gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))" }}
     >
+      {showAIImport && onOpenAIImport && (
       <button
         type="button"
         onClick={onOpenAIImport}
@@ -48,6 +50,7 @@ export function ServiceCategoryGrid({ countByType = {}, onSelect, onOpenAIImport
         <Sparkles className="h-6 w-6 text-primary" />
         <span className="text-center leading-tight px-1">Importar com IA</span>
       </button>
+      )}
 
       {CATEGORIES.map((cat) => {
         const Icon = cat.icon;
