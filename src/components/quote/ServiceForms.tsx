@@ -505,6 +505,14 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           {showFlightDetails && (
             <div className="px-4 pb-4 space-y-5 border-t border-border/40 pt-3">
               <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" direction="outbound" />
+              {internalLegs.length > 0 && (
+                <FlightLegFields legs={internalLegs} onChange={setInternalLegs} label="Trecho interno" direction="internal" defaultSegmentType="internal" />
+              )}
+              {internalLegs.length === 0 && (
+                <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setInternalLegs([{ ...emptyLeg(), segment_type: "internal" as SegmentType }])}>
+                  <Plus className="h-3 w-3 mr-1" /> Adicionar trecho interno
+                </Button>
+              )}
               {!isOneWay && <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" direction="return" />}
             </div>
           )}
