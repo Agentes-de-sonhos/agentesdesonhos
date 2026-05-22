@@ -2270,6 +2270,110 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
   return <FlightForm {...merged} />;
 }
 
+/* Generic entry for services that share the unified AI importer:
+   transfer, attraction, insurance, cruise, circuit, other.
+   Editing existing services skips the chooser. */
+function GenericImportEntry({
+  serviceKey,
+  icon,
+  children,
+  ...props
+}: Omit<ServiceFormProps, "serviceType"> & {
+  serviceKey: GenericServiceKey;
+  icon: React.ReactNode;
+  children: React.ReactElement;
+}) {
+  const isEditing = !!props.initialData;
+  const [mode, setMode] = useState<"chooser" | "manual" | "import">(isEditing ? "manual" : "chooser");
+  const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
+  const cfg = SERVICE_IMPORT_CONFIGS[serviceKey];
+
+  const Chooser = (
+    <GenericModeChooser
+      label={cfg.serviceLabel}
+      icon={icon}
+      onChoose={(m) => setMode(m)}
+    />
+  );
+
+  if (mode === "chooser") return Chooser;
+
+  if (mode === "import") {
+    return (
+      <>
+        {Chooser}
+        <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] sm:max-h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
+              <DialogTitle>Importar {cfg.serviceLabel} com IA</DialogTitle>
+              <DialogDescription>
+                Envie um PDF, imagem ou cole o texto da reserva. A IA extrai os dados principais para você revisar antes de aplicar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <GenericServiceSmartImport
+                serviceType={serviceKey}
+                serviceLabel={cfg.serviceLabel}
+                fields={cfg.fields}
+                mapToInitialData={cfg.mapToInitialData}
+                onCancel={() => setMode("chooser")}
+                onConfirm={(mapped) => {
+                  setInjectedInitial({
+                    service_data: mapped.service_data as any,
+                    amount: mapped.amount || 0,
+                    option_label: null,
+                    description: null,
+                  });
+                  setMode("manual");
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  // manual — inject extracted initialData into the wrapped form
+  const child = injectedInitial
+    ? React.cloneElement(children, { initialData: injectedInitial })
+    : children;
+  return child;
+}
+
+function GenericModeChooser({
+  label, icon, onChoose,
+}: { label: string; icon: React.ReactNode; onChoose: (mode: "manual" | "import") => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center space-y-1">
+        <h3 className="text-lg font-semibold">Como você quer preencher o serviço de {label}?</h3>
+        <p className="text-sm text-muted-foreground">Escolha o modo que for mais confortável agora.</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button type="button" onClick={() => onChoose("import")}
+          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">Importar com IA</span>
+          </div>
+          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
+          <p className="text-sm text-muted-foreground">A IA lê a reserva, extrai os dados principais e abre a tela de revisão.</p>
+        </button>
+        <button type="button" onClick={() => onChoose("manual")}
+          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors">
+          <div className="flex items-center gap-2 mb-2">
+            {icon}
+            <span className="text-sm font-semibold text-muted-foreground">Preencher manualmente</span>
+          </div>
+          <p className="font-semibold mb-1">Formulário tradicional</p>
+          <p className="text-sm text-muted-foreground">Digite os dados campo a campo.</p>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot }: ServiceFormProps) {
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
