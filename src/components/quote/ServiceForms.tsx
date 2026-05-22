@@ -36,7 +36,9 @@ import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./fligh
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
 import { HotelSmartImport } from "./hotel-import/HotelSmartImport";
 import { CarRentalSmartImport } from "./car-rental-import/CarRentalSmartImport";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Ticket, Shield, Ship, Map as MapIcon, Package } from "lucide-react";
+import { GenericServiceSmartImport, type GenericServiceKey } from "./service-import/GenericServiceSmartImport";
+import { SERVICE_IMPORT_CONFIGS } from "./service-import/serviceImportConfigs";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
