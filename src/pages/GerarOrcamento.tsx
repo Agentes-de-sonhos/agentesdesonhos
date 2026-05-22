@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal,
+  Pencil, MoreHorizontal, Play,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -829,18 +829,23 @@ export default function GerarOrcamento() {
               <button
                 type="button"
                 onClick={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
-                className="w-full text-left px-5 sm:px-6 pt-5 pb-5 hover:bg-muted/30 transition-colors rounded-lg"
+                className="w-full text-left px-5 sm:px-6 pt-5 pb-5 hover:bg-muted/30 transition-colors rounded-lg flex items-center justify-between gap-4"
               >
-                <div className="w-fit">
-                  <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-violet-500" />
-                    Configurações do Orçamento
-                  </h2>
-                  <div className="mt-2 h-1 w-full rounded-full bg-violet-500" />
+                <div>
+                  <div className="w-fit">
+                    <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                      <CreditCard className="h-5 w-5 text-violet-500" />
+                      Configurações do Orçamento
+                    </h2>
+                    <div className="mt-2 h-1 w-full rounded-full bg-violet-500" />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Destino, investimento, validade e documentos — em etapas guiadas.
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Destino, investimento, validade e documentos — em etapas guiadas.
-                </p>
+                <div className="shrink-0 h-10 w-10 rounded-full bg-violet-500 flex items-center justify-center shadow-md">
+                  <Play className="h-5 w-5 text-white fill-white" />
+                </div>
               </button>
             </Card>
 
