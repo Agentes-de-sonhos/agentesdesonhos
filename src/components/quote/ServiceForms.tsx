@@ -2338,7 +2338,15 @@ function GenericImportEntry({
   const child = injectedInitial
     ? React.cloneElement(children, { initialData: injectedInitial })
     : children;
-  return child;
+  // Services whose form already renders the photo slot internally
+  const FORMS_WITH_INTERNAL_PHOTO: GenericServiceKey[] = ["attraction", "other"];
+  const showExternalPhoto = !FORMS_WITH_INTERNAL_PHOTO.includes(serviceKey) && !!props.photoSlot;
+  return (
+    <>
+      {showExternalPhoto && props.photoSlot}
+      {child}
+    </>
+  );
 }
 
 function GenericModeChooser({
