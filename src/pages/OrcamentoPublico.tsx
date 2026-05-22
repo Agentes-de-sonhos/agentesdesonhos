@@ -304,8 +304,7 @@ function InclusionBadge({ ok, label }: { ok: boolean; label: string }) {
 }
 
 function FlightBody({ data }: { data: any }) {
-  const outLegs: any[] = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
-  const retLegs: any[] = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
+  const { outbound: outLegs, internal: intLegs, return_: retLegs } = splitFlightLegs(data) as { outbound: any[]; internal: any[]; return_: any[] };
   return (
     <div className="space-y-4">
       {/* Header: airline + route */}
@@ -321,6 +320,9 @@ function FlightBody({ data }: { data: any }) {
       </div>
 
       <FlightDirectionGroup title="Ida" icon={<PlaneTakeoff className="h-3.5 w-3.5" />} legs={outLegs} fallbackDate={data.departure_date} />
+      {intLegs.length > 0 && (
+        <FlightDirectionGroup title="Trecho interno" icon={<Plane className="h-3.5 w-3.5" />} legs={intLegs} />
+      )}
       {!data.is_one_way && retLegs.length > 0 && (
         <FlightDirectionGroup title="Volta" icon={<PlaneLanding className="h-3.5 w-3.5" />} legs={retLegs} fallbackDate={data.return_date} />
       )}
