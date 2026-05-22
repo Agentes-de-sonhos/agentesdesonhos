@@ -2306,12 +2306,12 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     case "flight": formElement = <FlightEntry {...formProps} />; break;
     case "hotel": formElement = <HotelEntry {...formProps} />; break;
     case "car_rental": formElement = <CarRentalEntry {...formProps} />; break;
-    case "transfer": formElement = <TransferForm {...formProps} />; break;
-    case "attraction": formElement = <AttractionForm {...formProps} />; break;
-    case "insurance": formElement = <InsuranceForm {...formProps} />; break;
-    case "cruise": formElement = <CruiseForm {...formProps} />; break;
-    case "circuit": formElement = <CircuitForm {...formProps} />; break;
-    case "other": formElement = <OtherForm {...formProps} />; break;
+    case "transfer": formElement = <GenericImportEntry serviceKey="transfer" icon={<MapIcon className="h-4 w-4 text-muted-foreground" />} {...formProps}><TransferForm {...formProps} /></GenericImportEntry>; break;
+    case "attraction": formElement = <GenericImportEntry serviceKey="attraction" icon={<Ticket className="h-4 w-4 text-muted-foreground" />} {...formProps}><AttractionForm {...formProps} /></GenericImportEntry>; break;
+    case "insurance": formElement = <GenericImportEntry serviceKey="insurance" icon={<Shield className="h-4 w-4 text-muted-foreground" />} {...formProps}><InsuranceForm {...formProps} /></GenericImportEntry>; break;
+    case "cruise": formElement = <GenericImportEntry serviceKey="cruise" icon={<Ship className="h-4 w-4 text-muted-foreground" />} {...formProps}><CruiseForm {...formProps} /></GenericImportEntry>; break;
+    case "circuit": formElement = <GenericImportEntry serviceKey="circuit" icon={<MapIcon className="h-4 w-4 text-muted-foreground" />} {...formProps}><CircuitForm {...formProps} /></GenericImportEntry>; break;
+    case "other": formElement = <GenericImportEntry serviceKey="other" icon={<Package className="h-4 w-4 text-muted-foreground" />} {...formProps}><OtherForm {...formProps} /></GenericImportEntry>; break;
     default: return null;
   }
 
