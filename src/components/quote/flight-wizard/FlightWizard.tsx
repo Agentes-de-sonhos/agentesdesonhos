@@ -20,6 +20,8 @@ import { useAirports } from "@/hooks/useAirports";
 import { cn } from "@/lib/utils";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { computeFlightStatus } from "./flightStatus";
+import { SEGMENT_TYPE_OPTIONS, classifySegments } from "@/lib/flightSegments";
+import type { SegmentType } from "@/types/quote";
 
 /* ─── Types ─── */
 export interface FlightLegDraft {
@@ -29,6 +31,7 @@ export interface FlightLegDraft {
   departure_time?: string;
   arrival_time?: string;
   flight_number?: string;
+  segment_type?: SegmentType;
 }
 
 export interface WizardFlightDraft {
@@ -243,14 +246,25 @@ function StepShell({
 
 /* ─── Leg editor (mirrors FlightLegFields) ─── */
 function LegEditor({
-  legs, onChange, label,
-}: { legs: FlightLegDraft[]; onChange: (l: FlightLegDraft[]) => void; label: string }) {
+  legs, onChange, label, defaultSegmentType,
+}: { legs: FlightLegDraft[]; onChange: (l: FlightLegDraft[]) => void; label: string; defaultSegmentType?: SegmentType }) {
   const upd = (idx: number, field: keyof FlightLegDraft, value: string) => {
     onChange(legs.map((l, i) => i === idx ? { ...l, [field]: value } : l));
   };
+  const autoClassify = () => {
+    const types = classifySegments(legs);
+    onChange(legs.map((l, i) => ({ ...l, segment_type: types[i] || l.segment_type })));
+  };
   return (
     <div className="space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">✈ {label}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">✈ {label}</p>
+        {legs.length > 1 && (
+          <Button type="button" variant="ghost" size="sm" onClick={autoClassify} className="h-6 text-xs">
+            <Sparkles className="h-3 w-3 mr-1" /> Classificar trechos
+          </Button>
+        )}
+      </div>
       {legs.map((leg, idx) => (
         <div key={idx} className="relative border border-border/30 rounded-md p-3 space-y-2">
           <div className="flex items-center justify-between mb-1">
@@ -301,6 +315,19 @@ function LegEditor({
               <label className="text-xs text-muted-foreground">Nº do voo</label>
               <Input placeholder="LA8084" value={leg.flight_number || ""} onChange={e => upd(idx, "flight_number", e.target.value)} className="h-8 text-sm mt-1" />
             </div>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Tipo do trecho</label>
+            <select
+              value={leg.segment_type || ""}
+              onChange={(e) => upd(idx, "segment_type", e.target.value as SegmentType)}
+              className="mt-1 h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+            >
+              <option value="">{defaultSegmentType ? `Auto (${SEGMENT_TYPE_OPTIONS.find(o => o.value === defaultSegmentType)?.label})` : "Não classificado"}</option>
+              {SEGMENT_TYPE_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
           </div>
         </div>
       ))}
