@@ -35,6 +35,7 @@ import type {
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
 import { HotelSmartImport } from "./hotel-import/HotelSmartImport";
+import { CarRentalSmartImport } from "./car-rental-import/CarRentalSmartImport";
 import { Sparkles } from "lucide-react";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
