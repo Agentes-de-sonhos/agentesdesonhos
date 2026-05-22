@@ -269,11 +269,38 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
             <label className="text-xs text-muted-foreground">Alerta / Observação do trecho</label>
             <Input placeholder="Conexão longa, troca de aeroporto…" value={leg.alert || ""} onChange={e => updateLeg(idx, "alert", e.target.value)} className="h-8 text-sm mt-1" />
           </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Tipo do trecho</label>
+            <select
+              value={(leg.segment_type as string) || ""}
+              onChange={e => updateLeg(idx, "segment_type", e.target.value || undefined)}
+              className="mt-1 h-8 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">Não classificado</option>
+              {SEGMENT_TYPE_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={addLeg} className="text-xs">
         <Plus className="h-3 w-3 mr-1" /> Adicionar trecho
       </Button>
+      {legs.length > 1 && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-xs ml-2"
+          onClick={() => {
+            const types = classifySegments(legs as any);
+            onChange(legs.map((l, i) => ({ ...l, segment_type: types[i] || (l.segment_type as SegmentType) })));
+          }}
+        >
+          Classificar trechos automaticamente
+        </Button>
+      )}
     </div>
   );
 }
