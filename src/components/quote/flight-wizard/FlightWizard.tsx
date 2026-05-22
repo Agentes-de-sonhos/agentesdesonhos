@@ -517,7 +517,7 @@ export function FlightWizard({
         return (
           <StepShell step={step + 1} total={totalSteps} title="Detalhes da ida"
             help="Cadastre o primeiro trecho da ida. Se houver conexão, adicione outro trecho para deixar o orçamento mais claro para o cliente.">
-            <LegEditor legs={data.outbound_legs || [emptyLeg()]} onChange={(legs) => upd({ outbound_legs: legs })} label="Ida" />
+            <LegEditor legs={data.outbound_legs || [emptyLeg()]} onChange={(legs) => upd({ outbound_legs: legs })} label="Ida" defaultSegmentType="outbound" />
           </StepShell>
         );
 
@@ -525,7 +525,7 @@ export function FlightWizard({
         return (
           <StepShell step={step + 1} total={totalSteps} title="Detalhes da volta"
             help="Agora informe os dados da volta. Se ainda não tiver os horários ou número do voo, você pode pular.">
-            <LegEditor legs={data.return_legs || [emptyLeg()]} onChange={(legs) => upd({ return_legs: legs })} label="Volta" />
+            <LegEditor legs={data.return_legs || [emptyLeg()]} onChange={(legs) => upd({ return_legs: legs })} label="Volta" defaultSegmentType="return" />
           </StepShell>
         );
 
