@@ -123,11 +123,21 @@ const flightLegSchema = z.object({
 const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ leg_date: "", airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
 
 /** Normalize old single-leg data to multi-leg arrays */
-function normalizeLegs(init: any): { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] } {
-  let { outbound, return_ } = splitFlightLegs(init) as { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] };
+function normalizeLegs(init: any): {
+  outbound: z.infer<typeof flightLegSchema>[];
+  internal: z.infer<typeof flightLegSchema>[];
+  return_: z.infer<typeof flightLegSchema>[];
+} {
+  const split = splitFlightLegs(init) as unknown as {
+    outbound: z.infer<typeof flightLegSchema>[];
+    internal: z.infer<typeof flightLegSchema>[];
+    return_: z.infer<typeof flightLegSchema>[];
+  };
+  let { outbound, internal, return_ } = split;
   if (!outbound.length) outbound = [emptyLeg()];
   if (!return_.length) return_ = [emptyLeg()];
-  return { outbound, return_ };
+  // internal stays empty by default — section only appears when user adds a leg
+  return { outbound, internal, return_ };
 }
 
 const flightSchema = z.object({
@@ -147,9 +157,10 @@ const flightSchema = z.object({
   notes: z.string().optional(),
   outbound_legs: z.array(flightLegSchema),
   return_legs: z.array(flightLegSchema),
+  internal_legs: z.array(flightLegSchema),
 });
 
-function FlightLegFields({ legs, onChange, label, direction }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string; direction: "outbound" | "return" }) {
+function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string; direction: "outbound" | "return" | "internal"; defaultSegmentType?: SegmentType }) {
   const { getAirport } = useAirports();
   const airportHint = (code?: string, fallbackCity?: string) => {
     const c = (code || "").toUpperCase().trim();
@@ -163,7 +174,11 @@ function FlightLegFields({ legs, onChange, label, direction }: { legs: z.infer<t
     const updated = legs.map((l, i) => i === idx ? { ...l, [field]: value } : l);
     onChange(updated);
   };
-  const addLeg = () => onChange([...legs, emptyLeg()]);
+  const addLeg = () => {
+    const leg = emptyLeg();
+    if (defaultSegmentType) (leg as any).segment_type = defaultSegmentType;
+    onChange([...legs, leg]);
+  };
   const removeLeg = (idx: number) => {
     if (legs.length <= 1) return;
     onChange(legs.filter((_, i) => i !== idx));
@@ -276,7 +291,7 @@ function FlightLegFields({ legs, onChange, label, direction }: { legs: z.infer<t
       <Button type="button" variant="outline" size="sm" onClick={addLeg} className="text-xs">
         <Plus className="h-3 w-3 mr-1" /> Adicionar trecho
       </Button>
-      {legs.length > 1 && (
+      {legs.length > 1 && direction !== "internal" && (
         <Button
           type="button"
           variant="ghost"
