@@ -336,7 +336,18 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const totalAmount = totalAdults + totalChildren;
 
   const hasNonEmptyLegs = (legs: z.infer<typeof flightLegSchema>[]) =>
-    legs.some(l => Object.values(l).some(v => v && String(v).length > 0));
+    legs.some(l => Object.entries(l).some(([key, v]) => key !== "segment_type" && v && String(v).length > 0));
+
+  const prepareLegsForSave = () => {
+    const outbound = hasNonEmptyLegs(outboundLegs) ? outboundLegs : [];
+    const return_ = !isOneWay && hasNonEmptyLegs(returnLegs) ? returnLegs : [];
+    const all = [...outbound, ...return_];
+    const hasManualTypes = all.some((leg) => !!leg.segment_type);
+    if (hasManualTypes) return { outbound, return_ };
+    const classified = classifySegments(all as any);
+    const stamped = all.map((leg, i) => ({ ...leg, segment_type: classified[i] || leg.segment_type }));
+    return { outbound: stamped.slice(0, outbound.length), return_: stamped.slice(outbound.length) };
+  };
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
     const computedTotalAdults = values.adult_price * adultsCount;
@@ -344,8 +355,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
     // Always persist legs that have data, regardless of whether the panel is expanded.
     // This guarantees imported segments survive save → reopen even if the user collapsed the section.
-    const hasOutbound = hasNonEmptyLegs(outboundLegs);
-    const hasReturn = hasNonEmptyLegs(returnLegs);
+    const preparedLegs = prepareLegsForSave();
+    const hasOutbound = preparedLegs.outbound.length > 0;
+    const hasReturn = preparedLegs.return_.length > 0;
 
     // Fallback: derive top-level dates from leg dates when the date pickers are empty
     // (e.g. AI import gave segments dates but the main "Data de ida/volta" wasn't picked).
@@ -377,13 +389,13 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     }
 
     if (hasOutbound) {
-      data.outbound_legs = outboundLegs;
+      data.outbound_legs = preparedLegs.outbound;
       // backward compat: keep first leg as outbound_detail
-      data.outbound_detail = outboundLegs[0];
+      data.outbound_detail = preparedLegs.outbound[0];
     }
     if (!isOneWay && hasReturn) {
-      data.return_legs = returnLegs;
-      data.return_detail = returnLegs[0];
+      data.return_legs = preparedLegs.return_;
+      data.return_detail = preparedLegs.return_[0];
     }
 
     onSubmit(data, computedTotalAdults + computedTotalChildren, values.option_label || undefined, values.service_description || undefined);
