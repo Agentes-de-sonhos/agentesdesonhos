@@ -1094,6 +1094,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDa
           <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
         )} />
         {renderPaymentSlot(paymentSlot, form.watch("price"))}
+        {photoSlot}
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
