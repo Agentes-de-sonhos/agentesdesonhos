@@ -12,6 +12,8 @@ import { extractPdfText } from "@/lib/pdfText";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { FlightData, FlightLegDetail } from "@/types/quote";
+import type { SegmentType } from "@/types/quote";
+import { classifySegments, SEGMENT_TYPE_OPTIONS } from "@/lib/flightSegments";
 
 /** ─────────── Types matching the new edge function ─────────── */
 export interface ParsedAirfareFlight {
@@ -37,6 +39,8 @@ export interface ParsedAirfareFlight {
   bagagem_despachada: boolean | null;
   quantidade_bagagem_despachada: number | null;
   alerta: string;
+  /** Optional segment classification (filled by AI or auto-classifier). */
+  segment_type?: SegmentType;
 }
 
 export interface ParsedAirfare {
@@ -171,6 +175,7 @@ function voo2leg(v: ParsedAirfareFlight, yearHint: number): FlightLegDetail {
     baggage_checked: v.bagagem_despachada ?? null,
     baggage_checked_count: v.quantidade_bagagem_despachada ?? null,
     alert: v.alerta || "",
+    segment_type: v.segment_type,
   };
 }
 
@@ -226,6 +231,13 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
   });
   const outboundLegs: FlightLegDetail[] = allLegs.slice(0, outboundCount);
   const returnLegs: FlightLegDetail[] = allLegs.slice(outboundCount);
+
+  // Auto-classify segment types using the full chronological list, then re-split.
+  const classified = classifySegments(allLegs);
+  allLegs.forEach((leg, i) => {
+    if (!leg.segment_type) leg.segment_type = classified[i];
+  });
+  // Also stamp on the sliced arrays (they share the same object refs).
 
   const first = voos[0];
   const lastOut = voos[outboundCount - 1] || first;
@@ -464,6 +476,18 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
         campos_nao_identificados: Array.isArray(candidate!.campos_nao_identificados) ? candidate!.campos_nao_identificados : [],
         confianca_extracao: candidate!.confianca_extracao || {},
       };
+      // Auto-classify segment types for any voo that didn't come pre-classified from the AI.
+      try {
+        const legs = result.voos.map(v => ({
+          airport_origin: v.origem_codigo,
+          airport_destination: v.destino_codigo,
+          leg_date: v.data_saida,
+          departure_time: v.hora_saida,
+          arrival_time: v.hora_chegada,
+        }));
+        const types = classifySegments(legs);
+        result.voos = result.voos.map((v, i) => ({ ...v, segment_type: v.segment_type || types[i] }));
+      } catch { /* noop */ }
       setParsed(result);
 
       const conf = result.confianca_extracao?.geral ?? 0;
@@ -707,6 +731,17 @@ function ReviewScreen({
     onChange({ ...data, valores: { ...data.valores, [field]: value } });
   const updateVoo = (idx: number, field: keyof ParsedAirfareFlight, value: any) =>
     onChange({ ...data, voos: data.voos.map((v, i) => (i === idx ? { ...v, [field]: value } : v)) });
+  const reclassifySegments = () => {
+    const legs = data.voos.map(v => ({
+      airport_origin: v.origem_codigo,
+      airport_destination: v.destino_codigo,
+      leg_date: v.data_saida,
+      departure_time: v.hora_saida,
+      arrival_time: v.hora_chegada,
+    }));
+    const types = classifySegments(legs);
+    onChange({ ...data, voos: data.voos.map((v, i) => ({ ...v, segment_type: types[i] })) });
+  };
   const removeVoo = (idx: number) =>
     onChange({ ...data, voos: data.voos.filter((_, i) => i !== idx).map((v, i) => ({ ...v, ordem: i + 1 })) });
   const addVoo = () =>
@@ -777,9 +812,14 @@ function ReviewScreen({
         <CardContent className="pt-4 space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-semibold">Voos identificados ({data.voos.length})</h4>
-            <Button type="button" variant="outline" size="sm" onClick={addVoo}>
-              <Plus className="h-3 w-3 mr-1" /> Adicionar voo
-            </Button>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={reclassifySegments}>
+                Reclassificar trechos
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={addVoo}>
+                <Plus className="h-3 w-3 mr-1" /> Adicionar voo
+              </Button>
+            </div>
           </div>
 
           {data.voos.map((v, idx) => (
@@ -815,6 +855,21 @@ function ReviewScreen({
                 <Field label="Escalas" value={String(v.numero_escalas ?? 0)} onChange={(val) => updateVoo(idx, "numero_escalas", parseInt(val) || 0)} />
                 <Field label="Base tarifária" value={v.base_tarifaria} onChange={(val) => updateVoo(idx, "base_tarifaria", val)} />
                 <Field label="Bagagem (texto)" value={v.bagagem_texto} onChange={(val) => updateVoo(idx, "bagagem_texto", val)} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Tipo do trecho</Label>
+                  <select
+                    value={v.segment_type || ""}
+                    onChange={(e) => updateVoo(idx, "segment_type", (e.target.value || undefined) as any)}
+                    className="mt-1 h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                  >
+                    <option value="">Não classificado</option>
+                    {SEGMENT_TYPE_OPTIONS.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               {v.alerta && (
                 <Field label="Alerta" value={v.alerta} onChange={(val) => updateVoo(idx, "alerta", val)} />

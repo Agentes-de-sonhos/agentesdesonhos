@@ -67,7 +67,17 @@ export interface FlightLegDetail {
   baggage_checked?: boolean | null;
   baggage_checked_count?: number | null;
   alert?: string;
+  /** Segment classification within the itinerary (ida, conexão, voo interno, etc.) */
+  segment_type?: SegmentType;
 }
+
+export type SegmentType =
+  | "outbound"
+  | "outbound_connection"
+  | "internal"
+  | "return_connection"
+  | "return"
+  | "other";
 
 export interface FlightData {
   origin_city: string;
