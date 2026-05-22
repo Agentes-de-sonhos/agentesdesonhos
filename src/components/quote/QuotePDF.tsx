@@ -79,9 +79,17 @@ function getServiceDetails(service: QuoteService): string[] {
       } else {
         details.push(`Ida: ${formatDate(data.departure_date)} (somente ida)`);
       }
-      // Multi-leg support (backward compat)
-      const outLegs = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
-      const retLegs = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
+      // Multi-leg support — re-bucket by segment_type so internal flights aren't shown under "Ida".
+      const { outbound: outLegs, internal: intLegs, return_: retLegs } = (() => {
+        try {
+          // Lazy import is unnecessary in this build — splitFlightLegs is in lib
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const { splitFlightLegs } = require("@/lib/flightSegments");
+          return splitFlightLegs(data);
+        } catch {
+          return { outbound: data.outbound_legs || [], internal: data.internal_legs || [], return_: data.return_legs || [] };
+        }
+      })();
       outLegs.forEach((ob: any, i: number) => {
         const parts: string[] = [];
         if (ob.leg_date) parts.push(formatDate(ob.leg_date));
@@ -90,6 +98,16 @@ function getServiceDetails(service: QuoteService): string[] {
         if (ob.departure_time) parts.push(`Saída: ${ob.departure_time}`);
         if (ob.arrival_time) parts.push(`Chegada: ${ob.arrival_time}`);
         const label = outLegs.length > 1 ? `✈ Ida (trecho ${i + 1})` : `✈ Ida`;
+        if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
+      });
+      intLegs.forEach((it: any, i: number) => {
+        const parts: string[] = [];
+        if (it.leg_date) parts.push(formatDate(it.leg_date));
+        if (it.flight_number) parts.push(`Voo ${it.flight_number}`);
+        if (it.airport_origin && it.airport_destination) parts.push(`${it.airport_origin} → ${it.airport_destination}`);
+        if (it.departure_time) parts.push(`Saída: ${it.departure_time}`);
+        if (it.arrival_time) parts.push(`Chegada: ${it.arrival_time}`);
+        const label = intLegs.length > 1 ? `✈ Trecho interno (${i + 1})` : `✈ Trecho interno`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
       retLegs.forEach((rt: any, i: number) => {
