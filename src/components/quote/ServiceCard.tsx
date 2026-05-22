@@ -66,7 +66,7 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Ida: ${formatDate(data.departure_date)}`);
       if (data.return_date && !data.is_one_way) details.push(`Volta: ${formatDate(data.return_date)}`);
       // Multi-leg support (with backward compat for single outbound_detail/return_detail)
-      const { outbound: outLegs, return_: retLegs } = splitFlightLegs(data);
+      const { outbound: outLegs, internal: intLegs, return_: retLegs } = splitFlightLegs(data);
       outLegs.forEach((ob: any, i: number) => {
         const label = ob.segment_type ? segmentLabel(ob.segment_type) : (outLegs.length > 1 ? `Voo ida (trecho ${i + 1})` : `Voo ida`);
         if (ob.flight_number) details.push(`${label}: ${ob.flight_number}`);
@@ -75,6 +75,15 @@ function getServiceDetails(service: QuoteService): string[] {
         if (ob.airport_origin || ob.airport_destination) legParts.push(`${ob.airport_origin || ''} → ${ob.airport_destination || ''}`);
         if (legParts.length) details.push(legParts.join(' | '));
         if (ob.departure_time || ob.arrival_time) details.push(`Saída: ${ob.departure_time || '-'} | Chegada: ${ob.arrival_time || '-'}`);
+      });
+      intLegs.forEach((it: any, i: number) => {
+        const label = intLegs.length > 1 ? `Trecho interno (${i + 1})` : `Trecho interno`;
+        if (it.flight_number) details.push(`${label}: ${it.flight_number}`);
+        const legParts: string[] = [];
+        if (it.leg_date) legParts.push(formatDate(it.leg_date));
+        if (it.airport_origin || it.airport_destination) legParts.push(`${it.airport_origin || ''} → ${it.airport_destination || ''}`);
+        if (legParts.length) details.push(legParts.join(' | '));
+        if (it.departure_time || it.arrival_time) details.push(`Saída: ${it.departure_time || '-'} | Chegada: ${it.arrival_time || '-'}`);
       });
       retLegs.forEach((rt: any, i: number) => {
         const label = rt.segment_type ? segmentLabel(rt.segment_type) : (retLegs.length > 1 ? `Voo volta (trecho ${i + 1})` : `Voo volta`);
