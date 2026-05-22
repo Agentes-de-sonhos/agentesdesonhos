@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign, Settings2 } from "lucide-react";
+import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign, Settings2, Car } from "lucide-react";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
@@ -35,6 +35,7 @@ import type {
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
 import { HotelSmartImport } from "./hotel-import/HotelSmartImport";
+import { CarRentalSmartImport } from "./car-rental-import/CarRentalSmartImport";
 import { Sparkles } from "lucide-react";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
@@ -2088,6 +2089,82 @@ function HotelModeChooser({ onChoose }: { onChoose: (mode: "manual" | "import") 
   );
 }
 
+/* Car rental entry: mode chooser → AI import or classic CarRentalForm.
+   Editing existing services skips chooser. */
+function CarRentalEntry(props: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+  const isEditing = !!props.initialData;
+  const [mode, setMode] = useState<"chooser" | "manual" | "import">(isEditing ? "manual" : "chooser");
+  const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
+
+  if (mode === "chooser") {
+    return <CarRentalModeChooser onChoose={(m) => setMode(m)} />;
+  }
+  if (mode === "import") {
+    return (
+      <>
+        <CarRentalModeChooser onChoose={(m) => setMode(m)} />
+        <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] sm:max-h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
+              <DialogTitle>Importar locação com IA</DialogTitle>
+              <DialogDescription>
+                Envie um PDF, imagem ou cole o texto da reserva. A IA extrai locadora, veículo, datas, locais, valores e proteções para você revisar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <CarRentalSmartImport
+                onCancel={() => setMode("chooser")}
+                onConfirm={(mapped) => {
+                  setInjectedInitial({
+                    service_data: mapped as any,
+                    amount: mapped.price || 0,
+                    option_label: null,
+                    description: null,
+                  });
+                  setMode("manual");
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+  const merged = injectedInitial ? { ...props, initialData: injectedInitial } : props;
+  return <CarRentalForm {...merged} />;
+}
+
+function CarRentalModeChooser({ onChoose }: { onChoose: (mode: "manual" | "import") => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center space-y-1">
+        <h3 className="text-lg font-semibold">Como você quer preencher a locação?</h3>
+        <p className="text-sm text-muted-foreground">Escolha o modo que for mais confortável agora.</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button type="button" onClick={() => onChoose("import")}
+          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">Importar com IA</span>
+          </div>
+          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
+          <p className="text-sm text-muted-foreground">A IA lê a reserva, extrai locadora, veículo, datas, valores e taxas, e abre a tela de revisão.</p>
+        </button>
+        <button type="button" onClick={() => onChoose("manual")}
+          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors">
+          <div className="flex items-center gap-2 mb-2">
+            <Car className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold text-muted-foreground">Preencher manualmente</span>
+          </div>
+          <p className="font-semibold mb-1">Formulário tradicional</p>
+          <p className="text-sm text-muted-foreground">Digite os dados da locação campo a campo.</p>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* Flight entry: mode chooser → FlightWizard or classic FlightForm.
    Editing existing services skips chooser and opens classic form (no regression). */
 function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
@@ -2225,7 +2302,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   switch (serviceType) {
     case "flight": formElement = <FlightEntry {...formProps} />; break;
     case "hotel": formElement = <HotelEntry {...formProps} />; break;
-    case "car_rental": formElement = <CarRentalForm {...formProps} />; break;
+    case "car_rental": formElement = <CarRentalEntry {...formProps} />; break;
     case "transfer": formElement = <TransferForm {...formProps} />; break;
     case "attraction": formElement = <AttractionForm {...formProps} />; break;
     case "insurance": formElement = <InsuranceForm {...formProps} />; break;
