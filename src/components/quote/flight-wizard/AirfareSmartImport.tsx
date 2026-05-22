@@ -284,7 +284,9 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     origin_city: first.origem_nome || p.resumo?.origem_inicial || "",
     destination_city: lastOut.destino_nome || p.resumo?.destino_final || "",
     departure_date: outboundLegs[0]?.leg_date || p.resumo?.data_ida || "",
-    return_date: returnLegs.length ? (returnLegs[0]?.leg_date || p.resumo?.data_retorno || "") : "",
+    return_date: returnLegs.length
+      ? (returnLegs[returnLegs.length - 1]?.leg_date || p.resumo?.data_retorno || "")
+      : "",
     includes_baggage: anyChecked,
     includes_boarding_fee: false,
     adult_price: totalAdult,
