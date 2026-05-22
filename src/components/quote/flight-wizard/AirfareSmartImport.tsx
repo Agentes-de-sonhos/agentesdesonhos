@@ -563,7 +563,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
                 ref={fileInputRef}
                 type="file"
                 accept=".pdf,image/png,image/jpeg,image/jpg,image/webp"
-                className="mt-1"
+                className="mt-1 cursor-pointer"
                 onChange={(e) => handleFileSelected(e.target.files?.[0] || null)}
               />
               {uploadFile && (
