@@ -12,6 +12,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, computeFlightStatus, type FlightStatus } from "./flight-wizard/flightStatus";
+import { segmentLabel, splitFlightLegs } from "@/lib/flightSegments";
 
 const SERVICE_ICONS: Record<ServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
@@ -65,10 +66,9 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Ida: ${formatDate(data.departure_date)}`);
       if (data.return_date && !data.is_one_way) details.push(`Volta: ${formatDate(data.return_date)}`);
       // Multi-leg support (with backward compat for single outbound_detail/return_detail)
-      const outLegs = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
-      const retLegs = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
+      const { outbound: outLegs, return_: retLegs } = splitFlightLegs(data);
       outLegs.forEach((ob: any, i: number) => {
-        const label = outLegs.length > 1 ? `Voo ida (trecho ${i + 1})` : `Voo ida`;
+        const label = ob.segment_type ? segmentLabel(ob.segment_type) : (outLegs.length > 1 ? `Voo ida (trecho ${i + 1})` : `Voo ida`);
         if (ob.flight_number) details.push(`${label}: ${ob.flight_number}`);
         const legParts: string[] = [];
         if (ob.leg_date) legParts.push(formatDate(ob.leg_date));
@@ -77,7 +77,7 @@ function getServiceDetails(service: QuoteService): string[] {
         if (ob.departure_time || ob.arrival_time) details.push(`Saída: ${ob.departure_time || '-'} | Chegada: ${ob.arrival_time || '-'}`);
       });
       retLegs.forEach((rt: any, i: number) => {
-        const label = retLegs.length > 1 ? `Voo volta (trecho ${i + 1})` : `Voo volta`;
+        const label = rt.segment_type ? segmentLabel(rt.segment_type) : (retLegs.length > 1 ? `Voo volta (trecho ${i + 1})` : `Voo volta`);
         if (rt.flight_number) details.push(`${label}: ${rt.flight_number}`);
         const legParts: string[] = [];
         if (rt.leg_date) legParts.push(formatDate(rt.leg_date));

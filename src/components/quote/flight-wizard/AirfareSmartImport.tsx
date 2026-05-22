@@ -184,31 +184,6 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
   const voos = p.voos || [];
   if (voos.length === 0) return {};
 
-  // Detect outbound/return split. If 1 flight → only outbound. Else split by approximate halves
-  // using the return date if available, otherwise the last flight returns to the first origin.
-  let outboundCount = voos.length;
-  if (voos.length > 1) {
-    const originIATA = voos[0].origem_codigo;
-    // Find the first flight whose origem matches the final destination of an earlier leg
-    // and whose destination heads back toward the original origin (best-effort)
-    const splitIdx = voos.findIndex((v, i) =>
-      i > 0 && v.destino_codigo === originIATA
-    );
-    if (splitIdx > 0) {
-      // splitIdx is the last leg of the return; outbound is everything before the
-      // first return leg. Walk back to find the first return leg in a contiguous block.
-      let firstReturn = splitIdx;
-      for (let i = splitIdx - 1; i > 0; i--) {
-        if (voos[i].destino_codigo === voos[i + 1].origem_codigo) {
-          firstReturn = i;
-        } else {
-          break;
-        }
-      }
-      outboundCount = firstReturn;
-    }
-  }
-
   // Infer year hint from resumo.data_ida (YYYY-MM-DD) or current year
   const isoIda = /^(\d{4})-\d{2}-\d{2}$/.exec(p.resumo?.data_ida || "");
   let yearHint = isoIda ? Number(isoIda[1]) : new Date().getFullYear();
@@ -229,19 +204,21 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     }
     return leg;
   });
-  const outboundLegs: FlightLegDetail[] = allLegs.slice(0, outboundCount);
-  const returnLegs: FlightLegDetail[] = allLegs.slice(outboundCount);
-
   // Auto-classify segment types using the full chronological list, then re-split.
   const classified = classifySegments(allLegs);
   allLegs.forEach((leg, i) => {
     if (!leg.segment_type) leg.segment_type = classified[i];
   });
-  // Also stamp on the sliced arrays (they share the same object refs).
+
+  const firstReturnIdx = allLegs.findIndex((leg, i) =>
+    i > 0 && (leg.segment_type === "return_connection" || leg.segment_type === "return")
+  );
+  const outboundCount = firstReturnIdx > 0 ? firstReturnIdx : voos.length;
+  const outboundLegs: FlightLegDetail[] = allLegs.slice(0, outboundCount);
+  const returnLegs: FlightLegDetail[] = allLegs.slice(outboundCount);
 
   const first = voos[0];
-  const lastOut = voos[outboundCount - 1] || first;
-  const lastRet = voos[voos.length - 1];
+  const mainDestinationLeg = [...outboundLegs].reverse().find((leg) => leg.segment_type === "outbound_connection") || outboundLegs[0] || allLegs[0];
 
   // Aggregated airlines display (e.g. "LATAM / Lufthansa")
   const airlinesSet = Array.from(new Set(voos.map((v) => v.companhia_aerea).filter(Boolean)));
@@ -294,7 +271,7 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
   return {
     airline: airlines,
     origin_city: first.origem_nome || p.resumo?.origem_inicial || "",
-    destination_city: lastOut.destino_nome || p.resumo?.destino_final || "",
+    destination_city: mainDestinationLeg?.destination_city || p.resumo?.destino_final || "",
     departure_date: outboundLegs[0]?.leg_date || p.resumo?.data_ida || "",
     return_date: returnLegs.length
       ? (returnLegs[returnLegs.length - 1]?.leg_date || p.resumo?.data_retorno || "")

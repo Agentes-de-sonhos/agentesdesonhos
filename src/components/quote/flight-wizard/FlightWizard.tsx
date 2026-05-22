@@ -20,7 +20,7 @@ import { useAirports } from "@/hooks/useAirports";
 import { cn } from "@/lib/utils";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { computeFlightStatus } from "./flightStatus";
-import { SEGMENT_TYPE_OPTIONS, classifySegments } from "@/lib/flightSegments";
+import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
 
 /* ─── Types ─── */
@@ -252,7 +252,7 @@ function LegEditor({
     onChange(legs.map((l, i) => i === idx ? { ...l, [field]: value } : l));
   };
   const autoClassify = () => {
-    const types = classifySegments(legs);
+    const types = defaultSegmentType === "return" ? classifyReturnSegments(legs) : classifySegments(legs);
     onChange(legs.map((l, i) => ({ ...l, segment_type: types[i] || l.segment_type })));
   };
   return (

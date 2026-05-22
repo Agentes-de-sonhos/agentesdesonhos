@@ -14,6 +14,20 @@ export function segmentLabel(t?: SegmentType | string | null): string {
   return SEGMENT_TYPE_OPTIONS.find(o => o.value === t)?.label || "—";
 }
 
+function sameAirport(a?: string, b?: string): boolean {
+  const aa = (a || "").trim().toUpperCase();
+  const bb = (b || "").trim().toUpperCase();
+  return !!aa && !!bb && aa === bb;
+}
+
+function isShortConnection(a: FlightSegmentLike, b: FlightSegmentLike): boolean {
+  if (!sameAirport(a.airport_destination, b.airport_origin)) return false;
+  const gap = gapHours(a, b);
+  return gap !== null && gap >= 0 && gap <= 36;
+}
+
+type FlightSegmentLike = Pick<FlightLegDetail, "airport_origin" | "airport_destination" | "leg_date" | "departure_time" | "arrival_time">;
+
 /** Returns the hour gap between arrival of leg A and departure of leg B, or null if unknown. */
 function gapHours(a: { leg_date?: string; arrival_time?: string }, b: { leg_date?: string; departure_time?: string }): number | null {
   if (!a?.leg_date || !b?.leg_date) return null;
@@ -40,7 +54,7 @@ function gapHours(a: { leg_date?: string; arrival_time?: string }, b: { leg_date
  * - middle legs with longer stay → internal
  * The leg right before the return-home leg with short gap is flagged return_connection.
  */
-export function classifySegments<T extends Pick<FlightLegDetail, "airport_origin" | "airport_destination" | "leg_date" | "departure_time" | "arrival_time">>(
+export function classifySegments<T extends FlightSegmentLike>(
   legs: T[],
 ): SegmentType[] {
   const n = legs.length;
@@ -61,24 +75,67 @@ export function classifySegments<T extends Pick<FlightLegDetail, "airport_origin
       }
     }
   }
-  if (returnIdx >= 0) result[returnIdx] = "return";
 
-  for (let i = 1; i < n; i++) {
-    if (i === returnIdx) continue;
-    const gap = gapHours(legs[i - 1], legs[i]);
-    const isShort = gap !== null && gap < 24;
-    if (returnIdx === -1 || i < returnIdx) {
-      result[i] = isShort ? "outbound_connection" : "internal";
+  // Return can be a chain (ROM→LIS, LIS→GRU). Walk backwards only through
+  // contiguous short layovers so an internal flight days before return is not
+  // absorbed into the return block.
+  let returnStart = returnIdx;
+  if (returnIdx >= 0) {
+    result[returnIdx] = "return";
+    for (let i = returnIdx - 1; i >= 1; i--) {
+      if (isShortConnection(legs[i], legs[i + 1])) returnStart = i;
+      else break;
+    }
+    for (let i = returnStart; i < returnIdx; i++) result[i] = "return_connection";
+  }
+
+  // Outbound is also a chain. Once there is a real stopover, later flights are
+  // internal until the return chain begins.
+  let outboundPhase = true;
+  const beforeReturn = returnStart >= 0 ? returnStart : n;
+  for (let i = 1; i < beforeReturn; i++) {
+    if (outboundPhase && isShortConnection(legs[i - 1], legs[i])) {
+      result[i] = "outbound_connection";
     } else {
-      result[i] = isShort ? "return_connection" : "internal";
+      outboundPhase = false;
+      result[i] = "internal";
     }
   }
 
-  // Promote the leg right before "return" to "return_connection" when the layover is short.
-  if (returnIdx > 1) {
-    const gap = gapHours(legs[returnIdx - 1], legs[returnIdx]);
-    if (gap !== null && gap < 24) result[returnIdx - 1] = "return_connection";
-  }
-
   return result;
+}
+
+export function classifyReturnSegments<T extends FlightSegmentLike>(legs: T[]): SegmentType[] {
+  if (!legs.length) return [];
+  if (legs.length === 1) return ["return"];
+  return legs.map((_, i) => (i === legs.length - 1 ? "return" : "return_connection"));
+}
+
+export function applyMissingSegmentTypes<T extends FlightLegDetail>(legs: T[]): T[] {
+  const types = classifySegments(legs);
+  return legs.map((leg, i) => ({ ...leg, segment_type: leg.segment_type || types[i] }) as T);
+}
+
+export function splitFlightLegs(data: any): { outbound: FlightLegDetail[]; return_: FlightLegDetail[] } {
+  const outbound = Array.isArray(data?.outbound_legs) && data.outbound_legs.length
+    ? data.outbound_legs
+    : data?.outbound_detail
+      ? [data.outbound_detail]
+      : [];
+  const return_ = Array.isArray(data?.return_legs) && data.return_legs.length
+    ? data.return_legs
+    : data?.return_detail
+      ? [data.return_detail]
+      : [];
+  const all = [...outbound, ...return_].filter(Boolean) as FlightLegDetail[];
+  const hasManualTypes = all.some((leg) => !!leg.segment_type);
+  if (!hasManualTypes) return { outbound, return_ };
+
+  const returnStart = all.findIndex((leg, i) =>
+    i > 0 && (leg.segment_type === "return_connection" || leg.segment_type === "return")
+  );
+  if (returnStart > 0) {
+    return { outbound: all.slice(0, returnStart), return_: all.slice(returnStart) };
+  }
+  return { outbound: all, return_: [] };
 }

@@ -34,7 +34,7 @@ import type {
 } from "@/types/quote";
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
-import { SEGMENT_TYPE_OPTIONS, classifySegments } from "@/lib/flightSegments";
+import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
 
@@ -124,18 +124,7 @@ const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ leg_date: "", airport
 
 /** Normalize old single-leg data to multi-leg arrays */
 function normalizeLegs(init: any): { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] } {
-  let outbound: z.infer<typeof flightLegSchema>[] = [];
-  let return_: z.infer<typeof flightLegSchema>[] = [];
-  if (init?.outbound_legs?.length) {
-    outbound = init.outbound_legs;
-  } else if (init?.outbound_detail) {
-    outbound = [init.outbound_detail];
-  }
-  if (init?.return_legs?.length) {
-    return_ = init.return_legs;
-  } else if (init?.return_detail) {
-    return_ = [init.return_detail];
-  }
+  let { outbound, return_ } = splitFlightLegs(init) as { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] };
   if (!outbound.length) outbound = [emptyLeg()];
   if (!return_.length) return_ = [emptyLeg()];
   return { outbound, return_ };
@@ -160,7 +149,7 @@ const flightSchema = z.object({
   return_legs: z.array(flightLegSchema),
 });
 
-function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string }) {
+function FlightLegFields({ legs, onChange, label, direction }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string; direction: "outbound" | "return" }) {
   const { getAirport } = useAirports();
   const airportHint = (code?: string, fallbackCity?: string) => {
     const c = (code || "").toUpperCase().trim();
@@ -294,7 +283,7 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
           size="sm"
           className="text-xs ml-2"
           onClick={() => {
-            const types = classifySegments(legs as any);
+            const types = direction === "return" ? classifyReturnSegments(legs as any) : classifySegments(legs as any);
             onChange(legs.map((l, i) => ({ ...l, segment_type: types[i] || (l.segment_type as SegmentType) })));
           }}
         >
@@ -347,7 +336,18 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const totalAmount = totalAdults + totalChildren;
 
   const hasNonEmptyLegs = (legs: z.infer<typeof flightLegSchema>[]) =>
-    legs.some(l => Object.values(l).some(v => v && String(v).length > 0));
+    legs.some(l => Object.entries(l).some(([key, v]) => key !== "segment_type" && v && String(v).length > 0));
+
+  const prepareLegsForSave = () => {
+    const outbound = hasNonEmptyLegs(outboundLegs) ? outboundLegs : [];
+    const return_ = !isOneWay && hasNonEmptyLegs(returnLegs) ? returnLegs : [];
+    const all = [...outbound, ...return_];
+    const hasManualTypes = all.some((leg) => !!leg.segment_type);
+    if (hasManualTypes) return { outbound, return_ };
+    const classified = classifySegments(all as any);
+    const stamped = all.map((leg, i) => ({ ...leg, segment_type: classified[i] || leg.segment_type }));
+    return { outbound: stamped.slice(0, outbound.length), return_: stamped.slice(outbound.length) };
+  };
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
     const computedTotalAdults = values.adult_price * adultsCount;
@@ -355,8 +355,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
     // Always persist legs that have data, regardless of whether the panel is expanded.
     // This guarantees imported segments survive save → reopen even if the user collapsed the section.
-    const hasOutbound = hasNonEmptyLegs(outboundLegs);
-    const hasReturn = hasNonEmptyLegs(returnLegs);
+    const preparedLegs = prepareLegsForSave();
+    const hasOutbound = preparedLegs.outbound.length > 0;
+    const hasReturn = preparedLegs.return_.length > 0;
 
     // Fallback: derive top-level dates from leg dates when the date pickers are empty
     // (e.g. AI import gave segments dates but the main "Data de ida/volta" wasn't picked).
@@ -388,13 +389,13 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     }
 
     if (hasOutbound) {
-      data.outbound_legs = outboundLegs;
+      data.outbound_legs = preparedLegs.outbound;
       // backward compat: keep first leg as outbound_detail
-      data.outbound_detail = outboundLegs[0];
+      data.outbound_detail = preparedLegs.outbound[0];
     }
     if (!isOneWay && hasReturn) {
-      data.return_legs = returnLegs;
-      data.return_detail = returnLegs[0];
+      data.return_legs = preparedLegs.return_;
+      data.return_detail = preparedLegs.return_[0];
     }
 
     onSubmit(data, computedTotalAdults + computedTotalChildren, values.option_label || undefined, values.service_description || undefined);
@@ -479,8 +480,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           </button>
           {showFlightDetails && (
             <div className="px-4 pb-4 space-y-5 border-t border-border/40 pt-3">
-              <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" />
-              {!isOneWay && <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" />}
+              <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" direction="outbound" />
+              {!isOneWay && <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" direction="return" />}
             </div>
           )}
         </div>
