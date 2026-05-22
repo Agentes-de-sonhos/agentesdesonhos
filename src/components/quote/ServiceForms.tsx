@@ -2089,6 +2089,7 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
             notes: draft.notes || "",
             outbound_legs: draft.outbound_legs,
             return_legs: draft.return_legs,
+            internal_legs: (draft as any).internal_legs,
           };
           setInjectedInitial({
             service_data: sd,
