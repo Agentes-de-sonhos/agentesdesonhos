@@ -115,3 +115,27 @@ export function applyMissingSegmentTypes<T extends FlightLegDetail>(legs: T[]): 
   const types = classifySegments(legs);
   return legs.map((leg, i) => ({ ...leg, segment_type: leg.segment_type || types[i] }));
 }
+
+export function splitFlightLegs(data: any): { outbound: FlightLegDetail[]; return_: FlightLegDetail[] } {
+  const outbound = Array.isArray(data?.outbound_legs) && data.outbound_legs.length
+    ? data.outbound_legs
+    : data?.outbound_detail
+      ? [data.outbound_detail]
+      : [];
+  const return_ = Array.isArray(data?.return_legs) && data.return_legs.length
+    ? data.return_legs
+    : data?.return_detail
+      ? [data.return_detail]
+      : [];
+  const all = [...outbound, ...return_].filter(Boolean) as FlightLegDetail[];
+  const hasManualTypes = all.some((leg) => !!leg.segment_type);
+  if (!hasManualTypes) return { outbound, return_ };
+
+  const returnStart = all.findIndex((leg, i) =>
+    i > 0 && (leg.segment_type === "return_connection" || leg.segment_type === "return")
+  );
+  if (returnStart > 0) {
+    return { outbound: all.slice(0, returnStart), return_: all.slice(returnStart) };
+  }
+  return { outbound: all, return_: [] };
+}
