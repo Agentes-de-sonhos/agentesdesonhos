@@ -175,7 +175,7 @@ export default function GerarOrcamento() {
     Record<"services" | "summary", boolean>
   >({
     services: false,
-    summary: false,
+    summary: true,
   });
   const toggleSection = (key: "services" | "summary") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
