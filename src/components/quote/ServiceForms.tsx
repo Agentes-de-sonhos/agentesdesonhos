@@ -34,7 +34,7 @@ import type {
 } from "@/types/quote";
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
-import { SEGMENT_TYPE_OPTIONS, classifySegments } from "@/lib/flightSegments";
+import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
 
@@ -124,18 +124,7 @@ const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ leg_date: "", airport
 
 /** Normalize old single-leg data to multi-leg arrays */
 function normalizeLegs(init: any): { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] } {
-  let outbound: z.infer<typeof flightLegSchema>[] = [];
-  let return_: z.infer<typeof flightLegSchema>[] = [];
-  if (init?.outbound_legs?.length) {
-    outbound = init.outbound_legs;
-  } else if (init?.outbound_detail) {
-    outbound = [init.outbound_detail];
-  }
-  if (init?.return_legs?.length) {
-    return_ = init.return_legs;
-  } else if (init?.return_detail) {
-    return_ = [init.return_detail];
-  }
+  let { outbound, return_ } = splitFlightLegs(init) as { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] };
   if (!outbound.length) outbound = [emptyLeg()];
   if (!return_.length) return_ = [emptyLeg()];
   return { outbound, return_ };
