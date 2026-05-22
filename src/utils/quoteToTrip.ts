@@ -59,7 +59,7 @@ function mapFlight(d: FlightData): { type: TripServiceType; data: TripServiceDat
       airline: d.airline || "",
       terminal: "",
       gate: "",
-      segment_type: "interno" as any,
+      segment_type: "conexao",
     });
   });
   ret.forEach((leg, i) => {
