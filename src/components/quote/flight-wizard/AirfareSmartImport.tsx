@@ -271,7 +271,7 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
   return {
     airline: airlines,
     origin_city: first.origem_nome || p.resumo?.origem_inicial || "",
-    destination_city: lastOut.destino_nome || p.resumo?.destino_final || "",
+    destination_city: mainDestinationLeg?.destination_city || p.resumo?.destino_final || "",
     departure_date: outboundLegs[0]?.leg_date || p.resumo?.data_ida || "",
     return_date: returnLegs.length
       ? (returnLegs[returnLegs.length - 1]?.leg_date || p.resumo?.data_retorno || "")
