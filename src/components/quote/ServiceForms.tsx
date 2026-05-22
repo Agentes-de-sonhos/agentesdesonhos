@@ -2012,6 +2012,82 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ MAIN ROUTER ━━━━━━━━━━━━━━━━━━━ */
+/* Hotel entry: mode chooser → AI import or classic HotelForm.
+   Editing existing services skips chooser. */
+function HotelEntry(props: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+  const isEditing = !!props.initialData;
+  const [mode, setMode] = useState<"chooser" | "manual" | "import">(isEditing ? "manual" : "chooser");
+  const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
+
+  if (mode === "chooser") {
+    return <HotelModeChooser onChoose={(m) => setMode(m)} />;
+  }
+  if (mode === "import") {
+    return (
+      <>
+        <HotelModeChooser onChoose={(m) => setMode(m)} />
+        <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] sm:max-h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
+              <DialogTitle>Importar hospedagem com IA</DialogTitle>
+              <DialogDescription>
+                Envie um PDF, imagem ou cole o texto da reserva. A IA extrai hotel, datas, regime, valores e taxas para você revisar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <HotelSmartImport
+                onCancel={() => setMode("chooser")}
+                onConfirm={(mapped) => {
+                  setInjectedInitial({
+                    service_data: mapped as any,
+                    amount: mapped.price || 0,
+                    option_label: null,
+                    description: null,
+                  });
+                  setMode("manual");
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+  const merged = injectedInitial ? { ...props, initialData: injectedInitial } : props;
+  return <HotelForm {...merged} />;
+}
+
+function HotelModeChooser({ onChoose }: { onChoose: (mode: "manual" | "import") => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center space-y-1">
+        <h3 className="text-lg font-semibold">Como você quer preencher a hospedagem?</h3>
+        <p className="text-sm text-muted-foreground">Escolha o modo que for mais confortável agora.</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button type="button" onClick={() => onChoose("import")}
+          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">Importar com IA</span>
+          </div>
+          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
+          <p className="text-sm text-muted-foreground">A IA lê a reserva, extrai hotel, datas, regime, valores e taxas, e abre a tela de revisão.</p>
+        </button>
+        <button type="button" onClick={() => onChoose("manual")}
+          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors">
+          <div className="flex items-center gap-2 mb-2">
+            <Hotel className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold text-muted-foreground">Preencher manualmente</span>
+          </div>
+          <p className="font-semibold mb-1">Formulário tradicional</p>
+          <p className="text-sm text-muted-foreground">Digite os dados da hospedagem campo a campo.</p>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* Flight entry: mode chooser → FlightWizard or classic FlightForm.
    Editing existing services skips chooser and opens classic form (no regression). */
 function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
