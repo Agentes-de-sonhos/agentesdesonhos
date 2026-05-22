@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign, Settings2 } from "lucide-react";
+import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign, Settings2, Car } from "lucide-react";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
@@ -2226,7 +2226,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   switch (serviceType) {
     case "flight": formElement = <FlightEntry {...formProps} />; break;
     case "hotel": formElement = <HotelEntry {...formProps} />; break;
-    case "car_rental": formElement = <CarRentalForm {...formProps} />; break;
+    case "car_rental": formElement = <CarRentalEntry {...formProps} />; break;
     case "transfer": formElement = <TransferForm {...formProps} />; break;
     case "attraction": formElement = <AttractionForm {...formProps} />; break;
     case "insurance": formElement = <InsuranceForm {...formProps} />; break;
