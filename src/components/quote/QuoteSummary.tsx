@@ -27,7 +27,6 @@ interface QuoteSummaryProps {
 
 export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const [editing, setEditing] = useState(false);
-  const [open, setOpen] = useState(true);
   const [editingDest, setEditingDest] = useState(false);
   const [destDraft, setDestDraft] = useState(quote.destination);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -98,17 +97,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
     : quote.total_amount;
 
   return (
-    <Card>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left"
-      >
-        <CardTitle className="text-lg">Resumo do Orçamento</CardTitle>
-        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
-      </button>
-      {open && (
-      <CardContent className="space-y-4 pt-0">
+    <div className="space-y-4">
         <div className="space-y-3">
           {/* Cliente editável */}
           <div className="flex items-center gap-2 text-sm">
@@ -306,8 +295,6 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
             </>
           );
         })()}
-      </CardContent>
-      )}
-    </Card>
+    </div>
   );
 }
