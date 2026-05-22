@@ -476,6 +476,18 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
         campos_nao_identificados: Array.isArray(candidate!.campos_nao_identificados) ? candidate!.campos_nao_identificados : [],
         confianca_extracao: candidate!.confianca_extracao || {},
       };
+      // Auto-classify segment types for any voo that didn't come pre-classified from the AI.
+      try {
+        const legs = result.voos.map(v => ({
+          airport_origin: v.origem_codigo,
+          airport_destination: v.destino_codigo,
+          leg_date: v.data_saida,
+          departure_time: v.hora_saida,
+          arrival_time: v.hora_chegada,
+        }));
+        const types = classifySegments(legs);
+        result.voos = result.voos.map((v, i) => ({ ...v, segment_type: v.segment_type || types[i] }));
+      } catch { /* noop */ }
       setParsed(result);
 
       const conf = result.confianca_extracao?.geral ?? 0;
