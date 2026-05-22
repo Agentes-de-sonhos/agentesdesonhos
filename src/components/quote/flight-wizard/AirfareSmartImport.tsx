@@ -12,6 +12,8 @@ import { extractPdfText } from "@/lib/pdfText";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { FlightData, FlightLegDetail } from "@/types/quote";
+import type { SegmentType } from "@/types/quote";
+import { classifySegments, SEGMENT_TYPE_OPTIONS } from "@/lib/flightSegments";
 
 /** ─────────── Types matching the new edge function ─────────── */
 export interface ParsedAirfareFlight {
@@ -37,6 +39,8 @@ export interface ParsedAirfareFlight {
   bagagem_despachada: boolean | null;
   quantidade_bagagem_despachada: number | null;
   alerta: string;
+  /** Optional segment classification (filled by AI or auto-classifier). */
+  segment_type?: SegmentType;
 }
 
 export interface ParsedAirfare {
@@ -171,6 +175,7 @@ function voo2leg(v: ParsedAirfareFlight, yearHint: number): FlightLegDetail {
     baggage_checked: v.bagagem_despachada ?? null,
     baggage_checked_count: v.quantidade_bagagem_despachada ?? null,
     alert: v.alerta || "",
+    segment_type: v.segment_type,
   };
 }
 
@@ -226,6 +231,13 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
   });
   const outboundLegs: FlightLegDetail[] = allLegs.slice(0, outboundCount);
   const returnLegs: FlightLegDetail[] = allLegs.slice(outboundCount);
+
+  // Auto-classify segment types using the full chronological list, then re-split.
+  const classified = classifySegments(allLegs);
+  allLegs.forEach((leg, i) => {
+    if (!leg.segment_type) leg.segment_type = classified[i];
+  });
+  // Also stamp on the sliced arrays (they share the same object refs).
 
   const first = voos[0];
   const lastOut = voos[outboundCount - 1] || first;
