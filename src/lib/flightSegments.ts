@@ -113,7 +113,7 @@ export function classifyReturnSegments<T extends FlightSegmentLike>(legs: T[]): 
 
 export function applyMissingSegmentTypes<T extends FlightLegDetail>(legs: T[]): T[] {
   const types = classifySegments(legs);
-  return legs.map((leg, i) => ({ ...leg, segment_type: leg.segment_type || types[i] }));
+  return legs.map((leg, i) => ({ ...leg, segment_type: leg.segment_type || types[i] }) as T);
 }
 
 export function splitFlightLegs(data: any): { outbound: FlightLegDetail[]; return_: FlightLegDetail[] } {
