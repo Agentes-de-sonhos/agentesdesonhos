@@ -314,12 +314,13 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
   const hasImportedLegs =
-    (init?.outbound_legs?.length ?? 0) > 0 || (init?.return_legs?.length ?? 0) > 0;
+    (init?.outbound_legs?.length ?? 0) > 0 || (init?.return_legs?.length ?? 0) > 0 || (init?.internal_legs?.length ?? 0) > 0;
   const [showFlightDetails, setShowFlightDetails] = useState(hasImportedLegs);
   const [showPricing, setShowPricing] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
   const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
+  const [internalLegs, setInternalLegs] = useState(normalizedLegs.internal);
 
   const isOneWayInit = init?.return_date ? false : !tripEndDate || (init && !init.return_date);
   const [isOneWay, setIsOneWay] = useState(init?.is_one_way ?? isOneWayInit ?? false);
@@ -339,6 +340,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       return_date: init?.return_date ? parseLocalDate(init.return_date) : (isOneWayInit ? undefined : tripEndDate),
       outbound_legs: normalizedLegs.outbound,
       return_legs: normalizedLegs.return_,
+      internal_legs: normalizedLegs.internal,
     },
   });
 
@@ -355,13 +357,16 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
   const prepareLegsForSave = () => {
     const outbound = hasNonEmptyLegs(outboundLegs) ? outboundLegs : [];
+    const internal = hasNonEmptyLegs(internalLegs) ? internalLegs : [];
     const return_ = !isOneWay && hasNonEmptyLegs(returnLegs) ? returnLegs : [];
+    // Internal legs are always classified as "internal" (don't reclassify).
+    const internalStamped = internal.map((l) => ({ ...l, segment_type: l.segment_type || ("internal" as SegmentType) }));
     const all = [...outbound, ...return_];
     const hasManualTypes = all.some((leg) => !!leg.segment_type);
-    if (hasManualTypes) return { outbound, return_ };
+    if (hasManualTypes) return { outbound, internal: internalStamped, return_ };
     const classified = classifySegments(all as any);
     const stamped = all.map((leg, i) => ({ ...leg, segment_type: classified[i] || leg.segment_type }));
-    return { outbound: stamped.slice(0, outbound.length), return_: stamped.slice(outbound.length) };
+    return { outbound: stamped.slice(0, outbound.length), internal: internalStamped, return_: stamped.slice(outbound.length) };
   };
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
@@ -373,6 +378,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     const preparedLegs = prepareLegsForSave();
     const hasOutbound = preparedLegs.outbound.length > 0;
     const hasReturn = preparedLegs.return_.length > 0;
+    const hasInternal = preparedLegs.internal.length > 0;
 
     // Fallback: derive top-level dates from leg dates when the date pickers are empty
     // (e.g. AI import gave segments dates but the main "Data de ida/volta" wasn't picked).
@@ -407,6 +413,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       data.outbound_legs = preparedLegs.outbound;
       // backward compat: keep first leg as outbound_detail
       data.outbound_detail = preparedLegs.outbound[0];
+    }
+    if (hasInternal) {
+      data.internal_legs = preparedLegs.internal;
     }
     if (!isOneWay && hasReturn) {
       data.return_legs = preparedLegs.return_;
