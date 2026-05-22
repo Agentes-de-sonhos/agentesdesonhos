@@ -2224,7 +2224,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   let formElement: React.ReactNode = null;
   switch (serviceType) {
     case "flight": formElement = <FlightEntry {...formProps} />; break;
-    case "hotel": formElement = <HotelForm {...formProps} />; break;
+    case "hotel": formElement = <HotelEntry {...formProps} />; break;
     case "car_rental": formElement = <CarRentalForm {...formProps} />; break;
     case "transfer": formElement = <TransferForm {...formProps} />; break;
     case "attraction": formElement = <AttractionForm {...formProps} />; break;
