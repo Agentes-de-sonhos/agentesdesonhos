@@ -149,7 +149,7 @@ const flightSchema = z.object({
   return_legs: z.array(flightLegSchema),
 });
 
-function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string }) {
+function FlightLegFields({ legs, onChange, label, direction }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string; direction: "outbound" | "return" }) {
   const { getAirport } = useAirports();
   const airportHint = (code?: string, fallbackCity?: string) => {
     const c = (code || "").toUpperCase().trim();
@@ -283,7 +283,7 @@ function FlightLegFields({ legs, onChange, label }: { legs: z.infer<typeof fligh
           size="sm"
           className="text-xs ml-2"
           onClick={() => {
-            const types = classifySegments(legs as any);
+            const types = direction === "return" ? classifyReturnSegments(legs as any) : classifySegments(legs as any);
             onChange(legs.map((l, i) => ({ ...l, segment_type: types[i] || (l.segment_type as SegmentType) })));
           }}
         >
@@ -480,8 +480,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           </button>
           {showFlightDetails && (
             <div className="px-4 pb-4 space-y-5 border-t border-border/40 pt-3">
-              <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" />
-              {!isOneWay && <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" />}
+              <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" direction="outbound" />
+              {!isOneWay && <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" direction="return" />}
             </div>
           )}
         </div>
