@@ -4,6 +4,7 @@ import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
+import { splitFlightLegs } from "@/lib/flightSegments";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea",
@@ -80,16 +81,7 @@ function getServiceDetails(service: QuoteService): string[] {
         details.push(`Ida: ${formatDate(data.departure_date)} (somente ida)`);
       }
       // Multi-leg support — re-bucket by segment_type so internal flights aren't shown under "Ida".
-      const { outbound: outLegs, internal: intLegs, return_: retLegs } = (() => {
-        try {
-          // Lazy import is unnecessary in this build — splitFlightLegs is in lib
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const { splitFlightLegs } = require("@/lib/flightSegments");
-          return splitFlightLegs(data);
-        } catch {
-          return { outbound: data.outbound_legs || [], internal: data.internal_legs || [], return_: data.return_legs || [] };
-        }
-      })();
+      const { outbound: outLegs, internal: intLegs, return_: retLegs } = splitFlightLegs(data);
       outLegs.forEach((ob: any, i: number) => {
         const parts: string[] = [];
         if (ob.leg_date) parts.push(formatDate(ob.leg_date));
