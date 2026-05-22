@@ -18,6 +18,7 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
+import { splitFlightLegs } from "@/lib/flightSegments";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -123,9 +124,8 @@ function getServiceDetails(service: QuoteService): string[] {
       } else {
         details.push(`Ida: ${formatDateShort(data.departure_date)} (somente ida)`);
       }
-      // Multi-leg support (backward compat)
-      const outLegs = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
-      const retLegs = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
+      // Multi-leg with internal-segment support
+      const { outbound: outLegs, internal: intLegs, return_: retLegs } = splitFlightLegs(data);
       outLegs.forEach((ob: any, i: number) => {
         const parts: string[] = [];
         if (ob.leg_date) parts.push(formatDateShort(ob.leg_date));
@@ -134,6 +134,16 @@ function getServiceDetails(service: QuoteService): string[] {
         if (ob.departure_time) parts.push(`Saída: ${ob.departure_time}`);
         if (ob.arrival_time) parts.push(`Chegada: ${ob.arrival_time}`);
         const label = outLegs.length > 1 ? `✈ Ida (trecho ${i + 1})` : `✈ Ida`;
+        if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
+      });
+      intLegs.forEach((it: any, i: number) => {
+        const parts: string[] = [];
+        if (it.leg_date) parts.push(formatDateShort(it.leg_date));
+        if (it.flight_number) parts.push(`Voo ${it.flight_number}`);
+        if (it.airport_origin && it.airport_destination) parts.push(`${it.airport_origin} → ${it.airport_destination}`);
+        if (it.departure_time) parts.push(`Saída: ${it.departure_time}`);
+        if (it.arrival_time) parts.push(`Chegada: ${it.arrival_time}`);
+        const label = intLegs.length > 1 ? `✈ Trecho interno (${i + 1})` : `✈ Trecho interno`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
       retLegs.forEach((rt: any, i: number) => {
@@ -294,8 +304,7 @@ function InclusionBadge({ ok, label }: { ok: boolean; label: string }) {
 }
 
 function FlightBody({ data }: { data: any }) {
-  const outLegs: any[] = data.outbound_legs?.length ? data.outbound_legs : data.outbound_detail ? [data.outbound_detail] : [];
-  const retLegs: any[] = data.return_legs?.length ? data.return_legs : data.return_detail ? [data.return_detail] : [];
+  const { outbound: outLegs, internal: intLegs, return_: retLegs } = splitFlightLegs(data) as { outbound: any[]; internal: any[]; return_: any[] };
   return (
     <div className="space-y-4">
       {/* Header: airline + route */}
@@ -311,6 +320,9 @@ function FlightBody({ data }: { data: any }) {
       </div>
 
       <FlightDirectionGroup title="Ida" icon={<PlaneTakeoff className="h-3.5 w-3.5" />} legs={outLegs} fallbackDate={data.departure_date} />
+      {intLegs.length > 0 && (
+        <FlightDirectionGroup title="Trecho interno" icon={<Plane className="h-3.5 w-3.5" />} legs={intLegs} />
+      )}
       {!data.is_one_way && retLegs.length > 0 && (
         <FlightDirectionGroup title="Volta" icon={<PlaneLanding className="h-3.5 w-3.5" />} legs={retLegs} fallbackDate={data.return_date} />
       )}

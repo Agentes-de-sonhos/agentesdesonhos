@@ -123,11 +123,21 @@ const flightLegSchema = z.object({
 const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ leg_date: "", airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
 
 /** Normalize old single-leg data to multi-leg arrays */
-function normalizeLegs(init: any): { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] } {
-  let { outbound, return_ } = splitFlightLegs(init) as { outbound: z.infer<typeof flightLegSchema>[]; return_: z.infer<typeof flightLegSchema>[] };
+function normalizeLegs(init: any): {
+  outbound: z.infer<typeof flightLegSchema>[];
+  internal: z.infer<typeof flightLegSchema>[];
+  return_: z.infer<typeof flightLegSchema>[];
+} {
+  const split = splitFlightLegs(init) as unknown as {
+    outbound: z.infer<typeof flightLegSchema>[];
+    internal: z.infer<typeof flightLegSchema>[];
+    return_: z.infer<typeof flightLegSchema>[];
+  };
+  let { outbound, internal, return_ } = split;
   if (!outbound.length) outbound = [emptyLeg()];
   if (!return_.length) return_ = [emptyLeg()];
-  return { outbound, return_ };
+  // internal stays empty by default — section only appears when user adds a leg
+  return { outbound, internal, return_ };
 }
 
 const flightSchema = z.object({
@@ -147,9 +157,10 @@ const flightSchema = z.object({
   notes: z.string().optional(),
   outbound_legs: z.array(flightLegSchema),
   return_legs: z.array(flightLegSchema),
+  internal_legs: z.array(flightLegSchema),
 });
 
-function FlightLegFields({ legs, onChange, label, direction }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string; direction: "outbound" | "return" }) {
+function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType }: { legs: z.infer<typeof flightLegSchema>[]; onChange: (legs: z.infer<typeof flightLegSchema>[]) => void; label: string; direction: "outbound" | "return" | "internal"; defaultSegmentType?: SegmentType }) {
   const { getAirport } = useAirports();
   const airportHint = (code?: string, fallbackCity?: string) => {
     const c = (code || "").toUpperCase().trim();
@@ -163,7 +174,11 @@ function FlightLegFields({ legs, onChange, label, direction }: { legs: z.infer<t
     const updated = legs.map((l, i) => i === idx ? { ...l, [field]: value } : l);
     onChange(updated);
   };
-  const addLeg = () => onChange([...legs, emptyLeg()]);
+  const addLeg = () => {
+    const leg = emptyLeg();
+    if (defaultSegmentType) (leg as any).segment_type = defaultSegmentType;
+    onChange([...legs, leg]);
+  };
   const removeLeg = (idx: number) => {
     if (legs.length <= 1) return;
     onChange(legs.filter((_, i) => i !== idx));
@@ -276,7 +291,7 @@ function FlightLegFields({ legs, onChange, label, direction }: { legs: z.infer<t
       <Button type="button" variant="outline" size="sm" onClick={addLeg} className="text-xs">
         <Plus className="h-3 w-3 mr-1" /> Adicionar trecho
       </Button>
-      {legs.length > 1 && (
+      {legs.length > 1 && direction !== "internal" && (
         <Button
           type="button"
           variant="ghost"
@@ -299,12 +314,13 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
   const hasImportedLegs =
-    (init?.outbound_legs?.length ?? 0) > 0 || (init?.return_legs?.length ?? 0) > 0;
+    (init?.outbound_legs?.length ?? 0) > 0 || (init?.return_legs?.length ?? 0) > 0 || (init?.internal_legs?.length ?? 0) > 0;
   const [showFlightDetails, setShowFlightDetails] = useState(hasImportedLegs);
   const [showPricing, setShowPricing] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
   const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
+  const [internalLegs, setInternalLegs] = useState(normalizedLegs.internal);
 
   const isOneWayInit = init?.return_date ? false : !tripEndDate || (init && !init.return_date);
   const [isOneWay, setIsOneWay] = useState(init?.is_one_way ?? isOneWayInit ?? false);
@@ -324,6 +340,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       return_date: init?.return_date ? parseLocalDate(init.return_date) : (isOneWayInit ? undefined : tripEndDate),
       outbound_legs: normalizedLegs.outbound,
       return_legs: normalizedLegs.return_,
+      internal_legs: normalizedLegs.internal,
     },
   });
 
@@ -340,13 +357,16 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
   const prepareLegsForSave = () => {
     const outbound = hasNonEmptyLegs(outboundLegs) ? outboundLegs : [];
+    const internal = hasNonEmptyLegs(internalLegs) ? internalLegs : [];
     const return_ = !isOneWay && hasNonEmptyLegs(returnLegs) ? returnLegs : [];
+    // Internal legs are always classified as "internal" (don't reclassify).
+    const internalStamped = internal.map((l) => ({ ...l, segment_type: l.segment_type || ("internal" as SegmentType) }));
     const all = [...outbound, ...return_];
     const hasManualTypes = all.some((leg) => !!leg.segment_type);
-    if (hasManualTypes) return { outbound, return_ };
+    if (hasManualTypes) return { outbound, internal: internalStamped, return_ };
     const classified = classifySegments(all as any);
     const stamped = all.map((leg, i) => ({ ...leg, segment_type: classified[i] || leg.segment_type }));
-    return { outbound: stamped.slice(0, outbound.length), return_: stamped.slice(outbound.length) };
+    return { outbound: stamped.slice(0, outbound.length), internal: internalStamped, return_: stamped.slice(outbound.length) };
   };
 
   const handleSubmit = (values: z.infer<typeof flightSchema>) => {
@@ -358,6 +378,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     const preparedLegs = prepareLegsForSave();
     const hasOutbound = preparedLegs.outbound.length > 0;
     const hasReturn = preparedLegs.return_.length > 0;
+    const hasInternal = preparedLegs.internal.length > 0;
 
     // Fallback: derive top-level dates from leg dates when the date pickers are empty
     // (e.g. AI import gave segments dates but the main "Data de ida/volta" wasn't picked).
@@ -392,6 +413,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       data.outbound_legs = preparedLegs.outbound;
       // backward compat: keep first leg as outbound_detail
       data.outbound_detail = preparedLegs.outbound[0];
+    }
+    if (hasInternal) {
+      data.internal_legs = preparedLegs.internal;
     }
     if (!isOneWay && hasReturn) {
       data.return_legs = preparedLegs.return_;
@@ -481,6 +505,14 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           {showFlightDetails && (
             <div className="px-4 pb-4 space-y-5 border-t border-border/40 pt-3">
               <FlightLegFields legs={outboundLegs} onChange={setOutboundLegs} label="Ida" direction="outbound" />
+              {internalLegs.length > 0 && (
+                <FlightLegFields legs={internalLegs} onChange={setInternalLegs} label="Trecho interno" direction="internal" defaultSegmentType="internal" />
+              )}
+              {internalLegs.length === 0 && (
+                <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setInternalLegs([{ ...emptyLeg(), segment_type: "internal" as SegmentType }])}>
+                  <Plus className="h-3 w-3 mr-1" /> Adicionar trecho interno
+                </Button>
+              )}
               {!isOneWay && <FlightLegFields legs={returnLegs} onChange={setReturnLegs} label="Volta" direction="return" />}
             </div>
           )}
@@ -2057,6 +2089,7 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
             notes: draft.notes || "",
             outbound_legs: draft.outbound_legs,
             return_legs: draft.return_legs,
+            internal_legs: (draft as any).internal_legs,
           };
           setInjectedInitial({
             service_data: sd,

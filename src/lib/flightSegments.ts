@@ -116,26 +116,54 @@ export function applyMissingSegmentTypes<T extends FlightLegDetail>(legs: T[]): 
   return legs.map((leg, i) => ({ ...leg, segment_type: leg.segment_type || types[i] }) as T);
 }
 
-export function splitFlightLegs(data: any): { outbound: FlightLegDetail[]; return_: FlightLegDetail[] } {
-  const outbound = Array.isArray(data?.outbound_legs) && data.outbound_legs.length
+export function splitFlightLegs(data: any): {
+  outbound: FlightLegDetail[];
+  internal: FlightLegDetail[];
+  return_: FlightLegDetail[];
+} {
+  const rawOutbound = Array.isArray(data?.outbound_legs) && data.outbound_legs.length
     ? data.outbound_legs
     : data?.outbound_detail
       ? [data.outbound_detail]
       : [];
-  const return_ = Array.isArray(data?.return_legs) && data.return_legs.length
+  const rawInternal = Array.isArray(data?.internal_legs) && data.internal_legs.length
+    ? data.internal_legs
+    : [];
+  const rawReturn = Array.isArray(data?.return_legs) && data.return_legs.length
     ? data.return_legs
     : data?.return_detail
       ? [data.return_detail]
       : [];
-  const all = [...outbound, ...return_].filter(Boolean) as FlightLegDetail[];
-  const hasManualTypes = all.some((leg) => !!leg.segment_type);
-  if (!hasManualTypes) return { outbound, return_ };
 
-  const returnStart = all.findIndex((leg, i) =>
-    i > 0 && (leg.segment_type === "return_connection" || leg.segment_type === "return")
-  );
-  if (returnStart > 0) {
-    return { outbound: all.slice(0, returnStart), return_: all.slice(returnStart) };
+  const all = [...rawOutbound, ...rawInternal, ...rawReturn].filter(Boolean) as FlightLegDetail[];
+  const hasManualTypes = all.some((leg) => !!leg.segment_type);
+
+  // No classification info — preserve legacy buckets as-is.
+  if (!hasManualTypes) {
+    return { outbound: rawOutbound, internal: rawInternal, return_: rawReturn };
   }
-  return { outbound: all, return_: [] };
+
+  // Distribute by segment_type, preserving chronological order.
+  const outbound: FlightLegDetail[] = [];
+  const internal: FlightLegDetail[] = [];
+  const return_: FlightLegDetail[] = [];
+  let phase: "outbound" | "internal" | "return" = "outbound";
+  for (const leg of all) {
+    const t = leg.segment_type;
+    if (t === "return" || t === "return_connection") {
+      phase = "return";
+      return_.push(leg);
+    } else if (t === "internal") {
+      if (phase === "outbound") phase = "internal";
+      internal.push(leg);
+    } else if (t === "outbound" || t === "outbound_connection") {
+      outbound.push(leg);
+    } else {
+      // unknown / "other" → keep with current phase
+      if (phase === "return") return_.push(leg);
+      else if (phase === "internal") internal.push(leg);
+      else outbound.push(leg);
+    }
+  }
+  return { outbound, internal, return_ };
 }

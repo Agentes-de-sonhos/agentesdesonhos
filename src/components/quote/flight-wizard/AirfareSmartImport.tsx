@@ -210,12 +210,27 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     if (!leg.segment_type) leg.segment_type = classified[i];
   });
 
-  const firstReturnIdx = allLegs.findIndex((leg, i) =>
-    i > 0 && (leg.segment_type === "return_connection" || leg.segment_type === "return")
-  );
-  const outboundCount = firstReturnIdx > 0 ? firstReturnIdx : voos.length;
-  const outboundLegs: FlightLegDetail[] = allLegs.slice(0, outboundCount);
-  const returnLegs: FlightLegDetail[] = allLegs.slice(outboundCount);
+  // Distribute by segment_type so internal flights land in their own bucket.
+  const outboundLegs: FlightLegDetail[] = [];
+  const internalLegs: FlightLegDetail[] = [];
+  const returnLegs: FlightLegDetail[] = [];
+  let phase: "outbound" | "internal" | "return" = "outbound";
+  for (const leg of allLegs) {
+    const t = leg.segment_type;
+    if (t === "return" || t === "return_connection") {
+      phase = "return";
+      returnLegs.push(leg);
+    } else if (t === "internal") {
+      if (phase === "outbound") phase = "internal";
+      internalLegs.push(leg);
+    } else if (t === "outbound" || t === "outbound_connection") {
+      outboundLegs.push(leg);
+    } else {
+      if (phase === "return") returnLegs.push(leg);
+      else if (phase === "internal") internalLegs.push(leg);
+      else outboundLegs.push(leg);
+    }
+  }
 
   const first = voos[0];
   const mainDestinationLeg = [...outboundLegs].reverse().find((leg) => leg.segment_type === "outbound_connection") || outboundLegs[0] || allLegs[0];
@@ -283,6 +298,7 @@ export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData>
     notes: noteLines.join("\n"),
     outbound_legs: outboundLegs,
     return_legs: returnLegs,
+    internal_legs: internalLegs,
     imported_summary: {
       fare_type: p.resumo?.tipo_tarifa || p.valores?.tipo || "",
       passengers: p.resumo?.quantidade_passageiros || "",

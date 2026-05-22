@@ -28,6 +28,7 @@ function mapFlight(d: FlightData): { type: TripServiceType; data: TripServiceDat
   const ret = (d.return_legs && d.return_legs.length > 0)
     ? d.return_legs
     : (d.return_detail ? [d.return_detail] : []);
+  const internal = (d.internal_legs && d.internal_legs.length > 0) ? d.internal_legs : [];
 
   outbound.forEach((leg, i) => {
     segments.push({
@@ -43,6 +44,22 @@ function mapFlight(d: FlightData): { type: TripServiceType; data: TripServiceDat
       terminal: "",
       gate: "",
       segment_type: i === 0 ? "ida" : "conexao",
+    });
+  });
+  internal.forEach((leg) => {
+    segments.push({
+      origin_airport: leg.airport_origin || "",
+      origin_city: "",
+      destination_airport: leg.airport_destination || "",
+      destination_city: "",
+      flight_date: leg.leg_date || "",
+      departure_time: leg.departure_time || "",
+      arrival_time: leg.arrival_time || "",
+      flight_number: leg.flight_number || "",
+      airline: d.airline || "",
+      terminal: "",
+      gate: "",
+      segment_type: "conexao",
     });
   });
   ret.forEach((leg, i) => {

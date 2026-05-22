@@ -96,6 +96,8 @@ export interface FlightData {
   return_detail?: FlightLegDetail;
   outbound_legs?: FlightLegDetail[];
   return_legs?: FlightLegDetail[];
+  /** Internal/domestic flights between outbound and return, classified as "internal" */
+  internal_legs?: FlightLegDetail[];
   /** Structured summary preserved from AI airfare import (does not change form UI) */
   imported_summary?: {
     fare_type?: string;          // RT / OW / MT
