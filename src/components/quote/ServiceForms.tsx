@@ -34,6 +34,8 @@ import type {
 } from "@/types/quote";
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
+import { SEGMENT_TYPE_OPTIONS, classifySegments } from "@/lib/flightSegments";
+import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day).
