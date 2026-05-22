@@ -117,6 +117,7 @@ const flightLegSchema = z.object({
   baggage_checked: z.boolean().nullable().optional(),
   baggage_checked_count: z.number().nullable().optional(),
   alert: z.string().optional(),
+  segment_type: z.string().optional(),
 }).passthrough();
 
 const emptyLeg = (): z.infer<typeof flightLegSchema> => ({ leg_date: "", airport_origin: "", airport_destination: "", departure_time: "", arrival_time: "", flight_number: "" });
