@@ -45,6 +45,7 @@ export interface WizardFlightDraft {
   includes_boarding_fee?: boolean;
   outbound_legs?: FlightLegDraft[];
   return_legs?: FlightLegDraft[];
+  internal_legs?: FlightLegDraft[];
   adult_price?: number;
   child_price?: number;
   option_label?: string;
@@ -408,6 +409,9 @@ export function FlightWizard({
     if (hasNonEmptyLegs(data.outbound_legs)) {
       out.outbound_legs = data.outbound_legs;
       out.outbound_detail = data.outbound_legs![0];
+    }
+    if (hasNonEmptyLegs(data.internal_legs)) {
+      out.internal_legs = data.internal_legs!.map(l => ({ ...l, segment_type: l.segment_type || "internal" as SegmentType }));
     }
     if (!isOneWay && hasNonEmptyLegs(data.return_legs)) {
       out.return_legs = data.return_legs;
