@@ -20,7 +20,7 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X } from "lucide-react";
+import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,7 @@ export default function CriarRoteiro() {
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [publishReviewOpen, setPublishReviewOpen] = useState(false);
   const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
+  const [editPresentationOpen, setEditPresentationOpen] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
@@ -527,6 +528,66 @@ export default function CriarRoteiro() {
                   {currentItinerary.days?.length || 0} dias
                 </CardDescription>
               </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* Cover thumbnail */}
+                  <div className="md:w-48 shrink-0">
+                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted">
+                      {currentItinerary.coverImageUrl || currentItinerary.destinationIntroImages?.[0] ? (
+                        <img
+                          src={currentItinerary.coverImageUrl || currentItinerary.destinationIntroImages?.[0]}
+                          alt="Capa do destino"
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-1">
+                          <ImageIcon className="h-6 w-6" />
+                          <span className="text-[10px] uppercase tracking-wider">Sem capa</span>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="w-full mt-2"
+                      onClick={() => setEditPresentationOpen(true)}
+                    >
+                      <ImageIcon className="h-3.5 w-3.5 mr-1.5" />
+                      Capa e fotos
+                    </Button>
+                  </div>
+
+                  {/* Intro text */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 text-primary" />
+                        Apresentação do destino
+                      </span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2"
+                        onClick={() => setEditPresentationOpen(true)}
+                      >
+                        <Pencil className="h-3.5 w-3.5 mr-1" />
+                        Editar
+                      </Button>
+                    </div>
+                    {currentItinerary.destinationIntroText ? (
+                      <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line line-clamp-6">
+                        {currentItinerary.destinationIntroText}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        Nenhum texto gerado ainda. Clique em "Editar" para criar a apresentação do destino.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
             </Card>
 
             {currentItinerary.days && currentItinerary.days.length > 0 && (
@@ -559,6 +620,34 @@ export default function CriarRoteiro() {
           onOpenChange={setPublishReviewOpen}
           itinerary={currentItinerary}
           onConfirm={handleConfirmPublish}
+        />
+      )}
+
+      {currentItinerary && editPresentationOpen && (
+        <PublishReviewDialog
+          open={editPresentationOpen}
+          onOpenChange={setEditPresentationOpen}
+          itinerary={currentItinerary}
+          mode="edit"
+          onConfirm={async (data) => {
+            await updateItineraryDetails.mutateAsync({
+              itineraryId: currentItinerary.id,
+              updates: {
+                destination_intro_text: data.introText,
+                destination_intro_images: data.images,
+                cover_image_url: data.coverUrl,
+                show_destination_intro: data.showIntro,
+              },
+            });
+            setCurrentItinerary({
+              ...currentItinerary,
+              destinationIntroText: data.introText || undefined,
+              destinationIntroImages: data.images,
+              coverImageUrl: data.coverUrl || undefined,
+              showDestinationIntro: data.showIntro,
+            });
+            toast.success("Apresentação atualizada!");
+          }}
         />
       )}
 

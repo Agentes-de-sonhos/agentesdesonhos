@@ -27,6 +27,7 @@ interface PublishReviewDialogProps {
     coverUrl: string | null;
     showIntro: boolean;
   }) => Promise<void>;
+  mode?: "publish" | "edit";
 }
 
 export function PublishReviewDialog({
@@ -34,6 +35,7 @@ export function PublishReviewDialog({
   onOpenChange,
   itinerary,
   onConfirm,
+  mode = "publish",
 }: PublishReviewDialogProps) {
   const [introText, setIntroText] = useState(itinerary.destinationIntroText || "");
   const [images, setImages] = useState<string[]>(itinerary.destinationIntroImages || []);
@@ -139,9 +141,13 @@ export function PublishReviewDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Revisar antes de publicar</DialogTitle>
+          <DialogTitle>
+            {mode === "publish" ? "Revisar antes de publicar" : "Apresentação do destino"}
+          </DialogTitle>
           <DialogDescription>
-            Revise a apresentação do destino, capa e galeria. O cliente verá esse material no link público.
+            {mode === "publish"
+              ? "Revise a apresentação do destino, capa e galeria. O cliente verá esse material no link público."
+              : "Edite o texto gerado pela IA, gerencie a galeria de fotos e escolha a capa do destino."}
           </DialogDescription>
         </DialogHeader>
 
@@ -280,10 +286,10 @@ export function PublishReviewDialog({
           <Button onClick={handleConfirm} disabled={saving}>
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
+            ) : mode === "publish" ? (
               <Link2 className="h-4 w-4 mr-2" />
-            )}
-            Publicar roteiro
+            ) : null}
+            {mode === "publish" ? "Publicar roteiro" : "Salvar alterações"}
           </Button>
         </DialogFooter>
       </DialogContent>
