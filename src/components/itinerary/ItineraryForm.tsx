@@ -544,11 +544,11 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="mobilityLimitations">Limitações de mobilidade</Label>
+              <Label htmlFor="mobilityLimitations">Mais alguma preferência?</Label>
               <Textarea
                 id="mobilityLimitations"
-                placeholder="Descreva qualquer limitação de mobilidade..."
-                rows={2}
+                placeholder="(ex: limitações de mobilidade, aniversário a comemorar, surpresa para o parceiro, restaurante dos sonhos, atividades que o cliente não pode perder de jeito nenhum...)"
+                rows={3}
                 {...form.register("mobilityLimitations")}
               />
             </div>
