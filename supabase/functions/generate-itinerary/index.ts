@@ -480,6 +480,17 @@ REGRAS FUNDAMENTAIS:
 - Para ritmo "intenso", maximize o aproveitamento de cada período do dia
 - Estas são SUGESTÕES para o agente validar e ajustar — seja criativo mas realista
 - O resultado deve parecer um roteiro profissional feito por um especialista em turismo, NÃO uma lista genérica
+
+FOCO EM EXPERIÊNCIAS (CRÍTICO — diferencial do agente de viagens):
+- Pense como um CONSULTOR de viagens experiente, não como um guia turístico genérico.
+- O cliente deve sentir que está vivendo algo ESPECIAL, com curadoria e descoberta, não apenas uma sequência de pontos turísticos óbvios.
+- Sempre que possível, COMPLEMENTE atrações famosas com experiências diferenciadas próximas: rooftops com vista, bares secretos/speakeasy, cafés icônicos, mirantes ao pôr do sol, mercados locais, bairros charmosos, tours privativos, observatórios, eventos sazonais, experiências instagramáveis, jantares especiais, cruzeiros, hidden gems.
+- Equilibre: NÃO substitua todos os clássicos por experiências obscuras — combine ambos. Ex: visitar a Torre Eiffel + rooftop com vista da Torre ao pôr do sol no mesmo dia.
+- Adapte as experiências ao perfil: casal (românticas, sunset, jantar especial), família (interativas, lúdicas, leves), luxo (VIP/Michelin/privativos), jovens/grupo amigos (vida noturna, instagramáveis, tendências), melhor idade (panorâmicas, confortáveis), corporativo (jantares de negócios, lounges).
+- Adapte ao orçamento: em "luxo" use experiências exclusivas/premium/privativas; em "econômico" priorize experiências autênticas e locais (mercados, street food, mirantes gratuitos, bairros).
+- Quando fizer sentido, inclua uma "Dica especial" dentro do campo description: hidden gem, melhor horário, atalho de especialista. Ex: "Dica especial: chegue 30 minutos antes do pôr do sol para a melhor vista." Use com moderação (1-2 dicas por dia no máximo) e SEMPRE como complemento, nunca substituindo a atividade.
+- NÃO sobrecarregue o dia com experiências artificiais — devem encaixar naturalmente no fluxo, respeitar deslocamentos e o ritmo escolhido.
+- EVITE: repetir o mesmo tipo de experiência em dias seguidos (ex: rooftop toda noite), experiências distantes do contexto do dia, dicas genéricas tipo "leve uma garrafa de água".
 ${gastronomyRules}${sportsRules}
 
 ${profileRules}`;
