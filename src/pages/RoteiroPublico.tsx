@@ -499,15 +499,15 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         {/* ─── Passageiros + Perfil da viagem ─── */}
         {((itinerary.passengers && itinerary.passengers.length > 0) ||
           (itinerary.passengerInterests && itinerary.passengerInterests.length > 0)) && (
-          <section className="rounded-2xl border border-border/40 bg-card p-5 sm:p-6 space-y-4">
+          <section className="rounded-2xl border border-border/40 bg-card p-4 sm:p-5 space-y-3">
             {itinerary.passengers && itinerary.passengers.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
                   <Users className="h-3.5 w-3.5" /> Passageiros
                 </p>
-                <ul className="space-y-1">
+                <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-1">
                   {itinerary.passengers.map((p, i) => (
-                    <li key={i} className="text-base font-medium text-foreground">
+                    <li key={i} className="text-sm font-medium text-foreground truncate">
                       {p.name}
                     </li>
                   ))}
@@ -516,7 +516,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             )}
             {itinerary.passengerInterests && itinerary.passengerInterests.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
                   ✨ Perfil da viagem
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -532,7 +532,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         )}
 
         {/* ─── Local time + Calendar with weather ─── */}
-        <section className="space-y-3">
+        <section className="space-y-3 sm:max-w-xl sm:mx-auto">
           {timezone && (
             <LocalClock
               timezone={timezone}
@@ -605,6 +605,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Briefcase className="h-3.5 w-3.5" />
                 Seu consultor de viagens
+                <span className="hidden sm:inline">— Precisa de ajuda? Fale com seu consultor de viagens</span>
               </p>
               <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
             </button>
