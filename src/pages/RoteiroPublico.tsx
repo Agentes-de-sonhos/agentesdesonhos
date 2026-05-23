@@ -611,8 +611,10 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               onClick={() => setAgentOpen((v) => !v)}
               className="w-full bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3 flex items-center justify-between hover:from-muted/70 transition-colors"
             >
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <HelpCircle className="h-3.5 w-3.5" />
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
+                  <HelpCircle className="h-4 w-4 text-primary" />
+                </span>
                 Precisa de ajuda? Fale com seu consultor de viagens
               </p>
               <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
