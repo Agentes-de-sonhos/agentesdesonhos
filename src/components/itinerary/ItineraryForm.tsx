@@ -396,11 +396,6 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
           )}
         </div>
 
-        {/* Perfil + Orçamento */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        </div>
-
         {/* Passageiros (cadastro individual) */}
         <div className="space-y-2">
           <Button
