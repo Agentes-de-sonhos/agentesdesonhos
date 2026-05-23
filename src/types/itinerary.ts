@@ -154,6 +154,10 @@ export interface Itinerary {
   createdAt: string;
   updatedAt: string;
   days?: ItineraryDay[];
+  coverImageUrl?: string | null;
+  destinationIntroText?: string | null;
+  destinationIntroImages?: string[];
+  showDestinationIntro?: boolean;
 }
 
 export interface AIGeneratedDay {
