@@ -321,22 +321,14 @@ export default function CriarRoteiro() {
   };
 
   const handleDelete = (itineraryId: string) => {
-    setItineraryToDelete(itineraryId);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (itineraryToDelete) {
-      deleteItinerary.mutate(itineraryToDelete, {
-        onSuccess: () => {
-          if (currentItinerary?.id === itineraryToDelete) {
-            setCurrentItinerary(null);
-          }
-          setDeleteDialogOpen(false);
-          setItineraryToDelete(null);
-        },
-      });
-    }
+    // Confirmation is handled inside ItineraryCard's own AlertDialog
+    deleteItinerary.mutate(itineraryId, {
+      onSuccess: () => {
+        if (currentItinerary?.id === itineraryId) {
+          setCurrentItinerary(null);
+        }
+      },
+    });
   };
 
   const handleBack = () => {
