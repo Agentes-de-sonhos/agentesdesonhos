@@ -1,0 +1,373 @@
+import { useState } from "react";
+import { Sparkles, Shuffle, Loader2, Wand2, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import type { Activity, ItineraryDay } from "@/types/itinerary";
+import type { ItineraryMemory } from "@/hooks/useItineraryMemory";
+
+export interface AIContext {
+  destination?: string;
+  tripType?: string;
+  budgetLevel?: string;
+  travelPace?: string;
+  travelersCount?: number;
+  interests?: string[];
+  observations?: string;
+}
+
+interface Alternative {
+  title: string;
+  short_description: string;
+  location?: string;
+  estimated_duration?: string;
+  estimated_cost?: string;
+}
+
+const QUICK_REFINEMENTS = [
+  "Deixe mais romântico",
+  "Mais econômico",
+  "Menos cansativo",
+  "Mais gastronômico",
+  "Algo infantil",
+];
+
+function dayPeerSummary(day: ItineraryDay) {
+  return day.activities.map((a) => ({
+    title: a.title,
+    period: a.period,
+    isApproved: a.isApproved,
+  }));
+}
+
+interface ActivityAIActionsProps {
+  activity: Activity;
+  day: ItineraryDay;
+  context: AIContext;
+  memory: ItineraryMemory;
+  onApplyUpdate: (updates: Partial<Activity>) => void;
+  onLearnInstruction: (instruction: string) => void;
+}
+
+export function ActivityAIActions({
+  activity,
+  day,
+  context,
+  memory,
+  onApplyUpdate,
+  onLearnInstruction,
+}: ActivityAIActionsProps) {
+  const [refineOpen, setRefineOpen] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [instruction, setInstruction] = useState("");
+  const [loading, setLoading] = useState<null | "refine" | "suggest">(null);
+  const [alternatives, setAlternatives] = useState<Alternative[]>([]);
+
+  const buildContext = () => ({
+    ...context,
+    dayNumber: day.dayNumber,
+    date: day.date,
+    period: activity.period,
+    existingActivities: dayPeerSummary(day),
+    approvedHighlights: memory.approved,
+    memory: {
+      avoid: memory.avoid,
+      preferred_style: memory.preferred_style,
+      pace: memory.pace,
+    },
+  });
+
+  const handleRefine = async (inst: string) => {
+    const finalInstruction = inst.trim();
+    if (!finalInstruction) return;
+    setLoading("refine");
+    try {
+      const { data, error } = await supabase.functions.invoke("refine-itinerary-activity", {
+        body: {
+          mode: "refine",
+          context: buildContext(),
+          current: {
+            title: activity.title,
+            description: activity.description ?? "",
+            location: activity.location ?? "",
+          },
+          instruction: finalInstruction,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const r = data?.result;
+      if (!r?.title) throw new Error("Resposta vazia");
+      onApplyUpdate({
+        title: r.title,
+        description: r.description ?? activity.description,
+        location: r.location ?? activity.location,
+        estimatedDuration: r.estimated_duration ?? activity.estimatedDuration,
+        estimatedCost: r.estimated_cost ?? activity.estimatedCost,
+      });
+      onLearnInstruction(finalInstruction);
+      setRefineOpen(false);
+      setInstruction("");
+      toast.success("Atividade refinada");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao refinar");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleSuggest = async () => {
+    setSuggestOpen(true);
+    if (alternatives.length) return;
+    setLoading("suggest");
+    try {
+      const { data, error } = await supabase.functions.invoke("refine-itinerary-activity", {
+        body: {
+          mode: "suggest_alternatives",
+          context: buildContext(),
+          current: {
+            title: activity.title,
+            description: activity.description ?? "",
+          },
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const list = data?.result?.alternatives ?? [];
+      setAlternatives(list);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao buscar sugestões");
+      setSuggestOpen(false);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const pickAlternative = (alt: Alternative) => {
+    onApplyUpdate({
+      title: alt.title,
+      description: alt.short_description,
+      location: alt.location ?? activity.location,
+      estimatedDuration: alt.estimated_duration ?? activity.estimatedDuration,
+      estimatedCost: alt.estimated_cost ?? activity.estimatedCost,
+    });
+    setAlternatives([]);
+    setSuggestOpen(false);
+    toast.success("Atividade substituída");
+  };
+
+  return (
+    <div className="flex gap-1">
+      {/* Refine */}
+      <Popover open={refineOpen} onOpenChange={setRefineOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-primary hover:text-primary"
+            title="Refinar com IA"
+          >
+            {loading === "refine" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80" align="end">
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-medium">Refinar com IA</p>
+              <p className="text-xs text-muted-foreground">
+                Descreva como deseja ajustar esta atividade.
+              </p>
+            </div>
+            <Input
+              autoFocus
+              placeholder="Ex: deixe mais romântico"
+              value={instruction}
+              onChange={(e) => setInstruction(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && instruction.trim()) handleRefine(instruction);
+              }}
+              disabled={loading === "refine"}
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {QUICK_REFINEMENTS.map((q) => (
+                <Badge
+                  key={q}
+                  variant="secondary"
+                  className="cursor-pointer text-xs hover:bg-primary/15"
+                  onClick={() => handleRefine(q)}
+                >
+                  {q}
+                </Badge>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                onClick={() => handleRefine(instruction)}
+                disabled={!instruction.trim() || loading === "refine"}
+              >
+                {loading === "refine" ? (
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                ) : (
+                  <Wand2 className="mr-1 h-3 w-3" />
+                )}
+                Refinar
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {/* Suggest alternatives */}
+      <Popover
+        open={suggestOpen}
+        onOpenChange={(o) => {
+          setSuggestOpen(o);
+          if (!o) setAlternatives([]);
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-primary hover:text-primary"
+            title="Sugerir outra opção"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSuggest();
+            }}
+          >
+            {loading === "suggest" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Shuffle className="h-4 w-4" />
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-96" align="end">
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Sugestões alternativas</p>
+            {loading === "suggest" && alternatives.length === 0 ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                <Loader2 className="h-4 w-4 animate-spin" /> Gerando opções...
+              </div>
+            ) : alternatives.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Nenhuma sugestão.</p>
+            ) : (
+              <div className="space-y-2">
+                {alternatives.map((alt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => pickAlternative(alt)}
+                    className="w-full text-left rounded-lg border p-2.5 hover:border-primary hover:bg-primary/5 transition-colors"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Check className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium leading-snug">{alt.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {alt.short_description}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+interface EmptyPeriodAISlotProps {
+  day: ItineraryDay;
+  period: Activity["period"];
+  context: AIContext;
+  memory: ItineraryMemory;
+  onCreate: (activity: Omit<Activity, "id" | "orderIndex" | "isApproved">) => void;
+}
+
+export function EmptyPeriodAISlot({
+  day,
+  period,
+  context,
+  memory,
+  onCreate,
+}: EmptyPeriodAISlotProps) {
+  const [loading, setLoading] = useState(false);
+
+  const handleSuggest = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("refine-itinerary-activity", {
+        body: {
+          mode: "suggest_new",
+          context: {
+            ...context,
+            dayNumber: day.dayNumber,
+            date: day.date,
+            period,
+            existingActivities: dayPeerSummary(day),
+            approvedHighlights: memory.approved,
+            memory: {
+              avoid: memory.avoid,
+              preferred_style: memory.preferred_style,
+              pace: memory.pace,
+            },
+          },
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const r = data?.result;
+      if (!r?.title) throw new Error("Resposta vazia");
+      onCreate({
+        period,
+        title: r.title,
+        description: r.description ?? null,
+        location: r.location ?? null,
+        estimatedDuration: r.estimated_duration ?? null,
+        estimatedCost: r.estimated_cost ?? null,
+      });
+      toast.success("Sugestão adicionada");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao sugerir");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="ml-6 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3 flex items-center justify-between gap-3">
+      <p className="text-sm text-muted-foreground italic">Nenhuma atividade definida</p>
+      <Button
+        size="sm"
+        variant="outline"
+        className="border-primary/50 text-primary hover:bg-primary/10"
+        onClick={handleSuggest}
+        disabled={loading}
+      >
+        {loading ? (
+          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+        )}
+        Gerar sugestão IA
+      </Button>
+    </div>
+  );
+}

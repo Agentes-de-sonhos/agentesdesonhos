@@ -503,6 +503,15 @@ export default function CriarRoteiro() {
                 onDeleteActivity={handleDeleteActivity}
                 onAddActivity={handleAddActivity}
                 onApproveAll={handleApproveAll}
+                aiContext={{
+                  destination: currentItinerary.destination,
+                  tripType: currentItinerary.tripType,
+                  budgetLevel: currentItinerary.budgetLevel,
+                  travelersCount: currentItinerary.travelersCount,
+                  travelPace: lastFormData?.travelPace,
+                  interests: lastFormData?.interests,
+                  observations: lastFormData?.additionalPreferences?.serviceContext,
+                }}
               />
             )}
           </div>
