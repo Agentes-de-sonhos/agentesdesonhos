@@ -98,6 +98,9 @@ export default function CriarRoteiro() {
       const data = await getItineraryWithDetails(itineraryId);
       setCurrentItinerary(data);
       setActiveTab("create");
+      if (data.status === "published" && data.shareToken) {
+        setGeneratedLinkUrl(buildItineraryUrl(data));
+      }
     } catch (error) {
       toast.error("Erro ao carregar roteiro");
     }
