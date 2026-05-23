@@ -85,6 +85,8 @@ export function useItineraries() {
             estimatedCost: a.estimated_cost as string | null,
             orderIndex: a.order_index,
             isApproved: a.is_approved,
+            photoUrl: (a as any).photo_url ?? null,
+            documentUrls: (a as any).document_urls ?? [],
           })),
         };
       })
