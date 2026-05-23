@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Star, Trash2, Plus, ImageIcon, Link2 } from "lucide-react";
+import { Loader2, Star, Trash2, Plus, ImageIcon, Link2, Search } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -57,11 +57,22 @@ export function PublishReviewDialog({
   const handleSearchPhotos = async () => {
     setSearching(true);
     try {
-      const { data, error } = await supabase.functions.invoke("places-autocomplete", {
-        body: { action: "photos", query: itinerary.destination, limit: 8 },
+      // Step 1: autocomplete to get a place_id
+      const { data: ac, error: acErr } = await supabase.functions.invoke("places-autocomplete", {
+        body: { input: itinerary.destination, place_type: "city" },
       });
-      if (error) throw error;
-      const photos: string[] = (data?.photos || data?.images || []).filter(Boolean);
+      if (acErr) throw acErr;
+      const placeId = ac?.predictions?.[0]?.place_id;
+      if (!placeId) {
+        toast.info("Nenhuma foto encontrada para este destino.");
+        return;
+      }
+      // Step 2: fetch details to get photo_urls
+      const { data: det, error: detErr } = await supabase.functions.invoke("places-autocomplete", {
+        body: { fetch_details: true, place_id: placeId },
+      });
+      if (detErr) throw detErr;
+      const photos: string[] = (det?.place?.photo_urls || []).filter(Boolean);
       if (photos.length === 0) {
         toast.info("Nenhuma foto encontrada para este destino.");
       } else {
