@@ -4,6 +4,19 @@ import { Itinerary, ItineraryDay } from "@/types/itinerary";
 import { parseLocalDate } from "@/lib/dateParsing";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
+import type { DayWeather } from "@/hooks/useTripWeather";
+
+function weatherEmoji(code: number): string {
+  if (code === 0) return "☀️";
+  if (code === 1 || code === 2) return "⛅";
+  if (code === 3) return "☁️";
+  if (code === 45 || code === 48) return "🌫️";
+  if (code >= 51 && code <= 57) return "🌦️";
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return "🌧️";
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "❄️";
+  if (code >= 95) return "⛈️";
+  return "☁️";
+}
 
 const tripTypeLabels: Record<string, string> = {
   familia: "Viagem em Família",
@@ -31,19 +44,55 @@ const periodLabels: Record<string, string> = {
 };
 
 function generateAgencyHeader(profile: AgentProfile | null): string {
-  if (!profile?.agency_logo_url) {
-    return `
-      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;">
-        <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
-          ${profile?.agency_name || "Roteiro de Viagem"}
-        </p>
-      </div>
-    `;
-  }
+  // Slim top bar mirroring the quote layout
+  const agencyName = profile?.agency_name || "Sua viagem";
   return `
-    <div style="text-align:center;padding:4px 0 2px;background:#ffffff;">
-      <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
-        style="max-height:180px;max-width:520px;object-fit:contain;display:block;margin:0 auto;" />
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#ffffff;border-bottom:1px solid #e2e8f0;">
+      <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:2.5px;color:#64748b;">✦ Roteiro de Viagem</span>
+      <span style="font-size:12px;font-weight:700;color:#0f172a;">${agencyName}</span>
+    </div>
+  `;
+}
+
+function generateHero(
+  itinerary: Itinerary & { days: ItineraryDay[] } & Record<string, any>,
+  profile: AgentProfile | null,
+  startDate: Date,
+  endDate: Date,
+  days: number
+): string {
+  const cover =
+    itinerary.coverImageUrl ||
+    (itinerary.destinationIntroImages && itinerary.destinationIntroImages[0]) ||
+    null;
+  const logo = profile?.agency_logo_url;
+  const bgStyle = cover
+    ? `background-image:linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.75)),url('${cover}');background-size:cover;background-position:center;`
+    : `background:linear-gradient(135deg,rgba(15,118,110,0.5),#0f172a);`;
+
+  return `
+    <div class="pdf-block pdf-hero" style="position:relative;${bgStyle}border-radius:14px;overflow:hidden;padding:${logo ? "90px" : "40px"} 26px 28px;color:#ffffff;margin:14px 0 16px;text-align:center;min-height:260px;">
+      ${logo ? `<div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);width:78px;height:78px;border-radius:50%;background:#ffffff;display:flex;align-items:center;justify-content:center;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.35);"><img src="${logo}" alt="${profile?.agency_name || ""}" style="max-width:100%;max-height:100%;object-fit:contain;" /></div>` : ""}
+      <div style="display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:10px;">📍 ${itinerary.destination}</div>
+      <h1 style="font-size:32px;font-weight:800;margin:0 0 6px;letter-spacing:-1px;line-height:1.05;text-shadow:0 2px 16px rgba(0,0,0,0.4);">${itinerary.destination}</h1>
+      <p style="font-size:13px;opacity:0.9;margin:0 0 12px;font-weight:300;">${days} ${days === 1 ? "dia" : "dias"} • ${format(startDate, "dd/MM/yyyy", { locale: ptBR })} — ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}</p>
+    </div>
+  `;
+}
+
+function generateGallery(images: string[]): string {
+  if (!images || images.length === 0) return "";
+  const shots = images.slice(0, 6);
+  return `
+    <div class="pdf-block" style="margin:0 0 16px;">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin:0 0 8px;text-align:center;">Galeria do destino</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+        ${shots
+          .map(
+            (url) => `<div style="aspect-ratio:4/3;overflow:hidden;border-radius:8px;background:#f1f5f9;"><img src="${url}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>`
+          )
+          .join("")}
+      </div>
     </div>
   `;
 }
@@ -86,7 +135,8 @@ function generateAgentSignature(profile: AgentProfile | null): string {
 
 export function generatePDFContent(
   itinerary: Itinerary & { days: ItineraryDay[] } & Record<string, any>,
-  profile?: AgentProfile | null
+  profile?: AgentProfile | null,
+  weatherByDate?: Record<string, DayWeather>
 ): string {
   const startDate = parseLocalDate(itinerary.startDate);
   const endDate = parseLocalDate(itinerary.endDate);
@@ -109,14 +159,22 @@ export function generatePDFContent(
 
   const daysHtml = itinerary.days
     .map(
-      (day) => `
+      (day) => {
+        const wx = weatherByDate?.[day.date];
+        const wxChip = wx
+          ? `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.85);border:1px solid rgba(15,118,110,0.2);padding:3px 8px;border-radius:9999px;font-size:11px;font-weight:700;color:#0f172a;">${weatherEmoji(wx.code)} ${wx.tmin}° / ${wx.tmax}°C</span>`
+          : "";
+        return `
       <div class="pdf-card day-card" style="border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-        <div class="pdf-block pdf-header day-title" style="background:linear-gradient(90deg,rgba(15,118,110,0.15),rgba(15,118,110,0.05));padding:8px 14px;color:#0f766e;display:flex;align-items:center;gap:12px;">
+        <div class="pdf-block pdf-header day-title" style="background:linear-gradient(90deg,rgba(15,118,110,0.15),rgba(15,118,110,0.05));padding:8px 14px;color:#0f766e;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
           <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.85);display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#0f766e;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${day.dayNumber}</div>
           <div style="min-width:0;flex:1;">
             <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0f766e;margin:0;line-height:1.2;">Dia ${day.dayNumber}</p>
             <p style="font-size:12px;color:#0f766e;opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;">${format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}</p>
           </div>
+          </div>
+          ${wxChip}
         </div>
         <div style="padding:12px 16px;">
           ${(["manha", "tarde", "noite"] as const)
@@ -160,7 +218,8 @@ export function generatePDFContent(
             .join("")}
         </div>
       </div>
-    `
+    `;
+      }
     )
     .join("");
 
@@ -200,15 +259,11 @@ export function generatePDFContent(
   <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
     ${generateAgencyHeader(profile || null)}
 
-    <div style="padding:6px 32px 0;">
-      <!-- Hero -->
-      <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
-        <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
-          🗺️ Roteiro de Viagem
-        </div>
-        <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${itinerary.destination}</h1>
-        ${clientName ? `<p style="font-size:14px;color:#64748b;margin-top:4px;">Preparado especialmente para <strong style="color:#1e293b;">${clientName}</strong></p>` : ""}
-      </div>
+    <div style="padding:0 24px;">
+      ${generateHero(itinerary, profile || null, startDate, endDate, days)}
+      ${clientName ? `<p style="text-align:center;font-size:13px;color:#64748b;margin:-4px 0 14px;">Preparado especialmente para <strong style="color:#1e293b;">${clientName}</strong></p>` : ""}
+      ${itinerary.showDestinationIntro !== false ? generateGallery(itinerary.destinationIntroImages || []) : ""}
+      ${itinerary.showDestinationIntro !== false && itinerary.destinationIntroText ? `<div class="pdf-block" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;margin-bottom:16px;"><p style="font-size:12px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;">${itinerary.destinationIntroText}</p></div>` : ""}
 
       <!-- Overview -->
       <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
@@ -258,9 +313,10 @@ export function generatePDFContent(
 
 export function downloadPDF(
   itinerary: Itinerary & { days: ItineraryDay[] },
-  profile?: AgentProfile | null
+  profile?: AgentProfile | null,
+  weatherByDate?: Record<string, DayWeather>
 ) {
-  const html = generatePDFContent(itinerary, profile);
+  const html = generatePDFContent(itinerary, profile, weatherByDate);
   const printWindow = window.open("", "_blank");
   if (printWindow) {
     printWindow.document.write(html);
