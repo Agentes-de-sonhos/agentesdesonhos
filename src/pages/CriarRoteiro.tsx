@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ExternalLink, Copy } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +51,10 @@ export default function CriarRoteiro() {
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
+  const [approvalPromptOpen, setApprovalPromptOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"pdf" | "link" | null>(null);
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
+  const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
 
   const {
     itineraries,
