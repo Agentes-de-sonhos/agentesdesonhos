@@ -21,7 +21,23 @@ const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "fami
 const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
 const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis", "esportes"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
-const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight", "arrivalInfo", "departureInfo", "extraDestinations"];
+const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight", "arrivalInfo", "departureInfo", "extraDestinations", "passengers"];
+const ALLOWED_PASSENGER_INTERESTS = ["gastronomia","cultura","historia","compras","natureza","praia","esportes","futebol","basquete","parques","vida_noturna","relaxamento","luxo","experiencias_locais","museus","fotografia","aventura","shows","vida_urbana"];
+const ALLOWED_PASSENGER_NEEDS = ["mobilidade_reduzida","restricao_alimentar","intolerancia_alimentar","gestante","crianca_pequena","ritmo_leve","acessibilidade","evitar_caminhadas_longas"];
+const PASSENGER_INTEREST_LABELS_PT: Record<string,string> = {
+  gastronomia:"gastronomia", cultura:"cultura", historia:"história", compras:"compras",
+  natureza:"natureza", praia:"praia", esportes:"esportes", futebol:"futebol",
+  basquete:"basquete", parques:"parques", vida_noturna:"vida noturna",
+  relaxamento:"relaxamento", luxo:"luxo", experiencias_locais:"experiências locais",
+  museus:"museus", fotografia:"fotografia", aventura:"aventura", shows:"shows",
+  vida_urbana:"vida urbana",
+};
+const PASSENGER_NEED_LABELS_PT: Record<string,string> = {
+  mobilidade_reduzida:"mobilidade reduzida", restricao_alimentar:"restrição alimentar",
+  intolerancia_alimentar:"intolerância alimentar", gestante:"gestante",
+  crianca_pequena:"criança pequena", ritmo_leve:"ritmo leve",
+  acessibilidade:"acessibilidade", evitar_caminhadas_longas:"evitar longas caminhadas",
+};
 const ALLOWED_DEST_KIND = ["principal", "secundario", "bate_volta", "conexao", "extensao"];
 const ALLOWED_TRANSPORT = ["aviao", "carro", "trem", "onibus", "transfer", "cruzeiro", "outro"];
 const DEST_KIND_LABELS: Record<string, string> = {
@@ -398,6 +414,59 @@ serve(async (req) => {
       multiDestText = `\n\nROTEIRO MULTI-DESTINOS — siga RIGOROSAMENTE a ordem e a logística:\n${lines.join("\n")}\n\nREGRAS PARA MÚLTIPLOS DESTINOS:\n- Distribua os dias do roteiro respeitando as noites informadas em cada destino.\n- No dia de deslocamento entre cidades, programe atividades LEVES (não sugira passeios pesados).\n- Bate-volta: NÃO troca a hospedagem; o viajante volta a dormir na cidade base.\n- Extensão: trate como nova etapa, com hospedagem própria no novo destino.\n- Conexão/pernoite curto: programe apenas algo leve ou descanso.\n- NUNCA sugira atividades em duas cidades distantes no mesmo dia/horário.\n- Considere o tempo de deslocamento informado (avião, carro, trem etc.) ao montar o dia da troca de cidade.\n- Indique no título da atividade do dia de transição algo como "Deslocamento <cidade A> → <cidade B>".`;
     }
 
+    // --- PASSAGEIROS (perfil individual) ---
+    type PassengerSan = { name: string; age?: number; interests: string[]; notes?: string; needs: string[] };
+    const passengersSan: PassengerSan[] = [];
+    if (Array.isArray(body.passengers)) {
+      for (const raw of body.passengers.slice(0, 20)) {
+        if (!raw || typeof raw !== "object") continue;
+        const r = raw as Record<string, unknown>;
+        const name = typeof r.name === "string" ? sanitizeText(r.name).slice(0, 120) : "";
+        if (!name) continue;
+        const age = typeof r.age === "number" && r.age >= 0 && r.age <= 120 ? Math.floor(r.age) : undefined;
+        const interests = Array.isArray(r.interests)
+          ? (r.interests as unknown[]).filter((x): x is string => typeof x === "string" && ALLOWED_PASSENGER_INTERESTS.includes(x)).slice(0, 20)
+          : [];
+        const needs = Array.isArray(r.needs)
+          ? (r.needs as unknown[]).filter((x): x is string => typeof x === "string" && ALLOWED_PASSENGER_NEEDS.includes(x)).slice(0, 10)
+          : [];
+        const notes = typeof r.notes === "string" ? sanitizeText(r.notes).slice(0, 400) : undefined;
+        passengersSan.push({ name, age, interests, notes: notes || undefined, needs });
+      }
+    }
+
+    let passengersText = "";
+    if (passengersSan.length > 0) {
+      const lines: string[] = [];
+      const aggInterests = new Set<string>();
+      const aggNeeds = new Set<string>();
+      passengersSan.forEach((p, i) => {
+        const parts: string[] = [`${i + 1}. ${p.name}`];
+        if (p.age !== undefined) parts.push(`${p.age} anos`);
+        if (p.interests.length > 0) {
+          parts.push(`interesses: ${p.interests.map((k) => PASSENGER_INTEREST_LABELS_PT[k] || k).join(", ")}`);
+          p.interests.forEach((k) => aggInterests.add(k));
+        }
+        if (p.notes) parts.push(`obs: ${p.notes}`);
+        if (p.needs.length > 0) {
+          parts.push(`necessidades: ${p.needs.map((k) => PASSENGER_NEED_LABELS_PT[k] || k).join(", ")}`);
+          p.needs.forEach((k) => aggNeeds.add(k));
+        }
+        lines.push("- " + parts.join(" — "));
+      });
+
+      const adaptRules: string[] = [
+        "- Combine os interesses dos passageiros: ao longo da viagem, contemple os interesses de cada um (ex: gastronomia para um adulto, parques para uma criança, esportes para um adolescente).",
+        "- Procure o equilíbrio: nenhum passageiro deve ficar sem atividades relevantes para o seu perfil.",
+        "- Adapte o ritmo, deslocamentos e intensidade conforme idade, presença de crianças/idosos, gestantes ou ritmo leve.",
+        "- Use as observações pessoais como dicas finas de personalização (ex: 'fã de Harry Potter' → sugerir experiência temática se existir no destino).",
+        "- Necessidades importantes (mobilidade, restrição alimentar, gestante, acessibilidade etc.) DEVEM influenciar as sugestões: evite atividades incompatíveis e priorize opções adequadas. NÃO mencione essas necessidades no texto público das atividades — use-as apenas como contexto interno para personalizar o roteiro.",
+        "- NUNCA escreva textos como 'adaptado para mobilidade reduzida' ou 'opção sem glúten' dentro das atividades. A adaptação deve ser invisível no resultado.",
+      ];
+
+      passengersText = `\n\nPERFIL DOS PASSAGEIROS (use como contexto INTERNO de personalização):\n${lines.join("\n")}\n\nREGRAS DE ADAPTAÇÃO AO GRUPO:\n${adaptRules.join("\n")}`;
+    }
+
     // --- BUILD AI REQUEST ---
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -561,7 +630,7 @@ ${profileRules}`;
 - Período: ${days} dias (${startDate} a ${endDate})
 - Viajantes: ${travelersDesc}
 - Tipo de viagem: ${tripTypeLabels[tripType] || tripType}
-- Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}${flightsText}${multiDestText}
+- Nível de orçamento: ${budgetLabels[budgetLevel] || budgetLevel}${interestsText}${paceText}${additionalText}${serviceContextText}${flightsText}${multiDestText}${passengersText}
 
 Datas dos dias: ${datesInfo.join(', ')}
 

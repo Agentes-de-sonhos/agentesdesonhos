@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { Itinerary, ItineraryDay } from "@/types/itinerary";
 import { parseLocalDate } from "@/lib/dateParsing";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 
 const tripTypeLabels: Record<string, string> = {
   familia: "Viagem em Família",
@@ -91,6 +92,20 @@ export function generatePDFContent(
   const endDate = parseLocalDate(itinerary.endDate);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   const clientName = (itinerary as any).client_name || (itinerary as any).clientName || "";
+  const passengers = (itinerary.passengers || []) as { name: string; age?: number | null }[];
+  const passengerInterests = (itinerary.passengerInterests || []) as string[];
+  const passengersHtml = (passengers.length > 0 || passengerInterests.length > 0)
+    ? `<div class="pdf-block" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 16px;margin-bottom:14px;">
+        ${passengers.length > 0 ? `
+          <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 6px;">👥 Passageiros</p>
+          <ul style="margin:0 0 ${passengerInterests.length > 0 ? "10px" : "0"};padding-left:18px;">
+            ${passengers.map((p) => `<li style="font-size:13px;color:#1e293b;font-weight:600;">${p.name}${p.age != null ? `<span style="font-weight:400;color:#64748b;"> · ${p.age} anos</span>` : ""}</li>`).join("")}
+          </ul>` : ""}
+        ${passengerInterests.length > 0 ? `
+          <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 6px;">✨ Perfil da viagem</p>
+          <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">${passengerInterests.map((k) => (PASSENGER_INTEREST_LABELS as any)[k] || k).join(" • ")}</p>` : ""}
+      </div>`
+    : "";
 
   const daysHtml = itinerary.days
     .map(
@@ -215,6 +230,7 @@ export function generatePDFContent(
 
       <!-- Days -->
       <div style="margin-bottom:18px;">
+        ${passengersHtml}
         <div class="pdf-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
           <div style="flex:1;height:1px;background:#e2e8f0;"></div>
           <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Programação Dia a Dia</h3>

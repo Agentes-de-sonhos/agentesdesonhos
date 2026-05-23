@@ -42,6 +42,11 @@ import {
   TRAVEL_INTEREST_LABELS,
   TRAVEL_INTEREST_ICONS,
   TRAVEL_PACE_LABELS,
+  Passenger,
+  PassengerInterest,
+  PassengerNeed,
+  PASSENGER_INTEREST_LABELS,
+  PASSENGER_NEED_LABELS,
 } from "@/types/itinerary";
 import type { DateRange } from "react-day-picker";
 
@@ -81,6 +86,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [departureInfo, setDepartureInfo] = useState<JourneyInfo>({ transport: 'aviao', period: 'tarde' });
   const [multiEnabled, setMultiEnabled] = useState(false);
   const [extraDestinations, setExtraDestinations] = useState<ExtraDestination[]>([]);
+  const [passengers, setPassengers] = useState<Passenger[]>([]);
+  const [showPassengers, setShowPassengers] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -141,6 +148,15 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
       arrivalInfo: journeyEnabled ? arrivalInfo : undefined,
       departureInfo: journeyEnabled ? departureInfo : undefined,
       extraDestinations: multiEnabled && extraDestinations.length > 0 ? extraDestinations : undefined,
+      passengers: passengers.length > 0
+        ? passengers
+            .map((p) => ({
+              ...p,
+              name: (p.name || "").trim(),
+              notes: (p.notes || "").trim() || undefined,
+            }))
+            .filter((p) => p.name.length > 0)
+        : undefined,
     });
   };
 
@@ -375,6 +391,64 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Adicionar destino
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Passageiros (cadastro individual) */}
+        <div className="space-y-2">
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full justify-between text-muted-foreground"
+            onClick={() => setShowPassengers(!showPassengers)}
+          >
+            <span className="flex items-center gap-2">
+              👥 Passageiros
+              {passengers.length > 0 && (
+                <span className="text-xs text-primary">({passengers.length} cadastrado{passengers.length > 1 ? "s" : ""})</span>
+              )}
+            </span>
+            {showPassengers ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+
+          {showPassengers && (
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Cadastre cada viajante com seu perfil. A IA usa essas informações para personalizar o roteiro.{" "}
+                <span className="font-medium text-foreground">Necessidades e observações ficam internas</span> e não aparecem publicamente.
+              </p>
+
+              {passengers.length === 0 && (
+                <p className="text-xs italic text-muted-foreground">Nenhum passageiro cadastrado ainda.</p>
+              )}
+
+              {passengers.map((p, idx) => (
+                <PassengerCard
+                  key={idx}
+                  index={idx}
+                  value={p}
+                  onChange={(next) =>
+                    setPassengers((prev) => prev.map((x, i) => (i === idx ? next : x)))
+                  }
+                  onRemove={() => setPassengers((prev) => prev.filter((_, i) => i !== idx))}
+                />
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setPassengers((prev) => [
+                    ...prev,
+                    { name: "", age: undefined, interests: [], notes: "", needs: [] },
+                  ])
+                }
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Adicionar passageiro
               </Button>
             </div>
           )}
@@ -703,6 +777,122 @@ function DestinationRow({ index, total, value, onChange, onRemove, onMove }: Des
           value={value.notes || ""}
           onChange={(e) => onChange({ ...value, notes: e.target.value })}
         />
+      </div>
+    </div>
+  );
+}
+
+interface PassengerCardProps {
+  index: number;
+  value: Passenger;
+  onChange: (v: Passenger) => void;
+  onRemove: () => void;
+}
+
+function PassengerCard({ index, value, onChange, onRemove }: PassengerCardProps) {
+  const toggleInterest = (i: PassengerInterest) => {
+    const set = new Set(value.interests);
+    if (set.has(i)) set.delete(i); else set.add(i);
+    onChange({ ...value, interests: Array.from(set) });
+  };
+  const toggleNeed = (n: PassengerNeed) => {
+    const set = new Set(value.needs);
+    if (set.has(n)) set.delete(n); else set.add(n);
+    onChange({ ...value, needs: Array.from(set) });
+  };
+
+  return (
+    <div className="rounded-md border border-border p-3 space-y-3 bg-muted/30">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-semibold text-muted-foreground">Passageiro {index + 1}</span>
+        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onRemove}>
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        <div className="col-span-2">
+          <Label className="text-xs">Nome</Label>
+          <Input
+            value={value.name}
+            onChange={(e) => onChange({ ...value, name: e.target.value })}
+            placeholder="Ex: Fernando Nobre"
+          />
+        </div>
+        <div>
+          <Label className="text-xs">Idade</Label>
+          <Input
+            type="number"
+            min={0}
+            max={120}
+            value={value.age ?? ""}
+            onChange={(e) =>
+              onChange({ ...value, age: e.target.value === "" ? undefined : Number(e.target.value) })
+            }
+            placeholder="—"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-xs">Interesses</Label>
+        <div className="mt-1 flex flex-wrap gap-1.5">
+          {(Object.entries(PASSENGER_INTEREST_LABELS) as [PassengerInterest, string][]).map(([k, l]) => {
+            const active = value.interests.includes(k);
+            return (
+              <button
+                key={k}
+                type="button"
+                onClick={() => toggleInterest(k)}
+                className={cn(
+                  "rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                  active
+                    ? "border-primary bg-primary/10 text-primary font-medium"
+                    : "border-border hover:bg-muted"
+                )}
+              >
+                {l}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-xs">Observações (opcional)</Label>
+        <Textarea
+          rows={2}
+          placeholder='Ex: "Ama futebol", "Fã de Harry Potter", "Cansa rápido"...'
+          value={value.notes || ""}
+          onChange={(e) => onChange({ ...value, notes: e.target.value })}
+        />
+      </div>
+
+      <div>
+        <Label className="text-xs flex items-center gap-1.5">
+          Necessidades importantes
+          <span className="text-[10px] font-normal text-muted-foreground">(uso interno — não aparece no roteiro público)</span>
+        </Label>
+        <div className="mt-1 flex flex-wrap gap-1.5">
+          {(Object.entries(PASSENGER_NEED_LABELS) as [PassengerNeed, string][]).map(([k, l]) => {
+            const active = value.needs.includes(k);
+            return (
+              <button
+                key={k}
+                type="button"
+                onClick={() => toggleNeed(k)}
+                className={cn(
+                  "rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                  active
+                    ? "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-400 font-medium"
+                    : "border-border hover:bg-muted"
+                )}
+              >
+                {l}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
