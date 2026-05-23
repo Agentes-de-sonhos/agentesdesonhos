@@ -112,23 +112,27 @@ function CollapsibleDayCard({
 
                 <div className="space-y-3 pl-7">
                   {activities.map((activity) => (
-                    <div key={activity.id} className="rounded-xl border border-border/40 bg-white p-4 space-y-3">
+                    <div
+                      key={activity.id}
+                      className="rounded-xl border border-border/40 bg-white p-4 sm:flex sm:gap-4 sm:items-start sm:p-4 space-y-3 sm:space-y-0"
+                    >
                       {(activity as any).photoUrl && (
-                        <div className="overflow-hidden rounded-lg border border-border/30">
+                        <div className="overflow-hidden rounded-lg border border-border/30 sm:shrink-0">
                           <img
                             src={(activity as any).photoUrl}
                             alt={activity.title}
                             loading="lazy"
                             decoding="async"
-                            className="w-full h-44 sm:h-52 object-cover"
+                            className="w-full h-44 object-cover sm:h-36 sm:w-36 sm:rounded-lg"
                           />
                         </div>
                       )}
+                      <div className="sm:flex-1 sm:min-w-0 space-y-3">
                       <h4 className="font-semibold text-foreground">{activity.title}</h4>
                       {activity.description && (
                         <p className="text-sm text-muted-foreground leading-relaxed">{activity.description}</p>
                       )}
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
                         {activity.location && (
                           <span className="flex items-center gap-1">
                             <MapPin className="h-4 w-4" /> {activity.location}
@@ -185,6 +189,7 @@ function CollapsibleDayCard({
                           </div>
                         </div>
                       )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -494,15 +499,15 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         {/* ─── Passageiros + Perfil da viagem ─── */}
         {((itinerary.passengers && itinerary.passengers.length > 0) ||
           (itinerary.passengerInterests && itinerary.passengerInterests.length > 0)) && (
-          <section className="rounded-2xl border border-border/40 bg-card p-5 sm:p-6 space-y-4">
+          <section className="rounded-2xl border border-border/40 bg-card p-4 sm:p-5 space-y-3">
             {itinerary.passengers && itinerary.passengers.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
                   <Users className="h-3.5 w-3.5" /> Passageiros
                 </p>
-                <ul className="space-y-1">
+                <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-1">
                   {itinerary.passengers.map((p, i) => (
-                    <li key={i} className="text-base font-medium text-foreground">
+                    <li key={i} className="text-sm font-medium text-foreground truncate">
                       {p.name}
                     </li>
                   ))}
@@ -511,7 +516,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             )}
             {itinerary.passengerInterests && itinerary.passengerInterests.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
                   ✨ Perfil da viagem
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -527,7 +532,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         )}
 
         {/* ─── Local time + Calendar with weather ─── */}
-        <section className="space-y-3">
+        <section className="space-y-3 sm:max-w-xl sm:mx-auto">
           {timezone && (
             <LocalClock
               timezone={timezone}
@@ -599,7 +604,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             >
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Briefcase className="h-3.5 w-3.5" />
-                Seu consultor de viagens
+                Precisa de ajuda? Fale com seu consultor de viagens
               </p>
               <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
             </button>
