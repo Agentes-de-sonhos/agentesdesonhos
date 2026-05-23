@@ -572,6 +572,15 @@ export default function CriarRoteiro() {
         </AlertDialog>
       </div>
 
+      {currentItinerary && publishReviewOpen && (
+        <PublishReviewDialog
+          open={publishReviewOpen}
+          onOpenChange={setPublishReviewOpen}
+          itinerary={currentItinerary}
+          onConfirm={handleConfirmPublish}
+        />
+      )}
+
       <AIGeneratingOverlay visible={isGenerating} />
     </DashboardLayout>
   );
