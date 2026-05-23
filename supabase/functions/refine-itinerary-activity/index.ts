@@ -9,7 +9,7 @@ const corsHeaders = {
 const MODEL = "google/gemini-3-flash-preview";
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-type Mode = "suggest_alternatives" | "refine" | "suggest_new";
+type Mode = "suggest_alternatives" | "refine" | "suggest_new" | "search";
 
 interface ContextPayload {
   destination?: string;
@@ -42,6 +42,7 @@ interface ReqBody {
     estimatedCost?: string;
   };
   instruction?: string; // for "refine"
+  query?: string; // for "search"
 }
 
 function buildContextBlock(ctx: ContextPayload) {
@@ -112,6 +113,45 @@ function buildMessages(body: ReqBody): { system: string; user: string; tool: any
               },
             },
             required: ["alternatives"],
+            additionalProperties: false,
+          },
+        },
+      },
+    };
+  }
+
+  if (body.mode === "search") {
+    return {
+      system: base,
+      user: `Contexto:\n${ctxBlock}\n\nO agente está buscando manualmente por: "${body.query ?? ""}"\n\nInterprete a busca de forma semântica (não literal). Considere o destino, cidade, período, perfil e interesses. Retorne 5 sugestões REAIS e RECONHECÍVEIS que atendam à intenção da busca, coerentes com o destino. Pode incluir atrações famosas, restaurantes, tours, experiências, museus, etc. Curto e direto (title até 70 chars, short_description até 130 chars).`,
+      tool: {
+        type: "function",
+        function: {
+          name: "return_search_results",
+          description: "Retorna resultados de busca de atividades.",
+          parameters: {
+            type: "object",
+            properties: {
+              results: {
+                type: "array",
+                minItems: 1,
+                maxItems: 5,
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { type: "string" },
+                    short_description: { type: "string" },
+                    category: { type: "string" },
+                    location: { type: "string" },
+                    estimated_duration: { type: "string" },
+                    estimated_cost: { type: "string" },
+                  },
+                  required: ["title", "short_description"],
+                  additionalProperties: false,
+                },
+              },
+            },
+            required: ["results"],
             additionalProperties: false,
           },
         },
