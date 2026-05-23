@@ -504,9 +504,6 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                   {itinerary.passengers.map((p, i) => (
                     <li key={i} className="text-base font-medium text-foreground">
                       {p.name}
-                      {p.age != null && (
-                        <span className="text-sm font-normal text-muted-foreground"> · {p.age} anos</span>
-                      )}
                     </li>
                   ))}
                 </ul>
