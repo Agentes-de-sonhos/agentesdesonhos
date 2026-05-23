@@ -112,23 +112,27 @@ function CollapsibleDayCard({
 
                 <div className="space-y-3 pl-7">
                   {activities.map((activity) => (
-                    <div key={activity.id} className="rounded-xl border border-border/40 bg-white p-4 space-y-3">
+                    <div
+                      key={activity.id}
+                      className="rounded-xl border border-border/40 bg-white p-4 sm:flex sm:gap-4 sm:items-start sm:p-4 space-y-3 sm:space-y-0"
+                    >
                       {(activity as any).photoUrl && (
-                        <div className="overflow-hidden rounded-lg border border-border/30">
+                        <div className="overflow-hidden rounded-lg border border-border/30 sm:shrink-0">
                           <img
                             src={(activity as any).photoUrl}
                             alt={activity.title}
                             loading="lazy"
                             decoding="async"
-                            className="w-full h-44 sm:h-52 object-cover"
+                            className="w-full h-44 object-cover sm:h-36 sm:w-36 sm:rounded-lg"
                           />
                         </div>
                       )}
+                      <div className="sm:flex-1 sm:min-w-0 space-y-3">
                       <h4 className="font-semibold text-foreground">{activity.title}</h4>
                       {activity.description && (
                         <p className="text-sm text-muted-foreground leading-relaxed">{activity.description}</p>
                       )}
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
                         {activity.location && (
                           <span className="flex items-center gap-1">
                             <MapPin className="h-4 w-4" /> {activity.location}
@@ -185,6 +189,7 @@ function CollapsibleDayCard({
                           </div>
                         </div>
                       )}
+                      </div>
                     </div>
                   ))}
                 </div>
