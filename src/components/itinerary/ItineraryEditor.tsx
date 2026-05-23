@@ -379,9 +379,13 @@ export function ItineraryEditor({
                       </div>
                     )}
                     {periodActivities.length === 0 ? (
-                      <p className="text-sm text-muted-foreground italic pl-6">
-                        Nenhuma atividade
-                      </p>
+                      <EmptyPeriodAISlot
+                        day={day}
+                        period={period}
+                        context={ctx}
+                        memory={memory}
+                        onCreate={(a) => onAddActivity(day.id!, a)}
+                      />
                     ) : (
                       periodActivities.map((activity) => (
                         <div
@@ -437,14 +441,27 @@ export function ItineraryEditor({
                                   size="icon"
                                   className="h-8 w-8"
                                   onClick={() =>
-                                    onUpdateActivity(activity.id!, {
-                                      isApproved: true,
-                                    } as Partial<Activity>)
+                                    {
+                                      onUpdateActivity(activity.id!, {
+                                        isApproved: true,
+                                      } as Partial<Activity>);
+                                      recordApproved(activity.title);
+                                    }
                                   }
                                 >
                                   <Check className="h-4 w-4 text-green-600" />
                                 </Button>
                               )}
+                              <ActivityAIActions
+                                activity={activity}
+                                day={day}
+                                context={ctx}
+                                memory={memory}
+                                onApplyUpdate={(updates) =>
+                                  onUpdateActivity(activity.id!, updates)
+                                }
+                                onLearnInstruction={learnFromInstruction}
+                              />
                               <Dialog>
                                 <DialogTrigger asChild>
                                   <Button
