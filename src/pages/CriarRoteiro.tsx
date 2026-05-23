@@ -415,7 +415,7 @@ export default function CriarRoteiro() {
                       onEdit={loadItinerary}
                       onDelete={handleDelete}
                       onGeneratePDF={handleGeneratePDF}
-                      onPublish={handlePublish}
+                      onPublish={openPublishReview}
                       onCopyLink={handleCopyLink}
                     />
                   ))}
@@ -436,7 +436,7 @@ export default function CriarRoteiro() {
                   Gerar PDF
                 </Button>
                 {currentItinerary.status === "approved" && (
-                  <Button onClick={() => handlePublish(currentItinerary.id)}>
+                  <Button onClick={() => openPublishReview(currentItinerary.id)}>
                     <Link2 className="mr-2 h-4 w-4" />
                     Compartilhar Link
                   </Button>
