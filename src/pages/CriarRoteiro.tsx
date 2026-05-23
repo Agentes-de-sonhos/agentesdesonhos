@@ -15,6 +15,8 @@ import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
 import { PublishReviewDialog } from "@/components/itinerary/PublishReviewDialog";
 import { useItineraries } from "@/hooks/useItineraries";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
+import { useTripWeather } from "@/hooks/useTripWeather";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -69,6 +71,11 @@ export default function CriarRoteiro() {
   const [editDestination, setEditDestination] = useState("");
 
   const { canUse: canCreateItinerary, remaining: itinerariesRemaining, hasLimit, incrementUsage } = useDailyLimit("itinerary");
+
+  // Weather for current itinerary (used for PDF + future UI)
+  const wxStart = currentItinerary ? parseLocalDate(currentItinerary.startDate) : new Date();
+  const wxEnd = currentItinerary ? parseLocalDate(currentItinerary.endDate) : new Date();
+  const { weatherByDate } = useTripWeather(currentItinerary?.destination, wxStart, wxEnd);
 
   useEffect(() => {
     if (user?.id) {
@@ -228,7 +235,7 @@ export default function CriarRoteiro() {
   const handleGeneratePDF = async (itineraryId: string) => {
     try {
       const data = await getItineraryWithDetails(itineraryId);
-      downloadPDF(data, agentProfile);
+      downloadPDF(data, agentProfile, weatherByDate);
     } catch (error) {
       toast.error("Erro ao gerar PDF");
     }
