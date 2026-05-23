@@ -23,7 +23,8 @@ export type TravelInterest =
   | 'vida_noturna'
   | 'parques_tematicos'
   | 'bem_estar_spa'
-  | 'instagramaveis';
+  | 'instagramaveis'
+  | 'esportes';
 
 export type TravelPace = 'leve' | 'moderado' | 'intenso';
 
@@ -199,6 +200,7 @@ export const TRAVEL_INTEREST_LABELS: Record<TravelInterest, string> = {
   parques_tematicos: 'Parques Temáticos',
   bem_estar_spa: 'Bem-estar / Spa',
   instagramaveis: 'Lugares Instagramáveis',
+  esportes: 'Esportes (estádios, jogos, arenas)',
 };
 
 export const TRAVEL_INTEREST_ICONS: Record<TravelInterest, string> = {
@@ -216,6 +218,7 @@ export const TRAVEL_INTEREST_ICONS: Record<TravelInterest, string> = {
   parques_tematicos: '🎢',
   bem_estar_spa: '🧖',
   instagramaveis: '📸',
+  esportes: '🏟️',
 };
 
 export const TRAVEL_PACE_LABELS: Record<TravelPace, string> = {
