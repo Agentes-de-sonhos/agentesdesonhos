@@ -623,6 +623,34 @@ export default function CriarRoteiro() {
         />
       )}
 
+      {currentItinerary && editPresentationOpen && (
+        <PublishReviewDialog
+          open={editPresentationOpen}
+          onOpenChange={setEditPresentationOpen}
+          itinerary={currentItinerary}
+          mode="edit"
+          onConfirm={async (data) => {
+            await updateItineraryDetails.mutateAsync({
+              itineraryId: currentItinerary.id,
+              updates: {
+                destination_intro_text: data.introText,
+                destination_intro_images: data.images,
+                cover_image_url: data.coverUrl,
+                show_destination_intro: data.showIntro,
+              },
+            });
+            setCurrentItinerary({
+              ...currentItinerary,
+              destinationIntroText: data.introText || undefined,
+              destinationIntroImages: data.images,
+              coverImageUrl: data.coverUrl || undefined,
+              showDestinationIntro: data.showIntro,
+            });
+            toast.success("Apresentação atualizada!");
+          }}
+        />
+      )}
+
       <AIGeneratingOverlay visible={isGenerating} />
     </DashboardLayout>
   );
