@@ -3546,6 +3546,7 @@ export type Database = {
           destination_intro_text: string | null
           end_date: string
           id: string
+          passengers: Json
           public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
@@ -3567,6 +3568,7 @@ export type Database = {
           destination_intro_text?: string | null
           end_date: string
           id?: string
+          passengers?: Json
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
@@ -3588,6 +3590,7 @@ export type Database = {
           destination_intro_text?: string | null
           end_date?: string
           id?: string
+          passengers?: Json
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
