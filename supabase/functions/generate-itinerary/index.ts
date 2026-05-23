@@ -422,6 +422,27 @@ serve(async (req) => {
 - Almoço e jantar NÃO precisam aparecer 100% dos dias, mas devem ser FREQUENTES — principalmente em viagens urbanas e internacionais. Em dias de aventura/natureza/deslocamento longo, é aceitável omitir.
 - EVITE: restaurantes genéricos, repetição do mesmo tipo de cozinha em dias seguidos, ou sugestões logisticamente incoerentes (jantar do outro lado da cidade depois de passeio noturno).
 - Sempre que possível, mencione 1 prato típico/recomendado do local no campo description.
+- GASTRONOMIA COMO EXPERIÊNCIA CULTURAL: vá além de "restaurante". Destaque comidas típicas, sobremesas tradicionais, bebidas locais, peculiaridades do destino e experiências gastronômicas culturais.
+  • Portugal: pastel de nata, vinho do Porto, bacalhau tradicional, ginjinha
+  • França: macarons, croissants artesanais, crepes, queijos franceses, soufflé
+  • Itália: gelato artesanal, tiramisù, aperitivo, pizza napolitana, trattorias
+  • Nova York: cheesecake, pastrami sandwich, cookies famosos, rooftop brunch
+  • Orlando: sobremesas temáticas, milkshakes extravagantes, restaurantes imersivos
+  • Tailândia: pad thai, mango sticky rice, curries, night markets
+  • México: tacos al pastor, churros, mole, mezcal
+  • Japão: ramen, sushi de mercado, wagashi, izakaya, depachika
+  • Espanha: tapas, jamón ibérico, churros con chocolate, paella
+- EXPERIÊNCIAS GASTRONÔMICAS DIFERENCIADAS: busque experiências que gerem memória afetiva:
+  • Sobremesas famosas do destino (ex: gelato em Roma, pastel de nata em Belém)
+  • Cafés icônicos e históricos
+  • Restaurantes instagramáveis com vista ou decoração única
+  • Rooftops gastronômicos com panorâmica da cidade
+  • Mercados municipais e food halls para almoço ou lanche
+  • Experiências Michelin ou 50 Best (quando orçamento for luxo)
+  • Jantar com vista (rio, mar, cidade, pôr do sol)
+  • Experiências temáticas (medieval, subaquático, imersivo)
+  • Street food tradicional e reconhecida
+  • Lugares "famosos entre locais" e recomendados por moradores
 ${hasGastronomia ? `
 - INTERESSE GASTRONOMIA SELECIONADO — INTENSIFIQUE: quase todos os almoços e jantares devem ser experiências gastronômicas marcantes. Inclua mercados municipais, cafés icônicos, wine bars, rooftops, street food famosa, bistrôs tradicionais. Se o orçamento for "luxo", considere restaurantes premiados (Michelin, 50 Best) quando existirem no destino. Use a manhã ocasionalmente para experiências como tour gastronômico, padaria histórica ou aula de culinária.` : ""}`;
 
