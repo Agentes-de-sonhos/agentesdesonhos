@@ -96,6 +96,17 @@ function CollapsibleDayCard({
                 <div className="space-y-3 pl-7">
                   {activities.map((activity) => (
                     <div key={activity.id} className="rounded-xl border border-border/40 bg-white p-4 space-y-3">
+                      {(activity as any).photoUrl && (
+                        <div className="overflow-hidden rounded-lg border border-border/30">
+                          <img
+                            src={(activity as any).photoUrl}
+                            alt={activity.title}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-44 sm:h-52 object-cover"
+                          />
+                        </div>
+                      )}
                       <h4 className="font-semibold text-foreground">{activity.title}</h4>
                       {activity.description && (
                         <p className="text-sm text-muted-foreground leading-relaxed">{activity.description}</p>
