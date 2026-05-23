@@ -23,6 +23,10 @@ export function useItineraries() {
     publicAccessCode: (data as any).public_access_code as string | null,
     createdAt: data.created_at as string,
     updatedAt: data.updated_at as string,
+    coverImageUrl: (data as any).cover_image_url ?? null,
+    destinationIntroText: (data as any).destination_intro_text ?? null,
+    destinationIntroImages: (data as any).destination_intro_images ?? [],
+    showDestinationIntro: (data as any).show_destination_intro ?? true,
   });
 
   const itinerariesQuery = useQuery({
