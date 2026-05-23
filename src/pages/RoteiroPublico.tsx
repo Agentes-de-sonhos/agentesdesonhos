@@ -9,15 +9,15 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { Itinerary, ItineraryDay, Activity } from "@/types/itinerary";
 import {
   MapPin, Calendar, Users, Sun, Sunset, Moon, Clock, DollarSign, Loader2,
-  ChevronDown, Briefcase, FileText, Download, Eye, ExternalLink,
+  ChevronDown, Briefcase, FileText, Download, Eye, ExternalLink, Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
-import { TripCalendar, LocalClock } from "@/components/trip/TripCalendar";
-import { useTripWeather } from "@/hooks/useTripWeather";
+import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
+import { useTripWeather, type DayWeather } from "@/hooks/useTripWeather";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon };
@@ -47,14 +47,22 @@ function isImageUrl(url: string) {
 }
 
 function CollapsibleDayCard({
-  day, periodImages, isOpen, onToggle,
+  day, periodImages, isOpen, onToggle, weather,
 }: {
   day: ItineraryDay; periodImages: Record<string, string>; isOpen: boolean; onToggle: () => void;
+  weather?: DayWeather;
 }) {
   const dateFormatted = format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR });
+  const WxIcon = weather ? weatherIconFor(weather.code) : null;
 
   return (
-    <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
+    <div
+      id={`day-${day.dayNumber}`}
+      data-date={day.date}
+      className={`scroll-mt-24 rounded-2xl border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg ${
+        isOpen ? "border-primary/40 shadow-md ring-1 ring-primary/10" : "border-border/40 hover:border-border/80"
+      }`}
+    >
       <button
         type="button"
         onClick={onToggle}
@@ -69,7 +77,15 @@ function CollapsibleDayCard({
             <span className="text-xs opacity-70 font-medium capitalize">{dateFormatted}</span>
           </div>
         </div>
-        <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        <div className="flex items-center gap-2">
+          {weather && WxIcon && (
+            <div className="flex items-center gap-1.5 rounded-full bg-white/80 border border-primary/15 px-2.5 py-1 text-xs font-semibold tabular-nums shadow-sm">
+              <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
+              <span>{weather.tmin}° / {weather.tmax}°C</span>
+            </div>
+          )}
+          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        </div>
       </button>
 
       <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"}`}>
