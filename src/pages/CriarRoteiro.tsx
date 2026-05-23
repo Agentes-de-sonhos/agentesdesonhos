@@ -510,10 +510,12 @@ export default function CriarRoteiro() {
                   <FileText className="mr-2 h-4 w-4" />
                   Gerar PDF
                 </Button>
-                <Button onClick={() => handleActionClick("link")}>
-                  <Link2 className="mr-2 h-4 w-4" />
-                  Gerar Link
-                </Button>
+                {!generatedLinkUrl && (
+                  <Button onClick={() => handleActionClick("link")}>
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Gerar Link
+                  </Button>
+                )}
               </div>
             </div>
 
