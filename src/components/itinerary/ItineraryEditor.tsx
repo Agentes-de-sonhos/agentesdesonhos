@@ -553,7 +553,10 @@ export function ItineraryEditor({
                                 </DialogContent>
                               </Dialog>
                               <ConfirmDeleteDialog
-                                onConfirm={() => onDeleteActivity(activity.id!)}
+                                onConfirm={() => {
+                                  recordRemoved(activity.title);
+                                  onDeleteActivity(activity.id!);
+                                }}
                                 title="Excluir atividade?"
                                 description="Esta atividade será removida permanentemente do roteiro. Tem certeza?"
                               >
