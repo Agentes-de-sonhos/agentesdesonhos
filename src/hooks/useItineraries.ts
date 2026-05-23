@@ -218,10 +218,71 @@ export function useItineraries() {
       if (activitiesError) throw activitiesError;
     }
 
-    await supabase
-      .from("itineraries")
-      .update({ status: "review" })
-      .eq("id", itineraryId);
+    // Best-effort: auto-generate destination intro (text + photo gallery)
+    // for the public itinerary page. Failures are non-blocking.
+    try {
+      const { data: itin } = await supabase
+        .from("itineraries")
+        .select("destination")
+        .eq("id", itineraryId)
+        .single();
+      const destination = (itin as any)?.destination as string | undefined;
+      const updates: Record<string, unknown> = { status: "review" };
+
+      if (destination) {
+        // 1) Intro text via AI
+        try {
+          const { data: introData } = await supabase.functions.invoke(
+            "generate-destination-intro",
+            { body: { destination } }
+          );
+          if (introData?.text) updates.destination_intro_text = introData.text;
+        } catch (e) {
+          console.warn("[itinerary] intro text generation failed", e);
+        }
+
+        // 2) Photos from Google Places (same flow as quote intro)
+        try {
+          const cities = destination.split(",").map((s) => s.trim()).filter(Boolean);
+          const MAX_PHOTOS = 5;
+          const perCity = Math.max(1, Math.floor(MAX_PHOTOS / cities.length));
+          const collected: string[] = [];
+          for (const city of cities) {
+            if (collected.length >= MAX_PHOTOS) break;
+            const { data: placeData } = await supabase.functions.invoke(
+              "places-autocomplete",
+              { body: { input: city, place_type: "city" } }
+            );
+            const firstId = placeData?.predictions?.[0]?.place_id;
+            if (!firstId) continue;
+            const { data: detailsData } = await supabase.functions.invoke(
+              "places-autocomplete",
+              { body: { fetch_details: true, place_id: firstId, place_type: "city" } }
+            );
+            const urls: string[] = detailsData?.details?.photo_urls || [];
+            if (urls.length > 0) collected.push(...urls.slice(0, perCity));
+          }
+          const photos = collected.slice(0, MAX_PHOTOS);
+          if (photos.length > 0) {
+            updates.destination_intro_images = photos;
+            updates.cover_image_url = photos[0];
+          }
+        } catch (e) {
+          console.warn("[itinerary] intro photo fetch failed", e);
+        }
+      }
+
+      await supabase
+        .from("itineraries")
+        .update(updates as any)
+        .eq("id", itineraryId);
+    } catch (e) {
+      console.warn("[itinerary] post-generation enrichment failed", e);
+      await supabase
+        .from("itineraries")
+        .update({ status: "review" })
+        .eq("id", itineraryId);
+    }
 
     queryClient.invalidateQueries({ queryKey: ["itineraries"] });
   };
