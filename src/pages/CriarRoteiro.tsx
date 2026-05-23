@@ -158,6 +158,8 @@ export default function CriarRoteiro() {
     if (updates.estimatedDuration !== undefined) dbUpdates.estimated_duration = updates.estimatedDuration;
     if (updates.estimatedCost !== undefined) dbUpdates.estimated_cost = updates.estimatedCost;
     if (updates.isApproved !== undefined) dbUpdates.is_approved = updates.isApproved;
+    if (updates.photo_url !== undefined) dbUpdates.photo_url = updates.photo_url;
+    if (updates.document_urls !== undefined) dbUpdates.document_urls = updates.document_urls;
 
     updateActivity.mutate(
       { activityId, updates: dbUpdates },
