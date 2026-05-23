@@ -11,6 +11,7 @@ interface ReqBody {
   query: string;        // ex: "Torre Eiffel"
   destination?: string; // ex: "Paris"
   location?: string;    // ex: "Champ de Mars"
+  limit?: number;       // when > 1 returns multiple candidates (no cache)
 }
 
 function normalizeKey(q: string, destination?: string, location?: string) {
@@ -48,6 +49,102 @@ serve(async (req) => {
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
     const key = normalizeKey(body.query, body.destination, body.location);
+    const wantMulti = Number(body.limit ?? 1) > 1;
+    const want = Math.min(Math.max(Number(body.limit ?? 1), 1), 18);
+    const queryText = [body.query, body.location, body.destination].filter(Boolean).join(" ");
+
+    // ─── Multi-photo search (gallery) — bypass cache, aggregate sources ───
+    if (wantMulti) {
+      const photos: Array<{
+        photo_url: string;
+        thumb_url: string;
+        source: string;
+        attributions?: string[];
+      }> = [];
+
+      // Google Places (best quality, real-place photos)
+      if (GOOGLE_PLACES_API_KEY && photos.length < want) {
+        try {
+          const findUrl =
+            `https://maps.googleapis.com/maps/api/place/findplacefromtext/json` +
+            `?input=${encodeURIComponent(queryText)}` +
+            `&inputtype=textquery&fields=place_id,name,photos&language=pt-BR` +
+            `&key=${GOOGLE_PLACES_API_KEY}`;
+          const findResp = await fetch(findUrl);
+          const findData = await findResp.json();
+          const candidate = findData?.candidates?.[0];
+          if (candidate?.place_id) {
+            const detUrl =
+              `https://maps.googleapis.com/maps/api/place/details/json` +
+              `?place_id=${candidate.place_id}&fields=photos&language=pt-BR` +
+              `&key=${GOOGLE_PLACES_API_KEY}`;
+            const detResp = await fetch(detUrl);
+            const detData = await detResp.json();
+            const refs: any[] = detData?.result?.photos ?? candidate.photos ?? [];
+            for (const p of refs.slice(0, want)) {
+              if (!p?.photo_reference) continue;
+              photos.push({
+                photo_url: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`,
+                thumb_url: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=320&photo_reference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`,
+                source: "google_places",
+                attributions: p.html_attributions ?? [],
+              });
+              if (photos.length >= want) break;
+            }
+          }
+        } catch (e) {
+          console.warn("multi google_places failed", e);
+        }
+      }
+
+      // Unsplash
+      if (UNSPLASH_ACCESS_KEY && photos.length < want) {
+        try {
+          const url = `https://api.unsplash.com/search/photos?per_page=${want}&orientation=landscape&query=${encodeURIComponent(queryText)}`;
+          const r = await fetch(url, { headers: { Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}` } });
+          const d = await r.json();
+          for (const p of (d?.results ?? [])) {
+            if (!p?.urls) continue;
+            photos.push({
+              photo_url: p.urls.regular ?? p.urls.full,
+              thumb_url: p.urls.thumb ?? p.urls.small,
+              source: "unsplash",
+              attributions: [
+                `Foto por ${p.user?.name ?? "Unsplash"} no Unsplash`,
+              ],
+            });
+            if (photos.length >= want) break;
+          }
+        } catch (e) {
+          console.warn("multi unsplash failed", e);
+        }
+      }
+
+      // Pexels
+      if (PEXELS_API_KEY && photos.length < want) {
+        try {
+          const url = `https://api.pexels.com/v1/search?per_page=${want}&orientation=landscape&query=${encodeURIComponent(queryText)}`;
+          const r = await fetch(url, { headers: { Authorization: PEXELS_API_KEY } });
+          const d = await r.json();
+          for (const p of (d?.photos ?? [])) {
+            if (!p?.src) continue;
+            photos.push({
+              photo_url: p.src.large ?? p.src.original,
+              thumb_url: p.src.tiny ?? p.src.small,
+              source: "pexels",
+              attributions: [`Foto por ${p.photographer ?? "Pexels"} no Pexels`],
+            });
+            if (photos.length >= want) break;
+          }
+        } catch (e) {
+          console.warn("multi pexels failed", e);
+        }
+      }
+
+      return new Response(JSON.stringify({ photos }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // 1) cache lookup
     const { data: cached } = await admin
@@ -61,8 +158,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const queryText = [body.query, body.location, body.destination].filter(Boolean).join(" ");
 
     // Helper: persist & return
     const persistAndReturn = async (payload: {
