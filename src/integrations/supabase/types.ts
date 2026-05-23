@@ -3539,13 +3539,17 @@ export type Database = {
         Row: {
           budget_level: string
           client_id: string | null
+          cover_image_url: string | null
           created_at: string
           destination: string
+          destination_intro_images: string[]
+          destination_intro_text: string | null
           end_date: string
           id: string
           public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
+          show_destination_intro: boolean
           start_date: string
           status: string
           travelers_count: number
@@ -3556,13 +3560,17 @@ export type Database = {
         Insert: {
           budget_level: string
           client_id?: string | null
+          cover_image_url?: string | null
           created_at?: string
           destination: string
+          destination_intro_images?: string[]
+          destination_intro_text?: string | null
           end_date: string
           id?: string
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
+          show_destination_intro?: boolean
           start_date: string
           status?: string
           travelers_count?: number
@@ -3573,13 +3581,17 @@ export type Database = {
         Update: {
           budget_level?: string
           client_id?: string | null
+          cover_image_url?: string | null
           created_at?: string
           destination?: string
+          destination_intro_images?: string[]
+          destination_intro_text?: string | null
           end_date?: string
           id?: string
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
+          show_destination_intro?: boolean
           start_date?: string
           status?: string
           travelers_count?: number
