@@ -51,6 +51,7 @@ import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItine
 import { parseLocalDate } from "@/lib/dateParsing";
 import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./ActivityAIActions";
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
+import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
 
 const periodIcons = {
   manha: Sun,
@@ -397,8 +398,13 @@ export function ItineraryEditor({
                               : "border-border bg-card"
                           )}
                         >
-                          <div className="flex items-start justify-between">
-                            <div className="space-y-1 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <ActivityPhotoThumb
+                              title={activity.title}
+                              location={activity.location}
+                              destination={ctx.destination}
+                            />
+                            <div className="space-y-1 flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <h4 className="font-medium">{activity.title}</h4>
                                 {activity.isApproved && (
