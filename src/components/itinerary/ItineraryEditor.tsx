@@ -349,6 +349,11 @@ export function ItineraryEditor({
                                 title={activity.title}
                                 location={activity.location}
                                 destination={ctx.destination}
+                                onResolved={(url) => {
+                                  if (!activity.photoUrl && activity.id) {
+                                    onUpdateActivity(activity.id, { photoUrl: url } as Partial<Activity>);
+                                  }
+                                }}
                               />
                             )}
                             <div className="space-y-1 flex-1 min-w-0">
