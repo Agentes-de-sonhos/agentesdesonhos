@@ -570,7 +570,18 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                   day={day}
                   periodImages={periodImages}
                   isOpen={openDayIndex === index}
-                  onToggle={() => setOpenDayIndex(prev => prev === index ? null : index)}
+                  onToggle={() => {
+                    setOpenDayIndex(prev => {
+                      const next = prev === index ? null : index;
+                      if (next !== null) {
+                        setTimeout(() => {
+                          const el = document.getElementById(`day-${day.dayNumber}`);
+                          el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }, 50);
+                      }
+                      return next;
+                    });
+                  }}
                   weather={weatherByDate?.[day.date]}
                 />
               ))}
