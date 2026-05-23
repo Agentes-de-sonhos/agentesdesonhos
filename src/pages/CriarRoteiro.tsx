@@ -291,6 +291,8 @@ export default function CriarRoteiro() {
 
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado! O roteiro foi publicado.");
+    setGeneratedLinkUrl(url);
+    return url;
   };
 
   const handleConfirmPublish = async (data: {
