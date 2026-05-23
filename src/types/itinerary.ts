@@ -72,6 +72,80 @@ export interface ExtraDestination {
   notes?: string;
 }
 
+// ──────────────── PASSAGEIROS ────────────────
+
+export type PassengerInterest =
+  | 'gastronomia'
+  | 'cultura'
+  | 'historia'
+  | 'compras'
+  | 'natureza'
+  | 'praia'
+  | 'esportes'
+  | 'futebol'
+  | 'basquete'
+  | 'parques'
+  | 'vida_noturna'
+  | 'relaxamento'
+  | 'luxo'
+  | 'experiencias_locais'
+  | 'museus'
+  | 'fotografia'
+  | 'aventura'
+  | 'shows'
+  | 'vida_urbana';
+
+export const PASSENGER_INTEREST_LABELS: Record<PassengerInterest, string> = {
+  gastronomia: 'Gastronomia',
+  cultura: 'Cultura',
+  historia: 'História',
+  compras: 'Compras',
+  natureza: 'Natureza',
+  praia: 'Praia',
+  esportes: 'Esportes',
+  futebol: 'Futebol',
+  basquete: 'Basquete',
+  parques: 'Parques',
+  vida_noturna: 'Vida noturna',
+  relaxamento: 'Relaxamento',
+  luxo: 'Luxo',
+  experiencias_locais: 'Experiências locais',
+  museus: 'Museus',
+  fotografia: 'Fotografia',
+  aventura: 'Aventura',
+  shows: 'Shows',
+  vida_urbana: 'Vida urbana',
+};
+
+export type PassengerNeed =
+  | 'mobilidade_reduzida'
+  | 'restricao_alimentar'
+  | 'intolerancia_alimentar'
+  | 'gestante'
+  | 'crianca_pequena'
+  | 'ritmo_leve'
+  | 'acessibilidade'
+  | 'evitar_caminhadas_longas';
+
+export const PASSENGER_NEED_LABELS: Record<PassengerNeed, string> = {
+  mobilidade_reduzida: 'Mobilidade reduzida',
+  restricao_alimentar: 'Restrição alimentar',
+  intolerancia_alimentar: 'Intolerância alimentar',
+  gestante: 'Gestante',
+  crianca_pequena: 'Criança pequena',
+  ritmo_leve: 'Ritmo leve',
+  acessibilidade: 'Acessibilidade',
+  evitar_caminhadas_longas: 'Evitar longas caminhadas',
+};
+
+export interface Passenger {
+  name: string;
+  age?: number;
+  interests: PassengerInterest[];
+  notes?: string;
+  needs: PassengerNeed[];
+}
+
 export const DESTINATION_KIND_LABELS: Record<DestinationKind, string> = {
   principal: 'Destino principal / cidade base',
   secundario: 'Destino secundário',
@@ -118,6 +192,7 @@ export interface ItineraryFormData {
   arrivalInfo?: JourneyInfo;
   departureInfo?: JourneyInfo;
   extraDestinations?: ExtraDestination[];
+  passengers?: Passenger[];
 }
 
 export interface Activity {
@@ -162,6 +237,8 @@ export interface Itinerary {
   destinationIntroText?: string | null;
   destinationIntroImages?: string[];
   showDestinationIntro?: boolean;
+  passengers?: { name: string; age?: number | null }[];
+  passengerInterests?: string[];
 }
 
 export interface AIGeneratedDay {
