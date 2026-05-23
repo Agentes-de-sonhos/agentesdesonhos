@@ -12,7 +12,6 @@ import {
   MapPin,
   Clock,
   DollarSign,
-  ImagePlus,
   Loader2,
   X,
 } from "lucide-react";
