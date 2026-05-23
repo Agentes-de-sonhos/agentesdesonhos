@@ -15,6 +15,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
+import { TripCalendar, LocalClock } from "@/components/trip/TripCalendar";
+import { useTripWeather } from "@/hooks/useTripWeather";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon };
 const periodLabels = { manha: "Manhã", tarde: "Tarde", noite: "Noite" };
@@ -291,6 +294,10 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         createdAt: itineraryData.created_at,
         updatedAt: itineraryData.updated_at,
         days: daysWithActivities,
+        coverImageUrl: (itineraryData as any).cover_image_url || null,
+        destinationIntroText: (itineraryData as any).destination_intro_text || null,
+        destinationIntroImages: (itineraryData as any).destination_intro_images || [],
+        showDestinationIntro: (itineraryData as any).show_destination_intro ?? true,
       };
 
       setItinerary(mappedItinerary);
