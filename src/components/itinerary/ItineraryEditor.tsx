@@ -52,6 +52,7 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./ActivityAIActions";
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
+import { ActivityMediaActions } from "./ActivityMediaActions";
 
 const periodIcons = {
   manha: Sun,
@@ -399,11 +400,23 @@ export function ItineraryEditor({
                           )}
                         >
                           <div className="flex items-start justify-between gap-3">
-                            <ActivityPhotoThumb
-                              title={activity.title}
-                              location={activity.location}
-                              destination={ctx.destination}
-                            />
+                            {activity.photoUrl ? (
+                              <div className="shrink-0 overflow-hidden rounded-md border bg-muted/50 h-16 w-16 sm:h-20 sm:w-20">
+                                <img
+                                  src={activity.photoUrl}
+                                  alt={activity.title}
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <ActivityPhotoThumb
+                                title={activity.title}
+                                location={activity.location}
+                                destination={ctx.destination}
+                              />
+                            )}
                             <div className="space-y-1 flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <h4 className="font-medium">{activity.title}</h4>
@@ -439,6 +452,18 @@ export function ItineraryEditor({
                                   </span>
                                 )}
                               </div>
+                              <ActivityMediaActions
+                                itineraryId={itineraryId}
+                                activityId={activity.id}
+                                activityTitle={activity.title}
+                                activityLocation={activity.location}
+                                destination={ctx.destination}
+                                photoUrl={activity.photoUrl ?? null}
+                                documentUrls={activity.documentUrls ?? []}
+                                onChange={(updates) =>
+                                  onUpdateActivity(activity.id!, updates as Partial<Activity>)
+                                }
+                              />
                             </div>
                             <div className="flex gap-1">
                               {!activity.isApproved && (
