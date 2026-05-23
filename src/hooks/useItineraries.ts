@@ -27,6 +27,17 @@ export function useItineraries() {
     destinationIntroText: (data as any).destination_intro_text ?? null,
     destinationIntroImages: (data as any).destination_intro_images ?? [],
     showDestinationIntro: (data as any).show_destination_intro ?? true,
+    passengers: ((data as any).passengers ?? []).map((p: any) => ({
+      name: p?.name ?? "",
+      age: p?.age ?? null,
+    })),
+    passengerInterests: Array.from(
+      new Set(
+        (((data as any).passengers ?? []) as any[]).flatMap((p: any) =>
+          Array.isArray(p?.interests) ? p.interests : []
+        )
+      )
+    ),
   });
 
   const itinerariesQuery = useQuery({
@@ -114,6 +125,7 @@ export function useItineraries() {
           budget_level: formData.budgetLevel,
           status: "generating",
           client_id: formData.clientId || null,
+          passengers: (formData.passengers ?? []) as any,
         } as any)
         .select()
         .single();
@@ -141,6 +153,7 @@ export function useItineraries() {
         interests: formData.interests || [],
         travelPace: formData.travelPace || "moderado",
         additionalPreferences: formData.additionalPreferences || {},
+        passengers: formData.passengers,
         arrivalInfo: formData.arrivalInfo
           ? { transport: formData.arrivalInfo.transport, period: formData.arrivalInfo.period }
           : undefined,
