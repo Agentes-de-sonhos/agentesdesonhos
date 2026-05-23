@@ -343,7 +343,74 @@ export default function CriarRoteiro() {
   const handleBack = () => {
     setCurrentItinerary(null);
     setFormData(null);
+    setGeneratedLinkUrl(null);
     navigate("/ferramentas-ia/criar-roteiro");
+  };
+
+  const areAllActivitiesApproved = (itinerary: Itinerary & { days: ItineraryDay[] }) => {
+    if (!itinerary.days || itinerary.days.length === 0) return false;
+    return itinerary.days.every((d) =>
+      d.activities.length === 0 ? true : d.activities.every((a) => a.isApproved)
+    );
+  };
+
+  const proceedWithAction = async (action: "pdf" | "link") => {
+    if (!currentItinerary) return;
+    if (action === "pdf") {
+      await handleGeneratePDF(currentItinerary.id);
+      return;
+    }
+    // link
+    if (currentItinerary.status === "published" && currentItinerary.shareToken) {
+      const url = buildItineraryUrl(currentItinerary);
+      setGeneratedLinkUrl(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      } catch {}
+      return;
+    }
+    setPendingPublishId(currentItinerary.id);
+    setPublishReviewOpen(true);
+  };
+
+  const handleActionClick = (action: "pdf" | "link") => {
+    if (!currentItinerary) return;
+    if (!areAllActivitiesApproved(currentItinerary)) {
+      setPendingAction(action);
+      setApprovalPromptOpen(true);
+      return;
+    }
+    proceedWithAction(action);
+  };
+
+  const handleConfirmApprovalAndProceed = async () => {
+    if (!currentItinerary || !pendingAction) return;
+    setIsProcessingAction(true);
+    try {
+      await handleApproveAll();
+      // Reload to get fresh approved state
+      const fresh = await getItineraryWithDetails(currentItinerary.id);
+      setCurrentItinerary(fresh);
+      const action = pendingAction;
+      setApprovalPromptOpen(false);
+      setPendingAction(null);
+      if (action === "pdf") {
+        await handleGeneratePDF(fresh.id);
+      } else {
+        if (fresh.status === "published" && fresh.shareToken) {
+          const url = buildItineraryUrl(fresh);
+          setGeneratedLinkUrl(url);
+          try { await navigator.clipboard.writeText(url); } catch {}
+          toast.success("Link copiado!");
+        } else {
+          setPendingPublishId(fresh.id);
+          setPublishReviewOpen(true);
+        }
+      }
+    } finally {
+      setIsProcessingAction(false);
+    }
   };
 
   return (
