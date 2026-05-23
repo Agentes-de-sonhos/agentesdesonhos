@@ -44,8 +44,6 @@ export default function CriarRoteiro() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
   const [publishReviewOpen, setPublishReviewOpen] = useState(false);
   const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
