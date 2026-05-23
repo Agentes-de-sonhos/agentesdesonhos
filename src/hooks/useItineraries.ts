@@ -306,6 +306,8 @@ export function useItineraries() {
         estimated_duration: string;
         estimated_cost: string;
         is_approved: boolean;
+        photo_url: string | null;
+        document_urls: string[];
       }>;
     }) => {
       const { error } = await supabase
