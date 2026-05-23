@@ -42,6 +42,11 @@ import {
   TRAVEL_INTEREST_LABELS,
   TRAVEL_INTEREST_ICONS,
   TRAVEL_PACE_LABELS,
+  Passenger,
+  PassengerInterest,
+  PassengerNeed,
+  PASSENGER_INTEREST_LABELS,
+  PASSENGER_NEED_LABELS,
 } from "@/types/itinerary";
 import type { DateRange } from "react-day-picker";
 
@@ -81,6 +86,8 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
   const [departureInfo, setDepartureInfo] = useState<JourneyInfo>({ transport: 'aviao', period: 'tarde' });
   const [multiEnabled, setMultiEnabled] = useState(false);
   const [extraDestinations, setExtraDestinations] = useState<ExtraDestination[]>([]);
+  const [passengers, setPassengers] = useState<Passenger[]>([]);
+  const [showPassengers, setShowPassengers] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -141,6 +148,15 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
       arrivalInfo: journeyEnabled ? arrivalInfo : undefined,
       departureInfo: journeyEnabled ? departureInfo : undefined,
       extraDestinations: multiEnabled && extraDestinations.length > 0 ? extraDestinations : undefined,
+      passengers: passengers.length > 0
+        ? passengers
+            .map((p) => ({
+              ...p,
+              name: (p.name || "").trim(),
+              notes: (p.notes || "").trim() || undefined,
+            }))
+            .filter((p) => p.name.length > 0)
+        : undefined,
     });
   };
 
