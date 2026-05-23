@@ -116,12 +116,25 @@ export function generatePDFContent(
                       (a) => `
                     <div class="pdf-block activity" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:6px;">
                       <p style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 4px;">${a.title}</p>
+                      ${(a as any).photoUrl ? `<img src="${(a as any).photoUrl}" alt="${a.title}" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin:0 0 6px;" />` : ""}
                       ${a.description ? `<p style="font-size:12px;color:#475569;line-height:1.45;margin:0 0 6px;white-space:pre-wrap;word-break:break-word;">${a.description}</p>` : ""}
                       <div style="font-size:11px;color:#64748b;display:flex;flex-wrap:wrap;gap:10px;">
                         ${a.location ? `<span>📍 ${a.location}</span>` : ""}
                         ${a.estimatedDuration ? `<span>⏱️ ${a.estimatedDuration}</span>` : ""}
                         ${a.estimatedCost ? `<span>💰 ${a.estimatedCost}</span>` : ""}
                       </div>
+                      ${
+                        ((a as any).documentUrls || []).length > 0
+                          ? `<div style="margin-top:6px;display:flex;flex-direction:column;gap:3px;">
+                              ${((a as any).documentUrls as string[])
+                                .map((url) => {
+                                  const name = decodeURIComponent((url.split("/").pop() || "arquivo").split("?")[0]);
+                                  return `<a href="${url}" target="_blank" style="font-size:11px;color:#0f766e;text-decoration:none;">📎 ${name}</a>`;
+                                })
+                                .join("")}
+                            </div>`
+                          : ""
+                      }
                     </div>
                   `
                     )

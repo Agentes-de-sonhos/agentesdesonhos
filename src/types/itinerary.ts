@@ -130,6 +130,10 @@ export interface Activity {
   estimatedCost: string | null;
   orderIndex: number;
   isApproved: boolean;
+  /** Custom photo chosen/uploaded by the agency for this activity. */
+  photoUrl?: string | null;
+  /** Voucher / document URLs attached to this activity. */
+  documentUrls?: string[];
 }
 
 export interface ItineraryDay {
