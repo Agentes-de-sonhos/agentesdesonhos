@@ -279,6 +279,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 isApproved: a.is_approved as boolean,
                 mapsUrl: (a as any).maps_url || tripAct?.maps_url || null,
                 documentUrls: (a as any).document_urls || tripAct?.document_urls || [],
+                photoUrl: (a as any).photo_url || null,
               };
             }),
           };
