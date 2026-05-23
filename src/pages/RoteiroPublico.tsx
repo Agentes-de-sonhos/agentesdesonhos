@@ -458,6 +458,44 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
           />
         )}
 
+        {/* ─── Passageiros + Perfil da viagem ─── */}
+        {((itinerary.passengers && itinerary.passengers.length > 0) ||
+          (itinerary.passengerInterests && itinerary.passengerInterests.length > 0)) && (
+          <section className="rounded-2xl border border-border/40 bg-card p-5 sm:p-6 space-y-4">
+            {itinerary.passengers && itinerary.passengers.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
+                  <Users className="h-3.5 w-3.5" /> Passageiros
+                </p>
+                <ul className="space-y-1">
+                  {itinerary.passengers.map((p, i) => (
+                    <li key={i} className="text-base font-medium text-foreground">
+                      {p.name}
+                      {p.age != null && (
+                        <span className="text-sm font-normal text-muted-foreground"> · {p.age} anos</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {itinerary.passengerInterests && itinerary.passengerInterests.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                  ✨ Perfil da viagem
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {itinerary.passengerInterests.map((k) => (
+                    <Badge key={k} variant="secondary">
+                      {PASSENGER_INTEREST_LABELS[k as keyof typeof PASSENGER_INTEREST_LABELS] || k}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* ─── Local time + Calendar with weather ─── */}
         <section className="space-y-3">
           {timezone && (
