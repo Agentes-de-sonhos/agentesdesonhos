@@ -12,6 +12,7 @@ import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay"
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
 import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
+import { PublishReviewDialog } from "@/components/itinerary/PublishReviewDialog";
 import { useItineraries } from "@/hooks/useItineraries";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
@@ -43,6 +44,8 @@ export default function CriarRoteiro() {
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
+  const [publishReviewOpen, setPublishReviewOpen] = useState(false);
+  const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
@@ -240,6 +243,15 @@ export default function CriarRoteiro() {
     return `${PUBLIC_DOMAIN}/roteiro/${itinerary.shareToken}`;
   };
 
+  const openPublishReview = async (itineraryId: string) => {
+    // Ensure currentItinerary is loaded for the dialog
+    if (!currentItinerary || currentItinerary.id !== itineraryId) {
+      await loadItinerary(itineraryId);
+    }
+    setPendingPublishId(itineraryId);
+    setPublishReviewOpen(true);
+  };
+
   const handlePublish = async (itineraryId: string) => {
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
@@ -268,6 +280,29 @@ export default function CriarRoteiro() {
 
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado! O roteiro foi publicado.");
+  };
+
+  const handleConfirmPublish = async (data: {
+    introText: string | null;
+    images: string[];
+    coverUrl: string | null;
+    showIntro: boolean;
+  }) => {
+    if (!pendingPublishId) return;
+    await updateItineraryDetails.mutateAsync({
+      itineraryId: pendingPublishId,
+      updates: {
+        destination_intro_text: data.introText,
+        destination_intro_images: data.images,
+        cover_image_url: data.coverUrl,
+        show_destination_intro: data.showIntro,
+      },
+    });
+    await handlePublish(pendingPublishId);
+    if (currentItinerary?.id === pendingPublishId) {
+      await loadItinerary(pendingPublishId);
+    }
+    setPendingPublishId(null);
   };
 
   const handleCopyLink = async (shareToken: string) => {
