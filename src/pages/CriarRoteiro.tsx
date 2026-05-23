@@ -12,8 +12,11 @@ import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay"
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
 import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
+import { PublishReviewDialog } from "@/components/itinerary/PublishReviewDialog";
 import { useItineraries } from "@/hooks/useItineraries";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
+import { useTripWeather } from "@/hooks/useTripWeather";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -43,6 +46,8 @@ export default function CriarRoteiro() {
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
+  const [publishReviewOpen, setPublishReviewOpen] = useState(false);
+  const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
@@ -66,6 +71,11 @@ export default function CriarRoteiro() {
   const [editDestination, setEditDestination] = useState("");
 
   const { canUse: canCreateItinerary, remaining: itinerariesRemaining, hasLimit, incrementUsage } = useDailyLimit("itinerary");
+
+  // Weather for current itinerary (used for PDF + future UI)
+  const wxStart = currentItinerary ? parseLocalDate(currentItinerary.startDate) : new Date();
+  const wxEnd = currentItinerary ? parseLocalDate(currentItinerary.endDate) : new Date();
+  const { weatherByDate } = useTripWeather(currentItinerary?.destination, wxStart, wxEnd);
 
   useEffect(() => {
     if (user?.id) {
@@ -225,7 +235,7 @@ export default function CriarRoteiro() {
   const handleGeneratePDF = async (itineraryId: string) => {
     try {
       const data = await getItineraryWithDetails(itineraryId);
-      downloadPDF(data, agentProfile);
+      downloadPDF(data, agentProfile, weatherByDate);
     } catch (error) {
       toast.error("Erro ao gerar PDF");
     }
@@ -238,6 +248,15 @@ export default function CriarRoteiro() {
       return buildRoteiroLink(agencyName, code);
     }
     return `${PUBLIC_DOMAIN}/roteiro/${itinerary.shareToken}`;
+  };
+
+  const openPublishReview = async (itineraryId: string) => {
+    // Ensure currentItinerary is loaded for the dialog
+    if (!currentItinerary || currentItinerary.id !== itineraryId) {
+      await loadItinerary(itineraryId);
+    }
+    setPendingPublishId(itineraryId);
+    setPublishReviewOpen(true);
   };
 
   const handlePublish = async (itineraryId: string) => {
@@ -268,6 +287,29 @@ export default function CriarRoteiro() {
 
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado! O roteiro foi publicado.");
+  };
+
+  const handleConfirmPublish = async (data: {
+    introText: string | null;
+    images: string[];
+    coverUrl: string | null;
+    showIntro: boolean;
+  }) => {
+    if (!pendingPublishId) return;
+    await updateItineraryDetails.mutateAsync({
+      itineraryId: pendingPublishId,
+      updates: {
+        destination_intro_text: data.introText,
+        destination_intro_images: data.images,
+        cover_image_url: data.coverUrl,
+        show_destination_intro: data.showIntro,
+      },
+    });
+    await handlePublish(pendingPublishId);
+    if (currentItinerary?.id === pendingPublishId) {
+      await loadItinerary(pendingPublishId);
+    }
+    setPendingPublishId(null);
   };
 
   const handleCopyLink = async (shareToken: string) => {
@@ -380,7 +422,7 @@ export default function CriarRoteiro() {
                       onEdit={loadItinerary}
                       onDelete={handleDelete}
                       onGeneratePDF={handleGeneratePDF}
-                      onPublish={handlePublish}
+                      onPublish={openPublishReview}
                       onCopyLink={handleCopyLink}
                     />
                   ))}
@@ -401,7 +443,7 @@ export default function CriarRoteiro() {
                   Gerar PDF
                 </Button>
                 {currentItinerary.status === "approved" && (
-                  <Button onClick={() => handlePublish(currentItinerary.id)}>
+                  <Button onClick={() => openPublishReview(currentItinerary.id)}>
                     <Link2 className="mr-2 h-4 w-4" />
                     Compartilhar Link
                   </Button>
@@ -536,6 +578,15 @@ export default function CriarRoteiro() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      {currentItinerary && publishReviewOpen && (
+        <PublishReviewDialog
+          open={publishReviewOpen}
+          onOpenChange={setPublishReviewOpen}
+          itinerary={currentItinerary}
+          onConfirm={handleConfirmPublish}
+        />
+      )}
 
       <AIGeneratingOverlay visible={isGenerating} />
     </DashboardLayout>

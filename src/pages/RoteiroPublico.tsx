@@ -9,15 +9,15 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { Itinerary, ItineraryDay, Activity } from "@/types/itinerary";
 import {
   MapPin, Calendar, Users, Sun, Sunset, Moon, Clock, DollarSign, Loader2,
-  ChevronDown, Briefcase, FileText, Download, Eye, ExternalLink,
+  ChevronDown, Briefcase, FileText, Download, Eye, ExternalLink, Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
-import { TripCalendar, LocalClock } from "@/components/trip/TripCalendar";
-import { useTripWeather } from "@/hooks/useTripWeather";
+import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
+import { useTripWeather, type DayWeather } from "@/hooks/useTripWeather";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon };
@@ -47,14 +47,22 @@ function isImageUrl(url: string) {
 }
 
 function CollapsibleDayCard({
-  day, periodImages, isOpen, onToggle,
+  day, periodImages, isOpen, onToggle, weather,
 }: {
   day: ItineraryDay; periodImages: Record<string, string>; isOpen: boolean; onToggle: () => void;
+  weather?: DayWeather;
 }) {
   const dateFormatted = format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR });
+  const WxIcon = weather ? weatherIconFor(weather.code) : null;
 
   return (
-    <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
+    <div
+      id={`day-${day.dayNumber}`}
+      data-date={day.date}
+      className={`scroll-mt-24 rounded-2xl border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg ${
+        isOpen ? "border-primary/40 shadow-md ring-1 ring-primary/10" : "border-border/40 hover:border-border/80"
+      }`}
+    >
       <button
         type="button"
         onClick={onToggle}
@@ -69,7 +77,15 @@ function CollapsibleDayCard({
             <span className="text-xs opacity-70 font-medium capitalize">{dateFormatted}</span>
           </div>
         </div>
-        <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        <div className="flex items-center gap-2">
+          {weather && WxIcon && (
+            <div className="flex items-center gap-1.5 rounded-full bg-white/80 border border-primary/15 px-2.5 py-1 text-xs font-semibold tabular-nums shadow-sm">
+              <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
+              <span>{weather.tmin}° / {weather.tmax}°C</span>
+            </div>
+          )}
+          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        </div>
       </button>
 
       <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"}`}>
@@ -188,6 +204,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDayIndex, setOpenDayIndex] = useState<number | null>(0);
+  const [agentOpen, setAgentOpen] = useState(false);
   const [periodImages, setPeriodImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -371,66 +388,82 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const introImages = itinerary.destinationIntroImages || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* ─── Premium Agency Header ─── */}
-      <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-center">
-          {agentProfile?.agency_logo_url ? (
-            <img
-              src={agentProfile.agency_logo_url}
-               alt={agentProfile.agency_name || "Agência"}
-               translate="no"
-              className="h-16 sm:h-20 max-w-[280px] object-contain"
-            />
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Briefcase className="h-7 w-7 text-primary" />
-              </div>
-              <BrandText as="span" className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-                {agentProfile?.agency_name || "Roteiro de Viagem"}
-              </BrandText>
-            </div>
-          )}
+    <div className="min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0">
+      {/* ─── Slim Premium Header (mirrors Orçamento) ─── */}
+      <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Roteiro de Viagem
+          </span>
+          <BrandText as="span" className="text-sm sm:text-base font-semibold tracking-tight text-foreground/85 truncate max-w-[55%] text-right">
+            {agentProfile?.agency_name || "Sua viagem"}
+          </BrandText>
         </div>
       </header>
 
-      {/* ─── Cover Image ─── */}
-      {coverImage && (
-        <div className="relative w-full h-56 sm:h-80 overflow-hidden">
-          <img
-            src={coverImage}
-            alt={itinerary.destination}
-            className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 px-4 pb-6 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
-              <MapPin className="h-3 w-3" />
-              Roteiro de Viagem
+      {/* ─── HERO PREMIUM (mirrors Orçamento) ─── */}
+      <section className="relative w-full overflow-hidden">
+        <div className="relative min-h-[460px] sm:min-h-[560px] w-full">
+          {coverImage ? (
+            <img
+              src={coverImage}
+              alt={itinerary.destination}
+              className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
+              loading="eager"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
+
+          {agentProfile?.agency_logo_url && (
+            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full bg-white p-3 sm:p-4 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
+              <img
+                src={agentProfile.agency_logo_url}
+                alt={agentProfile.agency_name || "Agência"}
+                translate="no"
+                className="h-full w-full object-contain"
+              />
             </div>
-            <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight drop-shadow">
+          )}
+
+          <div className={`relative max-w-4xl mx-auto px-5 sm:px-8 ${agentProfile?.agency_logo_url ? "pt-40 sm:pt-52" : "pt-24 sm:pt-32"} pb-20 sm:pb-24 flex flex-col text-white animate-fade-up`}>
+            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
+              <MapPin className="h-3 w-3" /> {itinerary.destination}
+            </span>
+            <h1 className="mt-4 text-[2.4rem] sm:text-6xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
               {itinerary.destination}
             </h1>
+            <p className="mt-4 text-base sm:text-lg font-light text-white/90 max-w-2xl leading-relaxed">
+              {itinerary.days.length} {itinerary.days.length === 1 ? "dia" : "dias"} para viver {itinerary.destination} de um jeito único.
+            </p>
+
+            <div className="mt-7 flex flex-wrap gap-2 sm:gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
+                <Calendar className="h-4 w-4 opacity-80" />
+                {format(tripStart, "dd 'de' MMM", { locale: ptBR })} – {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
+                <Users className="h-4 w-4 opacity-80" />
+                {itinerary.travelersCount} viajante{itinerary.travelersCount > 1 ? "s" : ""}
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium capitalize">
+                {tripTypeLabels[itinerary.tripType] || itinerary.tripType.replace("_", " ")}
+              </div>
+              {itinerary.budgetLevel && (
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
+                  {budgetLabels[itinerary.budgetLevel] || itinerary.budgetLevel}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      </section>
 
-      <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
-        {/* ─── Hero Section (fallback when no cover) ─── */}
-        {!coverImage && (
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
-              <MapPin className="h-3.5 w-3.5" />
-              Roteiro de Viagem
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
-              {itinerary.destination}
-            </h1>
-          </div>
-        )}
-
-        {/* ─── Trip meta ─── */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-10 space-y-12">
+        {/* ─── Trip meta (legacy fallback hidden when hero covers it) ─── */}
+        {false && (
         <div className="text-center space-y-3">
           <div className="flex flex-wrap items-center justify-center gap-4 text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -447,7 +480,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             <Badge variant="secondary">{tripTypeLabels[itinerary.tripType]}</Badge>
             <Badge variant="outline">{budgetLabels[itinerary.budgetLevel]}</Badge>
           </div>
-        </div>
+        </div>)}
 
         {/* ─── Destination intro (text + gallery) ─── */}
         {showIntro && (introText || introImages.length > 0) && (
@@ -513,6 +546,15 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             weatherByDate={weatherByDate}
             timezone={timezone}
             destinationLabel={itinerary.destination}
+            onDayClick={(dateStr) => {
+              const idx = itinerary.days.findIndex((d) => d.date === dateStr);
+              if (idx < 0) return;
+              setOpenDayIndex(idx);
+              setTimeout(() => {
+                const el = document.getElementById(`day-${itinerary.days[idx].dayNumber}`);
+                el?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 50);
+            }}
           />
         </section>
 
@@ -532,18 +574,28 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                   periodImages={periodImages}
                   isOpen={openDayIndex === index}
                   onToggle={() => setOpenDayIndex(prev => prev === index ? null : index)}
+                  weather={weatherByDate?.[day.date]}
                 />
               ))}
             </div>
           </section>
         )}
 
-        {/* ─── Agent Signature ─── */}
+        {/* ─── Agent Signature (collapsible) ─── */}
         {agentProfile && (
           <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">Seu consultor de viagens</p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setAgentOpen((v) => !v)}
+              className="w-full bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3 flex items-center justify-between hover:from-muted/70 transition-colors"
+            >
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Briefcase className="h-3.5 w-3.5" />
+                Seu consultor de viagens
+              </p>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ${agentOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}`}>
             <div className="p-6 sm:p-8">
               <div className="flex flex-col items-center text-center space-y-5">
                 {agentProfile.avatar_url ? (
@@ -568,6 +620,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                   </a>
                 )}
               </div>
+            </div>
             </div>
           </div>
         )}
