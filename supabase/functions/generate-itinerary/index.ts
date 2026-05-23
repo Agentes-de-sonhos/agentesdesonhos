@@ -19,7 +19,7 @@ const corsHeaders = {
 
 const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "familia_adolescentes", "grupo_amigos", "solo", "lua_de_mel", "melhor_idade", "corporativo"];
 const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
-const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis"];
+const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis", "esportes"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
 const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight", "arrivalInfo", "departureInfo", "extraDestinations"];
 const ALLOWED_DEST_KIND = ["principal", "secundario", "bate_volta", "conexao", "extensao"];
@@ -74,6 +74,7 @@ const interestLabels: Record<string, string> = {
   parques_tematicos: "parques temáticos e diversão",
   bem_estar_spa: "bem-estar, spa e relaxamento",
   instagramaveis: "lugares instagramáveis e fotogênicos",
+  esportes: "esportes (estádios icônicos, jogos ao vivo, arenas, tours esportivos, museus do esporte)",
 };
 
 const paceLabels: Record<string, string> = {
@@ -411,6 +412,25 @@ serve(async (req) => {
     const interestsText = interestsList.length > 0
       ? `\n- Interesses prioritários: ${interestsList.join(", ")}` : "";
 
+    const hasGastronomia = interests.includes("gastronomia");
+    const hasEsportes = interests.includes("esportes");
+
+    const gastronomyRules = `\n\nREGRAS GASTRONÔMICAS (siga rigorosamente):
+- CAFÉ DA MANHÃ: assuma que será no hotel (NÃO sugira atividade de café da manhã, exceto se for uma experiência icônica do destino — ex: café em padaria histórica em Paris, dim sum em Hong Kong).
+- ALMOÇO: na maioria dos dias, a atividade do período da TARDE (ou início dela) deve incluir ou ser um restaurante coerente com a região visitada naquele dia/manhã. Use restaurantes reais, conhecidos, do bairro/região da atividade da manhã para evitar grandes deslocamentos.
+- JANTAR: na maioria dos dias, a atividade da NOITE deve ser um restaurante ou experiência gastronômica relevante (rooftop, wine bar, food market, bistrô local). Combine com o perfil do viajante e o nível de orçamento.
+- Almoço e jantar NÃO precisam aparecer 100% dos dias, mas devem ser FREQUENTES — principalmente em viagens urbanas e internacionais. Em dias de aventura/natureza/deslocamento longo, é aceitável omitir.
+- EVITE: restaurantes genéricos, repetição do mesmo tipo de cozinha em dias seguidos, ou sugestões logisticamente incoerentes (jantar do outro lado da cidade depois de passeio noturno).
+- Sempre que possível, mencione 1 prato típico/recomendado do local no campo description.
+${hasGastronomia ? `
+- INTERESSE GASTRONOMIA SELECIONADO — INTENSIFIQUE: quase todos os almoços e jantares devem ser experiências gastronômicas marcantes. Inclua mercados municipais, cafés icônicos, wine bars, rooftops, street food famosa, bistrôs tradicionais. Se o orçamento for "luxo", considere restaurantes premiados (Michelin, 50 Best) quando existirem no destino. Use a manhã ocasionalmente para experiências como tour gastronômico, padaria histórica ou aula de culinária.` : ""}`;
+
+    const sportsRules = hasEsportes ? `\n\nREGRAS DE ESPORTES (interesse selecionado):
+- Inclua experiências esportivas relevantes para o destino: estádios icônicos, tours, museus, partidas ao vivo quando houver temporada.
+- Adapte ao destino: futebol europeu (Camp Nou, Bernabéu, Wembley, San Siro, Allianz), NBA/NFL/MLB/NHL nos EUA, Maracanã/Vila Belmiro no Brasil, Fórmula 1 quando houver GP, sumô no Japão, etc.
+- Combine quando fizer sentido: jantar em sports bar famoso, restaurante temático esportivo, ou refeição próxima ao estádio no dia da experiência.
+- Não force esporte em destinos onde não há relevância turística esportiva clara (ex: ilha de relaxamento) — nesses casos, sugira no máximo 1 experiência leve ou ignore o interesse.` : "";
+
     const paceText = travelPace ? `\n- Ritmo da viagem: ${paceLabels[travelPace] || travelPace}` : "";
 
     const additionalLines: string[] = [];
@@ -455,10 +475,12 @@ REGRAS FUNDAMENTAIS:
 - Ajuste o número e a intensidade das atividades conforme o ritmo escolhido
 - Inclua estimativas realistas de duração e custo
 - Sugira locais específicos, conhecidos e de qualidade no destino
-- Considere logística e deslocamento entre atividades
+- Considere logística e deslocamento entre atividades — atividades do mesmo dia devem estar geograficamente próximas (mesmo bairro/região sempre que possível)
 - Para ritmo "leve", sugira atividades mais curtas e com intervalos entre elas
 - Para ritmo "intenso", maximize o aproveitamento de cada período do dia
 - Estas são SUGESTÕES para o agente validar e ajustar — seja criativo mas realista
+- O resultado deve parecer um roteiro profissional feito por um especialista em turismo, NÃO uma lista genérica
+${gastronomyRules}${sportsRules}
 
 ${profileRules}`;
 
