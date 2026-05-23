@@ -343,7 +343,6 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
   const tripStart = parseLocalDate(itinerary.startDate);
   const tripEnd = parseLocalDate(itinerary.endDate);
-  const { weatherByDate, timezone } = useTripWeather(itinerary.destination, tripStart, tripEnd);
   const itineraryDates = new Set(itinerary.days.map((d) => d.date));
   const coverImage =
     itinerary.coverImageUrl ||
