@@ -392,6 +392,21 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const introText = itinerary.destinationIntroText || null;
   const introImages = itinerary.destinationIntroImages || [];
 
+  const scrollToDayStart = (dayNumber: number) => {
+    const el = document.getElementById(`day-${dayNumber}`);
+    if (!el) return;
+
+    const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+    const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  };
+
+  const scheduleDayScroll = (dayNumber: number) => {
+    requestAnimationFrame(() => scrollToDayStart(dayNumber));
+    window.setTimeout(() => scrollToDayStart(dayNumber), 360);
+  };
+
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0">
       {/* ─── Slim Premium Header (mirrors Orçamento) ─── */}
@@ -552,10 +567,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               const idx = itinerary.days.findIndex((d) => d.date === dateStr);
               if (idx < 0) return;
               setOpenDayIndex(idx);
-              setTimeout(() => {
-                const el = document.getElementById(`day-${itinerary.days[idx].dayNumber}`);
-                el?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }, 50);
+              scheduleDayScroll(itinerary.days[idx].dayNumber);
             }}
           />
         </section>
@@ -579,10 +591,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                     setOpenDayIndex(prev => {
                       const next = prev === index ? null : index;
                       if (next !== null) {
-                        setTimeout(() => {
-                          const el = document.getElementById(`day-${day.dayNumber}`);
-                          el?.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }, 50);
+                        scheduleDayScroll(day.dayNumber);
                       }
                       return next;
                     });
