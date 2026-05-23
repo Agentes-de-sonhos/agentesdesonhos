@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ExternalLink, Copy } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +51,10 @@ export default function CriarRoteiro() {
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
+  const [approvalPromptOpen, setApprovalPromptOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"pdf" | "link" | null>(null);
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
+  const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
 
   const {
     itineraries,
@@ -93,6 +98,9 @@ export default function CriarRoteiro() {
       const data = await getItineraryWithDetails(itineraryId);
       setCurrentItinerary(data);
       setActiveTab("create");
+      if (data.status === "published" && data.shareToken) {
+        setGeneratedLinkUrl(buildItineraryUrl(data));
+      }
     } catch (error) {
       toast.error("Erro ao carregar roteiro");
     }
@@ -286,6 +294,8 @@ export default function CriarRoteiro() {
 
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado! O roteiro foi publicado.");
+    setGeneratedLinkUrl(url);
+    return url;
   };
 
   const handleConfirmPublish = async (data: {
@@ -333,7 +343,74 @@ export default function CriarRoteiro() {
   const handleBack = () => {
     setCurrentItinerary(null);
     setFormData(null);
+    setGeneratedLinkUrl(null);
     navigate("/ferramentas-ia/criar-roteiro");
+  };
+
+  const areAllActivitiesApproved = (itinerary: Itinerary & { days: ItineraryDay[] }) => {
+    if (!itinerary.days || itinerary.days.length === 0) return false;
+    return itinerary.days.every((d) =>
+      d.activities.length === 0 ? true : d.activities.every((a) => a.isApproved)
+    );
+  };
+
+  const proceedWithAction = async (action: "pdf" | "link") => {
+    if (!currentItinerary) return;
+    if (action === "pdf") {
+      await handleGeneratePDF(currentItinerary.id);
+      return;
+    }
+    // link
+    if (currentItinerary.status === "published" && currentItinerary.shareToken) {
+      const url = buildItineraryUrl(currentItinerary);
+      setGeneratedLinkUrl(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      } catch {}
+      return;
+    }
+    setPendingPublishId(currentItinerary.id);
+    setPublishReviewOpen(true);
+  };
+
+  const handleActionClick = (action: "pdf" | "link") => {
+    if (!currentItinerary) return;
+    if (!areAllActivitiesApproved(currentItinerary)) {
+      setPendingAction(action);
+      setApprovalPromptOpen(true);
+      return;
+    }
+    proceedWithAction(action);
+  };
+
+  const handleConfirmApprovalAndProceed = async () => {
+    if (!currentItinerary || !pendingAction) return;
+    setIsProcessingAction(true);
+    try {
+      await handleApproveAll();
+      // Reload to get fresh approved state
+      const fresh = await getItineraryWithDetails(currentItinerary.id);
+      setCurrentItinerary(fresh);
+      const action = pendingAction;
+      setApprovalPromptOpen(false);
+      setPendingAction(null);
+      if (action === "pdf") {
+        await handleGeneratePDF(fresh.id);
+      } else {
+        if (fresh.status === "published" && fresh.shareToken) {
+          const url = buildItineraryUrl(fresh);
+          setGeneratedLinkUrl(url);
+          try { await navigator.clipboard.writeText(url); } catch {}
+          toast.success("Link copiado!");
+        } else {
+          setPendingPublishId(fresh.id);
+          setPublishReviewOpen(true);
+        }
+      }
+    } finally {
+      setIsProcessingAction(false);
+    }
   };
 
   return (
@@ -429,28 +506,56 @@ export default function CriarRoteiro() {
                 Voltar
               </Button>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => handleGeneratePDF(currentItinerary.id)}>
+                <Button variant="outline" onClick={() => handleActionClick("pdf")}>
                   <FileText className="mr-2 h-4 w-4" />
                   Gerar PDF
                 </Button>
-                {currentItinerary.status === "approved" && (
-                  <Button onClick={() => openPublishReview(currentItinerary.id)}>
-                    <Link2 className="mr-2 h-4 w-4" />
-                    Compartilhar Link
-                  </Button>
-                )}
-                {currentItinerary.status === "published" && currentItinerary.shareToken && (
-                  <Button onClick={() => {
-                    const url = buildItineraryUrl(currentItinerary);
-                    navigator.clipboard.writeText(url);
-                    toast.success("Link copiado!");
-                  }}>
-                    <Link2 className="mr-2 h-4 w-4" />
-                    Copiar Link
-                  </Button>
-                )}
+                <Button onClick={() => handleActionClick("link")}>
+                  <Link2 className="mr-2 h-4 w-4" />
+                  Gerar Link
+                </Button>
               </div>
             </div>
+
+            {generatedLinkUrl && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1.5">
+                      <Link2 className="h-3.5 w-3.5 text-primary" />
+                      Link público do roteiro
+                    </div>
+                    <div className="text-sm font-mono break-all text-foreground">
+                      {generatedLinkUrl}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(generatedLinkUrl, "_blank", "noopener,noreferrer")}
+                    >
+                      <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                      Abrir
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(generatedLinkUrl);
+                          toast.success("Link copiado!");
+                        } catch {
+                          toast.error("Não foi possível copiar");
+                        }
+                      }}
+                    >
+                      <Copy className="mr-1.5 h-3.5 w-3.5" />
+                      Copiar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>
@@ -652,6 +757,30 @@ export default function CriarRoteiro() {
       )}
 
       <AIGeneratingOverlay visible={isGenerating} />
+
+      <AlertDialog open={approvalPromptOpen} onOpenChange={(o) => { if (!o && !isProcessingAction) { setApprovalPromptOpen(false); setPendingAction(null); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aprovar todas as atividades?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Para {pendingAction === "pdf" ? "gerar o PDF" : "gerar o link público"} é necessário aprovar todas as atividades do roteiro. Deseja aprovar agora?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isProcessingAction}>Não</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isProcessingAction}
+              onClick={(e) => { e.preventDefault(); handleConfirmApprovalAndProceed(); }}
+            >
+              {isProcessingAction ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Aprovando...</>
+              ) : (
+                "Sim, aprovar e continuar"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
