@@ -506,28 +506,56 @@ export default function CriarRoteiro() {
                 Voltar
               </Button>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => handleGeneratePDF(currentItinerary.id)}>
+                <Button variant="outline" onClick={() => handleActionClick("pdf")}>
                   <FileText className="mr-2 h-4 w-4" />
                   Gerar PDF
                 </Button>
-                {currentItinerary.status === "approved" && (
-                  <Button onClick={() => openPublishReview(currentItinerary.id)}>
-                    <Link2 className="mr-2 h-4 w-4" />
-                    Compartilhar Link
-                  </Button>
-                )}
-                {currentItinerary.status === "published" && currentItinerary.shareToken && (
-                  <Button onClick={() => {
-                    const url = buildItineraryUrl(currentItinerary);
-                    navigator.clipboard.writeText(url);
-                    toast.success("Link copiado!");
-                  }}>
-                    <Link2 className="mr-2 h-4 w-4" />
-                    Copiar Link
-                  </Button>
-                )}
+                <Button onClick={() => handleActionClick("link")}>
+                  <Link2 className="mr-2 h-4 w-4" />
+                  Gerar Link
+                </Button>
               </div>
             </div>
+
+            {generatedLinkUrl && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1.5">
+                      <Link2 className="h-3.5 w-3.5 text-primary" />
+                      Link público do roteiro
+                    </div>
+                    <div className="text-sm font-mono break-all text-foreground">
+                      {generatedLinkUrl}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(generatedLinkUrl, "_blank", "noopener,noreferrer")}
+                    >
+                      <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                      Abrir
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(generatedLinkUrl);
+                          toast.success("Link copiado!");
+                        } catch {
+                          toast.error("Não foi possível copiar");
+                        }
+                      }}
+                    >
+                      <Copy className="mr-1.5 h-3.5 w-3.5" />
+                      Copiar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>
