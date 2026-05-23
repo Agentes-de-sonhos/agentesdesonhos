@@ -412,6 +412,10 @@ export function useItineraries() {
         travelers_count: number;
         trip_type: string;
         budget_level: string;
+        destination_intro_text: string | null;
+        destination_intro_images: string[];
+        cover_image_url: string | null;
+        show_destination_intro: boolean;
       }>;
     }) => {
       const { error } = await supabase
