@@ -757,6 +757,30 @@ export default function CriarRoteiro() {
       )}
 
       <AIGeneratingOverlay visible={isGenerating} />
+
+      <AlertDialog open={approvalPromptOpen} onOpenChange={(o) => { if (!o && !isProcessingAction) { setApprovalPromptOpen(false); setPendingAction(null); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aprovar todas as atividades?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Para {pendingAction === "pdf" ? "gerar o PDF" : "gerar o link público"} é necessário aprovar todas as atividades do roteiro. Deseja aprovar agora?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isProcessingAction}>Não</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isProcessingAction}
+              onClick={(e) => { e.preventDefault(); handleConfirmApprovalAndProceed(); }}
+            >
+              {isProcessingAction ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Aprovando...</>
+              ) : (
+                "Sim, aprovar e continuar"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
