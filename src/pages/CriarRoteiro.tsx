@@ -20,7 +20,7 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X } from "lucide-react";
+import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,7 @@ export default function CriarRoteiro() {
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [publishReviewOpen, setPublishReviewOpen] = useState(false);
   const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
+  const [editPresentationOpen, setEditPresentationOpen] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
