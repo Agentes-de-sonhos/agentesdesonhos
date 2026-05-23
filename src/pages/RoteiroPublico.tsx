@@ -335,6 +335,18 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
     ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${whatsappMessage}`
     : "";
 
+  const tripStart = parseLocalDate(itinerary.startDate);
+  const tripEnd = parseLocalDate(itinerary.endDate);
+  const { weatherByDate, timezone } = useTripWeather(itinerary.destination, tripStart, tripEnd);
+  const itineraryDates = new Set(itinerary.days.map((d) => d.date));
+  const coverImage =
+    itinerary.coverImageUrl ||
+    (itinerary.destinationIntroImages && itinerary.destinationIntroImages[0]) ||
+    null;
+  const showIntro = itinerary.showDestinationIntro !== false;
+  const introText = itinerary.destinationIntroText || null;
+  const introImages = itinerary.destinationIntroImages || [];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* ─── Premium Agency Header ─── */}
@@ -360,21 +372,48 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
-        {/* ─── Hero Section ─── */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
-            <MapPin className="h-3.5 w-3.5" />
-            Roteiro de Viagem
+      {/* ─── Cover Image ─── */}
+      {coverImage && (
+        <div className="relative w-full h-56 sm:h-80 overflow-hidden">
+          <img
+            src={coverImage}
+            alt={itinerary.destination}
+            className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 px-4 pb-6 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
+              <MapPin className="h-3 w-3" />
+              Roteiro de Viagem
+            </div>
+            <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-white leading-tight tracking-tight drop-shadow">
+              {itinerary.destination}
+            </h1>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
-            {itinerary.destination}
-          </h1>
+        </div>
+      )}
+
+      <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
+        {/* ─── Hero Section (fallback when no cover) ─── */}
+        {!coverImage && (
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
+              <MapPin className="h-3.5 w-3.5" />
+              Roteiro de Viagem
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
+              {itinerary.destination}
+            </h1>
+          </div>
+        )}
+
+        {/* ─── Trip meta ─── */}
+        <div className="text-center space-y-3">
           <div className="flex flex-wrap items-center justify-center gap-4 text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {format(parseLocalDate(itinerary.startDate), "dd 'de' MMM", { locale: ptBR })} –{" "}
-              {format(parseLocalDate(itinerary.endDate), "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
+              {format(tripStart, "dd 'de' MMM", { locale: ptBR })} –{" "}
+              {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
@@ -386,6 +425,35 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             <Badge variant="outline">{budgetLabels[itinerary.budgetLevel]}</Badge>
           </div>
         </div>
+
+        {/* ─── Destination intro (text + gallery) ─── */}
+        {showIntro && (introText || introImages.length > 0) && (
+          <DestinationIntroPublic
+            text={introText}
+            images={introImages}
+            destination={itinerary.destination}
+          />
+        )}
+
+        {/* ─── Local time + Calendar with weather ─── */}
+        <section className="space-y-3">
+          {timezone && (
+            <LocalClock
+              timezone={timezone}
+              destinationLabel={itinerary.destination}
+              weatherByDate={weatherByDate}
+              standalone
+            />
+          )}
+          <TripCalendar
+            startDate={tripStart}
+            endDate={tripEnd}
+            itineraryDates={itineraryDates}
+            weatherByDate={weatherByDate}
+            timezone={timezone}
+            destinationLabel={itinerary.destination}
+          />
+        </section>
 
         {/* ─── Collapsible Days (accordion — one open at a time) ─── */}
         {itinerary.days.length > 0 && (
