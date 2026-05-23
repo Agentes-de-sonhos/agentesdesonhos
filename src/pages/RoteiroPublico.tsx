@@ -201,6 +201,12 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
     enabled: !!itinerary?.userId,
   });
 
+  // Weather + timezone (hook must be called unconditionally before any early return)
+  const weatherDestination = itinerary?.destination;
+  const weatherStart = itinerary ? parseLocalDate(itinerary.startDate) : new Date();
+  const weatherEnd = itinerary ? parseLocalDate(itinerary.endDate) : new Date();
+  const { weatherByDate, timezone } = useTripWeather(weatherDestination, weatherStart, weatherEnd);
+
   const loadItinerary = async (shareToken: string) => {
     try {
       const { data: itineraryData, error: itineraryError } = await supabase
