@@ -49,6 +49,8 @@ import { ItineraryDay, Activity } from "@/types/itinerary";
 import { cn } from "@/lib/utils";
 import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItineraryPeriodImages";
 import { parseLocalDate } from "@/lib/dateParsing";
+import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./ActivityAIActions";
+import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 
 const periodIcons = {
   manha: Sun,
@@ -69,6 +71,7 @@ interface ItineraryEditorProps {
   onDeleteActivity: (activityId: string) => void;
   onAddActivity: (dayId: string, activity: Omit<Activity, "id" | "orderIndex" | "isApproved">) => void;
   onApproveAll: () => void;
+  aiContext?: AIContext;
 }
 
 export function ItineraryEditor({
@@ -78,6 +81,7 @@ export function ItineraryEditor({
   onDeleteActivity,
   onAddActivity,
   onApproveAll,
+  aiContext,
 }: ItineraryEditorProps) {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
@@ -85,6 +89,9 @@ export function ItineraryEditor({
     useItineraryPeriodImages(itineraryId);
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
+  const { memory, learnFromInstruction, recordApproved, recordRemoved } =
+    useItineraryMemory(itineraryId);
+  const ctx: AIContext = aiContext ?? {};
 
   const handleFileChange = async (
     dayDate: string,
