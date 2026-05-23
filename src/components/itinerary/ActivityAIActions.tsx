@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Sparkles, Shuffle, Loader2, Wand2, Check } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Sparkles, Shuffle, Loader2, Wand2, Check, Search, Clock, MapPin, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,6 +26,7 @@ export interface AIContext {
 interface Alternative {
   title: string;
   short_description: string;
+  category?: string;
   location?: string;
   estimated_duration?: string;
   estimated_cost?: string;
@@ -69,6 +70,11 @@ export function ActivityAIActions({
   const [instruction, setInstruction] = useState("");
   const [loading, setLoading] = useState<null | "refine" | "suggest">(null);
   const [alternatives, setAlternatives] = useState<Alternative[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Alternative[]>([]);
+  const [searching, setSearching] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchCacheRef = useRef<Map<string, Alternative[]>>(new Map());
 
   const buildContext = () => ({
     ...context,
@@ -159,9 +165,54 @@ export function ActivityAIActions({
       estimatedCost: alt.estimated_cost ?? activity.estimatedCost,
     });
     setAlternatives([]);
+    setSearchResults([]);
+    setSearchQuery("");
     setSuggestOpen(false);
     toast.success("Atividade substituída");
   };
+
+  const runSearch = async (q: string) => {
+    const query = q.trim();
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const cacheKey = `${context.destination ?? ""}::${query.toLowerCase()}`;
+    const cached = searchCacheRef.current.get(cacheKey);
+    if (cached) {
+      setSearchResults(cached);
+      return;
+    }
+    setSearching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("refine-itinerary-activity", {
+        body: {
+          mode: "search",
+          context: buildContext(),
+          query,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const list: Alternative[] = data?.result?.results ?? [];
+      searchCacheRef.current.set(cacheKey, list);
+      setSearchResults(list);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro na busca");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (!suggestOpen) return;
+    searchDebounceRef.current = setTimeout(() => runSearch(searchQuery), 450);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, suggestOpen]);
 
   return (
     <div className="flex gap-1">
@@ -234,7 +285,11 @@ export function ActivityAIActions({
         open={suggestOpen}
         onOpenChange={(o) => {
           setSuggestOpen(o);
-          if (!o) setAlternatives([]);
+          if (!o) {
+            setAlternatives([]);
+            setSearchResults([]);
+            setSearchQuery("");
+          }
         }}
       >
         <PopoverTrigger asChild>
@@ -255,36 +310,114 @@ export function ActivityAIActions({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-96" align="end">
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Sugestões alternativas</p>
-            {loading === "suggest" && alternatives.length === 0 ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
-                <Loader2 className="h-4 w-4 animate-spin" /> Gerando opções...
-              </div>
-            ) : alternatives.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Nenhuma sugestão.</p>
-            ) : (
-              <div className="space-y-2">
-                {alternatives.map((alt, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => pickAlternative(alt)}
-                    className="w-full text-left rounded-lg border p-2.5 hover:border-primary hover:bg-primary/5 transition-colors"
-                  >
-                    <div className="flex items-start gap-2">
-                      <Check className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+        <PopoverContent className="w-[420px] max-w-[92vw]" align="end">
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-medium">Sugestões alternativas</p>
+              <p className="text-xs text-muted-foreground">
+                Use a IA ou busque algo específico que tenha em mente.
+              </p>
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar atividade, passeio, restaurante ou experiência..."
+                className="pl-8 h-9 text-sm"
+              />
+              {searching && (
+                <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+              )}
+            </div>
+
+            {searchQuery.trim().length >= 2 ? (
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {searching && searchResults.length === 0 ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Buscando experiências...
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <p className="text-xs text-muted-foreground py-2">
+                    Nenhum resultado. Tente outras palavras.
+                  </p>
+                ) : (
+                  searchResults.map((alt, i) => (
+                    <button
+                      key={`s-${i}`}
+                      type="button"
+                      onClick={() => pickAlternative(alt)}
+                      className="w-full text-left rounded-lg border p-2.5 hover:border-primary hover:bg-primary/5 transition-colors"
+                    >
                       <div className="min-w-0">
                         <p className="text-sm font-medium leading-snug">{alt.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                           {alt.short_description}
                         </p>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-[11px] text-muted-foreground">
+                          {alt.category && (
+                            <span className="inline-flex items-center gap-1">
+                              <Tag className="h-3 w-3" />
+                              {alt.category}
+                            </span>
+                          )}
+                          {alt.location && (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {alt.location}
+                            </span>
+                          )}
+                          {alt.estimated_duration && (
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {alt.estimated_duration}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  ))
+                )}
               </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="h-px bg-border flex-1" />
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    Sugeridos pela IA
+                  </span>
+                  <div className="h-px bg-border flex-1" />
+                </div>
+                {loading === "suggest" && alternatives.length === 0 ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Gerando opções...
+                  </div>
+                ) : alternatives.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Nenhuma sugestão.</p>
+                ) : (
+                  <div className="space-y-2 max-h-72 overflow-y-auto">
+                    {alternatives.map((alt, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => pickAlternative(alt)}
+                        className="w-full text-left rounded-lg border p-2.5 hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        <div className="flex items-start gap-2">
+                          <Check className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium leading-snug">{alt.title}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {alt.short_description}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </PopoverContent>
