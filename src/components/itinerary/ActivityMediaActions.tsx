@@ -148,27 +148,6 @@ export function ActivityMediaActions({
       />
 
       {/* Photo preview (if set) */}
-      {photoUrl && (
-        <div className="relative w-full max-w-xs overflow-hidden rounded-lg border bg-muted">
-          <img
-            src={photoUrl}
-            alt={activityTitle}
-            className="h-28 w-full object-cover"
-            loading="lazy"
-          />
-          <Button
-            type="button"
-            size="icon"
-            variant="destructive"
-            className="absolute right-1 top-1 h-6 w-6"
-            onClick={handleRemovePhoto}
-            title="Remover foto"
-          >
-            <X className="h-3 w-3" />
-          </Button>
-        </div>
-      )}
-
       {/* Action buttons */}
       <div className="flex flex-wrap gap-1.5">
         <Button
@@ -192,6 +171,18 @@ export function ActivityMediaActions({
           destination={destination}
           onPick={(url) => onChange({ photo_url: url })}
         />
+        {photoUrl && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs gap-1.5"
+            onClick={handleRemovePhoto}
+          >
+            <X className="h-3 w-3" />
+            Remover foto
+          </Button>
+        )}
         <Button
           type="button"
           variant="outline"

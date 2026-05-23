@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImageIcon } from "lucide-react";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { cn } from "@/lib/utils";
@@ -8,17 +8,27 @@ interface Props {
   location?: string | null;
   destination?: string;
   className?: string;
+  /** Called once when an auto-fetched photo URL is resolved, so the parent can persist it. */
+  onResolved?: (url: string) => void;
 }
 
 /**
  * Small thumbnail of a representative photo for an activity.
  * Falls back to a subtle placeholder when no photo is available.
  */
-export function ActivityPhotoThumb({ title, location, destination, className }: Props) {
+export function ActivityPhotoThumb({ title, location, destination, className, onResolved }: Props) {
   const { data, loading } = useActivityPhoto({ query: title, location, destination });
   const [errored, setErrored] = useState(false);
 
   const url = !errored ? data?.thumb_url ?? data?.photo_url ?? null : null;
+  const fullUrl = !errored ? data?.photo_url ?? data?.thumb_url ?? null : null;
+  const notifiedRef = useRef(false);
+  useEffect(() => {
+    if (fullUrl && onResolved && !notifiedRef.current) {
+      notifiedRef.current = true;
+      onResolved(fullUrl);
+    }
+  }, [fullUrl, onResolved]);
 
   return (
     <div
