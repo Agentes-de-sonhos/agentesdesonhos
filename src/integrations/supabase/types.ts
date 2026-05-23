@@ -83,6 +83,39 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_photo_cache: {
+        Row: {
+          attributions: string[] | null
+          created_at: string
+          photo_url: string | null
+          place_id: string | null
+          query_key: string
+          source: string
+          thumb_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          attributions?: string[] | null
+          created_at?: string
+          photo_url?: string | null
+          place_id?: string | null
+          query_key: string
+          source?: string
+          thumb_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attributions?: string[] | null
+          created_at?: string
+          photo_url?: string | null
+          place_id?: string | null
+          query_key?: string
+          source?: string
+          thumb_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_action_logs: {
         Row: {
           action: string
