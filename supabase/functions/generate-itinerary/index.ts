@@ -21,7 +21,23 @@ const ALLOWED_TRIP_TYPES = ["casal", "familia", "familia_crianca_pequena", "fami
 const ALLOWED_BUDGET_LEVELS = ["economico", "conforto", "luxo"];
 const ALLOWED_INTERESTS = ["gastronomia", "vinhos", "cultura_historia", "religioso", "aventura", "natureza", "praia", "neve_esqui", "luxo", "compras", "vida_noturna", "parques_tematicos", "bem_estar_spa", "instagramaveis", "esportes"];
 const ALLOWED_PACES = ["leve", "moderado", "intenso"];
-const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight", "arrivalInfo", "departureInfo", "extraDestinations"];
+const ALLOWED_BODY_KEYS = ["origin", "destination", "startDate", "endDate", "travelersCount", "adultsCount", "childrenCount", "tripType", "budgetLevel", "interests", "travelPace", "additionalPreferences", "outboundFlight", "returnFlight", "arrivalInfo", "departureInfo", "extraDestinations", "passengers"];
+const ALLOWED_PASSENGER_INTERESTS = ["gastronomia","cultura","historia","compras","natureza","praia","esportes","futebol","basquete","parques","vida_noturna","relaxamento","luxo","experiencias_locais","museus","fotografia","aventura","shows","vida_urbana"];
+const ALLOWED_PASSENGER_NEEDS = ["mobilidade_reduzida","restricao_alimentar","intolerancia_alimentar","gestante","crianca_pequena","ritmo_leve","acessibilidade","evitar_caminhadas_longas"];
+const PASSENGER_INTEREST_LABELS_PT: Record<string,string> = {
+  gastronomia:"gastronomia", cultura:"cultura", historia:"história", compras:"compras",
+  natureza:"natureza", praia:"praia", esportes:"esportes", futebol:"futebol",
+  basquete:"basquete", parques:"parques", vida_noturna:"vida noturna",
+  relaxamento:"relaxamento", luxo:"luxo", experiencias_locais:"experiências locais",
+  museus:"museus", fotografia:"fotografia", aventura:"aventura", shows:"shows",
+  vida_urbana:"vida urbana",
+};
+const PASSENGER_NEED_LABELS_PT: Record<string,string> = {
+  mobilidade_reduzida:"mobilidade reduzida", restricao_alimentar:"restrição alimentar",
+  intolerancia_alimentar:"intolerância alimentar", gestante:"gestante",
+  crianca_pequena:"criança pequena", ritmo_leve:"ritmo leve",
+  acessibilidade:"acessibilidade", evitar_caminhadas_longas:"evitar longas caminhadas",
+};
 const ALLOWED_DEST_KIND = ["principal", "secundario", "bate_volta", "conexao", "extensao"];
 const ALLOWED_TRANSPORT = ["aviao", "carro", "trem", "onibus", "transfer", "cruzeiro", "outro"];
 const DEST_KIND_LABELS: Record<string, string> = {
