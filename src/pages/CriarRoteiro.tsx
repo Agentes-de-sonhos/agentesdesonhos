@@ -44,8 +44,6 @@ export default function CriarRoteiro() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [itineraryToDelete, setItineraryToDelete] = useState<string | null>(null);
   const [publishReviewOpen, setPublishReviewOpen] = useState(false);
   const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
@@ -321,22 +319,14 @@ export default function CriarRoteiro() {
   };
 
   const handleDelete = (itineraryId: string) => {
-    setItineraryToDelete(itineraryId);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (itineraryToDelete) {
-      deleteItinerary.mutate(itineraryToDelete, {
-        onSuccess: () => {
-          if (currentItinerary?.id === itineraryToDelete) {
-            setCurrentItinerary(null);
-          }
-          setDeleteDialogOpen(false);
-          setItineraryToDelete(null);
-        },
-      });
-    }
+    // Confirmation is handled inside ItineraryCard's own AlertDialog
+    deleteItinerary.mutate(itineraryId, {
+      onSuccess: () => {
+        if (currentItinerary?.id === itineraryId) {
+          setCurrentItinerary(null);
+        }
+      },
+    });
   };
 
   const handleBack = () => {
@@ -561,22 +551,6 @@ export default function CriarRoteiro() {
           </div>
         )}
 
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Excluir Roteiro</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tem certeza que deseja excluir este roteiro? Esta ação não pode ser desfeita.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Excluir
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
 
       {currentItinerary && publishReviewOpen && (
