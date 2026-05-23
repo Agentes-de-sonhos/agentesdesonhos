@@ -3614,6 +3614,7 @@ export type Database = {
           created_at: string
           day_id: string
           description: string | null
+          document_urls: string[]
           estimated_cost: string | null
           estimated_duration: string | null
           id: string
@@ -3621,6 +3622,7 @@ export type Database = {
           location: string | null
           order_index: number
           period: string
+          photo_url: string | null
           title: string
           updated_at: string
         }
@@ -3628,6 +3630,7 @@ export type Database = {
           created_at?: string
           day_id: string
           description?: string | null
+          document_urls?: string[]
           estimated_cost?: string | null
           estimated_duration?: string | null
           id?: string
@@ -3635,6 +3638,7 @@ export type Database = {
           location?: string | null
           order_index?: number
           period: string
+          photo_url?: string | null
           title: string
           updated_at?: string
         }
@@ -3642,6 +3646,7 @@ export type Database = {
           created_at?: string
           day_id?: string
           description?: string | null
+          document_urls?: string[]
           estimated_cost?: string | null
           estimated_duration?: string | null
           id?: string
@@ -3649,6 +3654,7 @@ export type Database = {
           location?: string | null
           order_index?: number
           period?: string
+          photo_url?: string | null
           title?: string
           updated_at?: string
         }
