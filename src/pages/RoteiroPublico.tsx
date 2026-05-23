@@ -604,8 +604,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             >
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Briefcase className="h-3.5 w-3.5" />
-                Seu consultor de viagens
-                <span className="hidden sm:inline">— Precisa de ajuda? Fale com seu consultor de viagens</span>
+                Precisa de ajuda? Fale com seu consultor de viagens
               </p>
               <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
             </button>
