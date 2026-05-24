@@ -511,7 +511,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         {showIntro && (introText || introImages.length > 0) && (
           <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-4">
             {introImages.length > 0 && (
-              <div className="-mx-3 sm:mx-0 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar">
+              <div className="-mx-3 sm:mx-0 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide">
                 <div className="flex gap-2.5 px-3 sm:px-0">
                   {introImages.map((src, i) => (
                     <div key={i} className="snap-start shrink-0 overflow-hidden rounded-xl border border-border/40 bg-muted">
@@ -600,7 +600,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               Calendário da Viagem
             </p>
             <div className="relative">
-              <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar -mx-1 px-1">
+              <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide -mx-1 px-1">
                 <div className="flex gap-2 min-w-min">
                   {itinerary.days.map((day, idx) => {
                     const d = parseLocalDate(day.date);
