@@ -55,42 +55,53 @@ function CollapsibleDayCard({
 }) {
   const dateFormatted = format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR });
   const WxIcon = weather ? weatherIconFor(weather.code) : null;
+  const totalActivities = day.activities.length;
+  const firstTitle = day.activities[0]?.title;
 
   return (
     <div
       id={`day-${day.dayNumber}`}
       data-date={day.date}
-      className={`scroll-mt-24 rounded-2xl border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg ${
-        isOpen ? "border-primary/40 shadow-md ring-1 ring-primary/10" : "border-border/40 hover:border-border/80"
+      className={`scroll-mt-24 rounded-2xl border bg-card overflow-hidden transition-all duration-300 ${
+        isOpen
+          ? "border-primary/40 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+          : "border-border/60 hover:border-border hover:shadow-sm"
       }`}
     >
       <button
         type="button"
         onClick={onToggle}
-        className="w-full bg-gradient-to-r from-primary/15 to-primary/5 text-primary px-5 py-3 flex items-center justify-between cursor-pointer transition-colors"
+        className="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between cursor-pointer text-left"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
-            <Calendar className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-11 w-11 flex-col items-center justify-center rounded-xl bg-primary/8 border border-primary/15 shrink-0">
+            <Calendar className="h-4 w-4 text-primary" strokeWidth={2.2} />
           </div>
-          <div className="flex flex-col items-start gap-0.5">
-            <span className="text-sm font-bold uppercase tracking-wide">Dia {day.dayNumber}</span>
-            <span className="text-xs opacity-70 font-medium capitalize">{dateFormatted}</span>
+          <div className="flex flex-col items-start gap-0.5 min-w-0">
+            <span className="text-[13px] font-bold tracking-tight text-primary uppercase">
+              Dia {day.dayNumber}
+            </span>
+            <span className="text-xs text-muted-foreground font-medium capitalize truncate">
+              {dateFormatted}
+              {!isOpen && totalActivities > 0 && (
+                <span className="text-muted-foreground/60"> · {totalActivities} {totalActivities === 1 ? "atividade" : "atividades"}</span>
+              )}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {weather && WxIcon && (
-            <div className="flex items-center gap-1.5 rounded-full bg-white/80 border border-primary/15 px-2.5 py-1 text-xs font-semibold tabular-nums shadow-sm">
-              <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
+            <div className="hidden xs:flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-foreground/80">
+              <WxIcon className="h-3.5 w-3.5 text-primary/70" strokeWidth={2.4} />
               <span>{weather.tmin}° / {weather.tmax}°C</span>
             </div>
           )}
-          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown className={`h-4 w-4 text-muted-foreground/60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
         </div>
       </button>
 
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-5 py-4 space-y-6">
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[8000px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="px-4 sm:px-5 pb-5 pt-1 space-y-7 border-t border-border/40">
           {(["manha", "tarde", "noite"] as const).map((period) => {
             const activities = day.activities.filter((a) => a.period === period);
             if (activities.length === 0) return null;
@@ -100,98 +111,109 @@ function CollapsibleDayCard({
 
             return (
               <div key={period}>
-                <div className="mb-3 flex items-center gap-2 font-semibold text-primary">
-                  <Icon className="h-5 w-5" />
-                  {periodLabels[period]}
+                <div className="mt-5 mb-3 flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
+                    <Icon className="h-3.5 w-3.5 text-primary" strokeWidth={2.4} />
+                  </div>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
+                    {periodLabels[period]}
+                  </span>
+                  <div className="h-px flex-1 bg-border/50" />
                 </div>
 
                 {periodImage && (
-                  <div className="mb-3 rounded-xl overflow-hidden border border-border/30">
-                    <img src={periodImage} alt={periodLabels[period]} className="w-full h-48 sm:h-56 object-cover" />
+                  <div className="mb-4 rounded-xl overflow-hidden border border-border/40">
+                    <img src={periodImage} alt={periodLabels[period]} className="w-full h-40 sm:h-48 object-cover" />
                   </div>
                 )}
 
-                <div className="space-y-3 pl-7">
+                <div className="space-y-3">
                   {activities.map((activity) => (
-                    <div
+                    <article
                       key={activity.id}
-                      className="rounded-xl border border-border/40 bg-white p-4 sm:flex sm:gap-4 sm:items-start sm:p-4 space-y-3 sm:space-y-0"
+                      className="group rounded-2xl border border-border/50 bg-white p-3 sm:p-4 flex gap-3 sm:gap-4 hover:border-border hover:shadow-sm transition-all"
                     >
-                      {(activity as any).photoUrl && (
-                        <div className="overflow-hidden rounded-lg border border-border/30 sm:shrink-0">
+                      {(activity as any).photoUrl ? (
+                        <div className="shrink-0 overflow-hidden rounded-xl border border-border/30 bg-muted">
                           <img
                             src={(activity as any).photoUrl}
                             alt={activity.title}
                             loading="lazy"
                             decoding="async"
-                            className="w-full h-44 object-cover sm:h-36 sm:w-36 sm:rounded-lg"
+                            className="h-20 w-20 sm:h-28 sm:w-28 object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
+                      ) : (
+                        <div className="shrink-0 h-20 w-20 sm:h-28 sm:w-28 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 flex items-center justify-center">
+                          <Icon className="h-6 w-6 text-primary/40" />
+                        </div>
                       )}
-                      <div className="sm:flex-1 sm:min-w-0 space-y-3">
-                      <h4 className="font-semibold text-foreground">{activity.title}</h4>
-                      {activity.description && (
-                        <p className="text-sm text-muted-foreground leading-relaxed">{activity.description}</p>
-                      )}
-                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-                        {activity.location && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" /> {activity.location}
-                          </span>
-                        )}
-                        {activity.estimatedDuration && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" /> {activity.estimatedDuration}
-                          </span>
-                        )}
-                        {activity.estimatedCost && (
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" /> {activity.estimatedCost}
-                          </span>
-                        )}
-                      </div>
 
-                      {/* Maps URL */}
-                      {(activity as any).mapsUrl && (
-                        <div>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <h4 className="font-semibold text-foreground text-[15px] leading-tight tracking-tight">
+                          {activity.title}
+                        </h4>
+
+                        {activity.description && (
+                          <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-3 sm:line-clamp-none">
+                            {activity.description}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-muted-foreground/90 pt-0.5">
+                          {activity.location && (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3 w-3" /> {activity.location}
+                            </span>
+                          )}
+                          {activity.estimatedDuration && (
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> {activity.estimatedDuration}
+                            </span>
+                          )}
+                          {activity.estimatedCost && (
+                            <span className="inline-flex items-center gap-1 font-semibold text-foreground/80">
+                              <DollarSign className="h-3 w-3" /> {activity.estimatedCost}
+                            </span>
+                          )}
+                        </div>
+
+                        {(activity as any).mapsUrl && (
                           <a
                             href={(activity as any).mapsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
                           >
-                            <MapPin className="h-3.5 w-3.5" />
+                            <MapPin className="h-3 w-3" />
                             Ver no mapa
-                            <ExternalLink className="h-3 w-3" />
+                            <ExternalLink className="h-2.5 w-2.5" />
                           </a>
-                        </div>
-                      )}
+                        )}
 
-                      {/* Documents */}
-                      {(activity as any).documentUrls?.length > 0 && (
-                        <div className="space-y-2 pt-1">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                            <FileText className="h-3.5 w-3.5" /> Documentos
-                          </p>
-                          <div className="space-y-1.5">
-                            {(activity as any).documentUrls.map((url: string, i: number) => {
-                              const name = getFileName(url);
-                              const isImg = isImageUrl(url);
-                              return (
-                                <div key={i} className="flex items-center gap-2 text-xs bg-muted/50 rounded-lg px-3 py-2">
-                                  {isImg ? <Eye className="h-3.5 w-3.5 text-muted-foreground shrink-0" /> : <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                                  <span className="flex-1 truncate text-muted-foreground">{name}</span>
-                                  <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                                    {isImg ? <Eye className="h-3.5 w-3.5" /> : <Download className="h-3.5 w-3.5" />}
+                        {(activity as any).documentUrls?.length > 0 && (
+                          <div className="space-y-1.5 pt-1">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 flex items-center gap-1">
+                              <FileText className="h-3 w-3" /> Documentos
+                            </p>
+                            <div className="space-y-1">
+                              {(activity as any).documentUrls.map((url: string, i: number) => {
+                                const name = getFileName(url);
+                                const isImg = isImageUrl(url);
+                                return (
+                                  <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-[11px] bg-muted/50 hover:bg-muted rounded-lg px-2.5 py-1.5 transition-colors">
+                                    {isImg ? <Eye className="h-3 w-3 text-muted-foreground shrink-0" /> : <FileText className="h-3 w-3 text-muted-foreground shrink-0" />}
+                                    <span className="flex-1 truncate text-muted-foreground">{name}</span>
+                                    {isImg ? <Eye className="h-3 w-3 text-primary" /> : <Download className="h-3 w-3 text-primary" />}
                                   </a>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               </div>
