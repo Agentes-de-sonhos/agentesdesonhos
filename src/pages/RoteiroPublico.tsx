@@ -674,48 +674,59 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
           </section>
         )}
 
-        {/* ─── Agent Signature (collapsible) ─── */}
+        {/* ─── Agent Signature (horizontal, premium) ─── */}
         {agentProfile && (
-          <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setAgentOpen((v) => !v)}
-              className="w-full bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3 flex items-center justify-between hover:from-muted/70 transition-colors"
-            >
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
-                  <HelpCircle className="h-4 w-4 text-primary" />
-                </span>
-                Precisa de ajuda? Fale com seu consultor de viagens
-              </p>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
-            </button>
-            <div className={`overflow-hidden transition-all duration-300 ${agentOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}`}>
-            <div className="p-6 sm:p-8">
-              <div className="flex flex-col items-center text-center space-y-5">
-                {agentProfile.avatar_url ? (
-                  <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
-                ) : (
-                  <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg ring-2 ring-white">
-                    {agentProfile.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="space-y-1">
-                  <p className="text-xl font-bold text-foreground">{agentProfile.name}</p>
-                  {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
+          <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="flex items-center gap-3 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-4">
+              {agentProfile.avatar_url ? (
+                <img src={agentProfile.avatar_url} alt={agentProfile.name}
+                  className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-cover ring-2 ring-primary/10 shrink-0" />
+              ) : (
+                <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-base font-bold ring-2 ring-white shrink-0">
+                  {agentProfile.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm sm:text-base font-bold text-foreground leading-tight">
+                  Precisa de ajuda?
+                </p>
+                <p className="text-[12px] sm:text-[13px] text-muted-foreground leading-snug truncate">
+                  Fale com seu consultor de viagens.
+                </p>
+              </div>
+              {whatsappUrl && (
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                  className="hidden sm:inline-flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-4 py-2.5 font-bold text-[13px] shadow-md hover:shadow-lg transition-all duration-200 shrink-0">
+                  <WhatsAppIcon className="h-4 w-4" />
+                  Falar no WhatsApp
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setAgentOpen((v) => !v)}
+                className="shrink-0 h-9 w-9 rounded-full flex items-center justify-center hover:bg-muted/60 transition-colors"
+                aria-label="Ver consultor"
+              >
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
+              </button>
+            </div>
+            <div className={`overflow-hidden transition-all duration-300 ${agentOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="px-5 pb-5 pt-1 border-t border-border/40 space-y-3">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-foreground">{agentProfile.name}</p>
+                  {agentProfile.agency_name && <BrandText as="p" className="text-[12px] text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
                   {(agentProfile.city || agentProfile.state) && (
-                    <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
+                    <p className="text-[11px] text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
                   )}
                 </div>
                 {whatsappUrl && (
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                    <WhatsAppIcon className="h-5 w-5" />
+                    className="sm:hidden inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-md w-full">
+                    <WhatsAppIcon className="h-4 w-4" />
                     Falar no WhatsApp
                   </a>
                 )}
               </div>
-            </div>
             </div>
           </div>
         )}
