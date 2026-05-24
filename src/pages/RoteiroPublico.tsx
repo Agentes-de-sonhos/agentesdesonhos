@@ -9,14 +9,15 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { Itinerary, ItineraryDay, Activity } from "@/types/itinerary";
 import {
   MapPin, Calendar, Users, Sun, Sunset, Moon, Clock, DollarSign, Loader2,
-  ChevronDown, FileText, Download, Eye, ExternalLink, Sparkles, HelpCircle,
+  ChevronDown, FileText, Download, Eye, ExternalLink, Sparkles, Headset,
+  ChevronLeft, ChevronRight, Tag,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
-import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
-import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
+import { FormattedText } from "@/components/ui/formatted-text";
+import { LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
 import { useTripWeather, type DayWeather } from "@/hooks/useTripWeather";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 
