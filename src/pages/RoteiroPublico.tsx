@@ -505,96 +505,143 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-10 space-y-12">
-        {/* ─── Trip meta (legacy fallback hidden when hero covers it) ─── */}
-        {false && (
-        <div className="text-center space-y-3">
-          <div className="flex flex-wrap items-center justify-center gap-4 text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {format(tripStart, "dd 'de' MMM", { locale: ptBR })} –{" "}
-              {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
-            </span>
-            <span className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              {itinerary.travelersCount} viajante(s)
-            </span>
-          </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Badge variant="secondary">{tripTypeLabels[itinerary.tripType]}</Badge>
-            <Badge variant="outline">{budgetLabels[itinerary.budgetLevel]}</Badge>
-          </div>
-        </div>)}
+      <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-10 space-y-7 sm:space-y-9">
 
-        {/* ─── Destination intro (text + gallery) ─── */}
+        {/* ─── Destination intro: editorial gallery + left-aligned text ─── */}
         {showIntro && (introText || introImages.length > 0) && (
-          <DestinationIntroPublic
-            text={introText}
-            images={introImages}
-            destination={itinerary.destination}
-          />
-        )}
-
-        {/* ─── Passageiros + Perfil da viagem ─── */}
-        {((itinerary.passengers && itinerary.passengers.length > 0) ||
-          (itinerary.passengerInterests && itinerary.passengerInterests.length > 0)) && (
-          <section className="rounded-2xl border border-border/40 bg-card p-4 sm:p-5 space-y-3">
-            {itinerary.passengers && itinerary.passengers.length > 0 && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5" /> Passageiros
-                </p>
-                <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-1">
-                  {itinerary.passengers.map((p, i) => (
-                    <li key={i} className="text-sm font-medium text-foreground truncate">
-                      {p.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {itinerary.passengerInterests && itinerary.passengerInterests.length > 0 && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
-                  ✨ Perfil da viagem
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {itinerary.passengerInterests.map((k) => (
-                    <Badge key={k} variant="secondary">
-                      {PASSENGER_INTEREST_LABELS[k as keyof typeof PASSENGER_INTEREST_LABELS] || k}
-                    </Badge>
+          <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-4">
+            {introImages.length > 0 && (
+              <div className="-mx-3 sm:mx-0 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar">
+                <div className="flex gap-2.5 px-3 sm:px-0">
+                  {introImages.map((src, i) => (
+                    <div key={i} className="snap-start shrink-0 overflow-hidden rounded-xl border border-border/40 bg-muted">
+                      <img
+                        src={src}
+                        alt={`${itinerary.destination} ${i + 1}`}
+                        loading={i < 2 ? "eager" : "lazy"}
+                        className="h-32 w-32 sm:h-36 sm:w-44 object-cover hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
                   ))}
                 </div>
+              </div>
+            )}
+            {introText && (
+              <p className="text-[13.5px] sm:text-[15px] text-foreground/75 leading-relaxed">
+                <FormattedText>{introText}</FormattedText>
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* ─── Passageiros: avatares premium ─── */}
+        {itinerary.passengers && itinerary.passengers.length > 0 && (
+          <section className="rounded-2xl border border-border/50 bg-card p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <p className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-primary mb-3 flex items-center gap-1.5">
+              <Users className="h-3 w-3" /> Passageiros
+            </p>
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-3">
+              {itinerary.passengers.map((p, i) => {
+                const age = p.age;
+                const isChild = typeof age === "number" && age < 18;
+                const profile = isChild
+                  ? age <= 2 ? "Bebê" : `Criança (${age} anos)`
+                  : "Adulto";
+                const initials = (p.name || "?").split(" ").filter(Boolean).slice(0, 2).map((s) => s.charAt(0).toUpperCase()).join("") || "?";
+                const palette = [
+                  "from-sky-400 to-sky-600",
+                  "from-amber-400 to-orange-500",
+                  "from-rose-400 to-pink-500",
+                  "from-emerald-400 to-teal-500",
+                  "from-violet-400 to-indigo-500",
+                  "from-cyan-400 to-blue-500",
+                ][i % 6];
+                return (
+                  <li key={i} className="flex items-center gap-2.5 min-w-0">
+                    <div className={`shrink-0 h-9 w-9 rounded-full bg-gradient-to-br ${palette} text-white flex items-center justify-center text-[11px] font-bold shadow-sm ring-2 ring-white`}>
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground leading-tight truncate">{p.name || "Passageiro"}</p>
+                      <p className="text-[10.5px] text-muted-foreground leading-tight">{profile}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            {itinerary.passengerInterests && itinerary.passengerInterests.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-border/40 flex flex-wrap gap-1.5">
+                {itinerary.passengerInterests.map((k) => (
+                  <Badge key={k} variant="secondary" className="rounded-full font-normal text-[11px]">
+                    {PASSENGER_INTEREST_LABELS[k as keyof typeof PASSENGER_INTEREST_LABELS] || k}
+                  </Badge>
+                ))}
               </div>
             )}
           </section>
         )}
 
-        {/* ─── Local time + Calendar with weather ─── */}
-        <section className="space-y-3 sm:max-w-xl sm:mx-auto">
-          {timezone && (
+        {/* ─── Local time strip ─── */}
+        {timezone && (
+          <section>
             <LocalClock
               timezone={timezone}
               destinationLabel={itinerary.destination}
               weatherByDate={weatherByDate}
               standalone
             />
-          )}
-          <TripCalendar
-            startDate={tripStart}
-            endDate={tripEnd}
-            itineraryDates={itineraryDates}
-            weatherByDate={weatherByDate}
-            timezone={timezone}
-            destinationLabel={itinerary.destination}
-            onDayClick={(dateStr) => {
-              const idx = itinerary.days.findIndex((d) => d.date === dateStr);
-              if (idx < 0) return;
-              setOpenDayIndex(idx);
-              scheduleDayScroll(itinerary.days[idx].dayNumber);
-            }}
-          />
-        </section>
+          </section>
+        )}
+
+        {/* ─── Horizontal day strip (app-like timeline) ─── */}
+        {itinerary.days.length > 0 && (
+          <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <p className="text-center text-[10.5px] font-bold uppercase tracking-[0.22em] text-primary mb-3">
+              Calendário da Viagem
+            </p>
+            <div className="relative">
+              <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar -mx-1 px-1">
+                <div className="flex gap-2 min-w-min">
+                  {itinerary.days.map((day, idx) => {
+                    const d = parseLocalDate(day.date);
+                    const isOpen = openDayIndex === idx;
+                    const wx = weatherByDate?.[day.date];
+                    const WxIcon = wx ? weatherIconFor(wx.code) : null;
+                    return (
+                      <button
+                        key={day.id}
+                        type="button"
+                        onClick={() => {
+                          setOpenDayIndex(idx);
+                          scheduleDayScroll(day.dayNumber);
+                        }}
+                        className={`snap-start shrink-0 flex flex-col items-center justify-center w-[68px] sm:w-[80px] py-3 rounded-xl border transition-all ${
+                          isOpen
+                            ? "bg-primary text-primary-foreground border-primary shadow-md"
+                            : "bg-white border-border/60 hover:border-primary/40 hover:bg-primary/5"
+                        }`}
+                      >
+                        <span className={`text-[9.5px] font-bold uppercase tracking-widest ${isOpen ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                          {format(d, "EEE", { locale: ptBR }).slice(0, 3)}
+                        </span>
+                        <span className={`text-xl sm:text-2xl font-extrabold tabular-nums leading-none mt-1 ${isOpen ? "" : "text-foreground"}`}>
+                          {format(d, "dd")}
+                        </span>
+                        <span className={`text-[9.5px] font-bold uppercase tracking-widest mt-1 ${isOpen ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                          {format(d, "MMM", { locale: ptBR }).replace(".", "")}
+                        </span>
+                        <span className={`mt-1.5 h-1 w-1 rounded-full ${isOpen ? "bg-white" : "bg-primary"}`} />
+                        {WxIcon && !isOpen && (
+                          <WxIcon className="mt-1 h-3 w-3 text-primary/70" strokeWidth={2.4} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ─── Collapsible Days (accordion — one open at a time) ─── */}
         {itinerary.days.length > 0 && (
