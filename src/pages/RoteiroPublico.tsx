@@ -9,14 +9,14 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { Itinerary, ItineraryDay, Activity } from "@/types/itinerary";
 import {
   MapPin, Calendar, Users, Sun, Sunset, Moon, Clock, DollarSign, Loader2,
-  ChevronDown, FileText, Download, Eye, ExternalLink, Sparkles, HelpCircle,
+  ChevronDown, FileText, Download, Eye, ExternalLink, Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
-import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
-import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
+import { FormattedText } from "@/components/ui/formatted-text";
+import { LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
 import { useTripWeather, type DayWeather } from "@/hooks/useTripWeather";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 
@@ -54,42 +54,53 @@ function CollapsibleDayCard({
 }) {
   const dateFormatted = format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR });
   const WxIcon = weather ? weatherIconFor(weather.code) : null;
+  const totalActivities = day.activities.length;
+  const firstTitle = day.activities[0]?.title;
 
   return (
     <div
       id={`day-${day.dayNumber}`}
       data-date={day.date}
-      className={`scroll-mt-24 rounded-2xl border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg ${
-        isOpen ? "border-primary/40 shadow-md ring-1 ring-primary/10" : "border-border/40 hover:border-border/80"
+      className={`scroll-mt-24 rounded-2xl border bg-card overflow-hidden transition-all duration-300 ${
+        isOpen
+          ? "border-primary/40 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+          : "border-border/60 hover:border-border hover:shadow-sm"
       }`}
     >
       <button
         type="button"
         onClick={onToggle}
-        className="w-full bg-gradient-to-r from-primary/15 to-primary/5 text-primary px-5 py-3 flex items-center justify-between cursor-pointer transition-colors"
+        className="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between cursor-pointer text-left"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
-            <Calendar className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-11 w-11 flex-col items-center justify-center rounded-xl bg-primary/8 border border-primary/15 shrink-0">
+            <Calendar className="h-4 w-4 text-primary" strokeWidth={2.2} />
           </div>
-          <div className="flex flex-col items-start gap-0.5">
-            <span className="text-sm font-bold uppercase tracking-wide">Dia {day.dayNumber}</span>
-            <span className="text-xs opacity-70 font-medium capitalize">{dateFormatted}</span>
+          <div className="flex flex-col items-start gap-0.5 min-w-0">
+            <span className="text-[13px] font-bold tracking-tight text-primary uppercase">
+              Dia {day.dayNumber}
+            </span>
+            <span className="text-xs text-muted-foreground font-medium capitalize truncate">
+              {dateFormatted}
+              {!isOpen && totalActivities > 0 && (
+                <span className="text-muted-foreground/60"> · {totalActivities} {totalActivities === 1 ? "atividade" : "atividades"}</span>
+              )}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {weather && WxIcon && (
-            <div className="flex items-center gap-1.5 rounded-full bg-white/80 border border-primary/15 px-2.5 py-1 text-xs font-semibold tabular-nums shadow-sm">
-              <WxIcon className="h-3.5 w-3.5 text-primary/80" strokeWidth={2.4} />
+            <div className="hidden xs:flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-foreground/80">
+              <WxIcon className="h-3.5 w-3.5 text-primary/70" strokeWidth={2.4} />
               <span>{weather.tmin}° / {weather.tmax}°C</span>
             </div>
           )}
-          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown className={`h-4 w-4 text-muted-foreground/60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
         </div>
       </button>
 
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-5 py-4 space-y-6">
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[8000px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="px-4 sm:px-5 pb-5 pt-1 space-y-7 border-t border-border/40">
           {(["manha", "tarde", "noite"] as const).map((period) => {
             const activities = day.activities.filter((a) => a.period === period);
             if (activities.length === 0) return null;
@@ -99,98 +110,109 @@ function CollapsibleDayCard({
 
             return (
               <div key={period}>
-                <div className="mb-3 flex items-center gap-2 font-semibold text-primary">
-                  <Icon className="h-5 w-5" />
-                  {periodLabels[period]}
+                <div className="mt-5 mb-3 flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
+                    <Icon className="h-3.5 w-3.5 text-primary" strokeWidth={2.4} />
+                  </div>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
+                    {periodLabels[period]}
+                  </span>
+                  <div className="h-px flex-1 bg-border/50" />
                 </div>
 
                 {periodImage && (
-                  <div className="mb-3 rounded-xl overflow-hidden border border-border/30">
-                    <img src={periodImage} alt={periodLabels[period]} className="w-full h-48 sm:h-56 object-cover" />
+                  <div className="mb-4 rounded-xl overflow-hidden border border-border/40">
+                    <img src={periodImage} alt={periodLabels[period]} className="w-full h-40 sm:h-48 object-cover" />
                   </div>
                 )}
 
-                <div className="space-y-3 pl-7">
+                <div className="space-y-3">
                   {activities.map((activity) => (
-                    <div
+                    <article
                       key={activity.id}
-                      className="rounded-xl border border-border/40 bg-white p-4 sm:flex sm:gap-4 sm:items-start sm:p-4 space-y-3 sm:space-y-0"
+                      className="group rounded-2xl border border-border/50 bg-white p-3 sm:p-4 flex gap-3 sm:gap-4 hover:border-border hover:shadow-sm transition-all"
                     >
-                      {(activity as any).photoUrl && (
-                        <div className="overflow-hidden rounded-lg border border-border/30 sm:shrink-0">
+                      {(activity as any).photoUrl ? (
+                        <div className="shrink-0 overflow-hidden rounded-xl border border-border/30 bg-muted">
                           <img
                             src={(activity as any).photoUrl}
                             alt={activity.title}
                             loading="lazy"
                             decoding="async"
-                            className="w-full h-44 object-cover sm:h-36 sm:w-36 sm:rounded-lg"
+                            className="h-20 w-20 sm:h-28 sm:w-28 object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
+                      ) : (
+                        <div className="shrink-0 h-20 w-20 sm:h-28 sm:w-28 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 flex items-center justify-center">
+                          <Icon className="h-6 w-6 text-primary/40" />
+                        </div>
                       )}
-                      <div className="sm:flex-1 sm:min-w-0 space-y-3">
-                      <h4 className="font-semibold text-foreground">{activity.title}</h4>
-                      {activity.description && (
-                        <p className="text-sm text-muted-foreground leading-relaxed">{activity.description}</p>
-                      )}
-                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-                        {activity.location && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" /> {activity.location}
-                          </span>
-                        )}
-                        {activity.estimatedDuration && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" /> {activity.estimatedDuration}
-                          </span>
-                        )}
-                        {activity.estimatedCost && (
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" /> {activity.estimatedCost}
-                          </span>
-                        )}
-                      </div>
 
-                      {/* Maps URL */}
-                      {(activity as any).mapsUrl && (
-                        <div>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <h4 className="font-semibold text-foreground text-[15px] leading-tight tracking-tight">
+                          {activity.title}
+                        </h4>
+
+                        {activity.description && (
+                          <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-3 sm:line-clamp-none">
+                            {activity.description}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-muted-foreground/90 pt-0.5">
+                          {activity.location && (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3 w-3" /> {activity.location}
+                            </span>
+                          )}
+                          {activity.estimatedDuration && (
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> {activity.estimatedDuration}
+                            </span>
+                          )}
+                          {activity.estimatedCost && (
+                            <span className="inline-flex items-center gap-1 font-semibold text-foreground/80">
+                              <DollarSign className="h-3 w-3" /> {activity.estimatedCost}
+                            </span>
+                          )}
+                        </div>
+
+                        {(activity as any).mapsUrl && (
                           <a
                             href={(activity as any).mapsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
                           >
-                            <MapPin className="h-3.5 w-3.5" />
+                            <MapPin className="h-3 w-3" />
                             Ver no mapa
-                            <ExternalLink className="h-3 w-3" />
+                            <ExternalLink className="h-2.5 w-2.5" />
                           </a>
-                        </div>
-                      )}
+                        )}
 
-                      {/* Documents */}
-                      {(activity as any).documentUrls?.length > 0 && (
-                        <div className="space-y-2 pt-1">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                            <FileText className="h-3.5 w-3.5" /> Documentos
-                          </p>
-                          <div className="space-y-1.5">
-                            {(activity as any).documentUrls.map((url: string, i: number) => {
-                              const name = getFileName(url);
-                              const isImg = isImageUrl(url);
-                              return (
-                                <div key={i} className="flex items-center gap-2 text-xs bg-muted/50 rounded-lg px-3 py-2">
-                                  {isImg ? <Eye className="h-3.5 w-3.5 text-muted-foreground shrink-0" /> : <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                                  <span className="flex-1 truncate text-muted-foreground">{name}</span>
-                                  <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                                    {isImg ? <Eye className="h-3.5 w-3.5" /> : <Download className="h-3.5 w-3.5" />}
+                        {(activity as any).documentUrls?.length > 0 && (
+                          <div className="space-y-1.5 pt-1">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 flex items-center gap-1">
+                              <FileText className="h-3 w-3" /> Documentos
+                            </p>
+                            <div className="space-y-1">
+                              {(activity as any).documentUrls.map((url: string, i: number) => {
+                                const name = getFileName(url);
+                                const isImg = isImageUrl(url);
+                                return (
+                                  <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-[11px] bg-muted/50 hover:bg-muted rounded-lg px-2.5 py-1.5 transition-colors">
+                                    {isImg ? <Eye className="h-3 w-3 text-muted-foreground shrink-0" /> : <FileText className="h-3 w-3 text-muted-foreground shrink-0" />}
+                                    <span className="flex-1 truncate text-muted-foreground">{name}</span>
+                                    {isImg ? <Eye className="h-3 w-3 text-primary" /> : <Download className="h-3 w-3 text-primary" />}
                                   </a>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               </div>
@@ -383,7 +405,6 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
   const tripStart = parseLocalDate(itinerary.startDate);
   const tripEnd = parseLocalDate(itinerary.endDate);
-  const itineraryDates = new Set(itinerary.days.map((d) => d.date));
   const coverImage =
     itinerary.coverImageUrl ||
     (itinerary.destinationIntroImages && itinerary.destinationIntroImages[0]) ||
@@ -421,156 +442,204 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         </div>
       </header>
 
-      {/* ─── HERO PREMIUM (mirrors Orçamento) ─── */}
+      {/* ─── HERO COMPACT PREMIUM ─── */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative min-h-[460px] sm:min-h-[560px] w-full">
-          {coverImage ? (
-            <img
-              src={coverImage}
-              alt={itinerary.destination}
-              className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
-              loading="eager"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
-
-          {agentProfile?.agency_logo_url && (
-            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full bg-white p-3 sm:p-4 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
+        <div className="relative w-full max-w-5xl mx-auto sm:px-4 sm:pt-4">
+          <div className="relative aspect-[16/10] sm:aspect-[21/9] min-h-[280px] sm:min-h-[340px] max-h-[480px] w-full overflow-hidden sm:rounded-2xl">
+            {coverImage ? (
               <img
-                src={agentProfile.agency_logo_url}
-                alt={agentProfile.agency_name || "Agência"}
-                translate="no"
-                className="h-full w-full object-contain"
+                src={coverImage}
+                alt={itinerary.destination}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="eager"
               />
-            </div>
-          )}
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
 
-          <div className={`relative max-w-4xl mx-auto px-5 sm:px-8 ${agentProfile?.agency_logo_url ? "pt-40 sm:pt-52" : "pt-24 sm:pt-32"} pb-20 sm:pb-24 flex flex-col text-white animate-fade-up`}>
-            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
-              <MapPin className="h-3 w-3" /> {itinerary.destination}
-            </span>
-            <h1 className="mt-4 text-[2.4rem] sm:text-6xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
-              {itinerary.destination}
-            </h1>
-            <p className="mt-4 text-base sm:text-lg font-light text-white/90 max-w-2xl leading-relaxed">
-              {itinerary.days.length} {itinerary.days.length === 1 ? "dia" : "dias"} para viver {itinerary.destination} de um jeito único.
-            </p>
+            {agentProfile?.agency_logo_url && (
+              <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-10 h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-full bg-white p-1.5 shadow-lg ring-1 ring-black/5 flex items-center justify-center">
+                <img
+                  src={agentProfile.agency_logo_url}
+                  alt={agentProfile.agency_name || "Agência"}
+                  translate="no"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            )}
 
-            <div className="mt-7 flex flex-wrap gap-2 sm:gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
-                <Calendar className="h-4 w-4 opacity-80" />
-                {format(tripStart, "dd 'de' MMM", { locale: ptBR })} – {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
-                <Users className="h-4 w-4 opacity-80" />
-                {itinerary.travelersCount} viajante{itinerary.travelersCount > 1 ? "s" : ""}
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium capitalize">
-                {tripTypeLabels[itinerary.tripType] || itinerary.tripType.replace("_", " ")}
-              </div>
-              {itinerary.budgetLevel && (
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
-                  {budgetLabels[itinerary.budgetLevel] || itinerary.budgetLevel}
+            <div className="absolute inset-x-0 bottom-0 px-5 sm:px-7 pb-5 sm:pb-7 text-white animate-fade-up">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 px-2.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.22em]">
+                <MapPin className="h-2.5 w-2.5" /> {itinerary.destination}
+              </span>
+              <h1 className="mt-2 text-[1.85rem] sm:text-5xl font-extrabold leading-[1.05] tracking-[-0.025em] drop-shadow-[0_2px_18px_rgba(0,0,0,0.5)]">
+                {itinerary.destination}
+              </h1>
+              <p className="mt-1.5 text-[13px] sm:text-base font-light text-white/90 leading-snug max-w-2xl">
+                {itinerary.days.length} {itinerary.days.length === 1 ? "dia" : "dias"} para viver {itinerary.destination} de um jeito único.
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
+                  <Calendar className="h-3 w-3 opacity-80" />
+                  {format(tripStart, "dd 'de' MMM", { locale: ptBR })} – {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
                 </div>
-              )}
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
+                  <Users className="h-3 w-3 opacity-80" />
+                  {itinerary.travelersCount} viajante{itinerary.travelersCount > 1 ? "s" : ""}
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium capitalize">
+                  {tripTypeLabels[itinerary.tripType] || itinerary.tripType.replace("_", " ")}
+                </div>
+                {itinerary.budgetLevel && (
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
+                    {budgetLabels[itinerary.budgetLevel] || itinerary.budgetLevel}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-10 space-y-12">
-        {/* ─── Trip meta (legacy fallback hidden when hero covers it) ─── */}
-        {false && (
-        <div className="text-center space-y-3">
-          <div className="flex flex-wrap items-center justify-center gap-4 text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {format(tripStart, "dd 'de' MMM", { locale: ptBR })} –{" "}
-              {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
-            </span>
-            <span className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              {itinerary.travelersCount} viajante(s)
-            </span>
-          </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Badge variant="secondary">{tripTypeLabels[itinerary.tripType]}</Badge>
-            <Badge variant="outline">{budgetLabels[itinerary.budgetLevel]}</Badge>
-          </div>
-        </div>)}
+      <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-10 space-y-7 sm:space-y-9">
 
-        {/* ─── Destination intro (text + gallery) ─── */}
+        {/* ─── Destination intro: editorial gallery + left-aligned text ─── */}
         {showIntro && (introText || introImages.length > 0) && (
-          <DestinationIntroPublic
-            text={introText}
-            images={introImages}
-            destination={itinerary.destination}
-          />
-        )}
-
-        {/* ─── Passageiros + Perfil da viagem ─── */}
-        {((itinerary.passengers && itinerary.passengers.length > 0) ||
-          (itinerary.passengerInterests && itinerary.passengerInterests.length > 0)) && (
-          <section className="rounded-2xl border border-border/40 bg-card p-4 sm:p-5 space-y-3">
-            {itinerary.passengers && itinerary.passengers.length > 0 && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5" /> Passageiros
-                </p>
-                <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-1">
-                  {itinerary.passengers.map((p, i) => (
-                    <li key={i} className="text-sm font-medium text-foreground truncate">
-                      {p.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {itinerary.passengerInterests && itinerary.passengerInterests.length > 0 && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
-                  ✨ Perfil da viagem
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {itinerary.passengerInterests.map((k) => (
-                    <Badge key={k} variant="secondary">
-                      {PASSENGER_INTEREST_LABELS[k as keyof typeof PASSENGER_INTEREST_LABELS] || k}
-                    </Badge>
+          <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-4">
+            {introImages.length > 0 && (
+              <div className="-mx-3 sm:mx-0 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide">
+                <div className="flex gap-2.5 px-3 sm:px-0">
+                  {introImages.map((src, i) => (
+                    <div key={i} className="snap-start shrink-0 overflow-hidden rounded-xl border border-border/40 bg-muted">
+                      <img
+                        src={src}
+                        alt={`${itinerary.destination} ${i + 1}`}
+                        loading={i < 2 ? "eager" : "lazy"}
+                        className="h-32 w-32 sm:h-36 sm:w-44 object-cover hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
                   ))}
                 </div>
+              </div>
+            )}
+            {introText && (
+              <p className="text-[13.5px] sm:text-[15px] text-foreground/75 leading-relaxed">
+                <FormattedText>{introText}</FormattedText>
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* ─── Passageiros: avatares premium ─── */}
+        {itinerary.passengers && itinerary.passengers.length > 0 && (
+          <section className="rounded-2xl border border-border/50 bg-card p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <p className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-primary mb-3 flex items-center gap-1.5">
+              <Users className="h-3 w-3" /> Passageiros
+            </p>
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-3">
+              {itinerary.passengers.map((p, i) => {
+                const age = p.age;
+                const isChild = typeof age === "number" && age < 18;
+                const profile = isChild
+                  ? age <= 2 ? "Bebê" : `Criança (${age} anos)`
+                  : "Adulto";
+                const initials = (p.name || "?").split(" ").filter(Boolean).slice(0, 2).map((s) => s.charAt(0).toUpperCase()).join("") || "?";
+                const palette = [
+                  "from-sky-400 to-sky-600",
+                  "from-amber-400 to-orange-500",
+                  "from-rose-400 to-pink-500",
+                  "from-emerald-400 to-teal-500",
+                  "from-violet-400 to-indigo-500",
+                  "from-cyan-400 to-blue-500",
+                ][i % 6];
+                return (
+                  <li key={i} className="flex items-center gap-2.5 min-w-0">
+                    <div className={`shrink-0 h-9 w-9 rounded-full bg-gradient-to-br ${palette} text-white flex items-center justify-center text-[11px] font-bold shadow-sm ring-2 ring-white`}>
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground leading-tight truncate">{p.name || "Passageiro"}</p>
+                      <p className="text-[10.5px] text-muted-foreground leading-tight">{profile}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            {itinerary.passengerInterests && itinerary.passengerInterests.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-border/40 flex flex-wrap gap-1.5">
+                {itinerary.passengerInterests.map((k) => (
+                  <Badge key={k} variant="secondary" className="rounded-full font-normal text-[11px]">
+                    {PASSENGER_INTEREST_LABELS[k as keyof typeof PASSENGER_INTEREST_LABELS] || k}
+                  </Badge>
+                ))}
               </div>
             )}
           </section>
         )}
 
-        {/* ─── Local time + Calendar with weather ─── */}
-        <section className="space-y-3 sm:max-w-xl sm:mx-auto">
-          {timezone && (
+        {/* ─── Local time strip ─── */}
+        {timezone && (
+          <section>
             <LocalClock
               timezone={timezone}
               destinationLabel={itinerary.destination}
               weatherByDate={weatherByDate}
               standalone
             />
-          )}
-          <TripCalendar
-            startDate={tripStart}
-            endDate={tripEnd}
-            itineraryDates={itineraryDates}
-            weatherByDate={weatherByDate}
-            timezone={timezone}
-            destinationLabel={itinerary.destination}
-            onDayClick={(dateStr) => {
-              const idx = itinerary.days.findIndex((d) => d.date === dateStr);
-              if (idx < 0) return;
-              setOpenDayIndex(idx);
-              scheduleDayScroll(itinerary.days[idx].dayNumber);
-            }}
-          />
-        </section>
+          </section>
+        )}
+
+        {/* ─── Horizontal day strip (app-like timeline) ─── */}
+        {itinerary.days.length > 0 && (
+          <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <p className="text-center text-[10.5px] font-bold uppercase tracking-[0.22em] text-primary mb-3">
+              Calendário da Viagem
+            </p>
+            <div className="relative">
+              <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide -mx-1 px-1">
+                <div className="flex gap-2 min-w-min">
+                  {itinerary.days.map((day, idx) => {
+                    const d = parseLocalDate(day.date);
+                    const isOpen = openDayIndex === idx;
+                    const wx = weatherByDate?.[day.date];
+                    const WxIcon = wx ? weatherIconFor(wx.code) : null;
+                    return (
+                      <button
+                        key={day.id}
+                        type="button"
+                        onClick={() => {
+                          setOpenDayIndex(idx);
+                          scheduleDayScroll(day.dayNumber);
+                        }}
+                        className={`snap-start shrink-0 flex flex-col items-center justify-center w-[68px] sm:w-[80px] py-3 rounded-xl border transition-all ${
+                          isOpen
+                            ? "bg-primary text-primary-foreground border-primary shadow-md"
+                            : "bg-white border-border/60 hover:border-primary/40 hover:bg-primary/5"
+                        }`}
+                      >
+                        <span className={`text-[9.5px] font-bold uppercase tracking-widest ${isOpen ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                          {format(d, "EEE", { locale: ptBR }).slice(0, 3)}
+                        </span>
+                        <span className={`text-xl sm:text-2xl font-extrabold tabular-nums leading-none mt-1 ${isOpen ? "" : "text-foreground"}`}>
+                          {format(d, "dd")}
+                        </span>
+                        <span className={`text-[9.5px] font-bold uppercase tracking-widest mt-1 ${isOpen ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                          {format(d, "MMM", { locale: ptBR }).replace(".", "")}
+                        </span>
+                        <span className={`mt-1.5 h-1 w-1 rounded-full ${isOpen ? "bg-white" : "bg-primary"}`} />
+                        {WxIcon && !isOpen && (
+                          <WxIcon className="mt-1 h-3 w-3 text-primary/70" strokeWidth={2.4} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ─── Collapsible Days (accordion — one open at a time) ─── */}
         {itinerary.days.length > 0 && (
@@ -603,48 +672,59 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
           </section>
         )}
 
-        {/* ─── Agent Signature (collapsible) ─── */}
+        {/* ─── Agent Signature (horizontal, premium) ─── */}
         {agentProfile && (
-          <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setAgentOpen((v) => !v)}
-              className="w-full bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3 flex items-center justify-between hover:from-muted/70 transition-colors"
-            >
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
-                  <HelpCircle className="h-4 w-4 text-primary" />
-                </span>
-                Precisa de ajuda? Fale com seu consultor de viagens
-              </p>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
-            </button>
-            <div className={`overflow-hidden transition-all duration-300 ${agentOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}`}>
-            <div className="p-6 sm:p-8">
-              <div className="flex flex-col items-center text-center space-y-5">
-                {agentProfile.avatar_url ? (
-                  <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
-                ) : (
-                  <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg ring-2 ring-white">
-                    {agentProfile.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="space-y-1">
-                  <p className="text-xl font-bold text-foreground">{agentProfile.name}</p>
-                  {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
+          <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="flex items-center gap-3 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-4">
+              {agentProfile.avatar_url ? (
+                <img src={agentProfile.avatar_url} alt={agentProfile.name}
+                  className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-cover ring-2 ring-primary/10 shrink-0" />
+              ) : (
+                <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-base font-bold ring-2 ring-white shrink-0">
+                  {agentProfile.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm sm:text-base font-bold text-foreground leading-tight">
+                  Precisa de ajuda?
+                </p>
+                <p className="text-[12px] sm:text-[13px] text-muted-foreground leading-snug truncate">
+                  Fale com seu consultor de viagens.
+                </p>
+              </div>
+              {whatsappUrl && (
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                  className="hidden sm:inline-flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-4 py-2.5 font-bold text-[13px] shadow-md hover:shadow-lg transition-all duration-200 shrink-0">
+                  <WhatsAppIcon className="h-4 w-4" />
+                  Falar no WhatsApp
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setAgentOpen((v) => !v)}
+                className="shrink-0 h-9 w-9 rounded-full flex items-center justify-center hover:bg-muted/60 transition-colors"
+                aria-label="Ver consultor"
+              >
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
+              </button>
+            </div>
+            <div className={`overflow-hidden transition-all duration-300 ${agentOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="px-5 pb-5 pt-1 border-t border-border/40 space-y-3">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-foreground">{agentProfile.name}</p>
+                  {agentProfile.agency_name && <BrandText as="p" className="text-[12px] text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
                   {(agentProfile.city || agentProfile.state) && (
-                    <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
+                    <p className="text-[11px] text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
                   )}
                 </div>
                 {whatsappUrl && (
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                    <WhatsAppIcon className="h-5 w-5" />
+                    className="sm:hidden inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-md w-full">
+                    <WhatsAppIcon className="h-4 w-4" />
                     Falar no WhatsApp
                   </a>
                 )}
               </div>
-            </div>
             </div>
           </div>
         )}
