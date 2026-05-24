@@ -444,61 +444,62 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         </div>
       </header>
 
-      {/* ─── HERO PREMIUM (mirrors Orçamento) ─── */}
+      {/* ─── HERO COMPACT PREMIUM ─── */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative min-h-[460px] sm:min-h-[560px] w-full">
-          {coverImage ? (
-            <img
-              src={coverImage}
-              alt={itinerary.destination}
-              className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
-              loading="eager"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
-
-          {agentProfile?.agency_logo_url && (
-            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full bg-white p-3 sm:p-4 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
+        <div className="relative w-full max-w-5xl mx-auto sm:px-4 sm:pt-4">
+          <div className="relative aspect-[16/10] sm:aspect-[21/9] min-h-[280px] sm:min-h-[340px] max-h-[480px] w-full overflow-hidden sm:rounded-2xl">
+            {coverImage ? (
               <img
-                src={agentProfile.agency_logo_url}
-                alt={agentProfile.agency_name || "Agência"}
-                translate="no"
-                className="h-full w-full object-contain"
+                src={coverImage}
+                alt={itinerary.destination}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="eager"
               />
-            </div>
-          )}
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
 
-          <div className={`relative max-w-4xl mx-auto px-5 sm:px-8 ${agentProfile?.agency_logo_url ? "pt-40 sm:pt-52" : "pt-24 sm:pt-32"} pb-20 sm:pb-24 flex flex-col text-white animate-fade-up`}>
-            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
-              <MapPin className="h-3 w-3" /> {itinerary.destination}
-            </span>
-            <h1 className="mt-4 text-[2.4rem] sm:text-6xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
-              {itinerary.destination}
-            </h1>
-            <p className="mt-4 text-base sm:text-lg font-light text-white/90 max-w-2xl leading-relaxed">
-              {itinerary.days.length} {itinerary.days.length === 1 ? "dia" : "dias"} para viver {itinerary.destination} de um jeito único.
-            </p>
+            {agentProfile?.agency_logo_url && (
+              <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-10 h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-full bg-white p-1.5 shadow-lg ring-1 ring-black/5 flex items-center justify-center">
+                <img
+                  src={agentProfile.agency_logo_url}
+                  alt={agentProfile.agency_name || "Agência"}
+                  translate="no"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            )}
 
-            <div className="mt-7 flex flex-wrap gap-2 sm:gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
-                <Calendar className="h-4 w-4 opacity-80" />
-                {format(tripStart, "dd 'de' MMM", { locale: ptBR })} – {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
-                <Users className="h-4 w-4 opacity-80" />
-                {itinerary.travelersCount} viajante{itinerary.travelersCount > 1 ? "s" : ""}
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium capitalize">
-                {tripTypeLabels[itinerary.tripType] || itinerary.tripType.replace("_", " ")}
-              </div>
-              {itinerary.budgetLevel && (
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
-                  {budgetLabels[itinerary.budgetLevel] || itinerary.budgetLevel}
+            <div className="absolute inset-x-0 bottom-0 px-5 sm:px-7 pb-5 sm:pb-7 text-white animate-fade-up">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 px-2.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.22em]">
+                <MapPin className="h-2.5 w-2.5" /> {itinerary.destination}
+              </span>
+              <h1 className="mt-2 text-[1.85rem] sm:text-5xl font-extrabold leading-[1.05] tracking-[-0.025em] drop-shadow-[0_2px_18px_rgba(0,0,0,0.5)]">
+                {itinerary.destination}
+              </h1>
+              <p className="mt-1.5 text-[13px] sm:text-base font-light text-white/90 leading-snug max-w-2xl">
+                {itinerary.days.length} {itinerary.days.length === 1 ? "dia" : "dias"} para viver {itinerary.destination} de um jeito único.
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
+                  <Calendar className="h-3 w-3 opacity-80" />
+                  {format(tripStart, "dd 'de' MMM", { locale: ptBR })} – {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
                 </div>
-              )}
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
+                  <Users className="h-3 w-3 opacity-80" />
+                  {itinerary.travelersCount} viajante{itinerary.travelersCount > 1 ? "s" : ""}
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium capitalize">
+                  {tripTypeLabels[itinerary.tripType] || itinerary.tripType.replace("_", " ")}
+                </div>
+                {itinerary.budgetLevel && (
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
+                    {budgetLabels[itinerary.budgetLevel] || itinerary.budgetLevel}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
