@@ -9,8 +9,7 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { Itinerary, ItineraryDay, Activity } from "@/types/itinerary";
 import {
   MapPin, Calendar, Users, Sun, Sunset, Moon, Clock, DollarSign, Loader2,
-  ChevronDown, FileText, Download, Eye, ExternalLink, Sparkles, Headset,
-  ChevronLeft, ChevronRight, Tag,
+  ChevronDown, FileText, Download, Eye, ExternalLink, Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
