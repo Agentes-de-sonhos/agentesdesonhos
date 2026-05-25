@@ -285,15 +285,38 @@ const sectionContainer = "max-w-[1100px] mx-auto px-6";
 /* ------------------------------------------------------------------ */
 const SORO_SCRIPT_SRC = "https://app.trysoro.com/api/embed/18bb9f90-e619-4a42-b7df-c1dce0cc053a";
 
+const BLOG_BASE_URL = "https://www.agentesdesonhos.com.br/blog";
+
+type SoroArticle = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  date: string;
+  isoDate: string;
+  image: string;
+};
+
 function BlogSection() {
+  const [articles, setArticles] = useState<SoroArticle[]>([]);
+
   useEffect(() => {
-    const existing = document.querySelector(`script[src="${SORO_SCRIPT_SRC}"]`);
-    if (!existing) {
-      const script = document.createElement("script");
-      script.src = SORO_SCRIPT_SRC;
-      script.defer = true;
-      document.body.appendChild(script);
-    }
+    let cancelled = false;
+    fetch(SORO_SCRIPT_SRC)
+      .then((r) => r.text())
+      .then((js) => {
+        const match = js.match(/SORO_ARTICLES\s*=\s*(\[[\s\S]*?\]);/);
+        if (!match) return;
+        const parsed: SoroArticle[] = JSON.parse(match[1]);
+        const sorted = [...parsed]
+          .sort((a, b) => new Date(b.isoDate).getTime() - new Date(a.isoDate).getTime())
+          .slice(0, 5);
+        if (!cancelled) setArticles(sorted);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -310,12 +333,48 @@ function BlogSection() {
           </div>
         </Reveal>
         <Reveal delay={120}>
-          <div id="soro-blog" className="min-h-[300px]" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {articles.map((a) => (
+              <a
+                key={a.id}
+                href={`${BLOG_BASE_URL}?post=${encodeURIComponent(a.slug)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition-all hover:shadow-lg hover:-translate-y-1"
+              >
+                {a.image && (
+                  <div className="aspect-[16/9] overflow-hidden bg-muted">
+                    <img
+                      src={a.image}
+                      alt={a.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                )}
+                <div className="flex flex-1 flex-col gap-3 p-5">
+                  <span className="text-xs text-muted-foreground">{a.date}</span>
+                  <h3 className="text-lg font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                    {a.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                    {a.excerpt}
+                  </p>
+                  <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                    Ler artigo
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
         </Reveal>
         <Reveal delay={200}>
           <div className="text-center">
             <a
-              href="https://www.agentesdesonhos.com.br/blog"
+              href={BLOG_BASE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
             >
               Ver todos os posts
