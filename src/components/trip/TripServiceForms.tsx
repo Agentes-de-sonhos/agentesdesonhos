@@ -1635,6 +1635,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🚗 Informações Principais">
         {imageSlot}
+        {googlePhotoSlot}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="rental_company" render={({ field }) => (
             <FormItem><FormLabel>Locadora *</FormLabel><FormControl><Input placeholder="Hertz, Alamo, Localiza..." {...field} /></FormControl><FormMessage /></FormItem>
@@ -1679,7 +1680,27 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         <CollapsibleFormSection title="📍 Dados de Retirada">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_location" render={({ field }) => (
-            <FormItem><FormLabel>Local de Retirada *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem>
+              <FormLabel>Local de Retirada *</FormLabel>
+              <FormControl>
+                <PlacesAutocompleteInput
+                  value={field.value}
+                  cityContext={form.getValues("pickup_city")}
+                  selectedPlaceId={placeId}
+                  placeholder="Aeroporto CDG, Localiza Centro..."
+                  onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                  onSelect={(p) => {
+                    field.onChange(p.name);
+                    onPlaceIdChange?.(p.place_id);
+                    const parts = parsePlaceSecondary(p.secondary);
+                    if (!form.getValues("pickup_city") && parts.city) form.setValue("pickup_city", parts.city);
+                    if (!form.getValues("pickup_country") && parts.country) form.setValue("pickup_country", parts.country);
+                    if (!form.getValues("pickup_address") && parts.address) form.setValue("pickup_address", parts.address);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )} />
           <FormField control={form.control} name="pickup_address" render={({ field }) => (
             <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input placeholder="Terminal 2E, Área de locação" {...field} /></FormControl></FormItem>
