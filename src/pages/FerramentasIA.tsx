@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Sparkles, Wand2, Image, ArrowRight, Lock, Brain } from "lucide-react";
+import { Sparkles, Wand2, Image, ArrowRight, Lock, Brain, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,13 @@ const tools = [
     icon: Image,
     href: "/ferramentas-ia/criar-conteudo",
     highlight: "Legendas, Stories e pitches de vendas",
+  },
+  {
+    title: "Biblioteca de Modelos",
+    description: "Reaproveite estruturas de roteiros como modelos inteligentes para acelerar novas vendas",
+    icon: Star,
+    href: "/ferramentas-ia/modelos-roteiros",
+    highlight: "Crie novos roteiros a partir de modelos salvos",
   },
 ];
 
