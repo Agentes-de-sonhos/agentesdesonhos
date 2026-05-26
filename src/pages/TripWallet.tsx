@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TripItinerary } from "@/components/trip/itinerary/TripItinerary";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
+import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
 import { PassengerPoolProvider } from "@/components/trip/PassengerPoolContext";
 import { TravelImporter } from "@/components/trip/TravelImporter";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
@@ -78,9 +79,17 @@ function TripWalletContent() {
 
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  // Hotel autocomplete / gallery state for ADD flow
+  const [addPlaceId, setAddPlaceId] = useState<string | null>(null);
+  const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
+  // Hotel place id for EDIT flow (mirrors DB and is updated when user picks new prediction)
+  const [editPlaceId, setEditPlaceId] = useState<string | null>(null);
   const editingService = editingServiceId
     ? trip?.services?.find((s) => s.id === editingServiceId) ?? null
     : null;
+  useEffect(() => {
+    setEditPlaceId(editingService?.place_id ?? null);
+  }, [editingServiceId, editingService?.place_id]);
   const [isUploading, setIsUploading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
@@ -157,8 +166,12 @@ function TripWalletContent() {
         voucher_url: attachments[0]?.url, 
         voucher_name: attachments[0]?.name,
         attachments,
+        image_urls: addImageUrls,
+        place_id: addPlaceId,
       });
       setSelectedServiceType(null);
+      setAddPlaceId(null);
+      setAddImageUrls([]);
     } finally {
       setIsUploading(false);
     }
@@ -244,6 +257,9 @@ function TripWalletContent() {
   const handleCancelServiceForm = () => {
     setSelectedServiceType(null);
     setEditingServiceId(null);
+    setAddPlaceId(null);
+    setAddImageUrls([]);
+    setEditPlaceId(null);
   };
 
   const handleAIImport = async (result: AIImportResult) => {
@@ -260,8 +276,6 @@ function TripWalletContent() {
   const handleUploadServiceImage = async (serviceId: string, file: File) => {
     try {
       setIsUploading(true);
-      // Upload to public bucket (same pattern as Orçamentos) so the image
-      // can be displayed directly via public URL — no signed URL needed.
       const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase();
       const path = `trip-services/${id}/${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
@@ -269,9 +283,12 @@ function TripWalletContent() {
         .upload(path, file, { upsert: true, contentType: file.type });
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from("quote-images").getPublicUrl(path);
+      const service = trip?.services?.find(s => s.id === serviceId);
+      const current = service?.image_urls || [];
+      const next = [...current, urlData.publicUrl];
       await supabase
         .from("trip_services")
-        .update({ image_url: urlData.publicUrl })
+        .update({ image_urls: next })
         .eq("id", serviceId);
       queryClient.invalidateQueries({ queryKey: ["trip", id] });
       toast({ title: "Imagem adicionada" });
@@ -284,12 +301,46 @@ function TripWalletContent() {
 
   const handleRemoveServiceImage = async (serviceId: string) => {
     try {
-      await supabase.from("trip_services").update({ image_url: null }).eq("id", serviceId);
+      await supabase.from("trip_services").update({ image_url: null, image_urls: [] }).eq("id", serviceId);
       queryClient.invalidateQueries({ queryKey: ["trip", id] });
-      toast({ title: "Imagem removida" });
+      toast({ title: "Imagens removidas" });
     } catch (err: any) {
-      toast({ title: "Erro ao remover imagem", description: err.message, variant: "destructive" });
+      toast({ title: "Erro ao remover imagens", description: err.message, variant: "destructive" });
     }
+  };
+
+  const handleAddServiceImageUrls = async (serviceId: string, urls: string[]) => {
+    if (urls.length === 0) return;
+    try {
+      const service = trip?.services?.find(s => s.id === serviceId);
+      const current = service?.image_urls || [];
+      const next = [...current, ...urls.filter(u => !current.includes(u))];
+      await supabase.from("trip_services").update({ image_urls: next }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+      toast({ title: "Fotos adicionadas" });
+    } catch (err: any) {
+      toast({ title: "Erro ao adicionar fotos", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleRemoveServiceImageAt = async (serviceId: string, index: number) => {
+    try {
+      const service = trip?.services?.find(s => s.id === serviceId);
+      const current = service?.image_urls || [];
+      const next = current.filter((_, i) => i !== index);
+      await supabase.from("trip_services").update({ image_urls: next }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+    } catch (err: any) {
+      toast({ title: "Erro ao remover foto", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleEditPlaceIdChange = async (serviceId: string, newPlaceId: string | null) => {
+    setEditPlaceId(newPlaceId);
+    try {
+      await supabase.from("trip_services").update({ place_id: newPlaceId }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+    } catch {}
   };
 
   const handleCopyLink = () => {
@@ -463,6 +514,35 @@ function TripWalletContent() {
                         onSubmit={handleAddService}
                         onCancel={handleCancelServiceForm}
                         isLoading={isAddingService || isUpdatingService || isUploading}
+                        placeId={addPlaceId}
+                        onPlaceIdChange={setAddPlaceId}
+                        googlePhotoSlot={
+                          selectedServiceType === "hotel" ? (
+                            <div className="space-y-2">
+                              {addImageUrls.length > 0 && (
+                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                  {addImageUrls.map((url, i) => (
+                                    <div key={i} className="relative shrink-0">
+                                      <img src={url} alt={`Foto ${i+1}`} className="h-20 w-28 object-cover rounded-md border" />
+                                      <button
+                                        type="button"
+                                        onClick={() => setAddImageUrls(prev => prev.filter((_, idx) => idx !== i))}
+                                        className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs"
+                                        aria-label="Remover foto"
+                                      >×</button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <GoogleHotelPhotos
+                                placeId={addPlaceId}
+                                existingUrls={addImageUrls}
+                                autoShow
+                                onPhotosSelected={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
+                              />
+                            </div>
+                          ) : null
+                        }
                       />
                     </PassengerPoolProvider>
                   </div>
@@ -517,26 +597,49 @@ function TripWalletContent() {
                       isLoading={isAddingService || isUpdatingService || isUploading}
                       defaultValues={editingService.service_data as any}
                       isEditing={true}
+                      placeId={editPlaceId}
+                      onPlaceIdChange={(pid) => handleEditPlaceIdChange(editingService.id, pid)}
+                      googlePhotoSlot={
+                        selectedServiceType === "hotel" ? (
+                          <GoogleHotelPhotos
+                            placeId={editPlaceId}
+                            existingUrls={editingService.image_urls || []}
+                            autoShow
+                            onPhotosSelected={(urls) => handleAddServiceImageUrls(editingService.id, urls)}
+                          />
+                        ) : null
+                      }
                       imageSlot={
                         <div className="space-y-2">
-                          {editingService.image_url && /^https?:\/\//i.test(editingService.image_url) && (
-                            <div className="relative overflow-hidden rounded-md bg-muted flex items-center justify-center">
-                              <img
-                                src={editingService.image_url}
-                                alt="Imagem do serviço"
-                                className="w-full max-h-48 object-contain"
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute top-2 right-2 h-7 w-7 opacity-80 hover:opacity-100"
-                                onClick={() => handleRemoveServiceImage(editingService.id)}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          )}
+                          {(() => {
+                            const gallery = (editingService.image_urls && editingService.image_urls.length > 0)
+                              ? editingService.image_urls
+                              : (editingService.image_url ? [editingService.image_url] : []);
+                            if (gallery.length === 0) return null;
+                            return (
+                              <div className="flex gap-2 overflow-x-auto pb-1">
+                                {gallery.map((url, i) => (
+                                  <div key={i} className="relative shrink-0">
+                                    <img src={url} alt={`Foto ${i+1}`} className="h-24 w-32 object-cover rounded-md border" />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (editingService.image_urls && editingService.image_urls.length > 0) {
+                                          handleRemoveServiceImageAt(editingService.id, i);
+                                        } else {
+                                          handleRemoveServiceImage(editingService.id);
+                                        }
+                                      }}
+                                      className="absolute top-1 right-1 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-90 hover:opacity-100"
+                                      aria-label="Remover foto"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
                           <label className="inline-flex">
                             <input
                               type="file"
@@ -550,7 +653,7 @@ function TripWalletContent() {
                             />
                             <Button type="button" variant="outline" size="sm" asChild>
                               <span className="cursor-pointer">
-                                <Camera className="h-3.5 w-3.5 mr-1" /> {editingService.image_url ? "Trocar Imagem" : "Adicionar Imagem"}
+                                <Camera className="h-3.5 w-3.5 mr-1" /> Adicionar foto manual
                               </span>
                             </Button>
                           </label>
