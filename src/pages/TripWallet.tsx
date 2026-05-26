@@ -597,26 +597,49 @@ function TripWalletContent() {
                       isLoading={isAddingService || isUpdatingService || isUploading}
                       defaultValues={editingService.service_data as any}
                       isEditing={true}
+                      placeId={editPlaceId}
+                      onPlaceIdChange={(pid) => handleEditPlaceIdChange(editingService.id, pid)}
+                      googlePhotoSlot={
+                        selectedServiceType === "hotel" ? (
+                          <GoogleHotelPhotos
+                            placeId={editPlaceId}
+                            existingUrls={editingService.image_urls || []}
+                            autoShow
+                            onPhotosSelected={(urls) => handleAddServiceImageUrls(editingService.id, urls)}
+                          />
+                        ) : null
+                      }
                       imageSlot={
                         <div className="space-y-2">
-                          {editingService.image_url && /^https?:\/\//i.test(editingService.image_url) && (
-                            <div className="relative overflow-hidden rounded-md bg-muted flex items-center justify-center">
-                              <img
-                                src={editingService.image_url}
-                                alt="Imagem do serviço"
-                                className="w-full max-h-48 object-contain"
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute top-2 right-2 h-7 w-7 opacity-80 hover:opacity-100"
-                                onClick={() => handleRemoveServiceImage(editingService.id)}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          )}
+                          {(() => {
+                            const gallery = (editingService.image_urls && editingService.image_urls.length > 0)
+                              ? editingService.image_urls
+                              : (editingService.image_url ? [editingService.image_url] : []);
+                            if (gallery.length === 0) return null;
+                            return (
+                              <div className="flex gap-2 overflow-x-auto pb-1">
+                                {gallery.map((url, i) => (
+                                  <div key={i} className="relative shrink-0">
+                                    <img src={url} alt={`Foto ${i+1}`} className="h-24 w-32 object-cover rounded-md border" />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (editingService.image_urls && editingService.image_urls.length > 0) {
+                                          handleRemoveServiceImageAt(editingService.id, i);
+                                        } else {
+                                          handleRemoveServiceImage(editingService.id);
+                                        }
+                                      }}
+                                      className="absolute top-1 right-1 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-90 hover:opacity-100"
+                                      aria-label="Remover foto"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
                           <label className="inline-flex">
                             <input
                               type="file"
@@ -630,7 +653,7 @@ function TripWalletContent() {
                             />
                             <Button type="button" variant="outline" size="sm" asChild>
                               <span className="cursor-pointer">
-                                <Camera className="h-3.5 w-3.5 mr-1" /> {editingService.image_url ? "Trocar Imagem" : "Adicionar Imagem"}
+                                <Camera className="h-3.5 w-3.5 mr-1" /> Adicionar foto manual
                               </span>
                             </Button>
                           </label>
