@@ -2509,7 +2509,7 @@ interface AttractionPassengerInput {
   notes: string;
 }
 
-function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
@@ -2633,11 +2633,28 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🎟️ Informações Principais">
         {imageSlot}
+        {googlePhotoSlot}
 
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
             <FormLabel>Nome da Atração / Experiência *</FormLabel>
-            <FormControl><Input placeholder="Walt Disney World, Torre Eiffel, Coliseu..." {...field} /></FormControl>
+            <FormControl>
+              <PlacesAutocompleteInput
+                value={field.value}
+                cityContext={form.getValues("city")}
+                selectedPlaceId={placeId}
+                placeholder="Walt Disney World, Torre Eiffel, Coliseu..."
+                onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                onSelect={(p) => {
+                  field.onChange(p.name);
+                  onPlaceIdChange?.(p.place_id);
+                  const parts = parsePlaceSecondary(p.secondary);
+                  if (!form.getValues("city") && parts.city) form.setValue("city", parts.city);
+                  if (!form.getValues("country") && parts.country) form.setValue("country", parts.country);
+                  if (!form.getValues("address") && parts.address) form.setValue("address", parts.address);
+                }}
+              />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )} />
