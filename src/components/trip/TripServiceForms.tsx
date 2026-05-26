@@ -3739,6 +3739,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🚢 Informações do Cruzeiro">
         {imageSlot}
+        {googlePhotoSlot}
 
         <FormField control={form.control} name="cruise_company" render={({ field }) => (
           <FormItem>
@@ -3777,7 +3778,20 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           <FormField control={form.control} name="embarkation_port" render={({ field }) => (
             <FormItem>
               <FormLabel>Porto de Embarque *</FormLabel>
-              <FormControl><Input placeholder="Santos" {...field} /></FormControl>
+              <FormControl>
+                <PlacesAutocompleteInput
+                  value={field.value}
+                  selectedPlaceId={placeId}
+                  placeholder="Porto de Santos, Port of Miami..."
+                  onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                  onSelect={(p) => {
+                    field.onChange(p.name);
+                    onPlaceIdChange?.(p.place_id);
+                    const parts = parsePlaceSecondary(p.secondary);
+                    if (!form.getValues("port_address") && parts.address) form.setValue("port_address", parts.address);
+                  }}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )} />
