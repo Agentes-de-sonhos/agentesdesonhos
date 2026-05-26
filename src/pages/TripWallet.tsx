@@ -514,6 +514,35 @@ function TripWalletContent() {
                         onSubmit={handleAddService}
                         onCancel={handleCancelServiceForm}
                         isLoading={isAddingService || isUpdatingService || isUploading}
+                        placeId={addPlaceId}
+                        onPlaceIdChange={setAddPlaceId}
+                        googlePhotoSlot={
+                          selectedServiceType === "hotel" ? (
+                            <div className="space-y-2">
+                              {addImageUrls.length > 0 && (
+                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                  {addImageUrls.map((url, i) => (
+                                    <div key={i} className="relative shrink-0">
+                                      <img src={url} alt={`Foto ${i+1}`} className="h-20 w-28 object-cover rounded-md border" />
+                                      <button
+                                        type="button"
+                                        onClick={() => setAddImageUrls(prev => prev.filter((_, idx) => idx !== i))}
+                                        className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs"
+                                        aria-label="Remover foto"
+                                      >×</button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <GoogleHotelPhotos
+                                placeId={addPlaceId}
+                                existingUrls={addImageUrls}
+                                autoShow
+                                onPhotosSelected={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
+                              />
+                            </div>
+                          ) : null
+                        }
                       />
                     </PassengerPoolProvider>
                   </div>
