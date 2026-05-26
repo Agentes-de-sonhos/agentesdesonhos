@@ -924,6 +924,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🏨 Informações Principais">
         {imageSlot}
+        {googlePhotoSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
