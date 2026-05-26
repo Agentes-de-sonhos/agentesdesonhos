@@ -441,66 +441,248 @@ export function EmptyPeriodAISlot({
   memory,
   onCreate,
 }: EmptyPeriodAISlotProps) {
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [alternatives, setAlternatives] = useState<Alternative[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Alternative[]>([]);
+  const [searching, setSearching] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchCacheRef = useRef<Map<string, Alternative[]>>(new Map());
 
-  const handleSuggest = async () => {
+  const buildContext = () => ({
+    ...context,
+    dayNumber: day.dayNumber,
+    date: day.date,
+    period,
+    existingActivities: dayPeerSummary(day),
+    approvedHighlights: memory.approved,
+    memory: {
+      avoid: memory.avoid,
+      preferred_style: memory.preferred_style,
+      pace: memory.pace,
+    },
+  });
+
+  const loadAlternatives = async () => {
+    if (alternatives.length) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("refine-itinerary-activity", {
         body: {
-          mode: "suggest_new",
-          context: {
-            ...context,
-            dayNumber: day.dayNumber,
-            date: day.date,
-            period,
-            existingActivities: dayPeerSummary(day),
-            approvedHighlights: memory.approved,
-            memory: {
-              avoid: memory.avoid,
-              preferred_style: memory.preferred_style,
-              pace: memory.pace,
-            },
-          },
+          mode: "suggest_alternatives",
+          context: buildContext(),
+          current: { title: "", description: "" },
         },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      const r = data?.result;
-      if (!r?.title) throw new Error("Resposta vazia");
-      onCreate({
-        period,
-        title: r.title,
-        description: r.description ?? null,
-        location: r.location ?? null,
-        estimatedDuration: r.estimated_duration ?? null,
-        estimatedCost: r.estimated_cost ?? null,
-      });
-      toast.success("Sugestão adicionada");
+      setAlternatives(data?.result?.alternatives ?? []);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao sugerir");
+      toast.error(e instanceof Error ? e.message : "Erro ao buscar sugestões");
+      setOpen(false);
     } finally {
       setLoading(false);
     }
   };
 
+  const runSearch = async (q: string) => {
+    const query = q.trim();
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const cacheKey = `${context.destination ?? ""}::${query.toLowerCase()}`;
+    const cached = searchCacheRef.current.get(cacheKey);
+    if (cached) {
+      setSearchResults(cached);
+      return;
+    }
+    setSearching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("refine-itinerary-activity", {
+        body: { mode: "search", context: buildContext(), query },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const list: Alternative[] = data?.result?.results ?? [];
+      searchCacheRef.current.set(cacheKey, list);
+      setSearchResults(list);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro na busca");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (!open) return;
+    searchDebounceRef.current = setTimeout(() => runSearch(searchQuery), 450);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, open]);
+
+  const pickAlternative = (alt: Alternative) => {
+    onCreate({
+      period,
+      title: alt.title,
+      description: alt.short_description ?? null,
+      location: alt.location ?? null,
+      estimatedDuration: alt.estimated_duration ?? null,
+      estimatedCost: alt.estimated_cost ?? null,
+    });
+    setAlternatives([]);
+    setSearchResults([]);
+    setSearchQuery("");
+    setOpen(false);
+    toast.success("Atividade adicionada");
+  };
+
   return (
     <div className="ml-6 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3 flex items-center justify-between gap-3">
       <p className="text-sm text-muted-foreground italic">Nenhuma atividade definida</p>
-      <Button
-        size="sm"
-        variant="outline"
-        className="border-primary/50 text-primary hover:bg-primary/10"
-        onClick={handleSuggest}
-        disabled={loading}
+      <Popover
+        open={open}
+        onOpenChange={(o) => {
+          setOpen(o);
+          if (o) {
+            loadAlternatives();
+          } else {
+            setAlternatives([]);
+            setSearchResults([]);
+            setSearchQuery("");
+          }
+        }}
       >
-        {loading ? (
-          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-        )}
-        Gerar sugestão IA
-      </Button>
+        <PopoverTrigger asChild>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-primary/50 text-primary hover:bg-primary/10"
+          >
+            {loading ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Gerar sugestões IA
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[420px] max-w-[92vw]" align="end">
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-medium">Escolha uma experiência</p>
+              <p className="text-xs text-muted-foreground">
+                Use a IA ou busque algo específico que tenha em mente.
+              </p>
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar atividade, passeio, restaurante ou experiência..."
+                className="pl-8 h-9 text-sm"
+              />
+              {searching && (
+                <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+              )}
+            </div>
+
+            {searchQuery.trim().length >= 2 ? (
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {searching && searchResults.length === 0 ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Buscando experiências...
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <p className="text-xs text-muted-foreground py-2">
+                    Nenhum resultado. Tente outras palavras.
+                  </p>
+                ) : (
+                  searchResults.map((alt, i) => (
+                    <button
+                      key={`s-${i}`}
+                      type="button"
+                      onClick={() => pickAlternative(alt)}
+                      className="w-full text-left rounded-lg border p-2.5 hover:border-primary hover:bg-primary/5 transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium leading-snug">{alt.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                          {alt.short_description}
+                        </p>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-[11px] text-muted-foreground">
+                          {alt.category && (
+                            <span className="inline-flex items-center gap-1">
+                              <Tag className="h-3 w-3" />
+                              {alt.category}
+                            </span>
+                          )}
+                          {alt.location && (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {alt.location}
+                            </span>
+                          )}
+                          {alt.estimated_duration && (
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {alt.estimated_duration}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="h-px bg-border flex-1" />
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    Sugeridos pela IA
+                  </span>
+                  <div className="h-px bg-border flex-1" />
+                </div>
+                {loading && alternatives.length === 0 ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Gerando opções...
+                  </div>
+                ) : alternatives.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Nenhuma sugestão.</p>
+                ) : (
+                  <div className="space-y-2 max-h-72 overflow-y-auto">
+                    {alternatives.map((alt, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => pickAlternative(alt)}
+                        className="w-full text-left rounded-lg border p-2.5 hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        <div className="flex items-start gap-2">
+                          <Check className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium leading-snug">{alt.title}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {alt.short_description}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
