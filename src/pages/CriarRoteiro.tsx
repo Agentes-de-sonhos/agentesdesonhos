@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
+import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -42,7 +43,7 @@ export default function CriarRoteiro() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"create" | "list">("create");
+  const [activeTab, setActiveTab] = useState<"create" | "list" | "templates">("create");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
@@ -445,10 +446,11 @@ export default function CriarRoteiro() {
         />
 
         {!currentItinerary ? (
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list")}>
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list" | "templates")}>
+            <TabsList className="grid w-full max-w-xl grid-cols-3">
               <TabsTrigger value="create">Novo Roteiro</TabsTrigger>
               <TabsTrigger value="list">Meus Roteiros</TabsTrigger>
+              <TabsTrigger value="templates">Meus Modelos</TabsTrigger>
             </TabsList>
 
             <TabsContent value="create" className="mt-6 space-y-4">
