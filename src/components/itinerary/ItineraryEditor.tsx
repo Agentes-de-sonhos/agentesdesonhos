@@ -83,11 +83,13 @@ function DroppablePeriod({
   period,
   isOver,
   children,
+  isDragActive,
 }: {
   dayId: string;
   period: "manha" | "tarde" | "noite";
   isOver?: boolean;
   children: React.ReactNode;
+  isDragActive?: boolean;
 }) {
   const { setNodeRef, isOver: over } = useDroppable({
     id: `drop-${dayId}-${period}`,
@@ -97,8 +99,9 @@ function DroppablePeriod({
     <div
       ref={setNodeRef}
       className={cn(
-        "space-y-2 rounded-lg transition-colors",
-        over && "bg-primary/5 ring-2 ring-primary/30 ring-offset-2 ring-offset-background"
+        "space-y-2 rounded-lg p-1 transition-all duration-150",
+        isDragActive && !over && "ring-1 ring-dashed ring-border/60",
+        over && "bg-primary/5 ring-2 ring-primary/40 shadow-[0_0_0_4px_hsl(var(--primary)/0.08)]"
       )}
     >
       {children}
@@ -106,25 +109,109 @@ function DroppablePeriod({
   );
 }
 
-function DraggableHandle({ activityId }: { activityId: string }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+function DraggableActivity({
+  activityId,
+  isApproved,
+  children,
+}: {
+  activityId: string;
+  isApproved?: boolean;
+  children: (handle: {
+    setActivatorNodeRef: (el: HTMLElement | null) => void;
+    attributes: React.HTMLAttributes<HTMLElement>;
+    listeners: React.DOMAttributes<HTMLElement>;
+    isDragging: boolean;
+  }) => React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    isDragging,
+  } = useDraggable({
     id: `drag-${activityId}`,
     data: { activityId },
   });
   return (
-    <button
+    <div
       ref={setNodeRef}
+      className={cn(
+        "ml-6 rounded-lg border p-3 transition-all duration-150 will-change-transform",
+        isApproved
+          ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950"
+          : "border-border bg-card",
+        isDragging && "opacity-40 scale-[0.99]"
+      )}
+    >
+      {children({
+        setActivatorNodeRef: setActivatorNodeRef as (el: HTMLElement | null) => void,
+        attributes: attributes as unknown as React.HTMLAttributes<HTMLElement>,
+        listeners: (listeners ?? {}) as unknown as React.DOMAttributes<HTMLElement>,
+        isDragging,
+      })}
+    </div>
+  );
+}
+
+function DragHandleButton({
+  setActivatorNodeRef,
+  attributes,
+  listeners,
+  isDragging,
+}: {
+  setActivatorNodeRef: (el: HTMLElement | null) => void;
+  attributes: React.HTMLAttributes<HTMLElement>;
+  listeners: React.DOMAttributes<HTMLElement>;
+  isDragging: boolean;
+}) {
+  return (
+    <button
+      ref={setActivatorNodeRef as unknown as React.Ref<HTMLButtonElement>}
       {...attributes}
       {...listeners}
       type="button"
       aria-label="Arrastar atividade"
       className={cn(
-        "flex h-8 w-6 cursor-grab items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground touch-none",
-        isDragging && "cursor-grabbing opacity-50"
+        "flex h-8 w-6 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground touch-none",
+        isDragging && "cursor-grabbing"
       )}
     >
       <GripVertical className="h-4 w-4" />
     </button>
+  );
+}
+
+function ActivityDragPreview({ activity }: { activity: Activity }) {
+  return (
+    <div className="pointer-events-none w-[320px] max-w-[90vw] rotate-[1.5deg] rounded-lg border border-primary/30 bg-card p-3 shadow-2xl ring-1 ring-primary/20">
+      <div className="flex items-start gap-3">
+        {activity.photoUrl && (
+          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted/50">
+            <img
+              src={activity.photoUrl}
+              alt={activity.title}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        )}
+        <div className="min-w-0 flex-1 space-y-1">
+          <h4 className="truncate font-medium">{activity.title}</h4>
+          {activity.location && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3" />
+              <span className="truncate">{activity.location}</span>
+            </div>
+          )}
+          {activity.estimatedDuration && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              <span className="truncate">{activity.estimatedDuration}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
