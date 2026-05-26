@@ -778,7 +778,7 @@ interface HotelGuestInput {
 
 const emptyGuest = (): HotelGuestInput => ({ name: '', age: '', notes: '' });
 
-function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [guests, setGuests] = useState<HotelGuestInput[]>(
@@ -786,6 +786,22 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   );
   const [newGuest, setNewGuest] = useState<HotelGuestInput>(emptyGuest());
   const [isEditingGuest, setIsEditingGuest] = useState(false);
+
+  // Google Places autocomplete state for hotel name
+  const [predictions, setPredictions] = useState<Array<{ place_id: string; name: string; secondary: string; is_hotel: boolean }>>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setShowDropdown(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
