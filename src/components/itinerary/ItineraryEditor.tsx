@@ -238,6 +238,7 @@ export function ItineraryEditor({
 }: ItineraryEditorProps) {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading } =
     useItineraryPeriodImages(itineraryId);
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
@@ -316,6 +317,7 @@ export function ItineraryEditor({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveDragId(null);
     if (!over || !onMoveActivity) return;
     const activityId = (active.data.current as { activityId?: string } | undefined)?.activityId;
     const target = over.data.current as { dayId?: string; period?: "manha" | "tarde" | "noite" } | undefined;
@@ -330,8 +332,22 @@ export function ItineraryEditor({
     onMoveActivity(activityId, target.dayId, target.period);
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const activityId = (event.active.data.current as { activityId?: string } | undefined)?.activityId;
+    setActiveDragId(activityId ?? null);
+  };
+
+  const activeActivity = activeDragId
+    ? days.flatMap((d) => d.activities).find((a) => a.id === activeDragId) ?? null
+    : null;
+
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={() => setActiveDragId(null)}
+    >
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
