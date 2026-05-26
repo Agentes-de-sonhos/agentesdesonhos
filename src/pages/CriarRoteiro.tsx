@@ -520,6 +520,9 @@ export default function CriarRoteiro() {
                 </div>
               )}
             </TabsContent>
+            <TabsContent value="templates" className="mt-6">
+              <TemplatesGrid />
+            </TabsContent>
           </Tabs>
         ) : (
           <div className="space-y-6">
