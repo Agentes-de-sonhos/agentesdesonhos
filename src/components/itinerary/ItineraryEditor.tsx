@@ -498,7 +498,12 @@ export function ItineraryEditor({
                 const Icon = periodIcons[period];
 
                 return (
-                  <DroppablePeriod key={period} dayId={day.id!} period={period}>
+                  <DroppablePeriod
+                    key={period}
+                    dayId={day.id!}
+                    period={period}
+                    isDragActive={!!activeDragId}
+                  >
                     <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                       <Icon className="h-4 w-4" />
                       {periodLabels[period]}
@@ -513,18 +518,15 @@ export function ItineraryEditor({
                       />
                     ) : (
                       periodActivities.map((activity) => (
-                        <div
+                        <DraggableActivity
                           key={activity.id}
-                          className={cn(
-                            "ml-6 rounded-lg border p-3",
-                            activity.isApproved
-                              ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950"
-                              : "border-border bg-card"
-                          )}
+                          activityId={activity.id!}
+                          isApproved={activity.isApproved}
                         >
+                          {(handle) => (
                           <div className="flex items-start justify-between gap-3">
                             {onMoveActivity && activity.id && (
-                              <DraggableHandle activityId={activity.id} />
+                              <DragHandleButton {...handle} />
                             )}
                             {activity.photoUrl ? (
                               <div className="shrink-0 overflow-hidden rounded-md border bg-muted/50 h-16 w-16 sm:h-20 sm:w-20">
@@ -732,7 +734,8 @@ export function ItineraryEditor({
                               </ConfirmDeleteDialog>
                             </div>
                           </div>
-                        </div>
+                          )}
+                        </DraggableActivity>
                       ))
                     )}
                   </DroppablePeriod>
