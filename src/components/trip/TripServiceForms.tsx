@@ -867,6 +867,46 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
     setIsEditingGuest(false);
   };
 
+  const fetchAutocomplete = useCallback(async (input: string) => {
+    if (input.trim().length < 3) { setPredictions([]); setShowDropdown(false); return; }
+    setIsSearching(true);
+    try {
+      const cityVal = form.getValues("city");
+      const { data } = await supabase.functions.invoke("hotel-autocomplete", {
+        body: { input: input.trim(), city: cityVal?.trim() || undefined },
+      });
+      if (data?.predictions) { setPredictions(data.predictions); setShowDropdown(data.predictions.length > 0); }
+    } catch {} finally { setIsSearching(false); }
+  }, [form]);
+
+  const handleHotelNameInput = useCallback((value: string, formOnChange: (v: string) => void) => {
+    formOnChange(value);
+    setSelectedPlaceId(null);
+    onPlaceIdChange?.(null);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchAutocomplete(value), 300);
+  }, [fetchAutocomplete, onPlaceIdChange]);
+
+  const handleSelectPrediction = useCallback((p: { place_id: string; name: string; secondary: string }) => {
+    form.setValue("hotel_name", p.name);
+    setSelectedPlaceId(p.place_id);
+    onPlaceIdChange?.(p.place_id);
+    setShowDropdown(false);
+    setPredictions([]);
+    if (p.secondary) {
+      const parts = p.secondary.split(",").map(s => s.trim()).filter(Boolean);
+      if (!form.getValues("city") && parts.length) {
+        const cityPart = parts.length >= 3 ? parts[1] : parts[0];
+        if (cityPart) form.setValue("city", cityPart);
+      }
+      if (!form.getValues("country") && parts.length >= 2) {
+        const countryPart = parts[parts.length - 1];
+        if (countryPart) form.setValue("country", countryPart);
+      }
+      if (!form.getValues("address")) form.setValue("address", p.secondary);
+    }
+  }, [form, onPlaceIdChange]);
+
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
     onSubmit(
       {
