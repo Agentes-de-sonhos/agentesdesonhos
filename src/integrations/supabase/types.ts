@@ -8912,7 +8912,9 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          image_urls: string[]
           order_index: number
+          place_id: string | null
           service_data: Json
           service_type: string
           trip_id: string
@@ -8925,7 +8927,9 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           order_index?: number
+          place_id?: string | null
           service_data?: Json
           service_type: string
           trip_id: string
@@ -8938,7 +8942,9 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           order_index?: number
+          place_id?: string | null
           service_data?: Json
           service_type?: string
           trip_id?: string

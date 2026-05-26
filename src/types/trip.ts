@@ -31,6 +31,8 @@ export interface TripService {
   voucher_url: string | null;
   voucher_name: string | null;
   image_url: string | null;
+  image_urls: string[];
+  place_id: string | null;
   attachments: TripAttachment[];
   order_index: number;
   created_at: string;
