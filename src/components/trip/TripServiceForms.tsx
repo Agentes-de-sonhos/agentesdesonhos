@@ -929,7 +929,37 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
             <FormItem>
               <FormLabel>Nome do Hotel *</FormLabel>
-              <FormControl><Input placeholder="Hotel Marriott Paris" {...field} /></FormControl>
+              <div className="relative" ref={dropdownRef}>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      placeholder="Digite o nome do hotel..."
+                      value={field.value || ""}
+                      onChange={(e) => handleHotelNameInput(e.target.value, field.onChange)}
+                      onFocus={() => predictions.length > 0 && setShowDropdown(true)}
+                      autoComplete="off"
+                    />
+                    {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                    {selectedPlaceId && !isSearching && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500" />}
+                  </div>
+                </FormControl>
+                {showDropdown && predictions.length > 0 && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
+                    {predictions.map((p) => (
+                      <button key={p.place_id} type="button"
+                        className="w-full flex items-start gap-3 px-3 py-2 hover:bg-accent/50 transition-colors text-left"
+                        onClick={() => handleSelectPrediction(p)}>
+                        <div className="mt-0.5 shrink-0">{p.is_hotel ? <HotelIcon className="h-4 w-4 text-primary" /> : <MapPin className="h-4 w-4 text-muted-foreground" />}</div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                          {p.secondary && <p className="text-xs text-muted-foreground truncate">{p.secondary}</p>}
+                        </div>
+                        {p.is_hotel && <Badge variant="secondary" className="text-[10px] shrink-0 mt-0.5">Hotel</Badge>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <FormMessage />
             </FormItem>
           )} />
