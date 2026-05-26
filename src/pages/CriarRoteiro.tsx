@@ -57,7 +57,7 @@ export default function CriarRoteiro() {
   const [pendingAction, setPendingAction] = useState<"pdf" | "link" | null>(null);
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
-  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [templateTargetItinerary, setTemplateTargetItinerary] = useState<Itinerary | null>(null);
 
   const {
     itineraries,
@@ -506,16 +506,20 @@ export default function CriarRoteiro() {
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {itineraries.map((itinerary) => (
-                    <ItineraryCard
-                      key={itinerary.id}
-                      itinerary={itinerary}
-                      onView={loadItinerary}
-                      onEdit={loadItinerary}
-                      onDelete={handleDelete}
-                      onGeneratePDF={handleGeneratePDF}
-                      onPublish={openPublishReview}
-                      onCopyLink={handleCopyLink}
-                    />
+                  <ItineraryCard
+                    key={itinerary.id}
+                    itinerary={itinerary}
+                    onView={loadItinerary}
+                    onEdit={loadItinerary}
+                    onDelete={handleDelete}
+                    onGeneratePDF={handleGeneratePDF}
+                    onPublish={openPublishReview}
+                    onCopyLink={handleCopyLink}
+                    onSaveTemplate={(id) => {
+                      const found = itineraries.find(i => i.id === id);
+                      if (found) setTemplateTargetItinerary(found);
+                    }}
+                  />
                   ))}
                 </div>
               )}
@@ -543,7 +547,7 @@ export default function CriarRoteiro() {
                   </Button>
                 )}
                 {currentItinerary && (
-                  <Button variant="outline" onClick={() => setSaveTemplateOpen(true)}>
+                <Button variant="outline" onClick={() => setTemplateTargetItinerary(currentItinerary)}>
                     <Star className="mr-2 h-4 w-4" />
                     Salvar como modelo
                   </Button>
@@ -817,11 +821,11 @@ export default function CriarRoteiro() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {currentItinerary && (
+      {(currentItinerary || templateTargetItinerary) && (
         <SaveAsTemplateDialog
-          open={saveTemplateOpen}
-          onOpenChange={setSaveTemplateOpen}
-          itinerary={currentItinerary}
+          open={!!templateTargetItinerary}
+          onOpenChange={(open) => !open && setTemplateTargetItinerary(null)}
+          itinerary={templateTargetItinerary || currentItinerary!}
         />
       )}
     </DashboardLayout>

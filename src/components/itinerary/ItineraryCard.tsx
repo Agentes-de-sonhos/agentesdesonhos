@@ -5,12 +5,12 @@ import {
   MapPin,
   Calendar,
   Users,
-  MoreVertical,
   FileText,
   Link2,
   Pencil,
   Trash2,
   Eye,
+  Star,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,13 +21,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,6 +66,7 @@ interface ItineraryCardProps {
   onGeneratePDF: (id: string) => void;
   onPublish: (id: string) => void;
   onCopyLink: (shareToken: string) => void;
+  onSaveTemplate?: (id: string) => void;
 }
 
 export function ItineraryCard({
@@ -83,16 +77,21 @@ export function ItineraryCard({
   onGeneratePDF,
   onPublish,
   onCopyLink,
+  onSaveTemplate,
 }: ItineraryCardProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const canPublish = itinerary.status === "approved";
+  const canCopyLink = itinerary.status === "published" && itinerary.shareToken;
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1 min-w-0">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <MapPin className="h-4 w-4 text-primary" />
-              {itinerary.destination}
+              <MapPin className="h-4 w-4 text-primary shrink-0" />
+              <span className="truncate">{itinerary.destination}</span>
             </CardTitle>
             <CardDescription className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
@@ -101,55 +100,100 @@ export function ItineraryCard({
               {format(parseLocalDate(itinerary.endDate), "dd/MM/yyyy", { locale: ptBR })}
             </CardDescription>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onView(itinerary.id)}>
-                <Eye className="mr-2 h-4 w-4" />
-                Visualizar
-              </DropdownMenuItem>
-              {itinerary.status !== "generating" && (
-                <DropdownMenuItem onClick={() => onEdit(itinerary.id)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Editar
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onGeneratePDF(itinerary.id)}>
-                <FileText className="mr-2 h-4 w-4" />
-                Gerar PDF
-              </DropdownMenuItem>
-              {itinerary.status === "approved" && (
-                <DropdownMenuItem onClick={() => onPublish(itinerary.id)}>
-                  <Link2 className="mr-2 h-4 w-4" />
-                  Publicar Link
-                </DropdownMenuItem>
-              )}
-              {itinerary.status === "published" && itinerary.shareToken && (
-                <DropdownMenuItem onClick={() => onCopyLink(itinerary.shareToken!)}>
-                  <Link2 className="mr-2 h-4 w-4" />
-                  Copiar Link
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.preventDefault();
-                  setConfirmOpen(true);
-                }}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Excluir
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </CardHeader>
+
+      <CardContent className="space-y-3">
+        {/* Action icons row */}
+        <div className="flex items-center gap-1 flex-wrap">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onView(itinerary.id)}
+            title="Visualizar"
+          >
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </Button>
+          {itinerary.status !== "generating" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onEdit(itinerary.id)}
+              title="Editar"
+            >
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onGeneratePDF(itinerary.id)}
+            title="Gerar PDF"
+          >
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </Button>
+          {canPublish && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onPublish(itinerary.id)}
+              title="Publicar Link"
+            >
+              <Link2 className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
+          {canCopyLink && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onCopyLink(itinerary.shareToken!)}
+              title="Copiar Link"
+            >
+              <Link2 className="h-4 w-4 text-primary" />
+            </Button>
+          )}
+          {onSaveTemplate && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onSaveTemplate(itinerary.id)}
+              title="Salvar como modelo"
+            >
+              <Star className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setConfirmOpen(true)}
+            title="Excluir"
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+
+        {/* Badges */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className={statusColors[itinerary.status]} variant="secondary">
+            {statusLabels[itinerary.status]}
+          </Badge>
+          <Badge variant="outline">
+            <Users className="mr-1 h-3 w-3" />
+            {itinerary.travelersCount}
+          </Badge>
+          <Badge variant="outline">
+            {tripTypeLabels[itinerary.tripType] || itinerary.tripType}
+          </Badge>
+        </div>
+      </CardContent>
+
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -169,20 +213,6 @@ export function ItineraryCard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <CardContent>
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge className={statusColors[itinerary.status]} variant="secondary">
-            {statusLabels[itinerary.status]}
-          </Badge>
-          <Badge variant="outline">
-            <Users className="mr-1 h-3 w-3" />
-            {itinerary.travelersCount}
-          </Badge>
-          <Badge variant="outline">
-            {tripTypeLabels[itinerary.tripType] || itinerary.tripType}
-          </Badge>
-        </div>
-      </CardContent>
     </Card>
   );
 }

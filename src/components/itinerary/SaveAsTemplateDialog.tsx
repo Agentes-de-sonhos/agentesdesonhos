@@ -21,7 +21,7 @@ const PROFILE_KEYS = Object.keys(TRIP_PROFILE_LABELS) as Array<keyof typeof TRIP
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  itinerary: Itinerary & { days: ItineraryDay[] };
+  itinerary: Itinerary;
 }
 
 export function SaveAsTemplateDialog({ open, onOpenChange, itinerary }: Props) {
