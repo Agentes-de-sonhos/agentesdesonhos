@@ -154,6 +154,7 @@ export default function MeusProjetos() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [deleteTarget, setDeleteTarget] = useState<ProjectItem | null>(null);
+  const [templateTarget, setTemplateTarget] = useState<Itinerary | null>(null);
 
   const { quotes, isLoading: quotesLoading, deleteQuote, duplicateQuote } = useQuotes();
   const { trips, isLoading: tripsLoading, deleteTrip } = useTrips();
