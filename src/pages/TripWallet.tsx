@@ -166,8 +166,12 @@ function TripWalletContent() {
         voucher_url: attachments[0]?.url, 
         voucher_name: attachments[0]?.name,
         attachments,
+        image_urls: addImageUrls,
+        place_id: addPlaceId,
       });
       setSelectedServiceType(null);
+      setAddPlaceId(null);
+      setAddImageUrls([]);
     } finally {
       setIsUploading(false);
     }
@@ -253,6 +257,9 @@ function TripWalletContent() {
   const handleCancelServiceForm = () => {
     setSelectedServiceType(null);
     setEditingServiceId(null);
+    setAddPlaceId(null);
+    setAddImageUrls([]);
+    setEditPlaceId(null);
   };
 
   const handleAIImport = async (result: AIImportResult) => {
@@ -269,8 +276,6 @@ function TripWalletContent() {
   const handleUploadServiceImage = async (serviceId: string, file: File) => {
     try {
       setIsUploading(true);
-      // Upload to public bucket (same pattern as Orçamentos) so the image
-      // can be displayed directly via public URL — no signed URL needed.
       const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase();
       const path = `trip-services/${id}/${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
@@ -278,9 +283,12 @@ function TripWalletContent() {
         .upload(path, file, { upsert: true, contentType: file.type });
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from("quote-images").getPublicUrl(path);
+      const service = trip?.services?.find(s => s.id === serviceId);
+      const current = service?.image_urls || [];
+      const next = [...current, urlData.publicUrl];
       await supabase
         .from("trip_services")
-        .update({ image_url: urlData.publicUrl })
+        .update({ image_urls: next })
         .eq("id", serviceId);
       queryClient.invalidateQueries({ queryKey: ["trip", id] });
       toast({ title: "Imagem adicionada" });
@@ -293,12 +301,46 @@ function TripWalletContent() {
 
   const handleRemoveServiceImage = async (serviceId: string) => {
     try {
-      await supabase.from("trip_services").update({ image_url: null }).eq("id", serviceId);
+      await supabase.from("trip_services").update({ image_url: null, image_urls: [] }).eq("id", serviceId);
       queryClient.invalidateQueries({ queryKey: ["trip", id] });
-      toast({ title: "Imagem removida" });
+      toast({ title: "Imagens removidas" });
     } catch (err: any) {
-      toast({ title: "Erro ao remover imagem", description: err.message, variant: "destructive" });
+      toast({ title: "Erro ao remover imagens", description: err.message, variant: "destructive" });
     }
+  };
+
+  const handleAddServiceImageUrls = async (serviceId: string, urls: string[]) => {
+    if (urls.length === 0) return;
+    try {
+      const service = trip?.services?.find(s => s.id === serviceId);
+      const current = service?.image_urls || [];
+      const next = [...current, ...urls.filter(u => !current.includes(u))];
+      await supabase.from("trip_services").update({ image_urls: next }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+      toast({ title: "Fotos adicionadas" });
+    } catch (err: any) {
+      toast({ title: "Erro ao adicionar fotos", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleRemoveServiceImageAt = async (serviceId: string, index: number) => {
+    try {
+      const service = trip?.services?.find(s => s.id === serviceId);
+      const current = service?.image_urls || [];
+      const next = current.filter((_, i) => i !== index);
+      await supabase.from("trip_services").update({ image_urls: next }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+    } catch (err: any) {
+      toast({ title: "Erro ao remover foto", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleEditPlaceIdChange = async (serviceId: string, newPlaceId: string | null) => {
+    setEditPlaceId(newPlaceId);
+    try {
+      await supabase.from("trip_services").update({ place_id: newPlaceId }).eq("id", serviceId);
+      queryClient.invalidateQueries({ queryKey: ["trip", id] });
+    } catch {}
   };
 
   const handleCopyLink = () => {
