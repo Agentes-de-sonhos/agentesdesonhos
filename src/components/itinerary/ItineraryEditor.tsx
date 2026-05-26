@@ -78,6 +78,56 @@ const periodLabels = {
   noite: "Noite",
 };
 
+function DroppablePeriod({
+  dayId,
+  period,
+  isOver,
+  children,
+}: {
+  dayId: string;
+  period: "manha" | "tarde" | "noite";
+  isOver?: boolean;
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver: over } = useDroppable({
+    id: `drop-${dayId}-${period}`,
+    data: { dayId, period },
+  });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "space-y-2 rounded-lg transition-colors",
+        over && "bg-primary/5 ring-2 ring-primary/30 ring-offset-2 ring-offset-background"
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DraggableHandle({ activityId }: { activityId: string }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `drag-${activityId}`,
+    data: { activityId },
+  });
+  return (
+    <button
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      type="button"
+      aria-label="Arrastar atividade"
+      className={cn(
+        "flex h-8 w-6 cursor-grab items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground touch-none",
+        isDragging && "cursor-grabbing opacity-50"
+      )}
+    >
+      <GripVertical className="h-4 w-4" />
+    </button>
+  );
+}
+
 interface ItineraryEditorProps {
   itineraryId?: string;
   days: ItineraryDay[];
