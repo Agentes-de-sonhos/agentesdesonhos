@@ -701,6 +701,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                     });
                   }}
                   weather={weatherByDate?.[day.date]}
+                  destination={itinerary.destination}
                 />
               ))}
             </div>
