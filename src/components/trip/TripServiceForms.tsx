@@ -1557,7 +1557,7 @@ interface CarDriverInput {
 
 const emptyDriver = (): CarDriverInput => ({ name: '', document: '', age: '', notes: '' });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [drivers, setDrivers] = useState<CarDriverInput[]>(
     defaultValues?.drivers?.length > 0 ? defaultValues.drivers : [emptyDriver()]
