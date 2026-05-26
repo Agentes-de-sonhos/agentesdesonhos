@@ -1,104 +1,80 @@
-## Biblioteca de Modelos de Roteiros
+## Objetivo
 
-Nova funcionalidade que permite ao agente salvar roteiros já criados como **modelos reutilizáveis** (estrutura, atividades e lógica) — sem dados de cliente, datas ou orçamento — e usar esses modelos como base para criar novos roteiros rapidamente.
+Trazer para a Carteira Digital a mesma experiência já existente no módulo de Orçamentos:
+- Ao digitar o **nome do hotel** (e de outros serviços), buscar no **Google Places** e auto-preencher os principais dados.
+- Ao selecionar o local, exibir uma **galeria de fotos do Google** para o usuário escolher quantas quiser, salvando-as no serviço.
+- Essas fotos passam a aparecer na **carteira digital pública** e no **PDF exportado**.
 
----
-
-### 1. Banco de dados (Lovable Cloud)
-
-Criar duas tabelas em uma migração:
-
-**`itinerary_templates`** — metadados do modelo
-- `user_id`, `name`, `cover_image_url`, `destination`
-- `nights_count` (int), `style` ('economico' | 'moderado' | 'luxo'), `profile` (TripProfile), `pace` ('leve' | 'moderado' | 'intenso')
-- `tags` (text[])
-- `destination_intro_text`, `destination_intro_images` (jsonb)
-- `source_itinerary_id` (referência opcional ao roteiro de origem)
-- `interests` (text[]), `additional_preferences` (jsonb)
-
-**`itinerary_template_activities`** — estrutura reutilizável (achatada, sem datas)
-- `template_id`, `day_number` (int — relativo, 1..N), `period` ('manha'|'tarde'|'noite')
-- `order_index`, `title`, `description`, `location`
-- `estimated_duration`, `estimated_cost` (texto-faixa, não valor fechado)
-- `photo_url`, `category` (tag/categoria da experiência), `priority` ('essencial'|'opcional')
-
-RLS estrita por `user_id`. GRANTs para `authenticated` e `service_role`.
-
-> Observação arquitetural: a separação em "metadados + atividades achatadas com `priority` e `category`" é o que viabiliza a futura adaptação por IA (condensar 10→7 noites removendo opcionais, trocar restaurantes premium por family-friendly, etc.). Nada de copiar `itinerary_days` cru.
+A mudança é **100% aditiva** — nenhum serviço, carteira ou PDF antigo é afetado. A foto única atual (`image_url`) continua funcionando como fallback para registros existentes.
 
 ---
 
-### 2. Ações no roteiro existente
+## Fase 1 — Hotéis (entrega inicial desta etapa)
 
-Em `src/pages/CriarRoteiro.tsx` (e nos cards da lista de roteiros), adicionar a ação **⭐ Salvar como modelo** ao lado das demais ações do roteiro.
+### Banco de dados (migration aditiva)
+- Adicionar coluna `image_urls text[] not null default '{}'` em `trip_services` (não remover `image_url`).
+- Adicionar coluna `place_id text` (cache do Google Places do serviço, opcional).
+- Nenhuma alteração em RLS / triggers existentes.
 
----
+### Formulário do Hotel (`TripServiceForms.tsx → HotelForm`)
+- Substituir o `<Input>` de "Nome do Hotel" por um autocomplete do Google Places (reaproveitando o padrão de `hotel-autocomplete` que o orçamento já usa).
+- Ao selecionar um hotel:
+  - Auto-preencher: `hotel_name`, `address`, `city`, `country`, `hotel_phone`, `hotel_website`, `maps_url` e, quando disponível, `hotel_category` (estrelas) — **apenas em campos vazios**, nunca sobrescrever o que o usuário já digitou.
+  - Salvar o `place_id` retornado.
+- Renderizar logo abaixo do nome o componente `GoogleHotelPhotos` (já existe em `src/components/shared/`) com `autoShow`, igual no orçamento.
+- O `imageSlot` no editor passa a suportar **múltiplas fotos** (grid com botão de remover + botão "Upload" para foto própria), mantendo o input de upload manual atual como alternativa.
 
-### 3. Modal "Salvar como modelo"
+### Persistência (`useTrips.ts` + handlers em `TripWallet.tsx`)
+- `handleUploadServiceImage` passa a **adicionar** ao array `image_urls` (em vez de substituir `image_url`).
+- Novo handler `handleAddServiceImageUrls(serviceId, urls[])` para fotos do Google (não passa por upload de arquivo).
+- Novo handler `handleRemoveServiceImageAt(serviceId, index)` para remover uma foto específica.
+- Atualizar `TripService` em `src/types/trip.ts` com `image_urls: string[]` e `place_id?: string | null`.
 
-Novo componente `src/components/itinerary/SaveAsTemplateDialog.tsx`:
-
-- **Nome do modelo** (input)
-- **Número de noites** (input numérico — pré-preenchido com `endDate - startDate`)
-- **Estilo da viagem** (select: Econômico / Moderado / Premium-Luxo — pré-preenchido com `budgetLevel`)
-- **Perfil principal** (select com TRIP_PROFILE_LABELS — pré-preenchido com `tripType`)
-- **Tags** (chips livres, reaproveitando padrão de `TagsEditForm`)
-- Banner de auto-sugestão no topo: *"Detectamos que este roteiro parece ser: Premium • Casal • 10 noites"* com botão "Usar sugestão".
-
-Ao confirmar:
-- Insere em `itinerary_templates`
-- Insere atividades em `itinerary_template_activities` derivando `day_number` relativo (1..N), descartando `date`, `clientId`, `passengers`, valores fechados de orçamento.
-
----
-
-### 4. Nova página: Biblioteca de Modelos
-
-Nova rota `/ferramentas-ia/modelos-roteiros` e página `src/pages/ModelosRoteiros.tsx`:
-
-- Grid de cards (estética Notion/Canva templates): capa, nome, badges (noites • estilo • perfil), destino, tags, contagem de dias/atividades.
-- Busca por nome/tag/destino, filtros por estilo e perfil.
-- Ações por card: **Criar roteiro a partir deste modelo**, **Editar**, **Duplicar**, **Excluir** (confirmação única).
-
-Hook `src/hooks/useItineraryTemplates.ts` com React Query (list/create/update/delete/createFromItinerary/instantiate).
-
-Adicionar entrada no `menuConfig` dentro do grupo de Ferramentas IA / Roteiros.
+### Renderização pública e PDF
+- `CarteiraPublicaV2.tsx`: onde hoje exibe `image_url` única, passa a renderizar um carrossel/grade horizontal usando `image_urls` (com fallback para `image_url` quando o array estiver vazio).
+- `TripServiceCard.tsx` (preview do agente): mesma lógica de fallback.
+- `TripPDF.tsx`: incluir até N fotos do hotel (ex: 2-3) na seção daquele serviço, mantendo a foto única como fallback.
 
 ---
 
-### 5. Criar roteiro a partir do modelo
+## Fase 2 — Demais serviços (no mesmo PR, escopo confirmado pelo usuário)
 
-Fluxo assistido em um único dialog (`InstantiateTemplateDialog.tsx`):
-1. **Cliente** (ClientSelector já existente, obrigatório por padrão do projeto)
-2. **Datas** (start / end) — com cálculo automático de noites
-3. **Ajustes opcionais**: estilo, perfil, ritmo (pré-preenchidos a partir do modelo)
+Aplicar o mesmo padrão de Places (sem galeria automática, exceto onde Google retorna fotos relevantes) em:
+- **Atrações/Ingressos** (`AttractionForm`) → `placeType="attraction"`, autofill de nome + endereço + maps + fotos do Places.
+- **Locação de Veículos** (`CarRentalForm`) → autocomplete para a locadora (já usado em orçamentos), sem galeria de fotos.
+- **Transfer** (`TransferForm`) → autocomplete para `location` (endereço de embarque/desembarque), sem galeria.
+- **Outros Serviços** (`OtherForm`) → autocomplete genérico para `company_name`, sem galeria.
 
-Ao confirmar, gera um novo `itinerary` + `itinerary_days` + `itinerary_activities`:
-- Se `noites_novo == noites_modelo` → mapeamento 1:1 dos dias do modelo nas novas datas.
-- Se diferente → por enquanto, mapeamento proporcional + flag `needs_ai_adaptation = true` no roteiro recém-criado (preparado para o passo 6). Atividades `priority='opcional'` são marcadas como candidatas a remoção quando encolhe.
-- Datas calculadas a partir da `startDate` informada.
-- Status: `draft` — o usuário cai direto no editor `/ferramentas-ia/criar-roteiro?id=...`.
+Voos, seguro, cruzeiro e trem não recebem Places (não faz sentido de catálogo).
 
 ---
 
-### 6. Preparado para adaptação por IA (sem implementar agora)
+## Detalhes técnicos
 
-A arquitetura escolhida já entrega o necessário para a próxima fase:
-- `priority` + `category` + `pace` permitem condensar/expandir.
-- `style` + `profile` no modelo + no novo roteiro permitem detectar incompatibilidades.
-- Estrutura achatada por `day_number` facilita reorganização.
-
-Nenhuma Edge Function nova nesta entrega — apenas o terreno preparado.
+- Reutilizar Edge Functions já existentes: `hotel-autocomplete`, `hotel-photos`, `places-autocomplete`. Nenhuma nova função necessária.
+- Reutilizar componentes já existentes: `PlacesAutocomplete`, `GoogleHotelPhotos`.
+- Reutilizar `usePlacesAutocomplete` (com `fetchDetailsOnSelect: true`) para puxar `address`, `latitude/longitude`, `photo_urls` etc.
+- Limite de fotos: igual ao orçamento (`MAX_IMAGES_PER_SERVICE`, atualmente 10).
+- Cache do Places já é feito server-side (`place_cache` table) — nenhum custo extra para hotéis repetidos.
 
 ---
 
-### Detalhes técnicos
+## Não-objetivos (não muda nesta etapa)
 
-- Tabelas com `GRANT SELECT, INSERT, UPDATE, DELETE ... TO authenticated; GRANT ALL ... TO service_role;` + RLS por `auth.uid() = user_id`.
-- Tipos em `src/types/itinerary.ts`: `ItineraryTemplate`, `ItineraryTemplateActivity`.
-- Reutilizar `Card`, `Dialog`, `Input`, `Select`, `Button`, `TagsEditForm` do design system — sem cores hard-coded, somente tokens semânticos.
-- Auto-sugestão: função pura `inferTemplateMetadata(itinerary)` em `src/lib/roteiro-domain.ts`.
-- Nenhuma alteração no PDF nem na página pública do roteiro.
+- Carteiras já publicadas seguem renderizando exatamente como hoje (fallback para `image_url`).
+- Não muda layout/identidade visual da carteira pública nem do PDF (só passa a exibir mais fotos quando houver).
+- Não muda a função de upload manual atual — ela continua disponível ao lado do Places.
+- Não toca em estrutura de roteiro, passageiros, vouchers, RLS ou autenticação.
 
-### Arquivos
-- **Novos**: migration; `src/hooks/useItineraryTemplates.ts`; `src/components/itinerary/SaveAsTemplateDialog.tsx`; `src/components/itinerary/InstantiateTemplateDialog.tsx`; `src/pages/ModelosRoteiros.tsx`.
-- **Editados**: `src/pages/CriarRoteiro.tsx` (botão + dialog), card de roteiros (ação extra), `src/App.tsx` (rota), `src/config/menuConfig.ts` (item de menu), `src/types/itinerary.ts`, `src/lib/roteiro-domain.ts`.
+---
+
+## Validação antes do merge
+
+1. Criar serviço novo de hotel via Places → conferir autofill, galeria, salvamento.
+2. Editar hotel já existente (sem `place_id`) → garantir que tudo continua funcionando e que nada foi sobrescrito.
+3. Abrir carteira pública antiga (sem `image_urls`) → garantir que continua exibindo a foto única.
+4. Gerar PDF de carteira nova com galeria → conferir fotos no PDF.
+
+---
+
+Confirma para eu seguir com a Fase 1 + Fase 2 nesse mesmo trabalho? Se preferir entregar só Hotel primeiro (Fase 1) e validar antes de aplicar nos demais serviços, me avisa.
