@@ -4944,11 +4944,11 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
 }
 
 // Main Service Form component
-export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: TripServiceFormProps) {
+export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: TripServiceFormProps) {
   const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot };
   switch (serviceType) {
     case "flight": return <FlightForm {...props} />;
-    case "hotel": return <HotelForm {...props} />;
+    case "hotel": return <HotelForm {...props} placeId={placeId} onPlaceIdChange={onPlaceIdChange} googlePhotoSlot={googlePhotoSlot} />;
     case "car_rental": return <CarRentalForm {...props} />;
     case "transfer": return <TransferForm {...props} />;
     case "attraction": return <AttractionForm {...props} />;
