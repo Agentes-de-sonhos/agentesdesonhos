@@ -365,6 +365,8 @@ export function useItineraries() {
         is_approved: boolean;
         photo_url: string | null;
         document_urls: string[];
+        period: "manha" | "tarde" | "noite";
+        day_id: string;
       }>;
     }) => {
       const { error } = await supabase
@@ -372,6 +374,27 @@ export function useItineraries() {
         .update(updates)
         .eq("id", activityId);
 
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["itineraries"] });
+    },
+  });
+
+  const moveActivity = useMutation({
+    mutationFn: async ({
+      activityId,
+      dayId,
+      period,
+    }: {
+      activityId: string;
+      dayId: string;
+      period: "manha" | "tarde" | "noite";
+    }) => {
+      const { error } = await supabase
+        .from("itinerary_activities")
+        .update({ day_id: dayId, period, order_index: 99 })
+        .eq("id", activityId);
       if (error) throw error;
     },
     onSuccess: () => {
