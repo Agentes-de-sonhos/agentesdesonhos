@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TripItinerary } from "@/components/trip/itinerary/TripItinerary";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
+import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
 import { PassengerPoolProvider } from "@/components/trip/PassengerPoolContext";
 import { TravelImporter } from "@/components/trip/TravelImporter";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
