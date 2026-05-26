@@ -537,7 +537,8 @@ function TripWalletContent() {
                               <GoogleHotelPhotos
                                 placeId={addPlaceId}
                                 existingUrls={addImageUrls}
-                                label={selectedServiceType === "hotel" ? "hotel" : selectedServiceType === "attraction" ? "atração" : selectedServiceType === "transfer" ? "local" : selectedServiceType === "car_rental" ? "locadora" : "porto"}
+                                loadingLabel={`Buscando fotos do Google...`}
+                                headingLabel="Fotos do Google"
                                 autoShow
                                 onPhotosSelected={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
                               />
@@ -605,7 +606,8 @@ function TripWalletContent() {
                           <GoogleHotelPhotos
                             placeId={editPlaceId}
                             existingUrls={editingService.image_urls || []}
-                            label={selectedServiceType === "hotel" ? "hotel" : selectedServiceType === "attraction" ? "atração" : selectedServiceType === "transfer" ? "local" : selectedServiceType === "car_rental" ? "locadora" : "porto"}
+                            loadingLabel={`Buscando fotos do Google...`}
+                            headingLabel="Fotos do Google"
                             autoShow
                             onPhotosSelected={(urls) => handleAddServiceImageUrls(editingService.id, urls)}
                           />
