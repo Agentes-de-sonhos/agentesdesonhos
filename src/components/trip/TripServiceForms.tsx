@@ -2012,7 +2012,7 @@ const emptyTransferPassenger = (): TransferPassengerInput => ({
   name: '', age: '', passenger_type: 'adulto', needs_child_seat: 'nao', notes: '',
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<TransferPassengerInput[]>(
     defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
@@ -2090,6 +2090,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🚐 Informações Principais">
         {imageSlot}
+        {googlePhotoSlot}
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="transfer_type" render={({ field }) => (
@@ -2145,7 +2146,22 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           <FormField control={form.control} name="destination_location" render={({ field }) => (
             <FormItem>
               <FormLabel>Destino *</FormLabel>
-              <FormControl><Input placeholder="Hotel / Aeroporto / Porto" {...field} /></FormControl>
+              <FormControl>
+                <PlacesAutocompleteInput
+                  value={field.value}
+                  cityContext={form.getValues("city")}
+                  selectedPlaceId={placeId}
+                  placeholder="Hotel / Aeroporto / Porto"
+                  onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                  onSelect={(p) => {
+                    field.onChange(p.name);
+                    onPlaceIdChange?.(p.place_id);
+                    const parts = parsePlaceSecondary(p.secondary);
+                    if (!form.getValues("city") && parts.city) form.setValue("city", parts.city);
+                    if (!form.getValues("destination_address") && parts.address) form.setValue("destination_address", parts.address);
+                  }}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )} />
