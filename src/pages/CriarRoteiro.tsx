@@ -811,6 +811,14 @@ export default function CriarRoteiro() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {currentItinerary && (
+        <SaveAsTemplateDialog
+          open={saveTemplateOpen}
+          onOpenChange={setSaveTemplateOpen}
+          itinerary={currentItinerary}
+        />
+      )}
     </DashboardLayout>
   );
 }
