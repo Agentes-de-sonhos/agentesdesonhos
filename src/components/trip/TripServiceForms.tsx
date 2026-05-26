@@ -42,6 +42,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCallback, useRef } from "react";
 import { resolveAirlineDisplay } from "@/lib/airlines";
 import { getAirportsMap } from "@/lib/airports";
+import { PlacesAutocompleteInput, parsePlaceSecondary } from "@/components/shared/PlacesAutocompleteInput";
 
 interface TripServiceFormProps {
   serviceType: TripServiceType;
