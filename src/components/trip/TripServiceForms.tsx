@@ -5015,14 +5015,15 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
 // Main Service Form component
 export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: TripServiceFormProps) {
   const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot };
+  const placesProps = { placeId, onPlaceIdChange, googlePhotoSlot };
   switch (serviceType) {
     case "flight": return <FlightForm {...props} />;
-    case "hotel": return <HotelForm {...props} placeId={placeId} onPlaceIdChange={onPlaceIdChange} googlePhotoSlot={googlePhotoSlot} />;
-    case "car_rental": return <CarRentalForm {...props} />;
-    case "transfer": return <TransferForm {...props} />;
-    case "attraction": return <AttractionForm {...props} />;
+    case "hotel": return <HotelForm {...props} {...placesProps} />;
+    case "car_rental": return <CarRentalForm {...props} {...placesProps} />;
+    case "transfer": return <TransferForm {...props} {...placesProps} />;
+    case "attraction": return <AttractionForm {...props} {...placesProps} />;
     case "insurance": return <InsuranceForm {...props} />;
-    case "cruise": return <CruiseForm {...props} />;
+    case "cruise": return <CruiseForm {...props} {...placesProps} />;
     case "train": return <TrainForm {...props} />;
     case "other": return <OtherForm {...props} />;
     default: return null;
