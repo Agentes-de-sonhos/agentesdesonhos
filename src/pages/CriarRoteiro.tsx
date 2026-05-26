@@ -535,6 +535,12 @@ export default function CriarRoteiro() {
                     Gerar Link
                   </Button>
                 )}
+                {currentItinerary && (
+                  <Button variant="outline" onClick={() => setSaveTemplateOpen(true)}>
+                    <Star className="mr-2 h-4 w-4" />
+                    Salvar como modelo
+                  </Button>
+                )}
               </div>
             </div>
 
