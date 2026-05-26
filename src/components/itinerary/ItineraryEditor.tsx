@@ -2,6 +2,18 @@ import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  DragOverlay,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import {
   Sun,
   Sunset,
   Moon,
@@ -14,6 +26,7 @@ import {
   DollarSign,
   Loader2,
   X,
+  GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +84,7 @@ interface ItineraryEditorProps {
   onUpdateActivity: (activityId: string, updates: Partial<Activity>) => void;
   onDeleteActivity: (activityId: string) => void;
   onAddActivity: (dayId: string, activity: Omit<Activity, "id" | "orderIndex" | "isApproved">) => void;
+  onMoveActivity?: (activityId: string, dayId: string, period: "manha" | "tarde" | "noite") => void;
   onApproveAll: () => void;
   aiContext?: AIContext;
 }
@@ -81,6 +95,7 @@ export function ItineraryEditor({
   onUpdateActivity,
   onDeleteActivity,
   onAddActivity,
+  onMoveActivity,
   onApproveAll,
   aiContext,
 }: ItineraryEditorProps) {
