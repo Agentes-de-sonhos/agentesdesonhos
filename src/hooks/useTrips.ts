@@ -260,13 +260,15 @@ export function useTrip(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type, service_data, voucher_url, voucher_name, attachments,
+      service_type, service_data, voucher_url, voucher_name, attachments, image_urls, place_id,
     }: {
       service_type: TripServiceType;
       service_data: TripServiceData;
       voucher_url?: string;
       voucher_name?: string;
       attachments?: { url: string; name: string }[];
+      image_urls?: string[];
+      place_id?: string | null;
     }) => {
       if (!id) throw new Error("Trip ID is required");
       const currentServices = trip?.services || [];
@@ -282,6 +284,8 @@ export function useTrip(id: string | undefined) {
           voucher_name: voucher_name || null,
           attachments: (attachments || []) as any,
           order_index: nextOrderIndex,
+          image_urls: image_urls && image_urls.length > 0 ? image_urls : null,
+          place_id: place_id || null,
         })
         .select()
         .single();
@@ -311,18 +315,22 @@ export function useTrip(id: string | undefined) {
 
   const updateServiceMutation = useMutation({
     mutationFn: async ({
-      serviceId, service_data, voucher_url, voucher_name, attachments,
+      serviceId, service_data, voucher_url, voucher_name, attachments, image_urls, place_id,
     }: {
       serviceId: string;
       service_data: TripServiceData;
       voucher_url?: string | null;
       voucher_name?: string | null;
       attachments?: { url: string; name: string }[];
+      image_urls?: string[] | null;
+      place_id?: string | null;
     }) => {
       const updateData: any = { service_data: service_data as any };
       if (voucher_url !== undefined) updateData.voucher_url = voucher_url;
       if (voucher_name !== undefined) updateData.voucher_name = voucher_name;
       if (attachments !== undefined) updateData.attachments = attachments;
+      if (image_urls !== undefined) updateData.image_urls = image_urls;
+      if (place_id !== undefined) updateData.place_id = place_id;
 
       const { error } = await supabase.from("trip_services").update(updateData).eq("id", serviceId);
       if (error) throw error;
