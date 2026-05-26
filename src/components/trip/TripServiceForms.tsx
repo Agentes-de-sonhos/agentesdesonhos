@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { TripServiceType } from "@/types/trip";
+import { Badge } from "@/components/ui/badge";
+import { useCallback, useRef } from "react";
 import { resolveAirlineDisplay } from "@/lib/airlines";
 import { getAirportsMap } from "@/lib/airports";
 
@@ -49,6 +51,9 @@ interface TripServiceFormProps {
   defaultValues?: any;
   isEditing?: boolean;
   imageSlot?: React.ReactNode;
+  placeId?: string | null;
+  onPlaceIdChange?: (id: string | null) => void;
+  googlePhotoSlot?: React.ReactNode;
 }
 
 interface MultiFileUploadProps {
