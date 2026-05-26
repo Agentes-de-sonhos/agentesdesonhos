@@ -34,6 +34,8 @@ import {
   Calendar,
   User as UserIcon,
   Star,
+  Eye,
+  Link2,
 } from "lucide-react";
 import { useQuotes } from "@/hooks/useQuotes";
 import { useTrips } from "@/hooks/useTrips";
@@ -41,6 +43,7 @@ import { useItineraries } from "@/hooks/useItineraries";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useItineraryTemplates } from "@/hooks/useItineraryTemplates";
 import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
+import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -55,6 +58,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { Itinerary } from "@/types/itinerary";
 
 type StatusFilter = "all" | "draft" | "published";
 type SortOrder = "recent" | "az";
