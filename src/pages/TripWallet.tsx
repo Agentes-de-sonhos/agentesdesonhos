@@ -517,7 +517,7 @@ function TripWalletContent() {
                         placeId={addPlaceId}
                         onPlaceIdChange={setAddPlaceId}
                         googlePhotoSlot={
-                          selectedServiceType === "hotel" ? (
+                          ["hotel","attraction","transfer","car_rental","cruise"].includes(selectedServiceType) ? (
                             <div className="space-y-2">
                               {addImageUrls.length > 0 && (
                                 <div className="flex gap-2 overflow-x-auto pb-1">
@@ -537,6 +537,8 @@ function TripWalletContent() {
                               <GoogleHotelPhotos
                                 placeId={addPlaceId}
                                 existingUrls={addImageUrls}
+                                loadingLabel={`Buscando fotos do Google...`}
+                                headingLabel="Fotos do Google"
                                 autoShow
                                 onPhotosSelected={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
                               />
@@ -600,10 +602,12 @@ function TripWalletContent() {
                       placeId={editPlaceId}
                       onPlaceIdChange={(pid) => handleEditPlaceIdChange(editingService.id, pid)}
                       googlePhotoSlot={
-                        selectedServiceType === "hotel" ? (
+                        ["hotel","attraction","transfer","car_rental","cruise"].includes(selectedServiceType) ? (
                           <GoogleHotelPhotos
                             placeId={editPlaceId}
                             existingUrls={editingService.image_urls || []}
+                            loadingLabel={`Buscando fotos do Google...`}
+                            headingLabel="Fotos do Google"
                             autoShow
                             onPhotosSelected={(urls) => handleAddServiceImageUrls(editingService.id, urls)}
                           />

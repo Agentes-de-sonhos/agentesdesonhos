@@ -42,6 +42,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCallback, useRef } from "react";
 import { resolveAirlineDisplay } from "@/lib/airlines";
 import { getAirportsMap } from "@/lib/airports";
+import { PlacesAutocompleteInput, parsePlaceSecondary } from "@/components/shared/PlacesAutocompleteInput";
 
 interface TripServiceFormProps {
   serviceType: TripServiceType;
@@ -1556,7 +1557,7 @@ interface CarDriverInput {
 
 const emptyDriver = (): CarDriverInput => ({ name: '', document: '', age: '', notes: '' });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [drivers, setDrivers] = useState<CarDriverInput[]>(
     defaultValues?.drivers?.length > 0 ? defaultValues.drivers : [emptyDriver()]
@@ -1634,6 +1635,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🚗 Informações Principais">
         {imageSlot}
+        {googlePhotoSlot}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="rental_company" render={({ field }) => (
             <FormItem><FormLabel>Locadora *</FormLabel><FormControl><Input placeholder="Hertz, Alamo, Localiza..." {...field} /></FormControl><FormMessage /></FormItem>
@@ -1678,7 +1680,27 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         <CollapsibleFormSection title="📍 Dados de Retirada">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_location" render={({ field }) => (
-            <FormItem><FormLabel>Local de Retirada *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem>
+              <FormLabel>Local de Retirada *</FormLabel>
+              <FormControl>
+                <PlacesAutocompleteInput
+                  value={field.value}
+                  cityContext={form.getValues("pickup_city")}
+                  selectedPlaceId={placeId}
+                  placeholder="Aeroporto CDG, Localiza Centro..."
+                  onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                  onSelect={(p) => {
+                    field.onChange(p.name);
+                    onPlaceIdChange?.(p.place_id);
+                    const parts = parsePlaceSecondary(p.secondary);
+                    if (!form.getValues("pickup_city") && parts.city) form.setValue("pickup_city", parts.city);
+                    if (!form.getValues("pickup_country") && parts.country) form.setValue("pickup_country", parts.country);
+                    if (!form.getValues("pickup_address") && parts.address) form.setValue("pickup_address", parts.address);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )} />
           <FormField control={form.control} name="pickup_address" render={({ field }) => (
             <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input placeholder="Terminal 2E, Área de locação" {...field} /></FormControl></FormItem>
@@ -2011,7 +2033,7 @@ const emptyTransferPassenger = (): TransferPassengerInput => ({
   name: '', age: '', passenger_type: 'adulto', needs_child_seat: 'nao', notes: '',
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<TransferPassengerInput[]>(
     defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
@@ -2089,6 +2111,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🚐 Informações Principais">
         {imageSlot}
+        {googlePhotoSlot}
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="transfer_type" render={({ field }) => (
@@ -2144,7 +2167,22 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           <FormField control={form.control} name="destination_location" render={({ field }) => (
             <FormItem>
               <FormLabel>Destino *</FormLabel>
-              <FormControl><Input placeholder="Hotel / Aeroporto / Porto" {...field} /></FormControl>
+              <FormControl>
+                <PlacesAutocompleteInput
+                  value={field.value}
+                  cityContext={form.getValues("city")}
+                  selectedPlaceId={placeId}
+                  placeholder="Hotel / Aeroporto / Porto"
+                  onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                  onSelect={(p) => {
+                    field.onChange(p.name);
+                    onPlaceIdChange?.(p.place_id);
+                    const parts = parsePlaceSecondary(p.secondary);
+                    if (!form.getValues("city") && parts.city) form.setValue("city", parts.city);
+                    if (!form.getValues("destination_address") && parts.address) form.setValue("destination_address", parts.address);
+                  }}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )} />
@@ -2508,7 +2546,7 @@ interface AttractionPassengerInput {
   notes: string;
 }
 
-function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
@@ -2632,11 +2670,28 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🎟️ Informações Principais">
         {imageSlot}
+        {googlePhotoSlot}
 
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
             <FormLabel>Nome da Atração / Experiência *</FormLabel>
-            <FormControl><Input placeholder="Walt Disney World, Torre Eiffel, Coliseu..." {...field} /></FormControl>
+            <FormControl>
+              <PlacesAutocompleteInput
+                value={field.value}
+                cityContext={form.getValues("city")}
+                selectedPlaceId={placeId}
+                placeholder="Walt Disney World, Torre Eiffel, Coliseu..."
+                onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                onSelect={(p) => {
+                  field.onChange(p.name);
+                  onPlaceIdChange?.(p.place_id);
+                  const parts = parsePlaceSecondary(p.secondary);
+                  if (!form.getValues("city") && parts.city) form.setValue("city", parts.city);
+                  if (!form.getValues("country") && parts.country) form.setValue("country", parts.country);
+                  if (!form.getValues("address") && parts.address) form.setValue("address", parts.address);
+                }}
+              />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -3568,7 +3623,7 @@ const cruiseSchema = z.object({
   ship_website: z.string().optional(),
 });
 
-function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; birth_date?: string; document?: string; notes?: string }[]>(
@@ -3684,6 +3739,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🚢 Informações do Cruzeiro">
         {imageSlot}
+        {googlePhotoSlot}
 
         <FormField control={form.control} name="cruise_company" render={({ field }) => (
           <FormItem>
@@ -3722,7 +3778,20 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           <FormField control={form.control} name="embarkation_port" render={({ field }) => (
             <FormItem>
               <FormLabel>Porto de Embarque *</FormLabel>
-              <FormControl><Input placeholder="Santos" {...field} /></FormControl>
+              <FormControl>
+                <PlacesAutocompleteInput
+                  value={field.value}
+                  selectedPlaceId={placeId}
+                  placeholder="Porto de Santos, Port of Miami..."
+                  onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
+                  onSelect={(p) => {
+                    field.onChange(p.name);
+                    onPlaceIdChange?.(p.place_id);
+                    const parts = parsePlaceSecondary(p.secondary);
+                    if (!form.getValues("port_address") && parts.address) form.setValue("port_address", parts.address);
+                  }}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )} />
@@ -4946,14 +5015,15 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
 // Main Service Form component
 export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: TripServiceFormProps) {
   const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot };
+  const placesProps = { placeId, onPlaceIdChange, googlePhotoSlot };
   switch (serviceType) {
     case "flight": return <FlightForm {...props} />;
-    case "hotel": return <HotelForm {...props} placeId={placeId} onPlaceIdChange={onPlaceIdChange} googlePhotoSlot={googlePhotoSlot} />;
-    case "car_rental": return <CarRentalForm {...props} />;
-    case "transfer": return <TransferForm {...props} />;
-    case "attraction": return <AttractionForm {...props} />;
+    case "hotel": return <HotelForm {...props} {...placesProps} />;
+    case "car_rental": return <CarRentalForm {...props} {...placesProps} />;
+    case "transfer": return <TransferForm {...props} {...placesProps} />;
+    case "attraction": return <AttractionForm {...props} {...placesProps} />;
     case "insurance": return <InsuranceForm {...props} />;
-    case "cruise": return <CruiseForm {...props} />;
+    case "cruise": return <CruiseForm {...props} {...placesProps} />;
     case "train": return <TrainForm {...props} />;
     case "other": return <OtherForm {...props} />;
     default: return null;

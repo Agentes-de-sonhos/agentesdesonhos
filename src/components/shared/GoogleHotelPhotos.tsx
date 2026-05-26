@@ -16,12 +16,26 @@ interface GoogleHotelPhotosProps {
   onPhotosSelected: (urls: string[]) => void;
   existingUrls?: string[];
   autoShow?: boolean;
+  /** Loading message. Default "Buscando fotos do hotel..." */
+  loadingLabel?: string;
+  /** Closed-state button label. Default "Sugerir fotos do Google ({n})" */
+  buttonLabel?: string;
+  /** Open-state heading. Default "Fotos do Google" */
+  headingLabel?: string;
 }
 
 // In-memory cache to avoid re-fetching
 const photoCache = new Map<string, GooglePhoto[]>();
 
-export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = [], autoShow = false }: GoogleHotelPhotosProps) {
+export function GoogleHotelPhotos({
+  placeId,
+  onPhotosSelected,
+  existingUrls = [],
+  autoShow = false,
+  loadingLabel = "Buscando fotos do hotel...",
+  buttonLabel,
+  headingLabel = "Fotos do Google",
+}: GoogleHotelPhotosProps) {
   const [photos, setPhotos] = useState<GooglePhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
@@ -88,7 +102,7 @@ export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = []
     return (
       <div className="flex items-center gap-2 text-xs text-muted-foreground py-1">
         <Loader2 className="h-3 w-3 animate-spin" />
-        <span>Buscando fotos do hotel...</span>
+        <span>{loadingLabel}</span>
       </div>
     );
   }
@@ -103,7 +117,7 @@ export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = []
         className="text-xs gap-1.5 h-8"
       >
         <Camera className="h-3.5 w-3.5" />
-        Sugerir fotos do Google ({photos.length})
+        {buttonLabel ?? `Sugerir fotos do Google (${photos.length})`}
       </Button>
     );
   }
@@ -113,7 +127,7 @@ export function GoogleHotelPhotos({ placeId, onPhotosSelected, existingUrls = []
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium flex items-center gap-1.5">
           <Camera className="h-4 w-4 text-primary" />
-          Fotos do Google
+          {headingLabel}
         </p>
         <div className="flex items-center gap-2">
           <Button type="button" variant="ghost" size="sm" onClick={selectAll} className="text-xs h-7">
