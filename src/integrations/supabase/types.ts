@@ -3744,6 +3744,125 @@ export type Database = {
           },
         ]
       }
+      itinerary_template_activities: {
+        Row: {
+          category: string | null
+          created_at: string
+          day_number: number
+          description: string | null
+          estimated_cost: string | null
+          estimated_duration: string | null
+          id: string
+          location: string | null
+          order_index: number
+          period: string
+          photo_url: string | null
+          priority: string
+          template_id: string
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          day_number: number
+          description?: string | null
+          estimated_cost?: string | null
+          estimated_duration?: string | null
+          id?: string
+          location?: string | null
+          order_index?: number
+          period: string
+          photo_url?: string | null
+          priority?: string
+          template_id: string
+          title: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          day_number?: number
+          description?: string | null
+          estimated_cost?: string | null
+          estimated_duration?: string | null
+          id?: string
+          location?: string | null
+          order_index?: number
+          period?: string
+          photo_url?: string | null
+          priority?: string
+          template_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itinerary_template_activities_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "itinerary_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      itinerary_templates: {
+        Row: {
+          additional_preferences: Json
+          cover_image_url: string | null
+          created_at: string
+          destination: string | null
+          destination_intro_images: Json
+          destination_intro_text: string | null
+          id: string
+          interests: string[]
+          name: string
+          nights_count: number
+          pace: string
+          profile: string
+          source_itinerary_id: string | null
+          style: string
+          tags: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_preferences?: Json
+          cover_image_url?: string | null
+          created_at?: string
+          destination?: string | null
+          destination_intro_images?: Json
+          destination_intro_text?: string | null
+          id?: string
+          interests?: string[]
+          name: string
+          nights_count?: number
+          pace?: string
+          profile?: string
+          source_itinerary_id?: string | null
+          style?: string
+          tags?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_preferences?: Json
+          cover_image_url?: string | null
+          created_at?: string
+          destination?: string | null
+          destination_intro_images?: Json
+          destination_intro_text?: string | null
+          id?: string
+          interests?: string[]
+          name?: string
+          nights_count?: number
+          pace?: string
+          profile?: string
+          source_itinerary_id?: string | null
+          style?: string
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lead_capture_forms: {
         Row: {
           created_at: string | null
