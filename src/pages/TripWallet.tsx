@@ -87,6 +87,9 @@ function TripWalletContent() {
   const editingService = editingServiceId
     ? trip?.services?.find((s) => s.id === editingServiceId) ?? null
     : null;
+  useEffect(() => {
+    setEditPlaceId(editingService?.place_id ?? null);
+  }, [editingServiceId, editingService?.place_id]);
   const [isUploading, setIsUploading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
