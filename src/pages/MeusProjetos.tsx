@@ -516,6 +516,15 @@ export default function MeusProjetos() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Save as template */}
+      {templateTarget && (
+        <SaveAsTemplateDialog
+          open={!!templateTarget}
+          onOpenChange={(open) => !open && setTemplateTarget(null)}
+          itinerary={templateTarget}
+        />
+      )}
     </DashboardLayout>
   );
 }
