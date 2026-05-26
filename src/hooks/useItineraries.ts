@@ -230,11 +230,55 @@ export function useItineraries() {
         is_approved: false,
       }));
 
-      const { error: activitiesError } = await supabase
+      const { data: insertedActivities, error: activitiesError } = await supabase
         .from("itinerary_activities")
-        .insert(activitiesInsert);
+        .insert(activitiesInsert)
+        .select("id, title, location");
 
       if (activitiesError) throw activitiesError;
+
+      // Best-effort: auto-pick a representative photo per activity so the
+      // public link and PDF already render with imagery without requiring
+      // the agent to open each activity in the editor first.
+      (async () => {
+        try {
+          const { data: itinForPhoto } = await supabase
+            .from("itineraries")
+            .select("destination")
+            .eq("id", itineraryId)
+            .maybeSingle();
+          const destination = (itinForPhoto as any)?.destination as string | undefined;
+          await Promise.all(
+            (insertedActivities || []).map(async (a: any) => {
+              try {
+                const { data: photo } = await supabase.functions.invoke(
+                  "activity-photo",
+                  {
+                    body: {
+                      query: a.title,
+                      location: a.location ?? undefined,
+                      destination,
+                    },
+                  }
+                );
+                const url: string | null =
+                  photo?.photo_url ?? photo?.thumb_url ?? null;
+                if (url) {
+                  await supabase
+                    .from("itinerary_activities")
+                    .update({ photo_url: url })
+                    .eq("id", a.id);
+                }
+              } catch (err) {
+                console.warn("[itinerary] activity photo prefetch failed", err);
+              }
+            })
+          );
+          queryClient.invalidateQueries({ queryKey: ["itineraries"] });
+        } catch (err) {
+          console.warn("[itinerary] activity photo batch failed", err);
+        }
+      })();
     }
 
     // Best-effort: auto-generate destination intro (text + photo gallery)
