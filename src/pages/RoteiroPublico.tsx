@@ -92,10 +92,10 @@ function ActivityImage({
 }
 
 function CollapsibleDayCard({
-  day, periodImages, isOpen, onToggle, weather,
+  day, periodImages, isOpen, onToggle, weather, destination,
 }: {
   day: ItineraryDay; periodImages: Record<string, string>; isOpen: boolean; onToggle: () => void;
-  weather?: DayWeather;
+  weather?: DayWeather; destination?: string;
 }) {
   const dateFormatted = format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR });
   const WxIcon = weather ? weatherIconFor(weather.code) : null;
@@ -177,21 +177,11 @@ function CollapsibleDayCard({
                       key={activity.id}
                       className="group rounded-2xl border border-border/50 bg-white overflow-hidden sm:overflow-visible sm:p-4 flex flex-col sm:flex-row sm:gap-4 hover:border-border hover:shadow-sm transition-all"
                     >
-                      {(activity as any).photoUrl ? (
-                        <div className="shrink-0 overflow-hidden sm:rounded-xl sm:border sm:border-border/30 bg-muted">
-                          <img
-                            src={(activity as any).photoUrl}
-                            alt={activity.title}
-                            loading="lazy"
-                            decoding="async"
-                            className="w-full h-44 sm:h-28 sm:w-28 object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      ) : (
-                        <div className="shrink-0 w-full h-44 sm:h-28 sm:w-28 sm:rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border-b sm:border border-primary/10 flex items-center justify-center">
-                          <Icon className="h-6 w-6 text-primary/40" />
-                        </div>
-                      )}
+                      <ActivityImage
+                        activity={activity}
+                        destination={destination}
+                        FallbackIcon={Icon}
+                      />
 
                       <div className="flex-1 min-w-0 space-y-2 p-3 sm:p-0">
                         <h4 className="font-semibold text-foreground text-[15px] leading-tight tracking-tight">
