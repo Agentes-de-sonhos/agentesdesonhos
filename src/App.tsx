@@ -22,6 +22,7 @@ const AdminCRM = lazy(() => import("./pages/AdminCRM"));
 const FerramentasIA = lazy(() => import("./pages/FerramentasIA"));
 const GerarOrcamento = lazy(() => import("./pages/GerarOrcamento"));
 const CriarRoteiro = lazy(() => import("./pages/CriarRoteiro"));
+const ModelosRoteiros = lazy(() => import("./pages/ModelosRoteiros"));
 const CriarConteudo = lazy(() => import("./pages/CriarConteudo"));
 const RoteiroPublico = lazy(() => import("./pages/RoteiroPublico"));
 const TripWallet = lazy(() => import("./pages/TripWallet"));
@@ -171,6 +172,7 @@ const App = () => (
             <Route path="/sorteador" element={<ProtectedRoute><Sorteador /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-roteiro" element={<ProtectedRoute><CriarRoteiro /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-roteiro/:id" element={<ProtectedRoute><CriarRoteiro /></ProtectedRoute>} />
+            <Route path="/ferramentas-ia/modelos-roteiros" element={<ProtectedRoute><ModelosRoteiros /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/criar-conteudo" element={<ProtectedRoute><CriarConteudo /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/gerar-orcamento" element={<ProtectedRoute><GerarOrcamento /></ProtectedRoute>} />
             <Route path="/ferramentas-ia/gerar-orcamento/:id" element={<ProtectedRoute><GerarOrcamento /></ProtectedRoute>} />

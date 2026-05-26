@@ -1,73 +1,104 @@
-# Modo Assistido — Passagem Aérea
+## Biblioteca de Modelos de Roteiros
 
-Objetivo: adicionar uma camada guiada (wizard de 8 etapas) ao cadastro de Passagem Aérea no Orçamento, reaproveitando 100% dos campos, validações e fluxo de salvamento existentes. **Nada do formulário manual atual é alterado, removido ou recriado**.
+Nova funcionalidade que permite ao agente salvar roteiros já criados como **modelos reutilizáveis** (estrutura, atividades e lógica) — sem dados de cliente, datas ou orçamento — e usar esses modelos como base para criar novos roteiros rapidamente.
 
-## Visão geral
+---
 
-Quando o usuário clica para adicionar um serviço do tipo Passagem Aérea, em vez de abrir direto o `FlightForm` atual, exibimos primeiro uma tela de **escolha de modo**:
+### 1. Banco de dados (Lovable Cloud)
 
-- **Preencher com ajuda** (passo a passo)
-- **Preencher manualmente** (formulário completo atual — comportamento idêntico ao de hoje)
+Criar duas tabelas em uma migração:
 
-Se escolher manual → renderiza o `FlightForm` como já é hoje (zero mudança de comportamento).
-Se escolher assistido → renderiza um novo componente `FlightWizard` que produz **exatamente o mesmo payload** que o `FlightForm` ao salvar.
+**`itinerary_templates`** — metadados do modelo
+- `user_id`, `name`, `cover_image_url`, `destination`
+- `nights_count` (int), `style` ('economico' | 'moderado' | 'luxo'), `profile` (TripProfile), `pace` ('leve' | 'moderado' | 'intenso')
+- `tags` (text[])
+- `destination_intro_text`, `destination_intro_images` (jsonb)
+- `source_itinerary_id` (referência opcional ao roteiro de origem)
+- `interests` (text[]), `additional_preferences` (jsonb)
 
-## Arquivos a criar
+**`itinerary_template_activities`** — estrutura reutilizável (achatada, sem datas)
+- `template_id`, `day_number` (int — relativo, 1..N), `period` ('manha'|'tarde'|'noite')
+- `order_index`, `title`, `description`, `location`
+- `estimated_duration`, `estimated_cost` (texto-faixa, não valor fechado)
+- `photo_url`, `category` (tag/categoria da experiência), `priority` ('essencial'|'opcional')
 
-- `src/components/quote/flight-wizard/FlightWizard.tsx` — orquestra etapas, estado central, persistência de rascunho.
-- `src/components/quote/flight-wizard/types.ts` — tipo `WizardFlightDraft` (espelha `FlightData` + `option_label`, `description`, `notes`, `image_urls`, `payment_config`).
-- `src/components/quote/flight-wizard/steps/Step1Main.tsx` — companhia, origem, destino, tipo (ida e volta / só ida), datas, bagagem, taxa.
-- `src/components/quote/flight-wizard/steps/Step2Outbound.tsx` — trechos da ida (reutiliza `FlightLegFields` já existente).
-- `src/components/quote/flight-wizard/steps/Step3Return.tsx` — trechos da volta (oculto se "somente ida").
-- `src/components/quote/flight-wizard/steps/Step4Baggage.tsx` — reforço de bagagem/taxa (mesmos checkboxes).
-- `src/components/quote/flight-wizard/steps/Step5Prices.tsx` — valor adulto / valor criança.
-- `src/components/quote/flight-wizard/steps/Step6Payment.tsx` — primeiro pergunta "padrão vs personalizado"; se personalizado, reutiliza `ServicePaymentForm`.
-- `src/components/quote/flight-wizard/steps/Step7Presentation.tsx` — etiqueta (com sugestões clicáveis), fotos (reutiliza o mesmo `photoSlot` que o form manual recebe), descrição, observações.
-- `src/components/quote/flight-wizard/steps/Step8Review.tsx` — resumo + alertas amigáveis + ações.
-- `src/components/quote/flight-wizard/ModeChooser.tsx` — tela inicial com os 2 cards de escolha.
-- `src/components/quote/flight-wizard/useFlightDraft.ts` — wrapper de `useFormDraft` (chave `flight-wizard:{quoteId}:{serviceId|new}`).
-- `src/components/quote/flight-wizard/flightStatus.ts` — função pura `computeFlightStatus(data)` → `'draft' | 'incomplete' | 'ready'`.
+RLS estrita por `user_id`. GRANTs para `authenticated` e `service_role`.
 
-## Arquivos a alterar (mínimo possível)
+> Observação arquitetural: a separação em "metadados + atividades achatadas com `priority` e `category`" é o que viabiliza a futura adaptação por IA (condensar 10→7 noites removendo opcionais, trocar restaurantes premium por family-friendly, etc.). Nada de copiar `itinerary_days` cru.
 
-- `src/components/quote/ServiceForms.tsx` — no switch do `case "flight"` (linha ~1842), encapsular num componente `FlightFormOrWizard` que, **só para flight**, decide entre `ModeChooser → FlightWizard` ou `FlightForm`. O componente `FlightForm` em si **não é modificado**. Quando vier `initialData` (edição), pular o ModeChooser e abrir o `FlightForm` clássico — preserva o comportamento "depois de salvo, edição continua igual".
-- `src/types/quote.ts` — adicionar campo opcional `flight_status?: 'draft' | 'incomplete' | 'ready'` dentro de `FlightData` (campo opcional, não quebra dados existentes; salvo dentro de `service_data`).
+---
 
-Nenhuma migration de banco. Nenhuma mudança em RLS, edge functions, OG, público.
+### 2. Ações no roteiro existente
 
-## Comportamento do wizard
+Em `src/pages/CriarRoteiro.tsx` (e nos cards da lista de roteiros), adicionar a ação **⭐ Salvar como modelo** ao lado das demais ações do roteiro.
 
-- Indicador de progresso "Etapa X de N" (N = 7 se "somente ida", 8 se ida e volta).
-- Botões: **Voltar**, **Pular por enquanto**, **Continuar**, **Salvar rascunho**, **Abrir edição completa** (em qualquer etapa, transfere o estado atual para o `FlightForm` manual já preenchido).
-- Toda etapa é opcional (nada bloqueia avançar).
-- Rascunho persistido em `localStorage` via `useFormDraft` (já existe em `usePersistedState.ts`).
-- Ao salvar: monta o mesmo objeto `FlightData` que o `FlightForm.handleSubmit` monta e chama o mesmo `onSubmit(data, amount, optionLabel, description, undefined, imageUrls)` — garante paridade absoluta com o fluxo manual.
+---
 
-## Status visual
+### 3. Modal "Salvar como modelo"
 
-`computeFlightStatus` (puro, sem efeitos):
-- `ready` se: companhia + origem + destino + data ida + (data volta OU somente ida) + adult_price > 0.
-- `draft` se: salvo via "Salvar rascunho" (flag explícita).
-- `incomplete` caso contrário.
+Novo componente `src/components/itinerary/SaveAsTemplateDialog.tsx`:
 
-Exibido como Badge no `ServiceCard` para serviços `flight`. Adicionar leitura de `service_data.flight_status` em `ServiceCard.tsx` apenas para flight (mudança visual mínima, 1 badge).
+- **Nome do modelo** (input)
+- **Número de noites** (input numérico — pré-preenchido com `endDate - startDate`)
+- **Estilo da viagem** (select: Econômico / Moderado / Premium-Luxo — pré-preenchido com `budgetLevel`)
+- **Perfil principal** (select com TRIP_PROFILE_LABELS — pré-preenchido com `tripType`)
+- **Tags** (chips livres, reaproveitando padrão de `TagsEditForm`)
+- Banner de auto-sugestão no topo: *"Detectamos que este roteiro parece ser: Premium • Casal • 10 noites"* com botão "Usar sugestão".
 
-## Preparação futura para IA/upload
+Ao confirmar:
+- Insere em `itinerary_templates`
+- Insere atividades em `itinerary_template_activities` derivando `day_number` relativo (1..N), descartando `date`, `clientId`, `passengers`, valores fechados de orçamento.
 
-`FlightWizard` aceita prop opcional `prefill?: Partial<WizardFlightDraft>` que pré-popula o draft inicial. É só isso — nenhuma UI, OCR, upload ou IA agora. Quando vier a fase futura, o consumidor passa `prefill` e o wizard já valida etapa por etapa.
+---
 
-## Detalhes técnicos
+### 4. Nova página: Biblioteca de Modelos
 
-- Reuso direto: `FlightLegFields`, `ServicePaymentForm`, `PlacesAutocomplete` (origem/destino), componente de upload de fotos (mesma prop `photoSlot` passada de fora).
-- O wizard mantém estado próprio em `useState` + sincroniza com `useFormDraft` (debounced). Não usa `react-hook-form` para simplicidade — toda validação é apenas visual ("alertas amigáveis"), nunca bloqueante.
-- Tela final faz o mesmo mapeamento de `outbound_legs`/`return_legs` (+ `outbound_detail`/`return_detail` para backward compat) que o `FlightForm` faz hoje.
-- Sugestões de etiqueta como chips clicáveis que apenas preenchem o input (usuário pode editar/limpar).
-- Edição de um serviço já salvo abre o `FlightForm` clássico (não o wizard), evitando qualquer regressão na edição.
+Nova rota `/ferramentas-ia/modelos-roteiros` e página `src/pages/ModelosRoteiros.tsx`:
 
-## Fora de escopo (não fazer)
+- Grid de cards (estética Notion/Canva templates): capa, nome, badges (noites • estilo • perfil), destino, tags, contagem de dias/atividades.
+- Busca por nome/tag/destino, filtros por estilo e perfil.
+- Ações por card: **Criar roteiro a partir deste modelo**, **Editar**, **Duplicar**, **Excluir** (confirmação única).
 
-- Não criar OCR, parser de PDF, integração IA, upload de e-mail.
-- Não alterar a página pública do orçamento.
-- Não alterar `QuoteService`/colunas do banco.
-- Não tocar nos demais tipos de serviço (hotel, transfer, etc.).
-- Não mudar fluxo de edição de serviço existente.
+Hook `src/hooks/useItineraryTemplates.ts` com React Query (list/create/update/delete/createFromItinerary/instantiate).
+
+Adicionar entrada no `menuConfig` dentro do grupo de Ferramentas IA / Roteiros.
+
+---
+
+### 5. Criar roteiro a partir do modelo
+
+Fluxo assistido em um único dialog (`InstantiateTemplateDialog.tsx`):
+1. **Cliente** (ClientSelector já existente, obrigatório por padrão do projeto)
+2. **Datas** (start / end) — com cálculo automático de noites
+3. **Ajustes opcionais**: estilo, perfil, ritmo (pré-preenchidos a partir do modelo)
+
+Ao confirmar, gera um novo `itinerary` + `itinerary_days` + `itinerary_activities`:
+- Se `noites_novo == noites_modelo` → mapeamento 1:1 dos dias do modelo nas novas datas.
+- Se diferente → por enquanto, mapeamento proporcional + flag `needs_ai_adaptation = true` no roteiro recém-criado (preparado para o passo 6). Atividades `priority='opcional'` são marcadas como candidatas a remoção quando encolhe.
+- Datas calculadas a partir da `startDate` informada.
+- Status: `draft` — o usuário cai direto no editor `/ferramentas-ia/criar-roteiro?id=...`.
+
+---
+
+### 6. Preparado para adaptação por IA (sem implementar agora)
+
+A arquitetura escolhida já entrega o necessário para a próxima fase:
+- `priority` + `category` + `pace` permitem condensar/expandir.
+- `style` + `profile` no modelo + no novo roteiro permitem detectar incompatibilidades.
+- Estrutura achatada por `day_number` facilita reorganização.
+
+Nenhuma Edge Function nova nesta entrega — apenas o terreno preparado.
+
+---
+
+### Detalhes técnicos
+
+- Tabelas com `GRANT SELECT, INSERT, UPDATE, DELETE ... TO authenticated; GRANT ALL ... TO service_role;` + RLS por `auth.uid() = user_id`.
+- Tipos em `src/types/itinerary.ts`: `ItineraryTemplate`, `ItineraryTemplateActivity`.
+- Reutilizar `Card`, `Dialog`, `Input`, `Select`, `Button`, `TagsEditForm` do design system — sem cores hard-coded, somente tokens semânticos.
+- Auto-sugestão: função pura `inferTemplateMetadata(itinerary)` em `src/lib/roteiro-domain.ts`.
+- Nenhuma alteração no PDF nem na página pública do roteiro.
+
+### Arquivos
+- **Novos**: migration; `src/hooks/useItineraryTemplates.ts`; `src/components/itinerary/SaveAsTemplateDialog.tsx`; `src/components/itinerary/InstantiateTemplateDialog.tsx`; `src/pages/ModelosRoteiros.tsx`.
+- **Editados**: `src/pages/CriarRoteiro.tsx` (botão + dialog), card de roteiros (ação extra), `src/App.tsx` (rota), `src/config/menuConfig.ts` (item de menu), `src/types/itinerary.ts`, `src/lib/roteiro-domain.ts`.
