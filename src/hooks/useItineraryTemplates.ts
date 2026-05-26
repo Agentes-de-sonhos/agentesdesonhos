@@ -139,7 +139,7 @@ export function useItineraryTemplates() {
           destination_intro_images: meta.destination_intro_images ?? [],
           additional_preferences: meta.additional_preferences ?? {},
           source_itinerary_id: meta.source_itinerary_id ?? null,
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;
@@ -148,7 +148,7 @@ export function useItineraryTemplates() {
         const rows = activities.map((a) => ({ ...a, template_id: tpl.id }));
         const { error: aErr } = await supabase
           .from("itinerary_template_activities")
-          .insert(rows);
+          .insert(rows as any);
         if (aErr) throw aErr;
       }
       return tpl;
@@ -205,7 +205,7 @@ export function useItineraryTemplates() {
         .insert({
           ...rest,
           name: `${template.name} (cópia)`,
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;
@@ -328,7 +328,7 @@ export function useItineraryTemplates() {
       if (actRows.length > 0) {
         const { error: aErr } = await supabase
           .from("itinerary_activities")
-          .insert(actRows);
+          .insert(actRows as any);
         if (aErr) throw aErr;
       }
 
