@@ -33,11 +33,14 @@ import {
   MapPin,
   Calendar,
   User as UserIcon,
+  Star,
 } from "lucide-react";
 import { useQuotes } from "@/hooks/useQuotes";
 import { useTrips } from "@/hooks/useTrips";
 import { useItineraries } from "@/hooks/useItineraries";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useItineraryTemplates } from "@/hooks/useItineraryTemplates";
+import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -151,6 +154,7 @@ export default function MeusProjetos() {
   const { quotes, isLoading: quotesLoading, deleteQuote, duplicateQuote } = useQuotes();
   const { trips, isLoading: tripsLoading, deleteTrip } = useTrips();
   const { itineraries, isLoading: itinerariesLoading, deleteItinerary } = useItineraries();
+  const { templates } = useItineraryTemplates();
 
   const normalized = useMemo(
     () => normalizeItems(quotes, trips, itineraries),
@@ -216,6 +220,7 @@ export default function MeusProjetos() {
       case "orcamentos": return normalized.quotes.length;
       case "carteiras": return normalized.trips.length;
       case "roteiros": return normalized.itineraries.length;
+      case "modelos": return templates.length;
       default: return 0;
     }
   };
@@ -371,7 +376,7 @@ export default function MeusProjetos() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={cn("w-full grid", isStartPlan ? "grid-cols-1" : "grid-cols-3")}>
+          <TabsList className={cn("w-full grid", isStartPlan ? "grid-cols-2" : "grid-cols-4")}>
             {!isStartPlan && (
               <TabsTrigger value="orcamentos" className="gap-2">
                 <FileText className="h-4 w-4" />
@@ -397,6 +402,13 @@ export default function MeusProjetos() {
                 {getTabCount("roteiros")}
               </Badge>
             </TabsTrigger>
+            <TabsTrigger value="modelos" className="gap-2">
+              <Star className="h-4 w-4" />
+              <span className={cn(isStartPlan ? "inline" : "hidden sm:inline")}>Modelos</span>
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                {getTabCount("modelos")}
+              </Badge>
+            </TabsTrigger>
           </TabsList>
 
           {!isStartPlan && (
@@ -411,6 +423,9 @@ export default function MeusProjetos() {
           )}
           <TabsContent value="roteiros" className="mt-4">
             {renderList(filteredItineraries, itinerariesLoading)}
+          </TabsContent>
+          <TabsContent value="modelos" className="mt-4">
+            <TemplatesGrid />
           </TabsContent>
         </Tabs>
       </div>
