@@ -422,21 +422,35 @@ function PublicServiceCard({ service }: { service: TripService }) {
   return (
     <Card className="border-border/40 shadow-sm hover:shadow transition-shadow">
       <CardContent className="p-4">
-        {/* Service image (preserves original aspect ratio — not cropped) */}
-        {service.image_url && /^https?:\/\//i.test(service.image_url) && (
-          <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted">
-            <img
-              src={service.image_url}
-              alt={title}
-              loading="lazy"
-              className="w-full h-56 md:h-48 object-cover object-center"
-              onError={(e) => {
-                const wrapper = e.currentTarget.parentElement;
-                if (wrapper) wrapper.style.display = "none";
-              }}
-            />
-          </div>
-        )}
+        {/* Service images (gallery) */}
+        {(() => {
+          const urls = (service.image_urls && service.image_urls.length > 0)
+            ? service.image_urls
+            : (service.image_url && /^https?:\/\//i.test(service.image_url) ? [service.image_url] : []);
+          if (urls.length === 0) return null;
+          if (urls.length === 1) {
+            return (
+              <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted">
+                <img src={urls[0]} alt={title} loading="lazy" className="w-full h-56 md:h-48 object-cover object-center" />
+              </div>
+            );
+          }
+          return (
+            <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted">
+              <div className="flex gap-1 overflow-x-auto snap-x snap-mandatory">
+                {urls.map((u, i) => (
+                  <img
+                    key={i}
+                    src={u}
+                    alt={`${title} ${i + 1}`}
+                    loading="lazy"
+                    className="snap-start shrink-0 w-full h-56 md:h-48 object-cover object-center"
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })()}
         <h4 className="font-semibold text-sm mb-1">{title}</h4>
         {dates && (
           <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
