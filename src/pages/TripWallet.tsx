@@ -79,6 +79,11 @@ function TripWalletContent() {
 
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  // Hotel autocomplete / gallery state for ADD flow
+  const [addPlaceId, setAddPlaceId] = useState<string | null>(null);
+  const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
+  // Hotel place id for EDIT flow (mirrors DB and is updated when user picks new prediction)
+  const [editPlaceId, setEditPlaceId] = useState<string | null>(null);
   const editingService = editingServiceId
     ? trip?.services?.find((s) => s.id === editingServiceId) ?? null
     : null;
