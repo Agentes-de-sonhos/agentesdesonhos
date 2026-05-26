@@ -19,6 +19,7 @@ import { FormattedText } from "@/components/ui/formatted-text";
 import { LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
 import { useTripWeather, type DayWeather } from "@/hooks/useTripWeather";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
+import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon };
 const periodLabels = { manha: "Manhã", tarde: "Tarde", noite: "Noite" };
@@ -44,6 +45,50 @@ function getFileName(url: string) {
 
 function isImageUrl(url: string) {
   return /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url);
+}
+
+/**
+ * Renders the activity photo. When the activity does not yet have a
+ * persisted photoUrl (e.g. older itineraries created before auto-pick),
+ * lazily fetches a representative image via the activity-photo edge
+ * function so the public link still shows imagery by default.
+ */
+function ActivityImage({
+  activity,
+  destination,
+  FallbackIcon,
+}: {
+  activity: any;
+  destination?: string;
+  FallbackIcon: any;
+}) {
+  const persisted: string | null = activity?.photoUrl ?? null;
+  const { data } = useActivityPhoto({
+    query: activity?.title,
+    location: activity?.location,
+    destination,
+    enabled: !persisted,
+  });
+  const url = persisted || data?.photo_url || data?.thumb_url || null;
+
+  if (url) {
+    return (
+      <div className="shrink-0 overflow-hidden sm:rounded-xl sm:border sm:border-border/30 bg-muted">
+        <img
+          src={url}
+          alt={activity.title}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-44 sm:h-28 sm:w-28 object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="shrink-0 w-full h-44 sm:h-28 sm:w-28 sm:rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border-b sm:border border-primary/10 flex items-center justify-center">
+      <FallbackIcon className="h-6 w-6 text-primary/40" />
+    </div>
+  );
 }
 
 function CollapsibleDayCard({
