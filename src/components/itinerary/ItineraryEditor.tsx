@@ -222,7 +222,29 @@ export function ItineraryEditor({
     day.activities.every((a) => a.isApproved)
   );
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || !onMoveActivity) return;
+    const activityId = (active.data.current as { activityId?: string } | undefined)?.activityId;
+    const target = over.data.current as { dayId?: string; period?: "manha" | "tarde" | "noite" } | undefined;
+    if (!activityId || !target?.dayId || !target?.period) return;
+
+    // skip if dropped on its current slot
+    const current = days
+      .flatMap((d) => d.activities.map((a) => ({ a, dayId: d.id! })))
+      .find((x) => x.a.id === activityId);
+    if (current && current.dayId === target.dayId && current.a.period === target.period) return;
+
+    onMoveActivity(activityId, target.dayId, target.period);
+  };
+
   return (
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -373,7 +395,7 @@ export function ItineraryEditor({
                 const Icon = periodIcons[period];
 
                 return (
-                  <div key={period} className="space-y-2">
+                  <DroppablePeriod key={period} dayId={day.id!} period={period}>
                     <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                       <Icon className="h-4 w-4" />
                       {periodLabels[period]}
@@ -398,6 +420,9 @@ export function ItineraryEditor({
                           )}
                         >
                           <div className="flex items-start justify-between gap-3">
+                            {onMoveActivity && activity.id && (
+                              <DraggableHandle activityId={activity.id} />
+                            )}
                             {activity.photoUrl ? (
                               <div className="shrink-0 overflow-hidden rounded-md border bg-muted/50 h-16 w-16 sm:h-20 sm:w-20">
                                 <img
