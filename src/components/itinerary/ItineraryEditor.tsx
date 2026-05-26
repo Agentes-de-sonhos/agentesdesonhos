@@ -632,7 +632,7 @@ export function ItineraryEditor({
                         </div>
                       ))
                     )}
-                  </div>
+                  </DroppablePeriod>
                 );
               })}
             </CardContent>
@@ -640,5 +640,6 @@ export function ItineraryEditor({
         ))}
       </div>
     </div>
+    </DndContext>
   );
 }
