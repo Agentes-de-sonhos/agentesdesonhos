@@ -66,6 +66,7 @@ export default function CriarRoteiro() {
     updateActivity,
     deleteActivity,
     addActivity,
+    moveActivity,
     updateItineraryStatus,
     updateItineraryDetails,
     deleteItinerary,
@@ -211,6 +212,24 @@ export default function CriarRoteiro() {
             loadItinerary(currentItinerary.id);
           }
           toast.success("Atividade adicionada");
+        },
+      }
+    );
+  };
+
+  const handleMoveActivity = (
+    activityId: string,
+    dayId: string,
+    period: "manha" | "tarde" | "noite"
+  ) => {
+    moveActivity.mutate(
+      { activityId, dayId, period },
+      {
+        onSuccess: () => {
+          if (currentItinerary) {
+            loadItinerary(currentItinerary.id);
+          }
+          toast.success("Atividade movida");
         },
       }
     );
@@ -704,6 +723,7 @@ export default function CriarRoteiro() {
                 onUpdateActivity={handleUpdateActivity}
                 onDeleteActivity={handleDeleteActivity}
                 onAddActivity={handleAddActivity}
+                onMoveActivity={handleMoveActivity}
                 onApproveAll={handleApproveAll}
                 aiContext={{
                   destination: currentItinerary.destination,

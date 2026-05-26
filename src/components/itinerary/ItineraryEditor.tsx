@@ -2,6 +2,18 @@ import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  DragOverlay,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import {
   Sun,
   Sunset,
   Moon,
@@ -14,6 +26,7 @@ import {
   DollarSign,
   Loader2,
   X,
+  GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,12 +78,63 @@ const periodLabels = {
   noite: "Noite",
 };
 
+function DroppablePeriod({
+  dayId,
+  period,
+  isOver,
+  children,
+}: {
+  dayId: string;
+  period: "manha" | "tarde" | "noite";
+  isOver?: boolean;
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver: over } = useDroppable({
+    id: `drop-${dayId}-${period}`,
+    data: { dayId, period },
+  });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "space-y-2 rounded-lg transition-colors",
+        over && "bg-primary/5 ring-2 ring-primary/30 ring-offset-2 ring-offset-background"
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DraggableHandle({ activityId }: { activityId: string }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `drag-${activityId}`,
+    data: { activityId },
+  });
+  return (
+    <button
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      type="button"
+      aria-label="Arrastar atividade"
+      className={cn(
+        "flex h-8 w-6 cursor-grab items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground touch-none",
+        isDragging && "cursor-grabbing opacity-50"
+      )}
+    >
+      <GripVertical className="h-4 w-4" />
+    </button>
+  );
+}
+
 interface ItineraryEditorProps {
   itineraryId?: string;
   days: ItineraryDay[];
   onUpdateActivity: (activityId: string, updates: Partial<Activity>) => void;
   onDeleteActivity: (activityId: string) => void;
   onAddActivity: (dayId: string, activity: Omit<Activity, "id" | "orderIndex" | "isApproved">) => void;
+  onMoveActivity?: (activityId: string, dayId: string, period: "manha" | "tarde" | "noite") => void;
   onApproveAll: () => void;
   aiContext?: AIContext;
 }
@@ -81,6 +145,7 @@ export function ItineraryEditor({
   onUpdateActivity,
   onDeleteActivity,
   onAddActivity,
+  onMoveActivity,
   onApproveAll,
   aiContext,
 }: ItineraryEditorProps) {
@@ -157,7 +222,29 @@ export function ItineraryEditor({
     day.activities.every((a) => a.isApproved)
   );
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || !onMoveActivity) return;
+    const activityId = (active.data.current as { activityId?: string } | undefined)?.activityId;
+    const target = over.data.current as { dayId?: string; period?: "manha" | "tarde" | "noite" } | undefined;
+    if (!activityId || !target?.dayId || !target?.period) return;
+
+    // skip if dropped on its current slot
+    const current = days
+      .flatMap((d) => d.activities.map((a) => ({ a, dayId: d.id! })))
+      .find((x) => x.a.id === activityId);
+    if (current && current.dayId === target.dayId && current.a.period === target.period) return;
+
+    onMoveActivity(activityId, target.dayId, target.period);
+  };
+
   return (
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -308,7 +395,7 @@ export function ItineraryEditor({
                 const Icon = periodIcons[period];
 
                 return (
-                  <div key={period} className="space-y-2">
+                  <DroppablePeriod key={period} dayId={day.id!} period={period}>
                     <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                       <Icon className="h-4 w-4" />
                       {periodLabels[period]}
@@ -333,6 +420,9 @@ export function ItineraryEditor({
                           )}
                         >
                           <div className="flex items-start justify-between gap-3">
+                            {onMoveActivity && activity.id && (
+                              <DraggableHandle activityId={activity.id} />
+                            )}
                             {activity.photoUrl ? (
                               <div className="shrink-0 overflow-hidden rounded-md border bg-muted/50 h-16 w-16 sm:h-20 sm:w-20">
                                 <img
@@ -542,7 +632,7 @@ export function ItineraryEditor({
                         </div>
                       ))
                     )}
-                  </div>
+                  </DroppablePeriod>
                 );
               })}
             </CardContent>
@@ -550,5 +640,6 @@ export function ItineraryEditor({
         ))}
       </div>
     </div>
+    </DndContext>
   );
 }
