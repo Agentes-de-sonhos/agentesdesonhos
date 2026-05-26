@@ -22,6 +22,7 @@ const AdminCRM = lazy(() => import("./pages/AdminCRM"));
 const FerramentasIA = lazy(() => import("./pages/FerramentasIA"));
 const GerarOrcamento = lazy(() => import("./pages/GerarOrcamento"));
 const CriarRoteiro = lazy(() => import("./pages/CriarRoteiro"));
+const ModelosRoteiros = lazy(() => import("./pages/ModelosRoteiros"));
 const CriarConteudo = lazy(() => import("./pages/CriarConteudo"));
 const RoteiroPublico = lazy(() => import("./pages/RoteiroPublico"));
 const TripWallet = lazy(() => import("./pages/TripWallet"));
