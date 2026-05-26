@@ -20,7 +20,8 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles } from "lucide-react";
+import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star } from "lucide-react";
+import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,7 @@ export default function CriarRoteiro() {
   const [pendingAction, setPendingAction] = useState<"pdf" | "link" | null>(null);
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
 
   const {
     itineraries,
