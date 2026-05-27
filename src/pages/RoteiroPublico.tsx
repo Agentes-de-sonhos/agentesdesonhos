@@ -73,19 +73,19 @@ function ActivityImage({
 
   if (url) {
     return (
-      <div className="shrink-0 overflow-hidden sm:rounded-xl sm:border sm:border-border/30 bg-muted">
+      <div className="shrink-0 sm:self-center overflow-hidden sm:rounded-xl sm:border sm:border-border/30 bg-muted w-full h-44 sm:h-[120px] sm:w-[120px]">
         <img
           src={url}
           alt={activity.title}
           loading="lazy"
           decoding="async"
-          className="w-full h-44 sm:h-28 sm:w-28 object-cover group-hover:scale-105 transition-transform duration-500"
+          className="block w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
       </div>
     );
   }
   return (
-    <div className="shrink-0 w-full h-44 sm:h-28 sm:w-28 sm:rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border-b sm:border border-primary/10 flex items-center justify-center">
+    <div className="shrink-0 sm:self-center w-full h-44 sm:h-[120px] sm:w-[120px] sm:rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border-b sm:border border-primary/10 flex items-center justify-center">
       <FallbackIcon className="h-6 w-6 text-primary/40" />
     </div>
   );
