@@ -29,6 +29,17 @@ import {
 import type { Operation, OperationStage } from "@/types/operations";
 import { OPERATION_STAGES, STAGE_CHECKLISTS, getStageMeta } from "@/types/operations";
 
+function StageChip({ stage }: { stage: OperationStage }) {
+  const meta = getStageMeta(stage);
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${meta.bg} ${meta.border} ${meta.text}`}
+    >
+      {meta.label}
+    </span>
+  );
+}
+
 interface Props {
   operation: Operation | null;
   open: boolean;
