@@ -1,80 +1,87 @@
-## Objetivo
 
-Trazer para a Carteira Digital a mesma experiência já existente no módulo de Orçamentos:
-- Ao digitar o **nome do hotel** (e de outros serviços), buscar no **Google Places** e auto-preencher os principais dados.
-- Ao selecionar o local, exibir uma **galeria de fotos do Google** para o usuário escolher quantas quiser, salvando-as no serviço.
-- Essas fotos passam a aparecer na **carteira digital pública** e no **PDF exportado**.
+# Funil Customizável no Kanban de Oportunidades
 
-A mudança é **100% aditiva** — nenhum serviço, carteira ou PDF antigo é afetado. A foto única atual (`image_url`) continua funcionando como fallback para registros existentes.
+Transformar o Kanban da seção Gestão de Clientes > Oportunidades em um funil totalmente personalizável (estilo Trello), preservando o layout atual e os dados existentes.
 
----
+## 1. Banco de Dados
 
-## Fase 1 — Hotéis (entrega inicial desta etapa)
+Criar a tabela `pipeline_stages` para armazenar as colunas do funil por usuário:
 
-### Banco de dados (migration aditiva)
-- Adicionar coluna `image_urls text[] not null default '{}'` em `trip_services` (não remover `image_url`).
-- Adicionar coluna `place_id text` (cache do Google Places do serviço, opcional).
-- Nenhuma alteração em RLS / triggers existentes.
+- `id` (uuid)
+- `user_id` (uuid)
+- `name` (text)
+- `position` (int)
+- `color` (text — hex ou nome de token)
+- `is_default` (bool — marca as 8 etapas padrão criadas no onboarding)
+- `created_at`, `updated_at`
 
-### Formulário do Hotel (`TripServiceForms.tsx → HotelForm`)
-- Substituir o `<Input>` de "Nome do Hotel" por um autocomplete do Google Places (reaproveitando o padrão de `hotel-autocomplete` que o orçamento já usa).
-- Ao selecionar um hotel:
-  - Auto-preencher: `hotel_name`, `address`, `city`, `country`, `hotel_phone`, `hotel_website`, `maps_url` e, quando disponível, `hotel_category` (estrelas) — **apenas em campos vazios**, nunca sobrescrever o que o usuário já digitou.
-  - Salvar o `place_id` retornado.
-- Renderizar logo abaixo do nome o componente `GoogleHotelPhotos` (já existe em `src/components/shared/`) com `autoShow`, igual no orçamento.
-- O `imageSlot` no editor passa a suportar **múltiplas fotos** (grid com botão de remover + botão "Upload" para foto própria), mantendo o input de upload manual atual como alternativa.
+Regras:
+- RLS estrita por `auth.uid() = user_id` para SELECT/INSERT/UPDATE/DELETE.
+- Trigger que garante manter ao menos uma coluna por usuário (bloqueia DELETE se for a última).
 
-### Persistência (`useTrips.ts` + handlers em `TripWallet.tsx`)
-- `handleUploadServiceImage` passa a **adicionar** ao array `image_urls` (em vez de substituir `image_url`).
-- Novo handler `handleAddServiceImageUrls(serviceId, urls[])` para fotos do Google (não passa por upload de arquivo).
-- Novo handler `handleRemoveServiceImageAt(serviceId, index)` para remover uma foto específica.
-- Atualizar `TripService` em `src/types/trip.ts` com `image_urls: string[]` e `place_id?: string | null`.
+### Migração de dados existentes
 
-### Renderização pública e PDF
-- `CarteiraPublicaV2.tsx`: onde hoje exibe `image_url` única, passa a renderizar um carrossel/grade horizontal usando `image_urls` (com fallback para `image_url` quando o array estiver vazio).
-- `TripServiceCard.tsx` (preview do agente): mesma lógica de fallback.
-- `TripPDF.tsx`: incluir até N fotos do hotel (ex: 2-3) na seção daquele serviço, mantendo a foto única como fallback.
+- Tabela `opportunities` ganha coluna `stage_id uuid` (nullable inicialmente, com FK para `pipeline_stages.id ON DELETE RESTRICT`).
+- Função `seed_default_pipeline_stages(user_id)` que cria as 8 etapas padrão (Novo Contato, Em Atendimento, Orçamento em Criação, Orçamento Enviado, Negociação, Follow-up, Fechado, Perdido) com cores atuais.
+- Backfill: para cada `user_id` distinto em `opportunities`, semeia as etapas padrão e atualiza `stage_id` mapeando pelo valor textual `stage`.
+- Manter coluna `stage` por compatibilidade (read-only daqui pra frente), mas o app passa a usar `stage_id`.
+- Trigger AFTER INSERT em `auth.users` (ou na criação do primeiro client/opportunity) para semear etapas padrão para novos usuários.
 
----
+## 2. Frontend — Kanban customizável
 
-## Fase 2 — Demais serviços (no mesmo PR, escopo confirmado pelo usuário)
+Arquivos afetados:
+- `src/hooks/usePipelineStages.ts` (novo) — CRUD + reorder + duplicar, via React Query.
+- `src/hooks/useCRM.ts` — `useOpportunities` passa a usar `stage_id`; `updateStage` recebe `toStageId`.
+- `src/components/crm/KanbanBoard.tsx` — usa stages dinâmicas vindas do hook, com fallback de loading.
+- `src/components/crm/StageColumnHeader.tsx` (novo) — cabeçalho da coluna com menu de três pontinhos (Editar nome, Mudar cor, Duplicar, Excluir).
+- `src/components/crm/AddStageColumn.tsx` (novo) — card final "+ Adicionar coluna".
+- `src/components/crm/DeleteStageDialog.tsx` (novo) — confirmação que exige escolher coluna de destino se houver oportunidades.
 
-Aplicar o mesmo padrão de Places (sem galeria automática, exceto onde Google retorna fotos relevantes) em:
-- **Atrações/Ingressos** (`AttractionForm`) → `placeType="attraction"`, autofill de nome + endereço + maps + fotos do Places.
-- **Locação de Veículos** (`CarRentalForm`) → autocomplete para a locadora (já usado em orçamentos), sem galeria de fotos.
-- **Transfer** (`TransferForm`) → autocomplete para `location` (endereço de embarque/desembarque), sem galeria.
-- **Outros Serviços** (`OtherForm`) → autocomplete genérico para `company_name`, sem galeria.
+### Funcionalidades
 
-Voos, seguro, cruzeiro e trem não recebem Places (não faz sentido de catálogo).
+1. **Editar nome** — inline edit no header, Enter/Esc para salvar/cancelar.
+2. **Excluir coluna** — se a coluna tem oportunidades, abre dialog com Select de coluna destino e move antes de excluir. Bloqueia se for a única coluna.
+3. **Reordenar colunas** — drag handle no header. Usa `@dnd-kit/sortable` (já presente no projeto via dnd-kit). Persiste `position` ao soltar.
+4. **Adicionar coluna** — botão no final, abre input inline com nome + cor pré-selecionada, salva com `position = max+1`.
+5. **Mudar cor** — popover com paleta de 8 cores predefinidas (que mapeiam para os tokens atuais bg/border/text).
+6. **Duplicar coluna** — copia nome + cor com sufixo "(cópia)" na posição seguinte.
 
----
+### UX
 
-## Detalhes técnicos
+- Menu de três pontinhos: opacity-0 group-hover:opacity-100 no desktop, sempre visível no mobile.
+- Cards de oportunidade continuam funcionando com drag and drop atual (HTML5 native).
+- Reorder de colunas usa dnd-kit (não conflita com HTML5 dos cards porque acontece no header com handle dedicado).
+- Toasts (sonner) para todas as ações.
+- Estado vazio elegante: "Nenhuma oportunidade aqui ainda" com ícone discreto.
 
-- Reutilizar Edge Functions já existentes: `hotel-autocomplete`, `hotel-photos`, `places-autocomplete`. Nenhuma nova função necessária.
-- Reutilizar componentes já existentes: `PlacesAutocomplete`, `GoogleHotelPhotos`.
-- Reutilizar `usePlacesAutocomplete` (com `fetchDetailsOnSelect: true`) para puxar `address`, `latitude/longitude`, `photo_urls` etc.
-- Limite de fotos: igual ao orçamento (`MAX_IMAGES_PER_SERVICE`, atualmente 10).
-- Cache do Places já é feito server-side (`place_cache` table) — nenhum custo extra para hotéis repetidos.
+## 3. Segurança
 
----
+- RLS estrita em `pipeline_stages` (apenas owner).
+- Validação no trigger de DELETE para impedir remoção da última coluna.
+- FK `ON DELETE RESTRICT` em `opportunities.stage_id` para impedir deleção via DB sem o fluxo de move.
 
-## Não-objetivos (não muda nesta etapa)
+## 4. Compatibilidade
 
-- Carteiras já publicadas seguem renderizando exatamente como hoje (fallback para `image_url`).
-- Não muda layout/identidade visual da carteira pública nem do PDF (só passa a exibir mais fotos quando houver).
-- Não muda a função de upload manual atual — ela continua disponível ao lado do Places.
-- Não toca em estrutura de roteiro, passageiros, vouchers, RLS ou autenticação.
+- Coluna `stage` (texto) é mantida e sincronizada via trigger para não quebrar relatórios, gamificação e queries antigas (`get_monthly_sales_ranking` etc. usam `sales`, não `opportunities.stage`, então impacto é mínimo).
+- A migração roda em uma única transação e é idempotente.
 
----
+## Resumo das mudanças
 
-## Validação antes do merge
+```text
+DB:
+  + table pipeline_stages
+  + opportunities.stage_id (FK)
+  + trigger sync + seed
+  + RLS policies
 
-1. Criar serviço novo de hotel via Places → conferir autofill, galeria, salvamento.
-2. Editar hotel já existente (sem `place_id`) → garantir que tudo continua funcionando e que nada foi sobrescrito.
-3. Abrir carteira pública antiga (sem `image_urls`) → garantir que continua exibindo a foto única.
-4. Gerar PDF de carteira nova com galeria → conferir fotos no PDF.
+Frontend:
+  + src/hooks/usePipelineStages.ts
+  + src/components/crm/StageColumnHeader.tsx
+  + src/components/crm/AddStageColumn.tsx
+  + src/components/crm/DeleteStageDialog.tsx
+  ~ src/components/crm/KanbanBoard.tsx
+  ~ src/hooks/useCRM.ts
+  ~ src/types/crm.ts
+```
 
----
-
-Confirma para eu seguir com a Fase 1 + Fase 2 nesse mesmo trabalho? Se preferir entregar só Hotel primeiro (Fase 1) e validar antes de aplicar nos demais serviços, me avisa.
+Aprova esse plano para eu seguir com a migration e a implementação?
