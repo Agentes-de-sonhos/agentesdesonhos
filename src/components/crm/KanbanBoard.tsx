@@ -41,6 +41,7 @@ import { OpportunityForm } from "./OpportunityForm";
 import { StageColumnHeader } from "./StageColumnHeader";
 import { AddStageColumn } from "./AddStageColumn";
 import { DeleteStageDialog } from "./DeleteStageDialog";
+import { QuickAddClientDialog } from "./QuickAddClientDialog";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
 import { usePipelineStages } from "@/hooks/usePipelineStages";
 import {
@@ -99,6 +100,7 @@ export function KanbanBoard() {
   const [filterClient, setFilterClient] = useState<string>("all");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   // Drag-to-scroll state
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -341,6 +343,7 @@ export function KanbanBoard() {
                     const avgTime = getAverageTimeInStage(stage.id);
                     const overdueCount = stageOpps.filter(hasOverdueFollowUp).length;
                     const tokens = getStageTokens(stage.color);
+                    const isFirstStage = stages[0]?.id === stage.id;
 
                     return (
                       <SortableColumn key={stage.id} stage={stage}>
@@ -371,6 +374,7 @@ export function KanbanBoard() {
                                 }
                                 onDuplicate={() => duplicateStage(stage.id)}
                                 onRequestDelete={() => setDeleteTarget(stage)}
+                                onQuickAdd={isFirstStage ? () => setQuickAddOpen(true) : undefined}
                               />
 
                               <div className="space-y-2.5 min-h-[100px]">
@@ -426,6 +430,8 @@ export function KanbanBoard() {
             await deleteStage({ id: deleteTarget.id, moveToStageId });
           }}
         />
+
+        <QuickAddClientDialog open={quickAddOpen} onOpenChange={setQuickAddOpen} />
       </div>
     </TooltipProvider>
   );
