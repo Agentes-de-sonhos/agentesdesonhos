@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Plus, Search, Edit2, Trash2, User, Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InternationalPhoneInput } from "@/components/ui/international-phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -170,10 +171,14 @@ export function ClientsManager() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Telefone/WhatsApp</FormLabel>
-                        <FormControl>
-                          <Input placeholder="(11) 99999-9999" {...field} />
-                        </FormControl>
+                         <FormLabel>Telefone/WhatsApp</FormLabel>
+                         <FormControl>
+                           <InternationalPhoneInput
+                             value={field.value}
+                             onChange={(v) => field.onChange(v ?? "")}
+                             placeholder="Número de telefone"
+                           />
+                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
