@@ -428,26 +428,9 @@ function PublicServiceCard({ service }: { service: TripService }) {
             ? service.image_urls
             : (service.image_url && /^https?:\/\//i.test(service.image_url) ? [service.image_url] : []);
           if (urls.length === 0) return null;
-          if (urls.length === 1) {
-            return (
-              <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted">
-                <img src={urls[0]} alt={title} loading="lazy" className="w-full h-56 md:h-48 object-cover object-center" />
-              </div>
-            );
-          }
           return (
-            <div className="relative mb-3 -mx-4 -mt-4 overflow-hidden rounded-t-lg bg-muted">
-              <div className="flex gap-1 overflow-x-auto snap-x snap-mandatory">
-                {urls.map((u, i) => (
-                  <img
-                    key={i}
-                    src={u}
-                    alt={`${title} ${i + 1}`}
-                    loading="lazy"
-                    className="snap-start shrink-0 w-full h-56 md:h-48 object-cover object-center"
-                  />
-                ))}
-              </div>
+            <div className="mb-3">
+              <ServiceImageCarousel images={urls} alt={title} />
             </div>
           );
         })()}
