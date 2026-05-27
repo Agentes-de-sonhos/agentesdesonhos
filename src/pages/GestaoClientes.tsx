@@ -1,11 +1,12 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Kanban, Target, Briefcase } from "lucide-react";
+import { Users, Kanban, Target, Briefcase, LayoutDashboard } from "lucide-react";
 import { ClientsModule } from "@/components/crm/ClientsModule";
 import { KanbanBoard } from "@/components/crm/KanbanBoard";
 import { SalesGoalsModule } from "@/components/crm/SalesGoalsModule";
 import { OperationsModule } from "@/components/crm/operations/OperationsModule";
+import { DashboardModule } from "@/components/crm/DashboardModule";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
@@ -22,20 +23,23 @@ function GestaoClientesContent() {
   const navigate = useNavigate();
   
   const getCurrentTab = () => {
+    if (location.pathname.includes('/dashboard')) return 'dashboard';
     if (location.pathname.includes('/funil')) return 'funil';
     if (location.pathname.includes('/metas')) return 'metas';
     if (location.pathname.includes('/operacoes')) return 'operacoes';
-    return 'clientes';
+    if (location.pathname.includes('/clientes')) return 'clientes';
+    return 'dashboard';
   };
 
   const handleTabChange = (value: string) => {
     const routes: Record<string, string> = {
+      dashboard: '/gestao-clientes/dashboard',
       clientes: '/gestao-clientes/clientes',
       funil: '/gestao-clientes/funil',
       metas: '/gestao-clientes/metas',
       operacoes: '/gestao-clientes/operacoes',
     };
-    navigate(routes[value] || '/gestao-clientes');
+    navigate(routes[value] || '/gestao-clientes/dashboard');
   };
 
   return (
@@ -50,7 +54,11 @@ function GestaoClientesContent() {
         />
 
         <Tabs value={getCurrentTab()} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-3xl">
+            <TabsTrigger value="dashboard" className="gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </TabsTrigger>
             <TabsTrigger value="clientes" className="gap-2">
               <Users className="h-4 w-4" />
               Clientes
@@ -68,6 +76,9 @@ function GestaoClientesContent() {
               Meta de Vendas
             </TabsTrigger>
           </TabsList>
+          <TabsContent value="dashboard" className="mt-6">
+            <DashboardModule />
+          </TabsContent>
           <TabsContent value="clientes" className="mt-6">
             <ClientsModule />
           </TabsContent>
