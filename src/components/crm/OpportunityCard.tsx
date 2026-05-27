@@ -143,18 +143,32 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         <CardContent className="p-3.5">
           {/* Labels strip (top) */}
           {appliedLabels.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
-              {appliedLabels.slice(0, 4).map((label) => (
-                <span
-                  key={label.id}
-                  className="inline-block h-1.5 w-9 rounded-full"
-                  style={{ backgroundColor: label.color }}
-                  title={label.name}
-                />
-              ))}
-              {appliedLabels.length > 4 && (
-                <span className="text-[10px] text-muted-foreground">
-                  +{appliedLabels.length - 4}
+            <div className="flex flex-wrap gap-1.5 mb-2.5">
+              {appliedLabels.slice(0, 3).map((label) => {
+                // Calculate contrast color based on luminance
+                const hex = label.color.replace("#", "");
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                const textColor = luminance > 0.6 ? "#1a1a1a" : "#ffffff";
+                return (
+                  <span
+                    key={label.id}
+                    className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
+                    style={{
+                      backgroundColor: label.color,
+                      color: textColor,
+                    }}
+                    title={label.name}
+                  >
+                    {label.name}
+                  </span>
+                );
+              })}
+              {appliedLabels.length > 3 && (
+                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground">
+                  +{appliedLabels.length - 3}
                 </span>
               )}
             </div>
