@@ -20,16 +20,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InternationalPhoneInput } from "@/components/ui/international-phone-input";
 import { Label } from "@/components/ui/label";
 import { useClients, useOpportunities } from "@/hooks/useCRM";
 import { useToast } from "@/hooks/use-toast";
-import { formatPhone } from "@/lib/validators";
 import { Loader2 } from "lucide-react";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Informe o nome").max(120),
   email: z.string().trim().email("E-mail inválido").max(255).optional().or(z.literal("")),
-  phone: z.string().trim().max(20).optional().or(z.literal("")),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
 });
 
 interface Props {
@@ -143,12 +143,11 @@ export function QuickAddClientDialog({ open, onOpenChange }: Props) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="qac-phone">WhatsApp / Telefone</Label>
-              <Input
+              <InternationalPhoneInput
                 id="qac-phone"
                 value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
-                placeholder="(00) 00000-0000"
-                inputMode="tel"
+                onChange={(v) => setPhone(v ?? "")}
+                placeholder="Número de telefone"
               />
             </div>
             <div className="space-y-1.5">
