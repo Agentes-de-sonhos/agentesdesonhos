@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Plus, Trash2, Upload, FileText, Clock, ListChecks, Paperclip,
-  Info, Copy, ExternalLink, MessageCircle,
+  Info, Copy, ExternalLink, MessageCircle, ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -259,31 +259,49 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
                 }}
               >Adicionar</Button>
             </div>
-            <div className="space-y-2">
-              {events.map((ev) => (
-                <div key={ev.id} className="flex gap-3 p-3 rounded-md border bg-card">
-                  <div className="w-1 rounded-full bg-primary/40" />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">
-                        {ev.event_type === "operation_created" ? "Operação criada"
-                          : ev.event_type === "stage_changed" ? "Etapa alterada"
-                          : ev.event_type === "manual_note" ? "Nota"
-                          : ev.event_type}
+            <div className="space-y-2 max-h-[440px] overflow-y-auto pr-1 [scrollbar-width:thin]">
+              {events.map((ev) => {
+                const isStageChange = ev.event_type === "stage_changed";
+                const isCreated = ev.event_type === "operation_created";
+                const from = (ev.metadata as any)?.from as OperationStage | undefined;
+                const to = (ev.metadata as any)?.to as OperationStage | undefined;
+                const eventLabel =
+                  isCreated ? "Operação criada"
+                  : isStageChange ? "Etapa alterada"
+                  : ev.event_type === "manual_note" ? "Nota"
+                  : ev.event_type;
+                return (
+                  <div
+                    key={ev.id}
+                    className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 p-3 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                        {eventLabel}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         {format(new Date(ev.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}
                       </span>
                     </div>
-                    {ev.description && <p className="text-sm text-muted-foreground mt-1">{ev.description}</p>}
-                    {ev.event_type === "stage_changed" && (ev.metadata as any)?.from && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {getStageMeta((ev.metadata as any).from).label} → {getStageMeta((ev.metadata as any).to).label}
-                      </p>
+                    {isStageChange && to && (
+                      <div className="flex items-center gap-2 flex-wrap mt-2">
+                        {from ? (
+                          <StageChip stage={from} />
+                        ) : (
+                          <span className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            Criação
+                          </span>
+                        )}
+                        <ArrowRight className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <StageChip stage={to} />
+                      </div>
+                    )}
+                    {ev.description && (
+                      <p className="text-sm text-slate-700 dark:text-slate-200 mt-2">{ev.description}</p>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {events.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">Sem eventos ainda.</p>
               )}
