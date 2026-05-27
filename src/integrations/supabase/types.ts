@@ -5223,6 +5223,231 @@ export type Database = {
         }
         Relationships: []
       }
+      operation_attachments: {
+        Row: {
+          category: string
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          operation_id: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          operation_id: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          operation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operation_attachments_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operation_tasks: {
+        Row: {
+          created_at: string
+          done_at: string | null
+          done_by: string | null
+          id: string
+          is_done: boolean
+          label: string
+          operation_id: string
+          position: number
+          stage: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          done_at?: string | null
+          done_by?: string | null
+          id?: string
+          is_done?: boolean
+          label: string
+          operation_id: string
+          position?: number
+          stage: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          done_at?: string | null
+          done_by?: string | null
+          id?: string
+          is_done?: boolean
+          label?: string
+          operation_id?: string
+          position?: number
+          stage?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operation_tasks_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operation_timeline: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          operation_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          operation_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          operation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operation_timeline_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operations: {
+        Row: {
+          assigned_user_id: string | null
+          client_id: string
+          created_at: string
+          destination: string | null
+          id: string
+          itinerary_id: string | null
+          notes: string | null
+          notification_preferences: Json
+          opportunity_id: string | null
+          passengers_count: number
+          payment_status: string
+          position: number
+          priority: string
+          quote_id: string | null
+          sale_amount: number
+          stage: string
+          stage_entered_at: string
+          title: string
+          travel_end_date: string | null
+          travel_start_date: string | null
+          trip_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          client_id: string
+          created_at?: string
+          destination?: string | null
+          id?: string
+          itinerary_id?: string | null
+          notes?: string | null
+          notification_preferences?: Json
+          opportunity_id?: string | null
+          passengers_count?: number
+          payment_status?: string
+          position?: number
+          priority?: string
+          quote_id?: string | null
+          sale_amount?: number
+          stage?: string
+          stage_entered_at?: string
+          title?: string
+          travel_end_date?: string | null
+          travel_start_date?: string | null
+          trip_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          client_id?: string
+          created_at?: string
+          destination?: string | null
+          id?: string
+          itinerary_id?: string | null
+          notes?: string | null
+          notification_preferences?: Json
+          opportunity_id?: string | null
+          passengers_count?: number
+          payment_status?: string
+          position?: number
+          priority?: string
+          quote_id?: string | null
+          sale_amount?: number
+          stage?: string
+          stage_entered_at?: string
+          title?: string
+          travel_end_date?: string | null
+          travel_start_date?: string | null
+          trip_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operator_review_moderation_log: {
         Row: {
           comment: string | null

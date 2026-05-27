@@ -207,6 +207,7 @@ const App = () => (
             <Route path="/gestao-clientes/clientes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/gestao-clientes/funil" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/gestao-clientes/metas" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
+            <Route path="/gestao-clientes/operacoes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
             <Route path="/educa-academy" element={<ProtectedRoute><EducaAcademy /></ProtectedRoute>} />
             <Route path="/comunidade" element={<ProtectedRoute><TradeConnectHub /></ProtectedRoute>} />
             <Route path="/comunidade/chat" element={<ProtectedRoute><Community /></ProtectedRoute>} />
