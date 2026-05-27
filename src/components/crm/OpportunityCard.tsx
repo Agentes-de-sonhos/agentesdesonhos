@@ -51,6 +51,7 @@ import {
 import { OpportunityForm } from "./OpportunityForm";
 import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
 import { OpportunityDetailsDrawer } from "./OpportunityDetailsDrawer";
+import { QuickLabelPicker } from "./QuickLabelPicker";
 import { useOpportunities } from "@/hooks/useCRM";
 import {
   useOpportunityNotesCounts,
@@ -82,6 +83,7 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showLabels, setShowLabels] = useState(false);
 
   const notesCount = notesCounts[opportunity.id] || 0;
   const appliedLabels = byOpportunity[opportunity.id] || [];
@@ -194,8 +196,11 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowLabels(true)}>
+                  <Tag className="mr-2 h-4 w-4" /> Etiquetas
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowDetails(true)}>
-                  <MessageSquare className="mr-2 h-4 w-4" /> Anotações & Etiquetas
+                  <MessageSquare className="mr-2 h-4 w-4" /> Anotações
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsEditing(true)}>
                   <Edit2 className="mr-2 h-4 w-4" /> Editar
@@ -311,6 +316,12 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         opportunity={opportunity}
         open={showDetails}
         onOpenChange={setShowDetails}
+      />
+
+      <QuickLabelPicker
+        opportunityId={opportunity.id}
+        open={showLabels}
+        onOpenChange={setShowLabels}
       />
 
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
