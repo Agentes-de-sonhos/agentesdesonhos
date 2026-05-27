@@ -68,6 +68,7 @@ export interface Opportunity {
   estimated_value: number;
   notes: string | null;
   stage: OpportunityStage;
+  stage_id: string | null;
   stage_entered_at: string;
   follow_up_date: string | null;
   created_at: string;
