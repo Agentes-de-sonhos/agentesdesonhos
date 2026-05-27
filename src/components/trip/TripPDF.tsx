@@ -1171,6 +1171,7 @@ export async function generateTripPDF(
     const emoji = SERVICE_EMOJI[type] || "📋";
     const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
     const bodyHtml = renderServiceBody(service);
+    const galleryHtml = renderServiceGallery(service);
 
     let attachmentsHtml = '';
     if (service.attachments?.length > 0) {
@@ -1206,6 +1207,7 @@ export async function generateTripPDF(
           </div>
         </div>
         <div style="padding:12px 16px;">
+          ${galleryHtml}
           ${bodyHtml}
           ${attachmentsBlock}
         </div>
