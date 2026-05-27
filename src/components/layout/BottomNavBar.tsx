@@ -4,7 +4,7 @@ import {
   Home, BookOpen, PlusCircle, Users, Menu, X,
   GraduationCap, Newspaper, Map, Compass, Tag, CalendarDays,
   Wallet, Calculator, Route, FileText,
-  ShoppingCart, Lock, Megaphone,
+  ShoppingCart, Lock, Megaphone, LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
