@@ -954,15 +954,65 @@ function renderServiceBody(service: TripService): string {
 }
 
 function renderServiceGallery(service: TripService): string {
-  const urls = (service.image_urls && service.image_urls.length > 0)
-    ? service.image_urls
-    : (service.image_url && /^https?:\/\//i.test(service.image_url) ? [service.image_url] : []);
+  // Aligned with QuotePDF: hotels get a grid of up to 10 thumbnails;
+  // other service types get a single left-side image rendered inside renderServiceLayout.
+  const urls = collectServiceImages(service);
   if (!urls.length) return "";
-  if (urls.length === 1) {
-    return `<div class="pdf-block" style="margin:-12px -16px 12px;overflow:hidden;"><img src="${urls[0]}" style="width:100%;height:200px;object-fit:cover;display:block;" /></div>`;
+  if (service.service_type !== 'hotel') return "";
+  const hotelImages = urls.slice(0, 10);
+  const rows: string[] = [];
+  for (let i = 0; i < hotelImages.length; i += 5) {
+    const row = hotelImages.slice(i, i + 5);
+    const rowHtml = row
+      .map(
+        (src) => `
+          <td style="width:20%;vertical-align:middle;padding:3px;">
+            <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;text-align:center;line-height:78px;font-size:0;">
+              <img src="${src}" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:inline-block;" />
+            </div>
+          </td>
+        `
+      )
+      .join("");
+    const padCount = 5 - row.length;
+    const padHtml = padCount > 0 ? Array(padCount).fill('<td style="width:20%;padding:3px;"></td>').join("") : "";
+    rows.push(`<tr>${rowHtml}${padHtml}</tr>`);
   }
-  const imgs = urls.slice(0, 6).map(u => `<img src="${u}" style="width:100%;height:110px;object-fit:cover;border-radius:6px;display:block;" />`).join('');
-  return `<div class="pdf-block" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:-4px 0 12px;">${imgs}</div>`;
+  return `
+    <div class="pdf-block pdf-hotel-gallery" style="margin-bottom:8px;">
+      <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
+        ${rows.join("")}
+      </table>
+    </div>
+  `;
+}
+
+function collectServiceImages(service: TripService): string[] {
+  const list: string[] = [];
+  if (service.image_urls && service.image_urls.length) list.push(...service.image_urls);
+  if (service.image_url && /^https?:\/\//i.test(service.image_url) && !list.includes(service.image_url)) {
+    list.push(service.image_url);
+  }
+  return list;
+}
+
+function renderServiceLayout(service: TripService, bodyHtml: string): string {
+  if (service.service_type === 'hotel') return bodyHtml;
+  const urls = collectServiceImages(service);
+  const firstImage = urls[0];
+  if (!firstImage) return bodyHtml;
+  return `
+    <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
+      <tr>
+        <td style="width:30%;vertical-align:top;padding:0 14px 0 0;">
+          <img src="${firstImage}" style="width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;display:block;" />
+        </td>
+        <td style="vertical-align:top;">
+          ${bodyHtml}
+        </td>
+      </tr>
+    </table>
+  `;
 }
 
 function generateAgencyHeader(profile: AgentProfile | null): string {
