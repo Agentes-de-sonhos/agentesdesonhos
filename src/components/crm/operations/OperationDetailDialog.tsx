@@ -196,11 +196,11 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
               </div>
             )}
 
-            <div className="flex justify-between pt-4 border-t">
+            <div className="flex flex-wrap gap-2 justify-between pt-4 border-t">
               <Button variant="destructive" size="sm" onClick={handleDelete}>
                 <Trash2 className="h-4 w-4 mr-1.5" /> Remover
               </Button>
-              <Button onClick={handleSave}>Salvar alterações</Button>
+              <Button onClick={handleSave} size="sm">Salvar alterações</Button>
             </div>
           </TabsContent>
 
