@@ -217,23 +217,23 @@ export function DashboardModule() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-bold">{formatCurrency(totalSold)}</span>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <span className="text-2xl sm:text-3xl font-bold break-words">{formatCurrency(totalSold)}</span>
             <span className="text-sm text-muted-foreground">
               de {formatCurrency(target)} ({goalPct.toFixed(0)}%)
             </span>
           </div>
           <Progress value={goalPct} className="h-3" />
-          <div className="grid grid-cols-3 gap-3 text-center text-sm pt-1">
-            <div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center text-sm pt-1">
+            <div className="min-w-0">
               <p className="text-muted-foreground text-xs">Vendido</p>
-              <p className="font-semibold text-emerald-600">{formatCurrency(totalSold)}</p>
+              <p className="font-semibold text-emerald-600 text-xs sm:text-sm break-words">{formatCurrency(totalSold)}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-muted-foreground text-xs">Restante</p>
-              <p className="font-semibold text-orange-600">{formatCurrency(Math.max(0, target - totalSold))}</p>
+              <p className="font-semibold text-orange-600 text-xs sm:text-sm break-words">{formatCurrency(Math.max(0, target - totalSold))}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-muted-foreground text-xs">Vendas</p>
               <p className="font-semibold">{stats?.salesCount || 0}</p>
             </div>

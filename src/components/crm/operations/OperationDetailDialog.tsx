@@ -89,30 +89,32 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-[calc(100vw-1.5rem)] p-4 sm:p-6">
         <DialogHeader>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <DialogTitle className="text-xl">{operation.title || operation.client?.name}</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-lg sm:text-xl break-words">{operation.title || operation.client?.name}</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1 break-words">
                 {operation.client?.name} {operation.destination && `· ${operation.destination}`}
               </p>
             </div>
-            <Badge className={`${meta.bg} ${meta.text} ${meta.border} border`}>{meta.label}</Badge>
+            <Badge className={`${meta.bg} ${meta.text} ${meta.border} border shrink-0`}>{meta.label}</Badge>
           </div>
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="mt-2">
-          <TabsList className="grid grid-cols-4 w-full">
-            <TabsTrigger value="overview" className="gap-1"><Info className="h-3.5 w-3.5" />Visão geral</TabsTrigger>
-            <TabsTrigger value="checklist" className="gap-1"><ListChecks className="h-3.5 w-3.5" />Checklist</TabsTrigger>
-            <TabsTrigger value="timeline" className="gap-1"><Clock className="h-3.5 w-3.5" />Timeline</TabsTrigger>
-            <TabsTrigger value="attachments" className="gap-1"><Paperclip className="h-3.5 w-3.5" />Anexos</TabsTrigger>
-          </TabsList>
+          <div className="-mx-1 overflow-x-auto sm:mx-0 sm:overflow-visible">
+            <TabsList className="inline-flex w-max gap-1 sm:grid sm:w-full sm:grid-cols-4">
+              <TabsTrigger value="overview" className="gap-1 whitespace-nowrap px-3"><Info className="h-3.5 w-3.5 shrink-0" />Visão geral</TabsTrigger>
+              <TabsTrigger value="checklist" className="gap-1 whitespace-nowrap px-3"><ListChecks className="h-3.5 w-3.5 shrink-0" />Checklist</TabsTrigger>
+              <TabsTrigger value="timeline" className="gap-1 whitespace-nowrap px-3"><Clock className="h-3.5 w-3.5 shrink-0" />Timeline</TabsTrigger>
+              <TabsTrigger value="attachments" className="gap-1 whitespace-nowrap px-3"><Paperclip className="h-3.5 w-3.5 shrink-0" />Anexos</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* OVERVIEW */}
           <TabsContent value="overview" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>Título</Label>
                 <Input value={form.title ?? ""} onChange={(e) => setForm({ ...form, title: e.target.value })} />
@@ -159,7 +161,7 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <Label>Etapa</Label>
                 <Select value={form.stage ?? operation.stage} onValueChange={(v) => setForm({ ...form, stage: v as OperationStage })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -170,7 +172,7 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <Label>Observações</Label>
                 <Textarea rows={3} value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
               </div>
@@ -194,11 +196,11 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
               </div>
             )}
 
-            <div className="flex justify-between pt-4 border-t">
+            <div className="flex flex-wrap gap-2 justify-between pt-4 border-t">
               <Button variant="destructive" size="sm" onClick={handleDelete}>
                 <Trash2 className="h-4 w-4 mr-1.5" /> Remover
               </Button>
-              <Button onClick={handleSave}>Salvar alterações</Button>
+              <Button onClick={handleSave} size="sm">Salvar alterações</Button>
             </div>
           </TabsContent>
 

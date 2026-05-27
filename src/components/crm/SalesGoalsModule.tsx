@@ -64,10 +64,10 @@ export function SalesGoalsModule() {
   return (
     <div className="space-y-6">
       {/* Header with Goal Setting */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold capitalize">Meta de {monthName}</h2>
-          <p className="text-muted-foreground">Acompanhe seu progresso de vendas</p>
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-xl font-bold capitalize">Meta de {monthName}</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Acompanhe seu progresso de vendas</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -111,9 +111,9 @@ export function SalesGoalsModule() {
 
       {/* Main Progress Card */}
       <Card className={cn("border-2", isGoalMet && "border-green-500 bg-green-50/50")}>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3 min-w-0">
               <div
                 className={cn(
                   "p-3 rounded-xl",
@@ -124,9 +124,9 @@ export function SalesGoalsModule() {
                   className={cn("h-6 w-6", isGoalMet ? "text-green-600" : "text-primary")}
                 />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm text-muted-foreground">Progresso da Meta</p>
-                <p className="text-3xl font-bold">
+                <p className="text-2xl sm:text-3xl font-bold">
                   {percentage.toFixed(1)}%
                 </p>
               </div>
@@ -141,18 +141,18 @@ export function SalesGoalsModule() {
 
           <Progress value={percentage} className="h-4 mb-4" />
 
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">Vendido</p>
-              <p className="text-xl font-bold text-green-600">{formatCurrency(totalSold)}</p>
+              <p className="text-base sm:text-xl font-bold text-green-600 break-words">{formatCurrency(totalSold)}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">Meta</p>
-              <p className="text-xl font-bold">{formatCurrency(targetValue)}</p>
+              <p className="text-base sm:text-xl font-bold break-words">{formatCurrency(targetValue)}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">Falta</p>
-              <p className="text-xl font-bold text-orange-600">{formatCurrency(remaining)}</p>
+              <p className="text-base sm:text-xl font-bold text-orange-600 break-words">{formatCurrency(remaining)}</p>
             </div>
           </div>
         </CardContent>
