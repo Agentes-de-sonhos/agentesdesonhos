@@ -170,10 +170,14 @@ export function ClientsManager() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Telefone/WhatsApp</FormLabel>
-                        <FormControl>
-                          <Input placeholder="(11) 99999-9999" {...field} />
-                        </FormControl>
+                         <FormLabel>Telefone/WhatsApp</FormLabel>
+                         <FormControl>
+                           <InternationalPhoneInput
+                             value={field.value}
+                             onChange={(v) => field.onChange(v ?? "")}
+                             placeholder="Número de telefone"
+                           />
+                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
