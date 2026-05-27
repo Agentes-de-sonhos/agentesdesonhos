@@ -304,9 +304,22 @@ export function useOpportunities() {
       follow_up_date?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
+      // Resolve first stage (lowest position) for this user
+      const { data: firstStage } = await supabase
+        .from("pipeline_stages")
+        .select("id, legacy_key")
+        .eq("user_id", user.id)
+        .order("position", { ascending: true })
+        .limit(1)
+        .maybeSingle();
       const { data: result, error } = await supabase
         .from("opportunities")
-        .insert({ ...data, user_id: user.id, stage: "new_contact" })
+        .insert({
+          ...data,
+          user_id: user.id,
+          stage: firstStage?.legacy_key || "new_contact",
+          stage_id: firstStage?.id || null,
+        })
         .select("*, client:clients(*)")
         .single();
       if (error) throw error;
@@ -314,7 +327,7 @@ export function useOpportunities() {
       await supabase.from("opportunity_history").insert({
         opportunity_id: result.id,
         from_stage: null,
-        to_stage: "new_contact",
+        to_stage: firstStage?.legacy_key || "new_contact",
       });
 
       return result as Opportunity;
@@ -348,21 +361,27 @@ export function useOpportunities() {
       id,
       fromStage,
       toStage,
+      toStageId,
+      fromStageLabel,
+      toStageLabel,
     }: {
       id: string;
-      fromStage: OpportunityStage;
-      toStage: OpportunityStage;
+      fromStage: string;
+      toStage: string;
+      toStageId?: string;
+      fromStageLabel?: string;
+      toStageLabel?: string;
     }) => {
       const { error: updateError } = await supabase
         .from("opportunities")
-        .update({ stage: toStage })
+        .update(toStageId ? { stage_id: toStageId } : { stage: toStage })
         .eq("id", id);
       if (updateError) throw updateError;
 
       const { error: historyError } = await supabase.from("opportunity_history").insert({
         opportunity_id: id,
-        from_stage: fromStage,
-        to_stage: toStage,
+        from_stage: fromStageLabel || fromStage,
+        to_stage: toStageLabel || toStage,
       });
       if (historyError) throw historyError;
     },

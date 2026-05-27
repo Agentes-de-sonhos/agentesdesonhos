@@ -5318,6 +5318,7 @@ export type Database = {
           passengers_count: number
           stage: string
           stage_entered_at: string | null
+          stage_id: string | null
           start_date: string | null
           updated_at: string
           user_id: string
@@ -5336,6 +5337,7 @@ export type Database = {
           passengers_count?: number
           stage?: string
           stage_entered_at?: string | null
+          stage_id?: string | null
           start_date?: string | null
           updated_at?: string
           user_id: string
@@ -5354,6 +5356,7 @@ export type Database = {
           passengers_count?: number
           stage?: string
           stage_entered_at?: string | null
+          stage_id?: string | null
           start_date?: string | null
           updated_at?: string
           user_id?: string
@@ -5364,6 +5367,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline_stages"
             referencedColumns: ["id"]
           },
         ]
@@ -5591,6 +5601,42 @@ export type Database = {
           nome?: string
           ordem_exibicao?: number
           slug?: string
+        }
+        Relationships: []
+      }
+      pipeline_stages: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_default: boolean
+          legacy_key: string | null
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          legacy_key?: string | null
+          name: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          legacy_key?: string | null
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -9652,6 +9698,10 @@ export type Database = {
       save_card_capture_via_token: {
         Args: { _data: Json; _token: string }
         Returns: string
+      }
+      seed_default_pipeline_stages: {
+        Args: { _user_id: string }
+        Returns: undefined
       }
       submit_sales_landing_lead: {
         Args: { p_lead_name: string; p_lead_phone: string; p_slug: string }
