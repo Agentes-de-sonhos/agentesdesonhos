@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Pencil, Copy, Trash2, Palette, GripVertical, Check, X } from "lucide-react";
+import { MoreVertical, Pencil, Copy, Trash2, Palette, GripVertical, Check, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ interface Props {
   onChangeColor: (color: StageColor) => void | Promise<void>;
   onDuplicate: () => void | Promise<void>;
   onRequestDelete: () => void;
+  onQuickAdd?: () => void;
 }
 
 const COLOR_KEYS = Object.keys(STAGE_COLOR_PALETTE) as StageColor[];
@@ -51,6 +52,7 @@ export function StageColumnHeader({
   onChangeColor,
   onDuplicate,
   onRequestDelete,
+  onQuickAdd,
 }: Props) {
   const tokens = getStageTokens(stage.color);
   const [editing, setEditing] = useState(false);
@@ -162,6 +164,22 @@ export function StageColumnHeader({
 
         {!editing && (
           <div className="flex items-center gap-1">
+            {onQuickAdd && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={onQuickAdd}
+                    className={cn("h-6 w-6", tokens.text)}
+                    aria-label="Adicionar novo cliente"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Adicionar novo cliente</TooltipContent>
+              </Tooltip>
+            )}
             {overdueCount > 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
