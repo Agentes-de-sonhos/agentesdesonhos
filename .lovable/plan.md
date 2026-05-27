@@ -1,87 +1,103 @@
+# Novo Módulo "Operações" na Gestão de Clientes
 
-# Funil Customizável no Kanban de Oportunidades
+Criar um módulo de pós-venda operacional (funil Kanban) dentro de Gestão de Clientes, **sem alterar** Clientes, Oportunidades ou Meta de Vendas.
 
-Transformar o Kanban da seção Gestão de Clientes > Oportunidades em um funil totalmente personalizável (estilo Trello), preservando o layout atual e os dados existentes.
+## 1. Banco de Dados (migration única, não-destrutiva)
 
-## 1. Banco de Dados
+### Tabela `operations`
+- `id`, `user_id`, `client_id` (FK clients), `opportunity_id` (FK opportunities, nullable)
+- `quote_id`, `itinerary_id`, `trip_id` (carteira digital) — todos nullable
+- `title` (texto curto, ex: "Maldivas - Família Silva")
+- `destination`, `travel_start_date`, `travel_end_date`
+- `passengers_count`, `sale_amount`
+- `stage` (texto: `venda_confirmada` | `emissao` | `documentacao` | `entrega` | `pre_embarque` | `em_viagem` | `pos_viagem` | `finalizado`)
+- `priority` (`normal` | `alta` | `urgente`)
+- `payment_status` (`pendente` | `parcial` | `pago`)
+- `assigned_user_id`, `notes`, `position` (ordenação no Kanban)
+- `stage_entered_at`, `created_at`, `updated_at`
 
-Criar a tabela `pipeline_stages` para armazenar as colunas do funil por usuário:
+### Tabela `operation_tasks` (checklists por etapa)
+- `id`, `operation_id`, `stage`, `label`, `is_done`, `done_at`, `done_by`, `position`
 
-- `id` (uuid)
-- `user_id` (uuid)
-- `name` (text)
-- `position` (int)
-- `color` (text — hex ou nome de token)
-- `is_default` (bool — marca as 8 etapas padrão criadas no onboarding)
-- `created_at`, `updated_at`
+### Tabela `operation_timeline` (eventos automáticos + manuais)
+- `id`, `operation_id`, `user_id`, `event_type`, `description`, `metadata` (jsonb), `created_at`
 
-Regras:
-- RLS estrita por `auth.uid() = user_id` para SELECT/INSERT/UPDATE/DELETE.
-- Trigger que garante manter ao menos uma coluna por usuário (bloqueia DELETE se for a última).
+### Tabela `operation_attachments`
+- `id`, `operation_id`, `user_id`, `file_url`, `file_name`, `file_type`, `category` (voucher/comprovante/documento), `created_at`
 
-### Migração de dados existentes
+### Storage bucket `operation-files` (privado, com RLS por user_id)
 
-- Tabela `opportunities` ganha coluna `stage_id uuid` (nullable inicialmente, com FK para `pipeline_stages.id ON DELETE RESTRICT`).
-- Função `seed_default_pipeline_stages(user_id)` que cria as 8 etapas padrão (Novo Contato, Em Atendimento, Orçamento em Criação, Orçamento Enviado, Negociação, Follow-up, Fechado, Perdido) com cores atuais.
-- Backfill: para cada `user_id` distinto em `opportunities`, semeia as etapas padrão e atualiza `stage_id` mapeando pelo valor textual `stage`.
-- Manter coluna `stage` por compatibilidade (read-only daqui pra frente), mas o app passa a usar `stage_id`.
-- Trigger AFTER INSERT em `auth.users` (ou na criação do primeiro client/opportunity) para semear etapas padrão para novos usuários.
+### Triggers/RLS
+- RLS estrita por `auth.uid() = user_id` em todas as tabelas.
+- Trigger `on_opportunity_closed_create_operation`: quando `opportunities.stage` mudar para `closed`, cria automaticamente uma `operation` vinculada (se ainda não existir uma para essa opportunity_id), na coluna `venda_confirmada`. Idempotente.
+- Trigger registra evento na `operation_timeline` em cada mudança de stage.
+- Trigger `update_updated_at_column` padrão.
+- GRANTs corretos para `authenticated` e `service_role`.
 
-## 2. Frontend — Kanban customizável
+**Compatibilidade**: nada altera as tabelas existentes (`clients`, `opportunities`, `quotes`, `itineraries`, `trips`). O trigger só adiciona registros em `operations`.
 
-Arquivos afetados:
-- `src/hooks/usePipelineStages.ts` (novo) — CRUD + reorder + duplicar, via React Query.
-- `src/hooks/useCRM.ts` — `useOpportunities` passa a usar `stage_id`; `updateStage` recebe `toStageId`.
-- `src/components/crm/KanbanBoard.tsx` — usa stages dinâmicas vindas do hook, com fallback de loading.
-- `src/components/crm/StageColumnHeader.tsx` (novo) — cabeçalho da coluna com menu de três pontinhos (Editar nome, Mudar cor, Duplicar, Excluir).
-- `src/components/crm/AddStageColumn.tsx` (novo) — card final "+ Adicionar coluna".
-- `src/components/crm/DeleteStageDialog.tsx` (novo) — confirmação que exige escolher coluna de destino se houver oportunidades.
+## 2. Frontend — Nova aba
 
-### Funcionalidades
+### `src/pages/GestaoClientes.tsx`
+Adicionar 4ª aba "Operações" (ícone `Briefcase` ou `Plane`) ao lado de Meta de Vendas, com rota `/gestao-clientes/operacoes`.
 
-1. **Editar nome** — inline edit no header, Enter/Esc para salvar/cancelar.
-2. **Excluir coluna** — se a coluna tem oportunidades, abre dialog com Select de coluna destino e move antes de excluir. Bloqueia se for a única coluna.
-3. **Reordenar colunas** — drag handle no header. Usa `@dnd-kit/sortable` (já presente no projeto via dnd-kit). Persiste `position` ao soltar.
-4. **Adicionar coluna** — botão no final, abre input inline com nome + cor pré-selecionada, salva com `position = max+1`.
-5. **Mudar cor** — popover com paleta de 8 cores predefinidas (que mapeiam para os tokens atuais bg/border/text).
-6. **Duplicar coluna** — copia nome + cor com sufixo "(cópia)" na posição seguinte.
+### Componentes novos em `src/components/crm/operations/`
+- `OperationsModule.tsx` — container com toggle Kanban/Calendário.
+- `OperationsKanban.tsx` — Kanban com 8 colunas fixas (padrão visual idêntico ao `KanbanBoard` atual).
+- `OperationCard.tsx` — card com nome do cliente, destino, data, passageiros, valor, badges (urgente, doc. pendente, pgto. pendente, viagem próxima), contador "Embarque em X dias".
+- `OperationDetailDialog.tsx` — drawer/dialog lateral com tabs:
+  - **Visão geral**: dados principais, links rápidos para Carteira Digital / Roteiro / Orçamento, copiar link, abrir WhatsApp.
+  - **Checklist**: tarefas da etapa atual (predefinidas + custom).
+  - **Timeline**: eventos automáticos e notas manuais.
+  - **Anexos**: vouchers, comprovantes, documentos.
+- `OperationsCalendar.tsx` — visualização mensal mostrando embarques/retornos (usa mesma lib de calendário do `Agenda.tsx`).
+- `OperationStageColumn.tsx` — coluna do Kanban.
 
-### UX
+### Hook `src/hooks/useOperations.ts`
+CRUD + reorder + mudança de stage + checklists + timeline + anexos via React Query.
 
-- Menu de três pontinhos: opacity-0 group-hover:opacity-100 no desktop, sempre visível no mobile.
-- Cards de oportunidade continuam funcionando com drag and drop atual (HTML5 native).
-- Reorder de colunas usa dnd-kit (não conflita com HTML5 dos cards porque acontece no header com handle dedicado).
-- Toasts (sonner) para todas as ações.
-- Estado vazio elegante: "Nenhuma oportunidade aqui ainda" com ícone discreto.
+### Checklists predefinidos
+Criar constantes em `src/types/operations.ts` com checklists sugeridos por etapa (conforme briefing — venda confirmada, emissão, documentação, entrega, pré-embarque, etc.). Ao criar uma operação ou mover de etapa, materializar essas tasks em `operation_tasks` para o usuário marcar.
 
-## 3. Segurança
+## 3. Integrações com módulos existentes
 
-- RLS estrita em `pipeline_stages` (apenas owner).
-- Validação no trigger de DELETE para impedir remoção da última coluna.
-- FK `ON DELETE RESTRICT` em `opportunities.stage_id` para impedir deleção via DB sem o fluxo de move.
+### Dashboard / Próximas Viagens
+Atualizar `src/pages/Dashboard.tsx` (e/ou hook `useTrips`) para incluir operações ativas com `travel_start_date` futuro na seção "Próximas Viagens". Mostrar: cliente, destino, data, dias restantes.
 
-## 4. Compatibilidade
+### Agenda
+Em `src/pages/Agenda.tsx`, adicionar eventos derivados de `operations` (embarques + retornos). Click no evento abre o `OperationDetailDialog`.
 
-- Coluna `stage` (texto) é mantida e sincronizada via trigger para não quebrar relatórios, gamificação e queries antigas (`get_monthly_sales_ranking` etc. usam `sales`, não `opportunities.stage`, então impacto é mínimo).
-- A migração roda em uma única transação e é idempotente.
+### Menu / Navegação
+- `src/config/menuConfig.ts`: adicionar `{ key: "operacoes", label: "Operações" }` em `clientes`.
+- Atualizar `App.tsx` se necessário para a rota `/gestao-clientes/operacoes`.
 
-## Resumo das mudanças
+## 4. UX/UI
+- Reaproveitar tokens, espaçamentos, tipografia, estilo de cards e animações do `KanbanBoard` atual.
+- Badges seguem `STAGE_COLOR_PALETTE` existente.
+- Mobile: scroll horizontal suave, drag via `@dnd-kit` (mesmo padrão do Kanban atual de Oportunidades).
+- Empty state: "Nenhuma operação ainda. Feche uma oportunidade para começar."
+
+## 5. Notificações (somente arquitetura)
+Adicionar coluna `notification_preferences` (jsonb) em `operations` com placeholders para `whatsapp`, `email`, `pre_embarque_alert`, `pos_viagem_alert`. Sem disparos automáticos nesta entrega — somente a estrutura.
+
+## Resumo
 
 ```text
 DB:
-  + table pipeline_stages
-  + opportunities.stage_id (FK)
-  + trigger sync + seed
-  + RLS policies
+  + table operations (+ trigger on opportunity closed)
+  + table operation_tasks
+  + table operation_timeline
+  + table operation_attachments
+  + storage bucket operation-files
+  + RLS + GRANTs
 
 Frontend:
-  + src/hooks/usePipelineStages.ts
-  + src/components/crm/StageColumnHeader.tsx
-  + src/components/crm/AddStageColumn.tsx
-  + src/components/crm/DeleteStageDialog.tsx
-  ~ src/components/crm/KanbanBoard.tsx
-  ~ src/hooks/useCRM.ts
-  ~ src/types/crm.ts
+  + src/types/operations.ts
+  + src/hooks/useOperations.ts
+  + src/components/crm/operations/{OperationsModule,OperationsKanban,OperationCard,OperationDetailDialog,OperationsCalendar,OperationStageColumn}.tsx
+  ~ src/pages/GestaoClientes.tsx (nova aba)
+  ~ src/config/menuConfig.ts (submenu)
+  ~ src/pages/Dashboard.tsx + src/pages/Agenda.tsx (integração leve)
 ```
 
-Aprova esse plano para eu seguir com a migration e a implementação?
+Aprova esse plano para eu rodar a migration e implementar?
