@@ -953,6 +953,18 @@ function renderServiceBody(service: TripService): string {
   }
 }
 
+function renderServiceGallery(service: TripService): string {
+  const urls = (service.image_urls && service.image_urls.length > 0)
+    ? service.image_urls
+    : (service.image_url && /^https?:\/\//i.test(service.image_url) ? [service.image_url] : []);
+  if (!urls.length) return "";
+  if (urls.length === 1) {
+    return `<div class="pdf-block" style="margin:-12px -16px 12px;overflow:hidden;"><img src="${urls[0]}" style="width:100%;height:200px;object-fit:cover;display:block;" /></div>`;
+  }
+  const imgs = urls.slice(0, 6).map(u => `<img src="${u}" style="width:100%;height:110px;object-fit:cover;border-radius:6px;display:block;" />`).join('');
+  return `<div class="pdf-block" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:-4px 0 12px;">${imgs}</div>`;
+}
+
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
@@ -1159,6 +1171,7 @@ export async function generateTripPDF(
     const emoji = SERVICE_EMOJI[type] || "📋";
     const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
     const bodyHtml = renderServiceBody(service);
+    const galleryHtml = renderServiceGallery(service);
 
     let attachmentsHtml = '';
     if (service.attachments?.length > 0) {
@@ -1194,6 +1207,7 @@ export async function generateTripPDF(
           </div>
         </div>
         <div style="padding:12px 16px;">
+          ${galleryHtml}
           ${bodyHtml}
           ${attachmentsBlock}
         </div>
