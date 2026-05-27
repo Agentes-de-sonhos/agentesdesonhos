@@ -1258,7 +1258,7 @@ export async function generateTripPDF(
         </div>
         <div style="padding:12px 16px;">
           ${galleryHtml}
-          ${bodyHtml}
+          ${renderServiceLayout(service, bodyHtml)}
           ${attachmentsBlock}
         </div>
       </div>
