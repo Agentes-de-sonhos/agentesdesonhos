@@ -54,28 +54,32 @@ function GestaoClientesContent() {
         />
 
         <Tabs value={getCurrentTab()} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 max-w-3xl">
-            <TabsTrigger value="dashboard" className="gap-2">
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="clientes" className="gap-2">
-              <Users className="h-4 w-4" />
-              Clientes
-            </TabsTrigger>
-            <TabsTrigger value="funil" className="gap-2">
-              <Kanban className="h-4 w-4" />
-              Oportunidades
-            </TabsTrigger>
-            <TabsTrigger value="operacoes" className="gap-2">
-              <Briefcase className="h-4 w-4" />
-              Operações
-            </TabsTrigger>
-            <TabsTrigger value="metas" className="gap-2">
-              <Target className="h-4 w-4" />
-              Meta de Vendas
-            </TabsTrigger>
-          </TabsList>
+          {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}
+          <div className="-mx-1 overflow-x-auto md:mx-0 md:overflow-visible scrollbar-thin">
+            <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-3xl md:grid-cols-5">
+              <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
+                <LayoutDashboard className="h-4 w-4 shrink-0" />
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-3">
+                <Users className="h-4 w-4 shrink-0" />
+                Clientes
+              </TabsTrigger>
+              <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-3">
+                <Kanban className="h-4 w-4 shrink-0" />
+                Oportunidades
+              </TabsTrigger>
+              <TabsTrigger value="operacoes" className="gap-1.5 whitespace-nowrap px-3">
+                <Briefcase className="h-4 w-4 shrink-0" />
+                Operações
+              </TabsTrigger>
+              <TabsTrigger value="metas" className="gap-1.5 whitespace-nowrap px-3">
+                <Target className="h-4 w-4 shrink-0" />
+                <span className="md:hidden">Metas</span>
+                <span className="hidden md:inline">Meta de Vendas</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent value="dashboard" className="mt-6">
             <DashboardModule />
           </TabsContent>
