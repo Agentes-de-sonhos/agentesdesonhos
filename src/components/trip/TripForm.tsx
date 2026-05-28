@@ -50,7 +50,11 @@ interface TripFormProps {
 
 export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
+  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(
+    defaultValues?.client_id && defaultValues?.client_name
+      ? { id: defaultValues.client_id, name: defaultValues.client_name }
+      : null
+  );
   const [clientError, setClientError] = useState("");
   const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("trip-form");
 
@@ -99,6 +103,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
       destination: values.destination,
       start_date: formatLocalDate(from),
       end_date: formatLocalDate(to),
+      opportunity_id: defaultValues?.opportunity_id || null,
     });
   };
 

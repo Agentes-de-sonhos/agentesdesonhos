@@ -1,7 +1,7 @@
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,7 @@ function TripWalletContent() {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { createTrip, isCreating, updateTrip, isUpdating, updatePassword, regeneratePassword, deleteTrip, unlockTrip } = useTrips();
@@ -140,6 +141,16 @@ function TripWalletContent() {
 
   const handleCreateTrip = async (data: TripFormData) => {
     const newTrip = await createTrip(data);
+    // Register event in opportunity timeline when created from CRM
+    if (data.opportunity_id) {
+      try {
+        await supabase.from("opportunity_history").insert({
+          opportunity_id: data.opportunity_id,
+          to_stage: "Carteira digital criada",
+          notes: `Carteira "${data.client_name} • ${data.destination}" criada.`,
+        } as any);
+      } catch { /* non-fatal */ }
+    }
     navigate(`/ferramentas-ia/trip-wallet/${newTrip.id}`, { replace: true });
   };
 
@@ -429,7 +440,29 @@ function TripWalletContent() {
           <Card className="max-w-2xl">
             <CardHeader><CardTitle>Informações da Viagem</CardTitle></CardHeader>
             <CardContent>
-              <TripForm onSubmit={handleCreateTrip} isLoading={isCreating} />
+              <TripForm
+                onSubmit={handleCreateTrip}
+                isLoading={isCreating}
+                defaultValues={(() => {
+                  const s = (location.state as {
+                    opportunity_id?: string;
+                    client_id?: string;
+                    client_name?: string;
+                    destination?: string;
+                    start_date?: string | null;
+                    end_date?: string | null;
+                  } | null) || null;
+                  if (!s) return undefined;
+                  return {
+                    client_id: s.client_id,
+                    client_name: s.client_name || "",
+                    destination: s.destination || "",
+                    start_date: s.start_date || "",
+                    end_date: s.end_date || "",
+                    opportunity_id: s.opportunity_id || null,
+                  };
+                })()}
+              />
             </CardContent>
           </Card>
         </div>

@@ -567,6 +567,7 @@ export interface TripFormData {
   destination: string;
   start_date: string;
   end_date: string;
+  opportunity_id?: string | null;
 }
 
 export const TRIP_SERVICE_LABELS: Record<TripServiceType, string> = {

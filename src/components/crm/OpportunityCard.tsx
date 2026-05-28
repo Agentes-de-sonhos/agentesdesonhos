@@ -128,6 +128,11 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const [showDetails, setShowDetails] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [showEditClient, setShowEditClient] = useState(false);
+  const [linkedDialog, setLinkedDialog] = useState<null | {
+    kind: "quote" | "trip";
+    existingId: string;
+  }>(null);
+  const [isCheckingLink, setIsCheckingLink] = useState(false);
 
   const notesCount = notesCounts[opportunity.id] || 0;
   const appliedLabels = byOpportunity[opportunity.id] || [];
@@ -154,32 +159,102 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
     setShowDeleteAlert(false);
   };
 
-  const handleCreateQuote = () => {
+  const buildOpportunityState = () => {
     const adults = opportunity.adults_count ?? opportunity.passengers_count ?? 1;
     const children = opportunity.children_count ?? 0;
-    navigate(`/ferramentas-ia/gerar-orcamento`, {
-      state: {
-        opportunity_id: opportunity.id,
-        client_id: opportunity.client_id,
-        client_name: opportunity.client?.name,
-        destination: opportunity.destination,
-        start_date: opportunity.start_date,
-        end_date: opportunity.end_date,
-        adults_count: adults,
-        children_count: children,
-      },
-    });
+    return {
+      opportunity_id: opportunity.id,
+      client_id: opportunity.client_id,
+      client_name: opportunity.client?.name,
+      client_email: opportunity.client?.email,
+      client_phone: opportunity.client?.phone,
+      client_city: opportunity.client?.city,
+      destination: opportunity.destination,
+      start_date: opportunity.start_date,
+      end_date: opportunity.end_date,
+      adults_count: adults,
+      children_count: children,
+      estimated_value: opportunity.estimated_value,
+      notes: opportunity.notes,
+    };
   };
 
-  const handleCreateTripWallet = () => {
-    navigate(`/ferramentas-ia/trip-wallet`, {
-      state: {
-        client_name: opportunity.client?.name,
-        destination: opportunity.destination,
-        start_date: opportunity.start_date,
-        end_date: opportunity.end_date,
-      },
-    });
+  const logTimelineEvent = async (toStage: string, notes: string) => {
+    try {
+      await supabase.from("opportunity_history").insert({
+        opportunity_id: opportunity.id,
+        to_stage: toStage,
+        notes,
+      } as any);
+    } catch { /* non-fatal */ }
+  };
+
+  const proceedCreateQuote = async () => {
+    await logTimelineEvent("Orçamento criado", `Novo orçamento iniciado a partir da oportunidade.`);
+    navigate(`/ferramentas-ia/gerar-orcamento`, { state: buildOpportunityState() });
+  };
+
+  const proceedCreateTripWallet = async () => {
+    await logTimelineEvent("Carteira digital criada", `Nova carteira digital iniciada a partir da oportunidade.`);
+    navigate(`/ferramentas-ia/trip-wallet/nova`, { state: buildOpportunityState() });
+  };
+
+  const handleCreateQuote = async () => {
+    if (isCheckingLink) return;
+    setIsCheckingLink(true);
+    try {
+      const { data } = await supabase
+        .from("quotes")
+        .select("id")
+        .eq("opportunity_id", opportunity.id)
+        .limit(1)
+        .maybeSingle();
+      if (data?.id) {
+        setLinkedDialog({ kind: "quote", existingId: data.id });
+        return;
+      }
+      await proceedCreateQuote();
+    } finally {
+      setIsCheckingLink(false);
+    }
+  };
+
+  const handleCreateTripWallet = async () => {
+    if (isCheckingLink) return;
+    setIsCheckingLink(true);
+    try {
+      const { data } = await supabase
+        .from("trips")
+        .select("id")
+        .eq("opportunity_id", opportunity.id)
+        .limit(1)
+        .maybeSingle();
+      if (data?.id) {
+        setLinkedDialog({ kind: "trip", existingId: data.id });
+        return;
+      }
+      await proceedCreateTripWallet();
+    } finally {
+      setIsCheckingLink(false);
+    }
+  };
+
+  const openExistingLinked = () => {
+    if (!linkedDialog) return;
+    if (linkedDialog.kind === "quote") {
+      navigate(`/ferramentas-ia/gerar-orcamento/${linkedDialog.existingId}`);
+    } else {
+      navigate(`/ferramentas-ia/trip-wallet/${linkedDialog.existingId}`);
+    }
+    setLinkedDialog(null);
+  };
+
+  const createAnotherLinked = async () => {
+    if (!linkedDialog) return;
+    const kind = linkedDialog.kind;
+    setLinkedDialog(null);
+    if (kind === "quote") await proceedCreateQuote();
+    else await proceedCreateTripWallet();
   };
 
   const handleEditClientClick = () => {
@@ -341,13 +416,11 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleCreateQuote}>
-                  <FileText className="mr-2 h-4 w-4" /> Criar Orçamento
+                  <FileText className="mr-2 h-4 w-4" /> Gerar Orçamento
                 </DropdownMenuItem>
-                {opportunity.stage === "closed" && (
-                  <DropdownMenuItem onClick={handleCreateTripWallet}>
-                    <Wallet className="mr-2 h-4 w-4" /> Criar Carteira Digital
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem onClick={handleCreateTripWallet}>
+                  <Wallet className="mr-2 h-4 w-4" /> Gerar Carteira Digital
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteAlert(true)}
@@ -673,6 +746,31 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
               className="bg-destructive text-destructive-foreground"
             >
               Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!linkedDialog} onOpenChange={(o) => !o && setLinkedDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {linkedDialog?.kind === "quote"
+                ? "Já existe um orçamento vinculado"
+                : "Já existe uma carteira digital vinculada"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta oportunidade já possui {linkedDialog?.kind === "quote" ? "um orçamento" : "uma carteira"}{" "}
+              criada. O que você deseja fazer?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <Button variant="outline" onClick={createAnotherLinked}>
+              Criar novo(a)
+            </Button>
+            <AlertDialogAction onClick={openExistingLinked}>
+              Abrir existente
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

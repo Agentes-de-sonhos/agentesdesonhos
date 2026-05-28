@@ -9415,6 +9415,7 @@ export type Database = {
           failed_password_attempts: number
           id: string
           is_locked: boolean
+          opportunity_id: string | null
           public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
@@ -9436,6 +9437,7 @@ export type Database = {
           failed_password_attempts?: number
           id?: string
           is_locked?: boolean
+          opportunity_id?: string | null
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
@@ -9457,6 +9459,7 @@ export type Database = {
           failed_password_attempts?: number
           id?: string
           is_locked?: boolean
+          opportunity_id?: string | null
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
@@ -9474,6 +9477,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
         ]
