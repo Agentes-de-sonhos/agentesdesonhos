@@ -143,7 +143,22 @@ export function useOperationTasks(operationId: string | null) {
       if (!user?.id || !operationId) return;
       const existing = tasks.filter((t) => t.stage === stage);
       if (existing.length > 0) return;
-      const labels = STAGE_CHECKLISTS[stage] || [];
+      // Try loading a user-defined template first
+      let labels: string[] = [];
+      const { data: tpl } = await supabase
+        .from("operation_checklist_templates" as any)
+        .select("items")
+        .eq("user_id", user.id)
+        .eq("stage", stage)
+        .eq("is_default", true)
+        .maybeSingle();
+      const tplItems = (tpl as any)?.items;
+      if (Array.isArray(tplItems) && tplItems.length > 0) {
+        labels = tplItems
+          .map((it: any) => (typeof it === "string" ? it : it?.label))
+          .filter((s: any) => typeof s === "string" && s.trim().length > 0);
+      }
+      if (labels.length === 0) labels = STAGE_CHECKLISTS[stage] || [];
       if (labels.length === 0) return;
       const rows = labels.map((label, idx) => ({
         operation_id: operationId,
@@ -203,6 +218,71 @@ export function useOperationTasks(operationId: string | null) {
     toggleTask: toggleTask.mutateAsync,
     addTask: addTask.mutateAsync,
     removeTask: removeTask.mutateAsync,
+  };
+}
+
+export function useChecklistTemplates() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  const saveTemplate = useMutation({
+    mutationFn: async ({
+      stage,
+      labels,
+    }: {
+      stage: import("@/types/operations").OperationStage;
+      labels: string[];
+    }) => {
+      if (!user?.id) throw new Error("Não autenticado");
+      const items = labels.map((label, idx) => ({ label, position: idx }));
+      // Upsert by (user_id, stage) where is_default=true
+      const { data: existing } = await supabase
+        .from("operation_checklist_templates" as any)
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("stage", stage)
+        .eq("is_default", true)
+        .maybeSingle();
+      if ((existing as any)?.id) {
+        const { error } = await supabase
+          .from("operation_checklist_templates" as any)
+          .update({ items, name: "Padrão" } as any)
+          .eq("id", (existing as any).id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("operation_checklist_templates" as any)
+          .insert({
+            user_id: user.id,
+            stage,
+            name: "Padrão",
+            is_default: true,
+            items,
+          } as any);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["operation-checklist-templates"] }),
+  });
+
+  const resetTemplate = useMutation({
+    mutationFn: async (stage: import("@/types/operations").OperationStage) => {
+      if (!user?.id) throw new Error("Não autenticado");
+      const { error } = await supabase
+        .from("operation_checklist_templates" as any)
+        .delete()
+        .eq("user_id", user.id)
+        .eq("stage", stage)
+        .eq("is_default", true);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["operation-checklist-templates"] }),
+  });
+
+  return {
+    saveTemplate: saveTemplate.mutateAsync,
+    resetTemplate: resetTemplate.mutateAsync,
+    isSaving: saveTemplate.isPending,
   };
 }
 
