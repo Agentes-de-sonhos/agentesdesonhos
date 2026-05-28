@@ -399,9 +399,9 @@ export default function GerarOrcamento() {
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
   };
 
-  const handleGeneratePDF = () => {
+  const handleGeneratePDF = async () => {
     if (!quote) return;
-    generateQuotePDF(quote, agentProfile);
+    await generateQuotePDF(quote, agentProfile);
   };
 
   const handlePublish = async () => {
