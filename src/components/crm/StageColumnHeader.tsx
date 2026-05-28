@@ -37,6 +37,7 @@ interface Props {
   onDuplicate: () => void | Promise<void>;
   onRequestDelete: () => void;
   onQuickAdd?: () => void;
+  isProtected?: boolean;
 }
 
 const COLOR_KEYS = Object.keys(STAGE_COLOR_PALETTE) as StageColor[];
