@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map,
   Newspaper,
-  User,
+  Settings,
   ChevronLeft,
   ChevronDown,
   Cloud,
@@ -228,7 +228,7 @@ const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Ment
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const startDashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard-start", icon: Home };
 const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
-const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Meu Perfil", url: "/perfil", icon: User };
+
 
 // Custom section shown ONLY for Start plan users (always at the top)
 const planoStartSection: MenuSection = {
@@ -251,7 +251,7 @@ const planoStartSection: MenuSection = {
   ],
 };
 
-const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+
 const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: CreditCard };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
@@ -680,7 +680,7 @@ export function AppSidebar() {
                       to="/minha-conta"
                       className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
                     >
-                      <CreditCard className="h-4 w-4" />
+                      <Settings className="h-4 w-4" />
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
@@ -719,7 +719,7 @@ export function AppSidebar() {
                     to="/minha-conta"
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
                   >
-                    <CreditCard className="h-3.5 w-3.5" />
+                    <Settings className="h-3.5 w-3.5" />
                     Minha Conta
                   </Link>
                 )}
