@@ -119,7 +119,6 @@ const guiasSection: MenuSection = {
     { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
     { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
     { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
-    { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
 
@@ -216,6 +215,8 @@ const marketingSection: MenuSection = {
 const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
 
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
+const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
+const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Meu Perfil", url: "/perfil", icon: User };
 const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
@@ -244,7 +245,7 @@ export function MobileSidebar() {
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [meusProjetosItem, comunidadeItem, mentoriasItem],
+    () => [comunidadeItem, mentoriasItem],
     []
   );
 
@@ -521,6 +522,9 @@ export function MobileSidebar() {
             )}
           >
             {renderMenuItem(dashboardItem)}
+            {renderMenuItem(meusProjetosItem)}
+            {renderMenuItem(minhaAgendaItem)}
+            {renderMenuItem(meuPerfilItem)}
           </nav>
 
           <div className={cn("py-2", expanded ? "px-3" : "px-2")}>
