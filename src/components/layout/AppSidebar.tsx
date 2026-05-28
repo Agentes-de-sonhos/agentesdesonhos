@@ -631,6 +631,7 @@ export function AppSidebar() {
         <div className="flex-1 overflow-y-auto py-2 space-y-0.5">
           {/* Início */}
           <nav className="flex flex-col gap-0.5 px-3">
+            {renderSingleItem(isStartPlan ? startDashboardItem : dashboardItem)}
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
             {/* meuPerfilItem removido */}
@@ -673,7 +674,6 @@ export function AppSidebar() {
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
-              <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
                     to="/perfil"
@@ -686,6 +686,7 @@ export function AppSidebar() {
                   <p className="text-sm font-medium">Perfil</p>
                 </TooltipContent>
               </Tooltip>
+              {!isFornecedor && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
@@ -727,13 +728,13 @@ export function AppSidebar() {
                   Suporte
                 </Link>
                 <Link
-                <Link
                   to="/perfil"
                   className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
                 >
                   <User className="h-3.5 w-3.5" />
                   Perfil
                 </Link>
+                {!isFornecedor && (
                   <Link
                     to="/minha-conta"
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
