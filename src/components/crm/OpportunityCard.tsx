@@ -416,13 +416,11 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleCreateQuote}>
-                  <FileText className="mr-2 h-4 w-4" /> Criar Orçamento
+                  <FileText className="mr-2 h-4 w-4" /> Gerar Orçamento
                 </DropdownMenuItem>
-                {opportunity.stage === "closed" && (
-                  <DropdownMenuItem onClick={handleCreateTripWallet}>
-                    <Wallet className="mr-2 h-4 w-4" /> Criar Carteira Digital
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem onClick={handleCreateTripWallet}>
+                  <Wallet className="mr-2 h-4 w-4" /> Gerar Carteira Digital
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteAlert(true)}
