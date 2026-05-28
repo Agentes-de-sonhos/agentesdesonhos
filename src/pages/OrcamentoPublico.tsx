@@ -1158,13 +1158,13 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const installmentValue = total / (installments || 1);
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   A partir de
                 </span>
-                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
                   {installments}x de {formatCurrency(installmentValue)}
                 </span>
-                <span className="text-xs text-muted-foreground mt-1">
+                <span className="text-xs text-muted-foreground mt-1.5">
                   sem juros{methodLabel ? ` • ${methodLabel}` : ""}
                 </span>
               </div>
@@ -1184,14 +1184,14 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const installmentValue = remainder / (installments || 1);
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   Condição especial
                 </span>
-                <span className="text-[2.2rem] sm:text-[3rem] font-extrabold tracking-tight text-foreground leading-none text-center">
+                <span className="text-[1.5rem] sm:text-[2rem] font-bold tracking-tight text-foreground leading-tight text-center">
                   Entrada de {formatCurrency(entryValue)} + {installments}x de {formatCurrency(installmentValue)}
                 </span>
                 {methodLabel && (
-                  <span className="text-xs text-muted-foreground mt-1">{methodLabel}</span>
+                  <span className="text-xs text-muted-foreground mt-1.5">{methodLabel}</span>
                 )}
               </div>
             );
@@ -1204,10 +1204,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           } else if (discountPct > 0) {
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-primary/80">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
                   Condição especial à vista
                 </span>
-                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
                   {formatCurrency(headlineTotal)}
                 </span>
                 <span className="text-sm text-muted-foreground line-through mt-1">{formatCurrency(total)}</span>
@@ -1221,14 +1221,14 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           } else {
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   Investimento
                 </span>
-                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
                   {formatCurrency(headlineTotal)}
                 </span>
                 {methodLabel && (
-                  <span className="text-xs text-muted-foreground mt-1">{methodLabel}</span>
+                  <span className="text-xs text-muted-foreground mt-1.5">{methodLabel}</span>
                 )}
               </div>
             );
@@ -1238,14 +1238,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           }
 
           return (
-            <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.28)] animate-fade-up">
-              <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-              <div className="relative text-center space-y-4 sm:space-y-5">
+            <section className="relative overflow-hidden rounded-2xl border border-border/40 bg-white p-6 sm:p-8 shadow-sm animate-fade-up">
+              <div className="relative text-center space-y-3">
                 {primaryDisplay}
                 {secondaryDisplay}
                 {quote.services && quote.services.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground/80">
                     {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
                   </p>
                 )}
