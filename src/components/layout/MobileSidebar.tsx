@@ -435,7 +435,7 @@ export function MobileSidebar() {
           )}
         >
           <Icon className="h-4 w-4" />
-          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left">
+          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left whitespace-nowrap">
             {section.title}
           </span>
           <ChevronDown
