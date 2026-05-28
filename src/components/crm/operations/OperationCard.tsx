@@ -206,7 +206,7 @@ export function OperationCard({ operation, onClick, onOpenTab, onDragStart }: Pr
     />
     {operation.client && (
       <EditClientDialog
-        client={operation.client as any}
+        clientId={operation.client.id}
         open={showEditClient}
         onOpenChange={setShowEditClient}
       />
