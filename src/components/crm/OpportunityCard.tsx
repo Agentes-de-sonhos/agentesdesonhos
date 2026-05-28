@@ -26,6 +26,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { InternationalPhoneInput } from "@/components/ui/international-phone-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Cake } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Form,
   FormControl,
@@ -71,7 +82,7 @@ import {
   useOpportunityNotesCounts,
   useOpportunityLabelAssignments,
 } from "@/hooks/useOpportunityExtras";
-import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, type Opportunity, type OpportunityStage } from "@/types/crm";
+import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, CLIENT_STATUS_LABELS, type Opportunity, type OpportunityStage } from "@/types/crm";
 import { cn } from "@/lib/utils";
 
 interface OpportunityCardProps {
@@ -94,6 +105,12 @@ const clientSchema = z.object({
   phone: z.string().optional(),
   city: z.string().optional(),
   notes: z.string().optional(),
+  status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]).optional(),
+  travel_preferences: z.string().optional(),
+  internal_notes: z.string().optional(),
+  birthday_day: z.string().optional(),
+  birthday_month: z.string().optional(),
+  birthday_year: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
@@ -102,6 +119,7 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const navigate = useNavigate();
   const { deleteOpportunity } = useOpportunities();
   const { updateClient } = useClients();
+  const { user } = useAuth();
   const notesCounts = useOpportunityNotesCounts();
   const { byOpportunity } = useOpportunityLabelAssignments();
   const [isEditing, setIsEditing] = useState(false);
@@ -122,6 +140,12 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
       phone: opportunity.client?.phone || "",
       city: opportunity.client?.city || "",
       notes: opportunity.client?.notes || "",
+      status: (opportunity.client?.status as any) || "lead",
+      travel_preferences: opportunity.client?.travel_preferences || "",
+      internal_notes: opportunity.client?.internal_notes || "",
+      birthday_day: opportunity.client?.birthday_day?.toString() || "",
+      birthday_month: opportunity.client?.birthday_month?.toString() || "",
+      birthday_year: opportunity.client?.birthday_year?.toString() || "",
     },
   });
 
@@ -166,6 +190,12 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         phone: opportunity.client.phone || "",
         city: opportunity.client.city || "",
         notes: opportunity.client.notes || "",
+        status: (opportunity.client.status as any) || "lead",
+        travel_preferences: opportunity.client.travel_preferences || "",
+        internal_notes: opportunity.client.internal_notes || "",
+        birthday_day: opportunity.client.birthday_day?.toString() || "",
+        birthday_month: opportunity.client.birthday_month?.toString() || "",
+        birthday_year: opportunity.client.birthday_year?.toString() || "",
       });
     }
     setShowEditClient(true);
@@ -173,6 +203,9 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
 
   const handleUpdateClient = async (data: ClientFormData) => {
     if (!opportunity.client) return;
+    const bDay = data.birthday_day ? parseInt(data.birthday_day) : null;
+    const bMonth = data.birthday_month ? parseInt(data.birthday_month) : null;
+    const bYear = data.birthday_year ? parseInt(data.birthday_year) : null;
     await updateClient({
       id: opportunity.client.id,
       name: data.name,
@@ -180,7 +213,39 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
       phone: data.phone || null,
       city: data.city || null,
       notes: data.notes || null,
+      status: data.status || "lead",
+      travel_preferences: data.travel_preferences || null,
+      internal_notes: data.internal_notes || null,
+      birthday_day: bDay,
+      birthday_month: bMonth,
+      birthday_year: bYear,
     });
+
+    // Sync birthday agency event
+    if (user) {
+      await supabase
+        .from("agency_events")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("client_id", opportunity.client.id)
+        .eq("event_type", "aniversario");
+      if (bDay && bMonth) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const birthdayThisYear = new Date(currentYear, bMonth - 1, bDay);
+        const targetYear = birthdayThisYear < now ? currentYear + 1 : currentYear;
+        const eventDate = `${targetYear}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}`;
+        await supabase.from("agency_events").insert({
+          user_id: user.id,
+          client_id: opportunity.client.id,
+          title: `🎂 Aniversário: ${data.name}`,
+          event_type: "aniversario",
+          event_date: eventDate,
+          color: "#ec4899",
+        });
+      }
+    }
+
     setShowEditClient(false);
   };
 
@@ -374,7 +439,7 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
 
       {/* Edit Client Dialog */}
       <Dialog open={showEditClient} onOpenChange={setShowEditClient}>
-        <DialogContent>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Cliente</DialogTitle>
           </DialogHeader>
@@ -414,21 +479,125 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                     <FormItem>
                       <FormLabel>Telefone/WhatsApp</FormLabel>
                       <FormControl>
-                        <Input placeholder="Número de telefone" {...field} />
+                        <InternationalPhoneInput
+                          value={field.value}
+                          onChange={(v) => field.onChange(v ?? "")}
+                          placeholder="Número de telefone"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={clientForm.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cidade</FormLabel>
+                      <FormControl>
+                        <Input placeholder="São Paulo, SP" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={clientForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(CLIENT_STATUS_LABELS).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <FormLabel className="flex items-center gap-1.5">
+                  <Cake className="h-4 w-4" />
+                  Data de Aniversário
+                </FormLabel>
+                <div className="grid grid-cols-3 gap-2">
+                  <FormField
+                    control={clientForm.control}
+                    name="birthday_day"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Dia" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                                <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={clientForm.control}
+                    name="birthday_month"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Mês" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"].map((m, i) => (
+                                <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={clientForm.control}
+                    name="birthday_year"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input type="number" placeholder="Ano (opcional)" min={1920} max={new Date().getFullYear()} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
               <FormField
                 control={clientForm.control}
-                name="city"
+                name="travel_preferences"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cidade</FormLabel>
+                    <FormLabel>Preferências de Viagem</FormLabel>
                     <FormControl>
-                      <Input placeholder="São Paulo, SP" {...field} />
+                      <Textarea placeholder="Ex: Prefere praias, viaja em família, classe executiva..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -439,9 +608,22 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Observações</FormLabel>
+                    <FormLabel>Observações Gerais</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Anotações sobre o cliente..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={clientForm.control}
+                name="internal_notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Observações Internas</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Notas internas (não visíveis ao cliente)..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
