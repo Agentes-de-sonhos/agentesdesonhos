@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -16,10 +19,21 @@ import {
   AlertTriangle,
   MessageSquare,
   Tag,
+  User,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,7 +66,7 @@ import { OpportunityForm } from "./OpportunityForm";
 import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
 import { OpportunityDetailsDrawer } from "./OpportunityDetailsDrawer";
 import { QuickLabelPicker } from "./QuickLabelPicker";
-import { useOpportunities } from "@/hooks/useCRM";
+import { useOpportunities, useClients } from "@/hooks/useCRM";
 import {
   useOpportunityNotesCounts,
   useOpportunityLabelAssignments,
@@ -74,9 +88,20 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
+const clientSchema = z.object({
+  name: z.string().min(2, "Nome é obrigatório"),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  phone: z.string().optional(),
+  city: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type ClientFormData = z.infer<typeof clientSchema>;
+
 export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColor }: OpportunityCardProps) {
   const navigate = useNavigate();
   const { deleteOpportunity } = useOpportunities();
+  const { updateClient } = useClients();
   const notesCounts = useOpportunityNotesCounts();
   const { byOpportunity } = useOpportunityLabelAssignments();
   const [isEditing, setIsEditing] = useState(false);
@@ -84,9 +109,21 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const [showHistory, setShowHistory] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
+  const [showEditClient, setShowEditClient] = useState(false);
 
   const notesCount = notesCounts[opportunity.id] || 0;
   const appliedLabels = byOpportunity[opportunity.id] || [];
+
+  const clientForm = useForm<ClientFormData>({
+    resolver: zodResolver(clientSchema),
+    defaultValues: {
+      name: opportunity.client?.name || "",
+      email: opportunity.client?.email || "",
+      phone: opportunity.client?.phone || "",
+      city: opportunity.client?.city || "",
+      notes: opportunity.client?.notes || "",
+    },
+  });
 
   const handleDelete = async () => {
     await deleteOpportunity(opportunity.id);
@@ -119,6 +156,32 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         end_date: opportunity.end_date,
       },
     });
+  };
+
+  const handleEditClientClick = () => {
+    if (opportunity.client) {
+      clientForm.reset({
+        name: opportunity.client.name,
+        email: opportunity.client.email || "",
+        phone: opportunity.client.phone || "",
+        city: opportunity.client.city || "",
+        notes: opportunity.client.notes || "",
+      });
+    }
+    setShowEditClient(true);
+  };
+
+  const handleUpdateClient = async (data: ClientFormData) => {
+    if (!opportunity.client) return;
+    await updateClient({
+      id: opportunity.client.id,
+      name: data.name,
+      email: data.email || null,
+      phone: data.phone || null,
+      city: data.city || null,
+      notes: data.notes || null,
+    });
+    setShowEditClient(false);
   };
 
   const timeInStage = formatDistanceToNow(new Date(opportunity.stage_entered_at), {
@@ -203,7 +266,10 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                   <MessageSquare className="mr-2 h-4 w-4" /> Anotações
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                  <Edit2 className="mr-2 h-4 w-4" /> Editar
+                  <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleEditClientClick}>
+                  <User className="mr-2 h-4 w-4" /> Editar cliente
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowHistory(true)}>
                   <History className="mr-2 h-4 w-4" /> Histórico
@@ -303,6 +369,94 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
             onSuccess={() => setIsEditing(false)}
             onCancel={() => setIsEditing(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Client Dialog */}
+      <Dialog open={showEditClient} onOpenChange={setShowEditClient}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Cliente</DialogTitle>
+          </DialogHeader>
+          <Form {...clientForm}>
+            <form onSubmit={clientForm.handleSubmit(handleUpdateClient)} className="space-y-4">
+              <FormField
+                control={clientForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Completo *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome do cliente" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={clientForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="email@exemplo.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={clientForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone/WhatsApp</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Número de telefone" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={clientForm.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cidade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="São Paulo, SP" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={clientForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Observações</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Anotações sobre o cliente..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowEditClient(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={clientForm.formState.isSubmitting}>
+                  Salvar
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
