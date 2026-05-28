@@ -16,7 +16,7 @@ export const MAIN_MENU_ITEMS: MenuItemConfig[] = [
   { key: "meus_projetos", label: "Meus Projetos" },
   { key: "section_clientes", label: "Clientes", isSection: true, sectionKey: "clientes" },
   { key: "section_financeiro", label: "Financeiro", isSection: true, sectionKey: "financeiro" },
-  { key: "section_marketing", label: "Marketing", isSection: true, sectionKey: "marketing" },
+  { key: "section_marketing", label: "Ferramentas de Marketing", isSection: true, sectionKey: "marketing" },
   { key: "comunidade", label: "Comunidade" },
   { key: "cursos_mentorias", label: "Cursos e Mentorias" },
 ];

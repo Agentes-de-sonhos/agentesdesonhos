@@ -195,7 +195,7 @@ const financeiroSection: MenuSection = {
 };
 
 const marketingSection: MenuSection = {
-  title: "Marketing",
+  title: "Ferramentas de Marketing",
   key: "section_marketing",
   icon: Megaphone,
   hoverColor: "hover:bg-pink-600 hover:text-white",
