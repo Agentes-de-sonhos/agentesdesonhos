@@ -748,6 +748,36 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
         </div>
 
+        <!-- Documentos anexados (logo após os serviços, como item integrado do roteiro) -->
+        ${quoteDocuments.length > 0 ? `
+          <div class="pdf-block quote-documents" style="border:1px solid #e2e8f0;border-radius:16px;margin-bottom:18px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(90deg,rgba(15,118,110,0.10),rgba(15,118,110,0.03));border-bottom:1px solid #e2e8f0;">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#ffffff;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">📎</span>
+              <div style="flex:1;">
+                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:#0f766e;margin:0;">Anexos</p>
+                <p style="font-size:14px;font-weight:700;color:#0f172a;margin:1px 0 0;">Documentos do seu orçamento</p>
+              </div>
+              <span style="font-size:11px;color:#94a3b8;">${quoteDocuments.length} ${quoteDocuments.length === 1 ? "arquivo" : "arquivos"}</span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              ${quoteDocuments.map((doc, idx) => `
+                <tr style="${idx > 0 ? "border-top:1px solid #f1f5f9;" : ""}">
+                  <td style="padding:12px 18px;vertical-align:middle;width:44px;">
+                    <div style="width:36px;height:36px;border-radius:10px;background:#ecfeff;display:inline-flex;align-items:center;justify-content:center;font-size:16px;">${emojiForDoc(doc.file_name, doc.file_type)}</div>
+                  </td>
+                  <td style="padding:12px 8px 12px 0;vertical-align:middle;">
+                    <p style="font-size:13px;font-weight:600;color:#0f172a;margin:0;word-break:break-word;">${(doc.file_name || "").replace(/</g, "&lt;")}</p>
+                    ${doc.file_size ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${formatDocSizePDF(doc.file_size)}</p>` : ""}
+                  </td>
+                  <td style="padding:12px 18px;vertical-align:middle;text-align:right;white-space:nowrap;">
+                    ${doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#0f766e;text-decoration:none;border:1px solid #0f766e;border-radius:999px;padding:6px 12px;">Abrir</a>` : ""}
+                  </td>
+                </tr>
+              `).join("")}
+            </table>
+          </div>
+        ` : ""}
+
         <!-- Total -->
         ${(() => {
           const total = quote.services && quote.services.length > 0
