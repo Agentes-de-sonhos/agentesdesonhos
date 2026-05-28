@@ -220,8 +220,8 @@ export function CommunitySocialFeed() {
   const visiblePosts = posts.slice(0, visibleCount);
 
   return (
-    <Card className="border-0 shadow-card bg-gradient-to-br from-[hsl(var(--section-community))]/20 via-[hsl(var(--section-community))]/10 to-[hsl(var(--section-community))]/[0.03]">
-      <CardContent className="pt-5 pb-4 space-y-4">
+    <Card className="border-0 shadow-card">
+      <CardContent className="pt-5 pb-5 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="w-fit">
@@ -238,21 +238,25 @@ export function CommunitySocialFeed() {
                 </span>
               )}
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl">
-              Compartilhe dúvidas, novidades, indicações, experiências e oportunidades com outros agentes de viagem.
-            </p>
             <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground"
+            className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform flex-shrink-0"
             onClick={() => setCollapsed((v) => !v)}
             aria-label={collapsed ? "Expandir seção" : "Recolher seção"}
             aria-expanded={!collapsed}
           >
             <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`} />
           </Button>
+        </div>
+
+        <div className="rounded-xl bg-[hsl(var(--section-community))]/5 border border-[hsl(var(--section-community))]/15 px-3 py-2 space-y-0.5 w-full">
+          <p className="text-sm font-semibold text-foreground leading-tight">💬 Conecte-se com outros agentes</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Compartilhe dúvidas, novidades, indicações, experiências e oportunidades com a comunidade.
+          </p>
         </div>
 
         {!collapsed && (
