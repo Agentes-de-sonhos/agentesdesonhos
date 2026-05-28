@@ -634,7 +634,7 @@ export function AppSidebar() {
             {renderSingleItem(isStartPlan ? startDashboardItem : dashboardItem)}
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
-            {renderSingleItem(meuPerfilItem)}
+            {/* meuPerfilItem removido */}
           </nav>
 
           <div className="px-3 py-1">
@@ -671,19 +671,6 @@ export function AppSidebar() {
                 </TooltipTrigger>
                 <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
                   <p className="text-sm font-medium">Suporte</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/perfil"
-                    className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
-                  >
-                    <User className="h-4 w-4" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                  <p className="text-sm font-medium">Perfil</p>
                 </TooltipContent>
               </Tooltip>
               {!isFornecedor && (
@@ -726,13 +713,6 @@ export function AppSidebar() {
                 >
                   <Headset className="h-3.5 w-3.5" />
                   Suporte
-                </Link>
-                <Link
-                  to="/perfil"
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
-                >
-                  <User className="h-3.5 w-3.5" />
-                  Perfil
                 </Link>
                 {!isFornecedor && (
                   <Link
