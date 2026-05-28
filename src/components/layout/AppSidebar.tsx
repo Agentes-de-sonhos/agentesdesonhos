@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map,
   Newspaper,
-  User,
+  Settings,
   ChevronLeft,
   ChevronDown,
   Cloud,
