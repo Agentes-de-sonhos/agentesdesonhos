@@ -49,6 +49,7 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
     { key: "gestao_clientes", label: "Gestão de Clientes" },
     { key: "oportunidades", label: "Oportunidades" },
     { key: "operacoes", label: "Operações" },
+    { key: "dashboard_fin", label: "Dashboard" },
     { key: "meta_vendas", label: "Meta de Vendas" },
   ],
   financeiro: [

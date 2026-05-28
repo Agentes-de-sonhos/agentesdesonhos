@@ -55,10 +55,10 @@ const navItems: NavItem[] = [
     label: "Clientes", icon: Users,
     color: "text-cyan-600", bgColor: "bg-cyan-50",
     subItems: [
-      { label: "Dashboard", icon: LayoutDashboard, path: "/gestao-clientes/dashboard", requiredFeature: "crm_basic" },
       { label: "Gestão de Clientes", icon: Users, path: "/gestao-clientes/clientes", requiredFeature: "crm_basic" },
       { label: "Oportunidades", icon: ShoppingCart, path: "/gestao-clientes/funil", requiredFeature: "crm_basic" },
       { label: "Operação", icon: CalendarDays, path: "/gestao-clientes/operacoes", requiredFeature: "crm_basic" },
+      { label: "Dashboard", icon: LayoutDashboard, path: "/gestao-clientes/dashboard", requiredFeature: "crm_basic" },
       { label: "Meta de Vendas", icon: Calculator, path: "/gestao-clientes/metas", requiredFeature: "financial" },
     ],
   },
