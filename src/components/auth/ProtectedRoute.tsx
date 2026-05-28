@@ -1,12 +1,12 @@
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useSessionTracker } from "@/hooks/useSessionTracker";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { LoadingScreen } from "./LoadingScreen";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -19,6 +19,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
   const checkInterval = useRef<ReturnType<typeof setInterval>>();
   useSessionTracker();
+
+  // Safety net: never block rendering on subscription/role loading for more
+  // than a few seconds. If something is slow or silently fails, release the
+  // gate so the user always sees the UI instead of a stuck loading screen.
+  const [safetyElapsed, setSafetyElapsed] = useState(false);
+  useEffect(() => {
+    setSafetyElapsed(false);
+    const t = window.setTimeout(() => setSafetyElapsed(true), 5000);
+    return () => window.clearTimeout(t);
+  }, [user?.id]);
 
   // Periodically check if user is still active (every 60s)
   useEffect(() => {
@@ -45,19 +55,30 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     };
   }, [user, signOut]);
 
-  if (loading || subLoading || roleLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
+  // Block ONLY on the auth session itself — that's required to know if the
+  // user is logged in. Subscription/role can resolve in background; they only
+  // affect redirect logic, which re-runs as soon as they arrive.
+  if (loading) {
+    return <LoadingScreen />;
   }
 
   if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  // While plan/role are still loading (and the safety timeout hasn't fired),
+  // show the friendly loader instead of risking a wrong redirect. After
+  // `safetyElapsed`, we proceed with whatever defaults we have so the user
+  // is never stuck on a blank/loading screen.
+  if ((subLoading || roleLoading) && !safetyElapsed) {
+    return <LoadingScreen />;
+  }
+
+  if ((subLoading || roleLoading) && safetyElapsed) {
+    console.warn(
+      "[ProtectedRoute] Safety timeout reached while waiting for",
+      { subLoading, roleLoading, userId: user.id }
+    );
   }
 
   // Fornecedor users have a dedicated ecosystem (dashboard, profile, materials, community,
