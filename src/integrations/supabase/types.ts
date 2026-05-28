@@ -5267,39 +5267,6 @@ export type Database = {
           },
         ]
       }
-      operation_stage_checklist_templates: {
-        Row: {
-          created_at: string
-          id: string
-          is_default: boolean
-          items: Json
-          name: string
-          stage: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_default?: boolean
-          items?: Json
-          name?: string
-          stage: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_default?: boolean
-          items?: Json
-          name?: string
-          stage?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       operation_tasks: {
         Row: {
           created_at: string

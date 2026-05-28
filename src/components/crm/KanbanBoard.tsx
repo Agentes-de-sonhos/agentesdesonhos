@@ -36,7 +36,6 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { toast } from "sonner";
 import { OpportunityCard } from "./OpportunityCard";
 import { OpportunityForm } from "./OpportunityForm";
 import { StageColumnHeader } from "./StageColumnHeader";
@@ -55,11 +54,9 @@ import { cn } from "@/lib/utils";
 
 function SortableColumn({
   stage,
-  disabled,
   children,
 }: {
   stage: PipelineStage;
-  disabled?: boolean;
   children: (handle: {
     dragHandleProps: React.HTMLAttributes<HTMLButtonElement>;
     isDragging: boolean;
@@ -67,7 +64,6 @@ function SortableColumn({
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: stage.id,
-    disabled,
   });
 
   const style: React.CSSProperties = {
@@ -88,9 +84,6 @@ function SortableColumn({
 }
 
 export function KanbanBoard() {
-  const PROTECTED_STAGE_KEYS = new Set(["new_contact", "closed", "lost"]);
-  const isProtectedStage = (s: PipelineStage) =>
-    !!s.legacy_key && PROTECTED_STAGE_KEYS.has(s.legacy_key);
   const { opportunities, isLoading, updateStage } = useOpportunities();
   const { clients } = useClients();
   const {
@@ -246,24 +239,6 @@ export function KanbanBoard() {
     const oldIndex = stages.findIndex((s) => s.id === active.id);
     const newIndex = stages.findIndex((s) => s.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
-    const activeStage = stages[oldIndex];
-    const overStage = stages[newIndex];
-    if (isProtectedStage(activeStage)) {
-      toast.info("Esta coluna é fixa e não pode ser movida.");
-      return;
-    }
-    // Determine the editable window: between the first protected (index 0)
-    // and the last two protected (Fechado, Perdido).
-    const firstFree = stages.findIndex((s) => !isProtectedStage(s));
-    let lastFree = -1;
-    for (let i = stages.length - 1; i >= 0; i--) {
-      if (!isProtectedStage(stages[i])) { lastFree = i; break; }
-    }
-    if (firstFree < 0 || lastFree < 0) return;
-    if (newIndex < firstFree || newIndex > lastFree) {
-      toast.info("As colunas fixas devem permanecer no início e no fim.");
-      return;
-    }
     const reordered = arrayMove(stages, oldIndex, newIndex);
     await reorderStages(reordered.map((s) => s.id));
   };
@@ -369,10 +344,9 @@ export function KanbanBoard() {
                     const overdueCount = stageOpps.filter(hasOverdueFollowUp).length;
                     const tokens = getStageTokens(stage.color);
                     const isFirstStage = stages[0]?.id === stage.id;
-                    const protectedStage = isProtectedStage(stage);
 
                     return (
-                      <SortableColumn key={stage.id} stage={stage} disabled={protectedStage}>
+                      <SortableColumn key={stage.id} stage={stage}>
                         {({ dragHandleProps, isDragging }) => (
                           <div
                             onDragOver={handleDragOver}
@@ -394,7 +368,6 @@ export function KanbanBoard() {
                                 avgTimeLabel={avgTime}
                                 dragHandleProps={dragHandleProps}
                                 isDragging={isDragging}
-                                isProtected={protectedStage}
                                 onRename={(name) => updateStageColumn({ id: stage.id, name })}
                                 onChangeColor={(color) =>
                                   updateStageColumn({ id: stage.id, color })

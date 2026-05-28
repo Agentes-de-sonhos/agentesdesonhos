@@ -143,23 +143,7 @@ export function useOperationTasks(operationId: string | null) {
       if (!user?.id || !operationId) return;
       const existing = tasks.filter((t) => t.stage === stage);
       if (existing.length > 0) return;
-      // 1) Try user's custom template for this stage
-      let labels: string[] = [];
-      const { data: tpl } = await supabase
-        .from("operation_stage_checklist_templates" as any)
-        .select("items")
-        .eq("user_id", user.id)
-        .eq("stage", stage)
-        .eq("is_default", true)
-        .maybeSingle();
-      const tplItems = (tpl as any)?.items;
-      if (Array.isArray(tplItems) && tplItems.length > 0) {
-        labels = tplItems
-          .map((it: any) => (typeof it === "string" ? it : it?.label))
-          .filter((s: any) => typeof s === "string" && s.trim().length > 0);
-      }
-      // 2) Fallback to system suggested checklist
-      if (labels.length === 0) labels = STAGE_CHECKLISTS[stage] || [];
+      const labels = STAGE_CHECKLISTS[stage] || [];
       if (labels.length === 0) return;
       const rows = labels.map((label, idx) => ({
         operation_id: operationId,
@@ -212,50 +196,6 @@ export function useOperationTasks(operationId: string | null) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["operation-tasks", operationId] }),
   });
 
-  const saveStageTemplate = useMutation({
-    mutationFn: async ({ stage, labels }: { stage: import("@/types/operations").OperationStage; labels: string[] }) => {
-      if (!user?.id) throw new Error("Não autenticado");
-      const items = labels.map((label, idx) => ({ label, order: idx }));
-      // Upsert by (user_id, stage) where is_default = true
-      const { data: existing } = await supabase
-        .from("operation_stage_checklist_templates" as any)
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("stage", stage)
-        .eq("is_default", true)
-        .maybeSingle();
-      if ((existing as any)?.id) {
-        const { error } = await supabase
-          .from("operation_stage_checklist_templates" as any)
-          .update({ items, name: "Padrão", is_default: true } as any)
-          .eq("id", (existing as any).id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("operation_stage_checklist_templates" as any)
-          .insert({ user_id: user.id, stage, name: "Padrão", is_default: true, items });
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => toast.success("Checklist salvo como padrão para esta etapa."),
-    onError: (e: any) => toast.error(e.message || "Erro ao salvar modelo"),
-  });
-
-  const deleteStageTemplate = useMutation({
-    mutationFn: async (stage: import("@/types/operations").OperationStage) => {
-      if (!user?.id) return;
-      const { error } = await supabase
-        .from("operation_stage_checklist_templates" as any)
-        .delete()
-        .eq("user_id", user.id)
-        .eq("stage", stage)
-        .eq("is_default", true);
-      if (error) throw error;
-    },
-    onSuccess: () => toast.success("Modelo personalizado removido. Sugestão original será usada."),
-    onError: (e: any) => toast.error(e.message || "Erro ao restaurar"),
-  });
-
   return {
     tasks,
     isLoading,
@@ -263,8 +203,6 @@ export function useOperationTasks(operationId: string | null) {
     toggleTask: toggleTask.mutateAsync,
     addTask: addTask.mutateAsync,
     removeTask: removeTask.mutateAsync,
-    saveStageTemplate: saveStageTemplate.mutateAsync,
-    deleteStageTemplate: deleteStageTemplate.mutateAsync,
   };
 }
 
