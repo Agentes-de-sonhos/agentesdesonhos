@@ -37,6 +37,7 @@ interface Props {
   onDuplicate: () => void | Promise<void>;
   onRequestDelete: () => void;
   onQuickAdd?: () => void;
+  isProtected?: boolean;
 }
 
 const COLOR_KEYS = Object.keys(STAGE_COLOR_PALETTE) as StageColor[];
@@ -53,6 +54,7 @@ export function StageColumnHeader({
   onDuplicate,
   onRequestDelete,
   onQuickAdd,
+  isProtected,
 }: Props) {
   const tokens = getStageTokens(stage.color);
   const [editing, setEditing] = useState(false);
@@ -236,13 +238,17 @@ export function StageColumnHeader({
                     );
                   })}
                 </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={onRequestDelete}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Excluir coluna
-                </DropdownMenuItem>
+                {!isProtected && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={onRequestDelete}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Excluir coluna
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
