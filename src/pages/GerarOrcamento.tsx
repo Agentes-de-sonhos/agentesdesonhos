@@ -55,6 +55,8 @@ import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
+import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
+import { useQueryClient } from "@tanstack/react-query";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles, Wallet } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
@@ -131,6 +133,7 @@ export default function GerarOrcamento() {
   const { user } = useAuth();
   const { quotes, isLoading: quotesLoading, createQuote, isCreating, publishQuote, isPublishing, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
   const { quote, addService, updateService, deleteService, isAddingService } = useQuote(id);
+  const queryClient = useQueryClient();
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
   // Persist UI state in sessionStorage so tab switches don't lose progress
@@ -918,7 +921,12 @@ export default function GerarOrcamento() {
           />
         )}
         renderIncluded={() => (
-          <WhatsIncludedEditor quote={quote} onUpdated={() => refetch?.()} />
+          <WhatsIncludedEditor
+            quote={quote}
+            onUpdated={() => {
+              queryClient.invalidateQueries({ queryKey: ["quote", id] });
+            }}
+          />
         )}
         renderPayment={() => (
           <div className="space-y-4">
